@@ -3,8 +3,9 @@ import { getStoredAccessToken } from "@/features/auth/api/auth-token-storage";
 export const HOCLIEU_PORTAL_HOST = "hoclieu.erg.edu.vn:3001";
 export const LMS_PORTAL_HOST = "lms.erg.edu.vn:3001";
 export const ELEARNING_PORTAL_HOST = "elearning.erg.edu.vn:3001";
+export const ELEARNING_VUONG_PORTAL_HOST = "elearning.vuongtran.io.vn";
 export const HOCLIEU_PORTAL_HOSTS = [HOCLIEU_PORTAL_HOST];
-export const ELEARNING_PORTAL_HOSTS = [ELEARNING_PORTAL_HOST];
+export const ELEARNING_PORTAL_HOSTS = [ELEARNING_PORTAL_HOST, ELEARNING_VUONG_PORTAL_HOST];
 
 export function getPortalUrl(host: string, path: string) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
