@@ -18,30 +18,46 @@ import type { ClassroomSchool, ClassroomSnapshot, InterventionItem } from "@/fea
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import { useI18n } from "@/features/i18n";
 import { cn } from "@/lib/utils";
+import type { ManagementScope } from "@/types/scope-types";
 
 type OverviewMode = "center" | "school";
 type BadgeTone = "success" | "warning" | "danger" | "outline" | "secondary";
 
 export function OverviewWorkspace({
   activeLeaf,
+  managementScope,
   mode,
   onOpenLeaf,
+  selectedSchoolId,
 }: {
   activeLeaf: DashboardLeaf;
+  managementScope: ManagementScope;
   mode: OverviewMode;
   onOpenLeaf: (leafId: string) => void;
+  selectedSchoolId: string;
 }) {
   const { locale } = useI18n();
   const copy = locale === "vi" ? viCopy : enCopy;
   const [clusterId, setClusterId] = useState("all");
+  const isGlobalScope = managementScope.level === "global";
+  const scopedSchools = useMemo(
+    () =>
+      isGlobalScope
+        ? classroomSchools
+        : classroomSchools.filter((school) => school.id === selectedSchoolId),
+    [isGlobalScope, selectedSchoolId],
+  );
 
   const filteredSchools = useMemo(
-    () => classroomSchools.filter((school) => (clusterId === "all" ? true : school.clusterId === clusterId)),
-    [clusterId],
+    () => scopedSchools.filter((school) => (!isGlobalScope || clusterId === "all" ? true : school.clusterId === clusterId)),
+    [clusterId, isGlobalScope, scopedSchools],
   );
   const filteredSnapshots = useMemo(
-    () => classroomSnapshots.filter((snapshot) => (clusterId === "all" ? true : snapshot.clusterId === clusterId)),
-    [clusterId],
+    () => {
+      const schoolIds = new Set(filteredSchools.map((school) => school.id));
+      return classroomSnapshots.filter((snapshot) => schoolIds.has(snapshot.schoolId));
+    },
+    [filteredSchools],
   );
 
   const totals = useMemo(() => {
@@ -69,13 +85,14 @@ export function OverviewWorkspace({
   );
 
   const activeCluster = classroomClusters.find((cluster) => cluster.id === clusterId);
+  const scopeLabel = isGlobalScope ? activeCluster?.label ?? copy.allClusters : filteredSchools[0]?.name ?? copy.selectedCenter;
   const summaryItems =
     mode === "center"
       ? [
           { label: copy.summary.openAssignments, value: String(assignmentRuns.length), detail: copy.summary.openAssignmentsHint },
           { label: copy.summary.needsSupport, value: String(totals.flaggedStudents), detail: copy.summary.needsSupportHint },
           { label: copy.summary.completion, value: `${totals.averageCompletion}%`, detail: copy.summary.completionHint },
-          { label: copy.summary.scope, value: activeCluster?.label ?? copy.allClusters, detail: copy.summary.scopeHint(filteredSchools.length) },
+          { label: copy.summary.scope, value: scopeLabel, detail: copy.summary.scopeHint(filteredSchools.length) },
         ]
       : [
           { label: copy.summary.schools, value: String(filteredSchools.length), detail: copy.summary.schoolHint },
@@ -87,26 +104,22 @@ export function OverviewWorkspace({
   return (
     <DashboardPageShell
       badge={mode === "center" ? copy.centerBadge : copy.schoolBadge}
-      title={activeLeaf.title}
+      title={mode === "center" ? copy.centerTitle : copy.schoolTitle}
       description={mode === "center" ? copy.centerDescription : copy.schoolDescription}
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
         <>
-          <DashboardSegmentedControl
-            options={[
-              { value: "all", label: copy.allClusters },
-              ...classroomClusters.map((cluster) => ({ value: cluster.id, label: cluster.label })),
-            ]}
-            value={clusterId}
-            onChange={setClusterId}
-          />
-          <Button variant="outline" onClick={() => onOpenLeaf("question-bank")}>
-            {copy.openQuestionBank}
-          </Button>
-          <Button variant="outline" onClick={() => onOpenLeaf(mode === "center" ? "school-pulse" : "ops-overview")}>
-            {mode === "center" ? copy.openSchoolOverview : copy.openLearningOps}
-          </Button>
-          <Button onClick={() => onOpenLeaf("course-modules")}>{copy.openQuizStudio}</Button>
+          {isGlobalScope ? (
+            <DashboardSegmentedControl
+              options={[
+                { value: "all", label: copy.allClusters },
+                ...classroomClusters.map((cluster) => ({ value: cluster.id, label: cluster.label })),
+              ]}
+              value={clusterId}
+              onChange={setClusterId}
+            />
+          ) : null}
+          <Button variant="outline">{copy.last30Days}</Button>
         </>
       }
       headerContent={<SummaryStrip items={summaryItems} />}
@@ -415,8 +428,12 @@ function getUrgencyTone(urgency: InterventionItem["urgency"]): BadgeTone {
 type OverviewCopy = typeof enCopy;
 
 const viCopy = {
-  centerBadge: "Điều hành",
-  schoolBadge: "Toàn cảnh",
+  centerBadge: "Tổng quan",
+  schoolBadge: "Báo cáo lớp",
+  centerTitle: "Báo cáo tổng quan",
+  schoolTitle: "Báo cáo trường/lớp",
+  last30Days: "30 ngày gần đây",
+  selectedCenter: "Trung tâm đã chọn",
   centerDescription:
     "Tập trung vào việc cần xử lý hôm nay: bài đang chạy, học sinh cần nhắc và lớp có dấu hiệu chậm nhịp.",
   schoolDescription:
@@ -483,6 +500,10 @@ const viCopy = {
 const enCopy = {
   centerBadge: "Learning ops",
   schoolBadge: "School overview",
+  centerTitle: "Overview report",
+  schoolTitle: "School and class report",
+  last30Days: "Last 30 days",
+  selectedCenter: "Selected center",
   centerDescription:
     "Focus on today's work: live assignments, students to nudge, and classes that are slowing down.",
   schoolDescription:

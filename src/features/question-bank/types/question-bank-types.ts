@@ -1,7 +1,7 @@
 import type { QuestionType } from "@/features/quiz-editor/types/quiz-editor-types";
 import type { ContentScope } from "@/types/scope-types";
 
-export type QuestionBankSubjectId = "ic3-gs6" | "mathematics" | "english" | "science";
+export type QuestionBankSubjectId = string;
 
 export type QuestionBankDifficulty = "core" | "stretch" | "challenge";
 

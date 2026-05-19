@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { useI18n } from "@/features/i18n";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { AnswerPayload, Question } from "@/lib/types";
 
 export function QuestionBodyWithImage({
@@ -10,8 +11,10 @@ export function QuestionBodyWithImage({
   question: Question;
   children: ReactNode;
 }) {
+  const isMobile = useIsMobile();
+
   return (
-    <div className="flex flex-col gap-5">
+    <div className={`flex flex-col ${isMobile ? "gap-3" : "gap-5"}`}>
       {question.contentImage ? <QuestionContentImage question={question} /> : null}
       {children}
     </div>
@@ -25,19 +28,21 @@ export function QuestionContentImage({
   question: Question;
   className?: string;
 }) {
+  const isMobile = useIsMobile();
+
   if (!question.contentImage) {
     return null;
   }
 
   return (
     <div
-      className={`overflow-hidden rounded-xl border bg-white shadow-sm ${className}`.trim()}
+      className={`overflow-hidden border bg-white shadow-sm ${className} ${isMobile ? "rounded-md" : "rounded-xl"}`.trim()}
       style={{ borderColor: "var(--quiz-canvas-border)" }}
     >
       <img
         src={question.contentImage.url}
         alt={question.contentImage.alt ?? question.title}
-        className="block h-auto max-h-[420px] w-full object-contain"
+        className={`block h-auto w-full object-contain ${isMobile ? "max-h-[180px]" : "max-h-[420px]"}`}
       />
     </div>
   );
@@ -61,6 +66,7 @@ export function InlineChoiceSelect({
   onRevealCorrectAnswer?: () => void;
 }) {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const selectedValue = value.inlineSelections?.[blank.id] ?? "";
   const isAnswered = Boolean(selectedValue);
   const isCorrect = reviewMode && isAnswered && selectedValue === correctValue;
@@ -70,7 +76,11 @@ export function InlineChoiceSelect({
     <div className="relative flex-none">
       <select
         aria-label={blank.statement}
-        className="min-h-13 min-w-[180px] rounded-lg border-2 px-4 pr-10 text-xl font-bold outline-none transition"
+        className={`outline-none transition ${
+          isMobile
+            ? "min-h-10 min-w-[92px] rounded-md border px-3 pr-9 text-sm font-medium"
+            : "min-h-13 min-w-[180px] rounded-lg border-2 px-4 pr-10 text-xl font-bold"
+        }`}
         disabled={submitted}
         style={{
           borderColor: isCorrect ? "#78b816" : isWrong ? "#ef6b5f" : "var(--quiz-canvas-border)",
@@ -102,7 +112,9 @@ export function InlineChoiceSelect({
         <button
           type="button"
           aria-label="Xem đáp án đúng"
-          className="absolute right-2 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full border-2 border-[#ef6b5f] text-base font-black text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30"
+          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border-2 border-[#ef6b5f] font-black text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30 ${
+            isMobile ? "right-1.5 h-6 w-6 text-sm" : "right-2 h-7 w-7 text-base"
+          }`}
           onClick={onRevealCorrectAnswer}
         >
           ?

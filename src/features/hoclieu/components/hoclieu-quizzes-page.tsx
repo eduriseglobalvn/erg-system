@@ -10,26 +10,26 @@ import {
 
 export function HocLieuQuizzesPage() {
   return (
-    <div className="bg-[#f8fafc] pb-24">
+    <div className="bg-slate-50 pb-16">
       <HocLieuPageHero
-        eyebrow="Assessment Hub"
-        title="Quiz bank Ä‘á»ƒ kiá»ƒm tra nhanh, mock thi tháº­t vÃ  Ä‘o tiáº¿n bá»™ há»c viÃªn."
-        description="Teacher Hub gom toÃ n bá»™ warm-up quiz, exit ticket, quiz giá»¯a buá»•i, Ä‘á» mÃ´ phá»ng vÃ  checklist cháº¥m nhanh thÃ nh má»™t khu assessment thá»‘ng nháº¥t cho giÃ¡o viÃªn."
+        eyebrow="Assessment hub"
+        title="Quiz bank để kiểm tra nhanh, mock quiz và theo dõi tiến độ."
+        description="Khu này gom warm-up quiz, checkpoint, quiz giữa buổi và mock sets để giáo viên lấy nhanh đúng bộ đánh giá cho lớp."
         stats={[
           { label: "Quiz tracks", value: `${QUIZ_TRACKS.length}` },
-          { label: "CÃ¢u há»i", value: "2.6k+" },
-          { label: "Mock sets", value: "34" },
+          { label: "Câu hỏi", value: "990+" },
+          { label: "Mock sets", value: "18" },
         ]}
         actions={[
-          { label: "Má»Ÿ kho há»c liá»‡u", href: "/kho-hoc-lieu", icon: ClipboardList },
-          { label: "VÃ o chÆ°Æ¡ng trÃ¬nh", href: "/chuong-trinh", icon: BrainCircuit, variant: "secondary" },
+          { label: "Mở kho học liệu", href: "/kho-hoc-lieu", icon: ClipboardList },
+          { label: "Vào chương trình", href: "/chuong-trinh", icon: BrainCircuit, variant: "secondary" },
         ]}
       />
 
       <HocLieuSection
-        eyebrow="Quiz Tracks"
-        title="Má»—i track cÃ³ ngÃ¢n hÃ ng Ä‘Ã¡nh giÃ¡ riÃªng."
-        description="CÃ¢u há»i khÃ´ng bá»‹ trá»™n láº«n vÃ´ tá»• chá»©c ná»¯a. Má»—i chÆ°Æ¡ng trÃ¬nh Ä‘Æ°á»£c tÃ¡ch quiz bank riÃªng Ä‘á»ƒ giÃ¡o viÃªn chá»n Ä‘Ãºng nÄƒng lá»±c cáº§n kiá»ƒm tra."
+        eyebrow="Quiz tracks"
+        title="Mỗi nhóm môn học có quiz bank riêng."
+        description="Câu hỏi được gom theo IC3, MOS và Tin học để giáo viên không mất thời gian lọc thủ công."
       >
         <HocLieuCardGrid
           items={QUIZ_TRACKS.map((track) => ({
@@ -42,26 +42,27 @@ export function HocLieuQuizzesPage() {
       </HocLieuSection>
 
       <HocLieuSection
-        eyebrow="Assessment Types"
-        title="CÃ¡c loáº¡i bÃ i Ä‘Ã¡nh giÃ¡ cÃ³ trong há»‡ thá»‘ng."
-        description="Má»™t bÃ i dáº¡y tá»‘t thÆ°á»ng cáº§n nhiá»u lá»›p kiá»ƒm tra: má»Ÿ bÃ i, checkpoint giá»¯a buá»•i, cá»§ng cá»‘ cuá»‘i buá»•i vÃ  bÃ i mÃ´ phá»ng cuá»‘i cháº·ng."
+        eyebrow="Assessment types"
+        title="Các lớp đánh giá có trong hệ thống."
+        description="Bài học tốt cần nhiều lớp kiểm tra khác nhau. UI quiz bank cần giúp giáo viên phân biệt vai trò từng bộ."
         tone="muted"
       >
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
           {[
-            { title: "Warm-up quiz", detail: "Khá»Ÿi Ä‘á»™ng 3-5 phÃºt Ä‘á»ƒ gá»i láº¡i kiáº¿n thá»©c cÅ©.", icon: BrainCircuit },
-            { title: "Checkpoint", detail: "Bá»™ cÃ¢u há»i ngáº¯n giá»¯a buá»•i há»c Ä‘á»ƒ cháº·n sá»›m pháº§n chÆ°a hiá»ƒu.", icon: CircleCheckBig },
-            { title: "Exit ticket", detail: "ÄÃ¡nh giÃ¡ cuá»‘i buá»•i vÃ  xÃ¡c Ä‘á»‹nh ai cáº§n há»— trá»£ tiáº¿p theo.", icon: ClipboardList },
-            { title: "Mock exam", detail: "BÃ i mÃ´ phá»ng gáº§n vá»›i ká»³ thi tháº­t, cÃ³ bÃ¡o cÃ¡o objective.", icon: ChartColumn },
+            { title: "Warm-up", detail: "Khởi động 3-5 phút để gợi lại kiến thức cũ.", icon: BrainCircuit },
+            { title: "Checkpoint", detail: "Bộ câu hỏi giữa tiết để chặn sớm phần học sinh chưa theo kịp.", icon: CircleCheckBig },
+            { title: "Exit ticket", detail: "Đánh giá cuối buổi và xác định nội dung cần bổ sung.", icon: ClipboardList },
+            { title: "Mock quiz", detail: "Bộ quiz mô phỏng để giáo viên dùng cho buổi ôn tập.", icon: ChartColumn },
           ].map((item) => {
             const ItemIcon = item.icon;
+
             return (
-              <div key={item.title} className="rounded-[28px] border border-slate-100 bg-white p-6 shadow-sm shadow-slate-200/30">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-[#00008b]">
+              <div key={item.title} className="rounded-[24px] border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-[var(--erg-blue)]">
                   <ItemIcon className="h-5 w-5" />
                 </div>
-                <h3 className="mt-5 text-2xl font-black tracking-tight text-slate-900">{item.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-slate-500">{item.detail}</p>
+                <h3 className="mt-5 text-2xl font-black tracking-tight text-slate-950">{item.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{item.detail}</p>
               </div>
             );
           })}
@@ -69,25 +70,25 @@ export function HocLieuQuizzesPage() {
       </HocLieuSection>
 
       <HocLieuSection
-        eyebrow="Assessment Flow"
-        title="Má»™t vÃ²ng Ä‘Ã¡nh giÃ¡ Ä‘á»§ Ä‘á»ƒ giÃ¡o viÃªn theo dÃµi tiáº¿n bá»™."
-        description="Quiz bank Ä‘Æ°á»£c thiáº¿t káº¿ Ä‘á»ƒ Ä‘i kÃ¨m lesson kit chá»© khÃ´ng Ä‘á»©ng riÃªng, nÃªn báº¡n cÃ³ thá»ƒ dÃ¹ng ngay trong flow váº­n hÃ nh lá»›p há»c."
+        eyebrow="Assessment flow"
+        title="Luồng đánh giá đi cùng lesson kit."
+        description="Quiz bank được đặt như một tầng bổ trợ cho giao diện học liệu, không tách rời khỏi flow dạy học."
       >
         <HocLieuTimeline
           items={[
             {
-              title: "Láº¥y quiz Ä‘Ãºng module",
-              detail: "Chá»n Ä‘Ãºng module cá»§a chÆ°Æ¡ng trÃ¬nh Ä‘á»ƒ trÃ¡nh kiá»ƒm tra lá»‡ch ná»™i dung Ä‘ang dáº¡y.",
+              title: "Lấy quiz đúng module",
+              detail: "Bắt đầu từ đúng chương trình hoặc đúng nhóm môn để chọn bộ quiz phù hợp.",
               meta: "01",
             },
             {
-              title: "Cháº¥m vÃ  nhÃ¬n lá»—i nhanh",
-              detail: "DÃ¹ng rubric hoáº·c answer map Ä‘á»ƒ cháº¥m nhanh, xÃ¡c Ä‘á»‹nh objective nÃ o lá»›p Ä‘ang yáº¿u.",
+              title: "Chấm và nhìn lỗi nhanh",
+              detail: "Dùng answer map hoặc rubric để xác định objective nào đang yếu.",
               meta: "02",
             },
             {
-              title: "Quay láº¡i lesson kit",
-              detail: "Tá»« káº¿t quáº£ quiz, giÃ¡o viÃªn quay láº¡i há»c liá»‡u hoáº·c portfolio Ä‘á»ƒ bá»• trá»£ pháº§n cÃ²n há»•ng.",
+              title: "Quay lại học liệu",
+              detail: "Từ kết quả quiz, giáo viên quay lại lấy slide, worksheet hoặc bài tập bổ sung.",
               meta: "03",
             },
           ]}

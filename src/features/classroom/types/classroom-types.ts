@@ -3,6 +3,7 @@ export type ClassroomClusterId = "central" | "east" | "south";
 export type ClassroomSchool = {
   id: string;
   name: string;
+  logoURL?: string;
   clusterId: ClassroomClusterId;
   principal: string;
   activeStudents: number;

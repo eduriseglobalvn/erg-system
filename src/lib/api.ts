@@ -7,10 +7,11 @@ import {
   markSessionSyncFailed,
   markSessionSynced,
 } from "@/lib/assessment-engine";
+import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { browserAttemptStore } from "@/lib/attempt-store";
 import { getAllQuestions } from "@/lib/quiz";
 import { sampleQuiz } from "@/lib/sample-quiz";
-import { getApiBase, getGradingStrategy } from "@/lib/platform";
+import { getGradingStrategy } from "@/lib/platform";
 import type {
   AnswerPayload,
   AnswerResult,
@@ -23,32 +24,11 @@ import type {
   StudentProgress,
 } from "@/lib/types";
 
-const API_BASE = getApiBase();
+const API_BASE = hasApiBase();
 const GRADING_STRATEGY = getGradingStrategy();
 const CLIENT_FIRST_GRADING = GRADING_STRATEGY === "client-first";
 
 let localSession: AttemptSession | null = null;
-
-async function safeFetch<T>(path: string, init?: RequestInit): Promise<T> {
-  if (!API_BASE) {
-    throw new Error("API base URL is not configured.");
-  }
-
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    throw new Error(`Request failed: ${response.status}`);
-  }
-
-  return (await response.json()) as T;
-}
 
 export async function fetchQuizList(): Promise<QuizSummary[]> {
   if (!API_BASE) {
@@ -56,7 +36,7 @@ export async function fetchQuizList(): Promise<QuizSummary[]> {
   }
 
   try {
-    const data = await safeFetch<{ items: QuizSummary[] }>("/quizzes");
+    const data = await apiRequest<{ items: QuizSummary[] }>("/api/lms/quizzes");
     return data.items;
   } catch {
     return getLocalQuizList();
@@ -70,7 +50,7 @@ export async function fetchQuiz(id: string): Promise<Quiz> {
 
   if (CLIENT_FIRST_GRADING) {
     try {
-      const quizPackage = await safeFetch<QuizPackage>(`/quizzes/${id}/package`);
+      const quizPackage = await apiRequest<QuizPackage>(`/api/lms/quizzes/${id}/package`);
       if (isQuizPackage(quizPackage)) {
         return quizPackage.quiz;
       }
@@ -80,7 +60,7 @@ export async function fetchQuiz(id: string): Promise<Quiz> {
   }
 
   try {
-    return await safeFetch<Quiz>(`/quizzes/${id}`);
+    return await apiRequest<Quiz>(`/api/lms/quizzes/${id}`);
   } catch {
     return sampleQuiz;
   }
@@ -92,7 +72,7 @@ export async function saveQuiz(quiz: Quiz): Promise<Quiz> {
   }
 
   try {
-    return await safeFetch<Quiz>(`/quizzes/${quiz.id}`, {
+    return await apiRequest<Quiz>(`/api/lms/quizzes/${quiz.id}`, {
       method: "PUT",
       body: JSON.stringify(quiz),
     });
@@ -116,7 +96,7 @@ export async function createAttempt(quizInput: Quiz | string): Promise<Attempt> 
   }
 
   try {
-    return await safeFetch<Attempt>("/attempts", {
+    return await apiRequest<Attempt>("/api/lms/attempts", {
       method: "POST",
       body: JSON.stringify({ quizId: quiz.id }),
     });
@@ -147,7 +127,7 @@ export async function submitAnswer(
   }
 
   try {
-    return await safeFetch<{ attempt: Attempt; result: AnswerResult }>(`/attempts/${attemptId}/answers`, {
+    return await apiRequest<{ attempt: Attempt; result: AnswerResult }>(`/api/lms/attempts/${attemptId}/answers`, {
       method: "POST",
       body: JSON.stringify({ questionId, answer }),
     });
@@ -176,7 +156,7 @@ export async function submitAttempt(
   }
 
   try {
-    return await safeFetch<Attempt>(`/attempts/${attemptId}/submit`, {
+    return await apiRequest<Attempt>(`/api/lms/attempts/${attemptId}/submit`, {
       method: "POST",
       body: JSON.stringify({ answers }),
     });
@@ -191,7 +171,7 @@ export async function fetchStudentProgress(quizId: string): Promise<StudentProgr
   }
 
   try {
-    const data = await safeFetch<{ items: StudentProgress[] }>(`/quizzes/${quizId}/students`);
+    const data = await apiRequest<{ items: StudentProgress[] }>(`/api/lms/quizzes/${quizId}/students`);
     return data.items;
   } catch {
     return getLocalStudentProgress(quizId);
@@ -282,10 +262,10 @@ async function postAttemptSyncPayload(payload: AttemptSyncPayload) {
     Object.values(payload.attempt.answers).map((record) => [record.questionId, record.input]),
   );
   const path = payload.submittedAt
-    ? `/attempts/${payload.attemptId}/submit`
-    : `/attempts/${payload.attemptId}/sync`;
+    ? `/api/lms/attempts/${payload.attemptId}/submit`
+    : `/api/lms/attempts/${payload.attemptId}/sync`;
 
-  await safeFetch<Attempt>(path, {
+  await apiRequest<Attempt>(path, {
     method: "POST",
     body: JSON.stringify({
       ...payload,

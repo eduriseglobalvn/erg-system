@@ -26,6 +26,25 @@ const hotspotMockImage = `data:image/svg+xml,${encodeURIComponent(`
   </svg>
 `)}`;
 
+function createCableMockImage(label: string, color: string) {
+  return `data:image/svg+xml,${encodeURIComponent(`
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">
+      <rect width="240" height="240" rx="36" fill="#ffffff"/>
+      <path d="M118 36h16v48h-16z" fill="#cbd5e1"/>
+      <rect x="92" y="72" width="68" height="36" rx="10" fill="${color}"/>
+      <rect x="103" y="112" width="46" height="70" rx="18" fill="#111827"/>
+      <rect x="109" y="182" width="34" height="18" rx="8" fill="#1f2937"/>
+      <path d="M120 198v18c0 10 8 18 18 18h8" stroke="#111827" stroke-width="8" stroke-linecap="round" fill="none"/>
+      <text x="120" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">${label}</text>
+    </svg>
+  `)}`;
+}
+
+const cableUsbCImage = createCableMockImage("USB-C", "#60a5fa");
+const cableUsbAImage = createCableMockImage("USB-A", "#34d399");
+const cableHdmiImage = createCableMockImage("HDMI", "#f59e0b");
+const cableLightningImage = createCableMockImage("LIGHT", "#f472b6");
+
 export const sampleQuiz: Quiz = {
   id: "avs-demo",
   title: "GS6 LV3 OTTHBS (TRAINING)",
@@ -148,6 +167,20 @@ export const sampleQuiz: Quiz = {
             { id: "q7-pair-2", prompt: "Khởi tạo (Initiation)", response: "Quyết định có theo đuổi dự án hay không." },
             { id: "q7-pair-3", prompt: "Thực hiện (Execution)", response: "Tạo ra sản phẩm dự án." },
             { id: "q7-pair-4", prompt: "Đóng (Close)", response: "Bàn giao và đánh giá dự án." },
+          ],
+        },
+        {
+          id: "q7b-matching-image",
+          kind: "matching",
+          title: "Match each connector name with the correct image.",
+          instructions: "Tap a row to open the answer picker with image options.",
+          points: 10,
+          feedback: standardFeedback,
+          matching: [
+            { id: "q7b-pair-1", prompt: "USB-C", response: "USB-C connector", responseImage: { url: cableUsbCImage, alt: "USB-C cable" } },
+            { id: "q7b-pair-2", prompt: "USB-A", response: "USB-A connector", responseImage: { url: cableUsbAImage, alt: "USB-A cable" } },
+            { id: "q7b-pair-3", prompt: "HDMI", response: "HDMI connector", responseImage: { url: cableHdmiImage, alt: "HDMI cable" } },
+            { id: "q7b-pair-4", prompt: "Lightning", response: "Lightning connector", responseImage: { url: cableLightningImage, alt: "Lightning cable" } },
           ],
         },
         {

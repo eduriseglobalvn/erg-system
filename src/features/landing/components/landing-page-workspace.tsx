@@ -1,8 +1,11 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { AuthFormPanel } from "@/features/auth/components/auth-form-panel";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { ErgFooter } from "@/components/erg-footer";
+import { getLmsPortalUrl } from "@/config/portal-urls";
+import { ERG_ASSETS } from "@/config/seo";
+import { loginStudent } from "@/features/auth/api/student-auth-storage";
+import { TeacherAuthDialog } from "@/features/auth/components/teacher-auth-dialog";
 import { cn } from "@/lib/utils";
 
 type LoginRole = "teacher" | "student";
@@ -46,6 +49,7 @@ const newsItems = [
 export function LandingPageWorkspace() {
   const navigate = useNavigate();
   const [loginOpen, setLoginOpen] = useState(false);
+  const [teacherAuthOpen, setTeacherAuthOpen] = useState(false);
 
   return (
     <main className="min-h-screen bg-white text-slate-950">
@@ -172,22 +176,32 @@ export function LandingPageWorkspace() {
         </div>
       </section>
 
-      <footer className="border-t border-slate-100 bg-white">
-        <div className="mx-auto flex max-w-[1180px] flex-col gap-2 px-4 py-6 sm:flex-row sm:items-center sm:justify-between">
-          <Brand />
-          <div className="text-sm text-slate-500">© 2026 Edurise Global. All rights reserved.</div>
-        </div>
-      </footer>
+      <ErgFooter />
 
       {loginOpen ? (
         <LoginChooser
           onClose={() => setLoginOpen(false)}
+          onTeacherSelected={() => {
+            setLoginOpen(false);
+            setTeacherAuthOpen(true);
+          }}
           onNavigate={(path) => {
             setLoginOpen(false);
+            if (path.startsWith("http")) {
+              window.location.assign(path);
+              return;
+            }
+
             navigate(path);
           }}
         />
       ) : null}
+
+      <TeacherAuthDialog
+        open={teacherAuthOpen}
+        onOpenChange={setTeacherAuthOpen}
+        onAuthenticated={() => window.location.assign(getLmsPortalUrl())}
+      />
     </main>
   );
 }
@@ -195,10 +209,7 @@ export function LandingPageWorkspace() {
 function Brand() {
   return (
     <div className="flex items-center gap-3">
-      <div className="text-3xl font-black leading-none">
-        <span className="text-[var(--erg-blue)]">ER</span>
-        <span className="text-[var(--erg-red)]">G</span>
-      </div>
+      <img alt="ERG Logo" className="h-10 w-auto object-contain" src={ERG_ASSETS.logo} />
       <div>
         <div className="text-lg font-bold leading-none text-[var(--erg-blue)]">EDURISE GLOBAL</div>
         <div className="mt-1 text-[10px] font-bold uppercase text-slate-400">Learn today, lead tomorrow</div>
@@ -207,8 +218,15 @@ function Brand() {
   );
 }
 
-function LoginChooser({ onClose, onNavigate }: { onClose: () => void; onNavigate: (path: string) => void }) {
-  const teacherAuth = useAuthSession();
+function LoginChooser({
+  onClose,
+  onNavigate,
+  onTeacherSelected,
+}: {
+  onClose: () => void;
+  onNavigate: (path: string) => void;
+  onTeacherSelected: () => void;
+}) {
   const [selectedRole, setSelectedRole] = useState<LoginRole | null>(null);
   const [loginForm, setLoginForm] = useState<LandingLoginForm>({
     email: "",
@@ -219,10 +237,14 @@ function LoginChooser({ onClose, onNavigate }: { onClose: () => void; onNavigate
   const roleConfig = selectedRole ? loginRoleConfig[selectedRole] : null;
 
   function chooseRole(role: LoginRole) {
+    if (role === "teacher") {
+      onTeacherSelected();
+      return;
+    }
+
     const config = loginRoleConfig[role];
     setSelectedRole(role);
     setErrorMessage(null);
-    teacherAuth.setNotice(null);
     setLoginForm({
       email: config.defaultEmail,
       password: config.defaultPassword,
@@ -230,29 +252,7 @@ function LoginChooser({ onClose, onNavigate }: { onClose: () => void; onNavigate
     });
   }
 
-  function runTeacherAuth(action: () => void) {
-    try {
-      action();
-      onNavigate("/dashboard");
-    } catch (error) {
-      teacherAuth.setNotice({
-        tone: "error",
-        message: error instanceof Error ? error.message : "Không thể đăng nhập giáo viên.",
-      });
-    }
-  }
-
-  function handleTeacherLoginSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    runTeacherAuth(teacherAuth.actions.login);
-  }
-
-  function handleTeacherRegisterSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    runTeacherAuth(teacherAuth.actions.register);
-  }
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!selectedRole) return;
 
@@ -261,21 +261,12 @@ function LoginChooser({ onClose, onNavigate }: { onClose: () => void; onNavigate
       return;
     }
 
-    if (loginForm.email.trim().toLowerCase() !== "student@erg.vn" || loginForm.password !== "12345678") {
-      setErrorMessage("Tài khoản học sinh demo là student@erg.vn / 12345678.");
-      return;
+    try {
+      await loginStudent(loginForm);
+      onNavigate(getLmsPortalUrl("/student"));
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Không thể đăng nhập học sinh.");
     }
-
-    window.localStorage.setItem(
-      "erg-learning.student-session",
-      JSON.stringify({
-        className: "Lớp 6A1",
-        email: loginForm.email.trim().toLowerCase(),
-        loggedInAt: new Date().toISOString(),
-        name: "Võ Ngọc Linh",
-      }),
-    );
-    onNavigate("/student");
   }
 
   return (
@@ -295,58 +286,8 @@ function LoginChooser({ onClose, onNavigate }: { onClose: () => void; onNavigate
           </button>
         </div>
 
-        {selectedRole === "teacher" ? (
-          <div className="mt-5">
-            <button
-              className="mb-4 rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-              onClick={() => {
-                setSelectedRole(null);
-                teacherAuth.setNotice(null);
-              }}
-              type="button"
-            >
-              Quay lại chọn vai trò
-            </button>
-
-            {teacherAuth.notice ? (
-              <div
-                className={cn(
-                  "mb-4 rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm",
-                  teacherAuth.notice.tone === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : teacherAuth.notice.tone === "error"
-                      ? "border-rose-200 bg-rose-50 text-rose-700"
-                      : "border-blue-200 bg-blue-50 text-blue-700",
-                )}
-              >
-                {teacherAuth.notice.message}
-              </div>
-            ) : null}
-
-            <AuthFormPanel
-              mode={teacherAuth.mode}
-              rememberMe={teacherAuth.rememberMe}
-              showPassword={teacherAuth.showPassword}
-              loginForm={teacherAuth.loginForm}
-              registerForm={teacherAuth.registerForm}
-              onModeChange={teacherAuth.setMode}
-              onRememberMeChange={teacherAuth.setRememberMe}
-              onShowPasswordToggle={() => teacherAuth.setShowPassword((current) => !current)}
-              onLoginFormChange={teacherAuth.setLoginForm}
-              onRegisterFormChange={teacherAuth.setRegisterForm}
-              onLoginSubmit={handleTeacherLoginSubmit}
-              onRegisterSubmit={handleTeacherRegisterSubmit}
-              onForgotPassword={teacherAuth.actions.forgotPassword}
-              onProviderLogin={(provider) => runTeacherAuth(() => teacherAuth.actions.loginByProvider(provider))}
-            />
-          </div>
-        ) : selectedRole === "student" ? (
+        {selectedRole === "student" ? (
           <form className="mt-5 space-y-4" onSubmit={handleSubmit}>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              <span className="font-semibold text-[var(--erg-blue)]">Tài khoản demo:</span>{" "}
-              {roleConfig?.defaultEmail} / {roleConfig?.defaultPassword}
-            </div>
-
             {errorMessage ? (
               <div className="rounded-lg border border-[var(--erg-red)]/20 bg-[var(--erg-red)]/5 px-4 py-3 text-sm font-medium text-[var(--erg-red)]">
                 {errorMessage}
@@ -458,16 +399,16 @@ const loginRoleConfig: Record<
   }
 > = {
   teacher: {
-    defaultEmail: "teacher@erg.vn",
-    defaultPassword: "12345678",
+    defaultEmail: "",
+    defaultPassword: "",
     emailLabel: "Email giáo viên",
     heading: "Đăng nhập giáo viên",
     subtitle: "Vào khu vực quản lý lớp học, giao bài và thông báo.",
   },
   student: {
-    defaultEmail: "student@erg.vn",
-    defaultPassword: "12345678",
-    emailLabel: "Email học sinh",
+    defaultEmail: "",
+    defaultPassword: "123456",
+    emailLabel: "Username học sinh",
     heading: "Đăng nhập học sinh",
     subtitle: "Vào khu vực làm bài, xem điểm và nhận thông báo từ giáo viên.",
   },

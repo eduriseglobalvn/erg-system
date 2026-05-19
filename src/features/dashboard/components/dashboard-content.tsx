@@ -1,4 +1,5 @@
 import {
+  ClassListWorkspace,
   ClassReportsWorkspace,
   ClassStudentsWorkspace,
   OverviewWorkspace,
@@ -7,6 +8,7 @@ import { AdminOperationsWorkspace } from "@/features/admin-operations";
 import { DashboardPlaceholderWorkspace } from "@/features/dashboard/components/dashboard-placeholder-workspace";
 import { QuizEditorWorkspace } from "@/features/dashboard/components/quiz-editor-workspace";
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
+import { PublicDisclosureAdminWorkspace } from "@/features/public-disclosure";
 import { QuestionBankWorkspace } from "@/features/question-bank";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
@@ -41,7 +43,17 @@ export function DashboardContent({
   }
 
   if (activeLeaf.variant.startsWith("admin-")) {
-    return <AdminOperationsWorkspace activeLeaf={activeLeaf} managementScope={managementScope} />;
+    if (activeLeaf.variant === "admin-public-disclosure") {
+      return <PublicDisclosureAdminWorkspace />;
+    }
+
+    return (
+      <AdminOperationsWorkspace
+        activeLeaf={activeLeaf}
+        managementScope={managementScope}
+        onOpenLeaf={onOpenLeaf}
+      />
+    );
   }
 
   if (activeLeaf.variant === "quiz-editor") {
@@ -57,11 +69,27 @@ export function DashboardContent({
   }
 
   if (activeLeaf.variant === "overview") {
-    return <OverviewWorkspace activeLeaf={activeLeaf} mode="center" onOpenLeaf={onOpenLeaf} />;
+    return (
+      <OverviewWorkspace
+        activeLeaf={activeLeaf}
+        managementScope={managementScope}
+        mode="center"
+        onOpenLeaf={onOpenLeaf}
+        selectedSchoolId={selectedSchoolId}
+      />
+    );
   }
 
   if (activeLeaf.variant === "school-pulse") {
-    return <OverviewWorkspace activeLeaf={activeLeaf} mode="school" onOpenLeaf={onOpenLeaf} />;
+    return (
+      <OverviewWorkspace
+        activeLeaf={activeLeaf}
+        managementScope={managementScope}
+        mode="school"
+        onOpenLeaf={onOpenLeaf}
+        selectedSchoolId={selectedSchoolId}
+      />
+    );
   }
 
   if (activeLeaf.variant === "question-bank" || activeLeaf.variant === "quiz-bank") {
@@ -81,6 +109,17 @@ export function DashboardContent({
         activeLeaf={activeLeaf}
         onOpenLeaf={onOpenLeaf}
         selectedClassId={selectedClassId}
+        selectedSchoolId={selectedSchoolId}
+      />
+    );
+  }
+
+  if (activeLeaf.variant === "class-active" || activeLeaf.variant === "class-ended") {
+    return (
+      <ClassListWorkspace
+        activeLeaf={activeLeaf}
+        mode={activeLeaf.variant === "class-active" ? "active" : "ended"}
+        onOpenLeaf={onOpenLeaf}
         selectedSchoolId={selectedSchoolId}
       />
     );

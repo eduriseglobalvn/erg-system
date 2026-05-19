@@ -1,8 +1,13 @@
 import path from "node:path";
+import fs from "node:fs";
+/// <reference types="vitest/config" />
 
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig, type Plugin } from "vite";
+import { type Plugin } from "vite";
 import react from "@vitejs/plugin-react";
+import { defineConfig } from "vitest/config";
+
+const devHttpsPfx = path.resolve(__dirname, "certs/erg-dev.pfx");
 
 function localMuiIconShim(): Plugin {
   const iconPrefix = "\0local-mui-icon:";
@@ -40,10 +45,31 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+  },
   server: {
+    host: "0.0.0.0",
     port: 3001,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+    },
+    https: fs.existsSync(devHttpsPfx)
+      ? {
+          pfx: fs.readFileSync(devHttpsPfx),
+          passphrase: "erg-local-dev",
+        }
+      : undefined,
+    allowedHosts: [".erg.edu.local", ".erg.edu.vn"],
   },
   preview: {
+    host: "0.0.0.0",
     port: 4173,
+    allowedHosts: [".erg.edu.local", ".erg.edu.vn"],
   },
 });

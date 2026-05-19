@@ -1,5 +1,6 @@
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function SingleChoiceQuestion({
   question,
@@ -8,7 +9,57 @@ export function SingleChoiceQuestion({
   submitted = false,
   reviewMode = false,
 }: QuestionComponentProps) {
+  const isMobile = useIsMobile();
   const selectedId = value.choiceId;
+
+  if (isMobile) {
+    return (
+      <div className="grid gap-3">
+        {question.contentImage ? <QuestionContentImage question={question} /> : null}
+        <div className="grid gap-2.5">
+          {question.choices?.map((choice) => {
+            const selected = selectedId === choice.id;
+            const showCorrect = reviewMode && choice.correct;
+            const showWrong = reviewMode && selected && !choice.correct;
+
+            return (
+              <button
+                key={choice.id}
+                type="button"
+                disabled={submitted}
+                className="grid min-h-[52px] w-full grid-cols-[28px_minmax(0,1fr)] items-center gap-3 rounded-md border bg-white px-4 py-3 text-left shadow-sm transition disabled:cursor-default"
+                style={{
+                  borderColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : selected ? "#76bff1" : "#e2e8f0",
+                  backgroundColor: showCorrect ? "#f7fff1" : showWrong ? "#fff7f6" : "#ffffff",
+                }}
+                onClick={() => {
+                  if (submitted) return;
+                  onChange({ choiceId: choice.id });
+                }}
+              >
+                <span
+                  className="inline-flex h-5 w-5 items-center justify-center rounded-full border bg-white"
+                  style={{
+                    borderColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : selected ? "#76bff1" : "#b8c4d0",
+                  }}
+                >
+                  {selected || showCorrect ? (
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        backgroundColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : "#3da2eb",
+                      }}
+                    />
+                  ) : null}
+                </span>
+                <span className="text-[15px] leading-6 text-slate-600">{choice.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`grid gap-5 ${question.contentImage ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,1fr)] lg:items-start" : ""}`}>

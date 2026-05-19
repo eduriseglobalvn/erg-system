@@ -1,12 +1,12 @@
 import type { FormEvent } from "react";
 
+import { getLmsPortalUrl } from "@/config/portal-urls";
 import { roleLabel, providerLabel } from "@/features/auth/api/auth-storage";
 import { CheckIcon } from "@/features/auth/components/auth-icons";
 import {
   Field,
   MetaBadge,
   MetaRow,
-  QuickLinkCard,
   formatDate,
   inputClassName,
   submitButtonClassName,
@@ -112,6 +112,14 @@ export function AccountPanel({
                     type="text"
                   />
                 </Field>
+                <Field label="Số điện thoại">
+                  <input
+                    className={inputClassName}
+                    value={profileForm.phone}
+                    onChange={(event) => onProfileFormChange({ ...profileForm, phone: event.target.value })}
+                    type="tel"
+                  />
+                </Field>
                 <Field label={t("auth.department")}>
                   <input
                     className={inputClassName}
@@ -204,8 +212,8 @@ export function AccountPanel({
           <div className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.24)]">
             <h3 className="text-lg font-semibold text-slate-950">{t("auth.quickAccess")}</h3>
             <div className="mt-4 grid gap-3">
-              <QuickLinkCard to="/dashboard" title={t("auth.goDashboard")} caption={t("auth.goDashboardCaption")} />
-              <QuickLinkCard to="/student" title={t("auth.viewStudentUi")} caption={t("auth.viewStudentUiCaption")} />
+              <ExternalQuickLinkCard href={getLmsPortalUrl()} title={t("auth.goDashboard")} caption={t("auth.goDashboardCaption")} />
+              <ExternalQuickLinkCard href={getLmsPortalUrl("/student")} title={t("auth.viewStudentUi")} caption={t("auth.viewStudentUiCaption")} />
             </div>
           </div>
 
@@ -226,5 +234,17 @@ export function AccountPanel({
         </div>
       </div>
     </div>
+  );
+}
+
+function ExternalQuickLinkCard({ href, title, caption }: { href: string; title: string; caption: string }) {
+  return (
+    <a
+      className="rounded-[20px] border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-slate-300 hover:bg-white"
+      href={href}
+    >
+      <div className="text-sm font-semibold text-slate-900">{title}</div>
+      <div className="mt-1 text-sm leading-6 text-slate-500">{caption}</div>
+    </a>
   );
 }

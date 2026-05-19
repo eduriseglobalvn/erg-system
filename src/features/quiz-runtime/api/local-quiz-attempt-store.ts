@@ -26,6 +26,7 @@ export const localQuizAttemptStore = {
       submittedAt: stored.submittedAt,
       status: stored.status,
       answers: stored.answers,
+      bookmarkedQuestionIds: stored.bookmarkedQuestionIds ?? [],
       clientEvents: stored.clientEvents,
       submitIdempotencyKey: stored.submitIdempotencyKey,
     };
@@ -50,6 +51,7 @@ export const localQuizAttemptStore = {
       updatedAt: now,
       status: "in_progress",
       answers: {},
+      bookmarkedQuestionIds: [],
       clientEvents: [
         {
           type: "attempt_started",
@@ -94,6 +96,34 @@ export const localQuizAttemptStore = {
       ],
       status: session.status === "submit_failed" ? "in_progress" : session.status,
       updatedAt: now,
+    };
+
+    await this.saveSession(nextSession);
+    return nextSession;
+  },
+
+  async toggleBookmark(
+    session: LocalQuizAttemptSession,
+    questionId: string,
+  ): Promise<LocalQuizAttemptSession> {
+    const bookmarkedQuestionIds = session.bookmarkedQuestionIds.includes(questionId)
+      ? session.bookmarkedQuestionIds.filter((id) => id !== questionId)
+      : [...session.bookmarkedQuestionIds, questionId];
+
+    const now = new Date().toISOString();
+    const nextSession: LocalQuizAttemptSession = {
+      ...session,
+      bookmarkedQuestionIds,
+      updatedAt: now,
+      clientEvents: [
+        ...session.clientEvents,
+        {
+          type: "bookmark_toggled",
+          createdAt: now,
+          questionId,
+          bookmarked: bookmarkedQuestionIds.includes(questionId),
+        },
+      ],
     };
 
     await this.saveSession(nextSession);

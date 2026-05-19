@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
@@ -6,153 +6,96 @@ import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurned
 import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
+import { ErgFooter } from "@/components/erg-footer";
 import { PlayerShell } from "@/components/quiz/player-shell";
 import { Badge, Button, Card, ProgressBar } from "@/components/ui/dashboard-kit";
-import { getCurrentAccount, logoutAccount } from "@/features/auth/api/auth-storage";
-import type { TeacherAccount } from "@/features/auth/types/auth-types";
+import {
+  getCurrentElearningViewerSession,
+  logoutElearningViewerSession,
+  type ElearningViewerSession,
+} from "@/features/auth/api/elearning-viewer-session";
 import { useI18n } from "@/features/i18n";
+import { StudentAnnouncementPopup } from "@/features/student-dashboard/components/student-announcement-popup";
+import { StudentDashboardMobileApp } from "@/features/student-dashboard/components/student-dashboard-mobile-app";
+import { StudentDashboardMobileAccount } from "@/features/student-dashboard/components/student-dashboard-mobile-account";
+import { StudentDashboardMobileAnnouncements } from "@/features/student-dashboard/components/student-dashboard-mobile-announcements";
+import { StudentDashboardMobileAssignments } from "@/features/student-dashboard/components/student-dashboard-mobile-assignments";
+import { StudentDashboardMobileOverview } from "@/features/student-dashboard/components/student-dashboard-mobile-overview";
+import { StudentDashboardMobileScores } from "@/features/student-dashboard/components/student-dashboard-mobile-scores";
+import { StudentDiscussionFeed } from "@/features/student-dashboard/components/discussion/student-discussion-feed";
+import { useDashboardSurface } from "@/features/student-dashboard/hooks/use-dashboard-surface";
 import {
   studentAssignments,
   studentDashboardProfile,
   studentDiscussionThreads,
   studentTeacherAnnouncements,
 } from "@/features/student-dashboard/api/mock-student-dashboard";
+import { loadStudentDashboardData } from "@/features/student-dashboard/api/student-dashboard-api";
 import profanityWords from "@/features/student-dashboard/config/profanity-words.json";
+import type {
+  StudentDiscussionFeedPost,
+  StudentDiscussionReactionKey,
+} from "@/features/student-dashboard/types/discussion-feed-types";
 import type {
   StudentAssignmentAttempt,
   StudentAssignmentStatus,
   StudentDashboardAssignment,
+  StudentDashboardProfile,
   StudentDiscussionImageAttachment,
   StudentDiscussionThread,
   StudentTeacherAnnouncement,
 } from "@/features/student-dashboard/types/student-dashboard-types";
+import {
+  addFeedComment,
+  createReactionSummary,
+  getCommentCount,
+  getFeedPostActivityMs,
+  toggleFeedCommentReaction,
+  toggleFeedPostReaction,
+} from "@/features/student-dashboard/utils/discussion-feed-state";
+import { getDiscussionOverviewPreview } from "@/features/student-dashboard/utils/discussion-overview";
+import type {
+  DashboardCopy,
+  DiscussionScrollTarget,
+  StudentDiscussionNotification,
+  StudentPageKey,
+  StudentViewState,
+} from "@/features/student-dashboard/types/dashboard-view-types";
 import { cn } from "@/lib/utils";
 
-type StudentViewState =
-  | { type: "dashboard" }
-  | {
-      type: "quiz";
-      assignmentId: string;
-    };
-
-type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
-
-type DiscussionScrollTarget = {
-  replyId?: string;
-  threadId: string;
-};
-
-type StudentDiscussionNotification = DiscussionScrollTarget & {
-  id: string;
-  primaryText: string;
-  secondaryText: string;
-  timeLabel: string;
-  unread: boolean;
-};
-
-type DashboardCopy = {
-  navItems: Array<{ key: StudentPageKey; label: string; icon: ReactNode }>;
-  heroEyebrow: string;
-  heroTitle: (name: string) => string;
-  heroDescription: (taskTitle: string) => string;
-  primaryAction: string;
-  secondaryAction: string;
-  stats: {
-    open: string;
-    overdue: string;
-    average: string;
-    completed: string;
-  };
-  priority: {
-    title: string;
-    action: string;
-    detail: (dueLabel: string) => string;
-  };
-  todayTitle: string;
-  assignmentsTitle: string;
-  assignmentsDescription: string;
-  scoresTitle: string;
-  scoresDescription: string;
-  bestScoreLabel: string;
-  recentResultsTitle: string;
-  noRecentResults: string;
-  attemptDurationLabel: string;
-  discussionTitle: string;
-  discussionDescription: string;
-  discussionComposerTitle: string;
-  discussionTitlePlaceholder: string;
-  discussionBodyPlaceholder: string;
-  discussionAttachmentAction: string;
-  discussionAttachmentHint: string;
-  discussionRemoveAttachment: string;
-  discussionModerationWarning: string;
-  discussionPostAction: string;
-  discussionReplyPlaceholder: string;
-  discussionReplyAction: string;
-  discussionRepliesLabel: (count: number) => string;
-  discussionResolvedLabel: string;
-  discussionRelatedLabel: string;
-  discussionEmptyTitle: string;
-  discussionEmptyDescription: string;
-  discussionPageLabel: (page: number, totalPages: number) => string;
-  discussionPreviousPage: string;
-  discussionNextPage: string;
-  announcementTitle: string;
-  announcementDescription: string;
-  announcementHeroTitle: string;
-  announcementHeroEmpty: string;
-  announcementPinnedLabel: string;
-  notificationTitle: string;
-  notificationEmpty: string;
-  notificationNewTopicLabel: string;
-  notificationImageOnly: string;
-  notificationNewThread: (authorName: string) => string;
-  notificationNewReply: (authorName: string) => string;
-  notificationTopicContext: (title: string) => string;
-  accountTitle: string;
-  accountDescription: string;
-  learningProfileTitle: string;
-  loginStateTitle: string;
-  accountActionsTitle: string;
-  progressLabel: string;
-  questionCountLabel: string;
-  scoreLabel: string;
-  scoreBadge: (score: number, maxScore: number) => string;
-  pendingScore: string;
-  assignmentAction: (status: StudentAssignmentStatus) => string;
-  signedInAs: string;
-  guestLabel: string;
-  signIn: string;
-  signOut: string;
-  footerTitle: string;
-  footerSubtitle: string;
-  sessionBadge: string;
-  sessionEyebrow: string;
-  sessionDescription: (subject: string, teacher: string, dueLabel: string) => string;
-  backToDashboard: string;
-};
+const ANNOUNCEMENT_POPUP_SNOOZE_KEY = "student-dashboard-announcement-popup-snooze";
+const ANNOUNCEMENT_POPUP_SNOOZE_MS = 2 * 60 * 60 * 1000;
 
 export function StudentDashboardWorkspace() {
   const navigate = useNavigate();
   const { locale } = useI18n();
+  const surface = useDashboardSurface();
+  const isMobile = surface === "mobile-web";
   const copy: DashboardCopy = locale === "vi" ? viCopy : enCopy;
   const [activePage, setActivePage] = useState<StudentPageKey>("overview");
   const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
-  const [account, setAccount] = useState<TeacherAccount | null>(() => getCurrentAccount());
-  const [discussionThreads, setDiscussionThreads] = useState<StudentDiscussionThread[]>(studentDiscussionThreads);
-  const [discussionNotifications, setDiscussionNotifications] = useState<StudentDiscussionNotification[]>(() =>
-    createInitialDiscussionNotifications(studentDiscussionThreads, locale),
+  const [account, setAccount] = useState<ElearningViewerSession | null>(() => getCurrentElearningViewerSession());
+  const [dashboardProfile, setDashboardProfile] = useState<StudentDashboardProfile>(studentDashboardProfile);
+  const [assignments, setAssignments] = useState<StudentDashboardAssignment[]>(studentAssignments);
+  const [teacherAnnouncements, setTeacherAnnouncements] =
+    useState<StudentTeacherAnnouncement[]>(studentTeacherAnnouncements);
+  const [discussionPosts, setDiscussionPosts] = useState<StudentDiscussionFeedPost[]>(() =>
+    createInitialDiscussionFeedPosts(studentDiscussionThreads),
   );
-  const [discussionScrollTarget, setDiscussionScrollTarget] = useState<DiscussionScrollTarget | null>(null);
+  const [discussionNotifications, setDiscussionNotifications] = useState<StudentDiscussionNotification[]>(() =>
+    createInitialDiscussionNotifications(createInitialDiscussionFeedPosts(studentDiscussionThreads), locale),
+  );
+  const [announcementPopupOpen, setAnnouncementPopupOpen] = useState(false);
+  const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
+  const [readAnnouncementIds, setReadAnnouncementIds] = useState<string[]>([]);
+  const announcementPopupTimerRef = useRef<number | null>(null);
 
-  const assignments = studentAssignments;
   const currentAssignment =
     viewState.type === "quiz"
       ? assignments.find((item) => item.id === viewState.assignmentId) ?? assignments[0]
@@ -165,8 +108,135 @@ export function StudentDashboardWorkspace() {
       Math.max(completedAssignments.length, 1),
   );
   const priorityAssignment = openAssignments[0] ?? assignments[0];
-  const teacherAnnouncements = studentTeacherAnnouncements;
   const pinnedAnnouncement = teacherAnnouncements.find((announcement) => announcement.isPinned) ?? teacherAnnouncements[0];
+  const latestAnnouncement = teacherAnnouncements[0];
+  const unreadAnnouncementCount = useMemo(
+    () => teacherAnnouncements.filter((announcement) => !readAnnouncementIds.includes(announcement.id)).length,
+    [readAnnouncementIds, teacherAnnouncements],
+  );
+  const discussionPreview = useMemo(() => getDiscussionOverviewPreview(discussionPosts), [discussionPosts]);
+  const mobileDockItems = useMemo(
+    () => [
+      copy.navItems.find((item) => item.key === "overview"),
+      copy.navItems.find((item) => item.key === "assignments"),
+      { key: "scores" as const, label: locale === "vi" ? "Điểm" : "Scores", icon: copy.navItems.find((item) => item.key === "scores")?.icon ?? <SchoolOutlinedIcon fontSize="small" /> },
+      { key: "discussion" as const, label: locale === "vi" ? "Trao đổi" : "Talk", icon: copy.navItems.find((item) => item.key === "discussion")?.icon ?? <ForumOutlinedIcon fontSize="small" /> },
+      { key: "announcements" as const, label: locale === "vi" ? "Thông báo" : "Notices", icon: copy.navItems.find((item) => item.key === "announcements")?.icon ?? <NotificationsNoneOutlinedIcon fontSize="small" /> },
+    ].filter(Boolean) as Array<{ key: "overview" | "assignments" | "scores" | "discussion" | "announcements"; label: string; icon: ReactNode }>,
+    [copy.navItems, locale],
+  );
+  const mobileCurrentPageLabel =
+    activePage === "announcements"
+      ? copy.announcementTitle
+      : mobileDockItems.find((item) => item.key === activePage)?.label ??
+        copy.navItems.find((item) => item.key === activePage)?.label ??
+        copy.accountTitle;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadStudentDashboardData()
+      .then((data) => {
+        if (!isMounted) return;
+        setDashboardProfile(data.profile);
+        setAssignments(data.assignments);
+        setTeacherAnnouncements(data.teacherAnnouncements.length ? data.teacherAnnouncements : studentTeacherAnnouncements);
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setDashboardProfile(studentDashboardProfile);
+        setAssignments(studentAssignments);
+        setTeacherAnnouncements(studentTeacherAnnouncements);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [account?.id]);
+
+  useEffect(() => {
+    if (viewState.type === "quiz") {
+      setAnnouncementPopupOpen(false);
+      return;
+    }
+
+    if (!latestAnnouncement) return;
+    if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
+    setAnnouncementPopupOpen(true);
+  }, [latestAnnouncement, viewState.type]);
+
+  useEffect(() => {
+    if (!announcementPopupOpen) {
+      if (announcementPopupTimerRef.current) {
+        window.clearTimeout(announcementPopupTimerRef.current);
+        announcementPopupTimerRef.current = null;
+      }
+      return;
+    }
+
+    announcementPopupTimerRef.current = window.setTimeout(() => {
+      setAnnouncementPopupOpen(false);
+      announcementPopupTimerRef.current = null;
+    }, 30000);
+
+    return () => {
+      if (announcementPopupTimerRef.current) {
+        window.clearTimeout(announcementPopupTimerRef.current);
+        announcementPopupTimerRef.current = null;
+      }
+    };
+  }, [announcementPopupOpen]);
+
+  useEffect(() => {
+    function reopenAnnouncementPopup() {
+      if (viewState.type === "quiz") return;
+      if (!latestAnnouncement) return;
+      if (document.visibilityState !== "visible") return;
+      if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
+
+      setAnnouncementPopupOpen(true);
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        reopenAnnouncementPopup();
+      }
+    }
+
+    window.addEventListener("focus", reopenAnnouncementPopup);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", reopenAnnouncementPopup);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [latestAnnouncement, viewState.type]);
+
+  useEffect(() => {
+    if (activePage !== "announcements") return;
+    if (teacherAnnouncements.length === 0) return;
+
+    setReadAnnouncementIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      teacherAnnouncements.forEach((announcement) => nextIds.add(announcement.id));
+      return Array.from(nextIds);
+    });
+  }, [activePage, teacherAnnouncements]);
+
+  useEffect(() => {
+    if (activePage !== "announcements" || !selectedAnnouncementId) return;
+
+    const timeoutId = window.setTimeout(() => {
+      document.getElementById(`student-announcement-${selectedAnnouncementId}`)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 120);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [activePage, selectedAnnouncementId]);
 
   function openAssignment(assignmentId: string) {
     setViewState({ type: "quiz", assignmentId });
@@ -177,97 +247,98 @@ export function StudentDashboardWorkspace() {
   }
 
   function handleSignOut() {
-    logoutAccount();
+    logoutElearningViewerSession();
     setAccount(null);
     navigate("/");
   }
 
-  function createDiscussionThread({
-    attachments,
-    content,
-    title,
-  }: {
-    attachments: StudentDiscussionImageAttachment[];
-    content: string;
-    title: string;
-  }) {
-    const now = Date.now();
-    const safeTitle = maskProfanity(title);
+  function createDiscussionPost(content: string, attachments: StudentDiscussionImageAttachment[]) {
+    const now = createTimestamp();
     const safeContent = maskProfanity(content);
-    const threadId = `discussion-${now}`;
-    const nextThread: StudentDiscussionThread = {
-      id: threadId,
-      title: safeTitle.value,
+    const postId = `discussion-post-${now}`;
+    const nextPost: StudentDiscussionFeedPost = {
+      id: postId,
       content: safeContent.value,
-      authorName: studentDashboardProfile.name,
-      authorInitials: getInitials(studentDashboardProfile.name),
+      authorName: dashboardProfile.name,
+      authorInitials: getInitials(dashboardProfile.name),
       createdAtLabel: locale === "vi" ? "Vừa xong" : "Just now",
       createdAtMs: now,
-      className: studentDashboardProfile.className,
-      isResolved: false,
+      className: dashboardProfile.className,
       attachments,
-      moderationWarning: safeTitle.hasProfanity || safeContent.hasProfanity,
-      replies: [],
+      moderationWarning: safeContent.hasProfanity,
+      reactions: createReactionSummary(),
+      comments: [],
+      viewerReaction: null,
     };
 
-    setDiscussionThreads((currentThreads) => [nextThread, ...currentThreads]);
+    setDiscussionPosts((currentPosts) => [nextPost, ...currentPosts]);
     pushDiscussionNotification({
-      id: `notification-${threadId}`,
-      primaryText: copy.notificationNewThread(nextThread.authorName),
-      secondaryText: nextThread.title,
+      id: `notification-${postId}`,
+      primaryText: copy.notificationNewThread(nextPost.authorName),
+      secondaryText: nextPost.content || copy.notificationImageOnly,
       replyId: undefined,
-      threadId,
+      threadId: postId,
       timeLabel: locale === "vi" ? "Vừa xong" : "Just now",
       unread: true,
     });
   }
 
-  function replyToDiscussionThread(threadId: string, content: string, attachments: StudentDiscussionImageAttachment[]) {
-    const now = Date.now();
+  function addDiscussionComment(
+    postId: string,
+    parentCommentId: string | undefined,
+    content: string,
+    attachments: StudentDiscussionImageAttachment[],
+  ) {
     const safeContent = maskProfanity(content);
-    const replyId = `reply-${threadId}-${now}`;
-    const threadTitle = discussionThreads.find((thread) => thread.id === threadId)?.title ?? copy.discussionTitle;
+    const targetPost = discussionPosts.find((post) => post.id === postId);
 
-    setDiscussionThreads((currentThreads) =>
-      currentThreads.map((thread) =>
-        thread.id === threadId
-          ? {
-              ...thread,
-              replies: [
-                ...thread.replies,
-                {
-                  id: replyId,
-                  authorName: studentDashboardProfile.name,
-                  authorInitials: getInitials(studentDashboardProfile.name),
-                  createdAtLabel: locale === "vi" ? "Vừa xong" : "Just now",
-                  createdAtMs: now,
-                  content: safeContent.value,
-                  attachments,
-                  moderationWarning: safeContent.hasProfanity,
-                },
-              ],
-            }
-          : thread,
+    setDiscussionPosts((currentPosts) =>
+      currentPosts.map((post) =>
+        post.id === postId
+          ? addFeedComment({
+              attachments,
+              content: safeContent.value,
+              createdAtLabel: locale === "vi" ? "Vừa xong" : "Just now",
+              moderationWarning: safeContent.hasProfanity,
+              parentCommentId,
+              post,
+              viewer: {
+                id: dashboardProfile.id,
+                initials: getInitials(dashboardProfile.name),
+                name: dashboardProfile.name,
+              },
+            })
+          : post,
       ),
     );
     pushDiscussionNotification({
-      id: `notification-${replyId}`,
-      primaryText: copy.notificationNewReply(studentDashboardProfile.name),
-      secondaryText: copy.notificationTopicContext(threadTitle),
-      replyId,
-      threadId,
+      id: `notification-comment-${postId}-${createTimestamp()}`,
+      primaryText: copy.notificationNewReply(dashboardProfile.name),
+      secondaryText: copy.notificationTopicContext(targetPost?.content.slice(0, 80) ?? copy.discussionTitle),
+      replyId: parentCommentId,
+      threadId: postId,
       timeLabel: locale === "vi" ? "Vừa xong" : "Just now",
       unread: true,
     });
   }
 
+  function toggleDiscussionPostReaction(postId: string, reaction: StudentDiscussionReactionKey) {
+    setDiscussionPosts((currentPosts) =>
+      currentPosts.map((post) => (post.id === postId ? toggleFeedPostReaction(post, reaction) : post)),
+    );
+  }
+
+  function toggleDiscussionCommentReaction(postId: string, commentId: string, reaction: StudentDiscussionReactionKey) {
+    setDiscussionPosts((currentPosts) =>
+      currentPosts.map((post) => (post.id === postId ? toggleFeedCommentReaction(post, commentId, reaction) : post)),
+    );
+  }
   function pushDiscussionNotification(notification: StudentDiscussionNotification) {
     setDiscussionNotifications((currentNotifications) => [notification, ...currentNotifications].slice(0, 8));
   }
 
   function handleDiscussionNotificationClick(target: DiscussionScrollTarget) {
     setActivePage("discussion");
-    setDiscussionScrollTarget(target);
     setDiscussionNotifications((currentNotifications) =>
       currentNotifications.map((notification) =>
         notification.threadId === target.threadId && notification.replyId === target.replyId
@@ -275,95 +346,100 @@ export function StudentDashboardWorkspace() {
           : notification,
       ),
     );
+    window.setTimeout(() => {
+      document
+        .getElementById(`student-discussion-post-${target.threadId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 120);
+  }
+
+  function markAnnouncementRead(announcementId: string) {
+    setReadAnnouncementIds((currentIds) => (currentIds.includes(announcementId) ? currentIds : [...currentIds, announcementId]));
+  }
+
+  function openAnnouncementDetail(announcementId: string) {
+    setAnnouncementPopupOpen(false);
+    setSelectedAnnouncementId(announcementId);
+    markAnnouncementRead(announcementId);
+    setActivePage("announcements");
+    setViewState({ type: "dashboard" });
+  }
+
+  function snoozeAnnouncementPopup(announcementId: string) {
+    writeAnnouncementPopupSnooze(announcementId, Date.now() + ANNOUNCEMENT_POPUP_SNOOZE_MS);
+    setAnnouncementPopupOpen(false);
   }
 
   if (viewState.type === "quiz" && currentAssignment) {
     return (
       <main className="min-h-screen bg-[#f7f8fb]">
-        <StudentBrandHeader
-          activePage={activePage}
-          account={account}
-          copy={copy}
-          notifications={discussionNotifications}
-          studentName={studentDashboardProfile.name}
-          studentClass={studentDashboardProfile.className}
-          onNotificationClick={handleDiscussionNotificationClick}
-          onPageChange={(nextPage) => {
-            setActivePage(nextPage);
-            setViewState({ type: "dashboard" });
-          }}
-          onSignIn={handleSignIn}
-          onSignOut={handleSignOut}
-        />
-
-        <section className="border-b border-slate-200 bg-white">
-          <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-4 px-4 py-4">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge className="border-[var(--erg-blue)]/10 bg-[var(--erg-blue)]/5 text-[var(--erg-blue)]" tone="outline">
-                    {copy.sessionBadge}
-                  </Badge>
-                  <StatusPill status={currentAssignment.status} label={currentAssignment.statusLabel} />
-                </div>
-                <h1 className="mt-3 max-w-4xl text-2xl font-semibold leading-tight text-[var(--erg-blue)]">
-                  {currentAssignment.title}
-                </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                  {copy.sessionDescription(
-                    currentAssignment.subjectLabel,
-                    currentAssignment.teacherName,
-                    currentAssignment.dueLabel,
-                  )}
-                </p>
-              </div>
-
-              <Button
-                variant="outline"
-                className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
-                onClick={() => setViewState({ type: "dashboard" })}
-              >
-                <ArrowBackOutlinedIcon fontSize="inherit" />
-                {copy.backToDashboard}
-              </Button>
+        <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/96 backdrop-blur">
+          <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
+            <Button
+              variant="outline"
+              className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
+              onClick={() => setViewState({ type: "dashboard" })}
+            >
+              <ArrowBackOutlinedIcon fontSize="inherit" />
+              {copy.backToDashboard}
+            </Button>
+            <div className="min-w-0 text-right">
+              <div className="truncate text-sm font-semibold text-[var(--erg-blue)]">{currentAssignment.title}</div>
+              <div className="text-xs text-slate-500">{currentAssignment.subjectLabel}</div>
             </div>
           </div>
-        </section>
+        </div>
 
-        <div className="mx-auto w-full max-w-[1480px] px-3 py-4">
+        <div className="w-full px-2 py-2 sm:px-3 sm:py-3">
           <PlayerShell assignmentId={currentAssignment.id} quizId={currentAssignment.quizId} />
         </div>
       </main>
     );
   }
 
-  return (
-    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
-      <StudentBrandHeader
-        activePage={activePage}
-        account={account}
-        copy={copy}
-        notifications={discussionNotifications}
-        studentName={studentDashboardProfile.name}
-        studentClass={studentDashboardProfile.className}
-        onNotificationClick={handleDiscussionNotificationClick}
-        onPageChange={setActivePage}
-        onSignIn={handleSignIn}
-        onSignOut={handleSignOut}
-      />
-
-      {activePage === "overview" ? (
-        <OverviewView
-          copy={copy}
+  const dashboardContent =
+    activePage === "overview" ? (
+      isMobile ? (
+        <StudentDashboardMobileOverview
           announcement={pinnedAnnouncement}
+          announcementPinnedLabel={copy.announcementPinnedLabel}
+          discussionPosts={discussionPreview}
+          discussionSectionTitle={locale === "vi" ? "Câu hỏi học sinh" : "Student questions"}
+          heroDescription={copy.heroDescription(priorityAssignment.title)}
+          heroEyebrow={copy.heroEyebrow}
+          heroTitle={copy.heroTitle(dashboardProfile.name)}
           onOpenAssignment={openAssignment}
           onPageChange={setActivePage}
           openAssignments={openAssignments}
+          primaryAction={copy.primaryAction}
+          priorityAssignment={priorityAssignment}
+          profile={dashboardProfile}
+          secondaryAction={copy.secondaryAction}
+          todayTitle={copy.todayTitle}
+        />
+      ) : (
+        <OverviewView
+          copy={copy}
+          announcement={pinnedAnnouncement}
+          discussionPosts={discussionPosts}
+          onOpenAssignment={openAssignment}
+          onPageChange={setActivePage}
+          openAssignments={openAssignments}
+          profile={dashboardProfile}
           priorityAssignment={priorityAssignment}
         />
-      ) : null}
-
-      {activePage === "assignments" ? (
+      )
+    ) : activePage === "assignments" ? (
+      isMobile ? (
+        <StudentDashboardMobileAssignments
+          assignments={assignments}
+          completedAssignments={completedAssignments}
+          copy={copy}
+          onOpenAssignment={openAssignment}
+          openAssignments={openAssignments}
+          overdueAssignments={overdueAssignments}
+        />
+      ) : (
         <AssignmentsView
           assignments={assignments}
           completedAssignments={completedAssignments}
@@ -372,32 +448,46 @@ export function StudentDashboardWorkspace() {
           openAssignments={openAssignments}
           overdueAssignments={overdueAssignments}
         />
-      ) : null}
-
-      {activePage === "scores" ? (
-        <ScoresView assignments={assignments} copy={copy} />
-      ) : null}
-
-      {activePage === "discussion" ? (
-        <DiscussionView
+      )
+    ) : activePage === "scores" ? (
+      isMobile ? <StudentDashboardMobileScores assignments={assignments} copy={copy} /> : <ScoresView assignments={assignments} copy={copy} />
+    ) : activePage === "discussion" ? (
+      <StudentDiscussionFeed
+        copy={copy}
+        posts={discussionPosts}
+        studentClass={dashboardProfile.className}
+        studentName={dashboardProfile.name}
+        onAddComment={addDiscussionComment}
+        onCommentReaction={toggleDiscussionCommentReaction}
+        onCreatePost={createDiscussionPost}
+        onPostReaction={toggleDiscussionPostReaction}
+      />
+    ) : activePage === "announcements" ? (
+      isMobile ? (
+        <StudentDashboardMobileAnnouncements
+          announcements={teacherAnnouncements}
           copy={copy}
-          scrollTarget={discussionScrollTarget}
-          studentName={studentDashboardProfile.name}
-          threads={discussionThreads}
-          onCreateThread={createDiscussionThread}
-          onScrollHandled={() => setDiscussionScrollTarget(null)}
-          onReply={replyToDiscussionThread}
+          selectedAnnouncementId={selectedAnnouncementId}
         />
-      ) : null}
-
-      {activePage === "announcements" ? (
+      ) : (
         <AnnouncementsView
           announcements={teacherAnnouncements}
           copy={copy}
+          selectedAnnouncementId={selectedAnnouncementId}
         />
-      ) : null}
-
-      {activePage === "account" ? (
+      )
+    ) : activePage === "account" ? (
+      isMobile ? (
+        <StudentDashboardMobileAccount
+          account={account}
+          averageAssignmentScore={averageAssignmentScore}
+          copy={copy}
+          onSignIn={handleSignIn}
+          onSignOut={handleSignOut}
+          openAssignments={openAssignments}
+          profile={dashboardProfile}
+        />
+      ) : (
         <AccountView
           account={account}
           averageAssignmentScore={averageAssignmentScore}
@@ -405,10 +495,75 @@ export function StudentDashboardWorkspace() {
           onSignIn={handleSignIn}
           onSignOut={handleSignOut}
           openAssignments={openAssignments}
+          profile={dashboardProfile}
+        />
+      )
+    ) : null;
+
+  if (isMobile) {
+    return (
+      <StudentDashboardMobileApp
+        activePage={activePage}
+        announcementPopup={
+          latestAnnouncement
+            ? {
+                announcement: latestAnnouncement,
+                autoDismissLabel: copy.announcementPopupAutoDismiss,
+                ctaLabel: copy.announcementPopupAction,
+                dismissLabel: copy.announcementPopupDismiss,
+                isOpen: announcementPopupOpen,
+                pinnedLabel: copy.announcementPinnedLabel,
+                onClose: () => setAnnouncementPopupOpen(false),
+                onOpenDetail: openAnnouncementDetail,
+                onSnooze: snoozeAnnouncementPopup,
+                snoozeLabel: copy.announcementPopupSnooze,
+              }
+            : null
+        }
+        announcementUnreadCount={unreadAnnouncementCount}
+        currentPageLabel={mobileCurrentPageLabel}
+        dockItems={mobileDockItems}
+        studentName={dashboardProfile.name}
+        onAccountOpen={() => setActivePage("account")}
+        onAnnouncementsOpen={() => setActivePage("announcements")}
+        onPageChange={setActivePage}
+      >
+        {dashboardContent}
+      </StudentDashboardMobileApp>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-[#f8fafc] text-slate-950">
+      {latestAnnouncement ? (
+        <StudentAnnouncementPopup
+          announcement={latestAnnouncement}
+          autoDismissLabel={copy.announcementPopupAutoDismiss}
+          ctaLabel={copy.announcementPopupAction}
+          dismissLabel={copy.announcementPopupDismiss}
+          isOpen={announcementPopupOpen}
+          pinnedLabel={copy.announcementPinnedLabel}
+          onClose={() => setAnnouncementPopupOpen(false)}
+          onOpenDetail={openAnnouncementDetail}
+          onSnooze={snoozeAnnouncementPopup}
+          snoozeLabel={copy.announcementPopupSnooze}
         />
       ) : null}
-
-      <StudentFooter copy={copy} />
+      <StudentBrandHeader
+        activePage={activePage}
+        account={account}
+        announcementUnreadCount={unreadAnnouncementCount}
+        copy={copy}
+        notifications={discussionNotifications}
+        studentName={dashboardProfile.name}
+        studentClass={dashboardProfile.className}
+        onNotificationClick={handleDiscussionNotificationClick}
+        onPageChange={setActivePage}
+        onSignIn={handleSignIn}
+        onSignOut={handleSignOut}
+      />
+      {dashboardContent}
+      <StudentFooter />
     </main>
   );
 }
@@ -416,18 +571,24 @@ export function StudentDashboardWorkspace() {
 function OverviewView({
   announcement,
   copy,
+  discussionPosts,
   onOpenAssignment,
   onPageChange,
   openAssignments,
+  profile,
   priorityAssignment,
 }: {
   announcement: StudentTeacherAnnouncement | undefined;
   copy: DashboardCopy;
+  discussionPosts: StudentDiscussionFeedPost[];
   onOpenAssignment: (assignmentId: string) => void;
   onPageChange: (page: StudentPageKey) => void;
   openAssignments: StudentDashboardAssignment[];
+  profile: StudentDashboardProfile;
   priorityAssignment: StudentDashboardAssignment;
 }) {
+  const discussionPreview = getDiscussionOverviewPreview(discussionPosts);
+
   return (
     <section className="mx-auto max-w-[1480px] px-4 py-6">
       <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -435,7 +596,7 @@ function OverviewView({
           <div>
             <div className="text-sm font-semibold text-slate-500">{copy.heroEyebrow}</div>
             <h1 className="mt-2 text-2xl font-semibold leading-tight text-[var(--erg-blue)] sm:text-3xl">
-              {copy.heroTitle(studentDashboardProfile.name)}
+              {copy.heroTitle(profile.name)}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
               {copy.heroDescription(priorityAssignment.title)}
@@ -464,7 +625,7 @@ function OverviewView({
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 {announcement?.isPinned ? <CompactBadge>{copy.announcementPinnedLabel}</CompactBadge> : null}
-                <CompactBadge>{announcement?.targetLabel ?? studentDashboardProfile.className}</CompactBadge>
+                <CompactBadge>{announcement?.targetLabel ?? profile.className}</CompactBadge>
               </div>
               <h2 className="mt-2 text-lg font-semibold text-[var(--erg-blue)]">
                 {announcement?.title ?? copy.announcementHeroTitle}
@@ -505,6 +666,30 @@ function OverviewView({
               copy={copy}
               onOpen={() => onOpenAssignment(assignment.id)}
             />
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-4 rounded-xl border border-slate-200 bg-white">
+        <SectionHeader actionLabel={copy.discussionTitle} onAction={() => onPageChange("discussion")} title="Câu hỏi học sinh" />
+        <div className="grid gap-3 p-3">
+          {discussionPreview.map((post) => (
+            <button
+              key={post.id}
+              type="button"
+              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-[var(--erg-blue)]/20 hover:bg-white"
+              onClick={() => onPageChange("discussion")}
+            >
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                <span className="rounded-full bg-white px-2.5 py-1 text-[var(--erg-blue)]">{post.className}</span>
+                <span>{post.authorName}</span>
+                <span>•</span>
+                <span>{post.createdAtLabel}</span>
+                <span>•</span>
+                <span>{post.commentCount} phản hồi</span>
+              </div>
+              <p className="mt-3 line-clamp-2 whitespace-pre-line text-sm leading-6 text-slate-700">{post.content}</p>
+            </button>
           ))}
         </div>
       </section>
@@ -556,7 +741,13 @@ function AssignmentsView({
   );
 }
 
-function ScoresView({ assignments, copy }: { assignments: StudentDashboardAssignment[]; copy: DashboardCopy }) {
+function ScoresView({
+  assignments,
+  copy,
+}: {
+  assignments: StudentDashboardAssignment[];
+  copy: DashboardCopy;
+}) {
   const attemptedAssignments = assignments.filter((assignment) => assignment.attempts.length > 0);
 
   return (
@@ -576,333 +767,14 @@ function ScoresView({ assignments, copy }: { assignments: StudentDashboardAssign
   );
 }
 
-function DiscussionView({
-  copy,
-  scrollTarget,
-  studentName,
-  threads,
-  onCreateThread,
-  onScrollHandled,
-  onReply,
-}: {
-  copy: DashboardCopy;
-  scrollTarget: DiscussionScrollTarget | null;
-  studentName: string;
-  threads: StudentDiscussionThread[];
-  onCreateThread: (thread: { attachments: StudentDiscussionImageAttachment[]; content: string; title: string }) => void;
-  onScrollHandled: () => void;
-  onReply: (threadId: string, content: string, attachments: StudentDiscussionImageAttachment[]) => void;
-}) {
-  const discussionPageSize = 3;
-  const [threadTitle, setThreadTitle] = useState("");
-  const [threadContent, setThreadContent] = useState("");
-  const [threadAttachments, setThreadAttachments] = useState<StudentDiscussionImageAttachment[]>([]);
-  const [replyDrafts, setReplyDrafts] = useState<Record<string, string>>({});
-  const [replyAttachments, setReplyAttachments] = useState<Record<string, StudentDiscussionImageAttachment[]>>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [highlightedTarget, setHighlightedTarget] = useState<DiscussionScrollTarget | null>(null);
-  const sortedThreads = useMemo(
-    () => [...threads].sort((left, right) => getThreadActivityMs(right) - getThreadActivityMs(left)),
-    [threads],
-  );
-  const totalPages = Math.max(1, Math.ceil(sortedThreads.length / discussionPageSize));
-  const visibleThreads = sortedThreads.slice((currentPage - 1) * discussionPageSize, currentPage * discussionPageSize);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
-
-  useEffect(() => {
-    if (!scrollTarget) {
-      return;
-    }
-
-    const targetThreadIndex = sortedThreads.findIndex((thread) => thread.id === scrollTarget.threadId);
-    if (targetThreadIndex < 0) {
-      return;
-    }
-
-    const nextPage = Math.floor(targetThreadIndex / discussionPageSize) + 1;
-    setCurrentPage(nextPage);
-    setHighlightedTarget(scrollTarget);
-
-    window.setTimeout(() => {
-      const targetId = scrollTarget.replyId
-        ? getDiscussionReplyDomId(scrollTarget.replyId)
-        : getDiscussionThreadDomId(scrollTarget.threadId);
-      document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "center" });
-      onScrollHandled();
-    }, 80);
-
-    const highlightTimer = window.setTimeout(() => setHighlightedTarget(null), 2400);
-    return () => window.clearTimeout(highlightTimer);
-  }, [onScrollHandled, scrollTarget, sortedThreads]);
-
-  function handleCreateThread(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    const nextTitle = threadTitle.trim();
-    const nextContent = threadContent.trim();
-    if (!nextTitle || (!nextContent && threadAttachments.length === 0)) {
-      return;
-    }
-
-    onCreateThread({
-      attachments: threadAttachments,
-      title: nextTitle,
-      content: nextContent,
-    });
-    setThreadTitle("");
-    setThreadContent("");
-    setThreadAttachments([]);
-  }
-
-  function handleReply(threadId: string) {
-    const nextReply = replyDrafts[threadId]?.trim();
-    const nextAttachments = replyAttachments[threadId] ?? [];
-    if (!nextReply && nextAttachments.length === 0) {
-      return;
-    }
-
-    onReply(threadId, nextReply, nextAttachments);
-    setReplyDrafts((currentDrafts) => ({ ...currentDrafts, [threadId]: "" }));
-    setReplyAttachments((currentAttachments) => ({ ...currentAttachments, [threadId]: [] }));
-  }
-
-  async function handleThreadAttachmentChange(files: FileList | null) {
-    const nextAttachments = await createImageAttachments(files);
-    setThreadAttachments((currentAttachments) => [...currentAttachments, ...nextAttachments]);
-  }
-
-  async function handleReplyAttachmentChange(threadId: string, files: FileList | null) {
-    const nextAttachments = await createImageAttachments(files);
-    setReplyAttachments((currentAttachments) => ({
-      ...currentAttachments,
-      [threadId]: [...(currentAttachments[threadId] ?? []), ...nextAttachments],
-    }));
-  }
-
-  return (
-    <section className="mx-auto max-w-[1480px] px-4 py-6">
-      <PageTitle
-        description={copy.discussionDescription}
-        icon={<ForumOutlinedIcon fontSize="inherit" />}
-        title={copy.discussionTitle}
-      />
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
-        <form className="rounded-xl border border-slate-200 bg-white p-4" onSubmit={handleCreateThread}>
-          <div className="flex items-center gap-3">
-            <Avatar initials={getInitials(studentName)} />
-            <div>
-              <h2 className="text-base font-semibold text-[var(--erg-blue)]">{copy.discussionComposerTitle}</h2>
-              <p className="mt-0.5 text-xs text-slate-500">{studentName}</p>
-            </div>
-          </div>
-
-          <input
-            className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/10"
-            placeholder={copy.discussionTitlePlaceholder}
-            value={threadTitle}
-            onChange={(event) => setThreadTitle(event.target.value)}
-          />
-
-          <textarea
-            className="mt-3 min-h-[132px] w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/10"
-            placeholder={copy.discussionBodyPlaceholder}
-            value={threadContent}
-            onChange={(event) => setThreadContent(event.target.value)}
-          />
-
-          <AttachmentPicker
-            attachments={threadAttachments}
-            buttonLabel={copy.discussionAttachmentAction}
-            hint={copy.discussionAttachmentHint}
-            inputId="discussion-thread-images"
-            removeLabel={copy.discussionRemoveAttachment}
-            onChange={handleThreadAttachmentChange}
-            onRemove={(attachmentId) =>
-              setThreadAttachments((currentAttachments) =>
-                currentAttachments.filter((attachment) => attachment.id !== attachmentId),
-              )
-            }
-          />
-
-          <Button className="mt-3 w-full bg-[var(--erg-blue)] text-white hover:bg-[#060b7a]" type="submit">
-            {copy.discussionPostAction}
-          </Button>
-        </form>
-
-        <div className="min-h-0">
-          <div className="max-h-[720px] overflow-y-auto pr-2">
-          <div className="grid gap-3">
-          {visibleThreads.length > 0 ? (
-            visibleThreads.map((thread) => {
-              const sortedReplies = [...thread.replies].sort((left, right) => right.createdAtMs - left.createdAtMs);
-
-              return (
-              <article
-                key={thread.id}
-                className={cn(
-                  "scroll-mt-28 rounded-xl border p-4 transition-colors duration-500",
-                  highlightedTarget?.threadId === thread.id && !highlightedTarget.replyId
-                    ? "border-amber-200 bg-amber-50/70"
-                    : "border-slate-200 bg-white",
-                )}
-                id={getDiscussionThreadDomId(thread.id)}
-              >
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="flex min-w-0 gap-3">
-                    <Avatar initials={thread.authorInitials} />
-                      <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <CompactBadge>{thread.className}</CompactBadge>
-                        {thread.isResolved ? (
-                          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-[11px] font-semibold uppercase text-emerald-700">
-                            {copy.discussionResolvedLabel}
-                          </span>
-                        ) : null}
-                      </div>
-                      <h2 className="mt-2 text-lg font-semibold leading-snug text-[var(--erg-blue)]">{thread.title}</h2>
-                      <p className="mt-1 text-sm leading-6 text-slate-600">{thread.content}</p>
-                      {thread.moderationWarning ? <ModerationNotice copy={copy} /> : null}
-                      <ImageAttachmentGrid attachments={thread.attachments} />
-                      <div className="mt-2 flex flex-wrap gap-2 text-xs text-slate-500">
-                        <span className="font-semibold text-slate-700">{thread.authorName}</span>
-                        <span>{thread.createdAtLabel}</span>
-                        {thread.relatedAssignmentTitle ? (
-                          <span>
-                            {copy.discussionRelatedLabel}: {thread.relatedAssignmentTitle}
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0 rounded-lg bg-slate-50 px-3 py-2 text-center">
-                    <div className="text-lg font-semibold text-[var(--erg-blue)]">{thread.replies.length}</div>
-                    <div className="text-xs font-semibold uppercase text-slate-400">
-                      {copy.discussionRepliesLabel(thread.replies.length)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="mt-4 space-y-2 border-t border-slate-100 pt-3">
-                  {sortedReplies.slice(0, 3).map((reply) => (
-                    <div
-                      key={reply.id}
-                      className={cn(
-                        "scroll-mt-28 flex gap-3 rounded-lg p-3 transition-colors duration-500",
-                        highlightedTarget?.replyId === reply.id ? "bg-amber-50 ring-1 ring-amber-200" : "bg-slate-50",
-                      )}
-                      id={getDiscussionReplyDomId(reply.id)}
-                    >
-                      <Avatar initials={reply.authorInitials} size="sm" />
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2 text-xs">
-                          <span className="font-semibold text-slate-900">{reply.authorName}</span>
-                          <span className="text-slate-500">{reply.createdAtLabel}</span>
-                        </div>
-                        <p className="mt-1 text-sm leading-6 text-slate-600">{reply.content}</p>
-                        {reply.moderationWarning ? <ModerationNotice copy={copy} /> : null}
-                        <ImageAttachmentGrid attachments={reply.attachments} compact />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-                  <div className="min-w-0 flex-1">
-                    <input
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/10"
-                      placeholder={copy.discussionReplyPlaceholder}
-                      value={replyDrafts[thread.id] ?? ""}
-                      onChange={(event) =>
-                        setReplyDrafts((currentDrafts) => ({
-                          ...currentDrafts,
-                          [thread.id]: event.target.value,
-                        }))
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter") {
-                          handleReply(thread.id);
-                        }
-                      }}
-                    />
-                    <AttachmentPicker
-                      attachments={replyAttachments[thread.id] ?? []}
-                      buttonLabel={copy.discussionAttachmentAction}
-                      hint={copy.discussionAttachmentHint}
-                      inputId={`discussion-reply-images-${thread.id}`}
-                      removeLabel={copy.discussionRemoveAttachment}
-                      onChange={(files) => handleReplyAttachmentChange(thread.id, files)}
-                      onRemove={(attachmentId) =>
-                        setReplyAttachments((currentAttachments) => ({
-                          ...currentAttachments,
-                          [thread.id]: (currentAttachments[thread.id] ?? []).filter(
-                            (attachment) => attachment.id !== attachmentId,
-                          ),
-                        }))
-                      }
-                    />
-                  </div>
-                  <Button
-                    className="bg-[var(--erg-blue)] px-4 text-white hover:bg-[#060b7a] sm:self-start"
-                    type="button"
-                    onClick={() => handleReply(thread.id)}
-                  >
-                    {copy.discussionReplyAction}
-                  </Button>
-                </div>
-              </article>
-              );
-            })
-          ) : (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-              <h2 className="text-lg font-semibold text-[var(--erg-blue)]">{copy.discussionEmptyTitle}</h2>
-              <p className="mt-2 text-sm text-slate-500">{copy.discussionEmptyDescription}</p>
-            </div>
-          )}
-          </div>
-          </div>
-
-          {totalPages > 1 ? (
-            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
-              <Button
-                variant="outline"
-                className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              >
-                {copy.discussionPreviousPage}
-              </Button>
-              <div className="text-sm font-semibold text-slate-500">
-                {copy.discussionPageLabel(currentPage, totalPages)}
-              </div>
-              <Button
-                variant="outline"
-                className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              >
-                {copy.discussionNextPage}
-              </Button>
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function AnnouncementsView({
   announcements,
   copy,
+  selectedAnnouncementId,
 }: {
   announcements: StudentTeacherAnnouncement[];
   copy: DashboardCopy;
+  selectedAnnouncementId: string | null;
 }) {
   return (
     <section className="mx-auto max-w-[1480px] px-4 py-6">
@@ -916,7 +788,13 @@ function AnnouncementsView({
         {announcements.map((announcement) => (
           <article
             key={announcement.id}
-            className="rounded-xl border border-slate-200 bg-white p-4"
+            id={`student-announcement-${announcement.id}`}
+            className={cn(
+              "rounded-xl border bg-white p-4 transition",
+              selectedAnnouncementId === announcement.id
+                ? "border-[var(--erg-blue)] shadow-[0_20px_48px_-32px_rgba(11,16,138,0.55)] ring-2 ring-[var(--erg-blue)]/10"
+                : "border-slate-200",
+            )}
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0">
@@ -939,107 +817,6 @@ function AnnouncementsView({
   );
 }
 
-function AttachmentPicker({
-  attachments,
-  buttonLabel,
-  hint,
-  inputId,
-  removeLabel,
-  onChange,
-  onRemove,
-}: {
-  attachments: StudentDiscussionImageAttachment[];
-  buttonLabel: string;
-  hint: string;
-  inputId: string;
-  removeLabel: string;
-  onChange: (files: FileList | null) => void;
-  onRemove: (attachmentId: string) => void;
-}) {
-  return (
-    <div className="mt-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <label
-          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-[var(--erg-blue)] transition hover:bg-slate-50"
-          htmlFor={inputId}
-        >
-          <ImageOutlinedIcon fontSize="small" />
-          {buttonLabel}
-        </label>
-        <input
-          accept="image/*"
-          className="sr-only"
-          id={inputId}
-          multiple
-          type="file"
-          onChange={(event) => {
-            onChange(event.target.files);
-            event.target.value = "";
-          }}
-        />
-        <span className="text-xs text-slate-500">{hint}</span>
-      </div>
-
-      {attachments.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {attachments.map((attachment) => (
-            <div key={attachment.id} className="group relative h-20 w-20 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-              <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
-              <button
-                type="button"
-                className="absolute inset-x-1 bottom-1 rounded-md bg-white/95 px-2 py-1 text-[11px] font-semibold text-[var(--erg-red)] opacity-0 shadow-sm transition group-hover:opacity-100"
-                onClick={() => onRemove(attachment.id)}
-              >
-                {removeLabel}
-              </button>
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function ImageAttachmentGrid({
-  attachments,
-  compact = false,
-}: {
-  attachments: StudentDiscussionImageAttachment[];
-  compact?: boolean;
-}) {
-  if (attachments.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className={cn("mt-3 flex flex-wrap gap-2", compact && "mt-2")}>
-      {attachments.map((attachment) => (
-        <a
-          key={attachment.id}
-          className={cn(
-            "block overflow-hidden rounded-lg border border-slate-200 bg-slate-50",
-            compact ? "h-16 w-16" : "h-28 w-28",
-          )}
-          href={attachment.url}
-          target="_blank"
-          rel="noreferrer"
-          title={attachment.name}
-        >
-          <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
-        </a>
-      ))}
-    </div>
-  );
-}
-
-function ModerationNotice({ copy }: { copy: DashboardCopy }) {
-  return (
-    <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-700">
-      {copy.discussionModerationWarning}
-    </div>
-  );
-}
-
 function AccountView({
   account,
   averageAssignmentScore,
@@ -1047,13 +824,15 @@ function AccountView({
   onSignIn,
   onSignOut,
   openAssignments,
+  profile,
 }: {
-  account: TeacherAccount | null;
+  account: ElearningViewerSession | null;
   averageAssignmentScore: number;
   copy: DashboardCopy;
   onSignIn: () => void;
   onSignOut: () => void;
   openAssignments: StudentDashboardAssignment[];
+  profile: StudentDashboardProfile;
 }) {
   return (
     <section className="mx-auto max-w-[1480px] px-4 py-6">
@@ -1068,12 +847,12 @@ function AccountView({
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <div className="grid h-16 w-16 place-items-center rounded-lg bg-[var(--erg-blue)] text-xl font-semibold text-white">
-                {studentDashboardProfile.name.slice(0, 1)}
+                {profile.name.slice(0, 1)}
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-[var(--erg-blue)]">{studentDashboardProfile.name}</h2>
+                <h2 className="text-2xl font-semibold text-[var(--erg-blue)]">{profile.name}</h2>
                 <p className="mt-1 text-sm text-slate-500">
-                  {studentDashboardProfile.className} • {studentDashboardProfile.schoolName}
+                  {profile.className} • {profile.schoolName}
                 </p>
               </div>
             </div>
@@ -1082,15 +861,15 @@ function AccountView({
 
           <div className="mt-6 grid gap-4 md:grid-cols-3">
             <ProfileStat label={copy.stats.average} value={`${averageAssignmentScore}`} />
-            <ProfileStat label={copy.stats.completed} value={`${studentDashboardProfile.completedAssignments}`} />
-            <ProfileStat label={copy.assignmentsTitle} value={`${studentDashboardProfile.completedAssignments}/${studentDashboardProfile.totalAssignments}`} />
+            <ProfileStat label={copy.stats.completed} value={`${profile.completedAssignments}`} />
+            <ProfileStat label={copy.assignmentsTitle} value={`${profile.completedAssignments}/${profile.totalAssignments}`} />
           </div>
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5">
           <h3 className="text-lg font-semibold text-[var(--erg-blue)]">{copy.loginStateTitle}</h3>
           <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm leading-7 text-slate-600">
-            <div className="font-semibold text-slate-900">{account?.fullName ?? copy.guestLabel}</div>
+            <div className="font-semibold text-slate-900">{account?.name ?? copy.guestLabel}</div>
             <div>{account?.email ?? copy.guestLabel}</div>
             <div>{account ? copy.signedInAs : copy.guestLabel}</div>
           </div>
@@ -1115,6 +894,7 @@ function AccountView({
 function StudentBrandHeader({
   account,
   activePage,
+  announcementUnreadCount,
   copy,
   notifications,
   studentName,
@@ -1124,8 +904,9 @@ function StudentBrandHeader({
   onSignIn,
   onSignOut,
 }: {
-  account: TeacherAccount | null;
+  account: ElearningViewerSession | null;
   activePage: StudentPageKey;
+  announcementUnreadCount: number;
   copy: DashboardCopy;
   notifications: StudentDiscussionNotification[];
   studentName: string;
@@ -1185,6 +966,11 @@ function StudentBrandHeader({
             >
               {item.icon}
               {item.label}
+              {item.key === "announcements" && announcementUnreadCount > 0 ? (
+                <span className="grid min-w-5 place-items-center rounded-full bg-[var(--erg-red)] px-1.5 py-0.5 text-[10px] font-bold text-white shadow-[0_8px_18px_-8px_rgba(233,45,74,0.95)]">
+                  {announcementUnreadCount}
+                </span>
+              ) : null}
             </button>
           ))}
         </nav>
@@ -1228,7 +1014,7 @@ function ProfileMenu({
   onSignIn,
   onSignOut,
 }: {
-  account: TeacherAccount | null;
+  account: ElearningViewerSession | null;
   copy: DashboardCopy;
   menuOpen: boolean;
   studentClass: string;
@@ -1418,7 +1204,15 @@ function BrandWordmark() {
   );
 }
 
-function PageTitle({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {
+function PageTitle({
+  description,
+  icon,
+  title,
+}: {
+  description: string;
+  icon: ReactNode;
+  title: string;
+}) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
       <div className="flex items-start gap-3">
@@ -1599,19 +1393,6 @@ function CompactBadge({ children }: { children: string }) {
   );
 }
 
-function Avatar({ initials, size = "md" }: { initials: string; size?: "sm" | "md" }) {
-  return (
-    <span
-      className={cn(
-        "grid shrink-0 place-items-center rounded-md bg-[var(--erg-blue)] font-semibold text-white",
-        size === "sm" ? "h-8 w-8 text-xs" : "h-10 w-10 text-sm",
-      )}
-    >
-      {initials}
-    </span>
-  );
-}
-
 function CompactStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-50 px-3 py-3">
@@ -1640,18 +1421,8 @@ function StatusPill({ status, label }: { status: StudentAssignmentStatus; label:
   );
 }
 
-function StudentFooter({ copy }: { copy: DashboardCopy }) {
-  return (
-    <footer className="mt-8 border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-[1480px] flex-col gap-2 px-4 py-5 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="font-semibold text-[var(--erg-blue)]">{copy.footerTitle}</div>
-          <div className="mt-1 text-sm text-slate-500">{copy.footerSubtitle}</div>
-        </div>
-        <div className="text-sm font-semibold text-slate-500">ERG Edurise Global</div>
-      </div>
-    </footer>
-  );
+function StudentFooter() {
+  return <ErgFooter />;
 }
 
 function getBestAttempt(attempts: StudentAssignmentAttempt[]) {
@@ -1669,56 +1440,68 @@ function getInitials(name: string) {
     .map((part) => part.slice(0, 1).toUpperCase())
     .join("");
 }
-
-function getThreadActivityMs(thread: StudentDiscussionThread) {
-  return Math.max(thread.createdAtMs, ...thread.replies.map((reply) => reply.createdAtMs));
+function createInitialDiscussionFeedPosts(threads: StudentDiscussionThread[]): StudentDiscussionFeedPost[] {
+  return threads.map((thread) => ({
+    id: thread.id,
+    authorName: thread.authorName,
+    authorInitials: thread.authorInitials,
+    className: thread.className,
+    content: `${thread.title}\n${thread.content}`,
+    createdAtLabel: thread.createdAtLabel,
+    createdAtMs: thread.createdAtMs,
+    attachments: thread.attachments,
+    relatedAssignmentTitle: thread.relatedAssignmentTitle,
+    moderationWarning: thread.moderationWarning,
+    reactions: createReactionSummary(undefined, thread.isResolved ? { like: 4, care: 1 } : { like: 2 }),
+    comments: thread.replies.map((reply) => ({
+      id: reply.id,
+      authorName: reply.authorName,
+      authorInitials: reply.authorInitials,
+      content: reply.content,
+      createdAtLabel: reply.createdAtLabel,
+      createdAtMs: reply.createdAtMs,
+      attachments: reply.attachments,
+      moderationWarning: reply.moderationWarning,
+      reactions: createReactionSummary(undefined, { like: 1 }),
+      replies: [],
+      viewerReaction: null,
+    })),
+    viewerReaction: null,
+  }));
 }
 
-function getDiscussionThreadDomId(threadId: string) {
-  return `discussion-thread-${threadId}`;
-}
-
-function getDiscussionReplyDomId(replyId: string) {
-  return `discussion-reply-${replyId}`;
+function createTimestamp() {
+  return Date.now();
 }
 
 function createInitialDiscussionNotifications(
-  threads: StudentDiscussionThread[],
+  posts: StudentDiscussionFeedPost[],
   locale: string,
 ): StudentDiscussionNotification[] {
-  return [...threads]
-    .sort((left, right) => getThreadActivityMs(right) - getThreadActivityMs(left))
+  return [...posts]
+    .sort((left, right) => getFeedPostActivityMs(right) - getFeedPostActivityMs(left))
     .slice(0, 3)
-    .map((thread) => {
-      const latestReply = [...thread.replies].sort((left, right) => right.createdAtMs - left.createdAtMs)[0];
-      const hasLatestReply = latestReply && latestReply.createdAtMs > thread.createdAtMs;
+    .map((post) => {
+      const commentCount = getCommentCount(post.comments);
 
       return {
-        id: `notification-${hasLatestReply ? latestReply.id : thread.id}`,
+        id: `notification-${post.id}`,
         primaryText:
           locale === "vi"
-            ? hasLatestReply
-              ? `${latestReply.authorName} đã trả lời bạn`
-              : `${thread.authorName} đã tạo chủ đề mới`
-            : hasLatestReply
-              ? `${latestReply.authorName} replied to you`
-              : `${thread.authorName} created a new topic`,
-        secondaryText:
-          locale === "vi"
-            ? hasLatestReply
-              ? `trong "${thread.title}"`
-              : thread.title
-            : hasLatestReply
-              ? `in "${thread.title}"`
-              : thread.title,
-        replyId: hasLatestReply ? latestReply.id : undefined,
-        threadId: thread.id,
-        timeLabel: hasLatestReply ? latestReply.createdAtLabel : thread.createdAtLabel,
+            ? commentCount > 0
+              ? `${post.authorName} có thảo luận đang sôi nổi`
+              : `${post.authorName} đã tạo bài viết mới`
+            : commentCount > 0
+              ? `${post.authorName} has an active discussion`
+              : `${post.authorName} created a new post`,
+        secondaryText: post.content,
+        replyId: undefined,
+        threadId: post.id,
+        timeLabel: post.createdAtLabel,
         unread: true,
       };
     });
 }
-
 function maskProfanity(value: string) {
   const maskedValue = profanityWords.reduce((currentValue, word) => {
     const pattern = new RegExp(`(^|[^\\p{L}\\p{N}])(${escapeRegExp(word)})(?=$|[^\\p{L}\\p{N}])`, "giu");
@@ -1735,28 +1518,51 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function createImageAttachments(files: FileList | null) {
-  const imageFiles = Array.from(files ?? []).filter((file) => file.type.startsWith("image/"));
+function readAnnouncementPopupSnoozes() {
+  if (typeof window === "undefined") return {};
 
-  return Promise.all(
-    imageFiles.map(
-      (file, index) =>
-        new Promise<StudentDiscussionImageAttachment>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve({
-              id: `image-${Date.now()}-${index}-${file.name}`,
-              type: "image",
-              name: file.name,
-              url: typeof reader.result === "string" ? reader.result : "",
-            });
-          };
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
-        }),
-    ),
-  );
+  try {
+    const rawValue = window.localStorage.getItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY);
+    if (!rawValue) return {};
+    const parsedValue = JSON.parse(rawValue);
+
+    if (!parsedValue || typeof parsedValue !== "object") {
+      return {};
+    }
+
+    return parsedValue as Record<string, number>;
+  } catch {
+    return {};
+  }
 }
+
+function writeAnnouncementPopupSnooze(announcementId: string, snoozeUntil: number) {
+  if (typeof window === "undefined") return;
+
+  const currentSnoozes = readAnnouncementPopupSnoozes();
+  currentSnoozes[announcementId] = snoozeUntil;
+  window.localStorage.setItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY, JSON.stringify(currentSnoozes));
+}
+
+function isAnnouncementPopupSnoozed(announcementId: string) {
+  const currentSnoozes = readAnnouncementPopupSnoozes();
+  const snoozeUntil = currentSnoozes[announcementId];
+
+  if (!snoozeUntil) {
+    return false;
+  }
+
+  if (snoozeUntil <= Date.now()) {
+    delete currentSnoozes[announcementId];
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY, JSON.stringify(currentSnoozes));
+    }
+    return false;
+  }
+
+  return true;
+}
+
 
 const assignmentStatusMeta: Record<
   StudentAssignmentStatus,
@@ -1847,6 +1653,10 @@ const viCopy: DashboardCopy = {
   announcementHeroTitle: "Chưa có thông báo mới",
   announcementHeroEmpty: "Khi giáo viên gửi thông báo, nội dung quan trọng sẽ hiển thị tại đây.",
   announcementPinnedLabel: "Quan trọng",
+  announcementPopupAutoDismiss: "Tự tắt sau 30 giây",
+  announcementPopupAction: "Xem chi tiết",
+  announcementPopupDismiss: "Tắt thông báo",
+  announcementPopupSnooze: "Không nhận thông báo này trong 2 giờ",
   notificationTitle: "Thông báo",
   notificationEmpty: "Chưa có thông báo mới.",
   notificationNewTopicLabel: "Chủ đề mới",
@@ -1938,6 +1748,10 @@ const enCopy: DashboardCopy = {
   announcementHeroTitle: "No new notices",
   announcementHeroEmpty: "Important teacher notices will appear here when they are posted.",
   announcementPinnedLabel: "Important",
+  announcementPopupAutoDismiss: "Auto closes in 30 seconds",
+  announcementPopupAction: "Open detail",
+  announcementPopupDismiss: "Dismiss notice",
+  announcementPopupSnooze: "Hide this notice for 2 hours",
   notificationTitle: "Notifications",
   notificationEmpty: "No new notifications.",
   notificationNewTopicLabel: "New topic",

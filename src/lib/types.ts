@@ -57,6 +57,8 @@ export type MatchingPair = {
   id: string;
   prompt: string;
   response: string;
+  promptImage?: QuestionImage;
+  responseImage?: QuestionImage;
 };
 
 export type SequenceItem = {

@@ -6,11 +6,16 @@ export type TeacherAccount = {
   fullName: string;
   email: string;
   password: string;
+  phone?: string;
+  avatarUrl?: string;
+  bio?: string;
   role: AccountRole;
   provider: AuthProvider;
   department: string;
   title: string;
   features: string[];
+  isProfileCompleted?: boolean;
+  status?: string;
   createdAt: string;
   lastLoginAt: string | null;
 };
@@ -38,8 +43,11 @@ export type RegisterFormState = {
 
 export type ProfileFormState = {
   fullName: string;
+  phone: string;
   department: string;
   title: string;
+  avatarUrl?: string;
+  bio?: string;
 };
 
 export type PasswordFormState = {
@@ -47,3 +55,4 @@ export type PasswordFormState = {
   nextPassword: string;
   confirmPassword: string;
 };
+

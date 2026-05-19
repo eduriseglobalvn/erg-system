@@ -1,0 +1,48 @@
+import type { ExerciseLibraryItem } from "@/features/admin-operations/utils/hoclieu-content-dialog";
+
+export const mockExerciseLibrary: ExerciseLibraryItem[] = [
+  {
+    id: "ic3-cdso-b1-01",
+    title: "Trắc nghiệm phân biệt thiết bị đầu vào và đầu ra",
+    subjectId: "ic3-gs6",
+    subjectLabel: "IC3 GS6",
+    topicLabel: "Chủ đề 1: Công dân số",
+    sectionLabel: "Bài 01. Xác định phần cứng và phần mềm phù hợp",
+    difficulty: "Cơ bản",
+    questionCount: 12,
+    durationMinutes: 15,
+  },
+  {
+    id: "ic3-cdso-b1-02",
+    title: "Phiếu bài tập nối tên linh kiện với công dụng",
+    subjectId: "ic3-gs6",
+    subjectLabel: "IC3 GS6",
+    topicLabel: "Chủ đề 1: Công dân số",
+    sectionLabel: "Bài 01. Xác định phần cứng và phần mềm phù hợp",
+    difficulty: "Vận dụng",
+    questionCount: 8,
+    durationMinutes: 10,
+  },
+  {
+    id: "ic3-cdso-b2-01",
+    title: "Bộ câu hỏi phần mềm hệ thống và phần mềm ứng dụng",
+    subjectId: "ic3-gs6",
+    subjectLabel: "IC3 GS6",
+    topicLabel: "Chủ đề 1: Công dân số",
+    sectionLabel: "Bài 02. Phần mềm trong đời sống số",
+    difficulty: "Nâng cao",
+    questionCount: 10,
+    durationMinutes: 18,
+  },
+  {
+    id: "stem-robot-01",
+    title: "Bài tập đọc sơ đồ mạch điều khiển",
+    subjectId: "giao-duc-stem",
+    subjectLabel: "Giáo dục STEM",
+    topicLabel: "Robot cơ bản",
+    sectionLabel: "Lesson 1. Làm quen với cảm biến",
+    difficulty: "Cơ bản",
+    questionCount: 9,
+    durationMinutes: 12,
+  },
+];

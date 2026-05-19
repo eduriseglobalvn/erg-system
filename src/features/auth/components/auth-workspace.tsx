@@ -12,9 +12,9 @@ export function AuthWorkspace() {
   const { t } = useI18n();
   const auth = useAuthSession();
 
-  function safely(run: () => void) {
+  async function safely(run: () => unknown | Promise<unknown>) {
     try {
-      run();
+      await run();
     } catch (error) {
         auth.setNotice({
           tone: "error",
@@ -25,22 +25,22 @@ export function AuthWorkspace() {
 
   function handleLoginSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    safely(auth.actions.login);
+    void safely(auth.actions.login);
   }
 
   function handleRegisterSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    safely(auth.actions.register);
+    void safely(auth.actions.register);
   }
 
   function handleProfileSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    safely(auth.actions.saveProfile);
+    void safely(auth.actions.saveProfile);
   }
 
   function handlePasswordSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    safely(auth.actions.savePassword);
+    void safely(auth.actions.savePassword);
   }
 
   return (
@@ -84,7 +84,7 @@ export function AuthWorkspace() {
                   onLoginSubmit={handleLoginSubmit}
                   onRegisterSubmit={handleRegisterSubmit}
                   onForgotPassword={auth.actions.forgotPassword}
-                  onProviderLogin={(provider) => safely(() => auth.actions.loginByProvider(provider))}
+                  onProviderLogin={(provider, idToken) => void safely(() => auth.actions.loginByProvider(provider, idToken))}
                 />
               ) : (
                 <AccountPanel

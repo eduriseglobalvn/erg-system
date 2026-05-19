@@ -253,7 +253,7 @@ export function isAnswerComplete(question: Question, answer?: AnswerPayload | nu
     case "multiple_response":
       return (answer.choiceIds?.length ?? 0) > 0;
     case "matching":
-      return (answer.matchingOrder?.length ?? 0) > 0;
+      return (question.matching ?? []).every((pair) => Boolean(answer.matchingAssignments?.[pair.id])) || (answer.matchingOrder?.length ?? 0) > 0;
     case "sequence":
       return (answer.sequenceOrder?.length ?? 0) > 0;
     case "inline_choice":

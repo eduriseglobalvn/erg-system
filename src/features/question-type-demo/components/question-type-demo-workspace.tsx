@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
+import { getLmsPortalUrl } from "@/config/portal-urls";
 import {
   questionTypeDemos,
   readinessCopy,
@@ -40,12 +40,12 @@ export function QuestionTypeDemoWorkspace() {
                 >
                   Xem demo đang chọn
                 </a>
-                <Link
-                  to="/dashboard"
+                <a
+                  href={getLmsPortalUrl()}
                   className="inline-flex h-11 items-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-[var(--erg-blue)] transition hover:border-blue-200 hover:bg-blue-50"
                 >
                   Về dashboard
-                </Link>
+                </a>
               </div>
             </div>
 

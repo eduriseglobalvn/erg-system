@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Bookmark } from "lucide-react";
 
+import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import {
@@ -13,6 +15,7 @@ import {
   submitFinalAttempt,
 } from "@/features/quiz-runtime";
 import { createInitialAnswer, getAllQuestions, isAnswerComplete, normalizeAnswerForSubmission } from "@/lib/quiz";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { LocalQuizAttemptSession } from "@/features/quiz-runtime";
 import type { AnswerPayload, AnswerResult, Attempt, Question, Quiz, QuizPackage, QuizResultDisplay } from "@/lib/types";
 
@@ -58,6 +61,7 @@ export function PlayerShell({
   quizId?: string;
 }) {
   const resolvedAssignmentId = assignmentId ?? quizId;
+  const isMobile = useIsMobile();
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
   const [loadRequestId, setLoadRequestId] = useState(0);
   const [started, setStarted] = useState(false);
@@ -174,7 +178,6 @@ export function PlayerShell({
   const submitted = Boolean(currentRecord);
   const storedAnswer = activeQuestion ? currentRecord?.input ?? drafts[activeQuestion.id] : undefined;
   const draftAnswer = activeQuestion ? storedAnswer ?? createInitialAnswer(activeQuestion) : {};
-  const currentAnswerComplete = activeQuestion ? isAnswerComplete(activeQuestion, storedAnswer) : false;
   const allQuestionsAnswered = questions.every((question) =>
     isAnswerComplete(question, drafts[question.id]),
   );
@@ -329,6 +332,8 @@ export function PlayerShell({
   const answeredCount = questions.filter((question) => isAnswerComplete(question, drafts[question.id])).length;
   const restoredDraft = loadState.status === "ready" && loadState.restored;
   const submitFailed = readySession.status === "submit_failed";
+  const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
+  const isCurrentQuestionBookmarked = bookmarkedQuestionIds.includes(readyQuestion.id);
 
   const playerCardStyle = {
     backgroundColor: "var(--quiz-player-bg)",
@@ -441,6 +446,17 @@ export function PlayerShell({
     void localQuizAttemptStore.saveSession(nextSession);
   }
 
+  async function handleToggleBookmark() {
+    const nextSession = await localQuizAttemptStore.toggleBookmark(readySession, readyQuestion.id);
+    setLoadState({
+      status: "ready",
+      attempt: readyAttempt,
+      quizPackage: readyPackage,
+      restored: false,
+      session: nextSession,
+    });
+  }
+
   function handleJumpToQuestion(index: number) {
     if (!started) {
       setStarted(true);
@@ -450,6 +466,50 @@ export function PlayerShell({
     }
     setCurrentIndex(index);
   }
+
+  function handleStartQuiz() {
+    setStarted(true);
+    if (!isTestingMode) {
+      setRemainingSeconds(null);
+    }
+  }
+
+  const footerMessage = reviewingAttempt
+    ? "Đang xem lại kết quả. Màu xanh là đáp án đúng, màu đỏ/cam là câu trả lời cần sửa."
+    : submitFailed
+      ? "Submit failed. Your answers are still saved on this device. Retry with the same request key."
+      : allQuestionsAnswered
+        ? "Tất cả câu hỏi đã có câu trả lời. Bạn có thể nộp bài."
+        : "Dùng Quay lại / Tiếp theo để rà soát bài trước khi nộp.";
+
+  const questionBody = (
+    <>
+      <QuestionRenderer
+        question={readyQuestion}
+        value={draftAnswer}
+        onChange={handleDraftChange}
+        submitted={submitted}
+        reviewMode={submitted}
+        result={lastResult}
+      />
+
+      {lastResult ? <QuestionFeedbackPanel result={lastResult} /> : null}
+
+      {submitted && readyQuestion.kind === "hotspot" ? <AnswerKeyCard question={readyQuestion} /> : null}
+
+      {submitError ? (
+        <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 shadow-[0_8px_20px_rgba(26,44,64,0.08)]">
+          {submitError}
+        </div>
+      ) : null}
+
+      {!isMobile ? (
+        <div className="pointer-events-none absolute bottom-4 right-6 text-xl font-extrabold opacity-30 sm:text-2xl" style={{ color: "var(--quiz-option-text)" }}>
+          ERG E-LEARNING
+        </div>
+      ) : null}
+    </>
+  );
 
   function renderSidebar() {
     return (
@@ -506,6 +566,7 @@ export function PlayerShell({
                 const index = questions.findIndex((item) => item.id === question.id);
                 const active = started && currentIndex === index;
                 const answered = isAnswerComplete(question, drafts[question.id]);
+                const bookmarked = bookmarkedQuestionIds.includes(question.id);
 
                 return (
                   <button
@@ -526,9 +587,12 @@ export function PlayerShell({
                       {answered ? "✓" : index + 1}
                     </span>
                     <span className="flex min-w-0 flex-1 flex-col gap-1">
-                      <strong className={`line-clamp-3 text-xs font-bold ${active ? "text-white" : "text-slate-600"}`}>
-                        {`${index + 1}. ${question.title}`}
-                      </strong>
+                      <span className="flex items-start justify-between gap-2">
+                        <strong className={`line-clamp-3 text-xs font-bold ${active ? "text-white" : "text-slate-600"}`}>
+                          {`${index + 1}. ${question.title}`}
+                        </strong>
+                        {bookmarked ? <Bookmark className={`mt-0.5 h-3.5 w-3.5 flex-none ${active ? "fill-current text-white" : "fill-current text-[var(--quiz-accent-start)]"}`} /> : null}
+                      </span>
                       <small className={`text-[11px] ${active ? "text-white/75" : "text-slate-400"}`}>
                         {questionLabel(question)}
                       </small>
@@ -553,6 +617,50 @@ export function PlayerShell({
   }
 
   if (!started) {
+    if (isMobile) {
+      return (
+        <QuizThemeSurface quiz={readyQuiz}>
+          <MobilePlayerShell
+            allQuestionsAnswered={allQuestionsAnswered}
+            answeredCount={answeredCount}
+            attemptCompleted={attemptCompleted}
+            bookmarkCount={bookmarkedQuestionIds.length}
+            bookmarkedQuestionIds={bookmarkedQuestionIds}
+            currentIndex={currentIndex}
+            footerMessage={footerMessage}
+            isBookmarked={isCurrentQuestionBookmarked}
+            isFirstQuestion={isFirstQuestion}
+            isLastQuestion={isLastQuestion}
+            isTestingMode={isTestingMode}
+            playerCardStyle={playerCardStyle}
+            canvasStyle={canvasStyle}
+            headerStyle={headerStyle}
+            accentButtonStyle={accentButtonStyle}
+            secondaryButtonStyle={secondaryButtonStyle}
+            modeBadgeStyle={modeBadgeStyle}
+            question={readyQuestion}
+            questions={questions}
+            quiz={readyQuiz}
+            resultDisplay={resultDisplay}
+            reviewingSubmittedAttempt={reviewingSubmittedAttempt}
+            started={started}
+            submitting={submitting}
+            submitFailed={submitFailed}
+            remainingSeconds={remainingSeconds}
+            onJumpToQuestion={handleJumpToQuestion}
+            onNext={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
+            onPrev={() => setCurrentIndex((value) => Math.max(0, value - 1))}
+            onRequestSubmit={handleRequestSubmit}
+            onReview={handleReviewQuiz}
+            onStart={handleStartQuiz}
+            onToggleBookmark={() => void handleToggleBookmark()}
+            body={questionBody}
+            resultBody={<FinalResultScreen attempt={readyAttempt} resultDisplay={resultDisplay} onReview={handleReviewQuiz} />}
+          />
+        </QuizThemeSurface>
+      );
+    }
+
     return (
       <QuizThemeSurface quiz={readyQuiz} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
         <section
@@ -630,12 +738,7 @@ export function PlayerShell({
                 className={navButtonClass}
                 style={accentButtonStyle}
                 type="button"
-                onClick={() => {
-                  setStarted(true);
-                  if (!isTestingMode) {
-                    setRemainingSeconds(null);
-                  }
-                }}
+                onClick={handleStartQuiz}
               >
                 {restoredDraft ? "CONTINUE DRAFT" : "BẮT ĐẦU"}
               </button>
@@ -644,6 +747,59 @@ export function PlayerShell({
         </section>
 
         {renderSidebar()}
+      </QuizThemeSurface>
+    );
+  }
+
+  if (isMobile) {
+    return (
+      <QuizThemeSurface quiz={readyQuiz}>
+        <MobilePlayerShell
+          allQuestionsAnswered={allQuestionsAnswered}
+          answeredCount={answeredCount}
+          attemptCompleted={attemptCompleted}
+          bookmarkCount={bookmarkedQuestionIds.length}
+          bookmarkedQuestionIds={bookmarkedQuestionIds}
+          currentIndex={currentIndex}
+          footerMessage={footerMessage}
+          isBookmarked={isCurrentQuestionBookmarked}
+          isFirstQuestion={isFirstQuestion}
+          isLastQuestion={isLastQuestion}
+          isTestingMode={isTestingMode}
+          playerCardStyle={playerCardStyle}
+          canvasStyle={canvasStyle}
+          headerStyle={headerStyle}
+          accentButtonStyle={accentButtonStyle}
+          secondaryButtonStyle={secondaryButtonStyle}
+          modeBadgeStyle={modeBadgeStyle}
+          question={readyQuestion}
+          questions={questions}
+          quiz={readyQuiz}
+          resultDisplay={resultDisplay}
+          reviewingSubmittedAttempt={reviewingSubmittedAttempt}
+          started={started}
+          submitting={submitting}
+          submitFailed={submitFailed}
+          remainingSeconds={remainingSeconds}
+          onJumpToQuestion={handleJumpToQuestion}
+          onNext={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
+          onPrev={() => setCurrentIndex((value) => Math.max(0, value - 1))}
+          onRequestSubmit={handleRequestSubmit}
+          onReview={handleReviewQuiz}
+          onStart={handleStartQuiz}
+          onToggleBookmark={() => void handleToggleBookmark()}
+          body={questionBody}
+          resultBody={<FinalResultScreen attempt={readyAttempt} resultDisplay={resultDisplay} onReview={handleReviewQuiz} />}
+        />
+        {submitDialogMode ? (
+          <SubmitConfirmDialog
+            mode={submitDialogMode}
+            resultDisplay={resultDisplay}
+            submitting={submitting}
+            onCancel={() => setSubmitDialogMode(null)}
+            onConfirm={() => void handleFinalizeAttempt()}
+          />
+        ) : null}
       </QuizThemeSurface>
     );
   }
@@ -665,6 +821,16 @@ export function PlayerShell({
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              aria-label={isCurrentQuestionBookmarked ? "Remove bookmark" : "Add bookmark"}
+              className={`grid h-9 w-9 place-items-center rounded-full border transition ${
+                isCurrentQuestionBookmarked ? "border-sky-200 bg-sky-50 text-sky-600" : "border-slate-200 bg-white text-slate-400"
+              }`}
+              onClick={() => void handleToggleBookmark()}
+            >
+              <Bookmark className={`h-4 w-4 ${isCurrentQuestionBookmarked ? "fill-current" : ""}`} />
+            </button>
             <span className="rounded-full px-3 py-1 text-xs font-black uppercase tracking-[0.12em]" style={modeBadgeStyle}>
               {readyQuiz.settings.mode}
             </span>
@@ -700,30 +866,7 @@ export function PlayerShell({
             ) : null}
 
             {attemptCompleted && !reviewingSubmittedAttempt ? null : (
-              <>
-                <QuestionRenderer
-                  question={readyQuestion}
-                  value={draftAnswer}
-                  onChange={handleDraftChange}
-                  submitted={submitted}
-                  reviewMode={submitted}
-                  result={lastResult}
-                />
-
-                {lastResult ? <QuestionFeedbackPanel result={lastResult} /> : null}
-
-                {submitted && readyQuestion.kind === "hotspot" ? <AnswerKeyCard question={readyQuestion} /> : null}
-
-                {submitError ? (
-                  <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 shadow-[0_8px_20px_rgba(26,44,64,0.08)]">
-                    {submitError}
-                  </div>
-                ) : null}
-
-                <div className="pointer-events-none absolute bottom-4 right-6 text-xl font-extrabold opacity-30 sm:text-2xl" style={{ color: "var(--quiz-option-text)" }}>
-                  ERG E-LEARNING
-                </div>
-              </>
+              <>{questionBody}</>
             )}
           </div>
         </div>
@@ -734,13 +877,7 @@ export function PlayerShell({
               {isTrainingMode ? "Học theo từng câu" : "Chế độ kiểm tra"}
             </span>
             <span className="text-sm font-bold tracking-[0.02em] text-slate-600">
-              {reviewingAttempt
-                  ? "Đang xem lại kết quả. Màu xanh là đáp án đúng, màu đỏ/cam là câu trả lời cần sửa."
-                  : submitFailed
-                    ? "Submit failed. Your answers are still saved on this device. Retry with the same request key."
-                  : allQuestionsAnswered
-                  ? "Tất cả câu hỏi đã có câu trả lời. Bạn có thể nộp bài."
-                  : "Dùng Quay lại / Tiếp theo để rà soát bài trước khi nộp."}
+              {footerMessage}
             </span>
           </div>
 
@@ -767,7 +904,7 @@ export function PlayerShell({
                 className={navButtonClass}
                 style={accentButtonStyle}
                 type="button"
-                disabled={isLastQuestion || (!reviewingAttempt && !currentAnswerComplete) || submitting}
+                disabled={isLastQuestion || submitting}
                 onClick={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
               >
                 TIẾP THEO

@@ -2,6 +2,7 @@ import {
   DndContext,
   DragOverlay,
   PointerSensor,
+  TouchSensor,
   useDraggable,
   useDroppable,
   useSensor,
@@ -10,10 +11,12 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical } from "lucide-react";
 import { useMemo, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { SequenceItem } from "@/lib/types";
 
 export function SequenceQuestion({
@@ -23,10 +26,14 @@ export function SequenceQuestion({
   reviewMode = false,
   onChange,
 }: QuestionComponentProps) {
+  const isMobile = useIsMobile();
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 120, tolerance: 6 },
     }),
   );
 
@@ -71,9 +78,9 @@ export function SequenceQuestion({
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="flex flex-col gap-3">
+      <div className={`flex flex-col ${isMobile ? "gap-2.5" : "gap-3"}`}>
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
-          <div className="flex flex-col gap-3">
+          <div className={`flex flex-col ${isMobile ? "gap-2.5" : "gap-3"}`}>
             {currentOrder.map((itemId, index) => {
               const item = itemMap.get(itemId);
               if (!item) return null;
@@ -83,14 +90,18 @@ export function SequenceQuestion({
 
               return (
                 <SequenceRowTarget key={item.id} rowId={item.id}>
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <span className="w-11 flex-none text-right text-3xl font-medium sm:w-14 sm:text-[44px]" style={{ color: "var(--quiz-option-text)" }}>
+                  <div className={`flex items-start ${isMobile ? "gap-2" : "gap-3 sm:gap-4"}`}>
+                    <span
+                      className={isMobile ? "w-6 flex-none pt-2 text-right text-[18px] font-semibold" : "w-11 flex-none text-right text-3xl font-medium sm:w-14 sm:text-[44px]"}
+                      style={{ color: "var(--quiz-option-text)" }}
+                    >
                       {index + 1}.
                     </span>
                     <DraggableSequenceItem
                       item={item}
                       disabled={submitted}
                       active={activeId === item.id}
+                      compact={isMobile}
                       correct={correctPosition}
                       incorrect={reviewMode && !correctPosition}
                       reviewIndex={reviewMode && originalIndex >= 0 ? originalIndex + 1 : undefined}
@@ -101,7 +112,7 @@ export function SequenceQuestion({
             })}
           </div>
 
-          <DragOverlay dropAnimation={null}>{activeItem ? <SequenceCard item={activeItem} overlay /> : null}</DragOverlay>
+          <DragOverlay dropAnimation={null}>{activeItem ? <SequenceCard item={activeItem} overlay compact={isMobile} /> : null}</DragOverlay>
         </DndContext>
       </div>
     </QuestionBodyWithImage>
@@ -128,6 +139,7 @@ function DraggableSequenceItem({
   item,
   disabled,
   active,
+  compact,
   correct,
   incorrect,
   reviewIndex,
@@ -135,6 +147,7 @@ function DraggableSequenceItem({
   item: SequenceItem;
   disabled: boolean;
   active: boolean;
+  compact: boolean;
   correct?: boolean;
   incorrect?: boolean;
   reviewIndex?: number;
@@ -156,6 +169,7 @@ function DraggableSequenceItem({
         item={item}
         dragging={isDragging}
         active={active}
+        compact={compact}
         locked={disabled}
         correct={correct}
         incorrect={incorrect}
@@ -175,6 +189,7 @@ function SequenceCard({
   overlay = false,
   locked = false,
   active = false,
+  compact = false,
   correct = false,
   incorrect = false,
   reviewIndex,
@@ -185,6 +200,7 @@ function SequenceCard({
   overlay?: boolean;
   locked?: boolean;
   active?: boolean;
+  compact?: boolean;
   correct?: boolean;
   incorrect?: boolean;
   reviewIndex?: number;
@@ -202,9 +218,11 @@ function SequenceCard({
   return (
     <button
       type="button"
-      className={`flex min-h-[56px] w-full items-center justify-between gap-3 rounded-[10px] border px-5 text-left text-[24px] leading-[1.3] text-slate-900 shadow-sm transition sm:min-h-[64px] sm:text-[26px] ${
-        stateClass
-      } ${dragging ? "opacity-15" : ""} ${locked ? "cursor-default" : "cursor-grab"}`}
+      className={`touch-none flex w-full items-center justify-between gap-2 border text-left text-slate-900 shadow-sm transition ${
+        compact
+          ? "min-h-[44px] rounded-md px-3 py-2 text-[15px] leading-6"
+          : "min-h-[56px] rounded-[10px] px-5 text-[24px] leading-[1.3] sm:min-h-[64px] sm:text-[26px]"
+      } ${stateClass} ${dragging ? "opacity-15" : ""} ${locked ? "cursor-default" : "cursor-grab"}`}
       style={!overlay && !active && !correct && !incorrect ? { borderColor: "var(--quiz-canvas-border)", backgroundColor: "var(--quiz-input-bg)", color: "var(--quiz-option-text)" } : undefined}
       {...dragProps}
     >
@@ -217,7 +235,11 @@ function SequenceCard({
         </span>
       ) : null}
       <span className="min-w-0 flex-1">{item.label}</span>
-      {!overlay ? <span aria-hidden="true" className="text-xl tracking-[-0.16em] text-slate-400">⋮⋮</span> : null}
+      {!overlay ? (
+        <span aria-hidden="true" className={compact ? "text-slate-400" : "text-xl tracking-[-0.16em] text-slate-400"}>
+          {compact ? <GripVertical className="h-4 w-4" /> : "⋮⋮"}
+        </span>
+      ) : null}
     </button>
   );
 }

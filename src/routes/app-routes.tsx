@@ -1,11 +1,26 @@
-import { lazy, Suspense } from "react";
-import { Route, Routes } from "react-router-dom";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { Navigate, Route, Routes } from "react-router-dom";
 
+import {
+  ELEARNING_PORTAL_HOST,
+  ELEARNING_PORTAL_HOSTS,
+  HOCLIEU_PORTAL_HOST,
+  HOCLIEU_PORTAL_HOSTS,
+  isPortalHost,
+  LMS_PORTAL_HOST,
+  shouldRedirectLocalPortal,
+} from "@/config/portal-urls";
+import { AuthenticatedAccountGate, PortalAuthGate, PortalLoginPage } from "@/features/auth/components/portal-auth-gates";
 import { RootLayout } from "@/layouts/root-layout";
 
 const DashboardPage = lazy(() =>
   import("@/pages/dashboard-page").then((module) => ({
     default: module.DashboardPage,
+  })),
+);
+const ProfilePage = lazy(() =>
+  import("@/pages/profile-page").then((module) => ({
+    default: module.ProfilePage,
   })),
 );
 const HomePage = lazy(() =>
@@ -21,6 +36,16 @@ const StudentPage = lazy(() =>
 const QuestionTypeDemoPage = lazy(() =>
   import("@/pages/question-type-demo-page").then((module) => ({
     default: module.QuestionTypeDemoPage,
+  })),
+);
+const PublicDisclosurePage = lazy(() =>
+  import("@/pages/public-disclosure-page").then((module) => ({
+    default: module.PublicDisclosurePage,
+  })),
+);
+const PublicDisclosureAdminPage = lazy(() =>
+  import("@/pages/public-disclosure-admin-page").then((module) => ({
+    default: module.PublicDisclosureAdminPage,
   })),
 );
 const NotFoundPage = lazy(() =>
@@ -68,26 +93,59 @@ const HocLieuQuizzesPage = lazy(() =>
     default: module.HocLieuQuizzesPage,
   })),
 );
+const AccessDeniedPage = lazy(() =>
+  import("@/features/auth").then((module) => ({
+    default: module.AccessDeniedPage,
+  })),
+);
+const SsoHandoffPage = lazy(() =>
+  import("@/features/auth/components/sso-handoff-page").then((module) => ({
+    default: module.SsoHandoffPage,
+  })),
+);
 
 function isHocLieuPortalHost() {
-  if (typeof window === "undefined") return false;
-
-  const hostname = window.location.hostname.toLowerCase();
-  return hostname.startsWith("hoclieu.");
+  return isPortalHost(HOCLIEU_PORTAL_HOSTS);
 }
 
 function HocLieuRouteGroup({ includeIndex = false }: { includeIndex?: boolean } = {}) {
   return (
-    <Route element={<HocLieuLayout />}>
-      {includeIndex ? <Route index element={<HocLieuHomePage />} /> : null}
-      <Route path="hoclieu" element={<HocLieuHomePage />} />
-      <Route path="chuong-trinh" element={<HocLieuProgramsPage />} />
-      <Route path="chuong-trinh/:slug" element={<HocLieuProgramDetailPage />} />
-      <Route path="kho-hoc-lieu" element={<HocLieuLibraryPage />} />
-      <Route path="cong-dong" element={<HocLieuCommunityPage />} />
-      <Route path="portfolio" element={<HocLieuPortfolioPage />} />
-      <Route path="quizzes" element={<HocLieuQuizzesPage />} />
-    </Route>
+    <>
+      <Route path="login" element={<PortalLoginPage portal="hoclieu" />} />
+      <Route element={<HocLieuLayout />}>
+        {includeIndex ? <Route index element={<HocLieuHomePage />} /> : null}
+        <Route path="hoclieu" element={<Navigate to="/" replace />} />
+        <Route
+          path="profile"
+          element={
+            <AuthenticatedAccountGate>
+              <ProfilePage />
+            </AuthenticatedAccountGate>
+          }
+        />
+        <Route path="chuong-trinh" element={<HocLieuProgramsPage />} />
+        <Route path="chuong-trinh/:slug" element={<HocLieuProgramDetailPage />} />
+        <Route
+          path="kho-hoc-lieu"
+          element={
+            <PortalAuthGate portal="hoclieu">
+              <HocLieuLibraryPage />
+            </PortalAuthGate>
+          }
+        />
+        <Route
+          path="kho-hoc-lieu/:gradeId"
+          element={
+            <PortalAuthGate portal="hoclieu">
+              <HocLieuLibraryPage />
+            </PortalAuthGate>
+          }
+        />
+        <Route path="cong-dong" element={<HocLieuCommunityPage />} />
+        <Route path="portfolio" element={<HocLieuPortfolioPage />} />
+        <Route path="quizzes" element={<HocLieuQuizzesPage />} />
+      </Route>
+    </>
   );
 }
 
@@ -101,21 +159,106 @@ function RouteFallback() {
   );
 }
 
+function PortalHostRedirect({
+  children,
+  preservePathAndSearch = false,
+  targetHost,
+  targetPath = "/",
+}: {
+  children?: ReactNode;
+  preservePathAndSearch?: boolean;
+  targetHost: string;
+  targetPath?: string;
+}) {
+  const shouldRedirect = shouldRedirectLocalPortal(targetHost);
+
+  useEffect(() => {
+    if (!shouldRedirect || typeof window === "undefined") return;
+
+    const targetUrl = new URL(window.location.href);
+    targetUrl.host = targetHost;
+    if (!preservePathAndSearch) {
+      targetUrl.pathname = targetPath;
+      targetUrl.search = "";
+    }
+    targetUrl.hash = "";
+    window.location.replace(targetUrl.toString());
+  }, [preservePathAndSearch, shouldRedirect, targetHost, targetPath]);
+
+  if (shouldRedirect) return <RouteFallback />;
+
+  return children ?? <RouteFallback />;
+}
+
 export function AppRoutes() {
   const isHocLieuPortal = isHocLieuPortalHost();
+  const isLmsPortal = isPortalHost(LMS_PORTAL_HOST);
+  const isElearningPortal = isPortalHost(ELEARNING_PORTAL_HOSTS);
 
   return (
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route element={<RootLayout />}>
           {isHocLieuPortal ? (
-            <>{HocLieuRouteGroup({ includeIndex: true })}</>
+            <>
+              <Route path="access-denied" element={<AccessDeniedPage />} />
+              <Route path="sso-handoff" element={<SsoHandoffPage />} />
+              {HocLieuRouteGroup({ includeIndex: true })}
+            </>
+          ) : isLmsPortal ? (
+            <>
+              <Route path="access-denied" element={<AccessDeniedPage />} />
+              <Route path="login" element={<PortalLoginPage portal="lms" />} />
+              <Route path="sso-handoff" element={<SsoHandoffPage />} />
+              <Route
+                index
+                element={
+                  <PortalAuthGate portal="lms">
+                    <DashboardPage />
+                  </PortalAuthGate>
+                }
+              />
+              <Route
+                path="profile"
+                element={
+                  <AuthenticatedAccountGate>
+                    <ProfilePage />
+                  </AuthenticatedAccountGate>
+                }
+              />
+              <Route path="student" element={<PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />} />
+              <Route path="dashboard" element={<Navigate to="/" replace />} />
+            </>
+          ) : isElearningPortal ? (
+            <>
+              <Route path="access-denied" element={<AccessDeniedPage />} />
+              <Route path="login" element={<PortalLoginPage portal="elearning" />} />
+              <Route
+                index
+                element={
+                  <PortalAuthGate portal="elearning">
+                    <StudentPage />
+                  </PortalAuthGate>
+                }
+              />
+              <Route path="student" element={<Navigate to="/" replace />} />
+            </>
           ) : (
             <>
               <Route path="/" element={<HomePage />} />
-              <Route path="/student" element={<StudentPage />} />
-              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/access-denied" element={<AccessDeniedPage />} />
+              <Route path="/student" element={<PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />} />
+              <Route path="/dashboard" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} />} />
+              <Route path="/cong-khai" element={<PublicDisclosurePage />} />
+              <Route path="/cong-khai/viewer/:documentId" element={<PublicDisclosurePage />} />
+              <Route path="/public-disclosure" element={<PublicDisclosureAdminPage />} />
               <Route path="/question-types" element={<QuestionTypeDemoPage />} />
+              <Route path="/kho-hoc-lieu/*" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
+              <Route path="/chuong-trinh/*" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
+              <Route path="/cong-dong" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
+              <Route path="/portfolio" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
+              <Route path="/quizzes" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
+              <Route path="/hoclieu" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} targetPath="/" />} />
               {HocLieuRouteGroup()}
             </>
           )}

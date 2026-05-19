@@ -10,15 +10,19 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
+import { Check, ChevronDown, Link2, X } from "lucide-react";
 import { useMemo, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
 
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { MatchingPair } from "@/lib/types";
 
 type DisplayMatchingPair = MatchingPair & {
   leftText: string;
   rightText: string;
+  leftImage?: MatchingPair["promptImage"];
+  rightImage?: MatchingPair["responseImage"];
 };
 
 export function MatchingQuestion({
@@ -28,7 +32,9 @@ export function MatchingQuestion({
   reviewMode = false,
   onChange,
 }: QuestionComponentProps) {
+  const isMobile = useIsMobile();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [activePromptId, setActivePromptId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -38,11 +44,12 @@ export function MatchingQuestion({
   const displayPairs = useMemo<DisplayMatchingPair[]>(
     () =>
       (question.matching ?? []).map((pair) => {
-        const promptLonger = pair.prompt.trim().length >= pair.response.trim().length;
         return {
           ...pair,
-          leftText: promptLonger ? pair.prompt : pair.response,
-          rightText: promptLonger ? pair.response : pair.prompt,
+          leftText: pair.prompt,
+          rightText: pair.response,
+          leftImage: pair.promptImage,
+          rightImage: pair.responseImage,
         };
       }),
     [question.matching],
@@ -125,6 +132,81 @@ export function MatchingQuestion({
     emit(nextOrder, [...nextConnectedRows]);
   }
 
+  if (isMobile) {
+    return (
+      <QuestionBodyWithImage question={question}>
+        <div className="grid gap-3">
+          {displayPairs.map((pair) => {
+            const selectedId = value.matchingAssignments?.[pair.id] ?? "";
+            const selectedOption = selectedId ? pairMap.get(selectedId) ?? null : null;
+            const correctId = pair.id;
+            const isCorrect = reviewMode && selectedId === correctId;
+            const isWrong = reviewMode && selectedId !== correctId;
+
+            return (
+              <div
+                key={pair.id}
+                className="overflow-hidden rounded-md border bg-white shadow-sm"
+                style={{
+                  borderColor: isCorrect ? "#78b816" : isWrong ? "#ef6b5f" : "var(--quiz-canvas-border)",
+                }}
+              >
+                <div className="grid grid-cols-[22px_minmax(0,1fr)]">
+                  <div className="flex items-center justify-center bg-slate-100 text-slate-300">
+                    <Link2 className="h-4 w-4" />
+                  </div>
+                  <div className="border-b px-4 py-3" style={{ borderColor: "rgba(148,163,184,0.18)" }}>
+                    <div className="min-w-0 text-[15px] leading-6 text-slate-600">{pair.leftText}</div>
+                  </div>
+                </div>
+                <div className="grid grid-cols-[22px_minmax(0,1fr)]">
+                  <div className="bg-slate-100" />
+                  <button
+                    type="button"
+                    aria-label={pair.leftText}
+                    disabled={submitted}
+                    className="flex min-h-[52px] items-center justify-between gap-3 px-4 py-2.5 text-left"
+                    onClick={() => setActivePromptId(pair.id)}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      {selectedOption?.rightImage ? (
+                        <span className="grid h-9 w-9 flex-none place-items-center overflow-hidden rounded-md border border-slate-200 bg-white">
+                          <img src={selectedOption.rightImage.url} alt={selectedOption.rightImage.alt ?? selectedOption.rightText} className="h-full w-full object-contain" />
+                        </span>
+                      ) : null}
+                      <span className="truncate text-sm text-slate-500">{selectedOption?.rightText ?? "- Select -"}</span>
+                    </span>
+                    <ChevronDown className="h-4 w-4 flex-none text-slate-400" />
+                  </button>
+                </div>
+                {reviewMode ? (
+                  <div className={`px-3 pb-3 text-xs font-bold ${isCorrect ? "text-lime-600" : "text-rose-600"}`}>
+                    {isCorrect ? "Matched correctly" : `Correct answer: ${pair.rightText}`}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
+        {activePromptId ? (
+          <MobileMatchingAnswerPicker
+            activePromptId={activePromptId}
+            assignments={value.matchingAssignments ?? {}}
+            optionMap={pairMap}
+            options={displayPairs}
+            onClose={() => setActivePromptId(null)}
+            onSelect={(rowId, optionId) => {
+              onChange({
+                matchingAssignments: createNextMatchingAssignments(value.matchingAssignments ?? {}, rowId, optionId),
+              });
+              setActivePromptId(null);
+            }}
+          />
+        ) : null}
+      </QuestionBodyWithImage>
+    );
+  }
+
   return (
     <QuestionBodyWithImage question={question}>
       <div className="flex flex-col gap-4 sm:gap-5">
@@ -190,6 +272,96 @@ export function MatchingQuestion({
       </div>
     </QuestionBodyWithImage>
   );
+}
+
+function MobileMatchingAnswerPicker({
+  activePromptId,
+  assignments,
+  optionMap,
+  options,
+  onClose,
+  onSelect,
+}: {
+  activePromptId: string;
+  assignments: Record<string, string>;
+  optionMap: Map<string, DisplayMatchingPair>;
+  options: DisplayMatchingPair[];
+  onClose: () => void;
+  onSelect: (rowId: string, optionId: string) => void;
+}) {
+  const selectedId = assignments[activePromptId];
+  const activePrompt = optionMap.get(activePromptId);
+  const assignedRowByOptionId = Object.fromEntries(
+    Object.entries(assignments).map(([rowId, optionId]) => [optionId, rowId]),
+  ) as Record<string, string>;
+
+  return (
+    <div className="fixed inset-0 z-[280] bg-slate-950/55 px-4 py-12">
+      <div className="mx-auto mt-10 flex max-h-[78vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-[0_24px_60px_rgba(15,23,42,0.35)]">
+        <div className="relative border-b px-4 py-3 text-center" style={{ borderColor: "rgba(148,163,184,0.22)" }}>
+          <div className="text-sm font-bold text-slate-700">Select an Answer</div>
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-sky-500"
+            onClick={onClose}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        {activePrompt ? (
+          <div className="border-b px-4 py-3 text-xs font-semibold leading-5 text-slate-500" style={{ borderColor: "rgba(148,163,184,0.16)" }}>
+            {activePrompt.leftText}
+          </div>
+        ) : null}
+        <div className="overflow-auto">
+          {options.map((option) => {
+            const isSelectedInCurrentRow = selectedId === option.id;
+            const assignedRowId = assignedRowByOptionId[option.id];
+            const isAssignedAnywhere = Boolean(assignedRowId);
+
+            return (
+              <button
+                key={option.id}
+                type="button"
+                className={`flex min-h-[72px] w-full items-center gap-3 border-b px-4 text-left text-sm text-slate-700 ${
+                  isSelectedInCurrentRow ? "bg-emerald-50/60" : ""
+                }`}
+                style={{ borderColor: "rgba(148,163,184,0.16)" }}
+                onClick={() => onSelect(activePromptId, option.id)}
+              >
+                {option.rightImage ? (
+                  <span className="grid h-12 w-12 flex-none place-items-center overflow-hidden rounded-md border border-slate-200 bg-white">
+                    <img src={option.rightImage.url} alt={option.rightImage.alt ?? option.rightText} className="h-full w-full object-contain" />
+                  </span>
+                ) : null}
+                <span className="min-w-0 flex-1 py-4">{option.rightText}</span>
+                {isAssignedAnywhere ? (
+                  <span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-500 text-white">
+                    <Check className="h-4 w-4" />
+                  </span>
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function createNextMatchingAssignments(
+  currentAssignments: Record<string, string>,
+  rowId: string,
+  optionId: string,
+) {
+  const nextAssignments = Object.fromEntries(
+    Object.entries(currentAssignments).filter(([existingRowId, existingOptionId]) =>
+      existingRowId === rowId ? false : existingOptionId !== optionId,
+    ),
+  );
+
+  nextAssignments[rowId] = optionId;
+  return nextAssignments;
 }
 
 function MatchingRowTarget({

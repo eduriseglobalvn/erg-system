@@ -13,6 +13,7 @@ export type LocalQuizAttemptSession = {
   submittedAt?: string;
   status: LocalQuizAttemptStatus;
   answers: Record<string, AnswerPayload>;
+  bookmarkedQuestionIds: string[];
   clientEvents: Array<Record<string, unknown>>;
   submitIdempotencyKey: string;
 };

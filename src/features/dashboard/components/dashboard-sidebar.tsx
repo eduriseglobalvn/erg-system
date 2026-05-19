@@ -1,5 +1,4 @@
 import { DashboardAccountCard } from "@/features/dashboard/components/dashboard-account-card";
-import { DashboardIcon } from "@/features/dashboard/components/dashboard-icons";
 import type { DashboardGroup, DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import { cn } from "@/utils/cn";
 
@@ -14,17 +13,6 @@ export function DashboardSidebar({
 }) {
   return (
     <aside className="flex w-[288px] shrink-0 flex-col border-r border-slate-200 bg-[#fafafa]">
-      <div className="border-b border-slate-200 px-5 py-4">
-        <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-950 text-white">
-            <DashboardIcon />
-          </div>
-          <div>
-            <div className="text-[26px] leading-none text-slate-950">Documentation</div>
-            <div className="mt-1 text-sm font-medium text-slate-500">ERG Learning Admin v1.0.0</div>
-          </div>
-        </div>
-      </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-5">
         <div className="space-y-7">

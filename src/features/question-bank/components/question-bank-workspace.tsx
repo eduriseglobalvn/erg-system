@@ -1,4 +1,4 @@
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -11,13 +11,11 @@ import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import { useI18n } from "@/features/i18n";
 import {
-  getQuestionBankCategoryCount,
-  getQuestionBankLevel,
-  getQuestionBankSubject,
   questionBankQuestions,
   questionBankSubjects,
   quizBankItems,
 } from "@/features/question-bank/api/mock-question-bank";
+import { loadQuestionBankData } from "@/features/question-bank/api/question-bank-api";
 import type {
   QuestionBankCategory,
   QuestionBankLevel,
@@ -46,21 +44,49 @@ export function QuestionBankWorkspace({
   const { locale } = useI18n();
   const copy = locale === "vi" ? viCopy : enCopy;
   const view = activeLeaf.variant === "quiz-bank" ? "quizzes" : "questions";
-  const initialSubject = getQuestionBankSubject("ic3-gs6");
+  const initialSubject = findQuestionBankSubject(questionBankSubjects, "ic3-gs6");
   const initialLevelId = initialSubject.levels[0]?.id ?? "";
 
+  const [subjects, setSubjects] = useState<QuestionBankSubject[]>(questionBankSubjects);
+  const [questions, setQuestions] = useState<QuestionBankQuestion[]>(questionBankQuestions);
+  const [quizzes, setQuizzes] = useState<QuizBankItem[]>(quizBankItems);
   const [subjectId, setSubjectId] = useState<QuestionBankSubjectId>("ic3-gs6");
   const [levelId, setLevelId] = useState(initialLevelId);
   const [topicId, setTopicId] = useState("all");
   const [quizKind, setQuizKind] = useState<QuizKindFilter>("all");
   const [searchValue, setSearchValue] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [autoTopicIds, setAutoTopicIds] = useState<string[]>(() => getDefaultAutoTopicIds("ic3-gs6", initialLevelId));
+  const [autoTopicIds, setAutoTopicIds] = useState<string[]>(() =>
+    getDefaultAutoTopicIds(questionBankSubjects, "ic3-gs6", initialLevelId),
+  );
   const [autoCount, setAutoCount] = useState(10);
   const deferredSearchValue = useDeferredValue(searchValue);
 
-  const activeSubject = useMemo(() => getQuestionBankSubject(subjectId), [subjectId]);
-  const activeLevel = useMemo(() => getQuestionBankLevel(subjectId, levelId), [levelId, subjectId]);
+  useEffect(() => {
+    let isMounted = true;
+
+    loadQuestionBankData().then((data) => {
+      if (!isMounted) return;
+      const nextSubjects = data.subjects.length ? data.subjects : questionBankSubjects;
+      const nextSubject = nextSubjects.find((subject) => subject.id === subjectId) ?? nextSubjects[0];
+      const nextLevel = nextSubject.levels.find((level) => level.id === levelId) ?? nextSubject.levels[0];
+
+      setSubjects(nextSubjects);
+      setQuestions(data.questions.length ? data.questions : questionBankQuestions);
+      setQuizzes(data.quizzes.length ? data.quizzes : quizBankItems);
+      setSubjectId(nextSubject.id);
+      setLevelId(nextLevel?.id ?? "");
+      setTopicId("all");
+      setAutoTopicIds(getDefaultAutoTopicIds(nextSubjects, nextSubject.id, nextLevel?.id ?? ""));
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const activeSubject = useMemo(() => findQuestionBankSubject(subjects, subjectId), [subjectId, subjects]);
+  const activeLevel = useMemo(() => findQuestionBankLevel(activeSubject, levelId), [activeSubject, levelId]);
   const levelTopics = useMemo(
     () => activeSubject.categories.filter((category) => category.levelId === activeLevel.id),
     [activeLevel.id, activeSubject.categories],
@@ -73,7 +99,7 @@ export function QuestionBankWorkspace({
   const visibleQuestions = useMemo(() => {
     const keyword = deferredSearchValue.trim().toLowerCase();
 
-    return questionBankQuestions.filter((question) => {
+    return questions.filter((question) => {
       const matchesSubject = question.subjectId === subjectId;
       const matchesLevel = question.levelId === activeLevel.id;
       const matchesTopic = topicId === "all" || question.categoryId === topicId;
@@ -92,15 +118,15 @@ export function QuestionBankWorkspace({
 
       return matchesSubject && matchesLevel && matchesTopic && matchesScope && matchesSearch;
     });
-  }, [activeLevel.id, contentScope, deferredSearchValue, subjectId, topicId]);
+  }, [activeLevel.id, contentScope, deferredSearchValue, questions, subjectId, topicId]);
 
   const selectedQuestions = useMemo(
-    () => questionBankQuestions.filter((question) => selectedIds.includes(question.id) && canUseInScope(question.scope, contentScope)),
-    [contentScope, selectedIds],
+    () => questions.filter((question) => selectedIds.includes(question.id) && canUseInScope(question.scope, contentScope)),
+    [contentScope, questions, selectedIds],
   );
 
   const autoPickedQuestions = useMemo(() => {
-    const candidates = questionBankQuestions
+    const candidates = questions
       .filter(
         (question) =>
           question.subjectId === subjectId &&
@@ -112,11 +138,11 @@ export function QuestionBankWorkspace({
       .sort((left, right) => pseudoRandomScore(left.id) - pseudoRandomScore(right.id));
 
     return candidates.slice(0, autoCount);
-  }, [activeLevel.id, autoCount, autoTopicIds, contentScope, subjectId]);
+  }, [activeLevel.id, autoCount, autoTopicIds, contentScope, questions, subjectId]);
 
   const visibleQuizzes = useMemo(
     () =>
-      quizBankItems.filter((quiz) => {
+      quizzes.filter((quiz) => {
         const matchesSubject = quiz.subjectId === subjectId;
         const matchesLevel = quiz.levelId === activeLevel.id;
         const matchesTopic = topicId === "all" || (activeTopic ? quiz.topicLabels.includes(activeTopic.label) : true);
@@ -125,24 +151,33 @@ export function QuestionBankWorkspace({
 
         return matchesSubject && matchesLevel && matchesTopic && matchesKind && matchesScope;
       }),
-    [activeLevel.id, activeTopic, contentScope, quizKind, subjectId, topicId],
+    [activeLevel.id, activeTopic, contentScope, quizKind, quizzes, subjectId, topicId],
   );
 
+  const getTopicQuestionCount = (categoryId: string, targetLevelId = activeLevel.id) =>
+    questions.filter(
+      (question) =>
+        question.subjectId === subjectId &&
+        question.levelId === targetLevelId &&
+        question.categoryId === categoryId &&
+        canUseInScope(question.scope, contentScope),
+    ).length;
+
   function pickSubject(nextSubjectId: string) {
-    const nextSubject = getQuestionBankSubject(nextSubjectId as QuestionBankSubjectId);
+    const nextSubject = findQuestionBankSubject(subjects, nextSubjectId);
     const nextLevel = nextSubject.levels[0];
 
     setSubjectId(nextSubject.id);
     setLevelId(nextLevel.id);
     setTopicId("all");
-    setAutoTopicIds(getDefaultAutoTopicIds(nextSubject.id, nextLevel.id));
+    setAutoTopicIds(getDefaultAutoTopicIds(subjects, nextSubject.id, nextLevel.id));
     setSelectedIds([]);
   }
 
   function pickLevel(nextLevelId: string) {
     setLevelId(nextLevelId);
     setTopicId("all");
-    setAutoTopicIds(getDefaultAutoTopicIds(subjectId, nextLevelId));
+    setAutoTopicIds(getDefaultAutoTopicIds(subjects, subjectId, nextLevelId));
     setSelectedIds([]);
   }
 
@@ -190,11 +225,13 @@ export function QuestionBankWorkspace({
           canManageGlobalContent={canManageGlobalContent}
           contentScope={contentScope}
           copy={copy}
+          getTopicQuestionCount={getTopicQuestionCount}
           levelTopics={levelTopics}
           onLevelChange={pickLevel}
           onSubjectChange={pickSubject}
           onTopicChange={setTopicId}
           subjectId={subjectId}
+          subjects={subjects}
           topicId={topicId}
         />
         ) : null
@@ -207,7 +244,7 @@ export function QuestionBankWorkspace({
               label={copy.subjectLabel}
               value={subjectId}
               onChange={pickSubject}
-              options={questionBankSubjects.map((subject) => ({
+              options={subjects.map((subject) => ({
                 value: subject.id,
                 label: subject.label,
                 description: subject.description,
@@ -232,7 +269,7 @@ export function QuestionBankWorkspace({
                 ...levelTopics.map((topic) => ({
                   value: topic.id,
                   label: topic.label,
-                  description: copy.questionCount(getQuestionBankCategoryCount(subjectId, topic.id, activeLevel.id)),
+                  description: copy.questionCount(getTopicQuestionCount(topic.id, activeLevel.id)),
                 })),
               ]}
             />
@@ -286,11 +323,13 @@ function QuestionStructurePanel({
   canManageGlobalContent,
   contentScope,
   copy,
+  getTopicQuestionCount,
   levelTopics,
   onLevelChange,
   onSubjectChange,
   onTopicChange,
   subjectId,
+  subjects,
   topicId,
 }: {
   activeLevel: QuestionBankLevel;
@@ -298,11 +337,13 @@ function QuestionStructurePanel({
   canManageGlobalContent: boolean;
   contentScope: ContentScope;
   copy: QuestionBankCopy;
+  getTopicQuestionCount: (categoryId: string, targetLevelId?: string) => number;
   levelTopics: QuestionBankCategory[];
   onLevelChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
   onTopicChange: (value: string) => void;
   subjectId: QuestionBankSubjectId;
+  subjects: QuestionBankSubject[];
   topicId: string;
 }) {
   return (
@@ -314,7 +355,7 @@ function QuestionStructurePanel({
             value={subjectId}
             onChange={onSubjectChange}
             hideDescription
-            options={questionBankSubjects.map((subject) => ({
+            options={subjects.map((subject) => ({
               value: subject.id,
               label: subject.label,
               description: subject.description,
@@ -358,7 +399,7 @@ function QuestionStructurePanel({
             </TopicChip>
             {levelTopics.map((topic) => (
               <TopicChip key={topic.id} active={topicId === topic.id} onClick={() => onTopicChange(topic.id)}>
-                {topic.label} ({getQuestionBankCategoryCount(subjectId, topic.id, activeLevel.id)})
+                {topic.label} ({getTopicQuestionCount(topic.id, activeLevel.id)})
               </TopicChip>
             ))}
           </div>
@@ -705,8 +746,16 @@ function pseudoRandomScore(value: string) {
   return value.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 97;
 }
 
-function getDefaultAutoTopicIds(subjectId: QuestionBankSubjectId, levelId: string) {
-  return getQuestionBankSubject(subjectId)
+function findQuestionBankSubject(subjects: QuestionBankSubject[], subjectId: QuestionBankSubjectId) {
+  return subjects.find((subject) => subject.id === subjectId) ?? subjects[0] ?? questionBankSubjects[0];
+}
+
+function findQuestionBankLevel(subject: QuestionBankSubject, levelId: string) {
+  return subject.levels.find((level) => level.id === levelId) ?? subject.levels[0] ?? questionBankSubjects[0].levels[0];
+}
+
+function getDefaultAutoTopicIds(subjects: QuestionBankSubject[], subjectId: QuestionBankSubjectId, levelId: string) {
+  return findQuestionBankSubject(subjects, subjectId)
     .categories.filter((category) => category.levelId === levelId)
     .slice(0, 2)
     .map((category) => category.id);

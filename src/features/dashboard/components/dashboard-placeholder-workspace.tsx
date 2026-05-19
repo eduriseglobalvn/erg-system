@@ -21,7 +21,11 @@ export function DashboardPlaceholderWorkspace({
       title={activeLeaf.title}
       description={activeLeaf.description}
       breadcrumbs={activeLeaf.breadcrumb}
-      actions={<Button onClick={() => onOpenLeaf("ops-overview")}>{copy.backToOps}</Button>}
+      actions={
+        <Button onClick={() => onOpenLeaf(activeLeaf.id.startsWith("admin") ? "admin-overview" : "ops-overview")}>
+          {copy.backToOps}
+        </Button>
+      }
     >
       <DashboardSectionCard title={copy.title} description={copy.description}>
         <div className="flex min-h-[280px] flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center">
@@ -39,9 +43,9 @@ export function DashboardPlaceholderWorkspace({
 const viCopy = {
   badge: "Workspace",
   backToOps: "Về bảng điều hành",
-  title: "Khu vực này đang được giữ chỗ cho phiên bản kế tiếp.",
+  title: "Khu vực này sẽ được mở ở phiên bản tiếp theo.",
   description:
-    "Tôi đã ưu tiên hoàn thiện các luồng mà giáo viên dùng thường xuyên nhất: dashboard vận hành, ngân hàng câu hỏi, quản lý học sinh, báo cáo thi đua và hành trình học viên.",
+    "Các luồng chính đã được ưu tiên trước: bảng điều hành, lớp học, thành viên, học liệu và quiz. Màn này giữ chỗ cho cấu hình nâng cao.",
 };
 
 const enCopy = {

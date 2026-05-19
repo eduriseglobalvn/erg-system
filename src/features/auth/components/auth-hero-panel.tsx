@@ -40,10 +40,6 @@ export function AuthHeroPanel() {
           ))}
         </div>
 
-        <div className="mt-auto pt-10 text-sm leading-7 text-white/72">
-          {t("auth.demoAccount")}{" "}
-          <span className="font-semibold text-white">teacher@erg.vn / 12345678</span>
-        </div>
       </div>
     </div>
   );

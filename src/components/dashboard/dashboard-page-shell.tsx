@@ -68,26 +68,26 @@ export function DashboardPageShell({
   children,
 }: DashboardPageShellProps) {
   return (
-    <div className="h-full overflow-y-auto bg-[radial-gradient(circle_at_top_left,rgba(30,64,175,0.08),transparent_22%),radial-gradient(circle_at_top_right,rgba(217,119,6,0.08),transparent_18%),linear-gradient(180deg,#f8fbff_0%,#f5f8fc_100%)]">
-      <div className="mx-auto flex max-w-[1560px] flex-col gap-6 px-5 py-5 sm:px-6 sm:py-6">
-        <section className="rounded-[32px] border border-slate-200/80 bg-white/88 p-5 shadow-[0_28px_80px_-42px_rgba(15,23,42,0.38)] backdrop-blur sm:p-6">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
+    <div className="h-full overflow-y-auto bg-[#f6f8fb]">
+      <div className="mx-auto flex max-w-[1560px] flex-col gap-5 px-5 py-5 sm:px-6">
+        <section className="rounded-[24px] border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-38px_rgba(15,23,42,0.45)] sm:p-6">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
                 {breadcrumbs.map((item, index) => (
-                  <div key={`${item}-${index}`} className="flex items-center gap-3">
+                  <div key={`${item}-${index}`} className="flex items-center gap-2">
                     {index > 0 ? <span className="text-slate-300">/</span> : null}
                     <span>{item}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-3">
+              <div className="mt-3 flex flex-wrap items-center gap-3">
                 {badge ? <Badge tone="secondary">{badge}</Badge> : null}
-                <h1 className="text-[30px] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[36px]">
+                <h1 className="text-[28px] font-semibold tracking-[-0.04em] text-slate-950 sm:text-[34px]">
                   {title}
                 </h1>
               </div>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-[15px]">
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600 sm:text-[15px]">
                 {description}
               </p>
             </div>
@@ -112,8 +112,8 @@ export function DashboardMetricCard({
   const toneClass = toneClassMap[tone];
 
   return (
-    <Card className="overflow-hidden border-slate-200/80 bg-white/94">
-      <div className="flex items-start justify-between gap-4 p-6">
+    <Card className="overflow-hidden border-slate-200 bg-white">
+      <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0">
           <div className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">{label}</div>
           <div className="mt-3 text-[30px] font-semibold tracking-[-0.04em] text-slate-950">{value}</div>
@@ -131,7 +131,7 @@ export function DashboardMetricCard({
         ) : null}
       </div>
       {delta ? (
-        <div className="border-t border-slate-100 px-6 py-3">
+        <div className="border-t border-slate-100 px-5 py-3">
           <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-medium", toneClass.delta)}>
             {delta}
           </span>
@@ -149,8 +149,8 @@ export function DashboardSectionCard({
   children,
 }: DashboardSectionCardProps) {
   return (
-    <Card className={cn("border-slate-200/80 bg-white/94", className)}>
-      <div className="flex flex-col gap-4 p-6">
+    <Card className={cn("border-slate-200 bg-white", className)}>
+      <div className="flex flex-col gap-4 p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
             <h2 className="text-lg font-semibold tracking-[-0.03em] text-slate-950">{title}</h2>

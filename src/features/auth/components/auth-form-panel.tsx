@@ -1,17 +1,14 @@
-import type { FormEvent } from "react";
+import { useRef, type FormEvent, type KeyboardEvent } from "react";
 
-import {
-  AppleIcon,
-  EyeIcon,
-  GoogleIcon,
-} from "@/features/auth/components/auth-icons";
+import { EyeIcon } from "@/features/auth/components/auth-icons";
 import {
   DividerText,
   Field,
-  SocialButton,
   inputClassName,
   submitButtonClassName,
 } from "@/features/auth/components/auth-shared";
+import { PortalMobileLoginForm } from "@/features/auth/components/portal-mobile-login-form";
+import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button";
 import type {
   AuthMode,
   LoginFormState,
@@ -35,6 +32,14 @@ export function AuthFormPanel({
   onRegisterSubmit,
   onForgotPassword,
   onProviderLogin,
+  allowGoogle = true,
+  allowRegister = true,
+  loginTitle,
+  loginSubtitle,
+  loginFootnote,
+  credentialLabel,
+  credentialPlaceholder,
+  mobileVariant = false,
 }: {
   mode: AuthMode;
   rememberMe: boolean;
@@ -49,14 +54,127 @@ export function AuthFormPanel({
   onLoginSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onRegisterSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onForgotPassword: () => void;
-  onProviderLogin: (provider: "google" | "apple") => void;
+  onProviderLogin: (provider: "google", idToken?: string) => void;
+  allowGoogle?: boolean;
+  allowRegister?: boolean;
+  loginTitle?: string;
+  loginSubtitle?: string;
+  loginFootnote?: string;
+  credentialLabel?: string;
+  credentialPlaceholder?: string;
+  mobileVariant?: boolean;
 }) {
   const { t } = useI18n();
+  const effectiveMode = allowRegister ? mode : "login";
+  const hasSocialLogin = allowGoogle;
+  const passwordInputRef = useRef<HTMLInputElement>(null);
+
+  if (mobileVariant) {
+    return (
+      <PortalMobileLoginForm
+        allowGoogle={allowGoogle}
+        allowRegister={allowRegister}
+        credentialLabel={credentialLabel}
+        credentialPlaceholder={credentialPlaceholder}
+        loginFootnote={loginFootnote}
+        loginForm={loginForm}
+        loginSubtitle={loginSubtitle}
+        loginTitle={loginTitle}
+        mode={mode}
+        onForgotPassword={onForgotPassword}
+        onLoginFormChange={onLoginFormChange}
+        onLoginSubmit={onLoginSubmit}
+        onModeChange={onModeChange}
+        onProviderLogin={onProviderLogin}
+        onRegisterFormChange={onRegisterFormChange}
+        onRegisterSubmit={onRegisterSubmit}
+        onRememberMeChange={onRememberMeChange}
+        onShowPasswordToggle={onShowPasswordToggle}
+        registerForm={registerForm}
+        rememberMe={rememberMe}
+        showPassword={showPassword}
+      />
+    );
+  }
+
+  function focusPasswordFromEmail(event: KeyboardEvent<HTMLInputElement>) {
+    if ((event.key !== "Tab" || event.shiftKey) && event.key !== "Enter") return;
+
+    event.preventDefault();
+    passwordInputRef.current?.focus();
+  }
+
+  const titleStyle = mobileVariant
+    ? ({ color: "#020617", fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.12 } as const)
+    : undefined;
+  const subtitleStyle = mobileVariant
+    ? ({ color: "#64748b", fontSize: 14, lineHeight: 1.7, marginTop: 10, maxWidth: 320 } as const)
+    : undefined;
+  const formCardStyle = mobileVariant
+    ? ({
+        backgroundColor: "#ffffff",
+        border: "1px solid #e2e8f0",
+        borderRadius: 24,
+        boxShadow: "0 24px 52px -42px rgba(15,23,42,0.24)",
+        marginTop: allowRegister ? 14 : 0,
+        padding: "22px 18px",
+      } as const)
+    : undefined;
+  const inputStyle = mobileVariant
+    ? ({
+        backgroundColor: "#ffffff",
+        border: "1px solid #cbd5e1",
+        borderRadius: 14,
+        color: "#0f172a",
+        fontSize: 16,
+        height: 52,
+        padding: "0 16px",
+        width: "100%",
+      } as const)
+    : undefined;
+  const passwordInputStyle = mobileVariant
+    ? ({
+        backgroundColor: "#ffffff",
+        border: "1px solid #cbd5e1",
+        borderRadius: 14,
+        color: "#0f172a",
+        fontSize: 16,
+        height: 52,
+        padding: "0 48px 0 16px",
+        width: "100%",
+      } as const)
+    : undefined;
+  const submitStyle = mobileVariant
+    ? ({
+        backgroundColor: "var(--erg-blue)",
+        borderRadius: 16,
+        color: "#fff",
+        display: "inline-flex",
+        fontSize: 16,
+        fontWeight: 700,
+        height: 52,
+        justifyContent: "center",
+        width: "100%",
+      } as const)
+    : undefined;
+  const footnoteStyle = mobileVariant
+    ? ({
+        backgroundColor: "#f8fafc",
+        border: "1px solid #e2e8f0",
+        borderRadius: 16,
+        color: "#475569",
+        fontSize: 14,
+        lineHeight: 1.7,
+        marginTop: 18,
+        padding: "14px 16px",
+      } as const)
+    : undefined;
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-4">
-        <div className="inline-flex rounded-full bg-slate-100 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
+    <div className="w-full" style={{ width: "100%" }}>
+      {allowRegister ? (
+      <div className="rounded-xl border border-slate-200 bg-white/80 p-1 shadow-sm backdrop-blur" style={{ backdropFilter: "blur(10px)", backgroundColor: "rgba(255,255,255,0.88)", border: "1px solid #e2e8f0", borderRadius: 16, padding: 4 }}>
+        <div className="grid grid-cols-2 gap-1" style={{ display: "grid", gap: 4, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           {[
             { id: "login" as const, label: t("auth.login") },
             { id: "register" as const, label: t("auth.register") },
@@ -66,58 +184,55 @@ export function AuthFormPanel({
               type="button"
               onClick={() => onModeChange(item.id)}
               className={cn(
-                "min-w-[210px] rounded-full px-8 py-3 text-lg font-semibold transition",
+                "h-11 rounded-xl px-4 text-sm font-bold transition",
                 mode === item.id
-                  ? "bg-white text-[var(--erg-blue)] shadow-sm"
-                  : "text-slate-900",
+                  ? "bg-[var(--erg-blue)] text-white shadow-sm"
+                  : "text-slate-500 hover:bg-white hover:text-[var(--erg-blue)]",
               )}
+              style={{ borderRadius: 12, fontSize: 14, fontWeight: 700, height: 44, padding: "0 16px" }}
             >
               {item.label}
             </button>
           ))}
         </div>
-
-        <button
-          type="button"
-          onClick={() => onModeChange(mode === "login" ? "register" : "login")}
-          className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-          aria-label={t("auth.switchMode")}
-        >
-          <CloseIcon />
-        </button>
       </div>
+      ) : null}
 
-      <div className="mt-8 rounded-[24px] border border-slate-200 bg-white px-6 py-7 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.35)] sm:px-7 sm:py-8">
-        {mode === "login" ? (
+      <div className={cn("rounded-xl border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-46px_rgba(15,23,42,0.55)] sm:px-7", allowRegister ? "mt-4" : "mt-0")} style={formCardStyle}>
+        {effectiveMode === "login" ? (
           <>
-            <div className="text-center">
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-slate-950 sm:text-[24px]">
-                {t("auth.loginTeacherHub")}
+            <div className="text-left" style={{ textAlign: "left" }}>
+              <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl" style={titleStyle}>
+                {loginTitle ?? t("auth.loginTeacherHub")}
               </h2>
-              <p className="mt-3 text-lg leading-8 text-slate-500">
-                {t("auth.loginSubtitle")}
+              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500" style={subtitleStyle}>
+                {loginSubtitle ?? t("auth.loginSubtitle")}
               </p>
             </div>
 
-            <div className="mt-8 space-y-4">
-              <SocialButton
-                icon={<AppleIcon />}
-                label={t("auth.loginWithApple")}
-                onClick={() => onProviderLogin("apple")}
-              />
-              <SocialButton
-                icon={<GoogleIcon />}
+            {hasSocialLogin ? (
+            <>
+            <div className="mt-6 space-y-3">
+              {allowGoogle ? (
+              <GoogleSignInButton
                 label={t("auth.loginWithGoogle")}
-                onClick={() => onProviderLogin("google")}
+                onCredential={(idToken) => onProviderLogin("google", idToken)}
+                onError={(message) => {
+                  console.warn(message);
+                }}
               />
+              ) : null}
             </div>
 
             <DividerText text={t("auth.orContinueWith")} />
+            </>
+            ) : null}
 
-            <form className="mt-7 space-y-5" onSubmit={onLoginSubmit}>
-              <Field label={t("auth.email")}>
+            <form className="mt-5 space-y-4" style={{ marginTop: 20 }} onSubmit={onLoginSubmit}>
+              <Field label={credentialLabel ?? t("auth.email")}>
                 <input
                   className={inputClassName}
+                  style={inputStyle}
                   value={loginForm.email}
                   onChange={(event) =>
                     onLoginFormChange({
@@ -125,8 +240,10 @@ export function AuthFormPanel({
                       email: event.target.value,
                     })
                   }
-                  placeholder={t("auth.placeholderWorkEmail")}
-                  type="email"
+                  placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
+                  type="text"
+                  autoComplete="username"
+                  onKeyDown={focusPasswordFromEmail}
                 />
               </Field>
 
@@ -135,7 +252,7 @@ export function AuthFormPanel({
                 action={
                   <button
                     type="button"
-                    className="font-medium text-slate-600 hover:text-slate-900"
+                    className="font-semibold text-[var(--erg-blue)] hover:text-blue-800"
                     onClick={onForgotPassword}
                   >
                     {t("auth.forgotPassword")}
@@ -144,7 +261,9 @@ export function AuthFormPanel({
               >
                 <div className="relative">
                   <input
+                    ref={passwordInputRef}
                     className={cn(inputClassName, "pr-12")}
+                    style={passwordInputStyle}
                     value={loginForm.password}
                     onChange={(event) =>
                       onLoginFormChange({
@@ -154,6 +273,7 @@ export function AuthFormPanel({
                     }
                     placeholder={t("auth.enterPassword")}
                     type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
                   />
                   <button
                     type="button"
@@ -166,44 +286,53 @@ export function AuthFormPanel({
                 </div>
               </Field>
 
-              <label className="inline-flex items-center gap-3 text-lg text-slate-700">
+              <label className="inline-flex items-center gap-2.5 text-sm font-medium text-slate-700">
                 <input
                   checked={rememberMe}
                   onChange={(event) => onRememberMeChange(event.target.checked)}
-                  className="h-5 w-5 rounded border-slate-300 accent-[var(--erg-blue)]"
+                  className="h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
+                  style={{ accentColor: "var(--erg-blue)", height: 16, width: 16 }}
                   type="checkbox"
                 />
                 {t("auth.rememberMe")}
               </label>
 
-              <button className={submitButtonClassName} type="submit">
+              <button className={submitButtonClassName} style={submitStyle} type="submit">
                 {t("auth.login")}
               </button>
             </form>
 
-            <div className="mt-7 text-center text-lg text-slate-600">
-              {t("auth.noAccount")}{" "}
+            {loginFootnote ? (
+              <p className="mt-5 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600" style={footnoteStyle}>
+                {loginFootnote}
+              </p>
+            ) : null}
+
+            {allowRegister ? (
+            <div className="mt-5 text-center text-sm text-slate-600">
+              {t("auth.noAccount")}
               <button
                 type="button"
-                className="font-semibold text-slate-900 underline underline-offset-4"
+                className="ml-1 font-semibold text-slate-900 underline underline-offset-4"
                 onClick={() => onModeChange("register")}
               >
                 {t("auth.registerNow")}
               </button>
             </div>
+            ) : null}
           </>
         ) : (
           <>
             <div className="text-center">
-              <h2 className="text-[20px] font-semibold tracking-[-0.02em] text-slate-950 sm:text-[24px]">
+              <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
                 {t("auth.createTeacherAccount")}
               </h2>
-              <p className="mt-3 text-lg leading-8 text-slate-500">
+              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
                 {t("auth.registerSubtitle")}
               </p>
             </div>
 
-            <form className="mt-8 space-y-5" onSubmit={onRegisterSubmit}>
+            <form className="mt-6 space-y-4" onSubmit={onRegisterSubmit}>
               <Field label={t("auth.fullName")}>
                 <input
                   className={inputClassName}
@@ -249,7 +378,7 @@ export function AuthFormPanel({
                 />
               </Field>
 
-              <div className="grid gap-5 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2">
                 <Field label={t("auth.password")}>
                   <input
                     className={inputClassName}
@@ -285,11 +414,11 @@ export function AuthFormPanel({
               </button>
             </form>
 
-            <div className="mt-7 text-center text-lg text-slate-600">
-              {t("auth.hasAccount")}{" "}
+            <div className="mt-5 text-center text-sm text-slate-600">
+              {t("auth.hasAccount")}
               <button
                 type="button"
-                className="font-semibold text-slate-900 underline underline-offset-4"
+                className="ml-1 font-semibold text-slate-900 underline underline-offset-4"
                 onClick={() => onModeChange("login")}
               >
                 {t("auth.backToLogin")}
@@ -299,23 +428,5 @@ export function AuthFormPanel({
         )}
       </div>
     </div>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
-    </svg>
   );
 }
