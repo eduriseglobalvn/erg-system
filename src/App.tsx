@@ -2,7 +2,7 @@ import { HashRouter, BrowserRouter } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-import { I18nProvider } from "@/features/i18n";
+import { I18nProvider } from "@/platform/i18n";
 import { shouldUseHashRouter } from "@/lib/platform";
 import { appQueryClient } from "@/lib/query-client";
 import { AppRoutes } from "@/routes/app-routes";

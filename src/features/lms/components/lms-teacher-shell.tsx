@@ -21,8 +21,8 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Badge, Button, Input, ProgressBar } from "@/components/ui/dashboard-kit";
 import { ERG_ASSETS } from "@/config/seo";
-import { logoutAccount } from "@/features/auth/api/auth-storage";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { logoutAccount } from "@/platform/auth/api/auth-storage";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import {
   assignmentRuns,
   classroomSchools,
@@ -30,13 +30,13 @@ import {
   classroomStudents,
   defaultClassId,
   defaultSchoolId,
-} from "@/features/classroom/api/mock-classroom-data";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/classroom/types/classroom-types";
+} from "@/features/lms/classroom/api/mock-classroom-data";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { AttendanceSheetPanel } from "@/features/lms/components/attendance-sheet-panel";
 import { ScoreSheetPanel } from "@/features/lms/components/score-sheet-panel";
 import { TeachingSchedulePanel } from "@/features/lms/components/teaching-schedule/teaching-schedule-panel";
-import { WeeklyClassLogPage } from "@/features/weekly-class-log";
+import { WeeklyClassLogPage } from "@/features/lms/weekly-class-log";
 import {
   getCurrentAcademicYear,
   LearningResourceDashboardScopeProvider,

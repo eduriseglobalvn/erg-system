@@ -1,7 +1,7 @@
 import { Minus, Plus, Pointer } from "lucide-react";
 import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from "react";
 
-import { useI18n } from "@/features/i18n";
+import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 

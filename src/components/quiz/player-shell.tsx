@@ -13,10 +13,10 @@ import {
   localQuizAttemptStore,
   startAttempt,
   submitFinalAttempt,
-} from "@/features/quiz-runtime";
+} from "@/features/lcms/quiz/quiz-runtime";
 import { createInitialAnswer, getAllQuestions, isAnswerComplete, normalizeAnswerForSubmission } from "@/lib/quiz";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { LocalQuizAttemptSession } from "@/features/quiz-runtime";
+import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime";
 import type { AnswerPayload, AnswerResult, Attempt, Question, Quiz, QuizPackage, QuizResultDisplay } from "@/lib/types";
 
 type LoadState =

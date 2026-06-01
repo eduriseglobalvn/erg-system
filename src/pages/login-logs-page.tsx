@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 import { Badge, Button } from "@/components/ui/dashboard-kit";
-import { listMyLoginSessions } from "@/features/auth/api/account-api";
+import { listMyLoginSessions } from "@/platform/auth/api/account-api";
 
 export function LoginLogsPage() {
   const navigate = useNavigate();

@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { useI18n } from "@/features/i18n"
+import { useI18n } from "@/platform/i18n"
 import {
   ArrowDownwardIcon,
   ArrowUpwardIcon,

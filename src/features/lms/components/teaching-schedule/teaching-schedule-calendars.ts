@@ -1,4 +1,4 @@
-﻿import { classroomSchools } from "@/features/classroom/api/mock-classroom-data";
+﻿import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
 
 import type { TeachingScheduleEvent } from "./teaching-schedule-types";
 

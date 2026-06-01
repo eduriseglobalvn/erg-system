@@ -3,8 +3,8 @@
   classroomSnapshots,
   defaultClassId,
   defaultSchoolId,
-} from "@/features/classroom/api/mock-classroom-data";
-import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/classroom/types/classroom-types";
+} from "@/features/lms/classroom/api/mock-classroom-data";
+import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import type { DashboardUserPermissions, ManagementScope } from "@/types/scope-types";
 

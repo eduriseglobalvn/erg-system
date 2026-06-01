@@ -22,9 +22,9 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { authApi } from "@/features/auth/api/auth-api";
-import { getCurrentAccount, saveCurrentAccount } from "@/features/auth/api/auth-storage";
-import type { TeacherAccount } from "@/features/auth/types/auth-types";
+import { authApi } from "@/platform/auth/api/auth-api";
+import { getCurrentAccount, saveCurrentAccount } from "@/platform/auth/api/auth-storage";
+import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 
 const inputClassName =
   "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0A48FF] focus:ring-4 focus:ring-blue-100";

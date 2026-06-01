@@ -1,7 +1,7 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppSeo } from "@/components/seo/app-seo";
-import { logoutAccount } from "@/features/auth/api/auth-storage";
-import { logoutStudentSession } from "@/features/auth/api/student-auth-storage";
+import { logoutAccount } from "@/platform/auth/api/auth-storage";
+import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";

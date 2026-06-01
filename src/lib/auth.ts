@@ -1,1 +1,1 @@
-export * from "@/features/auth";
+export * from "@/platform/auth";

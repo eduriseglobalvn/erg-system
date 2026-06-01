@@ -1,1 +1,1 @@
-export { DashboardShell as DashboardEditorShell } from "@/features/dashboard";
+export { DashboardShell as DashboardEditorShell } from "@/layouts/dashboard";

@@ -1,6 +1,6 @@
 ﻿import { FileText, MessageSquarePlus, UserPlus, UserRoundCheck } from "lucide-react";
 
-import type { ClassroomStudent } from "@/features/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 
 type StudentAttendanceContextMenuProps = {

@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
-import { useI18n, type Locale } from "@/features/i18n";
+import { useI18n, type Locale } from "@/platform/i18n";
 import { cn } from "@/utils/cn";
 import {
   ArrowDownwardIcon,

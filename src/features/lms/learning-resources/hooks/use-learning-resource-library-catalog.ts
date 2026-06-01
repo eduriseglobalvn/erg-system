@@ -139,11 +139,11 @@ async function openLibraryResource(resource: LearningResourceResource) {
 }
 
 function libraryBootstrapQueryKey(schoolId: string, academicYear: string) {
-  return ["hoclieu", "library-bootstrap", schoolId, academicYear] as const;
+  return ["learning-resources", "library-bootstrap", schoolId, academicYear] as const;
 }
 
 export function libraryProgressQueryKey(schoolId: string, academicYear: string) {
-  return ["hoclieu", "library-progress", schoolId, academicYear] as const;
+  return ["learning-resources", "library-progress", schoolId, academicYear] as const;
 }
 
 function progressMap(progress: LearningResourceLibraryProgressDTO | undefined) {

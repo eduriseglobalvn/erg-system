@@ -7,7 +7,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useI18n } from "@/features/i18n"
+import { useI18n } from "@/platform/i18n"
 import {
   SidebarGroup,
   SidebarGroupLabel,

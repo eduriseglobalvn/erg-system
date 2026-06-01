@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-import { useI18n } from "@/features/i18n";
+import { useI18n } from "@/platform/i18n";
 
 export function NotFoundPage() {
   const { t } = useI18n();

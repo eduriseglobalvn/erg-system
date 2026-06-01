@@ -12,7 +12,7 @@ import {
   LMS_PORTAL_HOST,
   shouldRedirectLocalPortal,
 } from "@/config/portal-urls";
-import { AuthenticatedAccountGate, PortalAuthGate, PortalLoginPage } from "@/features/auth/components/portal-auth-gates";
+import { AuthenticatedAccountGate, PortalAuthGate, PortalLoginPage } from "@/platform/auth/components/portal-auth-gates";
 import { RootLayout } from "@/layouts/root-layout";
 
 const DashboardPage = lazy(() =>
@@ -71,7 +71,7 @@ const NotFoundPage = lazy(() =>
   })),
 );
 const AccessDeniedPage = lazy(() =>
-  import("@/features/auth").then((module) => ({
+  import("@/platform/auth").then((module) => ({
     default: module.AccessDeniedPage,
   })),
 );

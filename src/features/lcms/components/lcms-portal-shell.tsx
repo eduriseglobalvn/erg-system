@@ -17,15 +17,15 @@ import {
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button, Input } from "@/components/ui/dashboard-kit";
-import { logoutAccount } from "@/features/auth/api/auth-storage";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { CreateEducationUnitDialog } from "@/features/admin-operations";
-import { defaultClassId, defaultSchoolId } from "@/features/classroom/api/mock-classroom-data";
-import { DashboardContent } from "@/features/dashboard/components/dashboard-content";
-import { PortalBrandMark } from "@/features/dashboard/components/portal-brand-mark";
+import { logoutAccount } from "@/platform/auth/api/auth-storage";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { CreateEducationUnitDialog } from "@/features/lcms/admin-operations";
+import { defaultClassId, defaultSchoolId } from "@/features/lms/classroom/api/mock-classroom-data";
+import { DashboardContent } from "@/layouts/dashboard/components/dashboard-content";
+import { PortalBrandMark } from "@/layouts/dashboard/components/portal-brand-mark";
 import type { LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
-import type { DashboardLeaf, DashboardLeafVariant } from "@/features/dashboard/types/dashboard-types";
-import type { QuestionBankQuestion } from "@/features/question-bank";
+import type { DashboardLeaf, DashboardLeafVariant } from "@/layouts/dashboard/types/dashboard-types";
+import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
 import { cn } from "@/lib/utils";
 

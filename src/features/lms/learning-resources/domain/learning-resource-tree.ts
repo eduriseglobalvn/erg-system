@@ -1,4 +1,4 @@
-import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 
 export type LearningResourceNodeKind = "group" | "lesson" | "folder";

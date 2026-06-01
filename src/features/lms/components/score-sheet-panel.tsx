@@ -2,7 +2,7 @@
 import { ArrowDownAZ, ArrowUpAZ, Check, ChevronDown, Filter, History, LockKeyhole, Plus, Search, UserRound, X } from "lucide-react";
 
 import { Button, Input } from "@/components/ui/dashboard-kit";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 
 type ScoreColumn = {

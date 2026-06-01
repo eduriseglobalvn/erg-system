@@ -19,8 +19,8 @@ import {
   SidebarContent,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { DashboardGroup } from "@/features/dashboard/types/dashboard-types";
-import { useI18n } from "@/features/i18n";
+import type { DashboardGroup } from "@/layouts/dashboard/types/dashboard-types";
+import { useI18n } from "@/platform/i18n";
 
 export function AppSidebar({
   activeLeafId,

@@ -1,4 +1,4 @@
-﻿import { listLearningResourceResources } from "@/features/admin-operations/api/learning-resource-authoring-api";
+﻿import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import {
   LEARNING_RESOURCE_CATEGORIES,
   LEARNING_RESOURCE_LIBRARY_SECTIONS,

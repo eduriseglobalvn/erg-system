@@ -2,7 +2,7 @@
 import { Download, LockKeyhole, RotateCcw, Save, Search, UserRound, X } from "lucide-react";
 
 import { Button, Input } from "@/components/ui/dashboard-kit";
-import type { ClassroomSnapshot, ClassroomStudent, StudentStatus } from "@/features/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
 import { StudentAttendanceContextMenu } from "@/features/lms/components/student-attendance-context-menu";
 import { cn } from "@/lib/utils";
 

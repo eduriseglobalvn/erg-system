@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { useI18n } from "@/features/i18n";
+import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { AnswerPayload, Question } from "@/lib/types";
 

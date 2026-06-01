@@ -1,0 +1,74 @@
+import {
+  CRM_PORTAL_HOST,
+  ELEARNING_PORTAL_HOST,
+  ELEARNING_VUONG_PORTAL_HOST,
+  LCMS_PORTAL_HOST,
+  LMS_PORTAL_HOST,
+} from "@/config/portal-urls";
+
+const LOGIN_PATH = "/login";
+const LOCALHOSTS = new Set(["localhost", "127.0.0.1"]);
+const ALLOWED_PORTAL_HOSTS = new Set([
+  CRM_PORTAL_HOST,
+  ELEARNING_PORTAL_HOST,
+  ELEARNING_VUONG_PORTAL_HOST,
+  LCMS_PORTAL_HOST,
+  LMS_PORTAL_HOST,
+].map((host) => host.toLowerCase()));
+
+export function normalizeSsoReturnTo(rawReturnTo: string) {
+  let url: URL;
+
+  try {
+    url = new URL(rawReturnTo);
+  } catch {
+    return null;
+  }
+
+  if (!isAllowedSsoReturnUrl(url)) {
+    return null;
+  }
+
+  const nestedRedirect = getNestedLoginRedirect(url);
+  if (nestedRedirect) {
+    return nestedRedirect;
+  }
+
+  return url.toString();
+}
+
+export function isAllowedSsoReturnHost(hostname: string) {
+  const normalized = hostname.trim().toLowerCase();
+  return LOCALHOSTS.has(normalized) || [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
+}
+
+function isAllowedSsoReturnUrl(url: URL) {
+  if (LOCALHOSTS.has(url.hostname.toLowerCase())) return true;
+  return ALLOWED_PORTAL_HOSTS.has(url.host.toLowerCase());
+}
+
+function getNestedLoginRedirect(url: URL) {
+  if (normalizePathname(url.pathname) !== LOGIN_PATH) {
+    return null;
+  }
+
+  const redirect = normalizeLocalRedirect(url.searchParams.get("redirect"));
+  if (!redirect) {
+    return null;
+  }
+
+  return new URL(redirect, url.origin).toString();
+}
+
+function normalizePathname(pathname: string) {
+  const normalized = pathname.replace(/\/+$/, "");
+  return normalized || "/";
+}
+
+function normalizeLocalRedirect(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) {
+    return null;
+  }
+
+  return value;
+}

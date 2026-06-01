@@ -1,4 +1,4 @@
-import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 
 export type LearningResourceTreeNodeKind = "category" | "topic" | "section" | "bookSeries" | "folder";
 

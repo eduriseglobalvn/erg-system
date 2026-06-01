@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
-import { TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY } from "./features/auth/api/auth-token-storage";
-import { hydrateSessionFromCookie } from "./features/auth/api/cross-domain-session";
+import { TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY } from "./platform/auth/api/auth-token-storage";
+import { hydrateSessionFromCookie } from "./platform/auth/api/cross-domain-session";
 import App from "./App";
 import baseCssText from "./index.css?inline";
 import globalCssText from "./styles/globals.css?inline";

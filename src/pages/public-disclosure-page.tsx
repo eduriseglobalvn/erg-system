@@ -1,4 +1,4 @@
-import { PublicDisclosurePage as PublicDisclosureFeaturePage } from "@/features/public-disclosure";
+import { PublicDisclosurePage as PublicDisclosureFeaturePage } from "@/features/lcms/public-disclosure";
 
 export function PublicDisclosurePage() {
   return <PublicDisclosureFeaturePage />;

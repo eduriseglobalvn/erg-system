@@ -215,10 +215,10 @@
   }
 
   .animate-fade-in {
-    animation: hoclieu-fade-in 0.5s ease both;
+    animation: learning-resource-fade-in 0.5s ease both;
   }
 
-  @keyframes hoclieu-fade-in {
+  @keyframes learning-resource-fade-in {
     from {
       opacity: 0;
       transform: translateY(6px);

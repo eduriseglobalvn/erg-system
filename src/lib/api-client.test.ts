@@ -1,7 +1,7 @@
 ﻿import { afterEach, expect, test, vi } from "vitest";
 
 import { apiRequest } from "@/lib/api-client";
-import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/features/auth/api/auth-token-storage";
+import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
 
 afterEach(() => {
   window.localStorage.clear();

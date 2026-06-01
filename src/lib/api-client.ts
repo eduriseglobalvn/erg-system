@@ -1,5 +1,5 @@
 ﻿import { getApiBase } from "@/lib/platform";
-import { getStoredAccessToken, resolveCurrentPortal, type StoredAuthSession } from "@/features/auth/api/auth-token-storage";
+import { getStoredAccessToken, resolveCurrentPortal, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
 export const AUTH_SESSION_REPLACED_EVENT = "erg-auth-session-replaced";

@@ -26,9 +26,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/features/auth";
-import { getStoredAccessToken } from "@/features/auth/api/auth-token-storage";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
+import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { loadLearningResourceLibrarySections, loadLearningResourceResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
 import {
   DEFAULT_LEARNING_RESOURCE_SELECTION,

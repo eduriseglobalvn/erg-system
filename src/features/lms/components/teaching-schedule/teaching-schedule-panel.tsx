@@ -24,7 +24,7 @@ import {
   X,
 } from "lucide-react";
 
-import type { ClassroomSnapshot } from "@/features/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 
 import { personalTeachingCalendar, schoolTeachingCalendars } from "./teaching-schedule-calendars";

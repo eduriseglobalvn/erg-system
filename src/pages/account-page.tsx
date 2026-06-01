@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/dashboard-kit";
-import { logoutAccount } from "@/features/auth/api/auth-storage";
-import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
+import { logoutAccount } from "@/platform/auth/api/auth-storage";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 
 export function AccountPage() {
   const auth = useAuthSession("lms");
