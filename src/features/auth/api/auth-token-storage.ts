@@ -1,11 +1,11 @@
-export type StoredAuthSession = {
+﻿export type StoredAuthSession = {
   accessToken?: string;
   loggedInAt?: string;
   refreshToken?: string;
   expiresAt?: string;
   permissions?: string[];
-  portal?: "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning";
-  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
+  portal?: "admin" | "crm" | "lcms" | "lms" | "elearning";
+  portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 export type StoredAuthIdentity = StoredAuthSession & {
@@ -17,7 +17,7 @@ export const TEACHER_LOCAL_SESSION_KEY = "erg-learning.session";
 export const TEACHER_TEMP_SESSION_KEY = "erg-learning.session.temp";
 export const STUDENT_LOCAL_SESSION_KEY = "erg-learning.student-session";
 export const STUDENT_TEMP_SESSION_KEY = "erg-learning.student-session.temp";
-const MERGED_TEACHER_PORTALS = ["lms", "lcms", "hoclieu"] as const;
+const MERGED_TEACHER_PORTALS = ["lms", "lcms"] as const;
 export const AUTH_SESSION_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 let teacherSessionSnapshot: StoredAuthIdentity | null = null;
@@ -83,8 +83,6 @@ export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): Sto
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
     parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "hoclieu")), null),
-    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "hoclieu")), null),
   ].filter(hasStoredAuthCredential);
 
   const studentSessions = [
@@ -116,7 +114,7 @@ export function resolveCurrentPortal(): NonNullable<StoredAuthSession["portal"]>
   if (host.startsWith("admin.") || pathname.startsWith("/admin")) return "admin";
   if (host.startsWith("elearning.") || pathname.startsWith("/student")) return "elearning";
   if (host.startsWith("lcms.") || pathname.startsWith("/lcms")) return "lcms";
-  if (host.startsWith("hoclieu.")) return "hoclieu";
+  if (host.startsWith("hoclieu.")) return "lms";
   return "lms";
 }
 
@@ -137,7 +135,7 @@ function hasMergedTeacherPortalAccess(session: StoredAuthSession) {
 }
 
 function isMergedTeacherPortal(portal: StoredAuthSession["portal"] | "*"): portal is (typeof MERGED_TEACHER_PORTALS)[number] {
-  return portal === "lms" || portal === "lcms" || portal === "hoclieu";
+  return portal === "lms" || portal === "lcms";
 }
 
 function readSessionExpiry(session: StoredAuthSession) {

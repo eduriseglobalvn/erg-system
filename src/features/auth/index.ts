@@ -1,4 +1,4 @@
-export { AuthWorkspace } from "@/features/auth/components/auth-workspace";
+﻿export { AuthWorkspace } from "@/features/auth/components/auth-workspace";
 export { AccessDeniedPage } from "@/features/auth/components/access-denied-page";
 export {
   AUTH_ACCOUNT_CHANGED_EVENT,

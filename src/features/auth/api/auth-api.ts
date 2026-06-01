@@ -7,7 +7,7 @@ export type LoginRequestDTO = {
   email: string;
   password: string;
   rememberMe: boolean;
-  portal?: "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning";
+  portal?: "admin" | "crm" | "lcms" | "lms" | "elearning";
   deviceId?: string;
   deviceName?: string;
   deviceFingerprint?: string;
@@ -44,7 +44,7 @@ export type AuthSessionResponseDTO = {
   refreshToken?: string;
   expiresAt?: string;
   permissions?: string[];
-  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
+  portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 type BackendProfileResponseDTO = {
@@ -84,7 +84,7 @@ type BackendAuthSessionResponseDTO = {
   expiresIn?: number;
   expires_in?: number;
   permissions?: string[];
-  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
+  portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 type BackendTokenContainerDTO = {
@@ -162,7 +162,7 @@ export const authApi = {
     });
   },
 
-  async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string, portal: "admin" | "crm" | "hoclieu" | "lcms" | "lms" = "lms") {
+  async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string, portal: "admin" | "crm" | "lcms" | "lms" = "lms") {
     const result = await apiRequest<BackendAuthSessionResponseDTO>(`/api/lms/auth/providers/${provider}`, {
       portal,
       method: "POST",

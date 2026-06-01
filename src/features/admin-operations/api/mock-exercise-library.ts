@@ -1,4 +1,4 @@
-import type { ExerciseLibraryItem } from "@/features/admin-operations/utils/hoclieu-content-dialog";
+import type { ExerciseLibraryItem } from "@/features/admin-operations/utils/learning-resource-content-dialog";
 
 export const mockExerciseLibrary: ExerciseLibraryItem[] = [
   {

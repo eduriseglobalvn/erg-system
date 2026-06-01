@@ -1,4 +1,4 @@
-import { type FormEvent } from "react";
+﻿import { type FormEvent } from "react";
 
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { AccountPanel } from "@/features/auth/components/account-panel";

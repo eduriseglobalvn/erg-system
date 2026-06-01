@@ -95,7 +95,7 @@ const scopeIcons: Record<AccessScopeType, typeof ShieldCheck> = {
 
 const moduleIcons: Record<string, typeof BookOpen> = {
   lms: BookOpen,
-  hoclieu: Layers3,
+  resources: Layers3,
   media: MonitorPlay,
 };
 
@@ -1049,7 +1049,7 @@ function mergeDraftPolicy(policies: UserAccessPolicy[], draftPolicy: UserAccessP
 function superAdminEffectiveAccess(modules?: AccessModule[]): EffectiveAccess {
   return {
     highestScope: "system",
-    modules: modules?.map((module) => module.id) ?? ["lms", "hoclieu", "media"],
+    modules: modules?.map((module) => module.id) ?? ["lms", "resources", "media"],
     permissions: ["*"],
   };
 }

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, expect, test, vi } from "vitest";
+﻿import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { saveServerAuthSession } from "./auth-storage";
 import { authApi, normalizeAuthSession, shouldRetrySharedAuthLogin, type AuthSessionResponseDTO } from "./auth-api";
@@ -198,13 +198,13 @@ test("persists nested token fields from backend login responses", async () => {
   expect(getStoredAccessToken("lms")).toBe("nested-token");
 });
 
-test("uses a stored LMS session for HocLieu resource requests", async () => {
+test("uses a stored LMS session for learning resource requests", async () => {
   saveServerAuthSession(
     normalizeLoginResponse({
       user: {
-        id: "teacher-hoclieu",
-        email: "teacher.hoclieu@erg.edu.vn",
-        fullName: "ERG HocLieu Teacher",
+        id: "teacher-resources",
+        email: "teacher.resources@erg.edu.vn",
+        fullName: "ERG Resource Teacher",
       },
       accessToken: "shared-lms-token",
       portals: ["lms"],
@@ -213,12 +213,12 @@ test("uses a stored LMS session for HocLieu resource requests", async () => {
     "lms",
   );
 
-  expect(readStoredAuthSession("hoclieu")).toMatchObject({
+  expect(readStoredAuthSession("lms")).toMatchObject({
     accessToken: "shared-lms-token",
     portal: "lms",
     portals: ["lms"],
   });
-  expect(getStoredAccessToken("hoclieu")).toBe("shared-lms-token");
+  expect(getStoredAccessToken("lms")).toBe("shared-lms-token");
 });
 
 test("uses a stored LMS session for LCMS requests", async () => {

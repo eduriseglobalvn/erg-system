@@ -1,4 +1,4 @@
-import { SparkleIcon } from "@/features/auth/components/auth-icons";
+﻿import { SparkleIcon } from "@/features/auth/components/auth-icons";
 import { useI18n } from "@/features/i18n";
 
 export function AuthHeroPanel() {

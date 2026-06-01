@@ -1,4 +1,4 @@
-import path from "node:path";
+﻿import path from "node:path";
 import fs from "node:fs";
 /// <reference types="vitest/config" />
 
@@ -47,6 +47,7 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    exclude: ["**/node_modules/**", "**/dist/**", "**/.codex-chrome-*/**"],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
   },

@@ -15,7 +15,6 @@ type PortalKey = NonNullable<StoredAuthSession["portal"]>;
 const portalLabels: Record<string, string> = {
   admin: "Admin",
   crm: "CRM",
-  hoclieu: "Kho học liệu",
   lcms: "LCMS",
   lms: "LMS",
   elearning: "Elearning",
@@ -103,6 +102,6 @@ function sanitizeRedirect(value: string | null) {
 }
 
 function toPortalKey(value: string): PortalKey | undefined {
-  if (value === "admin" || value === "crm" || value === "hoclieu" || value === "lcms" || value === "lms" || value === "elearning") return value;
+  if (value === "admin" || value === "crm" || value === "lcms" || value === "lms" || value === "elearning") return value;
   return undefined;
 }

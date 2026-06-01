@@ -88,8 +88,6 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
     parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
-    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "hoclieu")), null),
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "hoclieu")), null),
     readTeacherSessionSnapshot() as AccountSession | null,
   ];
   const validSession = candidates.find(hasStoredAuthCredential);
@@ -128,7 +126,7 @@ function clearSession() {
   if (!canUseStorage()) return;
   window.localStorage.removeItem(TEACHER_LOCAL_SESSION_KEY);
   window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
-  for (const portal of ["admin", "crm", "lms", "lcms", "hoclieu"] as const) {
+  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
     window.localStorage.removeItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
     window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
   }
@@ -243,8 +241,8 @@ function portalsFromJwtClaims(payload: JwtPayload | null): StoredAuthSession["po
   const portal = typeof payload?.portal === "string" ? [payload.portal] : [];
   const normalized = [...portals, ...portal]
     .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
-    .filter((item): item is "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*" =>
-      item === "admin" || item === "crm" || item === "hoclieu" || item === "lcms" || item === "lms" || item === "elearning" || item === "*",
+    .filter((item): item is "admin" | "crm" | "lcms" | "lms" | "elearning" | "*" =>
+      item === "admin" || item === "crm" || item === "lcms" || item === "lms" || item === "elearning" || item === "*",
     );
 
   return normalized.length ? Array.from(new Set(normalized)) : undefined;

@@ -16,7 +16,7 @@ import { Input } from "@/components/ui/input";
 import {
   createEducationUnit,
   type LmsEducationUnitDTO,
-} from "@/features/dashboard/api/lms-dashboard-api";
+} from "@/features/lms/infrastructure/lms-dashboard-api";
 import { cn } from "@/lib/utils";
 
 type EducationUnitType = "system" | "school" | "center";

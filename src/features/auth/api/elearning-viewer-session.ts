@@ -20,7 +20,7 @@ export function getCurrentElearningViewerSession(): ElearningViewerSession | nul
   const teacherAccount = getCurrentAccount();
   if (!teacherAccount) return null;
 
-  const teacherSession = readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession("hoclieu") ?? readStoredAuthSession();
+  const teacherSession = readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession();
 
   return {
     accessToken: teacherSession?.accessToken,

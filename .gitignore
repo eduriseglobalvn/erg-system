@@ -1,4 +1,4 @@
-# Logs
+﻿# Logs
 logs
 *.log
 npm-debug.log*
@@ -13,6 +13,7 @@ dist-ssr
 *.local
 certs/
 .codex-*.png
+.codex-chrome-*/
 .omc/
 
 # Editor directories and files

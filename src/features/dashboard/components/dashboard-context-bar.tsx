@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Bell as BellIcon,
-  BookOpen as BookOpenIcon,
   ChevronDown as ChevronDownIcon,
   LayoutGrid as LayoutGridIcon,
   LogOut as LogOutIcon,
@@ -25,20 +24,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/features/auth/api/auth-storage";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/classroom/types/classroom-types";
-import type { LmsEducationUnitDTO } from "@/features/dashboard/api/lms-dashboard-api";
+import type { LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";
 
 interface DashboardContextBarProps {
-  activePortal: "lms" | "hoclieu";
+  activePortal: "lms";
   canAccessGlobalErg: boolean;
   classes: ClassroomSnapshot[];
   manageableUnits: LmsEducationUnitDTO[];
   managementScope: ManagementScope;
   onOpenLeaf: (leafId: DashboardLeaf["id"]) => void;
   onSelectClass: (classId: string) => void;
-  onSelectScopeRoot: (schoolId: string | "global" | "hoclieu-studio") => void;
+  onSelectScopeRoot: (schoolId: string | "global") => void;
   onLogout: () => void;
   schools: ClassroomSchool[];
   systemUnits: LmsEducationUnitDTO[];
@@ -61,7 +60,7 @@ function ScopeAvatar({
   label,
   className,
 }: {
-  kind: "system" | "studio" | "school";
+  kind: "system" | "school";
   label: string;
   className?: string;
 }) {
@@ -71,14 +70,6 @@ function ScopeAvatar({
     return (
       <div className={cn(baseClassName, "bg-blue-600 text-white")}>
         <ShieldIcon className="size-5" />
-      </div>
-    );
-  }
-
-  if (kind === "studio") {
-    return (
-      <div className={cn(baseClassName, "bg-[var(--erg-blue)] text-white")}>
-        <BookOpenIcon className="size-5" />
       </div>
     );
   }
@@ -106,12 +97,7 @@ export function DashboardContextBar({
   selectedSchoolId,
 }: DashboardContextBarProps) {
   const isGlobalScope = managementScope.level === "global";
-  const isHocLieuPortal = activePortal === "hoclieu";
   const ergSystemUnit = systemUnits.find((unit) => unit.code === "ERG-SYSTEM");
-  const hoclieuStudioUnit =
-    manageableUnits.find((unit) => unit.code === "HOCLIEU-STUDIO" || unit.name.toLowerCase().includes("hoclieu studio")) ??
-    systemUnits.find((unit) => unit.code === "HOCLIEU-STUDIO");
-  const canOpenHocLieuStudio = canAccessGlobalErg || isHocLieuPortal || Boolean(hoclieuStudioUnit);
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId);
   const selectedClass = classes.find((classroom) => classroom.id === selectedClassId);
   const scopeUnits = manageableUnits.filter((unit) => unit.type !== "system" && unit.code !== "HOCLIEU-STUDIO");
@@ -127,16 +113,12 @@ export function DashboardContextBar({
   const accountName = account?.fullName || "Giáo viên ERG";
   const accountEmail = account?.email || "teacher@erg.edu.vn";
   const accountAvatar = account?.avatarUrl || "";
-  const scopeTitle = isHocLieuPortal
-    ? hoclieuStudioUnit?.name || "Hoclieu Studio"
-    : isGlobalScope
-      ? ergSystemUnit?.name || "Hệ thống ERG"
-      : selectedSchool?.name || "Chọn cơ sở";
-  const scopeSubtitle = isHocLieuPortal
-    ? hoclieuStudioUnit?.address || "Hệ thống học liệu"
-    : isGlobalScope
-      ? ergSystemUnit?.address || "Hệ thống ERG"
-      : "Cơ sở giáo dục";
+  const scopeTitle = isGlobalScope
+    ? ergSystemUnit?.name || "He thong ERG"
+    : selectedSchool?.name || "Chon co so";
+  const scopeSubtitle = isGlobalScope
+    ? ergSystemUnit?.address || "He thong ERG"
+    : "Co so giao duc";
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
@@ -151,7 +133,7 @@ export function DashboardContextBar({
                   "hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-100",
                 )}
               >
-                <ScopeAvatar kind={isHocLieuPortal ? "studio" : isGlobalScope ? "system" : "school"} label={scopeTitle} className="size-10 rounded-xl" />
+                <ScopeAvatar kind={isGlobalScope ? "system" : "school"} label={scopeTitle} className="size-10 rounded-xl" />
                 <div className="min-w-0 pr-1">
                   <div className="flex items-center gap-1.5">
                     <span className="truncate text-[15px] font-extrabold uppercase tracking-tight text-slate-900">{scopeTitle}</span>
@@ -185,23 +167,6 @@ export function DashboardContextBar({
                 </DropdownMenuItem>
               ) : null}
 
-              {canOpenHocLieuStudio ? (
-                <DropdownMenuItem
-                  onClick={() => onSelectScopeRoot("hoclieu-studio")}
-                  className={cn(
-                    "flex cursor-pointer items-center gap-3 rounded-xl p-3",
-                    isHocLieuPortal ? "bg-indigo-50 text-[var(--erg-blue)]" : "hover:bg-slate-50",
-                  )}
-                >
-                  <ScopeAvatar kind="studio" label={hoclieuStudioUnit?.name || "Hoclieu Studio"} className="size-9 rounded-lg" />
-                  <div className="flex flex-col">
-                    <span className="text-sm font-bold">{hoclieuStudioUnit?.name || "Hoclieu Studio"}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-tight opacity-70">
-                      {hoclieuStudioUnit?.address || "Quản trị kho học liệu"}
-                    </span>
-                  </div>
-                </DropdownMenuItem>
-              ) : null}
 
               {scopeUnits.length ? <DropdownMenuSeparator className="my-2" /> : null}
 

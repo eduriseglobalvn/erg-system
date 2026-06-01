@@ -79,7 +79,7 @@ test("allows teacher portals when a teacher session grants the teacher portal", 
   const teacherSession: StoredAuthSession = {
     accessToken: "teacher-token",
     portal: "lms",
-    portals: ["lms", "hoclieu"],
+    portals: ["lms", "lcms"],
   };
 
   expect(

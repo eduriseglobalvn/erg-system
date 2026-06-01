@@ -22,7 +22,7 @@ import {
   loadLmsDashboardBootstrap,
   updateLmsCurrentScope,
   type LmsEducationUnitDTO,
-} from "@/features/dashboard/api/lms-dashboard-api";
+} from "@/features/lms/infrastructure/lms-dashboard-api";
 import { useI18n } from "@/features/i18n";
 import type { QuestionBankQuestion } from "@/features/question-bank";
 import type { ContentScope, DashboardUserPermissions, ManagementScope } from "@/types/scope-types";
@@ -32,7 +32,7 @@ import { hasApiBase } from "@/lib/api-client";
 
 const COMPACT_DASHBOARD_BREAKPOINT = 1280;
 const SCOPE_SYNC_DEBOUNCE_MS = 250;
-type DashboardPortal = "lms" | "hoclieu";
+type DashboardPortal = "lms";
 const DASHBOARD_CONTEXT_STORAGE_KEY = "erg:lms-dashboard-context:v1";
 
 type StoredDashboardContext = {
@@ -59,7 +59,7 @@ function writeStoredDashboardContext(value: StoredDashboardContext) {
 }
 
 function normalizeStoredLeafId(leafId?: string) {
-  if (leafId === "admin-hoclieu-structure") return "admin-hoclieu-studio";
+  if (leafId === "admin-learning-structure" || leafId === "admin-learning-resources") return "admin-internal-docs";
   return leafId;
 }
 
@@ -89,11 +89,9 @@ export function DashboardShell() {
   const [managementScope, setManagementScope] = useState<ManagementScope>(() =>
     storedContext.managementScope ?? (apiBacked ? { level: "global" } : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
   );
-  const [activePortal, setActivePortal] = useState<DashboardPortal>(storedContext.activePortal ?? "lms");
+  const activePortal: DashboardPortal = "lms";
   const isSchoolScope = managementScope.level === "class";
-  const scopeMode: DashboardScopeMode = activePortal === "hoclieu"
-    ? "hoclieu"
-    : managementScope.level === "global"
+  const scopeMode: DashboardScopeMode = managementScope.level === "global"
       ? "system"
       : managementScope.level === "center"
         ? "center"
@@ -209,10 +207,6 @@ export function DashboardShell() {
       return;
     }
 
-    if (leafId.startsWith("admin-hoclieu-") || leafId.startsWith("admin-internal-docs")) {
-      setActivePortal("hoclieu");
-    }
-
     setActiveLeafId(normalizeStoredLeafId(leafId) ?? leafId);
   }
 
@@ -247,24 +241,11 @@ export function DashboardShell() {
   }
 
   function selectScopeRoot(value: string) {
-    if (value === "hoclieu-studio") {
-      const nextScope: ManagementScope = { level: "global" };
-      if (activePortal === "hoclieu" && scopesEqual(managementScope, nextScope) && activeLeafId === "admin-hoclieu-studio") {
-        return;
-      }
-      setActivePortal("hoclieu");
-      setManagementScope(nextScope);
-      if (currentUserPermissions.canAccessGlobalErg) scheduleScopeSync(nextScope);
-      setActiveLeafId("admin-hoclieu-studio");
-      return;
-    }
-
     if (value === "global" && currentUserPermissions.canAccessGlobalErg) {
       const nextScope: ManagementScope = { level: "global" };
       if (activePortal === "lms" && scopesEqual(managementScope, nextScope)) {
         return;
       }
-      setActivePortal("lms");
       setManagementScope(nextScope);
       scheduleScopeSync(nextScope);
       setActiveLeafId("admin-overview");
@@ -278,7 +259,6 @@ export function DashboardShell() {
     if (activePortal === "lms" && scopesEqual(managementScope, nextScope)) {
       return;
     }
-    setActivePortal("lms");
     setManagementScope(nextScope);
     scheduleScopeSync(nextScope);
     setActiveLeafId(nextScope.level === "center" ? "admin-overview" : "ops-overview");

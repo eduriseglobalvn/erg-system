@@ -1,4 +1,4 @@
-import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
+﻿import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 
 import { GoogleSignInButton } from "@/features/auth/components/google-sign-in-button";

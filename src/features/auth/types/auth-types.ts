@@ -1,4 +1,4 @@
-export type AccountRole = "teacher" | "coordinator" | "admin";
+﻿export type AccountRole = "teacher" | "coordinator" | "admin";
 export type AuthProvider = "password" | "google" | "apple";
 
 export type TeacherAccount = {

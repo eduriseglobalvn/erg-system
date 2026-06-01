@@ -1,9 +1,9 @@
-import type { StoredAuthSession } from "@/features/auth/api/auth-token-storage";
+﻿import type { StoredAuthSession } from "@/features/auth/api/auth-token-storage";
 import type { StudentSession } from "@/features/auth/api/student-auth-storage";
 import type { TeacherAccount } from "@/features/auth/types/auth-types";
 
 const ADMIN_EMAIL = "admin@erg.edu.vn";
-const TEACHER_PORTALS: Array<NonNullable<StoredAuthSession["portal"]>> = ["lms", "lcms", "hoclieu"];
+const TEACHER_PORTALS: Array<NonNullable<StoredAuthSession["portal"]>> = ["lms", "lcms"];
 
 type PortalAccessInput = {
   portal: NonNullable<StoredAuthSession["portal"]>;

@@ -3,7 +3,7 @@ import type { MessageKey } from "@/features/i18n";
 
 type Translate = (key: MessageKey, params?: Record<string, string | number>) => string;
 
-export type DashboardScopeMode = "system" | "center" | "school" | "teacher" | "hoclieu";
+export type DashboardScopeMode = "system" | "center" | "school" | "teacher";
 
 type BuildDashboardSectionsOptions = {
   scopeMode?: DashboardScopeMode;
@@ -356,92 +356,9 @@ function buildTeacherSections(genericDescription: string, showMemberManagement: 
 
   return sections;
 }
-
-function buildHocLieuStudioSectionsV2(genericDescription: string): DashboardGroup[] {
-  const root = "Hoclieu Studio";
-
-  return [
-    {
-      iconKey: "materials",
-      title: "Cấu trúc học liệu",
-      items: [
-        createLeaf(
-          "admin-hoclieu-studio",
-          "Cấu trúc môn học",
-          "Cấu trúc học liệu",
-          root,
-          "Tạo môn học, nhóm học liệu, chủ đề và bài học theo một cây cấu trúc thống nhất.",
-          "admin-internal-docs",
-        ),
-      ],
-    },
-    {
-      iconKey: "docs",
-      title: "Kho học liệu",
-      items: [
-        createLeaf(
-          "admin-hoclieu-resources",
-          "Danh sách học liệu",
-          "Kho học liệu",
-          root,
-          "Tra cứu, rà soát và cập nhật tài liệu, bài giảng và bài tập đã có trong hệ thống.",
-          "admin-internal-docs",
-        ),
-      ],
-    },
-    {
-      iconKey: "admin",
-      title: "Nhập học liệu",
-      items: [
-        createLeaf(
-          "admin-hoclieu-upload",
-          "Thêm bài giảng và tài liệu",
-          "Nhập học liệu",
-          root,
-          "Thêm file, link Google Slides hoặc bài tập và gắn vào đúng vị trí trong cây học liệu.",
-          "admin-internal-docs",
-        ),
-      ],
-    },
-    {
-      iconKey: "members",
-      title: "Kiểm tra xuất bản",
-      items: [
-        createLeaf(
-          "admin-hoclieu-publish",
-          "Xuất bản học liệu",
-          "Kiểm tra xuất bản",
-          root,
-          "Kiểm tra trạng thái sẵn sàng, nội dung còn thiếu và chất lượng trước khi xuất bản.",
-          "admin-internal-docs",
-        ),
-      ],
-    },
-    {
-      iconKey: "settings",
-      title: "Cấu hình học liệu",
-      items: [
-        createLeaf(
-          "admin-public-disclosure",
-          "Công khai học liệu",
-          "Cấu hình học liệu",
-          root,
-          "Quản lý PDF công khai, metadata, vị trí public và watermark trước khi xuất bản.",
-          "admin-public-disclosure",
-        ),
-        createLeaf("general-settings", "Thiết lập chung", "Cấu hình học liệu", root, genericDescription, "placeholder"),
-      ],
-    },
-  ];
-}
-
 export function buildDashboardSections(t: Translate, options: BuildDashboardSectionsOptions = {}): DashboardGroup[] {
   const genericDescription = t("dashboard.defaultWorkspaceDescription");
   const scopeMode = options.scopeMode ?? "teacher";
-
-  if (scopeMode === "hoclieu") {
-    return buildHocLieuStudioSectionsV2(genericDescription);
-  }
 
   if (scopeMode === "system") {
     return buildSystemSections(genericDescription);

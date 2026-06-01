@@ -4,7 +4,6 @@ import {
   BarChart3,
   BookOpenCheck,
   ClipboardCheck,
-  FileText,
   GraduationCap,
   KeyRound,
   LibraryBig,
@@ -330,7 +329,6 @@ function sanitizeRedirect(value: string | null, fallback = "/") {
 
 function defaultPortalRedirect(portal: PortalKey) {
   if (portal === "lcms") return "/resources";
-  if (portal === "hoclieu") return "/kho-hoc-lieu";
   if (portal === "admin" || portal === "crm") return "/";
   return "/";
 }
@@ -421,33 +419,6 @@ function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
           { label: "Câu hỏi", value: "Bank", icon: ClipboardCheck },
           { label: "Quiz", value: "Author", icon: Presentation },
           { label: "Học liệu", value: "Publish", icon: LibraryBig },
-        ],
-      };
-    case "hoclieu":
-      return {
-        badge: "Học liệu Portal",
-        mobileLabel: "Kho học liệu ERG",
-        title: "Kho học liệu giáo viên",
-        description: "Đăng nhập tài khoản giáo viên có quyền để mở sách mềm, giáo án, bài giảng, quiz bank và tài nguyên giảng dạy ERG.",
-        formTitle: "Đăng nhập kho học liệu",
-        formSubtitle: "Dành cho giáo viên và nhân sự được cấp quyền truy cập học liệu.",
-        formFootnote: "Nếu tài khoản chưa có quyền vào kho học liệu, vui lòng liên hệ quản trị viên ERG để được cấp quyền theo trường hoặc vai trò.",
-        credentialLabel: "Email giáo viên",
-        credentialPlaceholder: "teacher@erg.edu.vn",
-        allowGoogle: true,
-        allowRegister: false,
-        visualKicker: "Teaching resource library",
-        visualTitle: "Tài nguyên dạy học được gom đúng lớp, đúng môn và đúng định dạng.",
-        visualDescription: "Học liệu ưu tiên thao tác của giáo viên trước tiết dạy: tìm nhanh, mở nhanh, xem đúng viewer và không lẫn với LMS.",
-        trustItems: [
-          { label: "Theo trường được cấp", caption: "Phân quyền giáo viên", icon: School },
-          { label: "Viewer bảo mật", caption: "Ẩn link tài nguyên", icon: ShieldCheck },
-          { label: "Đúng định dạng file", caption: "PDF, PPTX, Video", icon: FileText },
-        ],
-        metrics: [
-          { label: "Sách mềm", value: "PDF", icon: LibraryBig },
-          { label: "Bài giảng", value: "PPTX", icon: Presentation },
-          { label: "Đánh giá", value: "Quiz", icon: ClipboardCheck },
         ],
       };
     case "lms":

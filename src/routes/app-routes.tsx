@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+﻿import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
@@ -6,7 +6,6 @@ import {
   CRM_PORTAL_HOSTS,
   ELEARNING_PORTAL_HOST,
   ELEARNING_PORTAL_HOSTS,
-  HOCLIEU_PORTAL_HOSTS,
   isPortalHost,
   LCMS_PORTAL_HOST,
   LCMS_PORTAL_HOSTS,
@@ -27,7 +26,7 @@ const CrmPage = lazy(() =>
   })),
 );
 const LcmsPage = lazy(() =>
-  import("@/features/dashboard").then((module) => ({
+  import("@/features/lcms").then((module) => ({
     default: module.LcmsPortalShell,
   })),
 );
@@ -71,98 +70,14 @@ const NotFoundPage = lazy(() =>
     default: module.NotFoundPage,
   })),
 );
-const HocLieuLayout = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuLayout,
-  })),
-);
-const HocLieuHomePage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuHomePage,
-  })),
-);
-const HocLieuProgramsPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuProgramsPage,
-  })),
-);
-const HocLieuProgramDetailPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuProgramDetailPage,
-  })),
-);
-const HocLieuLibraryPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuLibraryPage,
-  })),
-);
-const HocLieuCommunityPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuCommunityPage,
-  })),
-);
-const HocLieuPortfolioPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuPortfolioPage,
-  })),
-);
-const HocLieuQuizzesPage = lazy(() =>
-  import("@/features/hoclieu").then((module) => ({
-    default: module.HocLieuQuizzesPage,
-  })),
-);
 const AccessDeniedPage = lazy(() =>
   import("@/features/auth").then((module) => ({
     default: module.AccessDeniedPage,
   })),
 );
-function isHocLieuPortalHost() {
-  return isPortalHost(HOCLIEU_PORTAL_HOSTS);
-}
 
 function isLcmsPortalHost() {
   return isPortalHost(LCMS_PORTAL_HOSTS);
-}
-
-function HocLieuRouteGroup({ includeIndex = false }: { includeIndex?: boolean } = {}) {
-  return (
-    <>
-      <Route path="login" element={<PortalLoginPage portal="hoclieu" />} />
-      <Route element={<HocLieuLayout />}>
-        {includeIndex ? <Route index element={<HocLieuHomePage />} /> : null}
-        <Route path="hoclieu" element={<Navigate to="/" replace />} />
-        <Route
-          path="profile"
-          element={
-            <AuthenticatedAccountGate>
-              <ProfilePage />
-            </AuthenticatedAccountGate>
-          }
-        />
-        <Route path="chuong-trinh" element={<HocLieuProgramsPage />} />
-        <Route path="chuong-trinh/:slug" element={<HocLieuProgramDetailPage />} />
-        <Route
-          path="kho-hoc-lieu"
-          element={
-            <PortalAuthGate portal="hoclieu">
-              <HocLieuLibraryPage />
-            </PortalAuthGate>
-          }
-        />
-        <Route
-          path="kho-hoc-lieu/:gradeId"
-          element={
-            <PortalAuthGate portal="hoclieu">
-              <HocLieuLibraryPage />
-            </PortalAuthGate>
-          }
-        />
-        <Route path="cong-dong" element={<HocLieuCommunityPage />} />
-        <Route path="portfolio" element={<HocLieuPortfolioPage />} />
-        <Route path="quizzes" element={<HocLieuQuizzesPage />} />
-      </Route>
-    </>
-  );
 }
 
 function RouteFallback() {
@@ -207,7 +122,6 @@ function PortalHostRedirect({
 }
 
 export function AppRoutes() {
-  const isHocLieuPortal = isHocLieuPortalHost();
   const isLcmsPortal = isLcmsPortalHost();
   const isCrmPortal = isPortalHost(CRM_PORTAL_HOSTS);
   const isLmsPortal = isPortalHost(LMS_PORTAL_HOST);
@@ -217,12 +131,7 @@ export function AppRoutes() {
     <Suspense fallback={<RouteFallback />}>
       <Routes>
         <Route element={<RootLayout />}>
-          {isHocLieuPortal ? (
-            <>
-              <Route path="access-denied" element={<AccessDeniedPage />} />
-              {HocLieuRouteGroup({ includeIndex: true })}
-            </>
-          ) : isLcmsPortal ? (
+          {isLcmsPortal ? (
             <>
               <Route path="access-denied" element={<AccessDeniedPage />} />
               <Route path="login" element={<PortalLoginPage portal="lcms" />} />
@@ -375,13 +284,12 @@ export function AppRoutes() {
               <Route path="/cong-khai/viewer/:documentId" element={<PublicDisclosurePage />} />
               <Route path="/public-disclosure" element={<PublicDisclosureAdminPage />} />
               <Route path="/question-types" element={<QuestionTypeDemoPage />} />
-              <Route path="/kho-hoc-lieu/*" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              <Route path="/chuong-trinh/*" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              <Route path="/cong-dong" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              <Route path="/portfolio" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              <Route path="/quizzes" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              <Route path="/hoclieu" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
-              {HocLieuRouteGroup()}
+              <Route path="/kho-hoc-lieu/*" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/chuong-trinh/*" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/cong-dong" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/portfolio" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/quizzes" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/hoclieu/*" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />} />
             </>
           )}
           <Route path="*" element={<NotFoundPage />} />

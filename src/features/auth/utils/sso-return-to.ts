@@ -1,4 +1,4 @@
-const LOGIN_PATH = "/login";
+﻿const LOGIN_PATH = "/login";
 const LOCALHOSTS = new Set(["localhost", "127.0.0.1"]);
 
 export function normalizeSsoReturnTo(rawReturnTo: string) {

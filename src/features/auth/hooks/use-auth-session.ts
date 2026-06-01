@@ -85,7 +85,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   });
   const providerLoginMutation = useMutation({
     mutationKey: ["auth", "provider-login"],
-    mutationFn: ({ provider, rememberMe, idToken, portal }: { provider: "google"; rememberMe: boolean; idToken: string; portal: "admin" | "crm" | "hoclieu" | "lcms" | "lms" }) =>
+    mutationFn: ({ provider, rememberMe, idToken, portal }: { provider: "google"; rememberMe: boolean; idToken: string; portal: "admin" | "crm" | "lcms" | "lms" }) =>
       authApi.loginWithProvider(provider, rememberMe, idToken, portal),
   });
   const profileMutation = useMutation({

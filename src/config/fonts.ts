@@ -1,4 +1,4 @@
-export const appFontStack = '"Geist Variable", "Segoe UI", Arial, Helvetica, sans-serif';
+﻿export const appFontStack = '"Geist Variable", "Segoe UI", Arial, Helvetica, sans-serif';
 
 export const quizFontStacks = {
   Geist: appFontStack,

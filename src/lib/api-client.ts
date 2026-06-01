@@ -1,4 +1,4 @@
-import { getApiBase } from "@/lib/platform";
+﻿import { getApiBase } from "@/lib/platform";
 import { getStoredAccessToken, resolveCurrentPortal, type StoredAuthSession } from "@/features/auth/api/auth-token-storage";
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
@@ -241,18 +241,7 @@ function isPublicApiPath(path: string) {
     path === "/api/v1/auth/register" ||
     path === "/api/lms/auth/login" ||
     path === "/api/lms/auth/register" ||
-    path.startsWith("/api/lms/auth/providers/") ||
-    path === "/api/v1/hoclieu/home" ||
-    path === "/api/v1/hoclieu/programs" ||
-    path.startsWith("/api/v1/hoclieu/programs/") ||
-    path === "/api/hoclieu/home" ||
-    path === "/api/hoclieu/programs" ||
-    path.startsWith("/api/hoclieu/programs/") ||
-    path === "/api/hoclieu/taxonomy" ||
-    path === "/api/hoclieu/community/topics" ||
-    path === "/api/hoclieu/community/feed" ||
-    path === "/api/hoclieu/community/posts" ||
-    (path.startsWith("/api/hoclieu/community/posts/") && path.endsWith("/comments"))
+    path.startsWith("/api/lms/auth/providers/")
   );
 }
 
