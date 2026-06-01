@@ -48,14 +48,14 @@ import { cn } from "@/lib/utils";
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "students" | "resources" | "reports";
 
 const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: typeof ClipboardList }> = [
-  { id: "homework", label: "Giao bÃ i", path: "/homework", icon: ClipboardList },
-  { id: "score", label: "Báº£ng Ä‘iá»ƒm", path: "/score", icon: GraduationCap },
-  { id: "attendance", label: "Äiá»ƒm danh", path: "/attendance", icon: CalendarCheck },
-  { id: "schedule", label: "Lá»‹ch giáº£ng dáº¡y", path: "/calendar", icon: CalendarDays },
-  { id: "classLog", label: "Sá»• Ä‘áº§u bÃ i", path: "/class-log", icon: BookOpenCheck },
-  { id: "students", label: "Há»c sinh", path: "/students", icon: UserRound },
-  { id: "resources", label: "TÃ i nguyÃªn", path: "/resources", icon: BookOpen },
-  { id: "reports", label: "BÃ¡o cÃ¡o", path: "/reports", icon: FileText },
+  { id: "homework", label: "Giao bài", path: "/homework", icon: ClipboardList },
+  { id: "score", label: "Bảng điểm", path: "/score", icon: GraduationCap },
+  { id: "attendance", label: "Điểm danh", path: "/attendance", icon: CalendarCheck },
+  { id: "schedule", label: "Lịch giảng dạy", path: "/calendar", icon: CalendarDays },
+  { id: "classLog", label: "Sổ đầu bài", path: "/class-log", icon: BookOpenCheck },
+  { id: "students", label: "Học sinh", path: "/students", icon: UserRound },
+  { id: "resources", label: "Tài nguyên", path: "/resources", icon: BookOpen },
+  { id: "reports", label: "Báo cáo", path: "/reports", icon: FileText },
 ];
 
 function resolveSection(pathname: string): LmsSection {
@@ -90,7 +90,7 @@ export function LmsTeacherShell() {
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? classroomSchools[0];
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
-  const teacherName = account?.fullName || "LÃª Thá»‹ ThÃ¹y";
+  const teacherName = account?.fullName || "Lê Thị Thùy";
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
   const teacherAvatar = account?.avatarUrl || "";
   const learningResourceScope = useMemo(
@@ -188,7 +188,7 @@ export function LmsTeacherShell() {
                 value={selectedSchoolId}
                 onChange={(event) => selectSchool(event.target.value)}
                 className="hidden h-11 max-w-[230px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-300 lg:block"
-                aria-label="Chá»n trÆ°á»ng"
+                aria-label="Chọn trường"
               >
                 {schools.map((school) => (
                   <option key={school.id} value={school.id}>
@@ -200,7 +200,7 @@ export function LmsTeacherShell() {
                 value={selectedClass?.id ?? ""}
                 onChange={(event) => setSelectedClassId(event.target.value)}
                 className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-300"
-                aria-label="Chá»n lá»›p"
+                aria-label="Chọn lớp"
                 disabled={!selectedClassOptions.length}
               >
                 {selectedClassOptions.length ? (
@@ -210,10 +210,10 @@ export function LmsTeacherShell() {
                     </option>
                   ))
                 ) : (
-                  <option value="">ChÆ°a cÃ³ lá»›p</option>
+                  <option value="">Chưa có lớp</option>
                 )}
               </select>
-              <button type="button" aria-label="ThÃ´ng bÃ¡o" className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100">
+              <button type="button" aria-label="Thông báo" className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100">
                 <Bell className="h-5 w-5" />
               </button>
               <div className="relative">
@@ -221,7 +221,7 @@ export function LmsTeacherShell() {
                   type="button"
                   onClick={() => setAccountMenuOpen((open) => !open)}
                   className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-[#0b1f80] text-xs font-black text-white ring-2 ring-white transition hover:ring-blue-200"
-                  aria-label="TÃ i khoáº£n giÃ¡o viÃªn"
+                  aria-label="Tài khoản giáo viên"
                   aria-expanded={accountMenuOpen}
                 >
                   {teacherAvatar ? <img src={teacherAvatar} alt={teacherName} className="h-full w-full object-cover" /> : getInitials(teacherName)}
@@ -239,13 +239,13 @@ export function LmsTeacherShell() {
                     </div>
                     <div className="p-2">
                       <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account"); }} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50">
-                        Quáº£n lÃ½ tÃ i khoáº£n
+                        Quản lý tài khoản
                       </button>
                       <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account/login-logs"); }} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50">
-                        Lá»‹ch sá»­ Ä‘Äƒng nháº­p
+                        Lịch sử đăng nhập
                       </button>
                       <button type="button" onClick={signOut} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-rose-600 hover:bg-rose-50">
-                        ÄÄƒng xuáº¥t
+                        Đăng xuất
                       </button>
                     </div>
                   </div>
@@ -323,20 +323,20 @@ function TeacherWorkspaceFrame({
       <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-sm font-medium text-slate-400">Trang chá»§ / <span className="text-slate-600">{activeLabel}</span></div>
-            <h1 className="mt-4 text-[34px] font-black uppercase tracking-tight text-slate-950">{selectedClass?.className ?? "Lá»›p há»c"}</h1>
-            <p className="mt-1 text-sm font-semibold text-slate-500">{selectedSchoolName} Â· {selectedClass?.studentCount ?? 0} há»c sinh</p>
+            <div className="text-sm font-medium text-slate-400">Trang chủ / <span className="text-slate-600">{activeLabel}</span></div>
+            <h1 className="mt-4 text-[34px] font-black uppercase tracking-tight text-slate-950">{selectedClass?.className ?? "Lớp học"}</h1>
+            <p className="mt-1 text-sm font-semibold text-slate-500">{selectedSchoolName} · {selectedClass?.studentCount ?? 0} học sinh</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline">Xuáº¥t dá»¯ liá»‡u</Button>
-            <Button>Thao tÃ¡c nhanh</Button>
+            <Button variant="outline">Xuất dữ liệu</Button>
+            <Button>Thao tác nhanh</Button>
           </div>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-          <ClassStat icon={ClipboardList} label="BÃ i Ä‘ang má»Ÿ" value={String(selectedClass?.activeAssignments ?? 0)} />
-          <ClassStat icon={CheckCircle2} label="HoÃ n thÃ nh" value={`${selectedClass?.completionRate ?? 0}%`} />
-          <ClassStat icon={UsersRound} label="Cáº§n há»— trá»£" value={String(selectedClass?.riskStudents ?? 0)} />
-          <ClassStat icon={Clock3} label="Ná»™p gáº§n nháº¥t" value={selectedClass?.lastSubmissionAt ?? "-"} />
+          <ClassStat icon={ClipboardList} label="Bài đang mở" value={String(selectedClass?.activeAssignments ?? 0)} />
+          <ClassStat icon={CheckCircle2} label="Hoàn thành" value={`${selectedClass?.completionRate ?? 0}%`} />
+          <ClassStat icon={UsersRound} label="Cần hỗ trợ" value={String(selectedClass?.riskStudents ?? 0)} />
+          <ClassStat icon={Clock3} label="Nộp gần nhất" value={selectedClass?.lastSubmissionAt ?? "-"} />
         </div>
       </div>
       {children}
@@ -361,25 +361,25 @@ function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; l
 function HomeworkPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot }) {
   return (
     <>
-      <FilterBar primaryPlaceholder="TÃ¬m kiáº¿m theo tÃªn bÃ i" filters={["MÃ´n há»c", "Há»c ká»³", "Tráº¡ng thÃ¡i", "Loáº¡i bÃ i", "TÃ­nh Ä‘iá»ƒm", "Äá»‘i tÆ°á»£ng giao"]} />
+      <FilterBar primaryPlaceholder="Tìm kiếm theo tên bài" filters={["Môn học", "Học kỳ", "Trạng thái", "Loại bài", "Tính điểm", "Đối tượng giao"]} />
       <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
         <div className="overflow-x-auto">
           <div className="min-w-[1180px]">
-            <TableHeader columns="grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px]" labels={["STT", "TÃªn bÃ i", "MÃ´n há»c", "Loáº¡i bÃ i", "Äá»‘i tÆ°á»£ng", "Thá»i gian lÃ m bÃ i", "Tráº¡ng thÃ¡i", ""]} />
+            <TableHeader columns="grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px]" labels={["STT", "Tên bài", "Môn học", "Loại bài", "Đối tượng", "Thời gian làm bài", "Trạng thái", ""]} />
             <div className="divide-y divide-slate-100">
               {assignmentRuns.map((assignment, index) => (
                 <article key={assignment.id} className="grid grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px] items-center gap-3 px-4 py-4 text-sm transition hover:bg-slate-50/80">
                   <span className="font-semibold text-slate-400">{String(index + 1).padStart(2, "0")}</span>
                   <div className="min-w-0">
                     <button type="button" className="truncate text-left font-black text-[#1677d2] hover:text-[#0b5fb3]">{assignment.title}</button>
-                    <p className="mt-1 text-xs font-semibold text-slate-400">CÃ´ng bá»‘ Ä‘iá»ƒm tá»± Ä‘á»™ng</p>
+                    <p className="mt-1 text-xs font-semibold text-slate-400">Công bố điểm tự động</p>
                   </div>
                   <span className="font-semibold text-slate-700">{assignment.subjectLabel}</span>
-                  <span className="text-slate-600">{index % 2 === 0 ? "Kiá»ƒm tra Ä‘áº§u vÃ o" : "Luyá»‡n táº­p"}</span>
-                  <span className="font-semibold text-slate-700">{selectedClass?.className ?? "Cáº£ lá»›p"}</span>
+                  <span className="text-slate-600">{index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}</span>
+                  <span className="font-semibold text-slate-700">{selectedClass?.className ?? "Cả lớp"}</span>
                   <span className="leading-6 text-slate-600">21/05/2026 10:{50 + index}<br />28/05/2026 10:{50 + index}</span>
-                  <Badge tone={index > 3 ? "danger" : "success"} className="justify-self-start">{index > 3 ? "ÄÃ£ káº¿t thÃºc" : "Äang diá»…n ra"}</Badge>
-                  <button type="button" aria-label="Má»Ÿ thao tÃ¡c" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm">
+                  <Badge tone={index > 3 ? "danger" : "success"} className="justify-self-start">{index > 3 ? "Đã kết thúc" : "Đang diễn ra"}</Badge>
+                  <button type="button" aria-label="Mở thao tác" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm">
                     <MoreVertical className="h-5 w-5" />
                   </button>
                 </article>
@@ -394,19 +394,19 @@ function HomeworkPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot })
 
 function LegacyAttendancePanel({ selectedClass }: { selectedClass?: ClassroomSnapshot }) {
   const students = getClassStudents(selectedClass?.id);
-  const days = ["Thá»© Hai\n18/05/2026", "Thá»© Ba\n19/05/2026", "Thá»© TÆ°\n20/05/2026", "Thá»© NÄƒm\n21/05/2026", "Thá»© SÃ¡u\n22/05/2026", "Thá»© Báº£y\n23/05/2026", "Chá»§ Nháº­t\n24/05/2026"];
+  const days = ["Thứ Hai\n18/05/2026", "Thứ Ba\n19/05/2026", "Thứ Tư\n20/05/2026", "Thứ Năm\n21/05/2026", "Thứ Sáu\n22/05/2026", "Thứ Bảy\n23/05/2026", "Chủ Nhật\n24/05/2026"];
   return (
     <section className="space-y-5">
       <div className="flex justify-end gap-2">
         <Button variant="outline">â€¹</Button>
-        <Button variant="outline">Tuáº§n 12 (18/05 - 24/05)</Button>
-        <Button variant="outline">â€º</Button>
-        <Button>Tuáº§n nÃ y</Button>
+        <Button variant="outline">Tuần 12 (18/05 - 24/05)</Button>
+        <Button variant="outline">›</Button>
+        <Button>Tuần này</Button>
       </div>
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <div className="grid grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] bg-[#50a8e8] text-sm font-black text-white">
           <div className="px-4 py-4">STT</div>
-          <div className="px-4 py-4">Há»c sinh</div>
+          <div className="px-4 py-4">Học sinh</div>
           {days.map((day) => <div key={day} className="whitespace-pre-line px-4 py-4 text-center">{day}</div>)}
         </div>
         {students.slice(0, 10).map((student, index) => (
@@ -415,7 +415,7 @@ function LegacyAttendancePanel({ selectedClass }: { selectedClass?: ClassroomSna
             <div className="px-4 py-5 font-bold text-[#3d9df0]">{student.name}</div>
             {days.map((day, dayIndex) => (
               <div key={day} className={cn("px-4 py-5 text-center font-bold", dayIndex === 6 && "bg-sky-100")}>
-                {dayIndex > 0 && dayIndex < 5 ? <span className={dayIndex === 2 && index === 1 ? "text-rose-600" : "text-emerald-600"}>â—</span> : null}{" "}
+                {dayIndex > 0 && dayIndex < 5 ? <span className={dayIndex === 2 && index === 1 ? "text-rose-600" : "text-emerald-600"}>●</span> : null}{" "}
                 {dayIndex > 0 && dayIndex < 5 ? "1/1" : ""}
               </div>
             ))}
@@ -470,7 +470,7 @@ function AttendancePanel({
           <div className="mr-auto min-w-[190px]">
             <div className="text-sm font-black uppercase leading-5 text-slate-950">{selectedClass?.className ?? "Lop hoc"}</div>
             <div className="text-[11px] font-semibold text-slate-500">
-              {selectedSchoolName} Â· {students.length} hoc sinh Â· {visibleColumns.length} cot diem danh
+              {selectedSchoolName} · {students.length} hoc sinh · {visibleColumns.length} cot diem danh
             </div>
           </div>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
@@ -521,7 +521,7 @@ function AttendancePanel({
                 {visibleColumns.map((column) => (
                   <AttendanceHeaderCell key={column.id} className="sticky top-0 z-30 w-[136px]">
                     <span className="block">{column.day}</span>
-                    <span className="mt-0.5 block text-[10px] font-bold normal-case text-slate-500">{column.date} Â· {column.session}</span>
+                    <span className="mt-0.5 block text-[10px] font-bold normal-case text-slate-500">{column.date} · {column.session}</span>
                   </AttendanceHeaderCell>
                 ))}
               </tr>
@@ -538,7 +538,7 @@ function AttendancePanel({
                       </button>
                     </AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[234px] z-20 w-[66px] text-center font-semibold text-slate-600">
-                      {student.className.replace("LÃ¡Â»â€ºp ", "").replace("Lop ", "")}
+                      {student.className.replace("Lớp ", "").replace("Lop ", "")}
                     </AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[300px] z-20 w-[76px] text-center">
                       <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-black", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
@@ -605,7 +605,7 @@ function attendanceLabel(status: AttendanceStatus) {
   if (status === "absent") return "V";
   if (status === "late") return "M";
   if (status === "excused") return "P";
-  return "âœ“";
+  return "✓";
 }
 
 function attendanceCellClass(status: AttendanceStatus) {
@@ -628,7 +628,7 @@ function StudentsPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot })
   const students = getClassStudents(selectedClass?.id);
   return (
     <>
-      <FilterBar primaryPlaceholder="TÃ¬m há»c sinh" filters={["Tráº¡ng thÃ¡i", "Tiáº¿n Ä‘á»™", "Äiá»ƒm trung bÃ¬nh"]} />
+      <FilterBar primaryPlaceholder="Tìm học sinh" filters={["Trạng thái", "Tiến độ", "Điểm trung bình"]} />
       <section className="grid gap-4 xl:grid-cols-3">
         {students.slice(0, 12).map((student) => (
           <article key={student.id} className="rounded-xl border border-slate-200 bg-white p-5">
@@ -641,7 +641,7 @@ function StudentsPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot })
               <Badge tone={student.status === "support" ? "warning" : student.status === "ahead" ? "success" : "secondary"}>{student.status}</Badge>
             </div>
             <div className="mt-4 flex items-center justify-between text-sm font-bold">
-              <span className="text-slate-500">Tiáº¿n Ä‘á»™</span>
+              <span className="text-slate-500">Tiến độ</span>
               <span>{student.progressRate}%</span>
             </div>
             <ProgressBar value={student.progressRate} className="mt-2 h-2" />
@@ -656,10 +656,10 @@ function StudentsPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot })
 function ReportsPanel({ selectedClass, selectedSchoolName }: { selectedClass?: ClassroomSnapshot; selectedSchoolName: string }) {
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-      <Metric label="TrÆ°á»ng" value={selectedSchoolName} detail="Pháº¡m vi Ä‘ang xem" />
-      <Metric label="Lá»›p" value={selectedClass?.className ?? "-"} detail={`${selectedClass?.studentCount ?? 0} há»c sinh`} />
-      <Metric label="HoÃ n thÃ nh" value={`${selectedClass?.completionRate ?? 0}%`} detail="Trung bÃ¬nh bÃ i Ä‘ang má»Ÿ" />
-      <Metric label="Cáº§n há»— trá»£" value={String(selectedClass?.riskStudents ?? 0)} detail="Há»c sinh cáº§n theo sÃ¡t" />
+      <Metric label="Trường" value={selectedSchoolName} detail="Phạm vi đang xem" />
+      <Metric label="Lớp" value={selectedClass?.className ?? "-"} detail={`${selectedClass?.studentCount ?? 0} học sinh`} />
+      <Metric label="Hoàn thành" value={`${selectedClass?.completionRate ?? 0}%`} detail="Trung bình bài đang mở" />
+      <Metric label="Cần hỗ trợ" value={String(selectedClass?.riskStudents ?? 0)} detail="Học sinh cần theo sát" />
     </section>
   );
 }
@@ -677,8 +677,8 @@ function FilterBar({ filters, primaryPlaceholder }: { filters: string[]; primary
             <option>{filter}</option>
           </select>
         ))}
-        <Button variant="outline">Äáº·t láº¡i</Button>
-        <Button className="ml-auto bg-[#06112f] hover:bg-[#111d42]">Giao bÃ i</Button>
+        <Button variant="outline">Đặt lại</Button>
+        <Button className="ml-auto bg-[#06112f] hover:bg-[#111d42]">Giao bài</Button>
       </div>
     </div>
   );

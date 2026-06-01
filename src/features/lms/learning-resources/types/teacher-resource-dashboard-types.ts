@@ -1,31 +1,31 @@
-﻿export type HocLieuManagedSchool = {
+﻿export type LearningResourceManagedSchool = {
   id: string;
   name: string;
   principal: string;
 };
 
-export type HocLieuTeacherDashboardNodeKind = "folder" | "group" | "lesson" | "resource";
-export type HocLieuTeacherDashboardSourceKind = "folder" | "category" | "section" | "book_series" | "topic";
+export type LearningResourceTeacherDashboardNodeKind = "folder" | "group" | "lesson" | "resource";
+export type LearningResourceTeacherDashboardSourceKind = "folder" | "category" | "section" | "book_series" | "topic";
 
-export type HocLieuTeacherProgressSummary = {
+export type LearningResourceTeacherProgressSummary = {
   progressRate: number;
   taughtCount: number;
   totalCount: number;
   pendingCount: number;
 };
 
-export type HocLieuTeacherDashboardSubject = {
+export type LearningResourceTeacherDashboardSubject = {
   id: string;
   label: string;
   description?: string;
-  progress: HocLieuTeacherProgressSummary;
+  progress: LearningResourceTeacherProgressSummary;
 };
 
-export type HocLieuTeacherDashboardNode = {
+export type LearningResourceTeacherDashboardNode = {
   id: string;
   label: string;
-  kind: HocLieuTeacherDashboardNodeKind;
-  sourceKind?: HocLieuTeacherDashboardSourceKind;
+  kind: LearningResourceTeacherDashboardNodeKind;
+  sourceKind?: LearningResourceTeacherDashboardSourceKind;
   parentId?: string;
   subjectId?: string;
   subjectLabel?: string;
@@ -35,54 +35,54 @@ export type HocLieuTeacherDashboardNode = {
   thumbnailUrl?: string;
   fileTypeBadge?: string;
   hasChildren: boolean;
-  progress: HocLieuTeacherProgressSummary;
+  progress: LearningResourceTeacherProgressSummary;
   lastOpenedAt?: string;
   updatedAt?: string;
 };
 
-export type HocLieuTeacherDashboardBreadcrumb = {
+export type LearningResourceTeacherDashboardBreadcrumb = {
   id: string;
   label: string;
-  kind: HocLieuTeacherDashboardNodeKind;
+  kind: LearningResourceTeacherDashboardNodeKind;
 };
 
-export type HocLieuTeacherSubjectTree = {
+export type LearningResourceTeacherSubjectTree = {
   subjectId: string;
   subjectLabel: string;
   schoolId: string;
   academicYear: string;
   parentId?: string;
-  breadcrumbs: HocLieuTeacherDashboardBreadcrumb[];
-  children: HocLieuTeacherDashboardNode[];
-  progress: HocLieuTeacherProgressSummary;
+  breadcrumbs: LearningResourceTeacherDashboardBreadcrumb[];
+  children: LearningResourceTeacherDashboardNode[];
+  progress: LearningResourceTeacherProgressSummary;
 };
 
-export type HocLieuTeacherRecentLecture = {
+export type LearningResourceTeacherRecentLecture = {
   id: string;
   subjectId: string;
   subjectLabel: string;
   nodeId: string;
   nodeLabel: string;
-  nodeKind: HocLieuTeacherDashboardNodeKind;
+  nodeKind: LearningResourceTeacherDashboardNodeKind;
   resourceId?: string;
   resourceTitle?: string;
   resourceType?: string;
   openedAt: string;
 };
 
-export type HocLieuTeacherProgressDetailItem = {
+export type LearningResourceTeacherProgressDetailItem = {
   id: string;
   label: string;
-  kind: HocLieuTeacherDashboardNodeKind;
+  kind: LearningResourceTeacherDashboardNodeKind;
   status: "pending" | "in_progress" | "taught";
   progressRate: number;
 };
 
-export type HocLieuTeacherProgressDetail = {
+export type LearningResourceTeacherProgressDetail = {
   subjectId: string;
   nodeId?: string;
   schoolId: string;
   academicYear: string;
-  summary: HocLieuTeacherProgressSummary;
-  items: HocLieuTeacherProgressDetailItem[];
+  summary: LearningResourceTeacherProgressSummary;
+  items: LearningResourceTeacherProgressDetailItem[];
 };

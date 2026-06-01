@@ -7,7 +7,7 @@ import { StudentAttendanceContextMenu } from "@/features/lms/components/student-
 import { cn } from "@/lib/utils";
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused";
-type SessionPart = "Tiáº¿t 1" | "Tiáº¿t 2";
+type SessionPart = "Tiết 1" | "Tiết 2";
 
 type AttendanceColumn = {
   id: string;
@@ -44,9 +44,9 @@ type AttendanceSheetPanelProps = {
 const COURSE_START_DATE = "2026-05-29";
 
 const statusLabels: Record<StudentStatus, string> = {
-  ahead: "VÆ°á»£t tiáº¿n Ä‘á»™",
-  steady: "á»”n Ä‘á»‹nh",
-  support: "Cáº§n há»— trá»£",
+  ahead: "Vượt tiến độ",
+  steady: "Ổn định",
+  support: "Cần hỗ trợ",
 };
 
 type CurriculumItem = {
@@ -56,73 +56,73 @@ type CurriculumItem = {
 };
 
 const curriculumProgram: CurriculumItem[] = [
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 1, title: "BÃ i 1: XÃ¡c Ä‘á»‹nh yÃªu cáº§u há»‡ thá»‘ng vÃ  yÃªu cáº§u pháº§n má»m" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 2, title: "BÃ i 1: XÃ¡c Ä‘á»‹nh yÃªu cáº§u há»‡ thá»‘ng vÃ  yÃªu cáº§u pháº§n má»m" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 3, title: "BÃ i 2: Kháº¯c phá»¥c sá»± cá»‘ mÃ¡y tÃ­nh" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 4, title: "BÃ i 2: Kháº¯c phá»¥c sá»± cá»‘ mÃ¡y tÃ­nh" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 5, title: "BÃ i 3: Cáº¥p phÃ©p pháº§n má»m" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 6, title: "BÃ i 4: CÃ i Ä‘áº·t máº·c Ä‘á»‹nh pháº§n má»m" },
-  { topic: "CÄƒn báº£n vá» cÃ´ng nghá»‡", period: 7, title: "Ã”n táº­p 1" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 8, title: "BÃ i 5: BÃ¡o cÃ¡o hÃ nh vi gÃ¢y háº¡i (1)" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 9, title: "BÃ i 6: BÃ¡o cÃ¡o hÃ nh vi gÃ¢y háº¡i (2)" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 10, title: "BÃ i 7: Má»™t sá»‘ hÃ nh vi báº¥t há»£p phÃ¡p trÃªn mÃ´i trÆ°á»ng kÄ© thuáº­t sá»‘" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 11, title: "BÃ i 7: Má»™t sá»‘ hÃ nh vi báº¥t há»£p phÃ¡p trÃªn mÃ´i trÆ°á»ng kÄ© thuáº­t sá»‘" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 12, title: "BÃ i 8: Cáº­p nháº­t kiáº¿n thá»©c kÄ© thuáº­t sá»‘ (1)" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 13, title: "BÃ i 9: Cáº­p nháº­t kiáº¿n thá»©c kÄ© thuáº­t sá»‘ (2)" },
-  { topic: "CÃ´ng dÃ¢n sá»‘", period: 14, title: "Ã”n táº­p 2" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 15, title: "BÃ i 10: Thu háº¹p pháº¡m vi tÃ¬m kiáº¿m (1)" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 16, title: "BÃ i 10: Thu háº¹p pháº¡m vi tÃ¬m kiáº¿m (1)" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 17, title: "BÃ i 11: Thu háº¹p pháº¡m vi tÃ¬m kiáº¿m (2)" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 18, title: "BÃ i 12: ÄÃ¡nh giÃ¡ thÃ´ng tin (1)" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 19, title: "BÃ i 13: ÄÃ¡nh giÃ¡ thÃ´ng tin (2)" },
-  { topic: "Quáº£n lÃ½ thÃ´ng tin", period: 20, title: "Ã”n táº­p 3" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 21, title: "BÃ i 14: LÃ m viá»‡c vá»›i phÆ°Æ¡ng tiá»‡n truyá»n thÃ´ng kÄ© thuáº­t sá»‘" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 22, title: "BÃ i 14: LÃ m viá»‡c vá»›i phÆ°Æ¡ng tiá»‡n truyá»n thÃ´ng kÄ© thuáº­t sá»‘" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 23, title: "BÃ i 15: Sá»­ dá»¥ng dá»¯ liá»‡u trá»±c quan (1)" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 24, title: "BÃ i 16: Sá»­ dá»¥ng dá»¯ liá»‡u trá»±c quan (2)" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 25, title: "BÃ i 17: Quáº£n lÃ­ thÃ´ng tin kÄ© thuáº­t sá»‘" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 26, title: "BÃ i 18: Kháº£ nÄƒng tiáº¿p cáº­n" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 27, title: "BÃ i 18: Kháº£ nÄƒng tiáº¿p cáº­n" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 28, title: "BÃ i 19: Hiá»ƒu vá» sá»Ÿ há»¯u trÃ­ tuá»‡" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 29, title: "BÃ i 20: Báº£o vá»‡ sá»Ÿ há»¯u trÃ­ tuá»‡ (1)" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 30, title: "BÃ i 21: Báº£o vá»‡ sá»Ÿ há»¯u trÃ­ tuá»‡ (2)" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 31, title: "BÃ i 22: Láº­p káº¿ hoáº¡ch cho má»™t dá»± Ã¡n kÄ© thuáº­t sá»‘" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 32, title: "BÃ i 22: Láº­p káº¿ hoáº¡ch cho má»™t dá»± Ã¡n kÄ© thuáº­t sá»‘" },
-  { topic: "SÃ¡ng táº¡o ná»™i dung", period: 33, title: "Ã”n táº­p 4" },
-  { topic: "Giao tiáº¿p ká»¹ thuáº­t sá»‘", period: 34, title: "BÃ i 23: Sá»± mÆ¡ há»“ (Ambiguity) trong giao tiáº¿p kÄ© thuáº­t sá»‘" },
-  { topic: "Giao tiáº¿p ká»¹ thuáº­t sá»‘", period: 35, title: "BÃ i 24: Giao tiáº¿p kÄ© thuáº­t sá»‘ Ä‘á»ƒ giáº£i quyáº¿t váº¥n Ä‘á» (1)" },
-  { topic: "Giao tiáº¿p ká»¹ thuáº­t sá»‘", period: 36, title: "BÃ i 25: Giao tiáº¿p kÄ© thuáº­t sá»‘ Ä‘á»ƒ giáº£i quyáº¿t váº¥n Ä‘á» (2)" },
-  { topic: "Giao tiáº¿p ká»¹ thuáº­t sá»‘", period: 37, title: "BÃ i 26: TÆ°Æ¡ng tÃ¡c phÃ¹ há»£p khi giao tiáº¿p trÃªn mÃ´i trÆ°á»ng kÄ© thuáº­t sá»‘" },
-  { topic: "Cá»™ng tÃ¡c", period: 38, title: "BÃ i 27: Cá»™ng tÃ¡c Ä‘á»ƒ giáº£i quyáº¿t váº¥n Ä‘á»" },
-  { topic: "Cá»™ng tÃ¡c", period: 39, title: "BÃ i 27: Cá»™ng tÃ¡c Ä‘á»ƒ giáº£i quyáº¿t váº¥n Ä‘á»" },
-  { topic: "Cá»™ng tÃ¡c", period: 40, title: "BÃ i 28: ÄÃ³ng gÃ³p vÃ o cÃ¡c dá»± Ã¡n (1)" },
-  { topic: "Cá»™ng tÃ¡c", period: 41, title: "BÃ i 29: ÄÃ³ng gÃ³p vÃ o cÃ¡c dá»± Ã¡n (2)" },
-  { topic: "Cá»™ng tÃ¡c", period: 42, title: "Ã”n táº­p 5" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 43, title: "BÃ i 30: Báº£o máº­t thiáº¿t bá»‹ cá»§a báº¡n" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 44, title: "BÃ i 30: Báº£o máº­t thiáº¿t bá»‹ cá»§a báº¡n" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 45, title: "BÃ i 31: Dáº¥u hiá»‡u nháº­n biáº¿t vÃ  cÃ¡c pháº§n má»m chá»‘ng Virus (1)" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 46, title: "BÃ i 32: Dáº¥u hiá»‡u nháº­n biáº¿t vÃ  cÃ¡c pháº§n má»m chá»‘ng Virus (2)" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 47, title: "BÃ i 33: Äáº·t láº¡i thiáº¿t bá»‹" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 48, title: "BÃ i 34: TÃ¡c Ä‘á»™ng cá»§a cÃ¡c cÃ´ng cá»¥ vÃ  cÃ´ng nghá»‡ kÄ© thuáº­t sá»‘ (1)" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 49, title: "BÃ i 35: TÃ¡c Ä‘á»™ng cá»§a cÃ¡c cÃ´ng cá»¥ vÃ  cÃ´ng nghá»‡ kÄ© thuáº­t sá»‘ (2)" },
-  { topic: "An toÃ n vÃ  báº£o máº­t", period: 50, title: "Ã”n táº­p 6" },
-  { topic: "TÄƒng cÆ°á»ng", period: 51, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 52, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 53, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 54, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 55, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 56, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 57, title: "Ã”n táº­p" },
-  { topic: "TÄƒng cÆ°á»ng", period: 58, title: "Luyá»‡n thi" },
-  { topic: "TÄƒng cÆ°á»ng", period: 59, title: "Luyá»‡n thi" },
-  { topic: "TÄƒng cÆ°á»ng", period: 60, title: "Luyá»‡n thi" },
+  { topic: "Căn bản về công nghệ", period: 1, title: "Bài 1: Xác định yêu cầu hệ thống và yêu cầu phần mềm" },
+  { topic: "Căn bản về công nghệ", period: 2, title: "Bài 1: Xác định yêu cầu hệ thống và yêu cầu phần mềm" },
+  { topic: "Căn bản về công nghệ", period: 3, title: "Bài 2: Khắc phục sự cố máy tính" },
+  { topic: "Căn bản về công nghệ", period: 4, title: "Bài 2: Khắc phục sự cố máy tính" },
+  { topic: "Căn bản về công nghệ", period: 5, title: "Bài 3: Cấp phép phần mềm" },
+  { topic: "Căn bản về công nghệ", period: 6, title: "Bài 4: Cài đặt mặc định phần mềm" },
+  { topic: "Căn bản về công nghệ", period: 7, title: "Ôn tập 1" },
+  { topic: "Công dân số", period: 8, title: "Bài 5: Báo cáo hành vi gây hại (1)" },
+  { topic: "Công dân số", period: 9, title: "Bài 6: Báo cáo hành vi gây hại (2)" },
+  { topic: "Công dân số", period: 10, title: "Bài 7: Một số hành vi bất hợp pháp trên môi trường kĩ thuật số" },
+  { topic: "Công dân số", period: 11, title: "Bài 7: Một số hành vi bất hợp pháp trên môi trường kĩ thuật số" },
+  { topic: "Công dân số", period: 12, title: "Bài 8: Cập nhật kiến thức kĩ thuật số (1)" },
+  { topic: "Công dân số", period: 13, title: "Bài 9: Cập nhật kiến thức kĩ thuật số (2)" },
+  { topic: "Công dân số", period: 14, title: "Ôn tập 2" },
+  { topic: "Quản lý thông tin", period: 15, title: "Bài 10: Thu hẹp phạm vi tìm kiếm (1)" },
+  { topic: "Quản lý thông tin", period: 16, title: "Bài 10: Thu hẹp phạm vi tìm kiếm (1)" },
+  { topic: "Quản lý thông tin", period: 17, title: "Bài 11: Thu hẹp phạm vi tìm kiếm (2)" },
+  { topic: "Quản lý thông tin", period: 18, title: "Bài 12: Đánh giá thông tin (1)" },
+  { topic: "Quản lý thông tin", period: 19, title: "Bài 13: Đánh giá thông tin (2)" },
+  { topic: "Quản lý thông tin", period: 20, title: "Ôn tập 3" },
+  { topic: "Sáng tạo nội dung", period: 21, title: "Bài 14: Làm việc với phương tiện truyền thông kĩ thuật số" },
+  { topic: "Sáng tạo nội dung", period: 22, title: "Bài 14: Làm việc với phương tiện truyền thông kĩ thuật số" },
+  { topic: "Sáng tạo nội dung", period: 23, title: "Bài 15: Sử dụng dữ liệu trực quan (1)" },
+  { topic: "Sáng tạo nội dung", period: 24, title: "Bài 16: Sử dụng dữ liệu trực quan (2)" },
+  { topic: "Sáng tạo nội dung", period: 25, title: "Bài 17: Quản lí thông tin kĩ thuật số" },
+  { topic: "Sáng tạo nội dung", period: 26, title: "Bài 18: Khả năng tiếp cận" },
+  { topic: "Sáng tạo nội dung", period: 27, title: "Bài 18: Khả năng tiếp cận" },
+  { topic: "Sáng tạo nội dung", period: 28, title: "Bài 19: Hiểu về sở hữu trí tuệ" },
+  { topic: "Sáng tạo nội dung", period: 29, title: "Bài 20: Bảo vệ sở hữu trí tuệ (1)" },
+  { topic: "Sáng tạo nội dung", period: 30, title: "Bài 21: Bảo vệ sở hữu trí tuệ (2)" },
+  { topic: "Sáng tạo nội dung", period: 31, title: "Bài 22: Lập kế hoạch cho một dự án kĩ thuật số" },
+  { topic: "Sáng tạo nội dung", period: 32, title: "Bài 22: Lập kế hoạch cho một dự án kĩ thuật số" },
+  { topic: "Sáng tạo nội dung", period: 33, title: "Ôn tập 4" },
+  { topic: "Giao tiếp kỹ thuật số", period: 34, title: "Bài 23: Sự mơ hồ (Ambiguity) trong giao tiếp kĩ thuật số" },
+  { topic: "Giao tiếp kỹ thuật số", period: 35, title: "Bài 24: Giao tiếp kĩ thuật số để giải quyết vấn đề (1)" },
+  { topic: "Giao tiếp kỹ thuật số", period: 36, title: "Bài 25: Giao tiếp kĩ thuật số để giải quyết vấn đề (2)" },
+  { topic: "Giao tiếp kỹ thuật số", period: 37, title: "Bài 26: Tương tác phù hợp khi giao tiếp trên môi trường kĩ thuật số" },
+  { topic: "Cộng tác", period: 38, title: "Bài 27: Cộng tác để giải quyết vấn đề" },
+  { topic: "Cộng tác", period: 39, title: "Bài 27: Cộng tác để giải quyết vấn đề" },
+  { topic: "Cộng tác", period: 40, title: "Bài 28: Đóng góp vào các dự án (1)" },
+  { topic: "Cộng tác", period: 41, title: "Bài 29: Đóng góp vào các dự án (2)" },
+  { topic: "Cộng tác", period: 42, title: "Ôn tập 5" },
+  { topic: "An toàn và bảo mật", period: 43, title: "Bài 30: Bảo mật thiết bị của bạn" },
+  { topic: "An toàn và bảo mật", period: 44, title: "Bài 30: Bảo mật thiết bị của bạn" },
+  { topic: "An toàn và bảo mật", period: 45, title: "Bài 31: Dấu hiệu nhận biết và các phần mềm chống Virus (1)" },
+  { topic: "An toàn và bảo mật", period: 46, title: "Bài 32: Dấu hiệu nhận biết và các phần mềm chống Virus (2)" },
+  { topic: "An toàn và bảo mật", period: 47, title: "Bài 33: Đặt lại thiết bị" },
+  { topic: "An toàn và bảo mật", period: 48, title: "Bài 34: Tác động của các công cụ và công nghệ kĩ thuật số (1)" },
+  { topic: "An toàn và bảo mật", period: 49, title: "Bài 35: Tác động của các công cụ và công nghệ kĩ thuật số (2)" },
+  { topic: "An toàn và bảo mật", period: 50, title: "Ôn tập 6" },
+  { topic: "Tăng cường", period: 51, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 52, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 53, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 54, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 55, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 56, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 57, title: "Ôn tập" },
+  { topic: "Tăng cường", period: 58, title: "Luyện thi" },
+  { topic: "Tăng cường", period: 59, title: "Luyện thi" },
+  { topic: "Tăng cường", period: 60, title: "Luyện thi" },
 ];
 
 export function AttendanceSheetPanel({ selectedClass, students }: AttendanceSheetPanelProps) {
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(formatInputDate(new Date()));
-  const [sessionFilter, setSessionFilter] = useState<"Táº¥t cáº£ tiáº¿t" | SessionPart>("Táº¥t cáº£ tiáº¿t");
+  const [sessionFilter, setSessionFilter] = useState<"Tất cả tiết" | SessionPart>("Tất cả tiết");
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; student: ClassroomStudent } | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -130,7 +130,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
   const [notice, setNotice] = useState<string | null>(null);
 
   const dateColumns = useMemo(() => buildAttendanceColumns(selectedDate), [selectedDate]);
-  const visibleColumns = dateColumns.filter((column) => sessionFilter === "Táº¥t cáº£ tiáº¿t" || column.session === sessionFilter);
+  const visibleColumns = dateColumns.filter((column) => sessionFilter === "Tất cả tiết" || column.session === sessionFilter);
   const visibleDayGroups = useMemo(() => groupAttendanceColumnsByDate(visibleColumns), [visibleColumns]);
   const dateRangeLabel = `${dateColumns[0]?.date ?? ""} - ${dateColumns[dateColumns.length - 1]?.date ?? ""}`;
   const taughtLessonCount = countLessonsThroughDate(selectedDate);
@@ -171,7 +171,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
   }
 
   function exportCsv() {
-    const header = ["STT", "Há»c sinh", "Tá»•ng váº¯ng", ...visibleColumns.map((column) => `${column.day} ${column.date} ${column.session}`)];
+    const header = ["STT", "Học sinh", "Tổng vắng", ...visibleColumns.map((column) => `${column.day} ${column.date} ${column.session}`)];
     const rows = filteredStudents.map((student, studentIndex) => {
       const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column.id, columnIndex));
       const summary = attendanceSummary(statuses);
@@ -213,9 +213,9 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       <section className="shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="mr-auto min-w-[220px] border-b border-slate-900 pb-1 pr-6 text-[12px] italic leading-5 text-[#001d63]">
-            <div>Gv phá»¥ trÃ¡ch: <span className="font-semibold">{selectedClass?.homeroomTeacher ?? ""}</span></div>
+            <div>Gv phụ trách: <span className="font-semibold">{selectedClass?.homeroomTeacher ?? ""}</span></div>
             <div className="flex items-center gap-10">
-              <span>Sá»‘ tiáº¿t Ä‘Ã£ dáº¡y:</span>
+              <span>Số tiết đã dạy:</span>
               <span className="font-black not-italic text-red-600">{taughtLessonCount}</span>
             </div>
           </div>
@@ -225,16 +225,16 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="TÃ¬m há»c sinh"
+              placeholder="Tìm học sinh"
               className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
             />
           </div>
           <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700">
-            <span className="text-slate-500">NgÃ y</span>
+            <span className="text-slate-500">Ngày</span>
             <span className="min-w-[74px] text-slate-800">{formatFullDate(parseDateInput(selectedDate))}</span>
             <input
               type="date"
-              aria-label="Chá»n ngÃ y trá»ng tÃ¢m"
+              aria-label="Chọn ngày trọng tâm"
               value={selectedDate}
               onChange={(event) => {
                 setSelectedDate(event.target.value);
@@ -245,24 +245,24 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
           </label>
           <select
             value={sessionFilter}
-            onChange={(event) => setSessionFilter(event.target.value as "Táº¥t cáº£ tiáº¿t" | SessionPart)}
+            onChange={(event) => setSessionFilter(event.target.value as "Tất cả tiết" | SessionPart)}
             className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700 outline-none"
           >
-            <option>Táº¥t cáº£ tiáº¿t</option>
-            <option>Tiáº¿t 1</option>
-            <option>Tiáº¿t 2</option>
+            <option>Tất cả tiết</option>
+            <option>Tiết 1</option>
+            <option>Tiết 2</option>
           </select>
           <Button type="button" variant="outline" onClick={resetVisibleAttendance} className="h-8 rounded-md px-2.5 text-xs">
             <RotateCcw className="h-3.5 w-3.5" />
-            Äáº·t láº¡i
+            Đặt lại
           </Button>
           <Button type="button" variant="outline" onClick={exportCsv} className="h-8 rounded-md px-2.5 text-xs">
             <Download className="h-3.5 w-3.5" />
-            Xuáº¥t CSV
+            Xuất CSV
           </Button>
           <Button type="button" onClick={saveAttendance} className="h-8 rounded-md bg-slate-950 px-2.5 text-xs font-black text-white">
             <Save className="h-3.5 w-3.5" />
-            LÆ°u
+            Lưu
           </Button>
         </div>
       </section>
@@ -270,13 +270,13 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       <div className="grid min-h-0 flex-1 gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(360px,1fr)]">
         <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
-            <h2 className="text-sm font-black text-slate-950">Äiá»ƒm danh {dateRangeLabel}</h2>
+            <h2 className="text-sm font-black text-slate-950">Điểm danh {dateRangeLabel}</h2>
             <div className="flex items-center gap-1.5 text-[10px] font-bold">
-              {savedAt ? <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">ÄÃ£ lÆ°u {savedAt}</span> : null}
-              <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">CÃ³ máº·t</span>
-              <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Äi muá»™n</span>
-              <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Váº¯ng</span>
-              <span className="rounded bg-sky-50 px-1.5 py-0.5 text-sky-700">CÃ³ phÃ©p</span>
+              {savedAt ? <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Đã lưu {savedAt}</span> : null}
+              <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
+              <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
+              <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
+              <span className="rounded bg-sky-50 px-1.5 py-0.5 text-sky-700">Có phép</span>
             </div>
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
@@ -284,8 +284,8 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
               <thead>
                 <tr className="bg-[#f8fbff] text-[10px] font-black uppercase text-[#1d4ed8]">
                   <AttendanceHeaderCell rowSpan={2} className="sticky left-0 top-0 z-40 w-9">STT</AttendanceHeaderCell>
-                  <AttendanceHeaderCell rowSpan={2} className="sticky left-9 top-0 z-40 w-40 text-left">Há»c sinh</AttendanceHeaderCell>
-                  <AttendanceHeaderCell rowSpan={2} className="sticky left-[196px] top-0 z-40 w-[62px]">Tá»•ng váº¯ng</AttendanceHeaderCell>
+                  <AttendanceHeaderCell rowSpan={2} className="sticky left-9 top-0 z-40 w-40 text-left">Học sinh</AttendanceHeaderCell>
+                  <AttendanceHeaderCell rowSpan={2} className="sticky left-[196px] top-0 z-40 w-[62px]">Tổng vắng</AttendanceHeaderCell>
                   {visibleDayGroups.map((group) => (
                     <AttendanceHeaderCell key={group.id} colSpan={group.columns.length} className={cn("sticky top-0 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-t-2 border-blue-300 bg-blue-100 text-blue-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]")}>
                       <span className="block">{group.day}</span>
@@ -335,7 +335,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                               onClick={() => updateAttendance(student.id, studentIndex, column.id, columnIndex)}
                               className="h-6 w-full rounded text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-200"
                               aria-label={`${student.name} ${column.day} ${column.session}`}
-                              title="Báº¥m Ä‘á»ƒ Ä‘á»•i tráº¡ng thÃ¡i"
+                              title="Bấm để đổi trạng thái"
                             >
                               {attendanceLabel(status)}
                             </button>
@@ -355,16 +355,16 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
 
       <StudentAttendanceContextMenu
         menu={contextMenu}
-        onAddStudent={() => showAction("ÄÃ£ má»Ÿ thao tÃ¡c thÃªm há»c sinh má»›i")}
-        onAddNote={(student) => showAction(`ÄÃ£ thÃªm note nhanh cho ${student.name}`)}
+        onAddStudent={() => showAction("Đã mở thao tác thêm học sinh mới")}
+        onAddNote={(student) => showAction(`Đã thêm note nhanh cho ${student.name}`)}
         onChangeStatus={(student) => {
           updateStudentDraft(student.id, { status: nextStudentStatus(studentDrafts[student.id]?.status ?? student.status) });
-          showAction(`ÄÃ£ Ä‘á»•i tráº¡ng thÃ¡i ${student.name}`);
+          showAction(`Đã đổi trạng thái ${student.name}`);
         }}
         onClose={() => setContextMenu(null)}
         onOpenNote={(student) => {
           openStudentDetail(student);
-          showAction(`Äang ghi chÃº cho ${student.name}`);
+          showAction(`Đang ghi chú cho ${student.name}`);
         }}
       />
 
@@ -387,20 +387,20 @@ function CurriculumDistributionPanel({ selectedDate, taughtLessonCount }: { sele
       <div className="border-b border-slate-200 px-3 py-2">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-black uppercase text-[#001d63]">Khung chÆ°Æ¡ng trÃ¬nh tin há»c quá»‘c táº¿</h2>
-            <p className="mt-0.5 text-xs font-black text-[#001d63]">IC3 GS6 Level 3 - Tin há»c 8</p>
+            <h2 className="text-sm font-black uppercase text-[#001d63]">Khung chương trình tin học quốc tế</h2>
+            <p className="mt-0.5 text-xs font-black text-[#001d63]">IC3 GS6 Level 3 - Tin học 8</p>
           </div>
-          <span className="rounded bg-blue-50 px-2 py-1 text-[11px] font-black text-blue-700">{taughtLessonCount} tiáº¿t Ä‘Ã£ Ä‘iá»ƒm danh</span>
+          <span className="rounded bg-blue-50 px-2 py-1 text-[11px] font-black text-blue-700">{taughtLessonCount} tiết đã điểm danh</span>
         </div>
-        <p className="mt-1 text-[11px] font-semibold text-slate-500">NgÃ y trá»ng tÃ¢m {formatFullDate(parseDateInput(selectedDate))}</p>
+        <p className="mt-1 text-[11px] font-semibold text-slate-500">Ngày trọng tâm {formatFullDate(parseDateInput(selectedDate))}</p>
       </div>
       <div className="min-h-0 flex-1 overflow-auto bg-white p-2">
         <table className="w-full min-w-[560px] border-collapse text-[12px] text-[#001d63]">
           <thead className="sticky top-0 z-10 bg-white">
             <tr>
-              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Chá»§ Ä‘á»</th>
-              <th className="w-12 border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Tiáº¿t</th>
-              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">TÃªn bÃ i há»c</th>
+              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Chủ đề</th>
+              <th className="w-12 border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Tiết</th>
+              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Tên bài học</th>
             </tr>
           </thead>
           <tbody>
@@ -441,15 +441,15 @@ function StudentDetailDrawer({
 }) {
   return (
     <>
-      <button type="button" aria-label="ÄÃ³ng chi tiáº¿t há»c sinh" className="fixed inset-0 z-[90] bg-slate-950/20" onClick={onClose} />
+      <button type="button" aria-label="Đóng chi tiết học sinh" className="fixed inset-0 z-[90] bg-slate-950/20" onClick={onClose} />
       <aside className="fixed right-0 top-0 z-[100] flex h-screen w-[420px] max-w-[calc(100vw-20px)] flex-col border-l border-slate-200 bg-white shadow-2xl">
         <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-4">
           <div>
             <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
               <UserRound className="h-5 w-5" />
             </div>
-            <h2 className="mt-3 text-lg font-black text-slate-950">Chi tiáº¿t há»c sinh</h2>
-            <p className="text-xs font-semibold text-slate-500">{student.className} Â· {student.schoolName}</p>
+            <h2 className="mt-3 text-lg font-black text-slate-950">Chi tiết học sinh</h2>
+            <p className="text-xs font-semibold text-slate-500">{student.className} · {student.schoolName}</p>
           </div>
           <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-slate-100" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -457,7 +457,7 @@ function StudentDetailDrawer({
         </div>
         <div className="min-h-0 flex-1 overflow-auto p-4">
           <div className="grid gap-3">
-            <Field label="Há» tÃªn">
+            <Field label="Họ tên">
               <input value={draft.name} onChange={(event) => onUpdate({ name: event.target.value })} className={detailInputClass} />
             </Field>
             <Field label="Username">
@@ -469,28 +469,28 @@ function StudentDetailDrawer({
                 <input value={draft.password} onChange={(event) => onUpdate({ password: event.target.value })} className={cn(detailInputClass, "pl-8")} />
               </div>
             </Field>
-            <Field label="Tráº¡ng thÃ¡i">
+            <Field label="Trạng thái">
               <select value={draft.status} onChange={(event) => onUpdate({ status: event.target.value as StudentStatus })} className={detailInputClass}>
-                <option value="ahead">VÆ°á»£t tiáº¿n Ä‘á»™</option>
-                <option value="steady">á»”n Ä‘á»‹nh</option>
-                <option value="support">Cáº§n há»— trá»£</option>
+                <option value="ahead">Vượt tiến độ</option>
+                <option value="steady">Ổn định</option>
+                <option value="support">Cần hỗ trợ</option>
               </select>
             </Field>
-            <Field label="Ghi chÃº">
+            <Field label="Ghi chú">
               <textarea value={draft.note} onChange={(event) => onUpdate({ note: event.target.value })} className={cn(detailInputClass, "min-h-28 py-2 leading-5")} />
             </Field>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-2">
-            <MiniMetric label="Tiáº¿n Ä‘á»™" value={`${student.progressRate}%`} />
-            <MiniMetric label="Äiá»ƒm TB" value={`${student.averageScore}`} />
-            <MiniMetric label="BÃ i hoÃ n thÃ nh" value={`${student.completedAssignments}`} />
-            <MiniMetric label="Streak" value={`${student.streakDays} ngÃ y`} />
+            <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
+            <MiniMetric label="Điểm TB" value={`${student.averageScore}`} />
+            <MiniMetric label="Bài hoàn thành" value={`${student.completedAssignments}`} />
+            <MiniMetric label="Streak" value={`${student.streakDays} ngày`} />
           </div>
         </div>
         <div className="flex items-center justify-between gap-2 border-t border-slate-200 p-3">
           <span className="text-xs font-bold text-slate-500">{statusLabels[draft.status]}</span>
           <Button type="button" onClick={onClose} className="h-9 rounded-md px-3 text-xs">
-            LÆ°u thÃ´ng tin
+            Lưu thông tin
           </Button>
         </div>
       </aside>
@@ -589,9 +589,9 @@ function attendanceSubColumnWidthClass(column: AttendanceColumn, groups: Attenda
 
 function lessonsForDate(date: Date): SessionPart[] {
   const day = date.getDay();
-  if (day === 0) return ["Tiáº¿t 1"];
-  if (day === 2 || day === 4 || day === 6) return ["Tiáº¿t 1", "Tiáº¿t 2"];
-  return ["Tiáº¿t 1"];
+  if (day === 0) return ["Tiết 1"];
+  if (day === 2 || day === 4 || day === 6) return ["Tiết 1", "Tiết 2"];
+  return ["Tiết 1"];
 }
 
 function countLessonsThroughDate(selectedDateValue: string) {
@@ -630,14 +630,14 @@ function attendanceLabel(status: AttendanceStatus) {
   if (status === "absent") return "V";
   if (status === "late") return "M";
   if (status === "excused") return "P";
-  return "âœ“";
+  return "✓";
 }
 
 function attendanceText(status: AttendanceStatus) {
-  if (status === "absent") return "Váº¯ng";
-  if (status === "late") return "Äi muá»™n";
-  if (status === "excused") return "CÃ³ phÃ©p";
-  return "CÃ³ máº·t";
+  if (status === "absent") return "Vắng";
+  if (status === "late") return "Đi muộn";
+  if (status === "excused") return "Có phép";
+  return "Có mặt";
 }
 
 function attendanceCellClass(status: AttendanceStatus) {
@@ -712,7 +712,7 @@ function formatFullDate(date: Date) {
 }
 
 function weekdayLabel(date: Date) {
-  const labels = ["Chá»§ Nháº­t", "Thá»© Hai", "Thá»© Ba", "Thá»© TÆ°", "Thá»© NÄƒm", "Thá»© SÃ¡u", "Thá»© Báº£y"];
+  const labels = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
   return labels[date.getDay()];
 }
 
@@ -724,6 +724,6 @@ function removeVietnameseMarks(value: string) {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/Ä‘/g, "d")
-    .replace(/Ä/g, "D");
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
 }

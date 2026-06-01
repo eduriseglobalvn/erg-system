@@ -14,9 +14,9 @@
 import type { TeachingScheduleDraft, TeachingScheduleStatus } from "./teaching-schedule-types";
 
 const statusOptions: Array<{ label: string; value: TeachingScheduleStatus }> = [
-  { label: "ÄÃ£ phÃ¢n bá»•", value: "confirmed" },
-  { label: "Lá»‹ch nhÃ¡p", value: "draft" },
-  { label: "Cáº§n há»c liá»‡u", value: "needs-material" },
+  { label: "Đã phân bổ", value: "confirmed" },
+  { label: "Lịch nháp", value: "draft" },
+  { label: "Cần học liệu", value: "needs-material" },
 ];
 
 type TeachingScheduleEventDialogProps = {
@@ -47,11 +47,11 @@ export function TeachingScheduleEventDialog({
           <span className="h-1.5 w-8 rounded-full bg-[#dadce0]" />
           <div className="flex items-center text-[#5f6368]">
             {mode === "edit" && onDelete ? (
-              <button type="button" onClick={onDelete} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#e8eaed]" aria-label="XÃ³a">
+              <button type="button" onClick={onDelete} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#e8eaed]" aria-label="Xóa">
                 <Trash2 className="h-4 w-4" />
               </button>
             ) : null}
-            <button type="button" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#e8eaed]" aria-label="ÄÃ³ng">
+            <button type="button" onClick={onClose} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#e8eaed]" aria-label="Đóng">
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -63,21 +63,21 @@ export function TeachingScheduleEventDialog({
             value={draft.title}
             onChange={(event) => updateDraft("title", event.target.value)}
             className="border-0 border-b border-[#dadce0] px-0 pb-2 text-[22px] font-normal text-[#3c4043] outline-none placeholder:text-[#5f6368] focus:border-[#1a73e8]"
-            placeholder="ThÃªm tiÃªu Ä‘á»"
+            placeholder="Thêm tiêu đề"
             autoFocus
           />
 
           <div className="hidden md:block" />
           <div className="flex flex-wrap gap-2">
-            <Pill active>Sá»± kiá»‡n</Pill>
-            <Pill>Viá»‡c cáº§n lÃ m</Pill>
-            <Pill>LÃªn lá»‹ch háº¹n</Pill>
+            <Pill active>Sự kiện</Pill>
+            <Pill>Việc cần làm</Pill>
+            <Pill>Lên lịch hẹn</Pill>
           </div>
 
           <Clock3 className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
           <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
             <label className="grid gap-1">
-              <span className="text-xs font-medium text-[#5f6368]">Báº¯t Ä‘áº§u</span>
+              <span className="text-xs font-medium text-[#5f6368]">Bắt đầu</span>
               <input
                 type="datetime-local"
                 value={draft.start}
@@ -86,7 +86,7 @@ export function TeachingScheduleEventDialog({
               />
             </label>
             <label className="grid gap-1">
-              <span className="text-xs font-medium text-[#5f6368]">Káº¿t thÃºc</span>
+              <span className="text-xs font-medium text-[#5f6368]">Kết thúc</span>
               <input
                 type="datetime-local"
                 value={draft.end}
@@ -95,36 +95,36 @@ export function TeachingScheduleEventDialog({
               />
             </label>
             <div className="flex flex-wrap gap-2 lg:col-span-2">
-              <Chip>KhÃ´ng láº·p láº¡i</Chip>
-              <Chip>ThÃªm thá»i gian</Chip>
-              <Chip>KhÃ´ng cÃ³ giá» báº­n</Chip>
+              <Chip>Không lặp lại</Chip>
+              <Chip>Thêm thời gian</Chip>
+              <Chip>Không có giờ bận</Chip>
             </div>
           </div>
 
           <Users className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
-          <Field value={draft.className} onChange={(value) => updateDraft("className", value)} placeholder="ThÃªm lá»›p hoáº·c nhÃ³m há»c sinh" />
+          <Field value={draft.className} onChange={(value) => updateDraft("className", value)} placeholder="Thêm lớp hoặc nhóm học sinh" />
 
           <Video className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
-          <Field value={draft.lesson} onChange={(value) => updateDraft("lesson", value)} placeholder="PhÃ¢n tiáº¿t / tiáº¿t dáº¡y" />
+          <Field value={draft.lesson} onChange={(value) => updateDraft("lesson", value)} placeholder="Phân tiết / tiết dạy" />
 
           <MapPin className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
           <div className="grid gap-2 lg:grid-cols-2">
-            <Field value={draft.school} onChange={(value) => updateDraft("school", value)} placeholder="Dáº¡y á»Ÿ trÆ°á»ng nÃ o" />
-            <Field value={draft.room} onChange={(value) => updateDraft("room", value)} placeholder="PhÃ²ng há»c" />
+            <Field value={draft.school} onChange={(value) => updateDraft("school", value)} placeholder="Dạy ở trường nào" />
+            <Field value={draft.room} onChange={(value) => updateDraft("room", value)} placeholder="Phòng học" />
           </div>
 
           <Bell className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
           <div className="flex flex-wrap items-center gap-2">
-            <Chip>30 phÃºt trÆ°á»›c</Chip>
+            <Chip>30 phút trước</Chip>
             <Chip>Email</Chip>
             <button type="button" className="rounded px-3 py-2 text-sm font-medium text-[#1a73e8] hover:bg-[#e8f0fe]">
-              ThÃªm thÃ´ng bÃ¡o
+              Thêm thông báo
             </button>
           </div>
 
           <CalendarDays className="mt-2 hidden h-5 w-5 text-[#5f6368] md:block" />
           <div className="grid gap-2 sm:grid-cols-[1fr_160px]">
-            <Chip>Lá»‹ch dáº¡y cá»§a tÃ´i</Chip>
+            <Chip>Lịch dạy của tôi</Chip>
             <select
               value={draft.status}
               onChange={(event) => updateDraft("status", event.target.value)}
@@ -143,13 +143,13 @@ export function TeachingScheduleEventDialog({
             value={draft.note}
             onChange={(event) => updateDraft("note", event.target.value)}
             className="min-h-24 rounded border border-transparent bg-[#f1f3f4] px-3 py-3 text-sm leading-6 text-[#3c4043] outline-none placeholder:text-[#5f6368] focus:border-[#1a73e8] focus:bg-white"
-            placeholder="ThÃªm mÃ´ táº£, tÃ i nguyÃªn cáº§n chuáº©n bá»‹, ghi chÃº phÃ¢n bá»• giÃ¡o viÃªn..."
+            placeholder="Thêm mô tả, tài nguyên cần chuẩn bị, ghi chú phân bổ giáo viên..."
           />
         </div>
 
         <div className="flex items-center justify-between border-t border-[#e8eaed] px-6 py-3 md:px-8">
           <button type="button" className="rounded px-3 py-2 text-sm font-medium text-[#1a73e8] hover:bg-[#e8f0fe]">
-            TÃ¹y chá»n khÃ¡c
+            Tùy chọn khác
           </button>
           <button
             type="button"
@@ -157,7 +157,7 @@ export function TeachingScheduleEventDialog({
             className="inline-flex h-9 items-center gap-2 rounded bg-[#1a73e8] px-5 text-sm font-medium text-white hover:bg-[#1765cc]"
           >
             <Check className="h-4 w-4" />
-            LÆ°u
+            Lưu
           </button>
         </div>
       </div>

@@ -1,6 +1,6 @@
 ﻿import { apiRequest } from "@/lib/api-client";
 
-export type HocLieuTaxonomyOption = {
+export type LearningResourceTaxonomyOption = {
   id: string;
   label: string;
   slug?: string;
@@ -17,13 +17,13 @@ export type HocLieuTaxonomyOption = {
   metadata?: Record<string, string>;
 };
 
-export type HocLieuTaxonomyResponse = {
-  grades: HocLieuTaxonomyOption[];
-  subjects: HocLieuTaxonomyOption[];
-  categories: HocLieuTaxonomyOption[];
-  sections: HocLieuTaxonomyOption[];
-  bookSeries: HocLieuTaxonomyOption[];
-  topics: HocLieuTaxonomyOption[];
+export type LearningResourceTaxonomyResponse = {
+  grades: LearningResourceTaxonomyOption[];
+  subjects: LearningResourceTaxonomyOption[];
+  categories: LearningResourceTaxonomyOption[];
+  sections: LearningResourceTaxonomyOption[];
+  bookSeries: LearningResourceTaxonomyOption[];
+  topics: LearningResourceTaxonomyOption[];
   fileTypes: string[];
   designerPresets?: Array<{
     id: string;
@@ -34,7 +34,7 @@ export type HocLieuTaxonomyResponse = {
   }>;
 };
 
-export type HocLieuResourceCard = {
+export type LearningResourceResourceCard = {
   id: string;
   slug: string;
   title: string;
@@ -60,7 +60,7 @@ export type HocLieuResourceCard = {
   updatedAt?: string;
 };
 
-export type HocLieuAssetDetail = {
+export type LearningResourceAssetDetail = {
   id: string;
   resourceId: string;
   title?: string;
@@ -77,30 +77,30 @@ export type HocLieuAssetDetail = {
   status?: string;
 };
 
-export type HocLieuResourceDetail = HocLieuResourceCard & {
+export type LearningResourceResourceDetail = LearningResourceResourceCard & {
   description?: string;
-  assets: HocLieuAssetDetail[];
+  assets: LearningResourceAssetDetail[];
 };
 
-export type HocLieuResourceList = {
-  data: HocLieuResourceCard[];
+export type LearningResourceResourceList = {
+  data: LearningResourceResourceCard[];
   total?: number;
   page?: number;
   limit?: number;
 };
 
-type HocLieuStudioBootstrap = {
-  subjects: HocLieuTaxonomyOption[];
-  groups?: HocLieuTaxonomyOption[];
-  categories?: HocLieuTaxonomyOption[];
-  lessons?: HocLieuTaxonomyOption[];
-  sections?: HocLieuTaxonomyOption[];
+type LearningResourceStudioBootstrap = {
+  subjects: LearningResourceTaxonomyOption[];
+  groups?: LearningResourceTaxonomyOption[];
+  categories?: LearningResourceTaxonomyOption[];
+  lessons?: LearningResourceTaxonomyOption[];
+  sections?: LearningResourceTaxonomyOption[];
   resources?: StudioResourceResponse[];
   fileTypes?: string[];
-  designerPresets?: HocLieuTaxonomyResponse["designerPresets"];
+  designerPresets?: LearningResourceTaxonomyResponse["designerPresets"];
 };
 
-type StudioTaxonomyNodeResponse = HocLieuTaxonomyOption & {
+type StudioTaxonomyNodeResponse = LearningResourceTaxonomyOption & {
   kind?: string;
   childCount?: number;
   resourceCount?: number;
@@ -142,7 +142,7 @@ export type StudioAssetResponse = {
   status?: string;
 };
 
-export type CreateHocLieuResourcePayload = {
+export type CreateLearningResourceResourcePayload = {
   title: string;
   slug?: string;
   subtitle?: string;
@@ -208,17 +208,17 @@ export type CreateTaxonomyPayload = {
   metadata?: Record<string, string>;
 };
 
-export function loadHocLieuStudioBootstrap() {
-  return apiRequest<HocLieuStudioBootstrap>("/api/v1/admin/hoclieu/studio/bootstrap");
+export function loadLearningResourceStudioBootstrap() {
+  return apiRequest<LearningResourceStudioBootstrap>("/api/v1/admin/hoclieu/studio/bootstrap");
 }
 
-export async function loadHocLieuTaxonomies() {
-  const bootstrap = await loadHocLieuStudioBootstrap();
+export async function loadLearningResourceTaxonomies() {
+  const bootstrap = await loadLearningResourceStudioBootstrap();
   return mapStudioBootstrapToTaxonomies(bootstrap);
 }
 
-export async function loadHocLieuStudioWorkspaceData(limit = 120) {
-  const bootstrap = await loadHocLieuStudioBootstrap();
+export async function loadLearningResourceStudioWorkspaceData(limit = 120) {
+  const bootstrap = await loadLearningResourceStudioBootstrap();
   const taxonomy = mapStudioBootstrapToTaxonomies(bootstrap);
   const resources = mapStudioBootstrapToResources(bootstrap, limit);
 
@@ -229,8 +229,8 @@ export async function loadHocLieuStudioWorkspaceData(limit = 120) {
   };
 }
 
-export async function listHocLieuTaxonomies(kind: string) {
-  const taxonomy = await loadHocLieuTaxonomies();
+export async function listLearningResourceTaxonomies(kind: string) {
+  const taxonomy = await loadLearningResourceTaxonomies();
 
   switch (kind) {
     case "subjects":
@@ -251,12 +251,12 @@ export async function listHocLieuTaxonomies(kind: string) {
   }
 }
 
-export function listHocLieuSubjects() {
-  return listHocLieuTaxonomies("subjects");
+export function listLearningResourceSubjects() {
+  return listLearningResourceTaxonomies("subjects");
 }
 
-export async function listHocLieuResources(params: Record<string, string | number | undefined> = {}) {
-  const bootstrap = await loadHocLieuStudioBootstrap();
+export async function listLearningResourceResources(params: Record<string, string | number | undefined> = {}) {
+  const bootstrap = await loadLearningResourceStudioBootstrap();
   const limit = Number(params.limit ?? 100);
   const resources = (bootstrap.resources ?? [])
     .map(mapStudioResourceToCard)
@@ -270,16 +270,16 @@ export async function listHocLieuResources(params: Record<string, string | numbe
     total: resources.length,
     page: 1,
     limit,
-  } satisfies HocLieuResourceList;
+  } satisfies LearningResourceResourceList;
 }
 
-export async function createHocLieuResource(payload: CreateHocLieuResourcePayload) {
+export async function createLearningResourceResource(payload: CreateLearningResourceResourcePayload) {
   const resource = await apiRequest<StudioResourceResponse>("/api/v1/admin/hoclieu/resources", {
     method: "POST",
     body: JSON.stringify(toStudioResourceRequest(payload)),
   });
   if (payload.upstreamUrl || payload.storageUrl) {
-    await createHocLieuAsset(resource.id, {
+    await createLearningResourceAsset(resource.id, {
       title: payload.title,
       selectedFileType: payload.selectedFileType,
       originalFileName: payload.originalFileName || payload.title,
@@ -294,7 +294,7 @@ export async function createHocLieuResource(payload: CreateHocLieuResourcePayloa
   return mapStudioResourceToCard(resource);
 }
 
-export async function updateHocLieuResource(resourceId: string, payload: Partial<CreateHocLieuResourcePayload>) {
+export async function updateLearningResourceResource(resourceId: string, payload: Partial<CreateLearningResourceResourcePayload>) {
   const resource = await apiRequest<StudioResourceResponse>(`/api/v1/admin/hoclieu/resources/${encodeURIComponent(resourceId)}`, {
     method: "PATCH",
     body: JSON.stringify(toStudioResourceRequest(payload)),
@@ -302,13 +302,13 @@ export async function updateHocLieuResource(resourceId: string, payload: Partial
   return mapStudioResourceToCard(resource);
 }
 
-export function deleteHocLieuResource(resourceId: string) {
+export function deleteLearningResourceResource(resourceId: string) {
   return apiRequest<{ deleted: boolean }>(`/api/v1/admin/hoclieu/resources/${encodeURIComponent(resourceId)}`, {
     method: "DELETE",
   });
 }
 
-export async function loadHocLieuResourceDetail(resourceId: string): Promise<HocLieuResourceDetail> {
+export async function loadLearningResourceResourceDetail(resourceId: string): Promise<LearningResourceResourceDetail> {
   const detail = await apiRequest<StudioResourceResponse & { assets?: StudioAssetResponse[]; description?: string }>(
     `/api/v1/hoclieu/resources/${encodeURIComponent(resourceId)}`,
   );
@@ -320,7 +320,7 @@ export async function loadHocLieuResourceDetail(resourceId: string): Promise<Hoc
   };
 }
 
-export async function createHocLieuTaxonomy(kind: string, payload: CreateTaxonomyPayload) {
+export async function createLearningResourceTaxonomy(kind: string, payload: CreateTaxonomyPayload) {
   const path = payload.parentId
     ? `/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(payload.parentId)}/children`
     : "/api/v1/admin/hoclieu/taxonomy";
@@ -331,7 +331,7 @@ export async function createHocLieuTaxonomy(kind: string, payload: CreateTaxonom
   return mapStudioTaxonomyNode(node);
 }
 
-export async function updateHocLieuTaxonomy(kind: string, id: string, payload: Partial<CreateTaxonomyPayload>) {
+export async function updateLearningResourceTaxonomy(kind: string, id: string, payload: Partial<CreateTaxonomyPayload>) {
   const node = await apiRequest<StudioTaxonomyNodeResponse>(`/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body: JSON.stringify(toStudioTaxonomyRequest(kind, payload)),
@@ -339,13 +339,13 @@ export async function updateHocLieuTaxonomy(kind: string, id: string, payload: P
   return mapStudioTaxonomyNode(node);
 }
 
-export function deleteHocLieuTaxonomy(_kind: string, id: string) {
+export function deleteLearningResourceTaxonomy(_kind: string, id: string) {
   return apiRequest<{ deleted: boolean }>(`/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(id)}`, {
     method: "DELETE",
   });
 }
 
-export function uploadHocLieuAsset(input: {
+export function uploadLearningResourceAsset(input: {
   resourceId: string;
   file?: File;
   selectedFileType: string;
@@ -354,7 +354,7 @@ export function uploadHocLieuAsset(input: {
   totalSlides?: number;
   canDownload?: boolean;
 }): Promise<StudioAssetResponse> {
-  return createHocLieuAsset(input.resourceId, {
+  return createLearningResourceAsset(input.resourceId, {
     title: input.title || input.file?.name,
     selectedFileType: input.selectedFileType,
     file: input.file,
@@ -365,7 +365,7 @@ export function uploadHocLieuAsset(input: {
   });
 }
 
-export function createHocLieuAsset(
+export function createLearningResourceAsset(
   resourceId: string,
   input: {
     file?: File;
@@ -390,7 +390,7 @@ export function createHocLieuAsset(
   });
 }
 
-export function updateHocLieuAsset(
+export function updateLearningResourceAsset(
   assetId: string,
   input: {
     title?: string;
@@ -410,7 +410,7 @@ export function updateHocLieuAsset(
   }).then(mapStudioAssetToDetail);
 }
 
-export function uploadHocLieuResource(input: {
+export function uploadLearningResourceResource(input: {
   file?: File;
   title: string;
   selectedFileType: string;
@@ -435,13 +435,13 @@ export function uploadHocLieuResource(input: {
   storageUrl?: string;
   tags?: string[];
   totalSlides?: number;
-}): Promise<{ resource: HocLieuResourceCard; asset: StudioAssetResponse }> {
+}): Promise<{ resource: LearningResourceResourceCard; asset: StudioAssetResponse }> {
   const { upstreamUrl, storageUrl, ...resourceInput } = input;
-  return createHocLieuResource({
+  return createLearningResourceResource({
     ...resourceInput,
     programSlug: input.programSlug || input.subjectId,
   }).then(async (resource) => {
-    const asset = await createHocLieuAsset(resource.id, {
+    const asset = await createLearningResourceAsset(resource.id, {
       title: input.title,
       selectedFileType: input.selectedFileType,
       file: input.file,
@@ -454,7 +454,7 @@ export function uploadHocLieuResource(input: {
   });
 }
 
-function toStudioResourceRequest(payload: Partial<CreateHocLieuResourcePayload>) {
+function toStudioResourceRequest(payload: Partial<CreateLearningResourceResourcePayload>) {
   const fileType = payload.documentTypeId || payload.selectedFileType || "PDF";
   return compactObject({
     title: payload.title,
@@ -530,7 +530,7 @@ function toStudioAssetRequest(input: {
   });
 }
 
-function mapStudioBootstrapToTaxonomies(bootstrap: HocLieuStudioBootstrap): HocLieuTaxonomyResponse {
+function mapStudioBootstrapToTaxonomies(bootstrap: LearningResourceStudioBootstrap): LearningResourceTaxonomyResponse {
   return {
     grades: [],
     subjects: sortTaxonomies(bootstrap.subjects ?? []),
@@ -543,7 +543,7 @@ function mapStudioBootstrapToTaxonomies(bootstrap: HocLieuStudioBootstrap): HocL
   };
 }
 
-function mapStudioBootstrapToResources(bootstrap: HocLieuStudioBootstrap, limit: number): HocLieuResourceList {
+function mapStudioBootstrapToResources(bootstrap: LearningResourceStudioBootstrap, limit: number): LearningResourceResourceList {
   const resources = (bootstrap.resources ?? []).map(mapStudioResourceToCard).slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
 
   return {
@@ -554,7 +554,7 @@ function mapStudioBootstrapToResources(bootstrap: HocLieuStudioBootstrap, limit:
   };
 }
 
-function mapStudioTaxonomyNode(node: StudioTaxonomyNodeResponse): HocLieuTaxonomyOption {
+function mapStudioTaxonomyNode(node: StudioTaxonomyNodeResponse): LearningResourceTaxonomyOption {
   return {
     id: node.id,
     label: node.label,
@@ -569,7 +569,7 @@ function mapStudioTaxonomyNode(node: StudioTaxonomyNodeResponse): HocLieuTaxonom
   };
 }
 
-function mapStudioResourceToCard(resource: StudioResourceResponse): HocLieuResourceCard {
+function mapStudioResourceToCard(resource: StudioResourceResponse): LearningResourceResourceCard {
   const subjectId = resource.subjectId || "hoc-lieu";
   const categoryId = resource.categoryId || resource.groupId || subjectId;
   const sectionId = resource.sectionId || resource.lessonId || categoryId;
@@ -597,7 +597,7 @@ function mapStudioResourceToCard(resource: StudioResourceResponse): HocLieuResou
   };
 }
 
-function mapStudioAssetToDetail(asset: StudioAssetResponse): HocLieuAssetDetail {
+function mapStudioAssetToDetail(asset: StudioAssetResponse): LearningResourceAssetDetail {
   return {
     id: asset.id,
     resourceId: asset.resourceId,
@@ -616,7 +616,7 @@ function mapStudioAssetToDetail(asset: StudioAssetResponse): HocLieuAssetDetail 
   };
 }
 
-function sortTaxonomies(items: HocLieuTaxonomyOption[]) {
+function sortTaxonomies(items: LearningResourceTaxonomyOption[]) {
   return [...items].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.label.localeCompare(right.label, "vi"));
 }
 

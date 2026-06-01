@@ -1,35 +1,35 @@
 ﻿import { classroomSchools } from "@/features/classroom/api/mock-classroom-data";
-import { listHocLieuSubjects, type HocLieuTaxonomyOption } from "@/features/admin-operations/api/learning-resource-authoring-api";
+import { listLearningResourceSubjects, type LearningResourceTaxonomyOption } from "@/features/admin-operations/api/learning-resource-authoring-api";
 import { listManageableUnits, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type {
-  HocLieuManagedSchool,
-  HocLieuTeacherDashboardSubject,
-  HocLieuTeacherProgressDetail,
-  HocLieuTeacherRecentLecture,
-  HocLieuTeacherSubjectTree,
+  LearningResourceManagedSchool,
+  LearningResourceTeacherDashboardSubject,
+  LearningResourceTeacherProgressDetail,
+  LearningResourceTeacherRecentLecture,
+  LearningResourceTeacherSubjectTree,
 } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 
-const subjectProgressCache = new Map<string, Promise<HocLieuTeacherProgressDetail>>();
-const subjectTreeCache = new Map<string, Promise<HocLieuTeacherSubjectTree>>();
+const subjectProgressCache = new Map<string, Promise<LearningResourceTeacherProgressDetail>>();
+const subjectTreeCache = new Map<string, Promise<LearningResourceTeacherSubjectTree>>();
 const TEACHER_DASHBOARD_TIMEOUT_MS = 8000;
 
 const fallbackSubjectDescriptions: Record<string, string> = {
-  toan: "Theo dÃµi tiáº¿n Ä‘á»™ dáº¡y há»c vÃ  tÃ i liá»‡u Ä‘ang dÃ¹ng cho mÃ´n ToÃ¡n.",
-  "tieng-viet": "Danh sÃ¡ch ná»™i dung Tiáº¿ng Viá»‡t Ä‘ang triá»ƒn khai trong nÄƒm há»c hiá»‡n táº¡i.",
-  "tu-nhien-xa-hoi": "Chá»§ Ä‘á» vÃ  há»c liá»‡u Tá»± nhiÃªn vÃ  XÃ£ há»™i phá»¥c vá»¥ dáº¡y há»c háº±ng tuáº§n.",
-  "ngu-van": "Theo dÃµi chÆ°Æ¡ng trÃ¬nh, chá»§ Ä‘á» vÃ  bÃ i há»c Ngá»¯ vÄƒn theo trÆ°á»ng.",
-  "tieng-anh": "Há»c liá»‡u SGK, sÃ¡ch má»m vÃ  bÃ i giáº£ng cho giÃ¡o viÃªn Tiáº¿ng Anh.",
-  "khoa-hoc-tu-nhien": "Tiáº¿n Ä‘á»™ dáº¡y há»c Khoa há»c tá»± nhiÃªn theo tá»«ng chá»§ Ä‘á» vÃ  bÃ i há»c.",
-  "lich-su-dia-li": "Ná»™i dung Lá»‹ch sá»­ vÃ  Äá»‹a lÃ­ Ä‘ang dáº¡y trong trÆ°á»ng.",
-  "giao-duc-stem": "Lesson kit, dá»± Ã¡n STEM vÃ  ná»™i dung minh há»a theo chá»§ Ä‘á».",
-  "giao-duc-ki-nang-cong-dan-so": "TÃ i nguyÃªn ká»¹ nÄƒng sá»‘ vÃ  cÃ´ng dÃ¢n sá»‘ cho giÃ¡o viÃªn.",
-  "tin-hoc": "BÃ i giáº£ng, thá»±c hÃ nh vÃ  kho tÃ i nguyÃªn Tin há»c.",
-  ic3: "TÃ i nguyÃªn giáº£ng dáº¡y vÃ  luyá»‡n thi chá»©ng chá»‰ IC3.",
-  mos: "Lá»™ trÃ¬nh bÃ i dáº¡y, file thá»±c hÃ nh vÃ  bÃ i kiá»ƒm tra MOS.",
+  toan: "Theo dõi tiến độ dạy học và tài liệu đang dùng cho môn Toán.",
+  "tieng-viet": "Danh sách nội dung Tiếng Việt đang triển khai trong năm học hiện tại.",
+  "tu-nhien-xa-hoi": "Chủ đề và học liệu Tự nhiên và Xã hội phục vụ dạy học hằng tuần.",
+  "ngu-van": "Theo dõi chương trình, chủ đề và bài học Ngữ văn theo trường.",
+  "tieng-anh": "Học liệu SGK, sách mềm và bài giảng cho giáo viên Tiếng Anh.",
+  "khoa-hoc-tu-nhien": "Tiến độ dạy học Khoa học tự nhiên theo từng chủ đề và bài học.",
+  "lich-su-dia-li": "Nội dung Lịch sử và Địa lí đang dạy trong trường.",
+  "giao-duc-stem": "Lesson kit, dự án STEM và nội dung minh họa theo chủ đề.",
+  "giao-duc-ki-nang-cong-dan-so": "Tài nguyên kỹ năng số và công dân số cho giáo viên.",
+  "tin-hoc": "Bài giảng, thực hành và kho tài nguyên Tin học.",
+  ic3: "Tài nguyên giảng dạy và luyện thi chứng chỉ IC3.",
+  mos: "Lộ trình bài dạy, file thực hành và bài kiểm tra MOS.",
 };
 
-function fallbackManagedSchools(): HocLieuManagedSchool[] {
+function fallbackManagedSchools(): LearningResourceManagedSchool[] {
   return classroomSchools.map((school) => ({
     id: school.id,
     name: school.name,
@@ -37,7 +37,7 @@ function fallbackManagedSchools(): HocLieuManagedSchool[] {
   }));
 }
 
-export function buildManagedSchoolsFromUnits(units: LmsEducationUnitDTO[] | null | undefined): HocLieuManagedSchool[] {
+export function buildManagedSchoolsFromUnits(units: LmsEducationUnitDTO[] | null | undefined): LearningResourceManagedSchool[] {
   const normalizedUnits = Array.isArray(units)
     ? units.filter((unit) => unit?.id && unit?.name && unit.type !== "system" && unit.code !== "ERG-SYSTEM" && unit.code !== "HOCLIEU-STUDIO")
     : [];
@@ -49,11 +49,11 @@ export function buildManagedSchoolsFromUnits(units: LmsEducationUnitDTO[] | null
   return normalizedUnits.map((unit) => ({
     id: unit.id,
     name: unit.name,
-    principal: unit.type === "school" ? "Quáº£n trá»‹ trÆ°á»ng" : "Quáº£n trá»‹ trung tÃ¢m",
+    principal: unit.type === "school" ? "Quản trị trường" : "Quản trị trung tâm",
   }));
 }
 
-export async function listHocLieuManagedSchools() {
+export async function listLearningResourceManagedSchools() {
   if (!hasApiBase()) {
     return fallbackManagedSchools();
   }
@@ -66,10 +66,11 @@ export async function listHocLieuManagedSchools() {
   }
 }
 
-export async function listHocLieuTeacherSubjects(_: { schoolId: string; academicYear: string }) {
+export async function listLearningResourceTeacherSubjects(input: { schoolId: string; academicYear: string }) {
+  void input;
   if (!hasApiBase()) {
     return Object.entries(fallbackSubjectDescriptions).map(
-      ([id, description]): HocLieuTeacherDashboardSubject => ({
+      ([id, description]): LearningResourceTeacherDashboardSubject => ({
         id,
         label: id.toUpperCase(),
         description,
@@ -78,8 +79,8 @@ export async function listHocLieuTeacherSubjects(_: { schoolId: string; academic
     );
   }
 
-  const subjects = await listHocLieuSubjects();
-  return subjects.map((subject): HocLieuTeacherDashboardSubject => ({
+  const subjects = await listLearningResourceSubjects();
+  return subjects.map((subject): LearningResourceTeacherDashboardSubject => ({
     id: subject.id,
     label: subject.label,
     description: subject.description || fallbackSubjectDescriptions[subject.id],
@@ -87,7 +88,7 @@ export async function listHocLieuTeacherSubjects(_: { schoolId: string; academic
   }));
 }
 
-export function loadHocLieuTeacherSubjectTree(input: { subjectId: string; schoolId: string; academicYear: string; parentId?: string }) {
+export function loadLearningResourceTeacherSubjectTree(input: { subjectId: string; schoolId: string; academicYear: string; parentId?: string }) {
   const cacheKey = [input.subjectId, input.parentId ?? "root", input.schoolId, input.academicYear].join("::");
   const inFlight = subjectTreeCache.get(cacheKey);
   if (inFlight) {
@@ -102,7 +103,7 @@ export function loadHocLieuTeacherSubjectTree(input: { subjectId: string; school
   }
 
   const request = withTeacherDashboardTimeout(
-    apiRequest<HocLieuTeacherSubjectTree>(`/api/hoclieu/teacher/subjects/${encodeURIComponent(input.subjectId)}/tree?${search.toString()}`),
+    apiRequest<LearningResourceTeacherSubjectTree>(`/api/hoclieu/teacher/subjects/${encodeURIComponent(input.subjectId)}/tree?${search.toString()}`),
   ).finally(() => {
     subjectTreeCache.delete(cacheKey);
   });
@@ -111,15 +112,15 @@ export function loadHocLieuTeacherSubjectTree(input: { subjectId: string; school
   return request;
 }
 
-export function listHocLieuRecentOpened(input: { schoolId: string; academicYear: string; limit?: number }) {
+export function listLearningResourceRecentOpened(input: { schoolId: string; academicYear: string; limit?: number }) {
   const search = new URLSearchParams();
   search.set("schoolId", input.schoolId);
   search.set("academicYear", input.academicYear);
   search.set("limit", String(input.limit ?? 8));
-  return withTeacherDashboardTimeout(apiRequest<HocLieuTeacherRecentLecture[]>(`/api/hoclieu/teacher/recent-opened?${search.toString()}`));
+  return withTeacherDashboardTimeout(apiRequest<LearningResourceTeacherRecentLecture[]>(`/api/hoclieu/teacher/recent-opened?${search.toString()}`));
 }
 
-export function loadHocLieuTeacherProgress(input: { subjectId: string; schoolId: string; academicYear: string; nodeId?: string }) {
+export function loadLearningResourceTeacherProgress(input: { subjectId: string; schoolId: string; academicYear: string; nodeId?: string }) {
   const cacheKey = [input.subjectId, input.nodeId ?? "root", input.schoolId, input.academicYear].join("::");
   const inFlight = subjectProgressCache.get(cacheKey);
   if (inFlight) {
@@ -134,7 +135,7 @@ export function loadHocLieuTeacherProgress(input: { subjectId: string; schoolId:
     search.set("nodeId", input.nodeId);
   }
 
-  const request = withTeacherDashboardTimeout(apiRequest<HocLieuTeacherProgressDetail>(`/api/hoclieu/teacher/progress?${search.toString()}`)).finally(() => {
+  const request = withTeacherDashboardTimeout(apiRequest<LearningResourceTeacherProgressDetail>(`/api/hoclieu/teacher/progress?${search.toString()}`)).finally(() => {
     subjectProgressCache.delete(cacheKey);
   });
 
@@ -152,22 +153,22 @@ export function getCurrentAcademicYear(now = new Date()) {
 }
 
 export function toVietnameseRelativeTime(value?: string) {
-  if (!value) return "ChÆ°a cÃ³ dá»¯ liá»‡u";
+  if (!value) return "Chưa có dữ liệu";
 
   const diffMs = Date.now() - Date.parse(value);
   const diffMinutes = Math.max(1, Math.floor(diffMs / 60_000));
 
-  if (diffMinutes < 60) return `${diffMinutes} phÃºt trÆ°á»›c`;
+  if (diffMinutes < 60) return `${diffMinutes} phút trước`;
 
   const diffHours = Math.floor(diffMinutes / 60);
-  if (diffHours < 24) return `${diffHours} giá» trÆ°á»›c`;
+  if (diffHours < 24) return `${diffHours} giờ trước`;
 
   const diffDays = Math.floor(diffHours / 24);
-  return `${diffDays} ngÃ y trÆ°á»›c`;
+  return `${diffDays} ngày trước`;
 }
 
-export function getSubjectFallbackDescription(subject: Pick<HocLieuTaxonomyOption, "id" | "description">) {
-  return subject.description || fallbackSubjectDescriptions[subject.id] || "Theo dÃµi tiáº¿n Ä‘á»™ mÃ´n há»c, chá»§ Ä‘á» vÃ  bÃ i há»c Ä‘ang Ä‘Æ°á»£c dáº¡y.";
+export function getSubjectFallbackDescription(subject: Pick<LearningResourceTaxonomyOption, "id" | "description">) {
+  return subject.description || fallbackSubjectDescriptions[subject.id] || "Theo dõi tiến độ môn học, chủ đề và bài học đang được dạy.";
 }
 
 function withTeacherDashboardTimeout<T>(promise: Promise<T>, timeoutMs = TEACHER_DASHBOARD_TIMEOUT_MS) {

@@ -5,13 +5,13 @@ import { getStoredAccessToken } from "@/features/auth/api/auth-token-storage";
 import { normalizeSsoReturnTo } from "@/features/auth/utils/sso-return-to";
 
 /**
- * SSO Handoff page — This page is loaded on the "source" portal (e.g. LMS).
+ * SSO handoff page loaded on the source portal, for example LMS.
  *
  * Flow:
- * 1. HocLieu detects no session → redirects to lms.erg.edu.vn:3001/sso-handoff?returnTo=https://hoclieu.erg.edu.vn:3001/kho-hoc-lieu
- * 2. This page checks if the user is logged in on LMS.
- * 3. If logged in → redirects to returnTo URL with sso_token appended.
- * 4. If not logged in → redirects to LMS login with redirect back to this handoff page.
+ * 1. A target portal redirects to `/sso-handoff?returnTo=<target-url>`.
+ * 2. This page checks if the user is logged in on the source portal.
+ * 3. If logged in, it redirects to returnTo with sso_token appended.
+ * 4. If not logged in, it redirects to login and then back to this handoff page.
  */
 export function SsoHandoffPage() {
   const [params] = useSearchParams();
@@ -28,12 +28,12 @@ export function SsoHandoffPage() {
 
     const token = getStoredAccessToken();
     if (token) {
-      // User is logged in — redirect to target portal with token
+      // User is logged in; redirect to target portal with token.
       const url = new URL(normalizedReturnTo);
       url.searchParams.set("sso_token", token);
       window.location.replace(url.toString());
     } else {
-      // User is not logged in — redirect to login, then come back here
+      // User is not logged in; redirect to login, then come back here.
       const selfUrl = window.location.href;
       window.location.replace(`/login?redirect=${encodeURIComponent(selfUrl)}`);
     }

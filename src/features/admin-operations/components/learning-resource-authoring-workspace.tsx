@@ -58,22 +58,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  createHocLieuResource,
-  createHocLieuTaxonomy,
-  deleteHocLieuTaxonomy,
-  deleteHocLieuResource,
-  loadHocLieuResourceDetail,
-  loadHocLieuStudioWorkspaceData,
-  updateHocLieuTaxonomy,
-  updateHocLieuAsset,
-  updateHocLieuResource,
-  uploadHocLieuResource,
+  createLearningResourceResource,
+  createLearningResourceTaxonomy,
+  deleteLearningResourceTaxonomy,
+  deleteLearningResourceResource,
+  loadLearningResourceResourceDetail,
+  loadLearningResourceStudioWorkspaceData,
+  updateLearningResourceTaxonomy,
+  updateLearningResourceAsset,
+  updateLearningResourceResource,
+  uploadLearningResourceResource,
   type CreateTaxonomyPayload,
-  type HocLieuAssetDetail,
-  type HocLieuResourceCard,
-  type HocLieuResourceDetail,
-  type HocLieuTaxonomyOption,
-  type HocLieuTaxonomyResponse,
+  type LearningResourceAssetDetail,
+  type LearningResourceResourceCard,
+  type LearningResourceResourceDetail,
+  type LearningResourceTaxonomyOption,
+  type LearningResourceTaxonomyResponse,
 } from "@/features/admin-operations/api/learning-resource-authoring-api";
 import { mockExerciseLibrary } from "@/features/admin-operations/api/mock-exercise-library";
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
@@ -131,9 +131,9 @@ type LocalContentItem = {
   durationMinutes?: number;
   status?: string;
 };
-type AttachedResourceItem = HocLieuResourceCard & {
-  detail?: HocLieuResourceDetail;
-  asset?: HocLieuAssetDetail;
+type AttachedResourceItem = LearningResourceResourceCard & {
+  detail?: LearningResourceResourceDetail;
+  asset?: LearningResourceAssetDetail;
   linkUrl?: string;
 };
 type TaxonomyEditTarget =
@@ -147,7 +147,7 @@ type StructureSelection =
   | { type: "resource"; id: string }
   | null;
 
-const emptyModel: HocLieuTaxonomyResponse = {
+const emptyModel: LearningResourceTaxonomyResponse = {
   grades: [],
   subjects: [],
   categories: [],
@@ -158,21 +158,21 @@ const emptyModel: HocLieuTaxonomyResponse = {
   designerPresets: [],
 };
 
-const mockExplorerModel: HocLieuTaxonomyResponse = {
+const mockExplorerModel: LearningResourceTaxonomyResponse = {
   ...emptyModel,
   subjects: [
     {
       id: "mock-ic3-gs6",
       label: "IC3 GS6",
       slug: "ic3-gs6",
-      description: "Mock môn h?c IC3 GS6 v?i các level h?c li?u.",
+      description: "Mock môn học IC3 GS6 với các level học liệu.",
       status: "active",
     },
     {
       id: "mock-ai-iig-subject",
       label: "AI - IIG",
       slug: "ai-iig",
-      description: "Mock môn h?c AI và ch?ng ch? IIG.",
+      description: "Mock môn học AI và chứng chỉ IIG.",
       status: "active",
     },
   ],
@@ -182,7 +182,7 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
       label: "Level 1",
       slug: "level-1",
       subjectId: "mock-ic3-gs6",
-      description: "N?n t?ng máy tính và thao tác co b?n.",
+      description: "Nền tảng máy tính và thao tác cơ bản.",
       sortOrder: 1,
       status: "active",
     },
@@ -191,7 +191,7 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
       label: "Level 2",
       slug: "level-2",
       subjectId: "mock-ic3-gs6",
-      description: "?ng d?ng van phòng và Internet.",
+      description: "Ứng dụng văn phòng và Internet.",
       sortOrder: 2,
       status: "active",
     },
@@ -200,7 +200,7 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
       label: "Level 3",
       slug: "level-3",
       subjectId: "mock-ic3-gs6",
-      description: "Ôn t?p, ki?m tra và luy?n ch?ng ch?.",
+      description: "Ôn tập, kiểm tra và luyện chứng chỉ.",
       sortOrder: 3,
       status: "active",
     },
@@ -209,7 +209,7 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
       label: "AI Foundation",
       slug: "ai-foundation",
       subjectId: "mock-ai-iig-subject",
-      description: "Nhóm h?c li?u AI co b?n.",
+      description: "Nhóm học liệu AI cơ bản.",
       sortOrder: 1,
       status: "active",
     },
@@ -217,21 +217,21 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
   sections: [
     {
       id: "mock-ic3-lv1-intro",
-      label: "01. Làm quen v?i máy tính",
+      label: "01. Làm quen với máy tính",
       slug: "lam-quen-voi-may-tinh",
       subjectId: "mock-ic3-gs6",
       categoryId: "mock-ic3-level-1",
-      description: "Khái ni?m thi?t b?, h? di?u hành và qu?n lý t?p.",
+      description: "Khái niệm thiết bị, hệ điều hành và quản lý tệp.",
       sortOrder: 1,
       status: "active",
     },
     {
       id: "mock-ic3-lv1-files",
-      label: "02. Qu?n lý thu m?c và t?p",
+      label: "02. Quản lý thư mục và tệp",
       slug: "quan-ly-thu-muc-va-tep",
       subjectId: "mock-ic3-gs6",
       categoryId: "mock-ic3-level-1",
-      description: "T? ch?c file, folder và tài nguyên h?c t?p.",
+      description: "Tổ chức file, folder và tài nguyên học tập.",
       sortOrder: 2,
       status: "active",
     },
@@ -241,48 +241,48 @@ const mockExplorerModel: HocLieuTaxonomyResponse = {
       slug: "word-excel-powerpoint",
       subjectId: "mock-ic3-gs6",
       categoryId: "mock-ic3-level-2",
-      description: "Th?c hành b? ?ng d?ng van phòng.",
+      description: "Thực hành bộ ứng dụng văn phòng.",
       sortOrder: 1,
       status: "active",
     },
     {
       id: "mock-ic3-lv2-internet",
-      label: "02. Internet và an toàn s?",
+      label: "02. Internet và an toàn số",
       slug: "internet-va-an-toan-so",
       subjectId: "mock-ic3-gs6",
       categoryId: "mock-ic3-level-2",
-      description: "Tìm ki?m, email và an toàn tr?c tuy?n.",
+      description: "Tìm kiếm, email và an toàn trực tuyến.",
       sortOrder: 2,
       status: "active",
     },
     {
       id: "mock-ic3-lv3-practice",
-      label: "01. Ôn t?p ch?ng ch?",
+      label: "01. Ôn tập chứng chỉ",
       slug: "on-tap-chung-chi",
       subjectId: "mock-ic3-gs6",
       categoryId: "mock-ic3-level-3",
-      description: "Ð? luy?n t?p t?ng h?p.",
+      description: "Đề luyện tập tổng hợp.",
       sortOrder: 1,
       status: "active",
     },
     {
       id: "mock-ai-overview",
-      label: "01. T?ng quan AI trong h?c t?p",
+      label: "01. Tổng quan AI trong học tập",
       slug: "ai-overview",
       subjectId: "mock-ai-iig-subject",
       categoryId: "mock-ai-foundation",
-      description: "Bài m? d?u v? AI cho h?c sinh.",
+      description: "Bài mở đầu về AI cho học sinh.",
       sortOrder: 1,
       status: "active",
     },
   ],
 };
 
-const mockExplorerResources: HocLieuResourceCard[] = [
+const mockExplorerResources: LearningResourceResourceCard[] = [
   {
     id: "mock-resource-ai-slides",
     slug: "slide-ai-overview",
-    title: "Slide - T?ng quan AI trong h?c t?p",
+    title: "Slide - Tổng quan AI trong học tập",
     programSlug: "ai-iig",
     subjectId: "mock-ai-iig-subject",
     categoryId: "mock-ai-foundation",
@@ -299,7 +299,7 @@ const mockExplorerResources: HocLieuResourceCard[] = [
   {
     id: "mock-resource-ic3-pdf",
     slug: "ic3-gs6-final-guide",
-    title: "Level 1 - tài li?u hu?ng d?n",
+    title: "Level 1 - tài liệu hướng dẫn",
     programSlug: "ic3-gs6",
     subjectId: "mock-ic3-gs6",
     categoryId: "mock-ic3-level-1",
@@ -316,7 +316,7 @@ const mockExplorerResources: HocLieuResourceCard[] = [
   {
     id: "mock-resource-practice",
     slug: "on-tap-lv1",
-    title: "B? câu h?i ôn t?p Level 3",
+    title: "Bộ câu hỏi ôn tập Level 3",
     programSlug: "ic3-gs6",
     subjectId: "mock-ic3-gs6",
     categoryId: "mock-ic3-level-3",
@@ -339,8 +339,8 @@ const mockExplorerLocalContent: LocalContentItem[] = [
     subjectId: "mock-ai-iig-subject",
     parentNodeId: "lesson-mock-ai-overview",
     parentOptionId: "mock-ai-overview",
-    title: "Bài gi?ng Google Slides - T?ng quan AI",
-    description: "Mock link m? tr?c ti?p trong tab m?i.",
+    title: "Bài giảng Google Slides - Tổng quan AI",
+    description: "Mock link mở trực tiếp trong tab mới.",
     slidesUrl: "https://docs.google.com/presentation/d/mock-ai-overview/preview",
     status: "published",
   },
@@ -350,8 +350,8 @@ const mockExplorerLocalContent: LocalContentItem[] = [
     subjectId: "mock-ic3-gs6",
     parentNodeId: "lesson-mock-ic3-lv1-files",
     parentOptionId: "mock-ic3-lv1-files",
-    title: "Bài t?p: S?p x?p thu m?c dúng chu?n",
-    description: "Mock bài t?p n?i b?.",
+    title: "Bài tập: Sắp xếp thư mục đúng chuẩn",
+    description: "Mock bài tập nội bộ.",
     questionCount: 12,
     durationMinutes: 20,
     status: "published",
@@ -370,28 +370,28 @@ const mockExplorerLocalContent: LocalContentItem[] = [
 
 const screenMeta: Record<string, { title: string; description: string; icon: ReactNode }> = {
   "admin-learning-resources": {
-    title: "Ch? d? h?c li?u",
-    description: "T?o môn h?c, xây cây ch? d? và g?n tài li?u theo m?t lu?ng duy nh?t.",
+    title: "Chủ đề học liệu",
+    description: "Tạo môn học, xây cây chủ đề và gắn tài liệu theo một luồng duy nhất.",
     icon: <ListTree className="h-5 w-5" />,
   },
   "admin-learning-structure": {
-    title: "C?u trúc",
-    description: "T? ch?c môn h?c thành nhóm h?c li?u, ch? d? và unit/lesson d? Hoclieu hi?n th?.",
+    title: "Cấu trúc",
+    description: "Tổ chức môn học thành nhóm học liệu, chủ đề và unit/lesson để LMS hiển thị.",
     icon: <ListTree className="h-5 w-5" />,
   },
   "admin-learning-resource-list": {
-    title: "Tài li?u",
-    description: "Tra c?u và c?p nh?t h?c li?u dã g?n vào t?ng v? trí trong c?u trúc môn h?c.",
+    title: "Tài liệu",
+    description: "Tra cứu và cập nhật học liệu đã gắn vào từng vị trí trong cấu trúc môn học.",
     icon: <LibraryBig className="h-5 w-5" />,
   },
   "admin-learning-resource-upload": {
-    title: "G?n link",
-    description: "Dán link Google Drive/Google Slides và ch?n noi g?n trong cây h?c li?u.",
+    title: "Gắn link",
+    description: "Dán link Google Drive/Google Slides và chọn nơi gắn trong cây học liệu.",
     icon: <LinkIcon className="h-5 w-5" />,
   },
   "admin-learning-resource-publish": {
-    title: "Xu?t b?n",
-    description: "Ki?m tra tr?ng thái s?n sàng tru?c khi hi?n th? trên Hoclieu.",
+    title: "Xuất bản",
+    description: "Kiểm tra trạng thái sẵn sàng trước khi hiển thị trên LMS.",
     icon: <CheckCircle2 className="h-5 w-5" />,
   },
 };
@@ -400,7 +400,7 @@ function safeArray<T>(value: T[] | null | undefined): T[] {
   return Array.isArray(value) ? value : [];
 }
 
-function normalizeTaxonomyOption(option: HocLieuTaxonomyOption | null | undefined): HocLieuTaxonomyOption | null {
+function normalizeTaxonomyOption(option: LearningResourceTaxonomyOption | null | undefined): LearningResourceTaxonomyOption | null {
   if (!option || typeof option !== "object") return null;
   const id = String(option.id || option.slug || option.label || "").trim();
   const label = String(option.label || option.slug || option.id || "").trim();
@@ -422,11 +422,11 @@ function normalizeTaxonomyOption(option: HocLieuTaxonomyOption | null | undefine
   };
 }
 
-function normalizeTaxonomyOptions(options: HocLieuTaxonomyOption[] | null | undefined): HocLieuTaxonomyOption[] {
-  return safeArray(options).map(normalizeTaxonomyOption).filter(Boolean) as HocLieuTaxonomyOption[];
+function normalizeTaxonomyOptions(options: LearningResourceTaxonomyOption[] | null | undefined): LearningResourceTaxonomyOption[] {
+  return safeArray(options).map(normalizeTaxonomyOption).filter(Boolean) as LearningResourceTaxonomyOption[];
 }
 
-function normalizeContentModel(model: HocLieuTaxonomyResponse | null | undefined): HocLieuTaxonomyResponse {
+function normalizeContentModel(model: LearningResourceTaxonomyResponse | null | undefined): LearningResourceTaxonomyResponse {
   return {
     ...emptyModel,
     ...(model && typeof model === "object" ? model : {}),
@@ -441,7 +441,7 @@ function normalizeContentModel(model: HocLieuTaxonomyResponse | null | undefined
   };
 }
 
-function normalizeResources(resources: HocLieuResourceCard[] | null | undefined): HocLieuResourceCard[] {
+function normalizeResources(resources: LearningResourceResourceCard[] | null | undefined): LearningResourceResourceCard[] {
   return safeArray(resources).filter((resource) => Boolean(resource?.id && resource?.subjectId));
 }
 
@@ -464,7 +464,7 @@ function findPath(nodes: StudioNode[], nodeId: string, trail: StudioNode[] = [])
   return [];
 }
 
-function buildSubjects(model: HocLieuTaxonomyResponse, resources: HocLieuResourceCard[]): StudioSubject[] {
+function buildSubjects(model: LearningResourceTaxonomyResponse, resources: LearningResourceResourceCard[]): StudioSubject[] {
   return buildLearningResourceSubjects(model, resources) as StudioSubject[];
 }
 
@@ -515,35 +515,35 @@ function toEditTargetFromNode(node: StudioNode | null | undefined): TaxonomyEdit
 function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "category") {
     return {
-      title: "Nhóm h?c li?u",
-      description: "M?i nhóm h?c li?u ch? ch?a danh sách bài h?c bên trong.",
+      title: "Nhóm học liệu",
+      description: "Mỗi nhóm học liệu chỉ chứa danh sách bài học bên trong.",
       icon: <Folder className="h-5 w-5" />,
     };
   }
   if (optionId === "section") {
     return {
-      title: "Bài h?c",
-      description: "Bài h?c là noi g?n slide thuy?t trình, bài t?p và tài li?u trong cùng m?t ch?.",
+      title: "Bài học",
+      description: "Bài học là nơi gắn slide thuyết trình, bài tập và tài liệu trong cùng một chỗ.",
       icon: <GraduationCap className="h-5 w-5" />,
     };
   }
   if (optionId === "lecture") {
     return {
-      title: "Bài gi?ng",
-      description: "Uu tiên dán link Google Slides d? m? tr?c ti?p t? LMS mà không c?n upload file.",
+      title: "Bài giảng",
+      description: "Ưu tiên dán link Google Slides để mở trực tiếp từ LMS mà không cần upload file.",
       icon: <Presentation className="h-5 w-5" />,
     };
   }
   if (optionId === "resource") {
     return {
-      title: "Tài li?u",
-      description: "Dán link Google Drive/Google Slides d? g?n tài li?u tr?c ti?p trong popup này.",
+      title: "Tài liệu",
+      description: "Dán link Google Drive/Google Slides để gắn tài liệu trực tiếp trong popup này.",
       icon: <LinkIcon className="h-5 w-5" />,
     };
   }
   return {
-    title: "Bài t?p",
-    description: "Ch?n t? danh sách bài t?p mock theo môn, ch? d? và bài h?c d? g?n nhanh vào lesson.",
+    title: "Bài tập",
+    description: "Chọn từ danh sách bài tập mock theo môn, chủ đề và bài học để gắn nhanh vào lesson.",
     icon: <FileCheck className="h-5 w-5" />,
   };
 }
@@ -557,10 +557,10 @@ function getDisplayLink(resource: AttachedResourceItem | LocalContentItem) {
 }
 
 function getPublishStatusLabel(status?: string) {
-  if (status === "hidden") return "Ðã ?n";
-  if (status === "draft") return "B?n nháp";
-  if (status === "active" || status === "published") return "Ðã xu?t b?n";
-  return "B?n nháp";
+  if (status === "hidden") return "Đã ẩn";
+  if (status === "draft") return "Bản nháp";
+  if (status === "active" || status === "published") return "Đã xuất bản";
+  return "Bản nháp";
 }
 
 function getResourceDisplayBadge(resource: AttachedResourceItem) {
@@ -569,22 +569,22 @@ function getResourceDisplayBadge(resource: AttachedResourceItem) {
   if (link.includes("drive.google.com")) return "Google Drive";
 
   const rawType = (resource.fileTypeBadge || resource.selectedFileType || "").toUpperCase();
-  if (rawType === "PPTX" || rawType === "LINK") return "Bài gi?ng";
+  if (rawType === "PPTX" || rawType === "LINK") return "Bài giảng";
   if (rawType === "PDF") return "PDF";
   if (rawType === "VIDEO") return "Video";
   if (rawType === "AUDIO") return "Audio";
   if (rawType === "HTML5") return "HTML5";
-  if (rawType === "ZIP") return "T?p nén";
+  if (rawType === "ZIP") return "Tệp nén";
 
-  return "Tài li?u";
+  return "Tài liệu";
 }
 
 function slugifyPathSegment(value: string) {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/d/g, "d")
-    .replace(/Ð/g, "D")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "") || "muc";
@@ -631,8 +631,8 @@ function getExplorerSize(value: StudioNode | LocalContentItem | AttachedResource
 
 export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
   const queryClient = useQueryClient();
-  const [model, setModel] = useState<HocLieuTaxonomyResponse>(emptyModel);
-  const [resources, setResources] = useState<HocLieuResourceCard[]>([]);
+  const [model, setModel] = useState<LearningResourceTaxonomyResponse>(emptyModel);
+  const [resources, setResources] = useState<LearningResourceResourceCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
@@ -647,14 +647,14 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
     setLoading(true);
     try {
       if (options.force) {
+        await queryClient.invalidateQueries({ queryKey: ["admin-operations", "hoclieu-v2"] });
         await queryClient.invalidateQueries({ queryKey: ["admin-operations", "learning-resources-v2"] });
-        await queryClient.invalidateQueries({ queryKey: ["hoclieu"] });
       }
 
       const staleTime = options.force ? 0 : 60_000;
       const workspaceData = await queryClient.fetchQuery({
-        queryKey: ["admin-operations", "learning-resources-v2", "workspace", 120],
-        queryFn: () => loadHocLieuStudioWorkspaceData(120),
+        queryKey: ["admin-operations", "hoclieu-v2", "workspace", 120],
+        queryFn: () => loadLearningResourceStudioWorkspaceData(120),
         staleTime,
       });
 
@@ -820,7 +820,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
           setDialogState(null);
         }}
         onCreateLecture={async (payload) => {
-          await createHocLieuResource(payload);
+          await createLearningResourceResource(payload);
           await refreshData({ force: true });
           setDialogState(null);
         }}
@@ -900,23 +900,23 @@ function SubjectsScreen({
         <CardHeader>
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
-              <CardTitle>Danh sách môn h?c</CardTitle>
-              <CardDescription>M?i môn có th? có nhi?u nhóm h?c li?u, ch? d? và unit khác nhau.</CardDescription>
+              <CardTitle>Danh sách môn học</CardTitle>
+              <CardDescription>Mỗi môn có thể có nhiều nhóm học liệu, chủ đề và unit khác nhau.</CardDescription>
             </div>
             <Button onClick={onCreateSubject} className="bg-[var(--erg-blue)] hover:bg-blue-800">
               <Plus className="h-4 w-4" />
-              T?o môn h?c
+              Tạo môn học
             </Button>
           </div>
-          <SearchInput value={query} onChange={onQueryChange} placeholder="Tìm môn h?c, chuong trình, b? sách" />
+          <SearchInput value={query} onChange={onQueryChange} placeholder="Tìm môn học, chương trình, bộ sách" />
         </CardHeader>
         <CardContent>
           <div className="overflow-hidden rounded-2xl border border-slate-200">
             <div className="grid grid-cols-[minmax(0,1fr)_120px_120px_120px_120px] bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
-              <span>Môn h?c</span>
+              <span>Môn học</span>
               <span>Category</span>
-              <span>Tài li?u</span>
-              <span>Tr?ng thái</span>
+              <span>Tài liệu</span>
+              <span>Trạng thái</span>
               <span className="text-right">Thao tác</span>
             </div>
             {subjects.map((subject) => (
@@ -930,7 +930,7 @@ function SubjectsScreen({
               >
                 <span className="min-w-0">
                   <span className="block truncate font-semibold text-slate-950">{subject.label}</span>
-                  <span className="mt-1 block truncate text-sm text-slate-500">{subject.description || "Chua có mô t?."}</span>
+                  <span className="mt-1 block truncate text-sm text-slate-500">{subject.description || "Chưa có mô tả."}</span>
                 </span>
                 <span className="text-sm font-semibold text-slate-700">{subject.groupCount}</span>
                 <span className="text-sm font-semibold text-slate-700">{subject.resourceCount}</span>
@@ -969,24 +969,24 @@ function SubjectsScreen({
 
       <Card>
         <CardHeader>
-          <CardTitle>Môn dang ch?n</CardTitle>
-          <CardDescription>Thông tin t?ng quát tru?c khi vào c?u trúc.</CardDescription>
+          <CardTitle>Môn đang chọn</CardTitle>
+          <CardDescription>Thông tin tổng quát trước khi vào cấu trúc.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {selectedSubject ? (
             <>
               <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
                 <div className="text-xl font-bold text-slate-950">{selectedSubject.label}</div>
-                <p className="mt-2 text-sm leading-6 text-slate-500">{selectedSubject.description || "Môn này chua có mô t?."}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">{selectedSubject.description || "Môn này chưa có mô tả."}</p>
               </div>
-              <InfoRow label="Nhóm h?c li?u" value={`${selectedSubject.groupCount} nhóm`} />
-              <InfoRow label="Bài h?c" value={`${selectedSubject.lessonCount} bài`} />
-              <InfoRow label="Tài li?u" value={`${selectedSubject.resourceCount} tài li?u`} />
-              <InfoRow label="Tr?ng thái" value={getPublishStatusLabel(selectedSubject.status)} />
+              <InfoRow label="Nhóm học liệu" value={`${selectedSubject.groupCount} nhóm`} />
+              <InfoRow label="Bài học" value={`${selectedSubject.lessonCount} bài`} />
+              <InfoRow label="Tài liệu" value={`${selectedSubject.resourceCount} tài liệu`} />
+              <InfoRow label="Trạng thái" value={getPublishStatusLabel(selectedSubject.status)} />
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" onClick={() => onEditSubject(selectedSubject)}>
                   <Pencil className="h-4 w-4" />
-                  S?a môn
+                  Sửa môn
                 </Button>
                 <Button variant="danger" onClick={() => onDeleteSubject(selectedSubject)}>
                   <Trash2 className="h-4 w-4" />
@@ -995,7 +995,7 @@ function SubjectsScreen({
               </div>
             </>
           ) : (
-            <EmptyState title="Chua ch?n môn" description="Ch?n m?t môn ? danh sách d? xem chi ti?t." />
+            <EmptyState title="Chưa chọn môn" description="Chọn một môn ở danh sách để xem chi tiết." />
           )}
         </CardContent>
       </Card>
@@ -1044,7 +1044,7 @@ function StructureScreen({
   onEditLocalContent: (item: LocalContentItem) => void;
   onDeleteLocalContent: (itemId: string) => void;
   onRefreshData: () => Promise<void>;
-  resources: HocLieuResourceCard[];
+  resources: LearningResourceResourceCard[];
 }) {
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
   const [treeQuery, setTreeQuery] = useState("");
@@ -1126,7 +1126,7 @@ function StructureScreen({
     void Promise.all(
       missingDetails.map(async (resource) => {
         try {
-          const detail = await loadHocLieuResourceDetail(resource.id);
+          const detail = await loadLearningResourceResourceDetail(resource.id);
           const asset = detail.assets[0];
           return [
             resource.id,
@@ -1173,7 +1173,7 @@ function StructureScreen({
     onCreateChild();
   }, [onCreateChild, onSelectNode]);
   const handleDeleteResource = useCallback(async (resource: AttachedResourceItem) => {
-    await deleteHocLieuResource(resource.id);
+    await deleteLearningResourceResource(resource.id);
     setAttachedResources((current) => {
       const next = { ...current };
       delete next[resource.id];
@@ -1362,7 +1362,7 @@ function StructureScreen({
                         onOpenContextMenu={openContextMenu}
                       />
                     )) : (
-                      <div className="px-2 py-3 text-xs text-slate-500">Không tìm th?y n?i dung phù h?p.</div>
+                      <div className="px-2 py-3 text-xs text-slate-500">Không tìm thấy nội dung phù hợp.</div>
                     )}
                   </div>
                 ) : null}
@@ -1372,7 +1372,7 @@ function StructureScreen({
                 className="m-2 rounded-md border border-dashed border-slate-300 bg-slate-50 p-3 text-xs leading-5 text-slate-500"
                 onContextMenu={(event) => openContextMenu(event)}
               >
-                Chua có môn h?c. B?m New d? b?t d?u.
+                Chưa có môn học. Bấm New để bắt đầu.
               </div>
             )}
           </div>
@@ -1501,7 +1501,7 @@ function StructureScreen({
               <div className="flex h-full min-h-[340px] flex-col items-center justify-center text-center text-[13px]">
                 <Folder className="h-12 w-12 text-[#cbd5e1]" />
                 <div className="mt-3 font-semibold text-[#111827]">This folder is empty</div>
-                <p className="mt-1 max-w-sm text-[#64748b]">Dùng chu?t ph?i ho?c nút New d? t?o thu m?c, bài h?c ho?c g?n tài li?u.</p>
+                <p className="mt-1 max-w-sm text-[#64748b]">Dùng chuột phải hoặc nút New để tạo thư mục, bài học hoặc gắn tài liệu.</p>
               </div>
             ) : null}
           </div>
@@ -1636,8 +1636,8 @@ function StructureContextMenu({
 }) {
   const hasTarget = Boolean(node || localContent || resource || subject);
   const canOpen = Boolean(subject || node || resource?.linkUrl || (localContent && getDisplayLink(localContent)));
-  const targetTitle = node?.label || localContent?.title || resource?.title || subject?.label || "V? trí hi?n t?i";
-  const targetType = node ? getNodeKindLabel(node.kind) : localContent ? (localContent.kind === "lecture" ? "Bài gi?ng" : "Bài t?p") : resource ? getResourceDisplayBadge(resource) : subject ? "Môn h?c" : "Thu m?c hi?n t?i";
+  const targetTitle = node?.label || localContent?.title || resource?.title || subject?.label || "Vị trí hiện tại";
+  const targetType = node ? getNodeKindLabel(node.kind) : localContent ? (localContent.kind === "lecture" ? "Bài giảng" : "Bài tập") : resource ? getResourceDisplayBadge(resource) : subject ? "Môn học" : "Thư mục hiện tại";
   return (
     <div
       className="fixed z-50 w-[294px] overflow-hidden rounded-md border border-[#d8d8d8] bg-white py-1 text-[13px] text-[#1f1f1f] shadow-[0_8px_24px_rgba(15,23,42,0.18)]"
@@ -1650,20 +1650,20 @@ function StructureContextMenu({
       </div>
       <button type="button" onClick={onOpen} disabled={!canOpen} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
         <ArrowUpRight className="h-4 w-4 text-[#374151]" />
-        M?
+        Mở
       </button>
       <button type="button" onClick={onRefresh} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6]">
         <RefreshCw className="h-4 w-4 text-[#374151]" />
-        Làm m?i d? li?u
+        Làm mới dữ liệu
       </button>
       <div className="my-1 h-px bg-[#eeeeee]" />
       <button type="button" onClick={onEdit} disabled={!hasTarget} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
         <Pencil className="h-4 w-4 text-[#374151]" />
-        S?a tên / thông tin
+        Sửa tên / thông tin
       </button>
       <button type="button" onClick={onCopyUrl} disabled={!canCopyUrl} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
         <Copy className="h-4 w-4 text-[#374151]" />
-        Copy du?ng d?n
+        Copy đường dẫn
       </button>
       <button type="button" onClick={onDelete} disabled={!hasTarget} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
         <Trash2 className="h-4 w-4 text-[#dc2626]" />
@@ -1672,11 +1672,11 @@ function StructureContextMenu({
       <div className="my-1 h-px bg-[#eeeeee]" />
       <button type="button" onClick={onCreateSubject} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6]">
         <BookOpen className="h-4 w-4 text-[#374151]" />
-        T?o môn h?c
+        Tạo môn học
       </button>
       <button type="button" onClick={onCreateRoot} disabled={!canCreateRoot} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
         <FolderPlus className="h-4 w-4 text-[#374151]" />
-        T?o nhóm h?c li?u
+        Tạo nhóm học liệu
       </button>
       <button
         type="button"
@@ -1691,30 +1691,30 @@ function StructureContextMenu({
   );
 }
 
-function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; resources: HocLieuResourceCard[] }) {
+function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; resources: LearningResourceResourceCard[] }) {
   return (
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <CardTitle>Kho tài li?u</CardTitle>
-            <CardDescription>C?p nh?t thông tin, tr?ng thái và noi g?n tài li?u.</CardDescription>
+            <CardTitle>Kho tài liệu</CardTitle>
+            <CardDescription>Cập nhật thông tin, trạng thái và nơi gắn tài liệu.</CardDescription>
           </div>
           <Button className="bg-[var(--erg-blue)] hover:bg-blue-800">
             <LinkIcon className="h-4 w-4" />
-            G?n link tài li?u
+            Gắn link tài liệu
           </Button>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
-          <SearchInput value="" onChange={() => undefined} placeholder="Tìm tài li?u" />
+          <SearchInput value="" onChange={() => undefined} placeholder="Tìm tài liệu" />
           <select className={inputClassName}>
-            <option>T?t c? môn h?c</option>
+            <option>Tất cả môn học</option>
             {subjects.map((subject) => (
               <option key={subject.id}>{subject.label}</option>
             ))}
           </select>
           <select className={inputClassName}>
-            <option>T?t c? d?nh d?ng</option>
+            <option>Tất cả định dạng</option>
             <option>PDF</option>
             <option>PPTX</option>
             <option>Video</option>
@@ -1737,14 +1737,14 @@ function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; r
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
-                  C?p nh?t
+                  Cập nhật
                   <ArrowUpRight className="h-4 w-4" />
                 </Button>
               </div>
             ))}
           </div>
         ) : (
-          <EmptyState title="Chua có tài li?u" description="Khi BE tr? resources, danh sách s? hi?n th? ? dây d? c?p nh?t riêng." />
+          <EmptyState title="Chưa có tài liệu" description="Khi BE trả resources, danh sách sẽ hiển thị ở đây để cập nhật riêng." />
         )}
       </CardContent>
     </Card>
@@ -1786,19 +1786,19 @@ function UploadScreen({
     event.preventDefault();
     const normalizedUrl = normalizeGoogleViewerUrl(resourceUrl);
     if (!normalizedUrl || !subject || !location.categoryId) {
-      setMessage("Vui lòng ch?n môn, v? trí có nhóm h?c li?u và dán link Google Drive/Google Slides.");
+      setMessage("Vui lòng chọn môn, vị trí có nhóm học liệu và dán link Google Drive/Google Slides.");
       return;
     }
     const parsedTotalSlides = parsePositiveInteger(totalSlides);
     if (fileType === "PPTX" && totalSlides.trim() && !parsedTotalSlides) {
-      setMessage("T?ng s? slide ph?i là s? nguyên l?n hon 0.");
+      setMessage("Tổng số slide phải là số nguyên lớn hơn 0.");
       return;
     }
     setSaving(true);
     setMessage("");
     try {
-      await uploadHocLieuResource({
-        title: title.trim() || "Tài li?u Google Drive",
+      await uploadLearningResourceResource({
+        title: title.trim() || "Tài liệu Google Drive",
         selectedFileType: fileType,
         subjectId: subject.id,
         programSlug: subject.id,
@@ -1813,12 +1813,12 @@ function UploadScreen({
         totalSlides: parsedTotalSlides,
         canDownload: fileType !== "PPTX",
       });
-      setMessage("Ðã luu link và g?n tài li?u vào dúng v? trí trong cây h?c li?u.");
+      setMessage("Đã lưu link và gắn tài liệu vào đúng vị trí trong cây học liệu.");
       setTitle("");
       setResourceUrl("");
       setTotalSlides("");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không luu du?c link tài li?u.");
+      setMessage(error instanceof Error ? error.message : "Không lưu được link tài liệu.");
     } finally {
       setSaving(false);
     }
@@ -1828,12 +1828,12 @@ function UploadScreen({
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
       <Card>
         <CardHeader>
-          <CardTitle>G?n tài li?u b?ng link</CardTitle>
-          <CardDescription>Ch?n môn, v? trí trong c?u trúc và dán link Google Drive/Google Slides d? giáo viên m? tr?c ti?p.</CardDescription>
+          <CardTitle>Gắn tài liệu bằng link</CardTitle>
+          <CardDescription>Chọn môn, vị trí trong cấu trúc và dán link Google Drive/Google Slides để giáo viên mở trực tiếp.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-2" onSubmit={handleUpload}>
-            <Field label="Môn h?c">
+            <Field label="Môn học">
               <select className={inputClassName} value={subject?.id ?? ""} onChange={(event) => setSubjectId(event.target.value)}>
                 {subjects.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -1842,7 +1842,7 @@ function UploadScreen({
                 ))}
               </select>
             </Field>
-            <Field label="G?n vào v? trí">
+            <Field label="Gắn vào vị trí">
               <select className={inputClassName} value={node?.id ?? ""} onChange={(event) => setNodeId(event.target.value)}>
                 {subjectNodes.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -1851,16 +1851,16 @@ function UploadScreen({
                 ))}
               </select>
             </Field>
-            <Field label="Tên hi?n th?">
-              <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví d?: Bài gi?ng Unit 1" />
+            <Field label="Tên hiển thị">
+              <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Bài giảng Unit 1" />
             </Field>
-            <Field label="Lo?i tài li?u">
+            <Field label="Loại tài liệu">
               <select className={inputClassName} value={fileType} onChange={(event) => setFileType(event.target.value)}>
-                <option value="PPTX">Bài gi?ng di?n t?</option>
+                <option value="PPTX">Bài giảng điện tử</option>
                 <option value="PDF">PDF / Giáo trình</option>
                 <option value="AUDIO">Audio</option>
                 <option value="VIDEO">Video</option>
-                <option value="ZIP">Gói h?c li?u ZIP</option>
+                <option value="ZIP">Gói học liệu ZIP</option>
                 <option value="HTML5">HTML5</option>
               </select>
             </Field>
@@ -1869,24 +1869,24 @@ function UploadScreen({
                 <Input
                   value={resourceUrl}
                   onChange={(event) => setResourceUrl(event.target.value)}
-                  placeholder="Dán link share, preview ho?c embed t? Google Drive"
+                  placeholder="Dán link share, preview hoặc embed từ Google Drive"
                 />
                 <p className="text-xs leading-5 text-slate-500">
-                  FE s? luu link vào asset, không upload file th?t. Link Google Drive d?ng `/file/d/.../view` s? du?c chu?n hóa v? `/preview`.
+                  FE sẽ lưu link vào asset, không upload file thật. Link Google Drive dạng `/file/d/.../view` sẽ được chuẩn hóa về `/preview`.
                 </p>
               </Field>
             </div>
             {fileType === "PPTX" ? (
               <div className="md:col-span-2">
-                <Field label="T?ng s? slide">
+                <Field label="Tổng số slide">
                   <Input
                     value={totalSlides}
                     onChange={(event) => setTotalSlides(event.target.value.replace(/[^\d]/g, ""))}
                     inputMode="numeric"
-                    placeholder="Ví d?: 20"
+                    placeholder="Ví dụ: 20"
                   />
                   <p className="text-xs leading-5 text-slate-500">
-                    Dùng cho popup xác nh?n khi giáo viên back ho?c t?t bài trình chi?u.
+                    Dùng cho popup xác nhận khi giáo viên back hoặc tắt bài trình chiếu.
                   </p>
                 </Field>
               </div>
@@ -1894,7 +1894,7 @@ function UploadScreen({
             {message ? <div className="md:col-span-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-900">{message}</div> : null}
             <div className="md:col-span-2 flex justify-end">
               <Button type="submit" disabled={saving || !resourceUrl.trim() || !subject || !location.categoryId} className="bg-[var(--erg-blue)] hover:bg-blue-800">
-                {saving ? "Ðang luu..." : "Luu link và g?n tài li?u"}
+                {saving ? "Đang lưu..." : "Lưu link và gắn tài liệu"}
               </Button>
             </div>
           </form>
@@ -1903,15 +1903,15 @@ function UploadScreen({
 
       <Card>
         <CardHeader>
-          <CardTitle>Thông tin v? trí</CardTitle>
-          <CardDescription>Giúp giáo viên ki?m tra link s? du?c g?n vào dâu tru?c khi luu.</CardDescription>
+          <CardTitle>Thông tin vị trí</CardTitle>
+          <CardDescription>Giúp giáo viên kiểm tra link sẽ được gắn vào đâu trước khi lưu.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          <InfoRow label="Môn" value={subject?.label ?? "Chua ch?n"} />
-          <InfoRow label="V? trí" value={pathLabel(subject?.label ?? "", path) || "Chua ch?n"} />
-          <InfoRow label="Lo?i" value={node ? getNodeKindLabel(node.kind) : "Chua ch?n"} />
-          <ChecklistItem label={location.categoryId ? "Ðã xác d?nh nhóm h?c li?u" : "C?n ch?n m?t nhóm h?c li?u"} />
-          <ChecklistItem label={resourceUrl.trim() ? "Ðã nh?p link tài li?u" : "Chua nh?p link tài li?u"} />
+          <InfoRow label="Môn" value={subject?.label ?? "Chưa chọn"} />
+          <InfoRow label="Vị trí" value={pathLabel(subject?.label ?? "", path) || "Chưa chọn"} />
+          <InfoRow label="Loại" value={node ? getNodeKindLabel(node.kind) : "Chưa chọn"} />
+          <ChecklistItem label={location.categoryId ? "Đã xác định nhóm học liệu" : "Cần chọn một nhóm học liệu"} />
+          <ChecklistItem label={resourceUrl.trim() ? "Đã nhập link tài liệu" : "Chưa nhập link tài liệu"} />
         </CardContent>
       </Card>
     </div>
@@ -1939,22 +1939,22 @@ function pathLabel(subjectLabel: string, path: StudioNode[]) {
   return [subjectLabel, ...path.map((item) => item.label)].filter(Boolean).join(" / ");
 }
 
-function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; resources: HocLieuResourceCard[] }) {
+function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; resources: LearningResourceResourceCard[] }) {
   return (
     <div className="grid gap-5 lg:grid-cols-3">
-      <PublishCard title="Môn h?c" value={subjects.length} description="S?n sàng dua vào catalog." />
-      <PublishCard title="Tài li?u" value={resources.length} description="Ðang có trong kho h?c li?u." />
-      <PublishCard title="C?n ki?m tra" value={resources.filter((item) => item.status !== "published").length} description="Chua ? tr?ng thái dã xu?t b?n." />
+      <PublishCard title="Môn học" value={subjects.length} description="Sẵn sàng đưa vào catalog." />
+      <PublishCard title="Tài liệu" value={resources.length} description="Đang có trong kho học liệu." />
+      <PublishCard title="Cần kiểm tra" value={resources.filter((item) => item.status !== "published").length} description="Chưa ở trạng thái đã xuất bản." />
       <Card className="lg:col-span-3">
         <CardHeader>
-          <CardTitle>Lu?ng xu?t b?n d? xu?t</CardTitle>
-          <CardDescription>Tách kh?i màn hình t?o c?u trúc d? admin ki?m tra tru?c khi public.</CardDescription>
+          <CardTitle>Luồng xuất bản đề xuất</CardTitle>
+          <CardDescription>Tách khỏi màn hình tạo cấu trúc để admin kiểm tra trước khi public.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
-          <PublishStep icon={<BookOpen className="h-5 w-5" />} title="Môn h?c" description="Có tên, mô t? và tr?ng thái." />
-          <PublishStep icon={<ListTree className="h-5 w-5" />} title="C?u trúc" description="Có nhóm h?c li?u, ch? d? và unit/lesson." />
-          <PublishStep icon={<LinkIcon className="h-5 w-5" />} title="Tài li?u" description="Link tài li?u dã du?c g?n dúng v? trí." />
-          <PublishStep icon={<Settings2 className="h-5 w-5" />} title="Public" description="Ki?m tra visibility tru?c khi lên web." />
+          <PublishStep icon={<BookOpen className="h-5 w-5" />} title="Môn học" description="Có tên, mô tả và trạng thái." />
+          <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có nhóm học liệu, chủ đề và unit/lesson." />
+          <PublishStep icon={<LinkIcon className="h-5 w-5" />} title="Tài liệu" description="Link tài liệu đã được gắn đúng vị trí." />
+          <PublishStep icon={<Settings2 className="h-5 w-5" />} title="Public" description="Kiểm tra visibility trước khi lên web." />
         </CardContent>
       </Card>
     </div>
@@ -1994,7 +1994,7 @@ const ExplorerTreeRow = memo(function ExplorerTreeRow({
         type="button"
         onClick={() => (hasChildren ? onToggleNode(node.id) : onSelectNode(node.id))}
         className="grid h-6 w-5 place-items-center rounded text-[#6b7280]"
-        aria-label={expanded ? "Thu g?n" : "M? r?ng"}
+        aria-label={expanded ? "Thu gọn" : "Mở rộng"}
       >
         {hasChildren ? (expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />) : <span />}
       </button>
@@ -2012,7 +2012,7 @@ const ExplorerTreeRow = memo(function ExplorerTreeRow({
         onClick={() => onCreateChild(node)}
         disabled={!node.optionId}
         className="grid h-6 w-6 place-items-center rounded text-[#9ca3af] opacity-0 hover:bg-[#dceeff] hover:text-[#2563eb] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1]"
-        aria-label="Thêm n?i dung bên trong"
+        aria-label="Thêm nội dung bên trong"
       >
         <Plus className="h-3.5 w-3.5" />
       </button>
@@ -2025,22 +2025,22 @@ function getNodeIcon(node: StudioNode, expanded?: boolean) {
   if (text.includes("audio") || text.includes("âm thanh") || text.includes("phát âm")) {
     return <Headphones className="h-4 w-4" />;
   }
-  if (text.includes("ppt") || text.includes("slide") || text.includes("bài gi?ng di?n t?") || text.includes("presentation")) {
+  if (text.includes("ppt") || text.includes("slide") || text.includes("bài giảng điện tử") || text.includes("presentation")) {
     return <Presentation className="h-4 w-4" />;
   }
-  if (text.includes("giáo án") || text.includes("k? ho?ch")) {
+  if (text.includes("giáo án") || text.includes("kế hoạch")) {
     return <ClipboardList className="h-4 w-4" />;
   }
-  if (text.includes("ki?m tra") || text.includes("quiz") || text.includes("question") || text.includes("bài t?p")) {
+  if (text.includes("kiểm tra") || text.includes("quiz") || text.includes("question") || text.includes("bài tập")) {
     return <FileCheck className="h-4 w-4" />;
   }
-  if (text.includes("video") || text.includes("ho?t hình")) {
+  if (text.includes("video") || text.includes("hoạt hình")) {
     return <Video className="h-4 w-4" />;
   }
-  if (text.includes("tranh") || text.includes("?nh") || text.includes("image")) {
+  if (text.includes("tranh") || text.includes("ảnh") || text.includes("image")) {
     return <ImageIcon className="h-4 w-4" />;
   }
-  if (text.includes("link") || text.includes("liên k?t")) {
+  if (text.includes("link") || text.includes("liên kết")) {
     return <LinkIcon className="h-4 w-4" />;
   }
   if (text.includes("sách") || text.includes("giáo trình")) {
@@ -2060,13 +2060,13 @@ function getNodeIcon(node: StudioNode, expanded?: boolean) {
 
 function getNodeKindLabel(kind: StudioNodeKind) {
   const labels: Record<StudioNodeKind, string> = {
-    group: "Nhóm h?c li?u",
-    lesson: "Bài h?c",
-    bookSeries: "B? sách / Chuong trình",
-    category: "Nhóm h?c li?u",
-    folder: "Nhóm h? th?ng",
-    section: "Bài h?c",
-    topic: "Ch? d? / Bài h?c",
+    group: "Nhóm học liệu",
+    lesson: "Bài học",
+    bookSeries: "Bộ sách / Chương trình",
+    category: "Nhóm học liệu",
+    folder: "Nhóm hệ thống",
+    section: "Bài học",
+    topic: "Chủ đề / Bài học",
   };
   return labels[kind] ?? kind;
 }
@@ -2110,22 +2110,22 @@ function StatusSelectField({
   taxonomy?: boolean;
 }) {
   return (
-    <Field label="Tr?ng thái">
+    <Field label="Trạng thái">
       <select value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
-        <option value={taxonomy ? "active" : "published"}>Ðã xu?t b?n</option>
-        <option value="draft">B?n nháp</option>
-        <option value="hidden">Ðã ?n</option>
+        <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
+        <option value="draft">Bản nháp</option>
+        <option value="hidden">Đã ẩn</option>
       </select>
     </Field>
   );
 }
 
 function ContentTextFields({
-  titleLabel = "Tên hi?n th?",
+  titleLabel = "Tên hiển thị",
   titlePlaceholder,
   titleValue,
   onTitleChange,
-  descriptionLabel = "Mô t?",
+  descriptionLabel = "Mô tả",
   descriptionPlaceholder,
   descriptionValue,
   onDescriptionChange,
@@ -2237,23 +2237,23 @@ function TaxonomyCreateDialog({
   const open = Boolean(state);
   const isSubject = state?.mode === "subject";
   const title = isSubject
-    ? "T?o môn h?c"
+    ? "Tạo môn học"
     : state?.mode === "root"
-      ? "T?o nhóm h?c li?u"
+      ? "Tạo nhóm học liệu"
       : selectedNode?.kind === "group"
-        ? "T?o bài h?c"
+        ? "Tạo bài học"
         : selectedNode?.kind === "lesson"
-          ? "Thêm tài li?u vào bài h?c"
-          : "Thêm n?i dung bên trong";
+          ? "Thêm tài liệu vào bài học"
+          : "Thêm nội dung bên trong";
   const descriptionText = isSubject
-    ? "Môn h?c là c?p d?u tiên. Sau khi t?o, b?n s? xây d?ng các nhóm h?c li?u, ch? d? và unit bên trong."
+    ? "Môn học là cấp đầu tiên. Sau khi tạo, bạn sẽ xây dựng các nhóm học liệu, chủ đề và unit bên trong."
     : state?.mode === "root"
-      ? "T?o m?t nhóm h?c li?u ? c?p d?u tiên du?i môn h?c, ví d? Level 1, Level 2 ho?c H?c ph?n b? tr?."
+      ? "Tạo một nhóm học liệu ở cấp đầu tiên dưới môn học, ví dụ Level 1, Level 2 hoặc Học phần bổ trợ."
       : selectedNode?.kind === "group"
-        ? "T?o bài h?c n?m bên trong nhóm h?c li?u dang ch?n."
+        ? "Tạo bài học nằm bên trong nhóm học liệu đang chọn."
         : selectedNode?.kind === "lesson"
-          ? "Ch?n lo?i n?i dung c?n g?n vào bài h?c: bài gi?ng, bài t?p ho?c tài li?u."
-          : "N?i dung m?i s? n?m bên trong v? trí dang ch?n.";
+          ? "Chọn loại nội dung cần gắn vào bài học: bài giảng, bài tập hoặc tài liệu."
+          : "Nội dung mới sẽ nằm bên trong vị trí đang chọn.";
   const selectedContentNodeKind =
     selectedNode?.kind === "group" || selectedNode?.kind === "lesson" || selectedNode?.kind === "folder" ? selectedNode.kind : undefined;
   const availableOptions = useMemo(
@@ -2298,13 +2298,13 @@ function TaxonomyCreateDialog({
       if (selectedOption === "lecture") {
         const trimmedLabel = label.trim();
         const normalizedSlidesUrl = normalizeGoogleSlidesUrl(slidesUrl);
-        if (!trimmedLabel) throw new Error("Vui lòng nh?p tên bài gi?ng.");
-        if (!selectedSubject || !selectedNode?.optionId) throw new Error("Vui lòng ch?n lesson ho?c bài h?c tru?c.");
+        if (!trimmedLabel) throw new Error("Vui lòng nhập tên bài giảng.");
+        if (!selectedSubject || !selectedNode?.optionId) throw new Error("Vui lòng chọn lesson hoặc bài học trước.");
         if (!normalizedSlidesUrl) throw new Error("Vui lòng dán link Google Slides.");
         const parsedTotalSlides = parsePositiveInteger(slidesTotal);
-        if (slidesTotal.trim() && !parsedTotalSlides) throw new Error("T?ng s? slide ph?i là s? nguyên l?n hon 0.");
+        if (slidesTotal.trim() && !parsedTotalSlides) throw new Error("Tổng số slide phải là số nguyên lớn hơn 0.");
         const resourceLocation = buildResourceLocation(selectedPath);
-        if (!resourceLocation.categoryId) throw new Error("V? trí hi?n t?i chua xác d?nh du?c nhóm h?c li?u d? g?n bài gi?ng.");
+        if (!resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được nhóm học liệu để gắn bài giảng.");
         await onCreateLecture({
           title: trimmedLabel,
           subtitle: "Google Slides",
@@ -2328,8 +2328,8 @@ function TaxonomyCreateDialog({
 
       if (selectedOption === "exercise") {
         const parentOptionId = selectedNode?.optionId;
-        if (!selectedSubject || !parentOptionId) throw new Error("Vui lòng ch?n lesson ho?c bài h?c tru?c.");
-        if (!selectedExerciseIds.length) throw new Error("Vui lòng ch?n ít nh?t m?t bài t?p.");
+        if (!selectedSubject || !parentOptionId) throw new Error("Vui lòng chọn lesson hoặc bài học trước.");
+        if (!selectedExerciseIds.length) throw new Error("Vui lòng chọn ít nhất một bài tập.");
         const selectedExercises = filteredExercises.filter((item) => selectedExerciseIds.includes(item.id));
         await onCreateLocalContent(
           selectedExercises.map((item) => ({
@@ -2352,13 +2352,13 @@ function TaxonomyCreateDialog({
 
       if (selectedOption === "resource") {
         const normalizedResourceUrl = normalizeGoogleViewerUrl(resourceUrl);
-        if (!selectedSubject || !selectedNode) throw new Error("Vui lòng ch?n v? trí c?n g?n tài li?u.");
-        if (!resourceLocation.categoryId) throw new Error("V? trí hi?n t?i chua xác d?nh du?c nhóm h?c li?u d? g?n tài li?u.");
+        if (!selectedSubject || !selectedNode) throw new Error("Vui lòng chọn vị trí cần gắn tài liệu.");
+        if (!resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được nhóm học liệu để gắn tài liệu.");
         if (!normalizedResourceUrl) throw new Error("Vui lòng dán link Google Drive/Google Slides.");
         const parsedTotalSlides = parsePositiveInteger(resourceTotalSlides);
-        if (resourceFileType === "PPTX" && resourceTotalSlides.trim() && !parsedTotalSlides) throw new Error("T?ng s? slide ph?i là s? nguyên l?n hon 0.");
-        await uploadHocLieuResource({
-          title: label.trim() || "Tài li?u Google Drive",
+        if (resourceFileType === "PPTX" && resourceTotalSlides.trim() && !parsedTotalSlides) throw new Error("Tổng số slide phải là số nguyên lớn hơn 0.");
+        await uploadLearningResourceResource({
+          title: label.trim() || "Tài liệu Google Drive",
           description: description.trim(),
           selectedFileType: resourceFileType,
           subjectId: selectedSubject.id,
@@ -2381,13 +2381,13 @@ function TaxonomyCreateDialog({
       const resolvedKind = isSubject ? "category" : kind;
       const trimmedLabel = label.trim();
       if (!trimmedLabel) {
-        throw new Error(isSubject ? "Vui lòng nh?p tên môn h?c." : "Vui lòng nh?p tên.");
+        throw new Error(isSubject ? "Vui lòng nhập tên môn học." : "Vui lòng nhập tên.");
       }
       if (!isSubject && !selectedSubject) {
-        throw new Error("Vui lòng ch?n môn h?c tru?c.");
+        throw new Error("Vui lòng chọn môn học trước.");
       }
       if (state?.mode === "child" && !selectedNode) {
-        throw new Error("Vui lòng ch?n m?c cha tru?c.");
+        throw new Error("Vui lòng chọn mục cha trước.");
       }
 
       const payload: CreateTaxonomyPayload = {
@@ -2407,7 +2407,7 @@ function TaxonomyCreateDialog({
         if (resolvedKind === "section") {
           const currentLocation = buildResourceLocation(selectedPath);
           if (!currentLocation.categoryId) {
-            throw new Error("Nhóm h?c li?u hi?n t?i chua xác d?nh du?c category g?c d? t?o bài h?c.");
+            throw new Error("Nhóm học liệu hiện tại chưa xác định được category gốc để tạo bài học.");
           }
           payload.categoryId = currentLocation.categoryId;
           if (selectedNode.sourceKind === "topic" && selectedNode.optionId) payload.topicId = selectedNode.optionId;
@@ -2416,15 +2416,15 @@ function TaxonomyCreateDialog({
       }
 
       const created = normalizeTaxonomyOption(
-        await createHocLieuTaxonomy(isSubject ? "subjects" : apiKindForNodeKind(resolvedKind), payload),
+        await createLearningResourceTaxonomy(isSubject ? "subjects" : apiKindForNodeKind(resolvedKind), payload),
       );
       if (!created?.id) {
-        throw new Error("BE dã t?o d? li?u nhung không tr? v? id h?p l?.");
+        throw new Error("BE đã tạo dữ liệu nhưng không trả về id hợp lệ.");
       }
       await onCreated({ mode: state?.mode ?? "subject", kind: resolvedKind, id: created.id });
       onClose();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Không th? t?o m?c. Vui lòng th? l?i.");
+      setError(submitError instanceof Error ? submitError.message : "Không thể tạo mục. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }
@@ -2454,14 +2454,14 @@ function TaxonomyCreateDialog({
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isSubject ? (
             <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">V? trí trong c?u trúc</div>
-              <div className="mt-2 font-semibold text-slate-950">{selectedSubject?.label || "Chua ch?n môn"}</div>
+              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">Vị trí trong cấu trúc</div>
+              <div className="mt-2 font-semibold text-slate-950">{selectedSubject?.label || "Chưa chọn môn"}</div>
               {state?.mode === "child" ? (
                 <div className="mt-1 text-sm text-slate-600">
-                  Bên trong: <span className="font-semibold text-[var(--erg-blue)]">{selectedNode?.label || "Chua ch?n"}</span>
+                  Bên trong: <span className="font-semibold text-[var(--erg-blue)]">{selectedNode?.label || "Chưa chọn"}</span>
                 </div>
               ) : (
-                <div className="mt-1 text-sm text-slate-600">N?m ? c?p d?u tiên c?a môn h?c.</div>
+                <div className="mt-1 text-sm text-slate-600">Nằm ở cấp đầu tiên của môn học.</div>
               )}
             </div>
           ) : null}
@@ -2496,7 +2496,7 @@ function TaxonomyCreateDialog({
                 })}
               </div>
               <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-500">
-                V?i `bài gi?ng`, popup s? uu tiên link Google Slides. V?i `bài t?p`, giao di?n hi?n dang dùng danh sách mock d? ch? n?i DB th?t.
+                Với `bài giảng`, popup sẽ ưu tiên link Google Slides. Với `bài tập`, giao diện hiện đang dùng danh sách mock để chờ nối DB thật.
               </div>
             </div>
           ) : (
@@ -2513,7 +2513,7 @@ function TaxonomyCreateDialog({
                   {availableOptions.length > 1 ? (
                     <Button type="button" variant="outline" size="sm" onClick={() => setStep("pick")}>
                       <ChevronLeft className="h-4 w-4" />
-                      Ch?n l?i
+                      Chọn lại
                     </Button>
                   ) : null}
                 </div>
@@ -2522,12 +2522,12 @@ function TaxonomyCreateDialog({
               {selectedOption === "lecture" ? (
                 <>
                   <ContentTextFields
-                    titleLabel="Tên bài gi?ng"
-                    titlePlaceholder="Ví d?: Bài gi?ng Bài 01"
+                    titleLabel="Tên bài giảng"
+                    titlePlaceholder="Ví dụ: Bài giảng Bài 01"
                     titleValue={label}
                     onTitleChange={handleLectureTitleChange}
-                    descriptionLabel="Mô t? ng?n"
-                    descriptionPlaceholder="Ví d?: Slide dùng cho ti?t m? d?u, có note cho giáo viên"
+                    descriptionLabel="Mô tả ngắn"
+                    descriptionPlaceholder="Ví dụ: Slide dùng cho tiết mở đầu, có note cho giáo viên"
                     descriptionValue={description}
                     onDescriptionChange={setDescription}
                     autoFocus
@@ -2536,18 +2536,18 @@ function TaxonomyCreateDialog({
                     label="Link Google Slides"
                     value={slidesUrl}
                     onChange={setSlidesUrl}
-                    placeholder="Dán link edit, publish ho?c embed c?a Google Slides"
-                    hint="Popup này luu link Google Slides vào asset, không upload file th?t lên server."
+                    placeholder="Dán link edit, publish hoặc embed của Google Slides"
+                    hint="Popup này lưu link Google Slides vào asset, không upload file thật lên server."
                   />
-                  <Field label="T?ng s? slide">
+                  <Field label="Tổng số slide">
                     <Input
                       value={slidesTotal}
                       onChange={(event) => setSlidesTotal(event.target.value.replace(/[^\d]/g, ""))}
                       inputMode="numeric"
-                      placeholder="Ví d?: 20"
+                      placeholder="Ví dụ: 20"
                     />
                     <p className="text-xs leading-5 text-slate-500">
-                      Dùng cho popup xác nh?n khi giáo viên back ho?c t?t bài trình chi?u.
+                      Dùng cho popup xác nhận khi giáo viên back hoặc tắt bài trình chiếu.
                     </p>
                   </Field>
                   <StatusSelectField value={status} onChange={setStatus} />
@@ -2557,23 +2557,23 @@ function TaxonomyCreateDialog({
               {selectedOption === "exercise" ? (
                 <>
                   <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_220px]">
-                    <Field label="Tìm bài t?p">
-                      <Input value={exerciseQuery} onChange={(event) => setExerciseQuery(event.target.value)} placeholder="Tìm theo tên, ch? d? ho?c d? khó" autoFocus />
+                    <Field label="Tìm bài tập">
+                      <Input value={exerciseQuery} onChange={(event) => setExerciseQuery(event.target.value)} placeholder="Tìm theo tên, chủ đề hoặc độ khó" autoFocus />
                     </Field>
-                    <Field label="Môn h?c">
-                      <Input value={selectedSubject?.label ?? "Chua ch?n"} readOnly />
+                    <Field label="Môn học">
+                      <Input value={selectedSubject?.label ?? "Chưa chọn"} readOnly />
                     </Field>
-                    <Field label="Ng? c?nh">
-                      <Input value={selectedNode?.label ?? "Chua ch?n"} readOnly />
+                    <Field label="Ngữ cảnh">
+                      <Input value={selectedNode?.label ?? "Chưa chọn"} readOnly />
                     </Field>
                   </div>
                   <ContentTextFields
-                    titleLabel="Tên hi?n th?"
-                    titlePlaceholder="Ví d?: Bài t?p luy?n cu?i ti?t"
+                    titleLabel="Tên hiển thị"
+                    titlePlaceholder="Ví dụ: Bài tập luyện cuối tiết"
                     titleValue={label}
                     onTitleChange={setLabel}
-                    descriptionLabel="Ghi chú cho l?n g?n này"
-                    descriptionPlaceholder="Ví d?: Giao cu?i ti?t ho?c dùng d? luy?n t?p v? nhà"
+                    descriptionLabel="Ghi chú cho lần gắn này"
+                    descriptionPlaceholder="Ví dụ: Giao cuối tiết hoặc dùng để luyện tập về nhà"
                     descriptionValue={description}
                     onDescriptionChange={setDescription}
                     autoFocus
@@ -2581,7 +2581,7 @@ function TaxonomyCreateDialog({
                   <StatusSelectField value={status} onChange={setStatus} />
                   <div className="rounded-2xl border border-slate-200">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                      <div className="font-semibold text-slate-950">Danh sách bài t?p mock</div>
+                      <div className="font-semibold text-slate-950">Danh sách bài tập mock</div>
                       <Badge tone="outline">{filteredExercises.length} bài</Badge>
                     </div>
                     <div className="grid max-h-[320px] gap-2 overflow-y-auto p-3">
@@ -2607,14 +2607,14 @@ function TaxonomyCreateDialog({
                             </div>
                             <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                               <Badge tone="secondary">{item.difficulty}</Badge>
-                              <span>{item.questionCount} câu h?i</span>
+                              <span>{item.questionCount} câu hỏi</span>
                               <span>{item.durationMinutes} phút</span>
                             </div>
                           </button>
                         ))
                       ) : (
                         <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
-                          Không có bài t?p mock kh?p v?i b? l?c hi?n t?i.
+                          Không có bài tập mock khớp với bộ lọc hiện tại.
                         </div>
                       )}
                     </div>
@@ -2625,25 +2625,25 @@ function TaxonomyCreateDialog({
               {selectedOption === "resource" ? (
                 <>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <Field label="Lo?i tài li?u">
+                    <Field label="Loại tài liệu">
                       <select className={inputClassName} value={resourceFileType} onChange={(event) => setResourceFileType(event.target.value)}>
                         <option value="PDF">PDF / Giáo trình</option>
-                        <option value="PPTX">Bài gi?ng di?n t?</option>
+                        <option value="PPTX">Bài giảng điện tử</option>
                         <option value="VIDEO">Video</option>
                         <option value="AUDIO">Audio</option>
-                        <option value="IMAGE">?nh / thumbnail</option>
-                        <option value="ZIP">Gói h?c li?u ZIP</option>
+                        <option value="IMAGE">Ảnh / thumbnail</option>
+                        <option value="ZIP">Gói học liệu ZIP</option>
                         <option value="HTML5">HTML5</option>
                       </select>
                     </Field>
                     <div className="md:col-span-2">
                       <ContentTextFields
-                        titleLabel="Tên hi?n th?"
-                        titlePlaceholder="Ví d?: Unit 1 - Lesson 1"
+                        titleLabel="Tên hiển thị"
+                        titlePlaceholder="Ví dụ: Unit 1 - Lesson 1"
                         titleValue={label}
                         onTitleChange={setLabel}
-                        descriptionLabel="Mô t? ng?n"
-                        descriptionPlaceholder="Ví d?: Tài li?u dùng cho ti?t m? d?u ho?c bài luy?n t?p"
+                        descriptionLabel="Mô tả ngắn"
+                        descriptionPlaceholder="Ví dụ: Tài liệu dùng cho tiết mở đầu hoặc bài luyện tập"
                         descriptionValue={description}
                         onDescriptionChange={setDescription}
                         autoFocus
@@ -2654,21 +2654,21 @@ function TaxonomyCreateDialog({
                         label="Link Google Drive / Google Slides"
                         value={resourceUrl}
                         onChange={setResourceUrl}
-                        placeholder="Dán link share, preview ho?c embed t? Google Drive"
-                        hint={`Link s? du?c luu vào asset c?a tài li?u t?i ${pathLabel(selectedSubject?.label ?? "", selectedPath)}. Không upload file th?t lên server.`}
+                        placeholder="Dán link share, preview hoặc embed từ Google Drive"
+                        hint={`Link sẽ được lưu vào asset của tài liệu tại ${pathLabel(selectedSubject?.label ?? "", selectedPath)}. Không upload file thật lên server.`}
                       />
                     </div>
                     {resourceFileType === "PPTX" ? (
                       <div className="md:col-span-2">
-                        <Field label="T?ng s? slide">
+                        <Field label="Tổng số slide">
                           <Input
                             value={resourceTotalSlides}
                             onChange={(event) => setResourceTotalSlides(event.target.value.replace(/[^\d]/g, ""))}
                             inputMode="numeric"
-                            placeholder="Ví d?: 20"
+                            placeholder="Ví dụ: 20"
                           />
                           <p className="text-xs leading-5 text-slate-500">
-                            Dùng cho popup dánh d?u khi giáo viên back/t?t trình chi?u.
+                            Dùng cho popup đánh dấu khi giáo viên back/tắt trình chiếu.
                           </p>
                         </Field>
                       </div>
@@ -2683,12 +2683,12 @@ function TaxonomyCreateDialog({
               {(!selectedOption || selectedOption === "category" || selectedOption === "section" || isSubject) ? (
                 <>
                   <ContentTextFields
-                    titleLabel={isSubject ? "Tên môn h?c" : "Tên hi?n th?"}
-                    titlePlaceholder={isSubject ? "Ví d?: IC3 GS6" : kind === "category" ? "Ví d?: Ch? d? 1, H?c ph?n b? tr?" : "Ví d?: Bài 01. Làm quen v?i máy tính"}
+                    titleLabel={isSubject ? "Tên môn học" : "Tên hiển thị"}
+                    titlePlaceholder={isSubject ? "Ví dụ: IC3 GS6" : kind === "category" ? "Ví dụ: Chủ đề 1, Học phần bổ trợ" : "Ví dụ: Bài 01. Làm quen với máy tính"}
                     titleValue={label}
                     onTitleChange={setLabel}
-                    descriptionLabel="Mô t? ng?n"
-                    descriptionPlaceholder="Giúp giáo viên hi?u m?c này dùng d? làm gì"
+                    descriptionLabel="Mô tả ngắn"
+                    descriptionPlaceholder="Giúp giáo viên hiểu mục này dùng để làm gì"
                     descriptionValue={description}
                     onDescriptionChange={setDescription}
                     autoFocus
@@ -2696,7 +2696,7 @@ function TaxonomyCreateDialog({
 
                   {!isSubject ? (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                      Ðang t?o: <b>{kind === "category" ? "Nhóm h?c li?u" : "Bài h?c"}</b>. Lo?i này du?c quy?t d?nh theo v? trí dang ch?n trong cây.
+                      Đang tạo: <b>{kind === "category" ? "Nhóm học liệu" : "Bài học"}</b>. Loại này được quyết định theo vị trí đang chọn trong cây.
                     </div>
                   ) : null}
                   <StatusSelectField value={status} onChange={setStatus} taxonomy />
@@ -2709,7 +2709,7 @@ function TaxonomyCreateDialog({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>
-              H?y
+              Hủy
             </Button>
             {step === "details" ? (
               <Button
@@ -2727,18 +2727,18 @@ function TaxonomyCreateDialog({
                 className="bg-[var(--erg-blue)] hover:bg-blue-800"
               >
                 {saving
-                  ? "Ðang luu..."
+                  ? "Đang lưu..."
                   : selectedOption === "lecture"
-                    ? "Thêm bài gi?ng"
+                    ? "Thêm bài giảng"
                     : selectedOption === "exercise"
-                      ? "G?n bài t?p"
+                      ? "Gắn bài tập"
                       : selectedOption === "resource"
-                        ? "G?n link tài li?u"
+                        ? "Gắn link tài liệu"
                         : selectedOption === "category"
-                          ? "T?o nhóm h?c li?u"
+                          ? "Tạo nhóm học liệu"
                           : selectedOption === "section"
-                            ? "T?o bài h?c"
-                            : "T?o m?i"}
+                            ? "Tạo bài học"
+                            : "Tạo mới"}
               </Button>
             ) : null}
           </DialogFooter>
@@ -2786,13 +2786,13 @@ function TaxonomyEditDialog({
     if (!target) return;
     const trimmedLabel = label.trim();
     if (!trimmedLabel) {
-      setError("Vui lòng nh?p tên.");
+      setError("Vui lòng nhập tên.");
       return;
     }
     setSaving(true);
     setError("");
     try {
-      await updateHocLieuTaxonomy(apiKindForEditTarget(target.kind), target.id, {
+      await updateLearningResourceTaxonomy(apiKindForEditTarget(target.kind), target.id, {
         label: trimmedLabel,
         description: description.trim(),
         status,
@@ -2806,7 +2806,7 @@ function TaxonomyEditDialog({
       });
       await onSaved();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Không th? c?p nh?t. Vui lòng th? l?i.");
+      setError(submitError instanceof Error ? submitError.message : "Không thể cập nhật. Vui lòng thử lại.");
     } finally {
       setSaving(false);
     }
@@ -2816,31 +2816,31 @@ function TaxonomyEditDialog({
     <Dialog open={Boolean(target)} onOpenChange={(nextOpen) => (!nextOpen ? onClose() : undefined)}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>S?a {target?.kind === "subject" ? "môn h?c" : "n?i dung h?c li?u"}</DialogTitle>
-          <DialogDescription>C?p nh?t tên, mô t? và tr?ng thái d? trang Hoclieu hi?n th? rõ ràng hon.</DialogDescription>
+          <DialogTitle>Sửa {target?.kind === "subject" ? "môn học" : "nội dung học liệu"}</DialogTitle>
+          <DialogDescription>Cập nhật tên, mô tả và trạng thái để LMS hiển thị rõ ràng hơn.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
-            titleLabel="Tên hi?n th?"
+            titleLabel="Tên hiển thị"
             titleValue={label}
             onTitleChange={setLabel}
-            descriptionLabel="Mô t? cho giáo viên/h?c sinh"
+            descriptionLabel="Mô tả cho giáo viên/học sinh"
             descriptionValue={description}
             onDescriptionChange={setDescription}
             autoFocus
           />
           <StatusSelectField value={status} onChange={setStatus} taxonomy />
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <div className="font-semibold text-slate-950">Thông tin hi?n th? trên Hoclieu</div>
+            <div className="font-semibold text-slate-950">Thông tin hiển thị trên LMS</div>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              C?u trúc luu ph?n mô t? và ?nh d?i di?n. Tài li?u th?t s? du?c g?n b?ng link Google Drive/Google Slides ? ph?n N?i dung ho?c màn G?n link.
+              Cấu trúc lưu phần mô tả và ảnh đại diện. Tài liệu thật sẽ được gắn bằng link Google Drive/Google Slides ở phần Nội dung hoặc màn Gắn link.
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
-              <Field label="?nh bìa / thumbnail URL">
+              <Field label="Ảnh bìa / thumbnail URL">
                 <Input value={coverImageUrl} onChange={(event) => setCoverImageUrl(event.target.value)} placeholder="https://.../cover.webp" />
               </Field>
               {showPresentationField ? (
-                <Field label="Link bài gi?ng PPT/Slides">
+                <Field label="Link bài giảng PPT/Slides">
                   <Input value={presentationUrl} onChange={(event) => setPresentationUrl(event.target.value)} placeholder="https://docs.google.com/presentation/..." />
                 </Field>
               ) : null}
@@ -2854,9 +2854,9 @@ function TaxonomyEditDialog({
           </div>
           {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>H?y</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Hủy</Button>
             <Button type="submit" disabled={saving || !label.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
-              {saving ? "Ðang luu..." : "Luu thay d?i"}
+              {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </DialogFooter>
         </form>
@@ -2898,14 +2898,14 @@ function ResourceEditDialog({
     setError("");
     try {
       const normalizedUrl = linkUrl.trim() ? normalizeGoogleViewerUrl(linkUrl) || linkUrl.trim() : undefined;
-      await updateHocLieuResource(target.id, {
+      await updateLearningResourceResource(target.id, {
         title: title.trim(),
         description: description.trim(),
         status,
         visibility: status === "hidden" ? "private" : "public",
       });
       if (target.asset?.id) {
-        await updateHocLieuAsset(target.asset.id, {
+        await updateLearningResourceAsset(target.asset.id, {
           title: title.trim(),
           storageUrl: normalizedUrl,
           upstreamUrl: normalizedUrl,
@@ -2914,7 +2914,7 @@ function ResourceEditDialog({
       }
       await onSaved();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Không th? c?p nh?t tài li?u.");
+      setError(submitError instanceof Error ? submitError.message : "Không thể cập nhật tài liệu.");
     } finally {
       setSaving(false);
     }
@@ -2924,31 +2924,31 @@ function ResourceEditDialog({
     <Dialog open={Boolean(target)} onOpenChange={(nextOpen) => (!nextOpen ? onClose() : undefined)}>
       <DialogContent className="max-w-xl">
         <DialogHeader>
-          <DialogTitle>S?a tài li?u</DialogTitle>
-          <DialogDescription>C?p nh?t tên, link và tr?ng thái hi?n th? c?a tài li?u.</DialogDescription>
+          <DialogTitle>Sửa tài liệu</DialogTitle>
+          <DialogDescription>Cập nhật tên, link và trạng thái hiển thị của tài liệu.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
-            titleLabel="Tên hi?n th?"
+            titleLabel="Tên hiển thị"
             titleValue={title}
             onTitleChange={setTitle}
-            descriptionLabel="Mô t?"
+            descriptionLabel="Mô tả"
             descriptionValue={description}
             onDescriptionChange={setDescription}
             autoFocus
           />
           <ContentLinkField
-            label="Link tài li?u"
+            label="Link tài liệu"
             value={linkUrl}
             onChange={setLinkUrl}
-            placeholder="https://docs.google.com/... ho?c link PDF"
+            placeholder="https://docs.google.com/... hoặc link PDF"
           />
           <StatusSelectField value={status} onChange={setStatus} />
           {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>H?y</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Hủy</Button>
             <Button type="submit" disabled={saving || !title.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
-              {saving ? "Ðang luu..." : "Luu thay d?i"}
+              {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </DialogFooter>
         </form>
@@ -2994,29 +2994,29 @@ function LocalContentEditDialog({
     <Dialog open={Boolean(target)} onOpenChange={(nextOpen) => (!nextOpen ? onClose() : undefined)}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>S?a {target?.kind === "exercise" ? "bài t?p" : "bài gi?ng"}</DialogTitle>
-          <DialogDescription>C?p nh?t n?i dung hi?n th? và tr?ng thái trong màn biên so?n.</DialogDescription>
+          <DialogTitle>Sửa {target?.kind === "exercise" ? "bài tập" : "bài giảng"}</DialogTitle>
+          <DialogDescription>Cập nhật nội dung hiển thị và trạng thái trong màn biên soạn.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
-            titleLabel="Tên hi?n th?"
+            titleLabel="Tên hiển thị"
             titleValue={title}
             onTitleChange={setTitle}
-            descriptionLabel="Mô t?"
+            descriptionLabel="Mô tả"
             descriptionValue={description}
             onDescriptionChange={setDescription}
             autoFocus
           />
           <ContentLinkField
-            label={target?.kind === "exercise" ? "Link tham chi?u" : "Link bài gi?ng"}
+            label={target?.kind === "exercise" ? "Link tham chiếu" : "Link bài giảng"}
             value={resourceUrl}
             onChange={setResourceUrl}
             placeholder="https://..."
           />
           <StatusSelectField value={status} onChange={setStatus} />
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>H?y</Button>
-            <Button type="submit" className="bg-[var(--erg-blue)] hover:bg-blue-800">Luu thay d?i</Button>
+            <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
+            <Button type="submit" className="bg-[var(--erg-blue)] hover:bg-blue-800">Lưu thay đổi</Button>
           </DialogFooter>
         </form>
       </DialogContent>
@@ -3047,10 +3047,10 @@ function TaxonomyDeleteDialog({
     setDeleting(true);
     setError("");
     try {
-      await deleteHocLieuTaxonomy(apiKindForEditTarget(target.kind), target.id);
+      await deleteLearningResourceTaxonomy(apiKindForEditTarget(target.kind), target.id);
       await onDeleted();
     } catch (deleteError) {
-      setError(deleteError instanceof Error ? deleteError.message : "Không th? xóa. Vui lòng th? l?i.");
+      setError(deleteError instanceof Error ? deleteError.message : "Không thể xóa. Vui lòng thử lại.");
     } finally {
       setDeleting(false);
     }
@@ -3061,13 +3061,13 @@ function TaxonomyDeleteDialog({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>Xóa {target?.label}</DialogTitle>
-          <DialogDescription>Thao tác này xóa n?i dung kh?i DB. N?u m?c có c?p du?i ho?c tài li?u liên quan, b?n nên chuy?n d? li?u tru?c khi xóa.</DialogDescription>
+          <DialogDescription>Thao tác này xóa nội dung khỏi DB. Nếu mục có cấp dưới hoặc tài liệu liên quan, bạn nên chuyển dữ liệu trước khi xóa.</DialogDescription>
         </DialogHeader>
         {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={onClose} disabled={deleting}>H?y</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={deleting}>Hủy</Button>
           <Button type="button" variant="danger" onClick={handleDelete} disabled={deleting}>
-            {deleting ? "Ðang xóa..." : "Xóa"}
+            {deleting ? "Đang xóa..." : "Xóa"}
           </Button>
         </DialogFooter>
       </DialogContent>

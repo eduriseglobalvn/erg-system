@@ -2,48 +2,48 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
-  loadHocLieuLibraryBootstrap,
-  loadHocLieuLibraryProgress,
-  loadHocLieuResourceForViewer,
-  mapLibraryResourceToHocLieuResource,
-  type HocLieuLibraryBootstrapDTO,
-  type HocLieuLibraryProgressDTO,
+  loadLearningResourceLibraryBootstrap,
+  loadLearningResourceLibraryProgress,
+  loadLearningResourceResourceForViewer,
+  mapLibraryResourceToLearningResourceResource,
+  type LearningResourceLibraryBootstrapDTO,
+  type LearningResourceLibraryProgressDTO,
 } from "@/features/lms/learning-resources/api/learning-resource-api";
-import type { HocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
-import type { HocLieuTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
+import type { LearningResourceTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
 
-type HocLieuLibraryLesson = {
+type LearningResourceLibraryLesson = {
   id: string;
   title: string;
   description?: string;
   resourceCount: number;
-  resources: HocLieuResource[];
-  progress: HocLieuTeacherProgressSummary;
+  resources: LearningResourceResource[];
+  progress: LearningResourceTeacherProgressSummary;
 };
 
-type HocLieuLibrarySection = {
+type LearningResourceLibrarySection = {
   id: string;
   title: string;
   description?: string;
   resourceCount: number;
   lessonCount: number;
-  progress: HocLieuTeacherProgressSummary;
-  lessons: HocLieuLibraryLesson[];
+  progress: LearningResourceTeacherProgressSummary;
+  lessons: LearningResourceLibraryLesson[];
 };
 
-type HocLieuLibrarySubject = {
+type LearningResourceLibrarySubject = {
   id: string;
   label: string;
   description?: string;
   groupCount: number;
   lessonCount: number;
   resourceCount: number;
-  sections: HocLieuLibrarySection[];
+  sections: LearningResourceLibrarySection[];
 };
 
-function emptyProgress(): HocLieuTeacherProgressSummary {
+function emptyProgress(): LearningResourceTeacherProgressSummary {
   return {
     progressRate: 0,
     taughtCount: 0,
@@ -52,7 +52,7 @@ function emptyProgress(): HocLieuTeacherProgressSummary {
   };
 }
 
-function progressFromRate(progressRate = 0, totalCount = 1): HocLieuTeacherProgressSummary {
+function progressFromRate(progressRate = 0, totalCount = 1): LearningResourceTeacherProgressSummary {
   const normalizedRate = Math.max(0, Math.min(100, progressRate));
   const normalizedTotal = Math.max(0, totalCount);
   const taughtCount = normalizedTotal > 0 ? Math.round((normalizedRate / 100) * normalizedTotal) : 0;
@@ -65,7 +65,7 @@ function progressFromRate(progressRate = 0, totalCount = 1): HocLieuTeacherProgr
   };
 }
 
-function summarizeProgress(items: HocLieuTeacherProgressSummary[]): HocLieuTeacherProgressSummary {
+function summarizeProgress(items: LearningResourceTeacherProgressSummary[]): LearningResourceTeacherProgressSummary {
   if (!items.length) {
     return emptyProgress();
   }
@@ -79,16 +79,16 @@ function summarizeProgress(items: HocLieuTeacherProgressSummary[]): HocLieuTeach
 }
 
 export function toLibrarySubjects(
-  bootstrap: HocLieuLibraryBootstrapDTO | undefined,
+  bootstrap: LearningResourceLibraryBootstrapDTO | undefined,
   progressByLessonId: Map<string, number> = new Map(),
-): HocLieuLibrarySubject[] {
+): LearningResourceLibrarySubject[] {
   if (!bootstrap?.subjects?.length) return [];
 
   return bootstrap.subjects.map((subject) => {
     const sections = subject.groups.map((group) => {
       const lessons = group.lessons.map((lesson) => {
         const resources = lesson.resources.map((resource, index) =>
-          mapLibraryResourceToHocLieuResource(resource, {
+          mapLibraryResourceToLearningResourceResource(resource, {
             subjectId: subject.id,
             groupId: group.id,
             lessonId: lesson.id,
@@ -103,7 +103,7 @@ export function toLibrarySubjects(
           resourceCount: resources.length,
           resources,
           progress: progressFromRate(progressRate, resources.length || 1),
-        } satisfies HocLieuLibraryLesson;
+        } satisfies LearningResourceLibraryLesson;
       });
 
       return {
@@ -113,7 +113,7 @@ export function toLibrarySubjects(
         lessonCount: lessons.length,
         progress: summarizeProgress(lessons.map((lesson) => lesson.progress)),
         lessons,
-      } satisfies HocLieuLibrarySection;
+      } satisfies LearningResourceLibrarySection;
     });
 
     return {
@@ -123,16 +123,16 @@ export function toLibrarySubjects(
       lessonCount: sections.reduce((sum, section) => sum + section.lessonCount, 0),
       resourceCount: sections.reduce((sum, section) => sum + section.resourceCount, 0),
       sections,
-    } satisfies HocLieuLibrarySubject;
+    } satisfies LearningResourceLibrarySubject;
   });
 }
 
-async function openLibraryResource(resource: HocLieuResource) {
-  const hydratedResource = await loadHocLieuResourceForViewer(resource);
+async function openLibraryResource(resource: LearningResourceResource) {
+  const hydratedResource = await loadLearningResourceResourceForViewer(resource);
   const targetUrl = hydratedResource.viewer.embedUrl || hydratedResource.viewer.secureEmbedUrl;
 
   if (!targetUrl && !hydratedResource.viewer.slides?.length) {
-    throw new Error("Há»c liá»‡u nÃ y chÆ°a cÃ³ Ä‘Æ°á»ng dáº«n má»Ÿ tá»« há»‡ thá»‘ng.");
+    throw new Error("Học liệu này chưa có đường dẫn mở từ hệ thống.");
   }
 
   return hydratedResource;
@@ -146,11 +146,11 @@ export function libraryProgressQueryKey(schoolId: string, academicYear: string) 
   return ["hoclieu", "library-progress", schoolId, academicYear] as const;
 }
 
-function progressMap(progress: HocLieuLibraryProgressDTO | undefined) {
+function progressMap(progress: LearningResourceLibraryProgressDTO | undefined) {
   return new Map((progress?.lessons ?? []).map((lesson) => [lesson.lessonId, lesson.progressRate]));
 }
 
-export function useHocLieuLibraryCatalog() {
+export function useLearningResourceLibraryCatalog() {
   const queryClient = useQueryClient();
   const scope = useLearningResourceDashboardScope();
   const schoolId = scope?.selectedSchoolId ?? "";
@@ -164,7 +164,7 @@ export function useHocLieuLibraryCatalog() {
 
   const libraryQuery = useQuery({
     queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
-    queryFn: () => loadHocLieuLibraryBootstrap({ schoolId, academicYear }),
+    queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
     enabled: Boolean(schoolId),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -174,7 +174,7 @@ export function useHocLieuLibraryCatalog() {
 
   const progressQuery = useQuery({
     queryKey: libraryProgressQueryKey(schoolId, academicYear),
-    queryFn: () => loadHocLieuLibraryProgress({ schoolId, academicYear }),
+    queryFn: () => loadLearningResourceLibraryProgress({ schoolId, academicYear }),
     enabled: Boolean(schoolId),
     staleTime: 30_000,
     gcTime: 5 * 60_000,
@@ -197,7 +197,7 @@ export function useHocLieuLibraryCatalog() {
 
     void queryClient.prefetchQuery({
       queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
-      queryFn: () => loadHocLieuLibraryBootstrap({ schoolId, academicYear }),
+      queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
       staleTime: 5 * 60_000,
     });
   }, [academicYear, queryClient, schoolId]);
@@ -219,7 +219,7 @@ export function useHocLieuLibraryCatalog() {
   }, [activeSubject, selectedSectionId]);
 
   const filteredSections = useMemo(() => {
-    if (!activeSubject) return [] as HocLieuLibrarySection[];
+    if (!activeSubject) return [] as LearningResourceLibrarySection[];
 
     const query = searchValue.trim().toLowerCase();
     if (!query) {
@@ -298,7 +298,7 @@ export function useHocLieuLibraryCatalog() {
       return;
     }
 
-    setError(nextError instanceof Error ? nextError.message : "KhÃ´ng thá»ƒ táº£i kho há»c liá»‡u.");
+    setError(nextError instanceof Error ? nextError.message : "Không thể tải kho học liệu.");
   }, [libraryQuery.error]);
 
   async function handleSelectSubject(subjectId: string) {
@@ -317,12 +317,12 @@ export function useHocLieuLibraryCatalog() {
     setSelectedLessonId(lessonId);
   }
 
-  async function handleOpenResource(resource: HocLieuResource) {
+  async function handleOpenResource(resource: LearningResourceResource) {
     try {
       setError(null);
       return await openLibraryResource(resource);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "KhÃ´ng thá»ƒ má»Ÿ há»c liá»‡u.");
+      setError(nextError instanceof Error ? nextError.message : "Không thể mở học liệu.");
       return null;
     }
   }

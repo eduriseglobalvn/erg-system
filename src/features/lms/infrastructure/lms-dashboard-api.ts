@@ -193,7 +193,7 @@ export async function updateEducationUnit(id: string, input: UpdateEducationUnit
   if (!hasApiBase()) {
     return {
       id,
-      name: input.name || "CÆ¡ sá»Ÿ giÃ¡o dá»¥c",
+      name: input.name || "Cơ sở giáo dục",
       type: input.type || "school",
       code: "LOCAL",
       status: input.status || "active",
@@ -212,7 +212,7 @@ function mockBootstrap(): LmsDashboardBootstrap {
     classes: classroomSnapshots,
     managementScope: { level: "class", centerId: defaultSchoolId, classId: defaultClassId },
     manageableUnits: [
-      { id: "erg-system", type: "system", name: "Há»‡ thá»‘ng ERG", code: "ERG-SYSTEM", status: "active" },
+      { id: "erg-system", type: "system", name: "Hệ thống ERG", code: "ERG-SYSTEM", status: "active" },
       { id: "learning-resources", type: "center", name: "Studio học liệu", code: "LEARNING-RESOURCES", status: "active" },
       ...classroomSchools.map((school) => ({ id: school.id, type: "school", name: school.name, status: "active" })),
     ],
@@ -222,7 +222,7 @@ function mockBootstrap(): LmsDashboardBootstrap {
     },
     schools: classroomSchools,
     systemUnits: [
-      { id: "erg-system", type: "system", name: "Há»‡ thá»‘ng ERG", code: "ERG-SYSTEM", status: "active" },
+      { id: "erg-system", type: "system", name: "Hệ thống ERG", code: "ERG-SYSTEM", status: "active" },
       { id: "learning-resources", type: "system", name: "Studio học liệu", code: "LEARNING-RESOURCES", status: "active" },
     ],
   };
@@ -303,7 +303,7 @@ function unitsToSchools(units: LmsEducationUnitDTO[], snapshots: ClassroomSnapsh
       id: unit.id,
       name: unit.name,
       clusterId: clusterByIndex(index),
-      principal: unit.type === "school" ? "Quáº£n trá»‹ trÆ°á»ng" : "Quáº£n trá»‹ trung tÃ¢m",
+      principal: unit.type === "school" ? "Quản trị trường" : "Quản trị trung tâm",
       activeStudents: unitClasses.reduce((sum, item) => sum + item.studentCount, 0),
       activeClasses: unitClasses.length,
       completionRate: average(unitClasses.map((item) => item.completionRate), 84),
@@ -324,15 +324,15 @@ function classesToSnapshots(classes: LmsClassDTO[], units: LmsEducationUnitDTO[]
       schoolName: classroom.centerName || unit?.name || "ERG Learning",
       clusterId: clusterByIndex(index),
       className: classroom.name,
-      gradeLabel: `Khá»‘i ${grade}`,
-      homeroomTeacher: "GiÃ¡o viÃªn chá»§ nhiá»‡m",
+      gradeLabel: `Khối ${grade}`,
+      homeroomTeacher: "Giáo viên chủ nhiệm",
       studentCount: 0,
       activeAssignments: 0,
       completionRate: 0,
       averageScore: 0,
       riskStudents: 0,
       competitionPoints: 0,
-      lastSubmissionAt: "ChÆ°a cÃ³ dá»¯ liá»‡u",
+      lastSubmissionAt: "Chưa có dữ liệu",
     };
   });
 }
@@ -388,8 +388,8 @@ function normalizeUnitType(value: string | undefined): EducationUnitType | strin
 
 function getKnownUnitCode(id: string, name: string, type: string | undefined) {
   const normalizedName = name.toLowerCase();
-  if (id === "system" || (type === "system" && normalizedName.includes("há»‡ thá»‘ng erg"))) return "ERG-SYSTEM";
-  if (id === "ctr_hoclieu_001" || normalizedName.includes("há»c liá»‡u studio") || normalizedName.includes("hoclieu studio")) {
+  if (id === "system" || (type === "system" && normalizedName.includes("hệ thống erg"))) return "ERG-SYSTEM";
+  if (id === "ctr_hoclieu_001" || normalizedName.includes("học liệu studio") || normalizedName.includes("hoclieu studio")) {
     return "HOCLIEU-STUDIO";
   }
   return undefined;

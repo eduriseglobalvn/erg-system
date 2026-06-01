@@ -20,7 +20,7 @@ test("maps non-system education units into managed schools", () => {
   const schools = buildManagedSchoolsFromUnits(units);
 
   expect(schools.map((item) => ({ id: item.id, name: item.name, principal: item.principal }))).toEqual([
-    { id: "school-1", name: "Truong A", principal: "Quáº£n trá»‹ trÆ°á»ng" },
-    { id: "center-1", name: "Trung tam B", principal: "Quáº£n trá»‹ trung tÃ¢m" },
+    { id: "school-1", name: "Truong A", principal: "Quản trị trường" },
+    { id: "center-1", name: "Trung tam B", principal: "Quản trị trung tâm" },
   ]);
 });

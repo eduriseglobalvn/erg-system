@@ -1,5 +1,20 @@
+import {
+  CRM_PORTAL_HOST,
+  ELEARNING_PORTAL_HOST,
+  ELEARNING_VUONG_PORTAL_HOST,
+  LCMS_PORTAL_HOST,
+  LMS_PORTAL_HOST,
+} from "@/config/portal-urls";
+
 ﻿const LOGIN_PATH = "/login";
 const LOCALHOSTS = new Set(["localhost", "127.0.0.1"]);
+const ALLOWED_PORTAL_HOSTS = new Set([
+  CRM_PORTAL_HOST,
+  ELEARNING_PORTAL_HOST,
+  ELEARNING_VUONG_PORTAL_HOST,
+  LCMS_PORTAL_HOST,
+  LMS_PORTAL_HOST,
+].map((host) => host.toLowerCase()));
 
 export function normalizeSsoReturnTo(rawReturnTo: string) {
   let url: URL;
@@ -10,7 +25,7 @@ export function normalizeSsoReturnTo(rawReturnTo: string) {
     return null;
   }
 
-  if (!isAllowedSsoReturnHost(url.hostname)) {
+  if (!isAllowedSsoReturnUrl(url)) {
     return null;
   }
 
@@ -24,7 +39,12 @@ export function normalizeSsoReturnTo(rawReturnTo: string) {
 
 export function isAllowedSsoReturnHost(hostname: string) {
   const normalized = hostname.trim().toLowerCase();
-  return normalized === "erg.edu.vn" || normalized.endsWith(".erg.edu.vn") || LOCALHOSTS.has(normalized);
+  return LOCALHOSTS.has(normalized) || [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
+}
+
+function isAllowedSsoReturnUrl(url: URL) {
+  if (LOCALHOSTS.has(url.hostname.toLowerCase())) return true;
+  return ALLOWED_PORTAL_HOSTS.has(url.host.toLowerCase());
 }
 
 function getNestedLoginRedirect(url: URL) {

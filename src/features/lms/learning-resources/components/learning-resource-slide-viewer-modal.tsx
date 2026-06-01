@@ -1,7 +1,7 @@
 ﻿import { useEffect, useMemo, useState, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, Eraser, MousePointer2, PenLine, RotateCcw, X } from "lucide-react";
 
-import type { HocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 
 type DrawPoint = {
   x: number;
@@ -30,12 +30,11 @@ function pathToD(path: DrawPath) {
     .join(" ");
 }
 
-export function HocLieuSlideViewerModal({
+export function LearningResourceSlideViewerModal({
   resource,
-  progressRate: _progressRate,
   onClose,
 }: {
-  resource: HocLieuResource;
+  resource: LearningResourceResource;
   progressRate?: number;
   onClose: () => void;
 }) {
@@ -143,7 +142,7 @@ export function HocLieuSlideViewerModal({
     <div className="fixed inset-0 z-[240] flex flex-col bg-[#f3f4f6]">
       <header className="flex h-14 shrink-0 items-center justify-between bg-[#3f3f3f] px-4 text-white">
         <div className="flex min-w-0 items-center gap-3">
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="Quay láº¡i kho há»c liá»‡u">
+          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="Quay lại kho học liệu">
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0">
@@ -163,7 +162,7 @@ export function HocLieuSlideViewerModal({
                 }`}
               >
                 {drawingMode === "pen" ? <PenLine className="h-4 w-4" /> : <MousePointer2 className="h-4 w-4" />}
-                {drawingMode === "pen" ? "Äang váº½" : "Con trá»"}
+                {drawingMode === "pen" ? "Đang vẽ" : "Con trỏ"}
               </button>
               <button
                 type="button"
@@ -171,11 +170,11 @@ export function HocLieuSlideViewerModal({
                 className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-xs font-bold text-white/85 hover:bg-white/10"
               >
                 <Eraser className="h-4 w-4" />
-                XÃ³a nÃ©t
+                Xóa nét
               </button>
             </>
           ) : null}
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="ÄÃ³ng viewer">
+          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="Đóng viewer">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -248,7 +247,7 @@ export function HocLieuSlideViewerModal({
                 type="button"
                 onClick={() => setActiveSlideIndex(0)}
                 className="grid h-9 w-9 place-items-center rounded-full text-slate-500 hover:bg-slate-100"
-                aria-label="Quay láº¡i slide Ä‘áº§u"
+                aria-label="Quay lại slide đầu"
               >
                 <RotateCcw className="h-4 w-4" />
               </button>

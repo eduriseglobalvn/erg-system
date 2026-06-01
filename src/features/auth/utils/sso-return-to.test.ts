@@ -22,5 +22,6 @@ test("keeps encoded hash redirects when older links use profile hash tabs", () =
 
 test("rejects external SSO return hosts", () => {
   expect(normalizeSsoReturnTo("https://evil.example/login?redirect=%2Fprofile")).toBeNull();
+  expect(normalizeSsoReturnTo("https://untrusted.erg.edu.vn:3001/login?redirect=%2Fprofile")).toBeNull();
   expect(isAllowedSsoReturnHost("lms.erg.edu.vn")).toBe(true);
 });

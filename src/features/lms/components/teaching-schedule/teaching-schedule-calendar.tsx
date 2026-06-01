@@ -45,7 +45,7 @@ function renderTeachingScheduleEvent(info: EventContentArg) {
       <div className="truncate text-[11px] font-semibold leading-4">{info.event.title}</div>
       <div className="truncate text-[10px] leading-3 opacity-85">{meta.school}</div>
       <div className="truncate text-[10px] leading-3 opacity-75">
-        {meta.room} Â· {meta.lesson}
+        {meta.room} · {meta.lesson}
       </div>
     </div>
   );
@@ -105,7 +105,7 @@ export function TeachingScheduleCalendar({
         eventShortHeight={22}
         dayMaxEvents={3}
         dayMaxEventRows={3}
-        moreLinkText={(count) => `+${count} lá»‹ch`}
+        moreLinkText={(count) => `+${count} lịch`}
         multiMonthMaxColumns={4}
         multiMonthMinWidth={230}
         events={events}

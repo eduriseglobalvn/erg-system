@@ -58,6 +58,14 @@ export function AdminOperationsWorkspace({
     );
   }
 
+  if (activeLeaf.variant === "admin-internal-docs") {
+    return (
+      <main className="h-full min-h-0 overflow-y-auto bg-[#f6f8fb] p-2 lg:p-3">
+        <InternalDocsWorkspace activeLeaf={activeLeaf} />
+      </main>
+    );
+  }
+
   return (
     <DashboardPageShell
       badge="Admin ERG"
@@ -94,7 +102,6 @@ export function AdminOperationsWorkspace({
       {activeLeaf.variant === "admin-sheet-import" ? (
         <SheetImportWorkspace managementScope={managementScope} centers={scopedCenters} classes={scopedClasses} />
       ) : null}
-      {activeLeaf.variant === "admin-internal-docs" ? <InternalDocsWorkspace activeLeaf={activeLeaf} /> : null}
     </DashboardPageShell>
   );
 }

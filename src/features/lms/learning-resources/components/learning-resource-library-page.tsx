@@ -29,20 +29,20 @@ import {
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/features/auth";
 import { getStoredAccessToken } from "@/features/auth/api/auth-token-storage";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
-import { loadHocLieuLibrarySections, loadHocLieuResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
+import { loadLearningResourceLibrarySections, loadLearningResourceResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
 import {
-  DEFAULT_HOCLIEU_SELECTION,
+  DEFAULT_LEARNING_RESOURCE_SELECTION,
   getCategoryChildren,
   getTopLevelCategories,
-  HOCLIEU_CATEGORIES,
-  HOCLIEU_GRADES,
-  HOCLIEU_LIBRARY_SECTIONS,
-  HOCLIEU_SUBJECTS,
-  type HocLieuAccessState,
-  type HocLieuCategory,
-  type HocLieuFileType,
-  type HocLieuResource,
-  type HocLieuViewerUnit,
+  LEARNING_RESOURCE_CATEGORIES,
+  LEARNING_RESOURCE_GRADES,
+  LEARNING_RESOURCE_LIBRARY_SECTIONS,
+  LEARNING_RESOURCE_SUBJECTS,
+  type LearningResourceAccessState,
+  type LearningResourceCategory,
+  type LearningResourceFileType,
+  type LearningResourceResource,
+  type LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
 
 type PdfJsModule = typeof import("pdfjs-dist");
@@ -64,7 +64,7 @@ async function loadPdfJs() {
   return pdfJsPromise;
 }
 
-const categoryIcons: Record<HocLieuCategory["icon"], LucideIcon> = {
+const categoryIcons: Record<LearningResourceCategory["icon"], LucideIcon> = {
   book: FileText,
   document: FileText,
   stem: Sparkles,
@@ -73,7 +73,7 @@ const categoryIcons: Record<HocLieuCategory["icon"], LucideIcon> = {
   smart: Sparkles,
 };
 
-const fileIcons: Record<HocLieuFileType, LucideIcon> = {
+const fileIcons: Record<LearningResourceFileType, LucideIcon> = {
   PDF: FileText,
   PPTX: Presentation,
   VIDEO: Film,
@@ -96,19 +96,19 @@ const thumbnailThemes = {
   rose: "from-rose-100 via-orange-200 to-rose-500 text-rose-950",
   yellow: "from-yellow-100 via-amber-100 to-yellow-500 text-yellow-950",
   slate: "from-slate-100 via-slate-200 to-slate-500 text-slate-950",
-} satisfies Record<HocLieuResource["thumbnailTheme"], string>;
+} satisfies Record<LearningResourceResource["thumbnailTheme"], string>;
 
-const accessLabels: Record<HocLieuAccessState, string> = {
-  open: "Miá»…n phÃ­",
-  login_required: "Cáº§n Ä‘Äƒng nháº­p",
-  license_required: "KÃ­ch hoáº¡t sá»­ dá»¥ng",
-  unavailable: "ChÆ°a sáºµn sÃ ng",
+const accessLabels: Record<LearningResourceAccessState, string> = {
+  open: "Miễn phí",
+  login_required: "Cần đăng nhập",
+  license_required: "Kích hoạt sử dụng",
+  unavailable: "Chưa sẵn sàng",
 };
 
 function displayText(value?: string) {
   if (!value) return "";
 
-  if (!/[ÃƒÃ„Ã‚ÂºÂ»Â¼Â½Â¾\u0080-\u009f]/.test(value)) {
+  if (!/[ÃÄÂº»¼½¾\u0080-\u009f]/.test(value)) {
     return value;
   }
 
@@ -121,7 +121,7 @@ function displayText(value?: string) {
   }
 }
 
-function hasEmbeddableViewer(resource: HocLieuResource) {
+function hasEmbeddableViewer(resource: LearningResourceResource) {
   return Boolean(resource.viewer.embedUrl && resource.viewer.embedUrl !== "about:blank");
 }
 
@@ -134,7 +134,7 @@ function getCategoryScope(categoryId: string): string[] {
   return [categoryId, ...children.flatMap((child) => getCategoryScope(child.id))];
 }
 
-function getFormatBadgeClass(fileType: HocLieuFileType) {
+function getFormatBadgeClass(fileType: LearningResourceFileType) {
   switch (fileType) {
     case "PDF":
       return "bg-slate-500 text-white";
@@ -164,7 +164,7 @@ function getFormatBadgeClass(fileType: HocLieuFileType) {
 }
 
 function matchesResource(
-  resource: HocLieuResource,
+  resource: LearningResourceResource,
   selected: { gradeId: string; subjectId: string; categoryId: string; keyword: string },
 ) {
   const categoryScope = getCategoryScope(selected.categoryId);
@@ -197,13 +197,13 @@ function getPreferredCategoryForSubject(subjectId: string) {
     case "tieng-anh":
       return "sach-mem-2";
     default:
-      return DEFAULT_HOCLIEU_SELECTION.categoryId;
+      return DEFAULT_LEARNING_RESOURCE_SELECTION.categoryId;
   }
 }
 
 function getDefaultSelectionForGrade(gradeId: string) {
-  if (gradeId === DEFAULT_HOCLIEU_SELECTION.gradeId) {
-    return DEFAULT_HOCLIEU_SELECTION;
+  if (gradeId === DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId) {
+    return DEFAULT_LEARNING_RESOURCE_SELECTION;
   }
 
   return {
@@ -220,7 +220,7 @@ function GradeSubjectFilter({
   activeSubjectId: string;
   onSubjectChange: (subjectId: string) => void;
 }) {
-  const availableSubjects = HOCLIEU_SUBJECTS.filter(
+  const availableSubjects = LEARNING_RESOURCE_SUBJECTS.filter(
     (subject) => subject.id !== "all",
   );
 
@@ -261,10 +261,10 @@ function CategoryTree({
     <aside className="border-r border-slate-200 bg-white">
       <div className="grid grid-cols-2 border-b border-[var(--erg-blue)]/20 p-3">
         <button type="button" className="h-10 rounded-md bg-[var(--erg-blue)] text-sm font-black text-white">
-          Há»c liá»‡u
+          Học liệu
         </button>
         <button type="button" className="h-10 rounded-md border border-[var(--erg-blue)] bg-white text-sm font-black text-[var(--erg-blue)]">
-          ..cá»§a tÃ´i
+          ..của tôi
         </button>
       </div>
 
@@ -316,7 +316,7 @@ function CategoryTree({
   );
 }
 
-function ResourceThumbnail({ resource }: { resource: HocLieuResource }) {
+function ResourceThumbnail({ resource }: { resource: LearningResourceResource }) {
   const FileIcon = fileIcons[resource.fileType];
 
   return (
@@ -339,7 +339,7 @@ function ResourceThumbnail({ resource }: { resource: HocLieuResource }) {
   );
 }
 
-function FormatBadge({ resource }: { resource: HocLieuResource }) {
+function FormatBadge({ resource }: { resource: LearningResourceResource }) {
   return (
     <span className={`rounded-md px-2 py-1 text-[11px] font-black leading-none ${getFormatBadgeClass(resource.fileType)}`}>
       {displayText(resource.formatBadge)}
@@ -347,7 +347,7 @@ function FormatBadge({ resource }: { resource: HocLieuResource }) {
   );
 }
 
-function ResourceCard({ resource, onOpen }: { resource: HocLieuResource; onOpen: (resource: HocLieuResource) => void }) {
+function ResourceCard({ resource, onOpen }: { resource: LearningResourceResource; onOpen: (resource: LearningResourceResource) => void }) {
   const isLocked = resource.accessState !== "open";
 
   return (
@@ -380,8 +380,8 @@ function EmptyState() {
       <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
         <Search className="h-5 w-5" />
       </div>
-      <h3 className="mt-4 text-lg font-black text-slate-950">KhÃ´ng tÃ¬m tháº¥y tÃ i liá»‡u phÃ¹ há»£p</h3>
-      <p className="mt-2 text-sm text-slate-500">HÃ£y Ä‘á»•i bá»™ lá»c lá»›p, mÃ´n, nhÃ³m há»c liá»‡u hoáº·c tá»« khÃ³a tÃ¬m kiáº¿m.</p>
+      <h3 className="mt-4 text-lg font-black text-slate-950">Không tìm thấy tài liệu phù hợp</h3>
+      <p className="mt-2 text-sm text-slate-500">Hãy đổi bộ lọc lớp, môn, nhóm học liệu hoặc từ khóa tìm kiếm.</p>
     </div>
   );
 }
@@ -397,7 +397,7 @@ function base64ToUint8Array(value: string) {
   return bytes;
 }
 
-function getDefaultViewerUnits(resource: HocLieuResource): HocLieuViewerUnit[] {
+function getDefaultViewerUnits(resource: LearningResourceResource): LearningResourceViewerUnit[] {
   if (resource.viewer.units?.length) return resource.viewer.units;
 
   if (resource.subjectId === "tieng-anh") {
@@ -440,7 +440,7 @@ function PdfLessonBankView({
   onClose,
   onOpenLesson,
 }: {
-  resource: HocLieuResource;
+  resource: LearningResourceResource;
   onClose: () => void;
   onOpenLesson: (title: string) => void;
 }) {
@@ -454,7 +454,7 @@ function PdfLessonBankView({
         type="button"
         onClick={onClose}
         className="fixed left-0 top-7 z-10 flex h-16 w-24 items-center justify-center rounded-r-full bg-white/95 text-[var(--erg-blue)] shadow-lg shadow-slate-950/15 transition hover:w-28"
-        aria-label="Quay láº¡i kho há»c liá»‡u"
+        aria-label="Quay lại kho học liệu"
       >
         <span className="text-center text-xs font-black leading-4">
           ERG
@@ -486,7 +486,7 @@ function PdfLessonBankView({
   );
 }
 
-function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource; onClose: () => void }) {
+function PdfFullScreenPreview({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   const canEmbed = hasEmbeddableViewer(resource);
   const viewerSrc = resource.viewer.secureEmbedUrl ?? resource.viewer.embedUrl ?? "";
   const [activeLessonTitle, setActiveLessonTitle] = useState<string | null>(null);
@@ -623,7 +623,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
             type="button"
             onClick={() => setActiveLessonTitle(null)}
             className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/90 transition hover:bg-white/10 hover:text-white"
-            aria-label="Quay láº¡i danh sÃ¡ch bÃ i"
+            aria-label="Quay lại danh sách bài"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -634,7 +634,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
             type="button"
             onClick={() => setZoom((value) => Math.max(0.75, Number((value - 0.1).toFixed(2))))}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="Thu nhá» PDF"
+            aria-label="Thu nhỏ PDF"
           >
             <ZoomOut className="h-4 w-4" />
           </button>
@@ -642,7 +642,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
             type="button"
             onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="PhÃ³ng to PDF"
+            aria-label="Phóng to PDF"
           >
             <ZoomIn className="h-4 w-4" />
           </button>
@@ -650,7 +650,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
             type="button"
             onClick={() => void toggleFullscreen()}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="Má»Ÿ toÃ n mÃ n hÃ¬nh"
+            aria-label="Mở toàn màn hình"
           >
             <Maximize2 className="h-4 w-4" />
           </button>
@@ -660,12 +660,12 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
         <div className="h-[calc(100vh-48px)] overflow-y-auto bg-slate-100 px-4 py-6">
           {renderState === "loading" ? (
             <div className="mx-auto mb-6 max-w-[980px] rounded-xl border border-slate-200 bg-white p-5 text-sm font-bold text-slate-500 shadow-sm">
-              Äang táº£i tÃ i liá»‡u...
+              Đang tải tài liệu...
             </div>
           ) : null}
           {renderState === "error" ? (
             <div className="mx-auto max-w-[720px] rounded-xl border border-rose-200 bg-white p-6 text-sm font-bold text-rose-600 shadow-sm">
-              KhÃ´ng thá»ƒ má»Ÿ PDF. BE cáº§n tráº£ file dáº¡ng `application/pdf` qua viewer endpoint cÃ¹ng domain.
+              Không thể mở PDF. BE cần trả file dạng `application/pdf` qua viewer endpoint cùng domain.
             </div>
           ) : null}
           <div ref={canvasContainerRef} className="mx-auto max-w-[1100px]" />
@@ -705,17 +705,17 @@ function formatLessonTitle(value: string) {
   return text.replaceAll("_", " ");
 }
 
-function getLectureDeckLabel(resource: HocLieuResource) {
+function getLectureDeckLabel(resource: LearningResourceResource) {
   if (resource.subjectId === "giao-duc-stem") return resource.gradeId ? `STEM ${resource.gradeId}` : "STEM";
   if (resource.subjectId === "ic3") return "IC3 GS6";
   if (resource.subjectId === "mos") return "MOS Office";
-  if (resource.subjectId === "tin-hoc") return resource.gradeId ? `Tin há»c ${resource.gradeId}` : "Tin há»c";
-  if (resource.subjectId === "tieng-anh") return resource.gradeId ? `Tiáº¿ng Anh ${resource.gradeId}` : "Tiáº¿ng Anh";
+  if (resource.subjectId === "tin-hoc") return resource.gradeId ? `Tin học ${resource.gradeId}` : "Tin học";
+  if (resource.subjectId === "tieng-anh") return resource.gradeId ? `Tiếng Anh ${resource.gradeId}` : "Tiếng Anh";
 
   return displayText(resource.subtitle ?? resource.title);
 }
 
-function getLectureDeckTheme(resource: HocLieuResource) {
+function getLectureDeckTheme(resource: LearningResourceResource) {
   switch (resource.subjectId) {
     case "giao-duc-stem":
       return {
@@ -754,7 +754,7 @@ function LectureUnitCard({
   theme,
   onOpenLesson,
 }: {
-  unit: HocLieuViewerUnit;
+  unit: LearningResourceViewerUnit;
   index: number;
   theme: ReturnType<typeof getLectureDeckTheme>;
   onOpenLesson: (title: string) => void;
@@ -805,7 +805,7 @@ function LectureBankView({
   onClose,
   onOpenLesson,
 }: {
-  resource: HocLieuResource;
+  resource: LearningResourceResource;
   onClose: () => void;
   onOpenLesson: (title: string) => void;
 }) {
@@ -827,7 +827,7 @@ function LectureBankView({
         type="button"
         onClick={onClose}
         className="fixed left-0 top-7 z-10 flex h-16 w-24 items-center justify-center rounded-r-full bg-white/95 text-[var(--erg-blue)] shadow-lg shadow-slate-950/15 transition hover:w-28"
-        aria-label="Quay láº¡i kho há»c liá»‡u"
+        aria-label="Quay lại kho học liệu"
       >
         <span className="text-center text-xs font-black leading-4">
           ERG
@@ -846,7 +846,7 @@ function LectureBankView({
           <button
             type="button"
             className="absolute bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--erg-blue)] shadow-sm"
-            aria-label="Táº£i bÃ i giáº£ng"
+            aria-label="Tải bài giảng"
           >
             <Download className="h-5 w-5" />
           </button>
@@ -876,7 +876,7 @@ function LectureBankView({
   );
 }
 
-function SlideDeckPreview({ resource, onClose }: { resource: HocLieuResource; onClose: () => void }) {
+function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   const [activeLessonTitle, setActiveLessonTitle] = useState<string | null>(null);
   const canEmbed = hasEmbeddableViewer(resource);
   const presentationTitle = activeLessonTitle ?? displayText(resource.viewer.presentationTitle ?? resource.viewer.title);
@@ -893,7 +893,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: HocLieuResource; on
             type="button"
             onClick={() => setActiveLessonTitle(null)}
             className="-ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full text-white/90 transition hover:bg-white/10 hover:text-white"
-            aria-label="Quay láº¡i danh sÃ¡ch bÃ i giáº£ng"
+            aria-label="Quay lại danh sách bài giảng"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
@@ -920,7 +920,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: HocLieuResource; on
           type="button"
           onClick={() => setActiveLessonTitle(null)}
           className="-ml-1 inline-flex h-9 w-9 items-center justify-center rounded-full text-white/90 transition hover:bg-white/10 hover:text-white"
-          aria-label="Quay láº¡i danh sÃ¡ch bÃ i giáº£ng"
+          aria-label="Quay lại danh sách bài giảng"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -931,7 +931,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: HocLieuResource; on
           <Presentation className="mx-auto h-12 w-12 text-[var(--erg-blue)]" />
           <h4 className="mt-5 text-2xl font-black text-slate-950">{displayText(resource.viewer.title)}</h4>
           <p className="mt-3 text-sm leading-6 text-slate-500">
-            ChÆ°a cÃ³ `embedUrl` cho bÃ i giáº£ng nÃ y. BE cáº§n tráº£ viewer URL hoáº·c token URL Ä‘á»ƒ FE má»Ÿ trÃ¬nh chiáº¿u.
+            Chưa có `embedUrl` cho bài giảng này. BE cần trả viewer URL hoặc token URL để FE mở trình chiếu.
           </p>
         </div>
       </div>
@@ -939,7 +939,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: HocLieuResource; on
   );
 }
 
-function MediaPreview({ resource }: { resource: HocLieuResource }) {
+function MediaPreview({ resource }: { resource: LearningResourceResource }) {
   const isAudio = resource.launchMode === "audio_player";
 
   return (
@@ -962,7 +962,7 @@ function MediaPreview({ resource }: { resource: HocLieuResource }) {
   );
 }
 
-function FallbackPreview({ resource }: { resource: HocLieuResource }) {
+function FallbackPreview({ resource }: { resource: LearningResourceResource }) {
   const Icon =
     resource.launchMode === "quiz_runtime"
       ? FileQuestion
@@ -981,14 +981,14 @@ function FallbackPreview({ resource }: { resource: HocLieuResource }) {
         className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--erg-blue)] px-4 py-2 text-sm font-bold text-white"
         type="button"
       >
-        {resource.launchMode === "download_only" ? "Táº£i gÃ³i tÃ i liá»‡u" : "Má»Ÿ khi tÃ­ch há»£p BE"}
+        {resource.launchMode === "download_only" ? "Tải gói tài liệu" : "Mở khi tích hợp BE"}
         <ChevronRight className="h-4 w-4" />
       </button>
     </div>
   );
 }
 
-function ResourceViewerModal({ resource, onClose }: { resource: HocLieuResource; onClose: () => void }) {
+function ResourceViewerModal({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   if (resource.launchMode === "pdf_reader" || resource.launchMode === "ebook_reader") {
     return <PdfFullScreenPreview resource={resource} onClose={onClose} />;
   }
@@ -1007,7 +1007,7 @@ function ResourceViewerModal({ resource, onClose }: { resource: HocLieuResource;
             className="inline-flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100"
           >
             <ArrowLeft className="h-4 w-4" />
-            Quay láº¡i kho há»c liá»‡u
+            Quay lại kho học liệu
           </button>
           <div className="flex items-center gap-2">
             <FormatBadge resource={resource} />
@@ -1017,7 +1017,7 @@ function ResourceViewerModal({ resource, onClose }: { resource: HocLieuResource;
                 className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-600 hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
               >
                 <Download className="h-4 w-4" />
-                Táº£i xuá»‘ng
+                Tải xuống
               </button>
             ) : null}
             <button type="button" onClick={onClose} className="rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
@@ -1050,7 +1050,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
     } catch (error) {
       auth.setNotice({
         tone: "error",
-        message: error instanceof Error ? displayText(error.message) : "KhÃ´ng thá»ƒ Ä‘Äƒng nháº­p tÃ i khoáº£n giÃ¡o viÃªn.",
+        message: error instanceof Error ? displayText(error.message) : "Không thể đăng nhập tài khoản giáo viên.",
       });
     } finally {
       setIsSubmitting(false);
@@ -1066,7 +1066,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
     } catch (error) {
       auth.setNotice({
         tone: "error",
-        message: error instanceof Error ? displayText(error.message) : "KhÃ´ng thá»ƒ Ä‘Äƒng nháº­p tÃ i khoáº£n giÃ¡o viÃªn.",
+        message: error instanceof Error ? displayText(error.message) : "Không thể đăng nhập tài khoản giáo viên.",
       });
     } finally {
       setIsSubmitting(false);
@@ -1077,7 +1077,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
     <div className="min-h-[calc(100vh-96px)] bg-[#f4f7fb]">
       <div className="border-b border-[#cdeefa] bg-[#eaf8ff]">
         <div className="mx-auto flex max-w-[92rem] flex-wrap items-center justify-center gap-2 px-4 py-5 sm:px-6 lg:px-8">
-          {["Máº§m non", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].map((grade) => (
+          {["Mầm non", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].map((grade) => (
             <span
               key={grade}
               className={`rounded-lg px-3 py-2 text-sm font-black ${
@@ -1095,12 +1095,12 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
           <div className="bg-gradient-to-r from-[#70c9e5] to-[#3d96ad] px-6 py-8 text-white">
             <div className="flex items-start justify-between gap-5">
               <div>
-                <p className="text-sm font-black uppercase tracking-[0.2em] text-white/75">Kho há»c liá»‡u ERG</p>
+                <p className="text-sm font-black uppercase tracking-[0.2em] text-white/75">Kho học liệu ERG</p>
                 <h1 className="mt-4 max-w-3xl text-4xl font-black leading-tight tracking-tight md:text-5xl">
-                  ÄÄƒng nháº­p Ä‘á»ƒ má»Ÿ kho há»c liá»‡u.
+                  Đăng nhập để mở kho học liệu.
                 </h1>
                 <p className="mt-4 max-w-2xl text-base leading-7 text-white/88">
-                  Trang chá»§ cÃ³ thá»ƒ xem cÃ´ng khai. CÃ¡c tÃ i liá»‡u, bÃ i giáº£ng Ä‘iá»‡n tá»­, file PDF, video, IC3, MOS vÃ  Tin há»c chá»‰ má»Ÿ sau khi xÃ¡c thá»±c tÃ i khoáº£n giÃ¡o viÃªn.
+                  Trang chủ có thể xem công khai. Các tài liệu, bài giảng điện tử, file PDF, video, IC3, MOS và Tin học chỉ mở sau khi xác thực tài khoản giáo viên.
                 </p>
               </div>
               <div className="hidden h-20 w-20 shrink-0 items-center justify-center rounded-lg bg-white/20 md:flex">
@@ -1111,9 +1111,9 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
 
           <div className="grid gap-0 md:grid-cols-3">
             {[
-              { label: "SÃ¡ch vÃ  PDF", value: "PDF" },
-              { label: "BÃ i giáº£ng Ä‘iá»‡n tá»­", value: "PPTX" },
-              { label: "IC3 / MOS / Tin há»c", value: "API tháº­t" },
+              { label: "Sách và PDF", value: "PDF" },
+              { label: "Bài giảng điện tử", value: "PPTX" },
+              { label: "IC3 / MOS / Tin học", value: "API thật" },
             ].map((item) => (
               <div key={item.label} className="border-t border-slate-100 p-6 md:border-r md:last:border-r-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">{item.label}</p>
@@ -1129,8 +1129,8 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
               <Lock className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="text-xl font-black text-slate-950">ÄÄƒng nháº­p giÃ¡o viÃªn</h2>
-              <p className="mt-1 text-sm leading-6 text-slate-500">Sá»­ dá»¥ng tÃ i khoáº£n Ä‘Æ°á»£c cáº¥p quyá»n Há»c liá»‡u hoáº·c LMS Ä‘á»ƒ tiáº¿p tá»¥c.</p>
+              <h2 className="text-xl font-black text-slate-950">Đăng nhập giáo viên</h2>
+              <p className="mt-1 text-sm leading-6 text-slate-500">Sử dụng tài khoản được cấp quyền Học liệu hoặc LMS để tiếp tục.</p>
             </div>
           </div>
 
@@ -1151,7 +1151,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
               />
             </label>
             <label className="block">
-              <span className="text-sm font-bold text-slate-700">Máº­t kháº©u</span>
+              <span className="text-sm font-bold text-slate-700">Mật khẩu</span>
               <input
                 className="mt-2 h-11 w-full rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#5d79ff] focus:ring-4 focus:ring-[#5d79ff]/10"
                 type="password"
@@ -1165,7 +1165,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
               disabled={isSubmitting}
               type="submit"
             >
-              ÄÄƒng nháº­p vÃ  má»Ÿ kho há»c liá»‡u
+              Đăng nhập và mở kho học liệu
             </button>
           </form>
 
@@ -1209,19 +1209,19 @@ export function LearningResourceLoginPage() {
 
 export function LearningResourceLibraryPage() {
   const { gradeId: routeGradeId } = useParams<{ gradeId?: string }>();
-  const initialGradeId = HOCLIEU_GRADES.some((grade) => grade.id === routeGradeId)
-    ? routeGradeId ?? DEFAULT_HOCLIEU_SELECTION.gradeId
-    : DEFAULT_HOCLIEU_SELECTION.gradeId;
+  const initialGradeId = LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)
+    ? routeGradeId ?? DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId
+    : DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId;
   const initialSelection = getDefaultSelectionForGrade(initialGradeId);
   const [account, setAccount] = useState(() => getCurrentAccount());
   const [activeGradeId, setActiveGradeId] = useState(initialSelection.gradeId);
   const [activeSubjectId, setActiveSubjectId] = useState(initialSelection.subjectId);
   const [activeCategoryId, setActiveCategoryId] = useState(initialSelection.categoryId);
   const [keyword, setKeyword] = useState("");
-  const [librarySections, setLibrarySections] = useState(HOCLIEU_LIBRARY_SECTIONS);
+  const [librarySections, setLibrarySections] = useState(LEARNING_RESOURCE_LIBRARY_SECTIONS);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [viewerLoadingResourceId, setViewerLoadingResourceId] = useState<string | null>(null);
-  const [activeResource, setActiveResource] = useState<HocLieuResource | null>(null);
+  const [activeResource, setActiveResource] = useState<LearningResourceResource | null>(null);
 
   useEffect(() => {
     function handleAuthChanged() {
@@ -1233,7 +1233,7 @@ export function LearningResourceLibraryPage() {
   }, []);
 
   useEffect(() => {
-    if (!routeGradeId || !HOCLIEU_GRADES.some((grade) => grade.id === routeGradeId)) return;
+    if (!routeGradeId || !LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)) return;
     const nextSelection = getDefaultSelectionForGrade(routeGradeId);
     setActiveGradeId(nextSelection.gradeId);
     setActiveSubjectId(nextSelection.subjectId);
@@ -1248,11 +1248,11 @@ export function LearningResourceLibraryPage() {
     async function loadLibrary() {
       try {
         setLibraryError(null);
-        const sections = await loadHocLieuLibrarySections();
+        const sections = await loadLearningResourceLibrarySections();
         if (!isCancelled) setLibrarySections(sections);
       } catch (error) {
         if (!isCancelled) {
-          setLibraryError(error instanceof Error ? error.message : "KhÃ´ng thá»ƒ táº£i kho há»c liá»‡u tá»« API.");
+          setLibraryError(error instanceof Error ? error.message : "Không thể tải kho học liệu từ API.");
         }
       }
     }
@@ -1279,15 +1279,15 @@ export function LearningResourceLibraryPage() {
   }, [activeCategoryId, activeGradeId, activeSubjectId, keyword, librarySections]);
 
   const totalVisibleResources = visibleSections.reduce((total, section) => total + section.resources.length, 0);
-  const activeCategory = HOCLIEU_CATEGORIES.find((category) => category.id === activeCategoryId);
-  const activeSubject = HOCLIEU_SUBJECTS.find((subject) => subject.id === activeSubjectId);
+  const activeCategory = LEARNING_RESOURCE_CATEGORIES.find((category) => category.id === activeCategoryId);
+  const activeSubject = LEARNING_RESOURCE_SUBJECTS.find((subject) => subject.id === activeSubjectId);
 
   const handleSubjectChange = (subjectId: string) => {
     setActiveSubjectId(subjectId);
     setActiveCategoryId(getPreferredCategoryForSubject(subjectId));
   };
 
-  async function handleOpenResource(resource: HocLieuResource) {
+  async function handleOpenResource(resource: LearningResourceResource) {
     setActiveResource(resource);
     setLibraryError(null);
 
@@ -1296,10 +1296,10 @@ export function LearningResourceLibraryPage() {
     setViewerLoadingResourceId(resource.id);
 
     try {
-      const hydratedResource = await loadHocLieuResourceForViewer(resource);
+      const hydratedResource = await loadLearningResourceResourceForViewer(resource);
       setActiveResource((currentResource) => (currentResource?.id === resource.id ? hydratedResource : currentResource));
     } catch (error) {
-      setLibraryError(error instanceof Error ? error.message : "KhÃ´ng thá»ƒ má»Ÿ viewer tá»« API.");
+      setLibraryError(error instanceof Error ? error.message : "Không thể mở viewer từ API.");
     } finally {
       setViewerLoadingResourceId(null);
     }
@@ -1319,12 +1319,12 @@ export function LearningResourceLibraryPage() {
           <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <h1 className="text-2xl font-black uppercase tracking-tight text-slate-950">
-                {displayText(activeCategory?.label) || "Kho há»c liá»‡u"}
+                {displayText(activeCategory?.label) || "Kho học liệu"}
               </h1>
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-500">
-                <span>{displayText(HOCLIEU_GRADES.find((grade) => grade.id === activeGradeId)?.label) || "-"}</span>
+                <span>{displayText(LEARNING_RESOURCE_GRADES.find((grade) => grade.id === activeGradeId)?.label) || "-"}</span>
                 <span>/</span>
-                <span>{displayText(activeSubject?.label) || "Táº¥t cáº£"}</span>
+                <span>{displayText(activeSubject?.label) || "Tất cả"}</span>
                 <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-[var(--erg-blue)] shadow-sm">
                   <SlidersHorizontal className="h-3.5 w-3.5" />
                   {totalVisibleResources}
@@ -1335,7 +1335,7 @@ export function LearningResourceLibraryPage() {
               <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 className="h-10 w-full rounded-md border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[var(--erg-blue)]/10"
-                placeholder="TÃ¬m há»c liá»‡u"
+                placeholder="Tìm học liệu"
                 type="search"
                 value={keyword}
                 onChange={(event) => setKeyword(event.target.value)}
@@ -1350,7 +1350,7 @@ export function LearningResourceLibraryPage() {
           ) : null}
           {viewerLoadingResourceId ? (
             <p className="mb-4 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-blue-700">
-              Äang má»Ÿ há»c liá»‡u...
+              Đang mở học liệu...
             </p>
           ) : null}
 

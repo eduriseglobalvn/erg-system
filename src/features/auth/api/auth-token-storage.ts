@@ -114,7 +114,6 @@ export function resolveCurrentPortal(): NonNullable<StoredAuthSession["portal"]>
   if (host.startsWith("admin.") || pathname.startsWith("/admin")) return "admin";
   if (host.startsWith("elearning.") || pathname.startsWith("/student")) return "elearning";
   if (host.startsWith("lcms.") || pathname.startsWith("/lcms")) return "lcms";
-  if (host.startsWith("hoclieu.")) return "lms";
   return "lms";
 }
 

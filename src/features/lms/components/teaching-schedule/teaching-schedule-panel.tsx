@@ -45,10 +45,10 @@ type QuickEventState = {
 } | null;
 
 const viewLabels: Record<TeachingScheduleView, string> = {
-  timeGridDay: "NgÃ y",
-  timeGridWeek: "Tuáº§n",
-  dayGridMonth: "ThÃ¡ng",
-  multiMonthYear: "NÄƒm",
+  timeGridDay: "Ngày",
+  timeGridWeek: "Tuần",
+  dayGridMonth: "Tháng",
+  multiMonthYear: "Năm",
 };
 
 export function TeachingSchedulePanel({
@@ -66,7 +66,7 @@ export function TeachingSchedulePanel({
   const [events, setEvents] = useState<TeachingScheduleEvent[]>(initialEvents);
   const [dialogState, setDialogState] = useState<DialogState>(null);
   const [quickEvent, setQuickEvent] = useState<QuickEventState>(null);
-  const [title, setTitle] = useState("ThÃ¡ng 6, 2026");
+  const [title, setTitle] = useState("Tháng 6, 2026");
   const [view, setView] = useState<TeachingScheduleView>("timeGridWeek");
 
   useEffect(() => {
@@ -92,9 +92,9 @@ export function TeachingSchedulePanel({
         start: toDatetimeLocalValue(start),
         end: toDatetimeLocalValue(end),
         school: selectedClass?.schoolName ?? "ERG Alpha Campus",
-        className: selectedClass?.className ?? "Lá»›p 6A1",
-        room: "PhÃ²ng há»c",
-        lesson: "Tiáº¿t 1-2",
+        className: selectedClass?.className ?? "Lớp 6A1",
+        room: "Phòng học",
+        lesson: "Tiết 1-2",
         status: "confirmed",
         note: "",
       },
@@ -150,7 +150,7 @@ export function TeachingSchedulePanel({
 
     const normalizedDraft = {
       ...dialogState.draft,
-      title: dialogState.draft.title.trim() || "Lá»‹ch dáº¡y má»›i",
+      title: dialogState.draft.title.trim() || "Lịch dạy mới",
     };
     const nextEvent = buildTeachingScheduleEvent(normalizedDraft, teacherName);
     setEvents((currentEvents) =>
@@ -244,21 +244,21 @@ function GoogleCalendarTopBar({
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b border-[#dadce0] bg-white px-3 md:gap-4 md:px-5">
       <button type="button" onClick={() => onMove("today")} className="rounded border border-[#dadce0] px-4 py-2 text-sm font-medium text-[#3c4043] hover:bg-[#f8fafd]">
-        HÃ´m nay
+        Hôm nay
       </button>
       <div className="flex items-center">
-        <IconButton label="TrÆ°á»›c" icon={<ChevronLeft className="h-5 w-5" />} onClick={() => onMove("prev")} />
+        <IconButton label="Trước" icon={<ChevronLeft className="h-5 w-5" />} onClick={() => onMove("prev")} />
         <IconButton label="Sau" icon={<ChevronRight className="h-5 w-5" />} onClick={() => onMove("next")} />
       </div>
       <h1 className="min-w-0 flex-1 truncate text-lg font-normal text-[#3c4043] md:text-[22px]">{title}</h1>
       <div className="hidden items-center gap-1 text-[#5f6368] sm:flex">
-        <IconButton label="TÃ¬m kiáº¿m" icon={<Search className="h-5 w-5" />} />
-        <IconButton label="Trá»£ giÃºp" icon={<HelpCircle className="h-5 w-5" />} />
-        <IconButton label="CÃ i Ä‘áº·t" icon={<Settings className="h-5 w-5" />} />
+        <IconButton label="Tìm kiếm" icon={<Search className="h-5 w-5" />} />
+        <IconButton label="Trợ giúp" icon={<HelpCircle className="h-5 w-5" />} />
+        <IconButton label="Cài đặt" icon={<Settings className="h-5 w-5" />} />
       </div>
       <ViewMenu onChangeView={onChangeView} view={view} />
       <div className="hidden text-[#5f6368] md:block">
-        <IconButton label="á»¨ng dá»¥ng" icon={<Grid3X3 className="h-5 w-5" />} />
+        <IconButton label="Ứng dụng" icon={<Grid3X3 className="h-5 w-5" />} />
       </div>
     </header>
   );
@@ -324,28 +324,28 @@ function GoogleCalendarSidebar({ onCreate }: { onCreate: () => void }) {
         className="mb-5 inline-flex h-12 w-32 items-center justify-center gap-3 rounded-2xl bg-white text-sm font-medium text-[#3c4043] shadow-[0_1px_3px_0_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] hover:bg-[#f8fafd]"
       >
         <Plus className="h-5 w-5 text-[#1a73e8]" />
-        Táº¡o
+        Tạo
         <ChevronDown className="h-4 w-4 text-[#5f6368]" />
       </button>
       <MiniMonth />
       <button type="button" className="mt-4 flex h-10 items-center gap-3 rounded-full bg-[#f1f3f4] px-3 text-sm font-medium text-[#5f6368]">
         <Users className="h-4 w-4" />
-        TÃ¬m ngÆ°á»i
+        Tìm người
       </button>
-      <SidebarSection title="Lá»‹ch cá»§a tÃ´i" expanded>
+      <SidebarSection title="Lịch của tôi" expanded>
         <CalendarToggle color={personalTeachingCalendar.color} label={personalTeachingCalendar.label} />
       </SidebarSection>
-      <SidebarSection title="Lá»‹ch theo trÆ°á»ng" plus expanded>
+      <SidebarSection title="Lịch theo trường" plus expanded>
         {schoolTeachingCalendars.map((calendar) => (
           <CalendarToggle key={calendar.id} color={calendar.color} label={calendar.label} />
         ))}
       </SidebarSection>
-      <SidebarSection title="Lá»‹ch khÃ¡c" plus expanded>
-        {["NgÃ y lá»… á»Ÿ Viá»‡t Nam", "Sinh nháº­t", "Viá»‡c cáº§n lÃ m"].map((label) => (
+      <SidebarSection title="Lịch khác" plus expanded>
+        {["Ngày lễ ở Việt Nam", "Sinh nhật", "Việc cần làm"].map((label) => (
           <CalendarToggle key={label} color="#34a853" label={label} />
         ))}
       </SidebarSection>
-      <div className="mt-auto text-xs text-[#5f6368]">Äiá»u khoáº£n Â· Báº£o máº­t</div>
+      <div className="mt-auto text-xs text-[#5f6368]">Điều khoản · Bảo mật</div>
     </aside>
   );
 }
@@ -386,7 +386,7 @@ function MiniMonth() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between px-1 text-sm font-medium text-[#3c4043]">
-        <span>ThÃ¡ng 6, 2026</span>
+        <span>Tháng 6, 2026</span>
         <span className="flex gap-1 text-[#5f6368]">
           <ChevronLeft className="h-4 w-4" />
           <ChevronRight className="h-4 w-4" />
@@ -427,11 +427,11 @@ function QuickEventPopover({
       style={{ left: quickEvent.x, top: quickEvent.y }}
     >
       <div className="mb-2 flex justify-end text-[#5f6368]">
-        <IconButton label="Sá»­a" icon={<Pencil className="h-4 w-4" />} onClick={onEdit} />
-        <IconButton label="XÃ³a" icon={<Trash2 className="h-4 w-4" />} onClick={onDelete} />
+        <IconButton label="Sửa" icon={<Pencil className="h-4 w-4" />} onClick={onEdit} />
+        <IconButton label="Xóa" icon={<Trash2 className="h-4 w-4" />} onClick={onDelete} />
         <IconButton label="Email" icon={<Mail className="h-4 w-4" />} />
-        <IconButton label="ThÃªm" icon={<MoreVertical className="h-4 w-4" />} />
-        <IconButton label="ÄÃ³ng" icon={<X className="h-4 w-4" />} onClick={onClose} />
+        <IconButton label="Thêm" icon={<MoreVertical className="h-4 w-4" />} />
+        <IconButton label="Đóng" icon={<X className="h-4 w-4" />} onClick={onClose} />
       </div>
       <div className="grid grid-cols-[18px_1fr] gap-x-4 gap-y-3">
         <span className="mt-2 h-3 w-3 rounded-sm" style={{ backgroundColor: quickEvent.event.borderColor }} />
@@ -440,15 +440,15 @@ function QuickEventPopover({
           <p className="mt-1 text-sm text-[#3c4043]">{formatEventRange(quickEvent.event.start, quickEvent.event.end)}</p>
         </div>
         <Bell className="h-5 w-5 text-[#5f6368]" />
-        <span className="text-sm text-[#3c4043]">30 phÃºt trÆ°á»›c</span>
+        <span className="text-sm text-[#3c4043]">30 phút trước</span>
         <CalendarDays className="h-5 w-5 text-[#5f6368]" />
         <span className="text-sm text-[#3c4043]">{meta.teacher || personalTeachingCalendar.label}</span>
         <MapPin className="h-5 w-5 text-[#5f6368]" />
-        <span className="text-sm text-[#3c4043]">{meta.school} Â· {meta.room}</span>
+        <span className="text-sm text-[#3c4043]">{meta.school} · {meta.room}</span>
         <Video className="h-5 w-5 text-[#5f6368]" />
-        <span className="text-sm text-[#3c4043]">{meta.className} Â· {meta.lesson}</span>
+        <span className="text-sm text-[#3c4043]">{meta.className} · {meta.lesson}</span>
         <AlignLeft className="h-5 w-5 text-[#5f6368]" />
-        <span className="text-sm leading-6 text-[#3c4043]">{meta.note || "KhÃ´ng cÃ³ mÃ´ táº£"}</span>
+        <span className="text-sm leading-6 text-[#3c4043]">{meta.note || "Không có mô tả"}</span>
       </div>
     </div>
   );

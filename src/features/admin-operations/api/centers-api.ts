@@ -18,7 +18,7 @@ export async function getCenters(): Promise<ClassroomSchool[]> {
 
 /**
  * Fetches the access scopes for a specific user.
- * Defines which centers and modules (LMS/HocLieu) the user can access.
+ * Defines which centers and modules (LMS/learning resources) the user can access.
  */
 export async function getUserAccessScopes(userID: string) {
   return apiRequest(`/api/v1/users/${userID}/access-scopes`, { portal: getBackOfficePortal() });

@@ -7,7 +7,7 @@ vi.mock("@/lib/api-client", () => ({
   hasApiBase: () => true,
 }));
 
-import { createHocLieuResource, uploadHocLieuResource } from "./learning-resource-authoring-api";
+import { createLearningResourceResource, uploadLearningResourceResource } from "./learning-resource-authoring-api";
 
 beforeEach(() => {
   apiRequestMock.mockReset();
@@ -26,7 +26,7 @@ test("creates google slide assets with manual total slide metadata", async () =>
   });
   apiRequestMock.mockResolvedValueOnce({ id: "asset-1", resourceId: "resource-1" });
 
-  await createHocLieuResource({
+  await createLearningResourceResource({
     title: "Bai giang",
     subjectId: "subject-1",
     programSlug: "subject-1",
@@ -60,7 +60,7 @@ test("uploads google slide links with manual total slide metadata", async () => 
   });
   apiRequestMock.mockResolvedValueOnce({ id: "asset-1", resourceId: "resource-1" });
 
-  await uploadHocLieuResource({
+  await uploadLearningResourceResource({
     title: "Bai giang",
     subjectId: "subject-1",
     categoryId: "group-1",

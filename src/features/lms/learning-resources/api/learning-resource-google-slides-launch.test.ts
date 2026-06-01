@@ -11,10 +11,10 @@ vi.mock("@/lib/platform", () => ({
   getApiBase: () => "https://api.example.test",
 }));
 
-import { loadHocLieuResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
-import type { HocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import { loadLearningResourceResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
+import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 
-function googleLaunchResource(): HocLieuResource {
+function googleLaunchResource(): LearningResourceResource {
   return {
     id: "resource-google",
     slug: "resource-google",
@@ -55,7 +55,7 @@ test("maps manual slide count from Google Slides launch responses", async () => 
     slideCount: 2,
   });
 
-  const resource = await loadHocLieuResourceForViewer(googleLaunchResource());
+  const resource = await loadLearningResourceResourceForViewer(googleLaunchResource());
 
   expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/hoclieu/assets/asset-google/launch");
   expect(resource.viewer).toMatchObject({
@@ -64,7 +64,7 @@ test("maps manual slide count from Google Slides launch responses", async () => 
 });
 
 test("keeps Google Slides resources that already carry an embedUrl without refetching metadata", async () => {
-  const resource = await loadHocLieuResourceForViewer({
+  const resource = await loadLearningResourceResourceForViewer({
     ...googleLaunchResource(),
     viewer: {
       assetId: "asset-google",

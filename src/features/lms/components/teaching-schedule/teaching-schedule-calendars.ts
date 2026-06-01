@@ -6,7 +6,7 @@ export type TeachingScheduleCalendarColor = Pick<TeachingScheduleEvent, "backgro
 
 export const personalTeachingCalendar = {
   color: "#1a73e8",
-  label: "Lá»‹ch dáº¡y cá»§a tÃ´i",
+  label: "Lịch dạy của tôi",
 };
 
 const schoolColorPalette = ["#1a73e8", "#34a853", "#fbbc04", "#a142f4", "#fa7b17", "#24c1e0"];
@@ -54,5 +54,5 @@ export function getTeachingScheduleCalendarColor(school: string): TeachingSchedu
 }
 
 export function isPersonalCalendarSchool(school: string) {
-  return school.trim().toLowerCase() === "lá»‹ch cÃ¡ nhÃ¢n";
+  return school.trim().toLowerCase() === "lịch cá nhân";
 }

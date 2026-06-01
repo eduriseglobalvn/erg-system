@@ -1,20 +1,20 @@
-﻿import { listHocLieuResources } from "@/features/admin-operations/api/learning-resource-authoring-api";
+﻿import { listLearningResourceResources } from "@/features/admin-operations/api/learning-resource-authoring-api";
 import {
-  HOCLIEU_CATEGORIES,
-  HOCLIEU_LIBRARY_SECTIONS,
-  type HocLieuAccessState,
-  type HocLieuFileType,
-  type HocLieuLaunchMode,
-  type HocLieuPriceType,
-  type HocLieuResource,
-  type HocLieuResourceSection,
-  type HocLieuViewerSlide,
-  type HocLieuViewerUnit,
+  LEARNING_RESOURCE_CATEGORIES,
+  LEARNING_RESOURCE_LIBRARY_SECTIONS,
+  type LearningResourceAccessState,
+  type LearningResourceFileType,
+  type LearningResourceLaunchMode,
+  type LearningResourcePriceType,
+  type LearningResourceResource,
+  type LearningResourceResourceSection,
+  type LearningResourceViewerSlide,
+  type LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { getApiBase } from "@/lib/platform";
 
-type HocLieuResourceCardDTO = {
+type LearningResourceResourceCardDTO = {
   id: string;
   slug?: string;
   title: string;
@@ -29,35 +29,35 @@ type HocLieuResourceCardDTO = {
   lessonId?: string;
   bookSeriesId?: string;
   topicId?: string;
-  selectedFileType?: HocLieuFileType | string;
-  fileType?: HocLieuFileType | string;
+  selectedFileType?: LearningResourceFileType | string;
+  fileType?: LearningResourceFileType | string;
   documentTypeId?: string;
   fileTypeBadge?: string;
-  launchMode?: HocLieuLaunchMode | string;
-  priceType?: HocLieuPriceType | string;
-  accessState?: HocLieuAccessState | string;
+  launchMode?: LearningResourceLaunchMode | string;
+  priceType?: LearningResourcePriceType | string;
+  accessState?: LearningResourceAccessState | string;
   canDownload?: boolean;
   updatedAt?: string;
 };
 
-type HocLieuAssetDTO = {
+type LearningResourceAssetDTO = {
   id: string;
   resourceId: string;
   title?: string;
-  selectedFileType?: HocLieuFileType | string;
-  fileType?: HocLieuFileType | string;
+  selectedFileType?: LearningResourceFileType | string;
+  fileType?: LearningResourceFileType | string;
   fileTypeBadge?: string;
-  launchMode?: HocLieuLaunchMode | string;
+  launchMode?: LearningResourceLaunchMode | string;
   canDownload?: boolean;
 };
 
-type HocLieuResourceDetailDTO = HocLieuResourceCardDTO & {
+type LearningResourceResourceDetailDTO = LearningResourceResourceCardDTO & {
   description?: string;
-  assets?: HocLieuAssetDTO[];
-  items?: HocLieuResourceItemDTO[];
+  assets?: LearningResourceAssetDTO[];
+  items?: LearningResourceResourceItemDTO[];
 };
 
-type HocLieuResourceItemDTO = {
+type LearningResourceResourceItemDTO = {
   id: string;
   assetId: string;
   unitTitle: string;
@@ -67,27 +67,27 @@ type HocLieuResourceItemDTO = {
   durationSec?: number;
 };
 
-type HocLieuLaunchDTO = {
+type LearningResourceLaunchDTO = {
   assetId: string;
   resourceId: string;
-  selectedFileType?: HocLieuFileType | string;
-  fileType?: HocLieuFileType | string;
-  launchMode?: HocLieuLaunchMode | string;
+  selectedFileType?: LearningResourceFileType | string;
+  fileType?: LearningResourceFileType | string;
+  launchMode?: LearningResourceLaunchMode | string;
   title?: string;
   embedUrl?: string;
   viewerTokenUrl?: string;
   streamUrl?: string;
   url?: string;
   slideCount?: number;
-  slides?: HocLieuLaunchSlideDTO[];
+  slides?: LearningResourceLaunchSlideDTO[];
   viewerManifest?: {
     slideCount?: number;
-    slides?: HocLieuLaunchSlideDTO[];
+    slides?: LearningResourceLaunchSlideDTO[];
   };
   canDownload?: boolean;
 };
 
-type HocLieuLaunchSlideDTO = {
+type LearningResourceLaunchSlideDTO = {
   id?: string;
   index?: number;
   title?: string;
@@ -96,45 +96,45 @@ type HocLieuLaunchSlideDTO = {
   url?: string;
 };
 
-export type HocLieuLibraryBootstrapResourceDTO = {
+export type LearningResourceLibraryBootstrapResourceDTO = {
   id: string;
   assetId?: string;
   resourceId?: string;
   title: string;
   type: "lecture" | "exercise" | string;
-  fileType: HocLieuFileType | string;
+  fileType: LearningResourceFileType | string;
   thumbnailUrl?: string;
   launchUrl?: string;
-  launchMode?: HocLieuLaunchMode | string;
-  slides?: HocLieuLaunchSlideDTO[];
+  launchMode?: LearningResourceLaunchMode | string;
+  slides?: LearningResourceLaunchSlideDTO[];
 };
 
-export type HocLieuLibraryBootstrapLessonDTO = {
+export type LearningResourceLibraryBootstrapLessonDTO = {
   id: string;
   label: string;
   progressRate?: number;
-  resources: HocLieuLibraryBootstrapResourceDTO[];
+  resources: LearningResourceLibraryBootstrapResourceDTO[];
 };
 
-export type HocLieuLibraryBootstrapGroupDTO = {
+export type LearningResourceLibraryBootstrapGroupDTO = {
   id: string;
   label: string;
-  lessons: HocLieuLibraryBootstrapLessonDTO[];
+  lessons: LearningResourceLibraryBootstrapLessonDTO[];
 };
 
-export type HocLieuLibraryBootstrapSubjectDTO = {
+export type LearningResourceLibraryBootstrapSubjectDTO = {
   id: string;
   label: string;
-  groups: HocLieuLibraryBootstrapGroupDTO[];
+  groups: LearningResourceLibraryBootstrapGroupDTO[];
 };
 
-export type HocLieuLibraryBootstrapDTO = {
+export type LearningResourceLibraryBootstrapDTO = {
   schoolId: string;
   academicYear: string;
-  subjects: HocLieuLibraryBootstrapSubjectDTO[];
+  subjects: LearningResourceLibraryBootstrapSubjectDTO[];
 };
 
-export type HocLieuLibraryProgressDTO = {
+export type LearningResourceLibraryProgressDTO = {
   schoolId: string;
   academicYear: string;
   lessons: Array<{
@@ -143,7 +143,7 @@ export type HocLieuLibraryProgressDTO = {
   }>;
 };
 
-export async function loadHocLieuLibraryBootstrap(input: { schoolId: string; academicYear: string }) {
+export async function loadLearningResourceLibraryBootstrap(input: { schoolId: string; academicYear: string }) {
   if (!hasApiBase()) {
     return mockLibraryBootstrap(input);
   }
@@ -151,39 +151,39 @@ export async function loadHocLieuLibraryBootstrap(input: { schoolId: string; aca
   const search = new URLSearchParams();
   search.set("schoolId", input.schoolId);
   search.set("academicYear", input.academicYear);
-  return apiRequest<HocLieuLibraryBootstrapDTO>(`/api/v1/hoclieu/library/bootstrap?${search.toString()}`);
+  return apiRequest<LearningResourceLibraryBootstrapDTO>(`/api/v1/hoclieu/library/bootstrap?${search.toString()}`);
 }
 
-export async function loadHocLieuLibraryProgress(input: { schoolId: string; academicYear: string }) {
+export async function loadLearningResourceLibraryProgress(input: { schoolId: string; academicYear: string }) {
   if (!hasApiBase()) {
-    return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies HocLieuLibraryProgressDTO;
+    return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies LearningResourceLibraryProgressDTO;
   }
 
   const search = new URLSearchParams();
   search.set("schoolId", input.schoolId);
   search.set("academicYear", input.academicYear);
-  return apiRequest<HocLieuLibraryProgressDTO>(`/api/v1/hoclieu/library/progress?${search.toString()}`);
+  return apiRequest<LearningResourceLibraryProgressDTO>(`/api/v1/hoclieu/library/progress?${search.toString()}`);
 }
 
-export async function loadHocLieuLibrarySections(): Promise<HocLieuResourceSection[]> {
-  if (!hasApiBase()) return HOCLIEU_LIBRARY_SECTIONS;
+export async function loadLearningResourceLibrarySections(): Promise<LearningResourceResourceSection[]> {
+  if (!hasApiBase()) return LEARNING_RESOURCE_LIBRARY_SECTIONS;
 
-  const result = await listHocLieuResources({ limit: 100 });
+  const result = await listLearningResourceResources({ limit: 100 });
   const cards = result.data;
   return groupCardsBySection(cards.map(mapCardToResource));
 }
 
-export async function loadHocLieuResourcesBySubject(subjectId: string): Promise<HocLieuResource[]> {
+export async function loadLearningResourceResourcesBySubject(subjectId: string): Promise<LearningResourceResource[]> {
   if (!hasApiBase()) {
-    return HOCLIEU_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
+    return LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
   }
 
-  const result = await listHocLieuResources({ subjectId, limit: 100 });
+  const result = await listLearningResourceResources({ subjectId, limit: 100 });
   const cards = result.data;
   return cards.map((card, index) => mapCardToResource(card, index));
 }
 
-export async function loadHocLieuResourceForViewer(resource: HocLieuResource): Promise<HocLieuResource> {
+export async function loadLearningResourceResourceForViewer(resource: LearningResourceResource): Promise<LearningResourceResource> {
   if (!hasApiBase()) return resource;
   if (resource.viewer.launchUrl) {
     if (!isApiLaunchUrl(resource.viewer.launchUrl)) {
@@ -197,34 +197,34 @@ export async function loadHocLieuResourceForViewer(resource: HocLieuResource): P
       };
     }
 
-    const launch = await apiRequest<HocLieuLaunchDTO>(toApiRequestPath(resource.viewer.launchUrl));
+    const launch = await apiRequest<LearningResourceLaunchDTO>(toApiRequestPath(resource.viewer.launchUrl));
     return mergeLaunchIntoResource(resource, launch);
   }
   if (resource.viewer.assetId && resource.launchMode === "google_slide_embed" && !resource.viewer.embedUrl) {
-    const launch = await apiRequest<HocLieuLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(resource.viewer.assetId)}/launch`);
+    const launch = await apiRequest<LearningResourceLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(resource.viewer.assetId)}/launch`);
     return mergeLaunchIntoResource(resource, launch);
   }
   if (resource.viewer.embedUrl || resource.viewer.secureEmbedUrl || (resource.viewer.assetId && resource.viewer.slides?.length)) return resource;
 
-  const detail = await apiRequest<HocLieuResourceDetailDTO>(`/api/v1/hoclieu/resources/${encodeURIComponent(resource.id)}`);
+  const detail = await apiRequest<LearningResourceResourceDetailDTO>(`/api/v1/hoclieu/resources/${encodeURIComponent(resource.id)}`);
   const mapped = mapDetailToResource(detail, resource);
   const asset = detail.assets?.[0];
 
   if (!asset?.id) return mapped;
 
-  const launch = await apiRequest<HocLieuLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(asset.id)}/launch`);
+  const launch = await apiRequest<LearningResourceLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(asset.id)}/launch`);
   return mergeLaunchIntoResource(mapped, launch);
 }
 
-export function mapLibraryResourceToHocLieuResource(
-  resource: HocLieuLibraryBootstrapResourceDTO,
+export function mapLibraryResourceToLearningResourceResource(
+  resource: LearningResourceLibraryBootstrapResourceDTO,
   context: {
     subjectId: string;
     groupId: string;
     lessonId: string;
     sortOrder?: number;
   },
-): HocLieuResource {
+): LearningResourceResource {
   const fileType = normalizeFileType(resource.fileType);
   const launchMode = normalizeLaunchMode(resource.launchMode || "", fileType);
   const resourceType = resource.type === "exercise" && fileType !== "QUIZ" ? "interactive" : resourceTypeFor(fileType, launchMode);
@@ -256,7 +256,7 @@ export function mapLibraryResourceToHocLieuResource(
       assetId: resource.assetId,
       resourceId: resource.resourceId || resource.id,
       title: resource.title,
-      description: resource.type === "exercise" ? "BÃ i táº­p" : "BÃ i giáº£ng",
+      description: resource.type === "exercise" ? "Bài tập" : "Bài giảng",
       embedUrl: isLaunchEndpoint ? undefined : normalizeViewerUrl(viewerUrl),
       launchUrl: isLaunchEndpoint ? viewerUrl : undefined,
       pageCount: slides.length || undefined,
@@ -265,8 +265,8 @@ export function mapLibraryResourceToHocLieuResource(
   };
 }
 
-function groupCardsBySection(resources: HocLieuResource[]): HocLieuResourceSection[] {
-  const sectionMap = new Map<string, HocLieuResourceSection>();
+function groupCardsBySection(resources: LearningResourceResource[]): LearningResourceResourceSection[] {
+  const sectionMap = new Map<string, LearningResourceResourceSection>();
 
   for (const resource of resources) {
     const section = sectionMap.get(resource.sectionId);
@@ -276,7 +276,7 @@ function groupCardsBySection(resources: HocLieuResource[]): HocLieuResourceSecti
       continue;
     }
 
-    const mockSection = HOCLIEU_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId);
+    const mockSection = LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId);
     sectionMap.set(resource.sectionId, {
       id: resource.sectionId,
       title: mockSection?.title ?? categoryLabel(resource.categoryId),
@@ -294,7 +294,7 @@ function groupCardsBySection(resources: HocLieuResource[]): HocLieuResourceSecti
   }));
 }
 
-function mapDetailToResource(detail: HocLieuResourceDetailDTO, fallback: HocLieuResource): HocLieuResource {
+function mapDetailToResource(detail: LearningResourceResourceDetailDTO, fallback: LearningResourceResource): LearningResourceResource {
   const resource = mapCardToResource(detail, fallback.sortOrder);
   const items = detail.items?.length ? itemsToUnits(detail.items) : fallback.viewer.units;
 
@@ -309,13 +309,13 @@ function mapDetailToResource(detail: HocLieuResourceDetailDTO, fallback: HocLieu
   };
 }
 
-function mapCardToResource(card: HocLieuResourceCardDTO, sortOrder = 0): HocLieuResource {
+function mapCardToResource(card: LearningResourceResourceCardDTO, sortOrder = 0): LearningResourceResource {
   const subjectId = card.subjectId || card.programSlug || "hoc-lieu";
   const categoryId = card.categoryId || card.groupId || subjectId;
   const fileType = normalizeFileType(card.selectedFileType || card.fileType || card.documentTypeId || "PDF");
   const launchMode = normalizeLaunchMode(card.launchMode || "", fileType);
   const sectionId = card.sectionId || card.lessonId || categoryId || card.programSlug || "hoc-lieu";
-  const shellCategoryId = categoryForHocLieuShell(card);
+  const shellCategoryId = categoryForLearningResourceShell(card);
 
   return {
     id: card.id,
@@ -347,7 +347,7 @@ function mapCardToResource(card: HocLieuResourceCardDTO, sortOrder = 0): HocLieu
   };
 }
 
-function categoryForHocLieuShell(card: HocLieuResourceCardDTO) {
+function categoryForLearningResourceShell(card: LearningResourceResourceCardDTO) {
   if (card.subjectId === "giao-duc-stem") return "giao-duc-stem";
   if (card.subjectId === "ic3") return "ic3-digital-literacy";
   if (card.subjectId === "mos") return "mos";
@@ -361,7 +361,7 @@ function categoryForHocLieuShell(card: HocLieuResourceCardDTO) {
   return card.categoryId || card.groupId || "hoc-lieu-giao-duc-khac";
 }
 
-function mergeLaunchIntoResource(resource: HocLieuResource, launch: HocLieuLaunchDTO): HocLieuResource {
+function mergeLaunchIntoResource(resource: LearningResourceResource, launch: LearningResourceLaunchDTO): LearningResourceResource {
   const fileType = normalizeFileType(launch.selectedFileType || launch.fileType || resource.fileType);
   const launchMode = normalizeLaunchMode(launch.launchMode || "", fileType);
   const streamUrl = toApiUrl(launch.streamUrl);
@@ -389,12 +389,12 @@ function mergeLaunchIntoResource(resource: HocLieuResource, launch: HocLieuLaunc
   };
 }
 
-function itemsToUnits(items: HocLieuResourceItemDTO[]): HocLieuViewerUnit[] {
+function itemsToUnits(items: LearningResourceResourceItemDTO[]): LearningResourceViewerUnit[] {
   const sorted = [...items].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0));
-  const units = new Map<string, HocLieuViewerUnit>();
+  const units = new Map<string, LearningResourceViewerUnit>();
 
   for (const item of sorted) {
-    const unitTitle = item.unitTitle || "BÃ i há»c";
+    const unitTitle = item.unitTitle || "Bài học";
     const unitId = slugify(unitTitle);
     const unit = units.get(unitId) ?? { id: unitId, title: unitTitle, children: [] };
 
@@ -404,7 +404,7 @@ function itemsToUnits(items: HocLieuResourceItemDTO[]): HocLieuViewerUnit[] {
         {
           id: item.id,
           title: item.lessonTitle,
-          duration: item.durationSec ? `${Math.round(item.durationSec / 60)} phÃºt` : undefined,
+          duration: item.durationSec ? `${Math.round(item.durationSec / 60)} phút` : undefined,
         },
       ];
     }
@@ -416,18 +416,18 @@ function itemsToUnits(items: HocLieuResourceItemDTO[]): HocLieuViewerUnit[] {
 }
 
 function categoryLabel(categoryId: string) {
-  return HOCLIEU_CATEGORIES.find((category) => category.id === categoryId)?.label ?? "Há»c liá»‡u";
+  return LEARNING_RESOURCE_CATEGORIES.find((category) => category.id === categoryId)?.label ?? "Học liệu";
 }
 
-function normalizeFileType(fileType: string): HocLieuFileType {
+function normalizeFileType(fileType: string): LearningResourceFileType {
   const normalized = fileType.toUpperCase();
   if (["PDF", "PPTX", "VIDEO", "AUDIO", "HTML5", "LINK", "QUIZ", "ZIP", "DOCX", "XLSX", "IMAGE"].includes(normalized)) {
-    return normalized as HocLieuFileType;
+    return normalized as LearningResourceFileType;
   }
   return "PDF";
 }
 
-function normalizeLaunchMode(mode: string, fileType: HocLieuFileType): HocLieuLaunchMode {
+function normalizeLaunchMode(mode: string, fileType: LearningResourceFileType): LearningResourceLaunchMode {
   if (
     [
       "pdf_reader",
@@ -443,7 +443,7 @@ function normalizeLaunchMode(mode: string, fileType: HocLieuFileType): HocLieuLa
       "external",
     ].includes(mode)
   ) {
-    return mode as HocLieuLaunchMode;
+    return mode as LearningResourceLaunchMode;
   }
 
   if (fileType === "PPTX") return "google_slide_embed";
@@ -454,16 +454,16 @@ function normalizeLaunchMode(mode: string, fileType: HocLieuFileType): HocLieuLa
   return "download_only";
 }
 
-function normalizePriceType(value?: string): HocLieuPriceType {
+function normalizePriceType(value?: string): LearningResourcePriceType {
   return value === "paid" || value === "licensed" ? value : "free";
 }
 
-function normalizeAccessState(value?: string): HocLieuAccessState {
+function normalizeAccessState(value?: string): LearningResourceAccessState {
   if (value === "login_required" || value === "license_required" || value === "unavailable") return value;
   return "open";
 }
 
-function resourceTypeFor(fileType: HocLieuFileType, launchMode: HocLieuLaunchMode): HocLieuResource["resourceType"] {
+function resourceTypeFor(fileType: LearningResourceFileType, launchMode: LearningResourceLaunchMode): LearningResourceResource["resourceType"] {
   if (launchMode === "custom_slide_viewer" || launchMode === "slide_image_proxy" || launchMode === "google_slide_embed") return "slide";
   if (launchMode === "quiz_runtime" || fileType === "QUIZ") return "quiz";
   if (launchMode === "video_player" || fileType === "VIDEO") return "video";
@@ -475,7 +475,7 @@ function resourceTypeFor(fileType: HocLieuFileType, launchMode: HocLieuLaunchMod
   return "download_package";
 }
 
-function themeFor(fileType: HocLieuFileType): HocLieuResource["thumbnailTheme"] {
+function themeFor(fileType: LearningResourceFileType): LearningResourceResource["thumbnailTheme"] {
   switch (fileType) {
     case "PPTX":
       return "orange";
@@ -557,10 +557,10 @@ function normalizeViewerUrl(value?: string) {
   return value;
 }
 
-function normalizeViewerSlides(slides?: HocLieuLaunchSlideDTO[]): HocLieuViewerSlide[] {
+function normalizeViewerSlides(slides?: LearningResourceLaunchSlideDTO[]): LearningResourceViewerSlide[] {
   if (!Array.isArray(slides)) return [];
 
-  const normalizedSlides: HocLieuViewerSlide[] = [];
+  const normalizedSlides: LearningResourceViewerSlide[] = [];
 
   slides.forEach((slide, arrayIndex) => {
       const imageUrl = toApiUrl(slide.imageUrl || slide.url);
@@ -588,8 +588,8 @@ function slugify(value: string) {
     .toLowerCase();
 }
 
-function mockLibraryBootstrap(input: { schoolId: string; academicYear: string }): HocLieuLibraryBootstrapDTO {
-  const subjects = HOCLIEU_LIBRARY_SECTIONS.map((section) => ({
+function mockLibraryBootstrap(input: { schoolId: string; academicYear: string }): LearningResourceLibraryBootstrapDTO {
+  const subjects = LEARNING_RESOURCE_LIBRARY_SECTIONS.map((section) => ({
     id: section.subjectId,
     label: section.title,
     groups: [

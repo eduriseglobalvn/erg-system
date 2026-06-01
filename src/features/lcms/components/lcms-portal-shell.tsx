@@ -43,54 +43,54 @@ const lcmsNavItems: LcmsNavItem[] = [
   {
     id: "admin-overview",
     path: "/",
-    title: "Tá»•ng quan",
-    section: "Äiá»u hÃ nh",
-    description: "Theo dÃµi nhanh dá»¯ liá»‡u há»‡ thá»‘ng, trÆ°á»ng/trung tÃ¢m, lá»›p, há»c sinh vÃ  cÃ¡c viá»‡c LCMS cáº§n xá»­ lÃ½.",
+    title: "Tổng quan",
+    section: "Điều hành",
+    description: "Theo dõi nhanh dữ liệu hệ thống, trường/trung tâm, lớp, học sinh và các việc LCMS cần xử lý.",
     variant: "admin-overview",
     icon: LayoutDashboard,
   },
   {
     id: "admin-centers",
     path: "/schools",
-    title: "TrÆ°á»ng & Trung tÃ¢m",
-    section: "Tá»• chá»©c",
-    description: "Táº¡o, sá»­a vÃ  theo dÃµi tráº¡ng thÃ¡i váº­n hÃ nh cá»§a trÆ°á»ng, trung tÃ¢m vÃ  cÆ¡ sá»Ÿ giÃ¡o dá»¥c.",
+    title: "Trường & Trung tâm",
+    section: "Tổ chức",
+    description: "Tạo, sửa và theo dõi trạng thái vận hành của trường, trung tâm và cơ sở giáo dục.",
     variant: "admin-centers",
     icon: Building2,
   },
   {
     id: "admin-students",
     path: "/students",
-    title: "Lá»›p & Há»c sinh",
-    section: "Tá»• chá»©c",
-    description: "Tra cá»©u há»c sinh, lá»›p há»c vÃ  dá»¯ liá»‡u há»c táº­p theo pháº¡m vi toÃ n há»‡ thá»‘ng.",
+    title: "Lớp & Học sinh",
+    section: "Tổ chức",
+    description: "Tra cứu học sinh, lớp học và dữ liệu học tập theo phạm vi toàn hệ thống.",
     variant: "admin-students",
     icon: GraduationCap,
   },
   {
     id: "admin-sheet-import",
     path: "/import",
-    title: "Import dá»¯ liá»‡u",
-    section: "Tá»• chá»©c",
-    description: "Kiá»ƒm tra sheet, map cá»™t, táº¡o tÃ i khoáº£n há»c sinh vÃ  tráº£ káº¿t quáº£ import cho váº­n hÃ nh.",
+    title: "Import dữ liệu",
+    section: "Tổ chức",
+    description: "Kiểm tra sheet, map cột, tạo tài khoản học sinh và trả kết quả import cho vận hành.",
     variant: "admin-sheet-import",
     icon: ClipboardList,
   },
   {
     id: "admin-members",
     path: "/users",
-    title: "ThÃ nh viÃªn & PhÃ¢n quyá»n",
-    section: "Truy cáº­p",
-    description: "Quáº£n lÃ½ giÃ¡o viÃªn, quáº£n trá»‹ viÃªn vÃ  quyá»n truy cáº­p theo vai trÃ²/pháº¡m vi.",
+    title: "Thành viên & Phân quyền",
+    section: "Truy cập",
+    description: "Quản lý giáo viên, quản trị viên và quyền truy cập theo vai trò/phạm vi.",
     variant: "admin-members",
     icon: UsersRound,
   },
   {
     id: "question-bank",
     path: "/questions",
-    title: "NgÃ¢n hÃ ng cÃ¢u há»i",
-    section: "Ná»™i dung nguá»“n",
-    description: "Quáº£n lÃ½ cÃ¢u há»i nguá»“n dÃ¹ng chung toÃ n ERG vÃ  cÃ¢u há»i theo pháº¡m vi Ä‘Æ°á»£c cáº¥p.",
+    title: "Ngân hàng câu hỏi",
+    section: "Nội dung nguồn",
+    description: "Quản lý câu hỏi nguồn dùng chung toàn ERG và câu hỏi theo phạm vi được cấp.",
     variant: "question-bank",
     icon: Database,
   },
@@ -98,44 +98,44 @@ const lcmsNavItems: LcmsNavItem[] = [
     id: "quiz-bank",
     path: "/quiz-bank",
     title: "Quiz bank",
-    section: "Ná»™i dung nguá»“n",
-    description: "Quáº£n lÃ½ quiz Train/Test Ä‘Ã£ Ä‘Ã³ng gÃ³i Ä‘á»ƒ giÃ¡o viÃªn giao láº¡i trong LMS.",
+    section: "Nội dung nguồn",
+    description: "Quản lý quiz Train/Test đã đóng gói để giáo viên giao lại trong LMS.",
     variant: "quiz-bank",
     icon: BookOpenCheck,
   },
   {
     id: "course-modules",
     path: "/quiz-editor",
-    title: "Táº¡o quiz",
-    section: "Ná»™i dung nguá»“n",
-    description: "Táº¡o hoáº·c chá»‰nh sá»­a quiz nguá»“n tá»« cÃ¢u há»i, slide vÃ  cáº¥u hÃ¬nh player.",
+    title: "Tạo quiz",
+    section: "Nội dung nguồn",
+    description: "Tạo hoặc chỉnh sửa quiz nguồn từ câu hỏi, slide và cấu hình player.",
     variant: "quiz-editor",
     icon: FileCheck2,
   },
   {
     id: "admin-learning-resources",
     path: "/resources",
-    title: "Quáº£n trá»‹ há»c liá»‡u",
-    section: "Ná»™i dung nguá»“n",
-    description: "Táº¡o taxonomy, upload tÃ i liá»‡u, chá»‰nh metadata vÃ  publish há»c liá»‡u sang LMS.",
+    title: "Quản trị học liệu",
+    section: "Nội dung nguồn",
+    description: "Tạo taxonomy, upload tài liệu, chỉnh metadata và publish học liệu sang LMS.",
     variant: "admin-internal-docs",
     icon: BookOpenCheck,
   },
   {
     id: "admin-public-disclosure",
     path: "/legal",
-    title: "CÃ´ng khai phÃ¡p lÃ½",
-    section: "Cáº¥u hÃ¬nh",
-    description: "Quáº£n lÃ½ PDF cÃ´ng khai, metadata, vá»‹ trÃ­ public vÃ  watermark trÆ°á»›c khi xuáº¥t báº£n.",
+    title: "Công khai pháp lý",
+    section: "Cấu hình",
+    description: "Quản lý PDF công khai, metadata, vị trí public và watermark trước khi xuất bản.",
     variant: "admin-public-disclosure",
     icon: ShieldCheck,
   },
   {
     id: "general-settings",
     path: "/settings",
-    title: "Cáº¥u hÃ¬nh",
-    section: "Cáº¥u hÃ¬nh",
-    description: "CÃ¡c thiáº¿t láº­p há»‡ thá»‘ng dÃ¹ng chung cho LCMS, LMS vÃ  Elearning.",
+    title: "Cấu hình",
+    section: "Cấu hình",
+    description: "Các thiết lập hệ thống dùng chung cho LCMS, LMS và Elearning.",
     variant: "placeholder",
     icon: Settings,
   },
@@ -177,7 +177,7 @@ export function LcmsPortalShell() {
           <div className="min-w-0 flex-1 rounded-xl px-2.5 py-2">
             <span className="block truncate text-sm font-black uppercase tracking-tight text-[#0b1f80]">LCMS ERG</span>
             <span className="mt-0.5 block truncate text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
-              Há»c liá»‡u Studio
+              Học liệu Studio
             </span>
           </div>
         </div>
@@ -219,7 +219,7 @@ export function LcmsPortalShell() {
               <div className="truncate text-sm font-black">{account?.fullName || "LCMS ERG"}</div>
               <div className="truncate text-xs text-slate-500">{account?.email || "lcms@erg.edu.vn"}</div>
             </div>
-            <button type="button" onClick={signOut} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-rose-600" aria-label="ÄÄƒng xuáº¥t">
+            <button type="button" onClick={signOut} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-rose-600" aria-label="Đăng xuất">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
@@ -234,15 +234,15 @@ export function LcmsPortalShell() {
           </div>
           <div className="ml-auto hidden w-full max-w-[420px] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 md:flex">
             <Search className="h-4 w-4 text-slate-400" />
-            <Input className="border-0 bg-transparent shadow-none focus:ring-0" placeholder="TÃ¬m kiáº¿m toÃ n há»‡ thá»‘ng" />
+            <Input className="border-0 bg-transparent shadow-none focus:ring-0" placeholder="Tìm kiếm toàn hệ thống" />
           </div>
           <select className="hidden h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 xl:block" defaultValue="global">
-            <option value="global">ToÃ n ERG</option>
-            <option value="center">Theo trung tÃ¢m</option>
-            <option value="school">Theo trÆ°á»ng</option>
+            <option value="global">Toàn ERG</option>
+            <option value="center">Theo trung tâm</option>
+            <option value="school">Theo trường</option>
           </select>
-          <Button variant="outline" onClick={() => navigate("/resources")}>Quáº£n lÃ½ há»c liá»‡u</Button>
-          <Button onClick={() => setCreateEducationUnitOpen(true)}>Táº¡o cÆ¡ sá»Ÿ</Button>
+          <Button variant="outline" onClick={() => navigate("/resources")}>Quản lý học liệu</Button>
+          <Button onClick={() => setCreateEducationUnitOpen(true)}>Tạo cơ sở</Button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden">

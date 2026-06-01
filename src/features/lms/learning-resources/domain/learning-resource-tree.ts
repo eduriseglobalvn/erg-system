@@ -1,5 +1,5 @@
-import type { HocLieuResourceCard, HocLieuTaxonomyOption, HocLieuTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
-import type { HocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 
 export type LearningResourceNodeKind = "group" | "lesson" | "folder";
 export type LearningResourceSourceKind = "category" | "topic" | "section" | "bookSeries" | "folder";
@@ -36,15 +36,15 @@ export type LearningResourceSubject = {
   resourceCount: number;
 };
 
-function belongsToSubject(option: HocLieuTaxonomyOption, subjectId: string) {
+function belongsToSubject(option: LearningResourceTaxonomyOption, subjectId: string) {
   return option.subjectId === subjectId || option.id === subjectId || !option.subjectId;
 }
 
-function sortOptions<T extends HocLieuTaxonomyOption>(items: T[]) {
+function sortOptions<T extends LearningResourceTaxonomyOption>(items: T[]) {
   return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || String(a.label ?? "").localeCompare(String(b.label ?? ""), "vi"));
 }
 
-function sectionNode(section: HocLieuTaxonomyOption, fallbackLocation: LearningResourceLocation = {}): LearningResourceNode {
+function sectionNode(section: LearningResourceTaxonomyOption, fallbackLocation: LearningResourceLocation = {}): LearningResourceNode {
   return {
     id: `lesson-${section.id}`,
     label: section.label,
@@ -64,8 +64,8 @@ function sectionNode(section: HocLieuTaxonomyOption, fallbackLocation: LearningR
 
 function groupNode(
   sourceKind: Exclude<LearningResourceSourceKind, "section" | "folder">,
-  option: HocLieuTaxonomyOption,
-  lessons: HocLieuTaxonomyOption[],
+  option: LearningResourceTaxonomyOption,
+  lessons: LearningResourceTaxonomyOption[],
   location: LearningResourceLocation,
 ): LearningResourceNode {
   return {
@@ -91,8 +91,8 @@ function countLessons(nodes: LearningResourceNode[]): number {
 }
 
 export function buildLearningResourceSubjects(
-  model: HocLieuTaxonomyResponse,
-  resources: Array<Pick<HocLieuResourceCard, "subjectId"> | Pick<HocLieuResource, "subjectId">>,
+  model: LearningResourceTaxonomyResponse,
+  resources: Array<Pick<LearningResourceResourceCard, "subjectId"> | Pick<LearningResourceResource, "subjectId">>,
 ): LearningResourceSubject[] {
   return sortOptions(model.subjects).map((subject) => {
     const categories = sortOptions(model.categories.filter((item) => belongsToSubject(item, subject.id)));
@@ -114,10 +114,10 @@ export function buildLearningResourceSubjects(
     if (orphanLessons.length) {
       groups.push({
         id: `group-folder-${subject.id}-uncategorized`,
-        label: "NhÃ³m há»c liá»‡u chÆ°a xáº¿p",
+        label: "Nhóm học liệu chưa xếp",
         kind: "group",
         sourceKind: "folder",
-        description: "CÃ¡c bÃ i há»c chÆ°a náº±m trong nhÃ³m há»c liá»‡u chuáº©n.",
+        description: "Các bài học chưa nằm trong nhóm học liệu chuẩn.",
         location: {},
         children: orphanLessons.map((lesson) => sectionNode(lesson)),
       });
@@ -173,7 +173,7 @@ export function collectLearningResourceLessonIds(node: LearningResourceNode): st
   return node.children.flatMap((child) => collectLearningResourceLessonIds(child));
 }
 
-export function matchesResourceToLearningNode(resource: HocLieuResourceCard | { categoryId?: string; topicId?: string; sectionId?: string; bookSeriesId?: string }, node?: LearningResourceNode) {
+export function matchesResourceToLearningNode(resource: LearningResourceResourceCard | { categoryId?: string; topicId?: string; sectionId?: string; bookSeriesId?: string }, node?: LearningResourceNode) {
   if (!node) return false;
   if (node.kind === "lesson") return resource.sectionId === node.location.sectionId;
   if (node.kind === "group") {

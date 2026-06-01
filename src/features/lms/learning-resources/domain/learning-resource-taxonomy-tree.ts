@@ -1,4 +1,4 @@
-import type { HocLieuResourceCard, HocLieuTaxonomyOption, HocLieuTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard, LearningResourceTaxonomyOption, LearningResourceTaxonomyResponse } from "@/features/admin-operations/api/learning-resource-authoring-api";
 
 export type LearningResourceTreeNodeKind = "category" | "topic" | "section" | "bookSeries" | "folder";
 
@@ -24,22 +24,22 @@ export type LearningResourceTreeSubject = {
   resourceCount: number;
 };
 
-function belongsToSubject(option: HocLieuTaxonomyOption, subjectId: string) {
+function belongsToSubject(option: LearningResourceTaxonomyOption, subjectId: string) {
   return option.subjectId === subjectId || option.id === subjectId || !option.subjectId;
 }
 
-function sortOptions<T extends HocLieuTaxonomyOption>(items: T[]) {
+function sortOptions<T extends LearningResourceTaxonomyOption>(items: T[]) {
   return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || String(a.label ?? "").localeCompare(String(b.label ?? ""), "vi"));
 }
 
-function getTopicId(option: HocLieuTaxonomyOption) {
-  return (option as HocLieuTaxonomyOption & { topicId?: string }).topicId;
+function getTopicId(option: LearningResourceTaxonomyOption) {
+  return (option as LearningResourceTaxonomyOption & { topicId?: string }).topicId;
 }
 
 function buildCategoryNode(
-  category: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
+  category: LearningResourceTaxonomyOption,
+  allCategories: LearningResourceTaxonomyOption[],
+  model: LearningResourceTaxonomyResponse,
   visited = new Set<string>(),
 ): LearningResourceTreeNode {
   const visitKey = `category:${category.id}`;
@@ -70,9 +70,9 @@ function buildCategoryNode(
 }
 
 function buildTopicNode(
-  topic: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
+  topic: LearningResourceTaxonomyOption,
+  allCategories: LearningResourceTaxonomyOption[],
+  model: LearningResourceTaxonomyResponse,
   visited: Set<string>,
 ): LearningResourceTreeNode {
   const visitKey = `topic:${topic.id}`;
@@ -90,9 +90,9 @@ function buildTopicNode(
 }
 
 function buildBookSeriesNode(
-  bookSeries: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
+  bookSeries: LearningResourceTaxonomyOption,
+  allCategories: LearningResourceTaxonomyOption[],
+  model: LearningResourceTaxonomyResponse,
   visited: Set<string>,
 ): LearningResourceTreeNode {
   const visitKey = `bookSeries:${bookSeries.id}`;
@@ -110,9 +110,9 @@ function buildBookSeriesNode(
 }
 
 function buildSectionNode(
-  section: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
+  section: LearningResourceTaxonomyOption,
+  allCategories: LearningResourceTaxonomyOption[],
+  model: LearningResourceTaxonomyResponse,
   visited: Set<string>,
 ): LearningResourceTreeNode {
   const visitKey = `section:${section.id}`;
@@ -132,8 +132,8 @@ function buildSectionNode(
 function buildChildNodes(
   parentKind: LearningResourceTreeNodeKind,
   parentId: string,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
+  allCategories: LearningResourceTaxonomyOption[],
+  model: LearningResourceTaxonomyResponse,
   visited: Set<string>,
 ): LearningResourceTreeNode[] {
   const nodes: LearningResourceTreeNode[] = [];
@@ -171,7 +171,7 @@ function buildChildNodes(
   return nodes;
 }
 
-export function buildLearningResourceSubjectTree(subject: HocLieuTaxonomyOption, model: HocLieuTaxonomyResponse): LearningResourceTreeNode[] {
+export function buildLearningResourceSubjectTree(subject: LearningResourceTaxonomyOption, model: LearningResourceTaxonomyResponse): LearningResourceTreeNode[] {
   const categories = sortOptions(model.categories.filter((item) => belongsToSubject(item, subject.id)));
   const rootCategories = categories.filter((item) => !item.parentId);
   const bookSeries = sortOptions(model.bookSeries.filter((item) => belongsToSubject(item, subject.id) && !item.parentId && !item.categoryId));
@@ -183,7 +183,7 @@ export function buildLearningResourceSubjectTree(subject: HocLieuTaxonomyOption,
   if (bookSeries.length) {
     nodes.push({
       id: `books-${subject.id}`,
-      label: "Bá»™ sÃ¡ch / chÆ°Æ¡ng trÃ¬nh",
+      label: "Bộ sách / chương trình",
       kind: "folder",
       children: bookSeries.map((item) => ({
         ...buildBookSeriesNode(item, categories, model, new Set()),
@@ -194,7 +194,7 @@ export function buildLearningResourceSubjectTree(subject: HocLieuTaxonomyOption,
   if (orphanTopics.length) {
     nodes.push({
       id: `topics-${subject.id}`,
-      label: "Chá»§ Ä‘á» chÆ°a xáº¿p nhÃ³m",
+      label: "Chủ đề chưa xếp nhóm",
       kind: "folder",
       children: orphanTopics.map((item) => ({
         ...buildTopicNode(item, categories, model, new Set()),
@@ -205,7 +205,7 @@ export function buildLearningResourceSubjectTree(subject: HocLieuTaxonomyOption,
   if (orphanSections.length) {
     nodes.push({
       id: `sections-${subject.id}`,
-      label: "Há»c pháº§n chÆ°a xáº¿p nhÃ³m",
+      label: "Học phần chưa xếp nhóm",
       kind: "folder",
       children: orphanSections.map((item) => ({
         ...buildSectionNode(item, categories, model, new Set()),
@@ -250,7 +250,7 @@ export function collectLearningResourceLeafNodeIds(node: LearningResourceTreeNod
   return node.children.flatMap((child) => collectLearningResourceLeafNodeIds(child));
 }
 
-export function buildLearningResourceSubjects(model: HocLieuTaxonomyResponse, resources: HocLieuResourceCard[]): LearningResourceTreeSubject[] {
+export function buildLearningResourceSubjects(model: LearningResourceTaxonomyResponse, resources: LearningResourceResourceCard[]): LearningResourceTreeSubject[] {
   return sortOptions(model.subjects).map((subject) => {
     const tree = buildLearningResourceSubjectTree(subject, model);
     return {

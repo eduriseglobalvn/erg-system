@@ -1,14 +1,14 @@
 ﻿import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-import type { HocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-data";
-import { HocLieuSlideViewerModal } from "@/features/lms/learning-resources/components/learning-resource-slide-viewer-modal";
+import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import { LearningResourceSlideViewerModal } from "@/features/lms/learning-resources/components/learning-resource-slide-viewer-modal";
 
-function slideResource(): HocLieuResource {
+function slideResource(): LearningResourceResource {
   return {
     id: "resource-slide",
     slug: "resource-slide",
-    title: "BÃ i giáº£ng bÃ i 1",
+    title: "Bài giảng bài 1",
     subjectId: "subject-demo",
     categoryId: "group-demo",
     sectionId: "lesson-demo",
@@ -16,14 +16,14 @@ function slideResource(): HocLieuResource {
     fileType: "PPTX",
     formatBadge: "PPTX",
     launchMode: "custom_slide_viewer",
-    thumbnailLabel: "BÃ i giáº£ng",
+    thumbnailLabel: "Bài giảng",
     thumbnailTheme: "orange",
     priceType: "free",
     accessState: "open",
     isDownloadable: false,
     sortOrder: 1,
     viewer: {
-      title: "BÃ i giáº£ng bÃ i 1",
+      title: "Bài giảng bài 1",
       description: "Slide viewer",
       slides: [
         { id: "slide-1", index: 1, title: "Slide 1", imageUrl: "/slides/1.png" },
@@ -34,7 +34,7 @@ function slideResource(): HocLieuResource {
   };
 }
 
-function googleSlidesResource(): HocLieuResource {
+function googleSlidesResource(): LearningResourceResource {
   return {
     ...slideResource(),
     id: "resource-google-slide",
@@ -53,7 +53,7 @@ function googleSlidesResource(): HocLieuResource {
 test("navigates custom slides locally without progress tracking", () => {
   const onClose = vi.fn();
 
-  render(<HocLieuSlideViewerModal resource={slideResource()} onClose={onClose} />);
+  render(<LearningResourceSlideViewerModal resource={slideResource()} onClose={onClose} />);
 
   expect(screen.getByText("slide 1 / 3")).toBeInTheDocument();
 
@@ -69,7 +69,7 @@ test("navigates custom slides locally without progress tracking", () => {
 test("closes Google Slides directly without a progress prompt", () => {
   const onClose = vi.fn();
 
-  render(<HocLieuSlideViewerModal resource={googleSlidesResource()} onClose={onClose} />);
+  render(<LearningResourceSlideViewerModal resource={googleSlidesResource()} onClose={onClose} />);
 
   expect(screen.getByText("Google Slides")).toBeInTheDocument();
   expect(screen.queryByRole("spinbutton", { name: /slide/i })).not.toBeInTheDocument();

@@ -27,15 +27,15 @@ export function StudentAttendanceContextMenu({
   if (!menu) return null;
 
   const actions = [
-    { label: "ThÃªm HS má»›i", icon: UserPlus, onClick: onAddStudent },
-    { label: "Thay Ä‘á»•i tráº¡ng thÃ¡i HS", icon: UserRoundCheck, onClick: () => onChangeStatus(menu.student) },
+    { label: "Thêm HS mới", icon: UserPlus, onClick: onAddStudent },
+    { label: "Thay đổi trạng thái HS", icon: UserRoundCheck, onClick: () => onChangeStatus(menu.student) },
     { label: "Note nhanh", icon: MessageSquarePlus, onClick: () => onAddNote(menu.student) },
-    { label: "Ghi chÃº vá»›i HS nÃ y", icon: FileText, onClick: () => onOpenNote(menu.student) },
+    { label: "Ghi chú với HS này", icon: FileText, onClick: () => onOpenNote(menu.student) },
   ];
 
   return (
     <>
-      <button type="button" aria-label="ÄÃ³ng menu há»c sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
+      <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
       <div
         className="fixed z-[80] w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-xl shadow-slate-900/15"
         style={{ left: menu.x, top: menu.y }}

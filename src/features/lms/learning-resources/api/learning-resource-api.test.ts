@@ -1,12 +1,12 @@
 ﻿import { test, expect } from "vitest";
 
-import { mapLibraryResourceToHocLieuResource } from "@/features/lms/learning-resources/api/learning-resource-api";
+import { mapLibraryResourceToLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-api";
 
-test("maps library bootstrap resources to launchable HocLieu resources", () => {
-  const resource = mapLibraryResourceToHocLieuResource(
+test("maps library bootstrap resources to launchable LearningResource resources", () => {
+  const resource = mapLibraryResourceToLearningResourceResource(
     {
       id: "res-ic3-gs6-l1-slide",
-      title: "IC3 GS6 Level 1 - Slide bÃ i giáº£ng",
+      title: "IC3 GS6 Level 1 - Slide bài giảng",
       type: "lecture",
       fileType: "PPTX",
       thumbnailUrl: "/mock/hoclieu/res-ic3-gs6-l1-slide.png",
@@ -15,7 +15,7 @@ test("maps library bootstrap resources to launchable HocLieu resources", () => {
         {
           id: "slide-1",
           index: 1,
-          title: "Má»Ÿ Ä‘áº§u",
+          title: "Mở đầu",
           imageUrl: "/mock/hoclieu/slides/slide-1.png",
           thumbnailUrl: "/mock/hoclieu/slides/thumb-1.png",
         },
@@ -42,15 +42,15 @@ test("maps library bootstrap resources to launchable HocLieu resources", () => {
   expect(resource.viewer.slides?.[0]).toMatchObject({
     id: "slide-1",
     index: 1,
-    title: "Má»Ÿ Ä‘áº§u",
+    title: "Mở đầu",
   });
 });
 
 test("keeps slide viewer identity from bootstrap resources for progress tracking", () => {
-  const resource = mapLibraryResourceToHocLieuResource(
+  const resource = mapLibraryResourceToLearningResourceResource(
     {
       id: "res-custom-slide",
-      title: "Slide viewer tÃ¹y biáº¿n",
+      title: "Slide viewer tùy biến",
       type: "lecture",
       fileType: "PPTX",
       assetId: "asset-custom-slide",
@@ -60,7 +60,7 @@ test("keeps slide viewer identity from bootstrap resources for progress tracking
         {
           id: "slide-1",
           index: 1,
-          title: "Má»Ÿ Ä‘áº§u",
+          title: "Mở đầu",
           imageUrl: "/mock/hoclieu/slides/slide-1.png",
         },
       ],

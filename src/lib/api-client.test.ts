@@ -14,7 +14,7 @@ function setTestPath(path: string) {
   window.history.replaceState({}, "", path);
 }
 
-test("sends LMS portal auth for merged HocLieu API requests", async () => {
+test("sends LMS portal auth for merged LearningResource API requests", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   window.localStorage.setItem(
     portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),

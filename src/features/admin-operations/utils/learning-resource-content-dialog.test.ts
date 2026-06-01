@@ -12,23 +12,23 @@ import {
 const mockExercises: ExerciseLibraryItem[] = [
   {
     id: "ex-1",
-    title: "BÃƒÂ i tÃ¡ÂºÂ­p nhÃ¡ÂºÂ­n diÃ¡Â»â€¡n phÃ¡ÂºÂ§n cÃ¡Â»Â©ng",
+    title: "Bài tập nhận diện phần cứng",
     subjectId: "ic3",
     subjectLabel: "IC3 GS6",
-    topicLabel: "CÃƒÂ´ng dÃƒÂ¢n sÃ¡Â»â€˜",
-    sectionLabel: "BÃƒÂ i 01. XÃƒÂ¡c Ã„â€˜Ã¡Â»â€¹nh phÃ¡ÂºÂ§n cÃ¡Â»Â©ng",
-    difficulty: "CÃ†Â¡ bÃ¡ÂºÂ£n",
+    topicLabel: "Công dân số",
+    sectionLabel: "Bài 01. Xác định phần cứng",
+    difficulty: "Cơ bản",
     questionCount: 12,
     durationMinutes: 15,
   },
   {
     id: "ex-2",
-    title: "Worksheet ÃƒÂ´n tÃ¡ÂºÂ­p phÃ¡ÂºÂ§n mÃ¡Â»Âm",
+    title: "Worksheet ôn tập phần mềm",
     subjectId: "ic3",
     subjectLabel: "IC3 GS6",
-    topicLabel: "CÃƒÂ´ng dÃƒÂ¢n sÃ¡Â»â€˜",
-    sectionLabel: "BÃƒÂ i 02. PhÃ¡ÂºÂ§n mÃ¡Â»Âm vÃƒÂ  Ã¡Â»Â©ng dÃ¡Â»Â¥ng",
-    difficulty: "VÃ¡ÂºÂ­n dÃ¡Â»Â¥ng",
+    topicLabel: "Công dân số",
+    sectionLabel: "Bài 02. Phần mềm và ứng dụng",
+    difficulty: "Vận dụng",
     questionCount: 10,
     durationMinutes: 12,
   },
@@ -64,8 +64,8 @@ test("filters mock exercises by subject, topic, section, and query", () => {
     filterMockExercises(mockExercises, {
       query: "",
       subjectId: "ic3",
-      topicLabel: "CÃƒÂ´ng dÃƒÂ¢n sÃ¡Â»â€˜",
-      sectionLabel: "BÃƒÂ i 01",
+      topicLabel: "Công dân số",
+      sectionLabel: "Bài 01",
     }).map((item) => item.id),
   ).toEqual(["ex-1"]);
 
@@ -78,7 +78,7 @@ test("filters mock exercises by subject, topic, section, and query", () => {
 
   expect(
     filterMockExercises(mockExercises, {
-      query: "phÃ¡ÂºÂ§n mÃ¡Â»Âm",
+      query: "phần mềm",
       subjectId: "ic3",
     }).map((item) => item.id),
   ).toEqual(["ex-2"]);

@@ -27,18 +27,18 @@ const crmNavItems: CrmNavItem[] = [
   {
     id: "seo-overview",
     path: "/",
-    title: "Tá»•ng quan CRM",
+    title: "Tổng quan CRM",
     section: "CRM & P&L",
-    description: "Theo dÃµi pipeline trÆ°á»ng tÆ° váº¥n, doanh thu dá»± kiáº¿n, margin vÃ  viá»‡c cáº§n xá»­ lÃ½ trÆ°á»›c khi chá»‘t.",
+    description: "Theo dõi pipeline trường tư vấn, doanh thu dự kiến, margin và việc cần xử lý trước khi chốt.",
     variant: "seo-overview",
     icon: TrendingUp,
   },
   {
     id: "seo-schools",
     path: "/seo/schools",
-    title: "TrÆ°á»ng Ä‘Ã£ tÆ° váº¥n",
+    title: "Trường đã tư vấn",
     section: "CRM & P&L",
-    description: "Láº­p danh sÃ¡ch trÆ°á»ng, cáº­p nháº­t tÃ¬nh tráº¡ng tÆ° váº¥n, chá» chá»‘t, Ä‘Ã m phÃ¡n, chá» triá»ƒn khai hoáº·c active.",
+    description: "Lập danh sách trường, cập nhật tình trạng tư vấn, chờ chốt, đàm phán, chờ triển khai hoặc active.",
     variant: "seo-schools",
     icon: Building2,
   },
@@ -47,34 +47,34 @@ const crmNavItems: CrmNavItem[] = [
     path: "/seo/opportunities",
     title: "Opportunity",
     section: "CRM & P&L",
-    description: "Quáº£n lÃ½ cÆ¡ há»™i theo trÆ°á»ng, chÆ°Æ¡ng trÃ¬nh, nÄƒm há»c, xÃ¡c suáº¥t chá»‘t vÃ  tráº¡ng thÃ¡i thÆ°Æ¡ng lÆ°á»£ng.",
+    description: "Quản lý cơ hội theo trường, chương trình, năm học, xác suất chốt và trạng thái thương lượng.",
     variant: "seo-opportunities",
     icon: Handshake,
   },
   {
     id: "seo-pnl",
     path: "/seo/pnl",
-    title: "P&L chá»‘t trÆ°á»ng",
+    title: "P&L chốt trường",
     section: "CRM & P&L",
-    description: "Dá»± trÃ¹ doanh thu, chi phÃ­, lá»£i nhuáº­n, margin vÃ  Ä‘iá»ƒm hÃ²a vá»‘n trÆ°á»›c khi chuyá»ƒn trÆ°á»ng sang váº­n hÃ nh.",
+    description: "Dự trù doanh thu, chi phí, lợi nhuận, margin và điểm hòa vốn trước khi chuyển trường sang vận hành.",
     variant: "seo-pnl",
     icon: Calculator,
   },
   {
     id: "seo-followups",
     path: "/seo/follow-ups",
-    title: "Lá»‹ch follow-up",
+    title: "Lịch follow-up",
     section: "CRM & P&L",
-    description: "Theo dÃµi cÃ¡c viá»‡c CRM cáº§n lÃ m: gá»i láº¡i, gáº·p trÆ°á»ng, gá»­i proposal, xá»­ lÃ½ há»£p Ä‘á»“ng vÃ  bÃ n giao.",
+    description: "Theo dõi các việc CRM cần làm: gọi lại, gặp trường, gửi proposal, xử lý hợp đồng và bàn giao.",
     variant: "seo-followups",
     icon: PhoneCall,
   },
   {
     id: "seo-handover",
     path: "/seo/handover",
-    title: "BÃ n giao triá»ƒn khai",
+    title: "Bàn giao triển khai",
     section: "CRM & P&L",
-    description: "Deal Ä‘Ã£ chá»‘t Ä‘Æ°á»£c kiá»ƒm tra Ä‘iá»u kiá»‡n trÆ°á»›c khi quáº£n lÃ½ trung tÃ¢m active vÃ  cáº¥u hÃ¬nh giÃ¡o viÃªn, lá»›p, há»c sinh.",
+    description: "Deal đã chốt được kiểm tra điều kiện trước khi quản lý trung tâm active và cấu hình giáo viên, lớp, học sinh.",
     variant: "seo-handover",
     icon: ClipboardList,
   },
@@ -143,7 +143,7 @@ export function CrmPortalShell() {
               <div className="truncate text-sm font-black">{account?.fullName || "CRM ERG"}</div>
               <div className="truncate text-xs text-slate-500">{account?.email || "crm@erg.edu.vn"}</div>
             </div>
-            <button type="button" onClick={signOut} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-rose-600" aria-label="ÄÄƒng xuáº¥t">
+            <button type="button" onClick={signOut} className="rounded-lg p-2 text-slate-500 hover:bg-white hover:text-rose-600" aria-label="Đăng xuất">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
@@ -158,14 +158,14 @@ export function CrmPortalShell() {
           </div>
           <div className="ml-auto hidden w-full max-w-[420px] items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 md:flex">
             <Search className="h-4 w-4 text-slate-400" />
-            <Input className="border-0 bg-transparent shadow-none focus:ring-0" placeholder="TÃ¬m kiáº¿m toÃ n há»‡ thá»‘ng" />
+            <Input className="border-0 bg-transparent shadow-none focus:ring-0" placeholder="Tìm kiếm toàn hệ thống" />
           </div>
           <select className="hidden h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 xl:block" defaultValue="global">
-            <option value="global">ToÃ n ERG</option>
-            <option value="center">Theo trung tÃ¢m</option>
-            <option value="school">Theo trÆ°á»ng</option>
+            <option value="global">Toàn ERG</option>
+            <option value="center">Theo trung tâm</option>
+            <option value="school">Theo trường</option>
           </select>
-          <Button variant="outline" onClick={() => navigate("/seo/schools")}>Danh sÃ¡ch trÆ°á»ng</Button>
+          <Button variant="outline" onClick={() => navigate("/seo/schools")}>Danh sách trường</Button>
         </header>
 
         <div className="min-h-0 flex-1 overflow-hidden">

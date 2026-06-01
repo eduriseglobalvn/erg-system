@@ -1,4 +1,4 @@
-﻿export type HocLieuFileType =
+﻿export type LearningResourceFileType =
   | "PDF"
   | "PPTX"
   | "VIDEO"
@@ -11,7 +11,7 @@
   | "XLSX"
   | "IMAGE";
 
-export type HocLieuLaunchMode =
+export type LearningResourceLaunchMode =
   | "pdf_reader"
   | "ebook_reader"
   | "google_slide_embed"
@@ -24,44 +24,44 @@ export type HocLieuLaunchMode =
   | "download_only"
   | "external";
 
-export type HocLieuPriceType = "free" | "paid" | "licensed";
-export type HocLieuAccessState = "open" | "login_required" | "license_required" | "unavailable";
+export type LearningResourcePriceType = "free" | "paid" | "licensed";
+export type LearningResourceAccessState = "open" | "login_required" | "license_required" | "unavailable";
 
-export type HocLieuGrade = {
+export type LearningResourceGrade = {
   id: string;
   label: string;
 };
 
-export type HocLieuSubject = {
+export type LearningResourceSubject = {
   id: string;
   label: string;
   gradeIds?: string[];
 };
 
-export type HocLieuCategory = {
+export type LearningResourceCategory = {
   id: string;
   label: string;
   parentId?: string;
   icon: "book" | "document" | "stem" | "certificate" | "computer" | "smart";
 };
 
-export type HocLieuResourceSection = {
+export type LearningResourceResourceSection = {
   id: string;
   title: string;
   subtitle?: string;
   gradeId?: string;
   subjectId: string;
   categoryId: string;
-  resources: HocLieuResource[];
+  resources: LearningResourceResource[];
 };
 
-export type HocLieuViewerUnit = {
+export type LearningResourceViewerUnit = {
   id: string;
   title: string;
   children?: Array<{ id: string; title: string; duration?: string }>;
 };
 
-export type HocLieuViewerSlide = {
+export type LearningResourceViewerSlide = {
   id: string;
   index: number;
   title?: string;
@@ -69,7 +69,7 @@ export type HocLieuViewerSlide = {
   thumbnailUrl?: string;
 };
 
-export type HocLieuResource = {
+export type LearningResourceResource = {
   id: string;
   slug: string;
   title: string;
@@ -95,15 +95,15 @@ export type HocLieuResource = {
     | "download_package"
     | "interactive"
     | "external_link";
-  fileType: HocLieuFileType;
+  fileType: LearningResourceFileType;
   formatBadge: string;
-  launchMode: HocLieuLaunchMode;
+  launchMode: LearningResourceLaunchMode;
   thumbnailUrl?: string;
   thumbnailLabel: string;
   thumbnailSubLabel?: string;
   thumbnailTheme: "blue" | "green" | "orange" | "purple" | "teal" | "rose" | "yellow" | "slate";
-  priceType: HocLieuPriceType;
-  accessState: HocLieuAccessState;
+  priceType: LearningResourcePriceType;
+  accessState: LearningResourceAccessState;
   isDownloadable: boolean;
   sortOrder: number;
   viewer: {
@@ -117,56 +117,56 @@ export type HocLieuResource = {
     secureEmbedUrl?: string;
     launchUrl?: string;
     presentationTitle?: string;
-    slides?: HocLieuViewerSlide[];
-    units?: HocLieuViewerUnit[];
+    slides?: LearningResourceViewerSlide[];
+    units?: LearningResourceViewerUnit[];
   };
 };
 
-export const HOCLIEU_GRADES: HocLieuGrade[] = [
-  { id: "mam-non", label: "Máº§m non" },
+export const LEARNING_RESOURCE_GRADES: LearningResourceGrade[] = [
+  { id: "mam-non", label: "Mầm non" },
   ...Array.from({ length: 12 }, (_, index) => {
     const value = String(index + 1);
     return { id: value, label: value };
   }),
 ];
 
-export const HOCLIEU_SUBJECTS: HocLieuSubject[] = [
-  { id: "all", label: "Táº¥t cáº£" },
-  { id: "toan", label: "ToÃ¡n" },
-  { id: "tieng-viet", label: "Tiáº¿ng Viá»‡t" },
-  { id: "tu-nhien-xa-hoi", label: "Tá»± nhiÃªn vÃ  XÃ£ há»™i", gradeIds: ["1", "2", "3"] },
-  { id: "ngu-van", label: "Ngá»¯ vÄƒn" },
-  { id: "tieng-anh", label: "Tiáº¿ng Anh" },
-  { id: "khoa-hoc-tu-nhien", label: "Khoa há»c tá»± nhiÃªn" },
-  { id: "lich-su-dia-li", label: "Lá»‹ch sá»­ vÃ  Äá»‹a lÃ­" },
-  { id: "giao-duc-stem", label: "GiÃ¡o dá»¥c STEM" },
-  { id: "giao-duc-ki-nang-cong-dan-so", label: "GiÃ¡o dá»¥c KÄ© nÄƒng CÃ´ng dÃ¢n sá»‘" },
-  { id: "tin-hoc", label: "Tin há»c" },
+export const LEARNING_RESOURCE_SUBJECTS: LearningResourceSubject[] = [
+  { id: "all", label: "Tất cả" },
+  { id: "toan", label: "Toán" },
+  { id: "tieng-viet", label: "Tiếng Việt" },
+  { id: "tu-nhien-xa-hoi", label: "Tự nhiên và Xã hội", gradeIds: ["1", "2", "3"] },
+  { id: "ngu-van", label: "Ngữ văn" },
+  { id: "tieng-anh", label: "Tiếng Anh" },
+  { id: "khoa-hoc-tu-nhien", label: "Khoa học tự nhiên" },
+  { id: "lich-su-dia-li", label: "Lịch sử và Địa lí" },
+  { id: "giao-duc-stem", label: "Giáo dục STEM" },
+  { id: "giao-duc-ki-nang-cong-dan-so", label: "Giáo dục Kĩ năng Công dân số" },
+  { id: "tin-hoc", label: "Tin học" },
   { id: "ic3", label: "IC3" },
   { id: "mos", label: "MOS" },
 ];
 
-export const HOCLIEU_CATEGORIES: HocLieuCategory[] = [
-  { id: "nhat-ki-ngay-he-vui", label: "Nháº­t kÃ­ ngÃ y hÃ¨ vui", icon: "document" },
-  { id: "sgk-tieng-anh", label: "Há»c liá»‡u SGK Tiáº¿ng Anh", icon: "book" },
-  { id: "sach-mem-2", label: "SÃ¡ch Má»m 2.0", parentId: "sgk-tieng-anh", icon: "document" },
-  { id: "hop-phan-bo-tro", label: "Há»£p pháº§n bá»• trá»£", parentId: "sgk-tieng-anh", icon: "document" },
-  { id: "tieng-anh-tang-cuong", label: "Tiáº¿ng Anh TÄƒng CÆ°á»ng", icon: "book" },
+export const LEARNING_RESOURCE_CATEGORIES: LearningResourceCategory[] = [
+  { id: "nhat-ki-ngay-he-vui", label: "Nhật kí ngày hè vui", icon: "document" },
+  { id: "sgk-tieng-anh", label: "Học liệu SGK Tiếng Anh", icon: "book" },
+  { id: "sach-mem-2", label: "Sách Mềm 2.0", parentId: "sgk-tieng-anh", icon: "document" },
+  { id: "hop-phan-bo-tro", label: "Hợp phần bổ trợ", parentId: "sgk-tieng-anh", icon: "document" },
+  { id: "tieng-anh-tang-cuong", label: "Tiếng Anh Tăng Cường", icon: "book" },
   { id: "global-maths", label: "Global Maths", parentId: "tieng-anh-tang-cuong", icon: "document" },
   { id: "global-science", label: "Global Science", parentId: "tieng-anh-tang-cuong", icon: "document" },
-  { id: "hoc-lieu-thong-minh", label: "Há»c liá»‡u ThÃ´ng minh", icon: "smart" },
-  { id: "ket-noi-tri-thuc", label: "Káº¿t ná»‘i tri thá»©c vá»›i cuá»™c sá»‘ng", parentId: "hoc-lieu-thong-minh", icon: "document" },
-  { id: "chan-troi-sang-tao", label: "ChÃ¢n trá»i sÃ¡ng táº¡o", parentId: "hoc-lieu-thong-minh", icon: "document" },
-  { id: "cung-hoc-phat-trien", label: "CÃ¹ng há»c Ä‘á»ƒ phÃ¡t triá»ƒn nÄƒng lá»±c", parentId: "hoc-lieu-thong-minh", icon: "document" },
-  { id: "theo-sgk-khac", label: "Theo SGK khÃ¡c", parentId: "hoc-lieu-thong-minh", icon: "document" },
-  { id: "hoc-lieu-giao-duc-khac", label: "Há»c liá»‡u GiÃ¡o dá»¥c khÃ¡c", icon: "stem" },
-  { id: "giao-duc-stem", label: "Há»c liá»‡u GiÃ¡o dá»¥c STEM", parentId: "hoc-lieu-giao-duc-khac", icon: "stem" },
-  { id: "hoc-lieu-sach-tham-khao", label: "Há»c liá»‡u SÃ¡ch tham kháº£o", parentId: "hoc-lieu-giao-duc-khac", icon: "document" },
-  { id: "hoc-lieu-hanh-trang-cong-dan-so", label: "Há»c liá»‡u HÃ nh trang cÃ´ng dÃ¢n sá»‘", parentId: "hoc-lieu-giao-duc-khac", icon: "document" },
-  { id: "hoc-lieu-tin-hoc", label: "Há»c liá»‡u Tin há»c", icon: "computer" },
-  { id: "tin-hoc-pho-thong", label: "Tin há»c phá»• thÃ´ng", parentId: "hoc-lieu-tin-hoc", icon: "computer" },
+  { id: "hoc-lieu-thong-minh", label: "Học liệu Thông minh", icon: "smart" },
+  { id: "ket-noi-tri-thuc", label: "Kết nối tri thức với cuộc sống", parentId: "hoc-lieu-thong-minh", icon: "document" },
+  { id: "chan-troi-sang-tao", label: "Chân trời sáng tạo", parentId: "hoc-lieu-thong-minh", icon: "document" },
+  { id: "cung-hoc-phat-trien", label: "Cùng học để phát triển năng lực", parentId: "hoc-lieu-thong-minh", icon: "document" },
+  { id: "theo-sgk-khac", label: "Theo SGK khác", parentId: "hoc-lieu-thong-minh", icon: "document" },
+  { id: "hoc-lieu-giao-duc-khac", label: "Học liệu Giáo dục khác", icon: "stem" },
+  { id: "giao-duc-stem", label: "Học liệu Giáo dục STEM", parentId: "hoc-lieu-giao-duc-khac", icon: "stem" },
+  { id: "hoc-lieu-sach-tham-khao", label: "Học liệu Sách tham khảo", parentId: "hoc-lieu-giao-duc-khac", icon: "document" },
+  { id: "hoc-lieu-hanh-trang-cong-dan-so", label: "Học liệu Hành trang công dân số", parentId: "hoc-lieu-giao-duc-khac", icon: "document" },
+  { id: "hoc-lieu-tin-hoc", label: "Học liệu Tin học", icon: "computer" },
+  { id: "tin-hoc-pho-thong", label: "Tin học phổ thông", parentId: "hoc-lieu-tin-hoc", icon: "computer" },
   { id: "scratch-python", label: "Scratch & Python", parentId: "hoc-lieu-tin-hoc", icon: "computer" },
-  { id: "chung-chi-tin-hoc", label: "Chá»©ng chá»‰ Tin há»c", icon: "certificate" },
+  { id: "chung-chi-tin-hoc", label: "Chứng chỉ Tin học", icon: "certificate" },
   { id: "ic3-digital-literacy", label: "IC3 Digital Literacy", parentId: "chung-chi-tin-hoc", icon: "certificate" },
   { id: "mos", label: "MOS", parentId: "chung-chi-tin-hoc", icon: "certificate" },
 ];
@@ -174,14 +174,14 @@ export const HOCLIEU_CATEGORIES: HocLieuCategory[] = [
 const MOCK_GOOGLE_PDF_EMBED_URL = "/mock/hoclieu/global-success-preview.b64";
 const MOCK_SLIDES_EMBED_URL = "/mock/hoclieu/slide-preview.html";
 
-const commonLectureUnits: HocLieuViewerUnit[] = [
+const commonLectureUnits: LearningResourceViewerUnit[] = [
   {
     id: "unit-1",
     title: "Unit 1: My new school",
     children: [
-      { id: "lesson-1", title: "Unit 1_Lesson 1_Period 1", duration: "35 phÃºt" },
-      { id: "lesson-2", title: "Unit 1_Lesson 2_Period 2", duration: "35 phÃºt" },
-      { id: "lesson-3", title: "Unit 1_Lesson 3_Period 3", duration: "35 phÃºt" },
+      { id: "lesson-1", title: "Unit 1_Lesson 1_Period 1", duration: "35 phút" },
+      { id: "lesson-2", title: "Unit 1_Lesson 2_Period 2", duration: "35 phút" },
+      { id: "lesson-3", title: "Unit 1_Lesson 3_Period 3", duration: "35 phút" },
     ],
   },
   { id: "unit-2", title: "Unit 2: My house" },
@@ -194,11 +194,11 @@ const commonLectureUnits: HocLieuViewerUnit[] = [
   { id: "unit-9", title: "Unit 9: Cities of the World" },
 ];
 
-export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
+export const LEARNING_RESOURCE_LIBRARY_SECTIONS: LearningResourceResourceSection[] = [
   {
     id: "nhat-ki-ngay-he-vui",
-    title: "NHáº¬T KÃ NGÃ€Y HÃˆ VUI",
-    subtitle: "Há»c liá»‡u hÃ¨ cho há»c sinh lá»›p 1, má»Ÿ nhanh tá»« kho há»c liá»‡u.",
+    title: "NHẬT KÍ NGÀY HÈ VUI",
+    subtitle: "Học liệu hè cho học sinh lớp 1, mở nhanh từ kho học liệu.",
     gradeId: "1",
     subjectId: "all",
     categoryId: "nhat-ki-ngay-he-vui",
@@ -206,8 +206,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "nhat-ki-ngay-he-vui-lop-1",
         slug: "nhat-ki-ngay-he-vui-lop-1",
-        title: "Nháº­t kÃ­ ngÃ y hÃ¨ vui Lá»›p 1",
-        subtitle: "Bá»™ há»c liá»‡u tÃ­ch há»£p ToÃ¡n, Tiáº¿ng Viá»‡t, Tiáº¿ng Anh",
+        title: "Nhật kí ngày hè vui Lớp 1",
+        subtitle: "Bộ học liệu tích hợp Toán, Tiếng Việt, Tiếng Anh",
         gradeId: "1",
         subjectId: "all",
         categoryId: "nhat-ki-ngay-he-vui",
@@ -216,21 +216,21 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "HTML5",
         formatBadge: "HTML5",
         launchMode: "html5_embed",
-        thumbnailLabel: "Nháº­t kÃ­ ngÃ y hÃ¨ vui",
-        thumbnailSubLabel: "Lá»›p 1",
+        thumbnailLabel: "Nhật kí ngày hè vui",
+        thumbnailSubLabel: "Lớp 1",
         thumbnailTheme: "blue",
         priceType: "licensed",
         accessState: "license_required",
         isDownloadable: false,
         sortOrder: 1,
         viewer: {
-          title: "Nháº­t kÃ­ ngÃ y hÃ¨ vui Lá»›p 1",
-          description: "Há»c liá»‡u HTML5 mÃ´ phá»ng thao tÃ¡c kÃ­ch hoáº¡t sá»­ dá»¥ng vÃ  má»Ÿ bÃ i há»c.",
+          title: "Nhật kí ngày hè vui Lớp 1",
+          description: "Học liệu HTML5 mô phỏng thao tác kích hoạt sử dụng và mở bài học.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           units: [
-            { id: "nk-bai-1", title: "Tuáº§n 1: Khá»Ÿi Ä‘á»™ng mÃ¹a hÃ¨" },
-            { id: "nk-bai-2", title: "Tuáº§n 2: Ã”n táº­p ToÃ¡n vÃ  Tiáº¿ng Viá»‡t" },
-            { id: "nk-bai-3", title: "Tuáº§n 3: Em ká»ƒ chuyá»‡n ngÃ y hÃ¨" },
+            { id: "nk-bai-1", title: "Tuần 1: Khởi động mùa hè" },
+            { id: "nk-bai-2", title: "Tuần 2: Ôn tập Toán và Tiếng Việt" },
+            { id: "nk-bai-3", title: "Tuần 3: Em kể chuyện ngày hè" },
           ],
         },
       },
@@ -238,8 +238,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
   },
   {
     id: "sach-mem-2-lop-1",
-    title: "Há»ŒC LIá»†U SGK TIáº¾NG ANH",
-    subtitle: "SÃ¡ch Má»m 2.0",
+    title: "HỌC LIỆU SGK TIẾNG ANH",
+    subtitle: "Sách Mềm 2.0",
     gradeId: "1",
     subjectId: "tieng-anh",
     categoryId: "sach-mem-2",
@@ -247,8 +247,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-1-student-book",
         slug: "tieng-anh-1-global-success-sach-hoc-sinh",
-        title: "Tiáº¿ng Anh 1 - Global Success",
-        subtitle: "SÃ¡ch há»c sinh",
+        title: "Tiếng Anh 1 - Global Success",
+        subtitle: "Sách học sinh",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "sach-mem-2",
@@ -258,15 +258,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         formatBadge: "PDF",
         launchMode: "ebook_reader",
         thumbnailLabel: "Global Success",
-        thumbnailSubLabel: "PhiÃªn báº£n GV",
+        thumbnailSubLabel: "Phiên bản GV",
         thumbnailTheme: "green",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 1,
         viewer: {
-          title: "Tiáº¿ng Anh 1 - Global Success",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Tiếng Anh 1 - Global Success",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 96,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -274,8 +274,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-1-workbook",
         slug: "tieng-anh-1-global-success-sach-bai-tap",
-        title: "Tiáº¿ng Anh 1 - Global Success",
-        subtitle: "SÃ¡ch bÃ i táº­p",
+        title: "Tiếng Anh 1 - Global Success",
+        subtitle: "Sách bài tập",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "sach-mem-2",
@@ -285,15 +285,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         formatBadge: "PDF",
         launchMode: "pdf_reader",
         thumbnailLabel: "Workbook 1",
-        thumbnailSubLabel: "PhiÃªn báº£n GV",
+        thumbnailSubLabel: "Phiên bản GV",
         thumbnailTheme: "yellow",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 2,
         viewer: {
-          title: "Tiáº¿ng Anh 1 - Global Success - SÃ¡ch bÃ i táº­p",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Tiếng Anh 1 - Global Success - Sách bài tập",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 72,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -302,7 +302,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
   },
   {
     id: "hop-phan-bo-tro-lop-1",
-    title: "Há»£p pháº§n bá»• trá»£",
+    title: "Hợp phần bổ trợ",
     gradeId: "1",
     subjectId: "tieng-anh",
     categoryId: "hop-phan-bo-tro",
@@ -311,7 +311,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         id: "global-success-1-audio",
         slug: "global-success-1-audio",
         title: "Audio",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -326,13 +326,13 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         accessState: "open",
         isDownloadable: false,
         sortOrder: 1,
-        viewer: { title: "Audio - Tiáº¿ng Anh 1", description: "Danh sÃ¡ch audio theo unit.", duration: "01:12:00" },
+        viewer: { title: "Audio - Tiếng Anh 1", description: "Danh sách audio theo unit.", duration: "01:12:00" },
       },
       {
         id: "global-success-1-lesson-plan",
         slug: "global-success-1-ke-hoach-day-hoc",
-        title: "Káº¿ hoáº¡ch dáº¡y há»c",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Kế hoạch dạy học",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -341,19 +341,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "Káº¿ hoáº¡ch dáº¡y há»c",
+        thumbnailLabel: "Kế hoạch dạy học",
         thumbnailTheme: "orange",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 2,
-        viewer: { title: "Káº¿ hoáº¡ch dáº¡y há»c - Tiáº¿ng Anh 1", description: "PDF káº¿ hoáº¡ch dáº¡y há»c.", pageCount: 32 },
+        viewer: { title: "Kế hoạch dạy học - Tiếng Anh 1", description: "PDF kế hoạch dạy học.", pageCount: 32 },
       },
       {
         id: "global-success-1-slide",
         slug: "global-success-1-bai-giang-dien-tu",
-        title: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Bài giảng điện tử",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -362,19 +362,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PPTX",
         formatBadge: "PPTX",
         launchMode: "google_slide_embed",
-        thumbnailLabel: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
+        thumbnailLabel: "Bài giảng điện tử",
         thumbnailTheme: "orange",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 3,
-        viewer: { title: "BÃ i giáº£ng Ä‘iá»‡n tá»­ - Tiáº¿ng Anh 1", description: "PPTX xem trá»±c tiáº¿p qua Google Slides embed.", embedUrl: MOCK_SLIDES_EMBED_URL, units: commonLectureUnits },
+        viewer: { title: "Bài giảng điện tử - Tiếng Anh 1", description: "PPTX xem trực tiếp qua Google Slides embed.", embedUrl: MOCK_SLIDES_EMBED_URL, units: commonLectureUnits },
       },
       {
         id: "global-success-1-demo-lesson",
         slug: "global-success-1-giao-an-minh-hoa",
-        title: "GiÃ¡o Ã¡n minh há»a",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Giáo án minh họa",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -383,19 +383,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "GiÃ¡o Ã¡n minh há»a",
+        thumbnailLabel: "Giáo án minh họa",
         thumbnailTheme: "rose",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 4,
-        viewer: { title: "GiÃ¡o Ã¡n minh há»a", description: "PDF giÃ¡o Ã¡n minh há»a.", pageCount: 18 },
+        viewer: { title: "Giáo án minh họa", description: "PDF giáo án minh họa.", pageCount: 18 },
       },
       {
         id: "global-success-1-flashcards",
         slug: "global-success-1-the-tu",
-        title: "Tháº» tá»«",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Thẻ từ",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -404,19 +404,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "IMAGE",
         formatBadge: "IMAGE",
         launchMode: "external",
-        thumbnailLabel: "Tháº» tá»«",
+        thumbnailLabel: "Thẻ từ",
         thumbnailTheme: "teal",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 5,
-        viewer: { title: "Tháº» tá»«", description: "Bá»™ tháº» tá»« dÃ¹ng trÃªn lá»›p." },
+        viewer: { title: "Thẻ từ", description: "Bộ thẻ từ dùng trên lớp." },
       },
       {
         id: "global-success-1-situation-cards",
         slug: "global-success-1-tranh-tinh-huong",
-        title: "Tranh tÃ¬nh huá»‘ng",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Tranh tình huống",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -425,19 +425,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "IMAGE",
         formatBadge: "IMAGE",
         launchMode: "external",
-        thumbnailLabel: "Tranh tÃ¬nh huá»‘ng",
+        thumbnailLabel: "Tranh tình huống",
         thumbnailTheme: "purple",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 6,
-        viewer: { title: "Tranh tÃ¬nh huá»‘ng", description: "Bá»™ tranh tÃ¬nh huá»‘ng theo bÃ i há»c." },
+        viewer: { title: "Tranh tình huống", description: "Bộ tranh tình huống theo bài học." },
       },
       {
         id: "global-success-1-puppets",
         slug: "global-success-1-bo-quan-roi",
-        title: "Bá»™ quÃ¢n rá»‘i",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Bộ quân rối",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -446,19 +446,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "IMAGE",
         formatBadge: "IMAGE",
         launchMode: "external",
-        thumbnailLabel: "Bá»™ quÃ¢n rá»‘i",
+        thumbnailLabel: "Bộ quân rối",
         thumbnailTheme: "teal",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 7,
-        viewer: { title: "Bá»™ quÃ¢n rá»‘i", description: "TÃ i nguyÃªn quÃ¢n rá»‘i lá»›p há»c." },
+        viewer: { title: "Bộ quân rối", description: "Tài nguyên quân rối lớp học." },
       },
       {
         id: "global-success-1-sample-test",
         slug: "global-success-1-de-kiem-tra-minh-hoa",
-        title: "Äá» kiá»ƒm tra minh há»a",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Đề kiểm tra minh họa",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -467,19 +467,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "QUIZ",
         formatBadge: "QUIZ",
         launchMode: "quiz_runtime",
-        thumbnailLabel: "Äá» kiá»ƒm tra minh há»a",
+        thumbnailLabel: "Đề kiểm tra minh họa",
         thumbnailTheme: "green",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 8,
-        viewer: { title: "Äá» kiá»ƒm tra minh há»a", description: "Bá»™ Ä‘á» kiá»ƒm tra minh há»a." },
+        viewer: { title: "Đề kiểm tra minh họa", description: "Bộ đề kiểm tra minh họa." },
       },
       {
         id: "global-success-1-test-bank",
         slug: "global-success-1-ngan-hang-de-kiem-tra",
-        title: "NgÃ¢n hÃ ng Ä‘á» kiá»ƒm tra",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Ngân hàng đề kiểm tra",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -488,19 +488,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "QUIZ",
         formatBadge: "QUIZ",
         launchMode: "quiz_runtime",
-        thumbnailLabel: "NgÃ¢n hÃ ng Ä‘á» kiá»ƒm tra",
+        thumbnailLabel: "Ngân hàng đề kiểm tra",
         thumbnailTheme: "green",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 9,
-        viewer: { title: "NgÃ¢n hÃ ng Ä‘á» kiá»ƒm tra", description: "NgÃ¢n hÃ ng cÃ¢u há»i kiá»ƒm tra." },
+        viewer: { title: "Ngân hàng đề kiểm tra", description: "Ngân hàng câu hỏi kiểm tra." },
       },
       {
         id: "global-success-1-demo-video",
         slug: "global-success-1-video-tiet-day-minh-hoa",
-        title: "Video tiáº¿t dáº¡y minh há»a",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Video tiết dạy minh họa",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -509,19 +509,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "VIDEO",
         formatBadge: "VIDEO",
         launchMode: "video_player",
-        thumbnailLabel: "Video tiáº¿t dáº¡y minh há»a",
+        thumbnailLabel: "Video tiết dạy minh họa",
         thumbnailTheme: "green",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 10,
-        viewer: { title: "Video tiáº¿t dáº¡y minh há»a", description: "Video player tá»‘i giáº£n.", duration: "15:28" },
+        viewer: { title: "Video tiết dạy minh họa", description: "Video player tối giản.", duration: "15:28" },
       },
       {
         id: "global-success-1-pronunciation-video",
         slug: "global-success-1-video-huong-dan-phat-am",
-        title: "Video hÆ°á»›ng dáº«n phÃ¡t Ã¢m",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Video hướng dẫn phát âm",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -530,19 +530,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "VIDEO",
         formatBadge: "VIDEO",
         launchMode: "video_player",
-        thumbnailLabel: "Video hÆ°á»›ng dáº«n phÃ¡t Ã¢m",
+        thumbnailLabel: "Video hướng dẫn phát âm",
         thumbnailTheme: "purple",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 11,
-        viewer: { title: "Video hÆ°á»›ng dáº«n phÃ¡t Ã¢m", description: "Video hÆ°á»›ng dáº«n phÃ¡t Ã¢m.", duration: "12:02" },
+        viewer: { title: "Video hướng dẫn phát âm", description: "Video hướng dẫn phát âm.", duration: "12:02" },
       },
       {
         id: "global-success-1-cartoon",
         slug: "global-success-1-video-hoat-hinh",
-        title: "Video hoáº¡t hÃ¬nh",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Video hoạt hình",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -551,19 +551,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "VIDEO",
         formatBadge: "VIDEO",
         launchMode: "video_player",
-        thumbnailLabel: "Video hoáº¡t hÃ¬nh",
+        thumbnailLabel: "Video hoạt hình",
         thumbnailTheme: "blue",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 12,
-        viewer: { title: "Video hoáº¡t hÃ¬nh", description: "Video hoáº¡t hÃ¬nh theo unit.", duration: "10:04" },
+        viewer: { title: "Video hoạt hình", description: "Video hoạt hình theo unit.", duration: "10:04" },
       },
       {
         id: "global-success-1-teacher-book",
         slug: "global-success-1-sach-giao-vien",
-        title: "SÃ¡ch giÃ¡o viÃªn",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Sách giáo viên",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -572,19 +572,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "SÃ¡ch giÃ¡o viÃªn",
+        thumbnailLabel: "Sách giáo viên",
         thumbnailTheme: "rose",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 13,
-        viewer: { title: "SÃ¡ch giÃ¡o viÃªn - Tiáº¿ng Anh 1", description: "PDF sÃ¡ch giÃ¡o viÃªn.", pageCount: 156 },
+        viewer: { title: "Sách giáo viên - Tiếng Anh 1", description: "PDF sách giáo viên.", pageCount: 156 },
       },
       {
         id: "global-success-1-vocabulary",
         slug: "global-success-1-tong-hop-tu-vung",
-        title: "Tá»•ng há»£p tá»« vá»±ng",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Tổng hợp từ vựng",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -593,19 +593,19 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "Tá»•ng há»£p tá»« vá»±ng",
+        thumbnailLabel: "Tổng hợp từ vựng",
         thumbnailTheme: "yellow",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 14,
-        viewer: { title: "Tá»•ng há»£p tá»« vá»±ng", description: "Báº£ng tá»•ng há»£p tá»« vá»±ng.", pageCount: 24 },
+        viewer: { title: "Tổng hợp từ vựng", description: "Bảng tổng hợp từ vựng.", pageCount: 24 },
       },
       {
         id: "global-success-1-expanded-pack",
         slug: "global-success-1-tai-nguyen-mo-rong",
-        title: "TÃ i nguyÃªn má»Ÿ rá»™ng",
-        subtitle: "Tiáº¿ng Anh 1 - Global Success",
+        title: "Tài nguyên mở rộng",
+        subtitle: "Tiếng Anh 1 - Global Success",
         gradeId: "1",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -614,20 +614,20 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "ZIP",
         formatBadge: "ZIP",
         launchMode: "download_only",
-        thumbnailLabel: "TÃ i nguyÃªn má»Ÿ rá»™ng",
+        thumbnailLabel: "Tài nguyên mở rộng",
         thumbnailTheme: "rose",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 15,
-        viewer: { title: "TÃ i nguyÃªn má»Ÿ rá»™ng", description: "GÃ³i tÃ i nguyÃªn má»Ÿ rá»™ng táº£i xuá»‘ng." },
+        viewer: { title: "Tài nguyên mở rộng", description: "Gói tài nguyên mở rộng tải xuống." },
       },
     ],
   },
   {
     id: "sach-mem-2",
-    title: "SÃ¡ch Má»m 2.0",
-    subtitle: "Bá»™ sÃ¡ch há»c sinh vÃ  sÃ¡ch bÃ i táº­p theo lá»›p.",
+    title: "Sách Mềm 2.0",
+    subtitle: "Bộ sách học sinh và sách bài tập theo lớp.",
     gradeId: "7",
     subjectId: "tieng-anh",
     categoryId: "sach-mem-2",
@@ -635,8 +635,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-7-student-book",
         slug: "tieng-anh-7-global-success-sach-hoc-sinh",
-        title: "Tiáº¿ng Anh 7 - Global Success",
-        subtitle: "SÃ¡ch há»c sinh",
+        title: "Tiếng Anh 7 - Global Success",
+        subtitle: "Sách học sinh",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "sach-mem-2",
@@ -646,15 +646,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         formatBadge: "PDF",
         launchMode: "ebook_reader",
         thumbnailLabel: "Global Success",
-        thumbnailSubLabel: "PhiÃªn báº£n GV",
+        thumbnailSubLabel: "Phiên bản GV",
         thumbnailTheme: "blue",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 1,
         viewer: {
-          title: "Tiáº¿ng Anh 7 - Global Success",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Tiếng Anh 7 - Global Success",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 128,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -662,8 +662,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-7-workbook",
         slug: "tieng-anh-7-global-success-sach-bai-tap",
-        title: "Tiáº¿ng Anh 7 - Global Success",
-        subtitle: "SÃ¡ch bÃ i táº­p",
+        title: "Tiếng Anh 7 - Global Success",
+        subtitle: "Sách bài tập",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "sach-mem-2",
@@ -673,15 +673,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         formatBadge: "PDF",
         launchMode: "pdf_reader",
         thumbnailLabel: "Workbook 7",
-        thumbnailSubLabel: "PhiÃªn báº£n GV",
+        thumbnailSubLabel: "Phiên bản GV",
         thumbnailTheme: "yellow",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 2,
         viewer: {
-          title: "Tiáº¿ng Anh 7 - Global Success - SÃ¡ch bÃ i táº­p",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Tiếng Anh 7 - Global Success - Sách bài tập",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 96,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -690,8 +690,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
   },
   {
     id: "hop-phan-bo-tro",
-    title: "Há»£p pháº§n bá»• trá»£",
-    subtitle: "CÃ¡c tÃ i nguyÃªn Ä‘i kÃ¨m bÃ i há»c vÃ  bá»™ sÃ¡ch.",
+    title: "Hợp phần bổ trợ",
+    subtitle: "Các tài nguyên đi kèm bài học và bộ sách.",
     gradeId: "7",
     subjectId: "tieng-anh",
     categoryId: "hop-phan-bo-tro",
@@ -700,7 +700,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         id: "global-success-7-audio",
         slug: "global-success-7-audio",
         title: "Audio",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -716,16 +716,16 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 1,
         viewer: {
-          title: "Audio - Tiáº¿ng Anh 7",
-          description: "Danh sÃ¡ch audio theo unit, dÃ¹ng player compact.",
+          title: "Audio - Tiếng Anh 7",
+          description: "Danh sách audio theo unit, dùng player compact.",
           duration: "02:18:00",
         },
       },
       {
         id: "global-success-7-lesson-plan",
         slug: "global-success-7-ke-hoach-day-hoc",
-        title: "Káº¿ hoáº¡ch dáº¡y há»c",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        title: "Kế hoạch dạy học",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -734,15 +734,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "Káº¿ hoáº¡ch dáº¡y há»c",
+        thumbnailLabel: "Kế hoạch dạy học",
         thumbnailTheme: "blue",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 2,
         viewer: {
-          title: "Káº¿ hoáº¡ch dáº¡y há»c",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Kế hoạch dạy học",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 11,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -750,8 +750,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-7-slide",
         slug: "global-success-7-bai-giang-dien-tu",
-        title: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        title: "Bài giảng điện tử",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -760,15 +760,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PPTX",
         formatBadge: "PPTX",
         launchMode: "google_slide_embed",
-        thumbnailLabel: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
+        thumbnailLabel: "Bài giảng điện tử",
         thumbnailTheme: "orange",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 3,
         viewer: {
-          title: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
-          description: "PPTX xem trá»±c tiáº¿p qua Google Slides embed. UI khÃ´ng hiá»ƒn thá»‹ link gá»‘c.",
+          title: "Bài giảng điện tử",
+          description: "PPTX xem trực tiếp qua Google Slides embed. UI không hiển thị link gốc.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           presentationTitle: "Lesson 1 - GETTING STARTED",
           units: commonLectureUnits,
@@ -777,8 +777,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "global-success-7-test-bank",
         slug: "global-success-7-ngan-hang-de-kiem-tra",
-        title: "NgÃ¢n hÃ ng Ä‘á» kiá»ƒm tra",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        title: "Ngân hàng đề kiểm tra",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -787,22 +787,22 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "QUIZ",
         formatBadge: "QUIZ",
         launchMode: "quiz_runtime",
-        thumbnailLabel: "NgÃ¢n hÃ ng Ä‘á»",
+        thumbnailLabel: "Ngân hàng đề",
         thumbnailTheme: "purple",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 4,
         viewer: {
-          title: "NgÃ¢n hÃ ng Ä‘á» kiá»ƒm tra",
-          description: "Äiá»u hÆ°á»›ng sang quiz/runtime khi BE cung cáº¥p package tháº­t.",
+          title: "Ngân hàng đề kiểm tra",
+          description: "Điều hướng sang quiz/runtime khi BE cung cấp package thật.",
         },
       },
       {
         id: "global-success-7-video",
         slug: "global-success-7-video-tiet-day-minh-hoa",
-        title: "Video tiáº¿t dáº¡y minh há»a",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        title: "Video tiết dạy minh họa",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -811,23 +811,23 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "VIDEO",
         formatBadge: "VIDEO",
         launchMode: "video_player",
-        thumbnailLabel: "Video tiáº¿t dáº¡y",
+        thumbnailLabel: "Video tiết dạy",
         thumbnailTheme: "rose",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 5,
         viewer: {
-          title: "Video tiáº¿t dáº¡y minh há»a",
-          description: "Video player tá»‘i giáº£n, khÃ´ng autoplay.",
+          title: "Video tiết dạy minh họa",
+          description: "Video player tối giản, không autoplay.",
           duration: "18:42",
         },
       },
       {
         id: "global-success-7-teacher-pack",
         slug: "global-success-7-file-thuc-hanh",
-        title: "File thá»±c hÃ nh lá»›p há»c",
-        subtitle: "Tiáº¿ng Anh 7 - Global Success",
+        title: "File thực hành lớp học",
+        subtitle: "Tiếng Anh 7 - Global Success",
         gradeId: "7",
         subjectId: "tieng-anh",
         categoryId: "hop-phan-bo-tro",
@@ -843,16 +843,16 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: true,
         sortOrder: 6,
         viewer: {
-          title: "File thá»±c hÃ nh lá»›p há»c",
-          description: "GÃ³i táº£i xuá»‘ng, khÃ´ng cÃ³ preview trá»±c tiáº¿p.",
+          title: "File thực hành lớp học",
+          description: "Gói tải xuống, không có preview trực tiếp.",
         },
       },
     ],
   },
   {
     id: "stem-grade-1",
-    title: "Há»c liá»‡u GiÃ¡o dá»¥c STEM",
-    subtitle: "Bá»™ há»c liá»‡u STEM lá»›p 1 - HÃ nh trÃ¬nh sÃ¡ng táº¡o.",
+    title: "Học liệu Giáo dục STEM",
+    subtitle: "Bộ học liệu STEM lớp 1 - Hành trình sáng tạo.",
     gradeId: "1",
     subjectId: "giao-duc-stem",
     categoryId: "giao-duc-stem",
@@ -860,8 +860,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "stem-1-teacher-book",
         slug: "stem-1-sach-giao-vien",
-        title: "SÃ¡ch giÃ¡o viÃªn",
-        subtitle: "GiÃ¡o dá»¥c STEM 1 - HÃ nh trÃ¬nh sÃ¡ng táº¡o",
+        title: "Sách giáo viên",
+        subtitle: "Giáo dục STEM 1 - Hành trình sáng tạo",
         gradeId: "1",
         subjectId: "giao-duc-stem",
         categoryId: "giao-duc-stem",
@@ -870,23 +870,23 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "SÃ¡ch giÃ¡o viÃªn",
+        thumbnailLabel: "Sách giáo viên",
         thumbnailTheme: "teal",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 1,
         viewer: {
-          title: "SÃ¡ch giÃ¡o viÃªn - STEM 1",
-          description: "Reader PDF mÃ´ phá»ng sÃ¡ch giÃ¡o viÃªn STEM.",
+          title: "Sách giáo viên - STEM 1",
+          description: "Reader PDF mô phỏng sách giáo viên STEM.",
           pageCount: 140,
         },
       },
       {
         id: "stem-1-lesson-plan",
         slug: "stem-1-ke-hoach-bai-day",
-        title: "Káº¿ hoáº¡ch bÃ i dáº¡y",
-        subtitle: "GiÃ¡o dá»¥c STEM 1 - HÃ nh trÃ¬nh sÃ¡ng táº¡o",
+        title: "Kế hoạch bài dạy",
+        subtitle: "Giáo dục STEM 1 - Hành trình sáng tạo",
         gradeId: "1",
         subjectId: "giao-duc-stem",
         categoryId: "giao-duc-stem",
@@ -895,23 +895,23 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "Káº¿ hoáº¡ch bÃ i dáº¡y",
+        thumbnailLabel: "Kế hoạch bài dạy",
         thumbnailTheme: "teal",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 2,
         viewer: {
-          title: "Káº¿ hoáº¡ch bÃ i dáº¡y - STEM 1",
-          description: "Danh sÃ¡ch káº¿ hoáº¡ch bÃ i dáº¡y theo chá»§ Ä‘á».",
+          title: "Kế hoạch bài dạy - STEM 1",
+          description: "Danh sách kế hoạch bài dạy theo chủ đề.",
           pageCount: 40,
         },
       },
       {
         id: "stem-1-slide",
         slug: "stem-1-bai-giang-dien-tu",
-        title: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
-        subtitle: "GiÃ¡o dá»¥c STEM 1 - HÃ nh trÃ¬nh sÃ¡ng táº¡o",
+        title: "Bài giảng điện tử",
+        subtitle: "Giáo dục STEM 1 - Hành trình sáng tạo",
         gradeId: "1",
         subjectId: "giao-duc-stem",
         categoryId: "giao-duc-stem",
@@ -920,21 +920,21 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PPTX",
         formatBadge: "PPTX",
         launchMode: "google_slide_embed",
-        thumbnailLabel: "BÃ i giáº£ng Ä‘iá»‡n tá»­",
+        thumbnailLabel: "Bài giảng điện tử",
         thumbnailTheme: "teal",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 3,
         viewer: {
-          title: "BÃ i giáº£ng Ä‘iá»‡n tá»­ - STEM 1",
-          description: "PPTX xem trá»±c tiáº¿p qua Google Slides embed, khÃ´ng lá»™ link gá»‘c.",
+          title: "Bài giảng điện tử - STEM 1",
+          description: "PPTX xem trực tiếp qua Google Slides embed, không lộ link gốc.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           units: [
-            { id: "stem-bai-1", title: "BÃ i 1: NgÃ´i nhÃ  mÆ¡ Æ°á»›c" },
-            { id: "stem-bai-2", title: "BÃ i 2: Cá»™t Ä‘Ã¨n giao thÃ´ng xoay" },
-            { id: "stem-bai-3", title: "BÃ i 3: Dá»¥ng cá»¥ gáº¥p Ã¡o" },
-            { id: "stem-bai-4", title: "BÃ i 4: ThÆ°á»›c trÆ°á»£t cá»™ng trá»«" },
+            { id: "stem-bai-1", title: "Bài 1: Ngôi nhà mơ ước" },
+            { id: "stem-bai-2", title: "Bài 2: Cột đèn giao thông xoay" },
+            { id: "stem-bai-3", title: "Bài 3: Dụng cụ gấp áo" },
+            { id: "stem-bai-4", title: "Bài 4: Thước trượt cộng trừ" },
           ],
         },
       },
@@ -943,7 +943,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
   {
     id: "ic3-gs6",
     title: "IC3 GS6",
-    subtitle: "Digital Literacy theo 3 domain cá»‘t lÃµi.",
+    subtitle: "Digital Literacy theo 3 domain cốt lõi.",
     subjectId: "ic3",
     categoryId: "ic3-digital-literacy",
     resources: [
@@ -967,7 +967,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         sortOrder: 1,
         viewer: {
           title: "IC3 GS6 Level 1 - Computing Fundamentals",
-          description: "GiÃ¡o trÃ¬nh ná»n táº£ng mÃ¡y tÃ­nh cho lá»›p IC3.",
+          description: "Giáo trình nền tảng máy tính cho lớp IC3.",
           pageCount: 86,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -992,7 +992,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         sortOrder: 2,
         viewer: {
           title: "IC3 GS6 Level 1 - Key Applications",
-          description: "PPTX xem trá»±c tiáº¿p qua Google Slides embed.",
+          description: "PPTX xem trực tiếp qua Google Slides embed.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           units: [
             { id: "word", title: "Word processing fundamentals" },
@@ -1021,15 +1021,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         sortOrder: 3,
         viewer: {
           title: "IC3 GS6 Level 1 - Living Online",
-          description: "Video bÃ i há»c vá» cÃ´ng dÃ¢n sá»‘, tÃ¬m kiáº¿m vÃ  an toÃ n trá»±c tuyáº¿n.",
+          description: "Video bài học về công dân số, tìm kiếm và an toàn trực tuyến.",
           duration: "22:10",
         },
       },
       {
         id: "ic3-question-bank",
         slug: "ngan-hang-cau-hoi-ic3-gs6",
-        title: "NgÃ¢n hÃ ng cÃ¢u há»i IC3 GS6",
-        subtitle: "Mock test vÃ  exit ticket",
+        title: "Ngân hàng câu hỏi IC3 GS6",
+        subtitle: "Mock test và exit ticket",
         subjectId: "ic3",
         categoryId: "ic3-digital-literacy",
         sectionId: "ic3-gs6",
@@ -1044,8 +1044,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 4,
         viewer: {
-          title: "NgÃ¢n hÃ ng cÃ¢u há»i IC3 GS6",
-          description: "Mock quiz shell Ä‘á»ƒ FE tÃ­ch há»£p quiz runtime sau.",
+          title: "Ngân hàng câu hỏi IC3 GS6",
+          description: "Mock quiz shell để FE tích hợp quiz runtime sau.",
         },
       },
     ],
@@ -1053,14 +1053,14 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
   {
     id: "mos-office",
     title: "MOS Word, Excel, PowerPoint",
-    subtitle: "TÃ i nguyÃªn luyá»‡n thi Microsoft Office Specialist.",
+    subtitle: "Tài nguyên luyện thi Microsoft Office Specialist.",
     subjectId: "mos",
     categoryId: "mos",
     resources: [
       {
         id: "mos-word-book",
         slug: "mos-word-associate-giao-trinh",
-        title: "MOS Word Associate - GiÃ¡o trÃ¬nh",
+        title: "MOS Word Associate - Giáo trình",
         subtitle: "MOS Word",
         subjectId: "mos",
         categoryId: "mos",
@@ -1076,8 +1076,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: true,
         sortOrder: 1,
         viewer: {
-          title: "MOS Word Associate - GiÃ¡o trÃ¬nh",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "MOS Word Associate - Giáo trình",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 112,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -1085,7 +1085,7 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "mos-excel-slide",
         slug: "mos-excel-associate-bai-giang",
-        title: "MOS Excel Associate - BÃ i giáº£ng",
+        title: "MOS Excel Associate - Bài giảng",
         subtitle: "MOS Excel",
         subjectId: "mos",
         categoryId: "mos",
@@ -1101,20 +1101,20 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 2,
         viewer: {
-          title: "MOS Excel Associate - BÃ i giáº£ng",
-          description: "PPTX xem trá»±c tiáº¿p qua Google Slides embed.",
+          title: "MOS Excel Associate - Bài giảng",
+          description: "PPTX xem trực tiếp qua Google Slides embed.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           units: [
-            { id: "formulas", title: "CÃ´ng thá»©c vÃ  hÃ m cÆ¡ báº£n" },
-            { id: "tables", title: "Báº£ng dá»¯ liá»‡u vÃ  Ä‘á»‹nh dáº¡ng" },
-            { id: "charts", title: "Biá»ƒu Ä‘á»“ vÃ  phÃ¢n tÃ­ch nhanh" },
+            { id: "formulas", title: "Công thức và hàm cơ bản" },
+            { id: "tables", title: "Bảng dữ liệu và định dạng" },
+            { id: "charts", title: "Biểu đồ và phân tích nhanh" },
           ],
         },
       },
       {
         id: "mos-powerpoint-video",
         slug: "mos-powerpoint-video-thao-tac",
-        title: "MOS PowerPoint Associate - Video thao tÃ¡c",
+        title: "MOS PowerPoint Associate - Video thao tác",
         subtitle: "MOS PowerPoint",
         subjectId: "mos",
         categoryId: "mos",
@@ -1130,15 +1130,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 3,
         viewer: {
-          title: "MOS PowerPoint Associate - Video thao tÃ¡c",
-          description: "Video thao tÃ¡c slide master, layout vÃ  animation cÄƒn báº£n.",
+          title: "MOS PowerPoint Associate - Video thao tác",
+          description: "Video thao tác slide master, layout và animation căn bản.",
           duration: "19:35",
         },
       },
       {
         id: "mos-word-practice-files",
         slug: "file-thuc-hanh-mos-word",
-        title: "File thá»±c hÃ nh MOS Word",
+        title: "File thực hành MOS Word",
         subtitle: "MOS Word",
         subjectId: "mos",
         categoryId: "mos",
@@ -1154,24 +1154,24 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: true,
         sortOrder: 4,
         viewer: {
-          title: "File thá»±c hÃ nh MOS Word",
-          description: "GÃ³i file luyá»‡n thao tÃ¡c, khÃ´ng preview trá»±c tiáº¿p.",
+          title: "File thực hành MOS Word",
+          description: "Gói file luyện thao tác, không preview trực tiếp.",
         },
       },
     ],
   },
   {
     id: "tin-hoc-pho-thong",
-    title: "Tin há»c phá»• thÃ´ng",
-    subtitle: "Tin há»c, Scratch, Python vÃ  bÃ i táº­p thá»±c hÃ nh.",
+    title: "Tin học phổ thông",
+    subtitle: "Tin học, Scratch, Python và bài tập thực hành.",
     subjectId: "tin-hoc",
     categoryId: "tin-hoc-pho-thong",
     resources: [
       {
         id: "tin-hoc-6-may-tinh-cong-dong",
         slug: "tin-hoc-6-may-tinh-va-cong-dong",
-        title: "Tin há»c 6 - Chá»§ Ä‘á» mÃ¡y tÃ­nh vÃ  cá»™ng Ä‘á»“ng",
-        subtitle: "Tin há»c THCS",
+        title: "Tin học 6 - Chủ đề máy tính và cộng đồng",
+        subtitle: "Tin học THCS",
         gradeId: "6",
         subjectId: "tin-hoc",
         categoryId: "tin-hoc-pho-thong",
@@ -1180,15 +1180,15 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "PDF",
         formatBadge: "PDF",
         launchMode: "pdf_reader",
-        thumbnailLabel: "Tin há»c 6",
+        thumbnailLabel: "Tin học 6",
         thumbnailTheme: "blue",
         priceType: "free",
         accessState: "open",
         isDownloadable: true,
         sortOrder: 1,
         viewer: {
-          title: "Tin há»c 6 - MÃ¡y tÃ­nh vÃ  cá»™ng Ä‘á»“ng",
-          description: "PDF xem trá»±c tiáº¿p báº±ng Google Drive preview trong modal.",
+          title: "Tin học 6 - Máy tính và cộng đồng",
+          description: "PDF xem trực tiếp bằng Google Drive preview trong modal.",
           pageCount: 42,
           embedUrl: MOCK_GOOGLE_PDF_EMBED_URL,
         },
@@ -1196,8 +1196,8 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
       {
         id: "scratch-can-ban-slide",
         slug: "scratch-can-ban-bai-giang-dien-tu",
-        title: "Scratch cÄƒn báº£n - BÃ i giáº£ng Ä‘iá»‡n tá»­",
-        subtitle: "Láº­p trÃ¬nh Scratch",
+        title: "Scratch căn bản - Bài giảng điện tử",
+        subtitle: "Lập trình Scratch",
         subjectId: "tin-hoc",
         categoryId: "scratch-python",
         sectionId: "tin-hoc-pho-thong",
@@ -1212,21 +1212,21 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 2,
         viewer: {
-          title: "Scratch cÄƒn báº£n - BÃ i giáº£ng Ä‘iá»‡n tá»­",
-          description: "Slide deck xem trá»±c tiáº¿p qua Google Slides embed.",
+          title: "Scratch căn bản - Bài giảng điện tử",
+          description: "Slide deck xem trực tiếp qua Google Slides embed.",
           embedUrl: MOCK_SLIDES_EMBED_URL,
           units: [
-            { id: "sprite", title: "NhÃ¢n váº­t vÃ  sÃ¢n kháº¥u" },
-            { id: "motion", title: "Lá»‡nh chuyá»ƒn Ä‘á»™ng" },
-            { id: "event", title: "Sá»± kiá»‡n vÃ  tÆ°Æ¡ng tÃ¡c" },
+            { id: "sprite", title: "Nhân vật và sân khấu" },
+            { id: "motion", title: "Lệnh chuyển động" },
+            { id: "event", title: "Sự kiện và tương tác" },
           ],
         },
       },
       {
         id: "python-thieu-nhi-video",
         slug: "python-thieu-nhi-video-bai-hoc",
-        title: "Python thiáº¿u nhi - Video bÃ i há»c",
-        subtitle: "Python cÄƒn báº£n",
+        title: "Python thiếu nhi - Video bài học",
+        subtitle: "Python căn bản",
         subjectId: "tin-hoc",
         categoryId: "scratch-python",
         sectionId: "tin-hoc-pho-thong",
@@ -1241,16 +1241,16 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         isDownloadable: false,
         sortOrder: 3,
         viewer: {
-          title: "Python thiáº¿u nhi - Video bÃ i há»c",
-          description: "Video player cho bÃ i Python nháº­p mÃ´n.",
+          title: "Python thiếu nhi - Video bài học",
+          description: "Video player cho bài Python nhập môn.",
           duration: "24:08",
         },
       },
       {
         id: "tin-hoc-7-quiz",
         slug: "trac-nghiem-tin-hoc-7",
-        title: "Tráº¯c nghiá»‡m Tin há»c 7",
-        subtitle: "Tin há»c THCS",
+        title: "Trắc nghiệm Tin học 7",
+        subtitle: "Tin học THCS",
         gradeId: "7",
         subjectId: "tin-hoc",
         categoryId: "tin-hoc-pho-thong",
@@ -1259,35 +1259,35 @@ export const HOCLIEU_LIBRARY_SECTIONS: HocLieuResourceSection[] = [
         fileType: "QUIZ",
         formatBadge: "QUIZ",
         launchMode: "quiz_runtime",
-        thumbnailLabel: "Quiz Tin há»c",
+        thumbnailLabel: "Quiz Tin học",
         thumbnailTheme: "purple",
         priceType: "free",
         accessState: "open",
         isDownloadable: false,
         sortOrder: 4,
         viewer: {
-          title: "Tráº¯c nghiá»‡m Tin há»c 7",
-          description: "Quiz runtime placeholder cho bÃ i kiá»ƒm tra Tin há»c.",
+          title: "Trắc nghiệm Tin học 7",
+          description: "Quiz runtime placeholder cho bài kiểm tra Tin học.",
         },
       },
     ],
   },
 ];
 
-export const DEFAULT_HOCLIEU_SELECTION = {
+export const DEFAULT_LEARNING_RESOURCE_SELECTION = {
   gradeId: "1",
   subjectId: "tieng-anh",
   categoryId: "sach-mem-2",
 };
 
 export function getCategoryChildren(parentId: string) {
-  return HOCLIEU_CATEGORIES.filter((category) => category.parentId === parentId);
+  return LEARNING_RESOURCE_CATEGORIES.filter((category) => category.parentId === parentId);
 }
 
 export function getTopLevelCategories() {
-  return HOCLIEU_CATEGORIES.filter((category) => !category.parentId);
+  return LEARNING_RESOURCE_CATEGORIES.filter((category) => !category.parentId);
 }
 
-export function getHocLieuResourceById(resourceId: string) {
-  return HOCLIEU_LIBRARY_SECTIONS.flatMap((section) => section.resources).find((resource) => resource.id === resourceId);
+export function getLearningResourceResourceById(resourceId: string) {
+  return LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).find((resource) => resource.id === resourceId);
 }

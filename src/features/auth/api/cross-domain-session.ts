@@ -1,21 +1,19 @@
 /**
- * Cross-subdomain session sharing via cookies AND URL token handoff.
+ * Cross-subdomain session sharing via cookies and URL token handoff.
  *
- * localStorage is scoped per origin, so `lms.erg.edu.vn:3001` and
- * `hoclieu.erg.edu.vn:3001` have separate storage.
+ * localStorage is scoped per origin, so LMS/LCMS/CRM/Elearning hosts each have
+ * separate browser storage.
  *
- * Strategy (two-pronged):
- * 1. **Cookie**: Try to set a cookie on the parent domain. This works for most
- *    domains but may fail for compound TLDs like `.edu.vn` due to the Public
- *    Suffix List.
- * 2. **URL handoff**: When the user navigates between portals (e.g. from LMS
- *    to HocLieu via the nav bar), append `?sso_token=<accessToken>` to the URL.
- *    The receiving portal's login page picks up the token and hydrates the session.
+ * Strategy:
+ * 1. Try to set a cookie on the parent domain. This works for most domains but
+ *    may fail for compound TLDs like `.edu.vn` due to the Public Suffix List.
+ * 2. When the user navigates between portals, append `?sso_token=<accessToken>`
+ *    to the URL. The receiving portal login page hydrates the session.
  *
  * Flow:
- *   Login on lms.erg.edu.vn → cookie saved + localStorage saved
- *   Navigate to hoclieu.erg.edu.vn → check cookie → if found, hydrate.
- *   If cookie not found → redirect to login → check URL for sso_token → hydrate.
+ *   Login on lms.erg.edu.vn -> cookie saved + localStorage saved.
+ *   Navigate to another portal -> check cookie -> if found, hydrate.
+ *   If cookie not found -> redirect to login -> check URL for sso_token -> hydrate.
  */
 
 import type { StoredAuthSession } from "@/features/auth/api/auth-token-storage";
