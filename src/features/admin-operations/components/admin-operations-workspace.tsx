@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   DashboardMetricCard,
   DashboardPageShell,
@@ -193,6 +194,7 @@ function AdminOverview({
 }
 
 function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
+  const queryClient = useQueryClient();
   const [units, setUnits] = useState<LmsEducationUnitDTO[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -207,11 +209,17 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
     const timeoutId = window.setTimeout(() => {
       setIsLoading(true);
       setErrorMessage("");
-      void listEducationUnits({
-        keyword: keyword.trim() || undefined,
-        type: typeFilter || undefined,
-        limit: 100,
-      })
+      void queryClient
+        .fetchQuery({
+          queryKey: ["admin-operations", "education-units", keyword, typeFilter],
+          queryFn: () =>
+            listEducationUnits({
+              keyword: keyword.trim() || undefined,
+              type: typeFilter || undefined,
+              limit: 100,
+            }),
+          staleTime: 60_000,
+        })
         .then((response) => {
           if (cancelled) return;
           const items = response.items ?? [];
@@ -259,6 +267,7 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
         website: input.website ?? "",
       });
       setUnits((current) => current.map((unit) => (unit.id === updated.id ? updated : unit)));
+      void queryClient.invalidateQueries({ queryKey: ["admin-operations", "education-units"] });
       setSuccessMessage("Đã lưu thông tin cơ sở giáo dục.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Không lưu được thông tin cơ sở giáo dục.");
@@ -609,6 +618,7 @@ function StudentManagement({
   classes: ClassroomSnapshot[];
   fallbackStudents: typeof classroomStudents;
 }) {
+  const queryClient = useQueryClient();
   const scopeCenterId = managementScope.level === "global" ? "" : managementScope.centerId;
   const scopeClassId = managementScope.level === "class" ? managementScope.classId : "";
   const [keyword, setKeyword] = useState("");
@@ -651,13 +661,19 @@ function StudentManagement({
       setIsLoading(true);
       setErrorMessage("");
 
-      void listLmsStudents({
-        centerId: centerId || undefined,
-        classId: classId || undefined,
-        keyword: keyword.trim() || undefined,
-        status: status || undefined,
-        limit: 100,
-      })
+      void queryClient
+        .fetchQuery({
+          queryKey: ["admin-operations", "students", centerId, classId, keyword, status],
+          queryFn: () =>
+            listLmsStudents({
+              centerId: centerId || undefined,
+              classId: classId || undefined,
+              keyword: keyword.trim() || undefined,
+              status: status || undefined,
+              limit: 100,
+            }),
+          staleTime: 60_000,
+        })
         .then((response) => {
           if (cancelled) return;
           setStudents(response.items ?? []);
@@ -809,6 +825,7 @@ function InternalDocsWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }) {
 }
 
 function HocLieuAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }) {
+  const queryClient = useQueryClient();
   const selectedDocumentType = getInternalDocTypeFromLeafId(activeLeaf.id);
   const defaultFileType = selectedDocumentType === "slides" ? "PPTX" : "PDF";
   const [model, setModel] = useState<HocLieuTaxonomyResponse | null>(null);
@@ -828,8 +845,16 @@ function HocLieuAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }
   useEffect(() => {
     let cancelled = false;
     void Promise.allSettled([
-      loadHocLieuTaxonomies(),
-      listHocLieuResources({ limit: 100 }),
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "hoclieu-legacy", "taxonomies"],
+        queryFn: loadHocLieuTaxonomies,
+        staleTime: 60_000,
+      }),
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "hoclieu-legacy", "resources", 100],
+        queryFn: () => listHocLieuResources({ limit: 100 }),
+        staleTime: 60_000,
+      }),
     ])
       .then(([contentModelResult, resourceListResult]) => {
         if (cancelled) return;
@@ -874,7 +899,11 @@ function HocLieuAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }
   const selectedTypeMeta = INTERNAL_DOCUMENT_TYPES.find((type) => type.id === selectedDocumentType);
 
   async function refreshResources() {
-    const next = await listHocLieuResources({ limit: 100 });
+    const next = await queryClient.fetchQuery({
+      queryKey: ["admin-operations", "hoclieu-legacy", "resources", 100],
+      queryFn: () => listHocLieuResources({ limit: 100 }),
+      staleTime: 60_000,
+    });
     setResources(next.data ?? []);
   }
 
@@ -1056,7 +1085,7 @@ function HocLieuAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }
 
       <DashboardSectionCard
         title="Học liệu đã xuất bản"
-        description="Danh sách này lấy từ API /api/hoclieu/resources, không dùng mock."
+        description="Danh sách này lấy từ API bootstrap học liệu, không dùng mock."
         action={<Badge tone="secondary">{filteredResources.length} tài liệu</Badge>}
       >
         <div className="grid gap-3">

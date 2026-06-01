@@ -8,13 +8,16 @@ import {
   clearTeacherSessionSnapshot,
   hasStoredAuthCredential,
   readTeacherSessionSnapshot,
+  readStoredAuthSession,
+  resolveCurrentPortal,
   setTeacherSessionSnapshot,
   TEACHER_LOCAL_SESSION_KEY,
   TEACHER_TEMP_SESSION_KEY,
+  portalSessionKey,
   type StoredAuthSession,
   type StoredAuthIdentity,
 } from "@/features/auth/api/auth-token-storage";
-import { clearCrossDomainSession, hydrateSessionFromCookie, saveCrossDomainSession } from "@/features/auth/api/cross-domain-session";
+import { clearCrossDomainSession } from "@/features/auth/api/cross-domain-session";
 import { tr } from "@/features/i18n";
 import { getApiBase } from "@/lib/platform";
 
@@ -41,13 +44,6 @@ const defaultAccounts: TeacherAccount[] = [];
 
 function canUseStorage() {
   return typeof window !== "undefined";
-}
-
-let ssoHydrationDone = false;
-function hydrateSessionFromCookieOnce() {
-  if (ssoHydrationDone) return;
-  ssoHydrationDone = true;
-  hydrateSessionFromCookie(TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY);
 }
 
 function parseJson<T>(value: string | null, fallback: T) {
@@ -77,16 +73,23 @@ export function listAccounts() {
   return stored;
 }
 
-function readSession() {
+function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
   if (!canUseStorage()) return null;
+  if (portal) return readStoredAuthSession(portal) as AccountSession | null;
 
   // Try SSO hydration first — if another portal set a cookie or passed an sso_token,
   // this writes the session into localStorage before we read it.
-  hydrateSessionFromCookieOnce();
-
   const candidates = [
-    parseJson<AccountSession | null>(window.localStorage.getItem(TEACHER_LOCAL_SESSION_KEY), null),
-    parseJson<AccountSession | null>(window.sessionStorage.getItem(TEACHER_TEMP_SESSION_KEY), null),
+    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")), null),
+    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
+    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")), null),
+    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
+    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")), null),
+    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
+    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
+    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
+    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "hoclieu")), null),
+    parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "hoclieu")), null),
     readTeacherSessionSnapshot() as AccountSession | null,
   ];
   const validSession = candidates.find(hasStoredAuthCredential);
@@ -102,16 +105,16 @@ function writeSession(session: AccountSession) {
   setTeacherSessionSnapshot(session);
   if (!canUseStorage()) return;
 
+  const portal = session.portal && session.portal !== "elearning" ? session.portal : "lms";
+  const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
+  const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
   if (session.rememberMe) {
-    window.localStorage.setItem(TEACHER_LOCAL_SESSION_KEY, JSON.stringify(session));
-    window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
+    window.localStorage.setItem(localKey, JSON.stringify(session));
+    window.sessionStorage.removeItem(tempKey);
   } else {
-    window.sessionStorage.setItem(TEACHER_TEMP_SESSION_KEY, JSON.stringify(session));
-    window.localStorage.removeItem(TEACHER_LOCAL_SESSION_KEY);
+    window.sessionStorage.setItem(tempKey, JSON.stringify(session));
+    window.localStorage.removeItem(localKey);
   }
-
-  // Mirror to cross-domain cookie for SSO between lms/hoclieu subdomains
-  saveCrossDomainSession(session);
 }
 
 function notifyAuthAccountChanged() {
@@ -125,6 +128,10 @@ function clearSession() {
   if (!canUseStorage()) return;
   window.localStorage.removeItem(TEACHER_LOCAL_SESSION_KEY);
   window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
+  for (const portal of ["admin", "crm", "lms", "lcms", "hoclieu"] as const) {
+    window.localStorage.removeItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
+    window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
+  }
 }
 
 function saveAccount(nextAccount: TeacherAccount) {
@@ -142,8 +149,8 @@ export function saveCurrentAccount(nextAccount: TeacherAccount) {
   return saved;
 }
 
-export function getCurrentAccount() {
-  const session = readSession();
+export function getCurrentAccount(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
+  const session = readSession(portal);
   if (!session) return null;
   if (requiresServerSession() && !session.accessToken) return null;
 
@@ -154,8 +161,8 @@ function requiresServerSession() {
   return Boolean(getApiBase());
 }
 
-export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe: boolean) {
-  const previousSession = readSession();
+export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe: boolean, portal: StoredAuthSession["portal"] = "lms") {
+  const previousSession = readSession(portal);
   const isNewAuthSession = Boolean(result.accessToken || result.refreshToken);
   const accessToken = result.accessToken ?? previousSession?.accessToken;
   if (requiresServerSession() && !accessToken) {
@@ -165,7 +172,7 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
   const jwtClaims = accessToken ? decodeJwtPayload(accessToken) : null;
   const jwtPortals = portalsFromJwtClaims(jwtClaims);
   const jwtPermissions = permissionsFromJwtClaims(jwtClaims);
-  const portals = result.portals ?? jwtPortals ?? (isNewAuthSession ? ["lms", "hoclieu"] : previousSession?.portals ?? ["lms", "hoclieu"]);
+  const portals = result.portals ?? jwtPortals ?? (isNewAuthSession ? [portal] : previousSession?.portals ?? [portal]);
   const permissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
   const account: TeacherAccount = {
     ...result.account,
@@ -185,7 +192,7 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
     refreshToken: result.refreshToken ?? previousSession?.refreshToken,
     expiresAt: result.expiresAt ?? previousSession?.expiresAt,
     permissions,
-    portal: primaryPortalFromPortals(portals),
+    portal,
     portals,
   });
   notifyAuthAccountChanged();
@@ -193,27 +200,23 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
   return account;
 }
 
-function primaryPortalFromPortals(portals: StoredAuthSession["portals"]): StoredAuthSession["portal"] | undefined {
-  if (!portals?.length) return undefined;
-  if (portals.includes("hoclieu")) return "hoclieu";
-  if (portals.includes("lms")) return "lms";
-  if (portals.includes("elearning")) return "elearning";
-  if (portals.includes("*")) return "lms";
-  return undefined;
-}
-
 function accountFromSession(session: AccountSession): TeacherAccount | null {
   const claims = session.accessToken ? decodeJwtPayload(session.accessToken) : null;
   const email = (typeof claims?.email === "string" ? claims.email : "") || (typeof claims?.sub === "string" ? claims.sub : "");
 
-  if (!email && !session.accountId) return null;
+  if (!email) return null;
 
   const roles = Array.isArray(claims?.roles) ? claims.roles.filter((role): role is string => typeof role === "string") : [];
   const role = mapRoleFromRoles(roles);
+  const fullName =
+    (typeof claims?.fullName === "string" ? claims.fullName : "") ||
+    (typeof claims?.full_name === "string" ? claims.full_name : "") ||
+    (typeof claims?.name === "string" ? claims.name : "") ||
+    email;
 
   return {
-    id: session.accountId,
-    fullName: role === "admin" ? "Super Administrator" : "ERG Teacher",
+    id: session.accountId || email,
+    fullName,
     email,
     password: "",
     role,
@@ -240,8 +243,8 @@ function portalsFromJwtClaims(payload: JwtPayload | null): StoredAuthSession["po
   const portal = typeof payload?.portal === "string" ? [payload.portal] : [];
   const normalized = [...portals, ...portal]
     .map((item) => (typeof item === "string" ? item.trim().toLowerCase() : ""))
-    .filter((item): item is "hoclieu" | "lms" | "elearning" | "*" =>
-      item === "hoclieu" || item === "lms" || item === "elearning" || item === "*",
+    .filter((item): item is "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*" =>
+      item === "admin" || item === "crm" || item === "hoclieu" || item === "lcms" || item === "lms" || item === "elearning" || item === "*",
     );
 
   return normalized.length ? Array.from(new Set(normalized)) : undefined;
@@ -258,6 +261,9 @@ function permissionsFromJwtClaims(payload: JwtPayload | null): StoredAuthSession
 
 type JwtPayload = {
   email?: unknown;
+  fullName?: unknown;
+  full_name?: unknown;
+  name?: unknown;
   sub?: unknown;
   permissions?: unknown;
   portal?: unknown;

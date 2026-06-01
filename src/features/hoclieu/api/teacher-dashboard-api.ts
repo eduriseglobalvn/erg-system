@@ -1,28 +1,14 @@
 import { classroomSchools } from "@/features/classroom/api/mock-classroom-data";
 import { listHocLieuSubjects, type HocLieuTaxonomyOption } from "@/features/admin-operations/api/hoclieu-authoring-api";
-import { listEducationUnits, type LmsEducationUnitDTO } from "@/features/dashboard/api/lms-dashboard-api";
+import { listManageableUnits, type LmsEducationUnitDTO } from "@/features/dashboard/api/lms-dashboard-api";
 import type {
   HocLieuManagedSchool,
-  HocLieuTeacherDashboardNodeKind,
-  HocLieuTeacherDashboardSourceKind,
   HocLieuTeacherDashboardSubject,
   HocLieuTeacherProgressDetail,
-  HocLieuTeacherProgressEventType,
   HocLieuTeacherRecentLecture,
   HocLieuTeacherSubjectTree,
 } from "@/features/hoclieu/types/teacher-dashboard-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
-
-export type TrackHocLieuTeacherProgressEventInput = {
-  schoolId: string;
-  academicYear: string;
-  subjectId: string;
-  nodeId: string;
-  nodeKind: HocLieuTeacherDashboardNodeKind | HocLieuTeacherDashboardSourceKind;
-  eventType: HocLieuTeacherProgressEventType;
-  resourceId?: string;
-  occurredAt?: string;
-};
 
 const subjectProgressCache = new Map<string, Promise<HocLieuTeacherProgressDetail>>();
 const subjectTreeCache = new Map<string, Promise<HocLieuTeacherSubjectTree>>();
@@ -73,8 +59,8 @@ export async function listHocLieuManagedSchools() {
   }
 
   try {
-    const unitsResult = await listEducationUnits({ limit: 100 });
-    return buildManagedSchoolsFromUnits(unitsResult.items);
+    const unitsResult = await listManageableUnits();
+    return buildManagedSchoolsFromUnits(unitsResult);
   } catch {
     return fallbackManagedSchools();
   }
@@ -154,13 +140,6 @@ export function loadHocLieuTeacherProgress(input: { subjectId: string; schoolId:
 
   subjectProgressCache.set(cacheKey, request);
   return request;
-}
-
-export function trackHocLieuTeacherProgressEvent(input: TrackHocLieuTeacherProgressEventInput) {
-  return apiRequest<{ id: string } | void>("/api/hoclieu/teacher/progress-events", {
-    method: "POST",
-    body: JSON.stringify(input),
-  });
 }
 
 export function getCurrentAcademicYear(now = new Date()) {

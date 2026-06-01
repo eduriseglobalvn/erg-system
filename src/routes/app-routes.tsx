@@ -2,11 +2,14 @@ import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 
 import {
+  CRM_PORTAL_HOST,
+  CRM_PORTAL_HOSTS,
   ELEARNING_PORTAL_HOST,
   ELEARNING_PORTAL_HOSTS,
-  HOCLIEU_PORTAL_HOST,
   HOCLIEU_PORTAL_HOSTS,
   isPortalHost,
+  LCMS_PORTAL_HOST,
+  LCMS_PORTAL_HOSTS,
   LMS_PORTAL_HOST,
   shouldRedirectLocalPortal,
 } from "@/config/portal-urls";
@@ -18,14 +21,29 @@ const DashboardPage = lazy(() =>
     default: module.DashboardPage,
   })),
 );
+const CrmPage = lazy(() =>
+  import("@/pages/crm-page").then((module) => ({
+    default: module.CrmPage,
+  })),
+);
+const LcmsPage = lazy(() =>
+  import("@/features/dashboard").then((module) => ({
+    default: module.LcmsPortalShell,
+  })),
+);
 const ProfilePage = lazy(() =>
   import("@/pages/profile-page").then((module) => ({
     default: module.ProfilePage,
   })),
 );
-const HomePage = lazy(() =>
-  import("@/pages/home-page").then((module) => ({
-    default: module.HomePage,
+const AccountPage = lazy(() =>
+  import("@/pages/account-page").then((module) => ({
+    default: module.AccountPage,
+  })),
+);
+const LoginLogsPage = lazy(() =>
+  import("@/pages/login-logs-page").then((module) => ({
+    default: module.LoginLogsPage,
   })),
 );
 const StudentPage = lazy(() =>
@@ -98,14 +116,12 @@ const AccessDeniedPage = lazy(() =>
     default: module.AccessDeniedPage,
   })),
 );
-const SsoHandoffPage = lazy(() =>
-  import("@/features/auth/components/sso-handoff-page").then((module) => ({
-    default: module.SsoHandoffPage,
-  })),
-);
-
 function isHocLieuPortalHost() {
   return isPortalHost(HOCLIEU_PORTAL_HOSTS);
+}
+
+function isLcmsPortalHost() {
+  return isPortalHost(LCMS_PORTAL_HOSTS);
 }
 
 function HocLieuRouteGroup({ includeIndex = false }: { includeIndex?: boolean } = {}) {
@@ -192,6 +208,8 @@ function PortalHostRedirect({
 
 export function AppRoutes() {
   const isHocLieuPortal = isHocLieuPortalHost();
+  const isLcmsPortal = isLcmsPortalHost();
+  const isCrmPortal = isPortalHost(CRM_PORTAL_HOSTS);
   const isLmsPortal = isPortalHost(LMS_PORTAL_HOST);
   const isElearningPortal = isPortalHost(ELEARNING_PORTAL_HOSTS);
 
@@ -202,14 +220,87 @@ export function AppRoutes() {
           {isHocLieuPortal ? (
             <>
               <Route path="access-denied" element={<AccessDeniedPage />} />
-              <Route path="sso-handoff" element={<SsoHandoffPage />} />
               {HocLieuRouteGroup({ includeIndex: true })}
+            </>
+          ) : isLcmsPortal ? (
+            <>
+              <Route path="access-denied" element={<AccessDeniedPage />} />
+              <Route path="login" element={<PortalLoginPage portal="lcms" />} />
+              <Route
+                index
+                element={
+                  <PortalAuthGate portal="lcms">
+                    <LcmsPage />
+                  </PortalAuthGate>
+                }
+              />
+              {[
+                "schools",
+                "students",
+                "import",
+                "users",
+                "questions",
+                "quiz-bank",
+                "quiz-editor",
+                "resources",
+                "legal",
+                "settings",
+              ].map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    <PortalAuthGate portal="lcms">
+                      <LcmsPage />
+                    </PortalAuthGate>
+                  }
+                />
+              ))}
+              <Route path="kho-hoc-lieu/*" element={<Navigate to="/resources" replace />} />
+              <Route path="hoclieu/*" element={<Navigate to="/resources" replace />} />
+            </>
+          ) : isCrmPortal ? (
+            <>
+              <Route path="access-denied" element={<AccessDeniedPage />} />
+              <Route path="login" element={<PortalLoginPage portal="crm" />} />
+              <Route
+                index
+                element={
+                  <PortalAuthGate portal="crm">
+                    <CrmPage />
+                  </PortalAuthGate>
+                }
+              />
+              {[
+                "seo",
+                "seo/schools",
+                "seo/opportunities",
+                "seo/pnl",
+                "seo/follow-ups",
+                "seo/handover",
+              ].map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    <PortalAuthGate portal="crm">
+                      <CrmPage />
+                    </PortalAuthGate>
+                  }
+                />
+              ))}
+              {["schools", "students", "import", "users", "questions", "quiz-bank", "quiz-editor", "resources", "legal", "settings"].map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} preservePathAndSearch />}
+                />
+              ))}
             </>
           ) : isLmsPortal ? (
             <>
               <Route path="access-denied" element={<AccessDeniedPage />} />
               <Route path="login" element={<PortalLoginPage portal="lms" />} />
-              <Route path="sso-handoff" element={<SsoHandoffPage />} />
               <Route
                 index
                 element={
@@ -218,6 +309,18 @@ export function AppRoutes() {
                   </PortalAuthGate>
                 }
               />
+              {["homework", "score", "attendance", "calendar", "class-log", "students", "resources", "reports"].map((path) => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={
+                    <PortalAuthGate portal="lms">
+                      <DashboardPage />
+                    </PortalAuthGate>
+                  }
+                />
+              ))}
+              <Route path="teaching-schedule" element={<Navigate to="/calendar" replace />} />
               <Route
                 path="profile"
                 element={
@@ -226,8 +329,26 @@ export function AppRoutes() {
                   </AuthenticatedAccountGate>
                 }
               />
+              <Route
+                path="account"
+                element={
+                  <PortalAuthGate portal="lms">
+                    <AccountPage />
+                  </PortalAuthGate>
+                }
+              />
+              <Route
+                path="account/login-logs"
+                element={
+                  <PortalAuthGate portal="lms">
+                    <LoginLogsPage />
+                  </PortalAuthGate>
+                }
+              />
               <Route path="student" element={<PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />} />
-              <Route path="dashboard" element={<Navigate to="/" replace />} />
+              <Route path="dashboard" element={<Navigate to="/homework" replace />} />
+              <Route path="kho-hoc-lieu/*" element={<Navigate to="/resources" replace />} />
+              <Route path="hoclieu/*" element={<Navigate to="/resources" replace />} />
             </>
           ) : isElearningPortal ? (
             <>
@@ -245,20 +366,21 @@ export function AppRoutes() {
             </>
           ) : (
             <>
-              <Route path="/" element={<HomePage />} />
               <Route path="/access-denied" element={<AccessDeniedPage />} />
               <Route path="/student" element={<PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />} />
+              <Route path="/admin" element={<PortalHostRedirect targetHost={CRM_PORTAL_HOST} />} />
+              <Route path="/crm" element={<PortalHostRedirect targetHost={CRM_PORTAL_HOST} />} />
               <Route path="/dashboard" element={<PortalHostRedirect targetHost={LMS_PORTAL_HOST} />} />
               <Route path="/cong-khai" element={<PublicDisclosurePage />} />
               <Route path="/cong-khai/viewer/:documentId" element={<PublicDisclosurePage />} />
               <Route path="/public-disclosure" element={<PublicDisclosureAdminPage />} />
               <Route path="/question-types" element={<QuestionTypeDemoPage />} />
-              <Route path="/kho-hoc-lieu/*" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
-              <Route path="/chuong-trinh/*" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
-              <Route path="/cong-dong" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
-              <Route path="/portfolio" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
-              <Route path="/quizzes" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} preservePathAndSearch />} />
-              <Route path="/hoclieu" element={<PortalHostRedirect targetHost={HOCLIEU_PORTAL_HOST} targetPath="/" />} />
+              <Route path="/kho-hoc-lieu/*" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/chuong-trinh/*" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/cong-dong" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/portfolio" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/quizzes" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
+              <Route path="/hoclieu" element={<PortalHostRedirect targetHost={LCMS_PORTAL_HOST} targetPath="/resources" />} />
               {HocLieuRouteGroup()}
             </>
           )}

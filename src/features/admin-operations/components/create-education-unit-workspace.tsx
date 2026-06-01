@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Building2, CheckCircle2, MapPin, School } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -71,15 +72,16 @@ export function CreateEducationUnitDialog({
   const [email, setEmail] = useState("");
   const [website, setWebsite] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const createUnitMutation = useMutation({
+    mutationFn: createEducationUnit,
+  });
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrorMessage(null);
-    setIsSubmitting(true);
 
     try {
-      const created = await createEducationUnit({
+      const created = await createUnitMutation.mutateAsync({
         address: address.trim(),
         avatarUrl: avatarUrl.trim(),
         code: unitCode.trim() || createUnitCode(unitName),
@@ -102,8 +104,6 @@ export function CreateEducationUnitDialog({
       onOpenChange(false);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Không thể tạo cơ sở giáo dục.");
-    } finally {
-      setIsSubmitting(false);
     }
   }
 
@@ -208,7 +208,7 @@ export function CreateEducationUnitDialog({
                 Hủy
               </Button>
             </DialogClose>
-            <Button type="submit" size="lg" disabled={!unitName.trim() || isSubmitting}>
+            <Button type="submit" size="lg" disabled={!unitName.trim() || createUnitMutation.isPending}>
               Tạo cơ sở
             </Button>
           </DialogFooter>

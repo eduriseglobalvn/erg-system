@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
-import { getDocument, GlobalWorkerOptions } from "pdfjs-dist";
-import pdfWorkerUrl from "pdfjs-dist/build/pdf.worker.mjs?url";
 import {
   ArrowLeft,
   ChevronRight,
@@ -47,7 +45,24 @@ import {
   type HocLieuViewerUnit,
 } from "@/features/hoclieu/api/library-data";
 
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+type PdfJsModule = typeof import("pdfjs-dist");
+type PdfLoadingTask = ReturnType<PdfJsModule["getDocument"]>;
+
+let pdfJsPromise: Promise<PdfJsModule> | null = null;
+
+async function loadPdfJs() {
+  if (!pdfJsPromise) {
+    pdfJsPromise = Promise.all([
+      import("pdfjs-dist"),
+      import("pdfjs-dist/build/pdf.worker.mjs?url"),
+    ]).then(([pdfJs, worker]) => {
+      pdfJs.GlobalWorkerOptions.workerSrc = worker.default;
+      return pdfJs;
+    });
+  }
+
+  return pdfJsPromise;
+}
 
 const categoryIcons: Record<HocLieuCategory["icon"], LucideIcon> = {
   book: FileText,
@@ -339,11 +354,11 @@ function ResourceCard({ resource, onOpen }: { resource: HocLieuResource; onOpen:
     <button
       type="button"
       onClick={() => onOpen(resource)}
-      className="group flex min-h-[326px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left shadow-[0_14px_30px_rgba(15,23,42,0.08)] transition hover:-translate-y-0.5 hover:border-[var(--erg-blue)]/35 hover:shadow-[0_18px_42px_rgba(0,0,139,0.14)]"
+      className="group flex min-h-[326px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left hover:border-[var(--erg-blue)]/35"
     >
       <ResourceThumbnail resource={resource} />
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-3 min-h-16 text-base font-black leading-6 text-slate-950 transition group-hover:text-[var(--erg-blue)]">
+        <h3 className="line-clamp-3 min-h-16 text-base font-black leading-6 text-slate-950 group-hover:text-[var(--erg-blue)]">
           {displayText(resource.title)}
         </h3>
         <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{displayText(resource.subtitle)}</p>
@@ -447,9 +462,9 @@ function PdfLessonBankView({
           Hub
         </span>
       </button>
-      <main className="relative mx-auto my-8 flex h-[calc(100vh-64px)] w-[min(1350px,calc(100vw-120px))] flex-col overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-950/25">
+      <main className="relative mx-auto my-8 flex h-[calc(100vh-64px)] w-[min(1350px,calc(100vw-120px))] flex-col overflow-hidden rounded-xl bg-white shadow-md">
         <header className={`relative min-h-[200px] shrink-0 overflow-hidden bg-gradient-to-r ${theme.panel} px-7 py-7 text-white`}>
-          <div className="absolute right-10 top-5 hidden h-36 w-48 rounded-lg border-4 border-white/70 bg-white/25 shadow-2xl shadow-slate-950/20 rotate-3 lg:block" />
+          <div className="absolute right-10 top-5 hidden h-36 w-48 rounded-lg border-4 border-white/70 bg-white/25 rotate-3 lg:block" />
           <div className="absolute right-6 top-9 hidden rounded-2xl bg-white px-4 py-2 text-2xl font-black text-orange-500 shadow-xl lg:block">
             Global
             <br />
@@ -500,10 +515,11 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
 
     const viewerContainer = container;
     let isCancelled = false;
-    let loadingTask: ReturnType<typeof getDocument> | null = null;
+    let loadingTask: PdfLoadingTask | null = null;
 
     async function createLoadingTask() {
       const source = viewerSrc.split("#")[0];
+      const pdfJs = await loadPdfJs();
 
       if (source.endsWith(".b64")) {
         const response = await fetch(source, { cache: "force-cache" });
@@ -512,7 +528,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
           throw new Error("Cannot load encoded PDF asset");
         }
 
-        return getDocument({ data: base64ToUint8Array(await response.text()) });
+        return pdfJs.getDocument({ data: base64ToUint8Array(await response.text()) });
       }
 
       const token = getStoredAccessToken();
@@ -525,7 +541,7 @@ function PdfFullScreenPreview({ resource, onClose }: { resource: HocLieuResource
         throw new Error("Cannot load protected PDF asset");
       }
 
-      return getDocument({ data: new Uint8Array(await response.arrayBuffer()) });
+      return pdfJs.getDocument({ data: new Uint8Array(await response.arrayBuffer()) });
     }
 
     async function renderPdf() {
@@ -751,7 +767,7 @@ function LectureUnitCard({
       <button
         type="button"
         onClick={() => onOpenLesson(unitTitle)}
-        className={`flex min-h-14 w-full items-center rounded-lg px-7 text-left text-2xl font-black leading-tight shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${theme.unit}`}
+        className={`flex min-h-14 w-full items-center rounded-lg px-7 text-left text-2xl font-black leading-tight ${theme.unit}`}
       >
         {unitTitle}
       </button>
@@ -819,9 +835,9 @@ function LectureBankView({
           Hub
         </span>
       </button>
-      <main className="relative mx-auto my-8 w-[min(1350px,calc(100vw-120px))] overflow-hidden rounded-xl bg-white shadow-2xl shadow-slate-950/25">
+      <main className="relative mx-auto my-8 w-[min(1350px,calc(100vw-120px))] overflow-hidden rounded-xl bg-white shadow-md">
         <header className={`relative min-h-[200px] overflow-hidden bg-gradient-to-r ${theme.panel} px-7 py-7 text-white`}>
-          <div className="absolute right-10 top-5 hidden h-36 w-48 rounded-lg border-4 border-white/70 bg-white/25 shadow-2xl shadow-slate-950/20 rotate-3 lg:block" />
+          <div className="absolute right-10 top-5 hidden h-36 w-48 rounded-lg border-4 border-white/70 bg-white/25 rotate-3 lg:block" />
           <div className="absolute right-6 top-9 hidden rounded-2xl bg-white px-4 py-2 text-2xl font-black text-orange-500 shadow-xl lg:block">
             Global
             <br />
@@ -829,7 +845,7 @@ function LectureBankView({
           </div>
           <button
             type="button"
-            className="absolute bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--erg-blue)] shadow-lg transition hover:-translate-y-0.5"
+            className="absolute bottom-6 right-6 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--erg-blue)] shadow-sm"
             aria-label="Tải bài giảng"
           >
             <Download className="h-5 w-5" />
@@ -982,8 +998,8 @@ function ResourceViewerModal({ resource, onClose }: { resource: HocLieuResource;
   }
 
   return (
-    <div className="fixed inset-0 z-[220] overflow-y-auto bg-slate-950/55 p-4 backdrop-blur-sm">
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-[24px] bg-slate-50 shadow-2xl">
+    <div className="fixed inset-0 z-[220] overflow-y-auto bg-slate-950/55 p-4">
+      <div className="mx-auto max-w-6xl overflow-hidden rounded-[24px] bg-slate-50 shadow-lg">
         <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
           <button
             type="button"

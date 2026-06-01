@@ -9,7 +9,7 @@ import type {
 import { cn } from "@/lib/utils";
 
 export const inputClassName =
-  "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/80 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500";
+  "flex h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200/80 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500";
 
 type CardProps = HTMLAttributes<HTMLDivElement>;
 
@@ -17,7 +17,7 @@ export function Card({ className, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-[20px] border border-slate-200/90 bg-white shadow-[0_16px_42px_-34px_rgba(15,23,42,0.38)]",
+        "rounded-[20px] border border-slate-200/90 bg-white",
         className,
       )}
       {...props}
@@ -126,7 +126,7 @@ export function Button({
     <button
       type={type}
       className={cn(
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium shadow-sm transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 disabled:pointer-events-none disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-200 disabled:pointer-events-none disabled:opacity-50",
         variantClass,
         sizeClass,
         className,
@@ -160,7 +160,7 @@ export function ProgressBar({
   return (
     <div className={cn("h-2.5 overflow-hidden rounded-full bg-slate-200", className)}>
       <div
-        className={cn("h-full rounded-full bg-slate-900 transition-[width]", indicatorClassName)}
+        className={cn("h-full rounded-full bg-slate-900", indicatorClassName)}
         style={{ width: `${Math.max(0, Math.min(100, value))}%` }}
       />
     </div>
@@ -189,14 +189,14 @@ export function Switch({
       disabled={disabled}
       onClick={() => onCheckedChange(!checked)}
       className={cn(
-        "relative inline-flex h-7 w-12 items-center rounded-full border transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50",
+        "relative inline-flex h-7 w-12 items-center rounded-full border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-200 disabled:cursor-not-allowed disabled:opacity-50",
         checked ? "border-slate-900 bg-slate-900" : "border-slate-200 bg-slate-200",
         className,
       )}
     >
       <span
         className={cn(
-          "block h-5 w-5 rounded-full bg-white shadow-sm transition-transform",
+          "block h-5 w-5 rounded-full bg-white",
           checked ? "translate-x-6" : "translate-x-1",
         )}
       />

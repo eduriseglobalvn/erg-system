@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
@@ -132,27 +133,21 @@ export function StudentDashboardWorkspace() {
         copy.navItems.find((item) => item.key === activePage)?.label ??
         copy.accountTitle;
 
-  useEffect(() => {
-    let isMounted = true;
+  const studentDashboardQuery = useQuery({
+    queryKey: ["student-dashboard", account?.id ?? "anonymous"],
+    queryFn: loadStudentDashboardData,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-    loadStudentDashboardData()
-      .then((data) => {
-        if (!isMounted) return;
+  useEffect(() => {
+    const data = studentDashboardQuery.data;
+    if (!data) return;
         setDashboardProfile(data.profile);
         setAssignments(data.assignments);
         setTeacherAnnouncements(data.teacherAnnouncements.length ? data.teacherAnnouncements : studentTeacherAnnouncements);
-      })
-      .catch(() => {
-        if (!isMounted) return;
-        setDashboardProfile(studentDashboardProfile);
-        setAssignments(studentAssignments);
-        setTeacherAnnouncements(studentTeacherAnnouncements);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [account?.id]);
+  }, [studentDashboardQuery.data]);
 
   useEffect(() => {
     if (viewState.type === "quiz") {

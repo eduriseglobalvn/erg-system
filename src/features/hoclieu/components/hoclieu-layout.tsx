@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState, type ImgHTMLAttributes, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
   Bell,
@@ -33,8 +34,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ERG_ASSETS } from "@/config/seo";
 import { classroomSchools } from "@/features/classroom/api/mock-classroom-data";
-import { listEducationUnits } from "@/features/dashboard/api/lms-dashboard-api";
+import { listManageableUnits } from "@/features/dashboard/api/lms-dashboard-api";
 import { TeacherAuthDialog } from "@/features/auth/components/teacher-auth-dialog";
+import { logoutAccount } from "@/features/auth/api/auth-storage";
+import { logoutStudentSession } from "@/features/auth/api/student-auth-storage";
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { buildRedirectPath } from "@/features/auth/utils/auth-redirects";
 import {
@@ -48,6 +51,7 @@ import {
 import { HocLieuLink as Link } from "@/features/hoclieu/components/hoclieu-link";
 import { getCurrentAcademicYear } from "@/features/hoclieu/api/teacher-dashboard-api";
 import { HocLieuDashboardScopeProvider } from "@/features/hoclieu/hooks/use-hoclieu-dashboard-scope";
+import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 
 const quickNavItems = QUICK_ACCESS_NAV.filter((item) => item.href !== "/chuong-trinh");
 
@@ -296,41 +300,28 @@ function useManagedSchools() {
       })),
     [],
   );
-  const [schools, setSchools] = useState<ManagedSchoolOption[]>(fallbackSchools);
 
-  useEffect(() => {
-    let cancelled = false;
+  const schoolsQuery = useQuery({
+    queryKey: ["hoclieu", "managed-schools"],
+    queryFn: async () => {
+      const unitsResult = await listManageableUnits();
 
-    async function hydrate() {
-      try {
-        const unitsResult = await listEducationUnits({ limit: 100 });
+      const nextSchools = unitsResult
+        .filter((unit) => unit.type === "school")
+        .map((unit) => ({
+          id: unit.id,
+          name: unit.name,
+          principal: unit.description?.trim() || "Đang cập nhật",
+        }));
 
-        if (cancelled) return;
+      return nextSchools.length ? nextSchools : fallbackSchools;
+    },
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-        const nextSchools = unitsResult.items
-          .filter((unit) => unit.type !== "system")
-          .map((unit) => ({
-            id: unit.id,
-            name: unit.name,
-            principal: unit.description?.trim() || "Đang cập nhật",
-          }));
-
-        setSchools(nextSchools.length ? nextSchools : fallbackSchools);
-      } catch {
-        if (!cancelled) {
-          setSchools(fallbackSchools);
-        }
-      }
-    }
-
-    void hydrate();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [fallbackSchools]);
-
-  return schools;
+  return schoolsQuery.data ?? [];
 }
 
 function ManagedSchoolSwitcher({
@@ -354,8 +345,8 @@ function ManagedSchoolSwitcher({
         <button
           type="button"
           aria-label="Chọn trường quản lý"
-          className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white text-left transition hover:bg-slate-50 ${
-            compact ? "h-10 px-3" : "h-11 px-4 shadow-sm"
+          className={`flex items-center gap-3 rounded-full border border-slate-200 bg-white text-left hover:bg-slate-50 ${
+            compact ? "h-10 px-3" : "h-11 px-4"
           }`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-[#00008b]">
@@ -368,7 +359,7 @@ function ManagedSchoolSwitcher({
           <ChevronDown className="h-4 w-4 text-slate-400" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 rounded-[22px] border border-slate-200 bg-white p-2 shadow-2xl">
+      <DropdownMenuContent align="end" className="w-80 rounded-[22px] border border-slate-200 bg-white p-2 shadow-sm">
         <DropdownMenuLabel className="p-2 font-normal">
           <div className="rounded-2xl bg-slate-50 p-3">
             <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">Danh sách trường</p>
@@ -409,7 +400,7 @@ function HeaderSearchButton({ compact = false }: { compact?: boolean }) {
       className={
         compact
           ? "flex h-10 w-10 items-center justify-center rounded-full text-[var(--erg-blue)] hover:bg-slate-100"
-          : "hidden h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#00008b] transition-all hover:bg-slate-100 active:scale-90 xl:flex"
+          : "hidden h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#00008b] hover:bg-slate-100 xl:flex"
       }
     >
       <Search className="h-5 w-5" />
@@ -443,6 +434,7 @@ function HocLieuUserMenu() {
 
   function signOut() {
     auth.actions.signOut();
+    logoutStudentSession();
     navigate("/login", { replace: true });
   }
 
@@ -452,7 +444,7 @@ function HocLieuUserMenu() {
       <button
         type="button"
         onClick={() => navigate(`/login?redirect=${encodeURIComponent(redirect)}`)}
-        className="flex h-10 items-center rounded-full border border-[var(--erg-blue)]/20 bg-white px-4 text-xs font-black uppercase tracking-[0.12em] text-[var(--erg-blue)] transition hover:bg-blue-50"
+        className="flex h-10 items-center rounded-full border border-[var(--erg-blue)]/20 bg-white px-4 text-xs font-black uppercase tracking-[0.12em] text-[var(--erg-blue)] hover:bg-blue-50"
       >
         Đăng nhập
       </button>
@@ -465,7 +457,7 @@ function HocLieuUserMenu() {
         <button
           type="button"
           aria-label="Mở menu tài khoản"
-          className="relative flex h-10 w-10 items-center justify-center rounded-full text-left transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full text-left hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100"
         >
           <Avatar className="h-8 w-8 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm">
             <AvatarImage src={account.avatarUrl || ""} alt={displayName} />
@@ -476,7 +468,7 @@ function HocLieuUserMenu() {
           <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2 border-white bg-emerald-500" />
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-[22px] border border-slate-200 bg-white p-2 shadow-2xl">
+      <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-[22px] border border-slate-200 bg-white p-2 shadow-sm">
         <DropdownMenuLabel className="p-2 font-normal">
           <div className="flex min-w-0 items-center gap-3 rounded-2xl bg-slate-50 p-3">
             <Avatar className="h-12 w-12 overflow-hidden rounded-xl border border-white shadow-sm">
@@ -546,6 +538,7 @@ function InstagramIcon({ className }: { className?: string }) {
 
 function HocLieuPageLayout({ children }: { children: ReactNode }) {
   const { pathname } = useLocation();
+  const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
@@ -569,6 +562,26 @@ function HocLieuPageLayout({ children }: { children: ReactNode }) {
     if (!managedSchools.length) return;
     setSelectedSchoolId((current) => (managedSchools.some((school) => school.id === current) ? current : managedSchools[0].id));
   }, [managedSchools]);
+
+  useEffect(() => {
+    function redirectToLogin() {
+      logoutAccount();
+      logoutStudentSession();
+
+      if (location.pathname === "/login") return;
+
+      const redirect = buildRedirectPath(location.pathname, location.search, location.hash);
+      navigate(`/login?redirect=${encodeURIComponent(redirect)}`, { replace: true });
+    }
+
+    window.addEventListener(AUTH_SESSION_INVALID_EVENT, redirectToLogin);
+    window.addEventListener(AUTH_SESSION_REPLACED_EVENT, redirectToLogin);
+
+    return () => {
+      window.removeEventListener(AUTH_SESSION_INVALID_EVENT, redirectToLogin);
+      window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, redirectToLogin);
+    };
+  }, [location.hash, location.pathname, location.search, navigate]);
 
   const dashboardScope = useMemo(
     () => ({

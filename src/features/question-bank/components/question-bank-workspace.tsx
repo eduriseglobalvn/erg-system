@@ -1,6 +1,7 @@
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import { useQuery } from "@tanstack/react-query";
 
 import {
   DashboardPageShell,
@@ -62,11 +63,18 @@ export function QuestionBankWorkspace({
   const [autoCount, setAutoCount] = useState(10);
   const deferredSearchValue = useDeferredValue(searchValue);
 
-  useEffect(() => {
-    let isMounted = true;
+  const questionBankQuery = useQuery({
+    queryKey: ["question-bank", "workspace"],
+    queryFn: loadQuestionBankData,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-    loadQuestionBankData().then((data) => {
-      if (!isMounted) return;
+  useEffect(() => {
+    const data = questionBankQuery.data;
+    if (!data) return;
+
       const nextSubjects = data.subjects.length ? data.subjects : questionBankSubjects;
       const nextSubject = nextSubjects.find((subject) => subject.id === subjectId) ?? nextSubjects[0];
       const nextLevel = nextSubject.levels.find((level) => level.id === levelId) ?? nextSubject.levels[0];
@@ -78,12 +86,7 @@ export function QuestionBankWorkspace({
       setLevelId(nextLevel?.id ?? "");
       setTopicId("all");
       setAutoTopicIds(getDefaultAutoTopicIds(nextSubjects, nextSubject.id, nextLevel?.id ?? ""));
-    });
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  }, [levelId, questionBankQuery.data, subjectId]);
 
   const activeSubject = useMemo(() => findQuestionBankSubject(subjects, subjectId), [subjectId, subjects]);
   const activeLevel = useMemo(() => findQuestionBankLevel(activeSubject, levelId), [activeSubject, levelId]);

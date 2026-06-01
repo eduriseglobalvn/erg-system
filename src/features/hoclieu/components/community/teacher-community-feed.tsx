@@ -1,4 +1,5 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Bookmark,
   CheckCircle2,
@@ -35,6 +36,7 @@ import {
   setCommunityFollow,
   setCommunityReaction,
   uploadCommunityMedia,
+  type CreateCommunityCommentPayload,
   type CommunityPostDTO,
   type CommunityTopicDTO,
 } from "@/features/hoclieu/api/community-api";
@@ -456,32 +458,51 @@ export function TeacherCommunityFeed() {
     [isAuthenticated, sortedPosts],
   );
   const hasLockedFeed = !isAuthenticated && sortedPosts.length > visiblePosts.length;
+  const communityHydrationQuery = useQuery({
+    queryKey: ["hoclieu", "community", "bootstrap"],
+    queryFn: async () => {
+      const [topics, feed] = await Promise.all([loadCommunityTopics(), loadCommunityPosts({ limit: 30 })]);
+      return {
+        topics,
+        posts: feed.data.map(communityPostToTeacherPost),
+      };
+    },
+    staleTime: 60_000,
+    gcTime: 10 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const uploadMediaMutation = useMutation({
+    mutationKey: ["hoclieu", "community", "media-upload"],
+    mutationFn: uploadCommunityMedia,
+  });
+  const createPostMutation = useMutation({
+    mutationKey: ["hoclieu", "community", "create-post"],
+    mutationFn: createCommunityPost,
+  });
+  const createCommentMutation = useMutation({
+    mutationKey: ["hoclieu", "community", "create-comment"],
+    mutationFn: ({ postId, payload }: { postId: string; payload: CreateCommunityCommentPayload }) =>
+      createCommunityComment(postId, payload),
+  });
+  const reactionMutation = useMutation({
+    mutationKey: ["hoclieu", "community", "reaction"],
+    mutationFn: ({ targetType, targetId, reaction }: { targetType: "post" | "comment"; targetId: string; reaction: SocialReactionKey | null }) =>
+      setCommunityReaction(targetType, targetId, reaction),
+  });
+  const followMutation = useMutation({
+    mutationKey: ["hoclieu", "community", "follow"],
+    mutationFn: ({ targetType, targetId, following }: { targetType: "topic" | "user"; targetId: string; following: boolean }) =>
+      setCommunityFollow(targetType, targetId, following),
+  });
 
   useEffect(() => {
-    let ignore = false;
+    if (!communityHydrationQuery.data) return;
 
-    async function hydrateCommunity() {
-      try {
-        const [topics, feed] = await Promise.all([
-          loadCommunityTopics(),
-          loadCommunityPosts({ limit: 30 }),
-        ]);
-        if (ignore) return;
-        setApiTopics(topics);
-        if (feed.data.length > 0) {
-          setPosts(feed.data.map(communityPostToTeacherPost));
-        }
-      } catch {
-        // Keep the forum usable in frontend-only previews or when the API base
-        // URL is not configured yet.
-      }
+    setApiTopics(communityHydrationQuery.data.topics);
+    if (communityHydrationQuery.data.posts.length > 0) {
+      setPosts(communityHydrationQuery.data.posts);
     }
-
-    void hydrateCommunity();
-    return () => {
-      ignore = true;
-    };
-  }, []);
+  }, [communityHydrationQuery.data]);
 
   useEffect(() => {
     if (isAuthenticated || !hasLockedFeed || hasAutoOpenedLoginGate) return;
@@ -497,7 +518,7 @@ export function TeacherCommunityFeed() {
       setLoginGateOpen(true);
       return;
     }
-    const nextAttachments = await createImageAttachments(files);
+    const nextAttachments = await createImageAttachments(files, (file) => uploadMediaMutation.mutateAsync(file));
     setAttachments((current) => [...current, ...nextAttachments]);
   }
 
@@ -536,7 +557,7 @@ export function TeacherCommunityFeed() {
 
     setIsPosting(true);
     try {
-      const saved = await createCommunityPost({
+      const saved = await createPostMutation.mutateAsync({
         content,
         media: attachments.map((item, index) => ({
           id: item.id,
@@ -573,7 +594,7 @@ export function TeacherCommunityFeed() {
     );
     const topicId = topicIdForChannel(apiTopics, channel);
     if (topicId) {
-      void setCommunityFollow("topic", topicId, !followedChannels.includes(channel));
+      void followMutation.mutateAsync({ targetType: "topic", targetId: topicId, following: !followedChannels.includes(channel) });
     }
   }
 
@@ -605,7 +626,7 @@ export function TeacherCommunityFeed() {
           : post,
       ),
     );
-    void setCommunityReaction("post", postId, nextReaction);
+    void reactionMutation.mutateAsync({ targetType: "post", targetId: postId, reaction: nextReaction });
   }
 
   function addComment(postId: string, parentCommentId: string | undefined, content: string) {
@@ -634,7 +655,7 @@ export function TeacherCommunityFeed() {
           : post,
       ),
     );
-    void createCommunityComment(postId, { content: trimmedContent, parentId: parentCommentId });
+    void createCommentMutation.mutateAsync({ postId, payload: { content: trimmedContent, parentId: parentCommentId } });
   }
 
   function toggleCommentReaction(postId: string, commentId: string, reaction: SocialReactionKey) {
@@ -658,7 +679,7 @@ export function TeacherCommunityFeed() {
           : post,
       ),
     );
-    void setCommunityReaction("comment", commentId, nextReaction);
+    void reactionMutation.mutateAsync({ targetType: "comment", targetId: commentId, reaction: nextReaction });
   }
 
   return (
@@ -930,22 +951,11 @@ export function TeacherCommunityFeed() {
         onOpenChange={setLoginGateOpen}
         onAuthenticated={() => {
           setLoginGateOpen(false);
-          void refreshCommunityFeed();
+          void communityHydrationQuery.refetch();
         }}
       />
     </div>
   );
-
-  async function refreshCommunityFeed() {
-    try {
-      const feed = await loadCommunityPosts({ limit: 50 });
-      if (feed.data.length > 0) {
-        setPosts(feed.data.map(communityPostToTeacherPost));
-      }
-    } catch {
-      // Keep the current feed if the API refresh fails after login.
-    }
-  }
 }
 
 function TeacherPostCard({
@@ -1736,13 +1746,16 @@ function getCommentCount(comments: TeacherCommunityComment[]): number {
   return comments.reduce((total, comment) => total + 1 + getCommentCount(comment.replies), 0);
 }
 
-function createImageAttachments(files: FileList | null) {
+function createImageAttachments(
+  files: FileList | null,
+  uploadMedia: (file: File) => Promise<{ media: { id?: string; mimeType?: string; originalName?: string; storageKey?: string; type: "image" | "video"; url: string } }>,
+) {
   const mediaFiles = Array.from(files ?? []).filter((file) => file.type.startsWith("image/") || file.type.startsWith("video/"));
 
   return Promise.all(
     mediaFiles.map(async (file, index) => {
       try {
-        const uploaded = await uploadCommunityMedia(file);
+        const uploaded = await uploadMedia(file);
         return {
           id: uploaded.media.id ?? `teacher-community-media-${Date.now()}-${index}-${file.name}`,
           mimeType: uploaded.media.mimeType ?? file.type,

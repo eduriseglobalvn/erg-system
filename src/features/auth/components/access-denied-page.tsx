@@ -3,6 +3,7 @@ import { ShieldAlert } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { ERG_ASSETS } from "@/config/seo";
+import { authApi } from "@/features/auth/api/auth-api";
 import { logoutAccount } from "@/features/auth/api/auth-storage";
 import { readStoredAuthSession, type StoredAuthSession } from "@/features/auth/api/auth-token-storage";
 import { getCurrentStudentSession, logoutStudentSession } from "@/features/auth/api/student-auth-storage";
@@ -12,7 +13,10 @@ import { canAccessPortal } from "@/features/auth/utils/portal-access";
 type PortalKey = NonNullable<StoredAuthSession["portal"]>;
 
 const portalLabels: Record<string, string> = {
+  admin: "Admin",
+  crm: "CRM",
   hoclieu: "Kho học liệu",
+  lcms: "LCMS",
   lms: "LMS",
   elearning: "Elearning",
 };
@@ -38,6 +42,7 @@ export function AccessDeniedPage() {
   }, [auth.account, navigate, portal, redirect]);
 
   function loginAgain() {
+    void authApi.logout().catch(() => undefined);
     logoutStudentSession();
     logoutAccount();
     navigate(`/login?redirect=${encodeURIComponent(redirect)}`, { replace: true });
@@ -98,6 +103,6 @@ function sanitizeRedirect(value: string | null) {
 }
 
 function toPortalKey(value: string): PortalKey | undefined {
-  if (value === "hoclieu" || value === "lms" || value === "elearning") return value;
+  if (value === "admin" || value === "crm" || value === "hoclieu" || value === "lcms" || value === "lms" || value === "elearning") return value;
   return undefined;
 }

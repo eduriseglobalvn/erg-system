@@ -26,7 +26,6 @@ import { PortalMobileLoginShell } from "@/features/auth/components/portal-mobile
 import { useAuthSession } from "@/features/auth/hooks/use-auth-session";
 import { buildRedirectPath, isAuthOnlyRedirect } from "@/features/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/features/auth/utils/portal-access";
-import { normalizeSsoReturnTo } from "@/features/auth/utils/sso-return-to";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApiClientError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
@@ -78,11 +77,11 @@ type PortalLoginCopy = {
 };
 
 export function PortalAuthGate({ children, portal }: PortalAuthGateProps) {
-  const auth = useAuthSession();
+  const auth = useAuthSession(portal);
   const location = useLocation();
   const redirect = buildRedirectPath(location.pathname, location.search, location.hash);
   const studentSession = getCurrentStudentSession();
-  const teacherSession = readStoredAuthSession(portal) ?? readStoredAuthSession();
+  const teacherSession = readStoredAuthSession(portal);
 
   if (canAccessPortal({ portal, studentSession, teacherAccount: auth.account, teacherSession })) {
     if (needsOnboarding(auth.account)) {
@@ -101,21 +100,6 @@ export function PortalAuthGate({ children, portal }: PortalAuthGateProps) {
     return <Navigate replace to={accessDeniedPath(portal, auth.account.email, redirect)} />;
   }
 
-  // Cross-portal SSO: if we're on HocLieu and not logged in, try to get a token from LMS.
-  // Use a sessionStorage flag to prevent infinite redirect loops.
-  if (portal === "hoclieu" && typeof window !== "undefined") {
-    const currentHost = window.location.host.toLowerCase();
-    const isOnHocLieu = currentHost.startsWith("hoclieu.");
-    const ssoAttempted = window.sessionStorage.getItem("sso-attempted");
-    if (isOnHocLieu && !ssoAttempted) {
-      window.sessionStorage.setItem("sso-attempted", "1");
-      const returnTo = normalizeSsoReturnTo(window.location.href) ?? window.location.href;
-      const lmsHandoffUrl = `${window.location.protocol}//lms.erg.edu.vn:3001/sso-handoff?returnTo=${encodeURIComponent(returnTo)}`;
-      window.location.replace(lmsHandoffUrl);
-      return null;
-    }
-  }
-
   return <Navigate replace to={`/login?redirect=${encodeURIComponent(redirect)}`} />;
 }
 
@@ -128,24 +112,11 @@ export function AuthenticatedAccountGate({ children }: { children: ReactNode }) 
     return <>{children}</>;
   }
 
-  if (typeof window !== "undefined") {
-    const currentHost = window.location.host.toLowerCase();
-    const isOnHocLieu = currentHost.startsWith("hoclieu.");
-    const ssoAttempted = window.sessionStorage.getItem("sso-attempted");
-    if (isOnHocLieu && !ssoAttempted) {
-      window.sessionStorage.setItem("sso-attempted", "1");
-      const returnTo = normalizeSsoReturnTo(window.location.href) ?? window.location.href;
-      const lmsHandoffUrl = `${window.location.protocol}//lms.erg.edu.vn:3001/sso-handoff?returnTo=${encodeURIComponent(returnTo)}`;
-      window.location.replace(lmsHandoffUrl);
-      return null;
-    }
-  }
-
   return <Navigate replace to={`/login?redirect=${encodeURIComponent(redirect)}`} />;
 }
 
 export function PortalLoginPage({ badge, description, portal, title }: PortalLoginPageProps) {
-  const auth = useAuthSession();
+  const auth = useAuthSession(portal);
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -159,7 +130,7 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     description: description ?? copy.description,
   };
   const studentSession = getCurrentStudentSession();
-  const teacherSession = readStoredAuthSession(portal) ?? readStoredAuthSession();
+  const teacherSession = readStoredAuthSession(portal);
 
   if (canAccessPortal({ portal, studentSession, teacherAccount: auth.account, teacherSession })) {
     return <Navigate replace to={redirect} />;
@@ -207,8 +178,8 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
           void safely(
             auth,
             async () => {
-              const account = await auth.actions.loginByProvider(provider, idToken);
-              redirectAfterAuth(account ?? getCurrentAccount(), portal, redirect, (path) => navigate(path, { replace: true }));
+              const account = await auth.actions.loginByProvider(provider, idToken, portal);
+              redirectAfterAuth(account ?? getCurrentAccount(portal), portal, redirect, (path) => navigate(path, { replace: true }));
             },
             () => navigate(accessDeniedPath(portal, googleEmailFromIdToken(idToken) || auth.loginForm.email, redirect), { replace: true }),
           )
@@ -263,8 +234,8 @@ function handleLoginSubmit(
 ) {
   event.preventDefault();
   void safely(auth, async () => {
-    const account = await auth.actions.login();
-    redirectAfterAuth(account ?? getCurrentAccount(), portal, redirect, navigateTo);
+    const account = await auth.actions.login(portal);
+    redirectAfterAuth(account ?? getCurrentAccount(portal), portal, redirect, navigateTo);
   });
 }
 
@@ -277,8 +248,8 @@ function handleRegisterSubmit(
 ) {
   event.preventDefault();
   void safely(auth, async () => {
-    const account = await auth.actions.register();
-    redirectAfterAuth(account ?? getCurrentAccount(), portal, redirect, navigateTo);
+    const account = await auth.actions.register(portal);
+    redirectAfterAuth(account ?? getCurrentAccount(portal), portal, redirect, navigateTo);
   });
 }
 
@@ -321,7 +292,7 @@ function redirectAfterAuth(
     canAccessPortal({
       portal,
       teacherAccount: account,
-      teacherSession: readStoredAuthSession(portal) ?? readStoredAuthSession(),
+      teacherSession: readStoredAuthSession(portal),
     }) || isAuthOnlyRedirect(portal, redirect)
       ? redirect
       : accessDeniedPath(portal, account?.email ?? "", redirect),
@@ -358,7 +329,9 @@ function sanitizeRedirect(value: string | null, fallback = "/") {
 }
 
 function defaultPortalRedirect(portal: PortalKey) {
+  if (portal === "lcms") return "/resources";
   if (portal === "hoclieu") return "/kho-hoc-lieu";
+  if (portal === "admin" || portal === "crm") return "/";
   return "/";
 }
 
@@ -368,6 +341,34 @@ function accessDeniedPath(portal: PortalKey, email: string, redirect: string) {
 
 function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
   switch (portal) {
+    case "admin":
+    case "crm":
+      return {
+        badge: "CRM Portal",
+        mobileLabel: "Quản trị ERG",
+        title: "Quản trị hệ thống ERG",
+        description: "Đăng nhập tài khoản quản trị để quản lý dữ liệu nguồn, trường/trung tâm, tài khoản, câu hỏi, quiz bank và học liệu xuất bản.",
+        formTitle: "Đăng nhập CRM",
+        formSubtitle: "Chỉ dành cho quản trị viên hệ thống hoặc tài khoản được cấp quyền CRM.",
+        formFootnote: "Tài khoản giáo viên thường không thể vào CRM. Nếu cần quyền quản trị, vui lòng liên hệ quản trị viên ERG.",
+        credentialLabel: "Email quản trị",
+        credentialPlaceholder: "admin@erg.edu.vn",
+        allowGoogle: true,
+        allowRegister: false,
+        visualKicker: "System back office",
+        visualTitle: "Một nơi quản lý dữ liệu nguồn, phân quyền và xuất bản học liệu cho toàn hệ thống.",
+        visualDescription: "CRM tách khỏi workflow giáo viên để tránh lẫn thao tác dạy học hằng ngày với quản trị dữ liệu nguồn.",
+        trustItems: [
+          { label: "Phân quyền chặt", caption: "CRM-only", icon: KeyRound },
+          { label: "Dữ liệu nguồn", caption: "Câu hỏi, quiz, học liệu", icon: ShieldCheck },
+          { label: "Quản lý hệ thống", caption: "Trường, lớp, tài khoản", icon: BarChart3 },
+        ],
+        metrics: [
+          { label: "Câu hỏi", value: "Bank", icon: ClipboardCheck },
+          { label: "Học liệu", value: "Publish", icon: LibraryBig },
+          { label: "Tài khoản", value: "ACL", icon: School },
+        ],
+      };
     case "elearning":
       return {
         badge: "Elearning Portal",
@@ -393,6 +394,33 @@ function getPortalLoginCopy(portal: PortalKey): PortalLoginCopy {
           { label: "Bài tập", value: "Làm bài", icon: ClipboardCheck },
           { label: "Lớp học", value: "Theo lớp", icon: School },
           { label: "Tiến độ", value: "Cá nhân", icon: BookOpenCheck },
+        ],
+      };
+    case "lcms":
+      return {
+        badge: "LCMS Portal",
+        mobileLabel: "LCMS ERG",
+        title: "Quản trị nội dung học tập",
+        description: "Đăng nhập tài khoản được cấp quyền để quản lý ngân hàng câu hỏi, quiz bank, học liệu, taxonomy và xuất bản nội dung cho LMS.",
+        formTitle: "Đăng nhập LCMS",
+        formSubtitle: "Dành cho đội vận hành nội dung, học liệu và quản trị viên được cấp quyền LCMS/LMS.",
+        formFootnote: "LCMS dùng quyền LMS đã gộp, nhưng được tách portal để không lẫn với kho học liệu giáo viên.",
+        credentialLabel: "Email nội bộ",
+        credentialPlaceholder: "admin@erg.edu.vn",
+        allowGoogle: true,
+        allowRegister: false,
+        visualKicker: "Learning content management",
+        visualTitle: "Một nơi quản trị nội dung nguồn trước khi đưa sang lớp học.",
+        visualDescription: "LCMS tập trung vào biên soạn, phân loại, kiểm duyệt và xuất bản nội dung học tập; không phải CRM và cũng không phải kho mở tài liệu của giáo viên.",
+        trustItems: [
+          { label: "Nội dung nguồn", caption: "Question, quiz, học liệu", icon: LibraryBig },
+          { label: "Xuất bản có kiểm soát", caption: "Metadata, taxonomy", icon: ShieldCheck },
+          { label: "Dùng quyền LMS", caption: "Không tách account", icon: KeyRound },
+        ],
+        metrics: [
+          { label: "Câu hỏi", value: "Bank", icon: ClipboardCheck },
+          { label: "Quiz", value: "Author", icon: Presentation },
+          { label: "Học liệu", value: "Publish", icon: LibraryBig },
         ],
       };
     case "hoclieu":

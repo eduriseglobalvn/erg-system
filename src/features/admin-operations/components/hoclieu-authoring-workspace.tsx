@@ -1,4 +1,6 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent, type MouseEvent, type ReactNode } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { memo, useCallback, useDeferredValue } from "react";
 import {
   ArrowUpRight,
   BookMarked,
@@ -7,10 +9,11 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  Clipboard,
   ClipboardList,
+  Copy,
   FileCheck,
   FileText,
-  FileUp,
   Folder,
   FolderPlus,
   FolderOpen,
@@ -21,11 +24,15 @@ import {
   LibraryBig,
   Link as LinkIcon,
   ListTree,
+  Monitor,
+  MoreHorizontal,
   Pencil,
   Plus,
   Presentation,
+  RefreshCw,
   Search,
   Settings2,
+  Scissors,
   Trash2,
   Video,
 } from "lucide-react";
@@ -54,13 +61,17 @@ import {
   createHocLieuResource,
   createHocLieuTaxonomy,
   deleteHocLieuTaxonomy,
-  listHocLieuSubjects,
-  listHocLieuResources,
-  loadHocLieuTaxonomies,
+  deleteHocLieuResource,
+  loadHocLieuResourceDetail,
+  loadHocLieuStudioWorkspaceData,
   updateHocLieuTaxonomy,
+  updateHocLieuAsset,
+  updateHocLieuResource,
   uploadHocLieuResource,
   type CreateTaxonomyPayload,
+  type HocLieuAssetDetail,
   type HocLieuResourceCard,
+  type HocLieuResourceDetail,
   type HocLieuTaxonomyOption,
   type HocLieuTaxonomyResponse,
 } from "@/features/admin-operations/api/hoclieu-authoring-api";
@@ -69,7 +80,9 @@ import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import {
   filterMockExercises,
   getAvailableContentOptions,
+  isGoogleSlidesUrl,
   normalizeGoogleSlidesUrl,
+  normalizeGoogleViewerUrl,
   type ContentDialogOptionId,
 } from "@/features/admin-operations/utils/hoclieu-content-dialog";
 import { cn } from "@/lib/utils";
@@ -111,15 +124,28 @@ type LocalContentItem = {
   title: string;
   description?: string;
   slidesUrl?: string;
+  resourceUrl?: string;
   topicLabel?: string;
   sectionLabel?: string;
   questionCount?: number;
   durationMinutes?: number;
+  status?: string;
+};
+type AttachedResourceItem = HocLieuResourceCard & {
+  detail?: HocLieuResourceDetail;
+  asset?: HocLieuAssetDetail;
+  linkUrl?: string;
 };
 type TaxonomyEditTarget =
   | { kind: "subject"; id: string; label: string; description?: string; status?: string; metadata?: Record<string, string> }
   | { kind: StudioNodeKind; id: string; label: string; description?: string; status?: string; metadata?: Record<string, string> };
 type TaxonomyDeleteTarget = TaxonomyEditTarget;
+type LocalContentEditTarget = LocalContentItem | null;
+type StructureSelection =
+  | { type: "node"; id: string }
+  | { type: "local-content"; id: string }
+  | { type: "resource"; id: string }
+  | null;
 
 const emptyModel: HocLieuTaxonomyResponse = {
   grades: [],
@@ -131,6 +157,216 @@ const emptyModel: HocLieuTaxonomyResponse = {
   fileTypes: [],
   designerPresets: [],
 };
+
+const mockExplorerModel: HocLieuTaxonomyResponse = {
+  ...emptyModel,
+  subjects: [
+    {
+      id: "mock-ic3-gs6",
+      label: "IC3 GS6",
+      slug: "ic3-gs6",
+      description: "Mock môn học IC3 GS6 với các level học liệu.",
+      status: "active",
+    },
+    {
+      id: "mock-ai-iig-subject",
+      label: "AI - IIG",
+      slug: "ai-iig",
+      description: "Mock môn học AI và chứng chỉ IIG.",
+      status: "active",
+    },
+  ],
+  categories: [
+    {
+      id: "mock-ic3-level-1",
+      label: "Level 1",
+      slug: "level-1",
+      subjectId: "mock-ic3-gs6",
+      description: "Nền tảng máy tính và thao tác cơ bản.",
+      sortOrder: 1,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-level-2",
+      label: "Level 2",
+      slug: "level-2",
+      subjectId: "mock-ic3-gs6",
+      description: "Ứng dụng văn phòng và Internet.",
+      sortOrder: 2,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-level-3",
+      label: "Level 3",
+      slug: "level-3",
+      subjectId: "mock-ic3-gs6",
+      description: "Ôn tập, kiểm tra và luyện chứng chỉ.",
+      sortOrder: 3,
+      status: "active",
+    },
+    {
+      id: "mock-ai-foundation",
+      label: "AI Foundation",
+      slug: "ai-foundation",
+      subjectId: "mock-ai-iig-subject",
+      description: "Nhóm học liệu AI cơ bản.",
+      sortOrder: 1,
+      status: "active",
+    },
+  ],
+  sections: [
+    {
+      id: "mock-ic3-lv1-intro",
+      label: "01. Làm quen với máy tính",
+      slug: "lam-quen-voi-may-tinh",
+      subjectId: "mock-ic3-gs6",
+      categoryId: "mock-ic3-level-1",
+      description: "Khái niệm thiết bị, hệ điều hành và quản lý tệp.",
+      sortOrder: 1,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-lv1-files",
+      label: "02. Quản lý thư mục và tệp",
+      slug: "quan-ly-thu-muc-va-tep",
+      subjectId: "mock-ic3-gs6",
+      categoryId: "mock-ic3-level-1",
+      description: "Tổ chức file, folder và tài nguyên học tập.",
+      sortOrder: 2,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-lv2-office",
+      label: "01. Word, Excel, PowerPoint",
+      slug: "word-excel-powerpoint",
+      subjectId: "mock-ic3-gs6",
+      categoryId: "mock-ic3-level-2",
+      description: "Thực hành bộ ứng dụng văn phòng.",
+      sortOrder: 1,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-lv2-internet",
+      label: "02. Internet và an toàn số",
+      slug: "internet-va-an-toan-so",
+      subjectId: "mock-ic3-gs6",
+      categoryId: "mock-ic3-level-2",
+      description: "Tìm kiếm, email và an toàn trực tuyến.",
+      sortOrder: 2,
+      status: "active",
+    },
+    {
+      id: "mock-ic3-lv3-practice",
+      label: "01. Ôn tập chứng chỉ",
+      slug: "on-tap-chung-chi",
+      subjectId: "mock-ic3-gs6",
+      categoryId: "mock-ic3-level-3",
+      description: "Đề luyện tập tổng hợp.",
+      sortOrder: 1,
+      status: "active",
+    },
+    {
+      id: "mock-ai-overview",
+      label: "01. Tổng quan AI trong học tập",
+      slug: "ai-overview",
+      subjectId: "mock-ai-iig-subject",
+      categoryId: "mock-ai-foundation",
+      description: "Bài mở đầu về AI cho học sinh.",
+      sortOrder: 1,
+      status: "active",
+    },
+  ],
+};
+
+const mockExplorerResources: HocLieuResourceCard[] = [
+  {
+    id: "mock-resource-ai-slides",
+    slug: "slide-ai-overview",
+    title: "Slide - Tổng quan AI trong học tập",
+    programSlug: "ai-iig",
+    subjectId: "mock-ai-iig-subject",
+    categoryId: "mock-ai-foundation",
+    sectionId: "mock-ai-overview",
+    selectedFileType: "PPTX",
+    fileTypeBadge: "PPTX",
+    launchMode: "external",
+    priceType: "free",
+    accessState: "open",
+    visibility: "public",
+    status: "published",
+    canDownload: false,
+  },
+  {
+    id: "mock-resource-ic3-pdf",
+    slug: "ic3-gs6-final-guide",
+    title: "Level 1 - tài liệu hướng dẫn",
+    programSlug: "ic3-gs6",
+    subjectId: "mock-ic3-gs6",
+    categoryId: "mock-ic3-level-1",
+    sectionId: "mock-ic3-lv1-intro",
+    selectedFileType: "PDF",
+    fileTypeBadge: "PDF",
+    launchMode: "external",
+    priceType: "free",
+    accessState: "open",
+    visibility: "public",
+    status: "published",
+    canDownload: true,
+  },
+  {
+    id: "mock-resource-practice",
+    slug: "on-tap-lv1",
+    title: "Bộ câu hỏi ôn tập Level 3",
+    programSlug: "ic3-gs6",
+    subjectId: "mock-ic3-gs6",
+    categoryId: "mock-ic3-level-3",
+    sectionId: "mock-ic3-lv3-practice",
+    selectedFileType: "HTML5",
+    fileTypeBadge: "Quiz",
+    launchMode: "internal",
+    priceType: "free",
+    accessState: "open",
+    visibility: "public",
+    status: "published",
+    canDownload: false,
+  },
+];
+
+const mockExplorerLocalContent: LocalContentItem[] = [
+  {
+    id: "mock-local-ai-slides",
+    kind: "lecture",
+    subjectId: "mock-ai-iig-subject",
+    parentNodeId: "lesson-mock-ai-overview",
+    parentOptionId: "mock-ai-overview",
+    title: "Bài giảng Google Slides - Tổng quan AI",
+    description: "Mock link mở trực tiếp trong tab mới.",
+    slidesUrl: "https://docs.google.com/presentation/d/mock-ai-overview/preview",
+    status: "published",
+  },
+  {
+    id: "mock-local-ai-exercise",
+    kind: "exercise",
+    subjectId: "mock-ic3-gs6",
+    parentNodeId: "lesson-mock-ic3-lv1-files",
+    parentOptionId: "mock-ic3-lv1-files",
+    title: "Bài tập: Sắp xếp thư mục đúng chuẩn",
+    description: "Mock bài tập nội bộ.",
+    questionCount: 12,
+    durationMinutes: 20,
+    status: "published",
+  },
+  {
+    id: "mock-local-ic3-slides",
+    kind: "lecture",
+    subjectId: "mock-ic3-gs6",
+    parentNodeId: "lesson-mock-ic3-lv2-office",
+    parentOptionId: "mock-ic3-lv2-office",
+    title: "Level 2 - Slide Word Excel PowerPoint",
+    slidesUrl: "https://docs.google.com/presentation/d/mock-ic3-final/preview",
+    status: "published",
+  },
+];
 
 const screenMeta: Record<string, { title: string; description: string; icon: ReactNode }> = {
   "admin-hoclieu-studio": {
@@ -149,9 +385,9 @@ const screenMeta: Record<string, { title: string; description: string; icon: Rea
     icon: <LibraryBig className="h-5 w-5" />,
   },
   "admin-hoclieu-upload": {
-    title: "Upload",
-    description: "Đưa file mới lên kho và chọn nơi gắn trong cây học liệu.",
-    icon: <FileUp className="h-5 w-5" />,
+    title: "Gắn link",
+    description: "Dán link Google Drive/Google Slides và chọn nơi gắn trong cây học liệu.",
+    icon: <LinkIcon className="h-5 w-5" />,
   },
   "admin-hoclieu-publish": {
     title: "Xuất bản",
@@ -209,218 +445,6 @@ function normalizeResources(resources: HocLieuResourceCard[] | null | undefined)
   return safeArray(resources).filter((resource) => Boolean(resource?.id && resource?.subjectId));
 }
 
-function sortOptions<T extends HocLieuTaxonomyOption>(items: T[]) {
-  return [...items].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0) || String(a.label ?? "").localeCompare(String(b.label ?? ""), "vi"));
-}
-
-function belongsToSubject(option: HocLieuTaxonomyOption, subjectId: string) {
-  return option.subjectId === subjectId || option.id === subjectId || !option.subjectId;
-}
-
-function getTopicId(option: HocLieuTaxonomyOption) {
-  return (option as HocLieuTaxonomyOption & { topicId?: string }).topicId;
-}
-
-function buildCategoryNodes(
-  category: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
-  visited = new Set<string>(),
-): StudioNode {
-  const visitKey = `category:${category.id}`;
-  if (visited.has(visitKey)) {
-    return {
-      id: `category-${category.id}`,
-      label: category.label,
-      description: category.description,
-      status: category.status,
-      metadata: category.metadata,
-      kind: "category",
-      sourceKind: "category",
-      optionId: category.id,
-      location: { categoryId: category.id },
-      children: [],
-    };
-  }
-  const nextVisited = new Set(visited).add(visitKey);
-
-  return {
-    id: `category-${category.id}`,
-    label: category.label,
-    description: category.description,
-    status: category.status,
-    metadata: category.metadata,
-    kind: "category",
-    sourceKind: "category",
-    optionId: category.id,
-    location: { categoryId: category.id },
-    children: buildChildNodes("category", category.id, allCategories, model, nextVisited),
-  };
-}
-
-function buildTopicNode(
-  topic: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
-  visited: Set<string>,
-): StudioNode {
-  const visitKey = `topic:${topic.id}`;
-  const nextVisited = new Set(visited).add(visitKey);
-  return {
-    id: `topic-${topic.id}`,
-    label: topic.label,
-    description: topic.description,
-    status: topic.status,
-    metadata: topic.metadata,
-    kind: "topic",
-    sourceKind: "topic",
-    optionId: topic.id,
-    location: { categoryId: topic.categoryId, topicId: topic.id },
-    children: visited.has(visitKey) ? [] : buildChildNodes("topic", topic.id, allCategories, model, nextVisited),
-  };
-}
-
-function buildBookSeriesNode(
-  bookSeries: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
-  visited: Set<string>,
-): StudioNode {
-  const visitKey = `bookSeries:${bookSeries.id}`;
-  const nextVisited = new Set(visited).add(visitKey);
-  return {
-    id: `book-${bookSeries.id}`,
-    label: bookSeries.label,
-    description: bookSeries.description,
-    status: bookSeries.status,
-    metadata: bookSeries.metadata,
-    kind: "bookSeries",
-    sourceKind: "bookSeries",
-    optionId: bookSeries.id,
-    location: { categoryId: bookSeries.categoryId, bookSeriesId: bookSeries.id },
-    children: visited.has(visitKey) ? [] : buildChildNodes("bookSeries", bookSeries.id, allCategories, model, nextVisited),
-  };
-}
-
-function buildSectionNode(
-  section: HocLieuTaxonomyOption,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
-  visited: Set<string>,
-): StudioNode {
-  const visitKey = `section:${section.id}`;
-  const nextVisited = new Set(visited).add(visitKey);
-  return {
-    id: `section-${section.id}`,
-    label: section.label,
-    description: section.description,
-    status: section.status,
-    metadata: section.metadata,
-    kind: "section",
-    sourceKind: "section",
-    optionId: section.id,
-    location: { categoryId: section.categoryId, topicId: getTopicId(section), sectionId: section.id, bookSeriesId: section.bookSeriesId },
-    children: visited.has(visitKey) ? [] : buildChildNodes("section", section.id, allCategories, model, nextVisited),
-  };
-}
-
-function buildChildNodes(
-  parentKind: StudioNodeKind,
-  parentId: string,
-  allCategories: HocLieuTaxonomyOption[],
-  model: HocLieuTaxonomyResponse,
-  visited: Set<string>,
-): StudioNode[] {
-  const nodes: StudioNode[] = [];
-  const pushed = new Set<string>();
-  const push = (key: string, node: StudioNode) => {
-    if (pushed.has(key)) return;
-    pushed.add(key);
-    nodes.push(node);
-  };
-
-  sortOptions(allCategories.filter((item) => item.parentId === parentId)).forEach((item) => {
-    push(`category:${item.id}`, buildCategoryNodes(item, allCategories, model, visited));
-  });
-
-  sortOptions(model.bookSeries.filter((item) => item.parentId === parentId || (parentKind === "category" && item.categoryId === parentId))).forEach((item) => {
-    push(`bookSeries:${item.id}`, buildBookSeriesNode(item, allCategories, model, visited));
-  });
-
-  sortOptions(model.topics.filter((item) => item.parentId === parentId || (parentKind === "category" && item.categoryId === parentId))).forEach((item) => {
-    push(`topic:${item.id}`, buildTopicNode(item, allCategories, model, visited));
-  });
-
-  sortOptions(
-    model.sections.filter(
-      (item) =>
-        item.parentId === parentId ||
-        (parentKind === "category" && item.categoryId === parentId && !getTopicId(item)) ||
-        (parentKind === "topic" && getTopicId(item) === parentId) ||
-        (parentKind === "bookSeries" && item.bookSeriesId === parentId),
-    ),
-  ).forEach((item) => {
-    push(`section:${item.id}`, buildSectionNode(item, allCategories, model, visited));
-  });
-
-  return nodes;
-}
-
-function buildSubjectTree(subject: HocLieuTaxonomyOption, model: HocLieuTaxonomyResponse): StudioNode[] {
-  const categories = sortOptions(model.categories.filter((item) => belongsToSubject(item, subject.id)));
-  const rootCategories = categories.filter((item) => !item.parentId);
-  const bookSeries = sortOptions(model.bookSeries.filter((item) => belongsToSubject(item, subject.id) && !item.parentId && !item.categoryId));
-  const orphanTopics = sortOptions(model.topics.filter((item) => belongsToSubject(item, subject.id) && !item.parentId && !item.categoryId));
-  const orphanSections = sortOptions(model.sections.filter((item) => belongsToSubject(item, subject.id) && !item.parentId && !item.categoryId && !getTopicId(item)));
-
-  const nodes = rootCategories.map((item) => buildCategoryNodes(item, categories, model));
-
-  if (bookSeries.length) {
-    nodes.push({
-      id: `books-${subject.id}`,
-      label: "Bộ sách / chương trình",
-      kind: "folder",
-      sourceKind: "folder",
-      location: {},
-      children: bookSeries.map((item) => ({
-        ...buildBookSeriesNode(item, categories, model, new Set()),
-      })),
-    });
-  }
-
-  if (orphanTopics.length) {
-    nodes.push({
-      id: `topics-${subject.id}`,
-      label: "Chủ đề chưa xếp nhóm",
-      kind: "folder",
-      sourceKind: "folder",
-      location: {},
-      children: orphanTopics.map((item) => ({
-        ...buildTopicNode(item, categories, model, new Set()),
-      })),
-    });
-  }
-
-  if (orphanSections.length) {
-    nodes.push({
-      id: `sections-${subject.id}`,
-      label: "Học phần chưa xếp nhóm",
-      kind: "folder",
-      sourceKind: "folder",
-      location: {},
-      children: orphanSections.map((item) => ({
-        ...buildSectionNode(item, categories, model, new Set()),
-      })),
-    });
-  }
-
-  return nodes;
-}
-
-function countNodes(nodes: StudioNode[]): number {
-  return nodes.reduce((total, node) => total + 1 + countNodes(node.children), 0);
-}
-
 function findNode(nodes: StudioNode[], nodeId: string): StudioNode | undefined {
   for (const node of nodes) {
     if (node.id === nodeId) return node;
@@ -443,9 +467,6 @@ function findPath(nodes: StudioNode[], nodeId: string, trail: StudioNode[] = [])
 function buildSubjects(model: HocLieuTaxonomyResponse, resources: HocLieuResourceCard[]): StudioSubject[] {
   return buildHocLieuLearningSubjects(model, resources) as StudioSubject[];
 }
-
-void buildSubjectTree;
-void countNodes;
 
 function flattenNodes(nodes: StudioNode[]): StudioNode[] {
   return nodes.flatMap((node) => [node, ...flattenNodes(node.children)]);
@@ -479,6 +500,18 @@ function nodeIdForCreated(kind: TaxonomyCreateKind, id: string) {
   return `lesson-${id}`;
 }
 
+function toEditTargetFromNode(node: StudioNode | null | undefined): TaxonomyEditTarget | null {
+  if (!node?.optionId) return null;
+  return {
+    kind: node.kind,
+    id: node.optionId,
+    label: node.label,
+    description: node.description,
+    status: node.status,
+    metadata: node.metadata,
+  };
+}
+
 function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "category") {
     return {
@@ -504,8 +537,8 @@ function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "resource") {
     return {
       title: "Tài liệu",
-      description: "Upload PDF, video, audio, ảnh hoặc gói học liệu trực tiếp trong popup này.",
-      icon: <FileUp className="h-5 w-5" />,
+      description: "Dán link Google Drive/Google Slides để gắn tài liệu trực tiếp trong popup này.",
+      icon: <LinkIcon className="h-5 w-5" />,
     };
   }
   return {
@@ -515,7 +548,89 @@ function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   };
 }
 
-export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
+function getDisplayLink(resource: AttachedResourceItem | LocalContentItem) {
+  if ("linkUrl" in resource) {
+    return resource.linkUrl;
+  }
+  const localContent = resource as LocalContentItem;
+  return localContent.slidesUrl || localContent.resourceUrl;
+}
+
+function getPublishStatusLabel(status?: string) {
+  if (status === "hidden") return "Đã ẩn";
+  if (status === "draft") return "Bản nháp";
+  if (status === "active" || status === "published") return "Đã xuất bản";
+  return "Bản nháp";
+}
+
+function getResourceDisplayBadge(resource: AttachedResourceItem) {
+  const link = resource.linkUrl?.toLowerCase() || "";
+  if (link.includes("docs.google.com/presentation")) return "Google Slides";
+  if (link.includes("drive.google.com")) return "Google Drive";
+
+  const rawType = (resource.fileTypeBadge || resource.selectedFileType || "").toUpperCase();
+  if (rawType === "PPTX" || rawType === "LINK") return "Bài giảng";
+  if (rawType === "PDF") return "PDF";
+  if (rawType === "VIDEO") return "Video";
+  if (rawType === "AUDIO") return "Audio";
+  if (rawType === "HTML5") return "HTML5";
+  if (rawType === "ZIP") return "Tệp nén";
+
+  return "Tài liệu";
+}
+
+function slugifyPathSegment(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "muc";
+}
+
+function buildExplorerPathUrl(subject?: StudioSubject, path: StudioNode[] = [], target?: StudioNode | LocalContentItem | AttachedResourceItem) {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://lcms.erg.edu.vn";
+  const segments = ["resources"];
+  if (subject?.label) segments.push(slugifyPathSegment(subject.label));
+  path.forEach((item) => segments.push(slugifyPathSegment(item.label)));
+  if (target && "label" in target) segments.push(slugifyPathSegment(target.label));
+  if (target && "title" in target) segments.push(slugifyPathSegment(target.title));
+  return `${origin}/${segments.join("/")}`;
+}
+
+function buildExplorerBreadcrumb(subject?: StudioSubject, path: StudioNode[] = []) {
+  if (!subject) return [];
+  return [subject.label, ...path.map((item) => item.label)].filter(Boolean);
+}
+
+function copyTextToClipboard(value: string) {
+  if (typeof navigator === "undefined" || !navigator.clipboard) return;
+  void navigator.clipboard.writeText(value);
+}
+
+function getStableDate(seed: string) {
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) % 100_000;
+  const month = (hash % 12) + 1;
+  const day = (Math.floor(hash / 12) % 27) + 1;
+  const hour = (Math.floor(hash / 500) % 12) + 1;
+  const minute = Math.floor(hash / 17) % 60;
+  return `${month}/${day}/2026 ${hour}:${String(minute).padStart(2, "0")} ${hash % 2 ? "AM" : "PM"}`;
+}
+
+function getExplorerSize(value: StudioNode | LocalContentItem | AttachedResourceItem) {
+  if ("children" in value) return "";
+  if ("questionCount" in value && value.questionCount) return `${value.questionCount} câu`;
+  const seed = "title" in value ? value.title : "item";
+  let hash = 0;
+  for (const char of seed) hash = (hash * 17 + char.charCodeAt(0)) % 800_000;
+  return `${Math.max(24, hash).toLocaleString("en-US")} KB`;
+}
+
+export function HocLieuAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
+  const queryClient = useQueryClient();
   const [model, setModel] = useState<HocLieuTaxonomyResponse>(emptyModel);
   const [resources, setResources] = useState<HocLieuResourceCard[]>([]);
   const [loading, setLoading] = useState(true);
@@ -525,29 +640,36 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
   const [dialogState, setDialogState] = useState<TaxonomyDialogState>(null);
   const [editTarget, setEditTarget] = useState<TaxonomyEditTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<TaxonomyDeleteTarget | null>(null);
-  const [localContentItems, setLocalContentItems] = useState<LocalContentItem[]>([]);
+  const [localContentItems, setLocalContentItems] = useState<LocalContentItem[]>(mockExplorerLocalContent);
+  const [editingLocalContent, setEditingLocalContent] = useState<LocalContentEditTarget>(null);
 
-  async function refreshData() {
+  async function refreshData(options: { force?: boolean } = {}) {
     setLoading(true);
     try {
-      const [contentModelResult, subjectListResult, resourceListResult] = await Promise.allSettled([
-        loadHocLieuTaxonomies(),
-        listHocLieuSubjects(),
-        listHocLieuResources({ limit: 120 }),
-      ]);
+      if (options.force) {
+        await queryClient.invalidateQueries({ queryKey: ["admin-operations", "hoclieu-v2"] });
+        await queryClient.invalidateQueries({ queryKey: ["hoclieu"] });
+      }
 
-      const contentModel = contentModelResult.status === "fulfilled" ? contentModelResult.value : emptyModel;
-      const subjectList = subjectListResult.status === "fulfilled" ? subjectListResult.value : [];
-      const resourceList = resourceListResult.status === "fulfilled" ? resourceListResult.value : { data: [] as HocLieuResourceCard[] };
+      const staleTime = options.force ? 0 : 60_000;
+      const workspaceData = await queryClient.fetchQuery({
+        queryKey: ["admin-operations", "hoclieu-v2", "workspace", 120],
+        queryFn: () => loadHocLieuStudioWorkspaceData(120),
+        staleTime,
+      });
 
-      const nextModel = { ...normalizeContentModel(contentModel), subjects: normalizeTaxonomyOptions(subjectList) };
+      const normalizedSubjects = normalizeTaxonomyOptions(workspaceData.subjects);
+      const nextModel = normalizedSubjects.length
+        ? { ...normalizeContentModel(workspaceData.taxonomy), subjects: normalizedSubjects }
+        : mockExplorerModel;
+      const nextResources = normalizeResources(workspaceData.resources.data);
       setModel(nextModel);
-      setResources(normalizeResources(resourceList?.data));
+      setResources(nextResources.length ? nextResources : mockExplorerResources);
       return nextModel;
     } catch {
-      setModel(emptyModel);
-      setResources([]);
-      return emptyModel;
+      setModel(mockExplorerModel);
+      setResources(mockExplorerResources);
+      return mockExplorerModel;
     } finally {
       setLoading(false);
     }
@@ -590,26 +712,55 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
   const meta = screenMeta[activeLeaf.id] ?? screenMeta["admin-hoclieu-studio"];
   void meta;
   void loading;
-  const selectedSubjectTarget = selectedSubject
-    ? {
-        kind: "subject" as const,
-        id: selectedSubject.id,
-        label: selectedSubject.label,
-        description: selectedSubject.description,
-        status: selectedSubject.status,
-        metadata: selectedSubject.metadata,
-      }
-    : undefined;
-  const selectedNodeTarget = selectedNode?.optionId
-    ? {
-        kind: selectedNode.kind,
-        id: selectedNode.optionId,
-        label: selectedNode.label,
-        description: selectedNode.description,
-        status: selectedNode.status,
-        metadata: selectedNode.metadata,
-      }
-    : undefined;
+  const selectedSubjectTarget = useMemo(
+    () =>
+      selectedSubject
+        ? {
+            kind: "subject" as const,
+            id: selectedSubject.id,
+            label: selectedSubject.label,
+            description: selectedSubject.description,
+            status: selectedSubject.status,
+            metadata: selectedSubject.metadata,
+          }
+        : undefined,
+    [selectedSubject],
+  );
+  const selectedNodeTarget = useMemo(() => toEditTargetFromNode(selectedNode), [selectedNode]);
+  const openCreateSubjectDialog = useCallback(() => setDialogState({ mode: "subject" }), []);
+  const openCreateRootDialog = useCallback(() => setDialogState({ mode: "root" }), []);
+  const openCreateChildDialog = useCallback(() => setDialogState({ mode: "child" }), []);
+  const selectStructureSubject = useCallback((subjectId: string) => {
+    const nextSubject = subjects.find((subject) => subject.id === subjectId);
+    setSelectedSubjectId(subjectId);
+    setSelectedNodeId(nextSubject?.tree[0]?.id ?? "");
+  }, [subjects]);
+  const editSelectedSubject = useCallback(() => {
+    if (selectedSubjectTarget) setEditTarget(selectedSubjectTarget);
+  }, [selectedSubjectTarget]);
+  const deleteSelectedSubject = useCallback(() => {
+    if (selectedSubjectTarget) setDeleteTarget(selectedSubjectTarget);
+  }, [selectedSubjectTarget]);
+  const editSelectedNode = useCallback(() => {
+    if (selectedNodeTarget) {
+      setEditTarget(selectedNodeTarget);
+      return;
+    }
+    if (selectedSubjectTarget) setEditTarget(selectedSubjectTarget);
+  }, [selectedNodeTarget, selectedSubjectTarget]);
+  const deleteSelectedNode = useCallback(() => {
+    if (selectedNodeTarget) {
+      setDeleteTarget(selectedNodeTarget);
+      return;
+    }
+    if (selectedSubjectTarget) setDeleteTarget(selectedSubjectTarget);
+  }, [selectedNodeTarget, selectedSubjectTarget]);
+  const updateLocalContentItem = useCallback((itemId: string, patch: Partial<LocalContentItem>) => {
+    setLocalContentItems((current) => current.map((item) => (item.id === itemId ? { ...item, ...patch } : item)));
+  }, []);
+  const deleteLocalContentItem = useCallback((itemId: string) => {
+    setLocalContentItems((current) => current.filter((item) => item.id !== itemId));
+  }, []);
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
@@ -620,7 +771,7 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
           onQueryChange={setQuery}
           selectedSubject={selectedSubject}
           onSelectSubject={setSelectedSubjectId}
-          onCreateSubject={() => setDialogState({ mode: "subject" })}
+          onCreateSubject={openCreateSubjectDialog}
           onEditSubject={(subject) => setEditTarget({ kind: "subject", id: subject.id, label: subject.label, description: subject.description, status: subject.status, metadata: subject.metadata })}
           onDeleteSubject={(subject) => setDeleteTarget({ kind: "subject", id: subject.id, label: subject.label, description: subject.description, status: subject.status, metadata: subject.metadata })}
         />
@@ -631,20 +782,27 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
           selectedSubject={selectedSubject}
           selectedNode={selectedNode}
           selectedPath={selectedPath}
-          onSelectSubject={(subjectId) => {
-            const nextSubject = subjects.find((subject) => subject.id === subjectId);
-            setSelectedSubjectId(subjectId);
-            setSelectedNodeId(nextSubject?.tree[0]?.id ?? "");
-          }}
+          onSelectSubject={selectStructureSubject}
           onSelectNode={setSelectedNodeId}
-          onCreateSubject={() => setDialogState({ mode: "subject" })}
-          onCreateRoot={() => setDialogState({ mode: "root" })}
-          onCreateChild={() => setDialogState({ mode: "child" })}
-          onEditSubject={() => selectedSubjectTarget && setEditTarget(selectedSubjectTarget)}
-          onDeleteSubject={() => selectedSubjectTarget && setDeleteTarget(selectedSubjectTarget)}
-          onEditNode={() => selectedNodeTarget && setEditTarget(selectedNodeTarget)}
-          onDeleteNode={() => selectedNodeTarget && setDeleteTarget(selectedNodeTarget)}
+          onCreateSubject={openCreateSubjectDialog}
+          onCreateRoot={openCreateRootDialog}
+          onCreateChild={openCreateChildDialog}
+          onEditSubject={editSelectedSubject}
+          onDeleteSubject={deleteSelectedSubject}
+          onEditSelection={editSelectedNode}
+          onDeleteSelection={deleteSelectedNode}
+          onEditNodeSelection={(node) => {
+            const target = toEditTargetFromNode(node);
+            if (target) setEditTarget(target);
+          }}
+          onDeleteNodeSelection={(node) => {
+            const target = toEditTargetFromNode(node);
+            if (target) setDeleteTarget(target);
+          }}
           localContentItems={localContentItems}
+          onEditLocalContent={(item) => setEditingLocalContent(item)}
+          onDeleteLocalContent={deleteLocalContentItem}
+          onRefreshData={() => refreshData({ force: true }).then(() => undefined)}
           resources={resources}
         />
       ) : null}
@@ -663,15 +821,15 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
         }}
         onCreateLecture={async (payload) => {
           await createHocLieuResource(payload);
-          await refreshData();
+          await refreshData({ force: true });
           setDialogState(null);
         }}
         onUploadResource={async () => {
-          await refreshData();
+          await refreshData({ force: true });
           setDialogState(null);
         }}
         onCreated={async ({ mode, kind, id }) => {
-          const nextModel = await refreshData();
+          const nextModel = await refreshData({ force: true });
           if (mode === "subject") {
             setSelectedSubjectId(id);
             setSelectedNodeId("");
@@ -686,7 +844,7 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
         target={editTarget}
         onClose={() => setEditTarget(null)}
         onSaved={async () => {
-          await refreshData();
+          await refreshData({ force: true });
           setEditTarget(null);
         }}
       />
@@ -694,7 +852,7 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
         target={deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onDeleted={async () => {
-          await refreshData();
+          await refreshData({ force: true });
           setDeleteTarget(null);
           if (deleteTarget?.kind === "subject") {
             setSelectedSubjectId("");
@@ -702,6 +860,15 @@ export function HocLieuAuthoringWorkspace({ activeLeaf, onOpenLeaf: _onOpenLeaf 
           } else if (deleteTarget?.id === selectedNode?.optionId) {
             setSelectedNodeId("");
           }
+        }}
+      />
+      <LocalContentEditDialog
+        target={editingLocalContent}
+        onClose={() => setEditingLocalContent(null)}
+        onSaved={(patch) => {
+          if (!editingLocalContent) return;
+          updateLocalContentItem(editingLocalContent.id, patch);
+          setEditingLocalContent(null);
         }}
       />
     </div>
@@ -757,7 +924,7 @@ function SubjectsScreen({
                 key={subject.id}
                 onClick={() => onSelectSubject(subject.id)}
                 className={cn(
-                  "grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_120px_120px_120px_120px] items-center gap-3 border-t border-slate-200 px-4 py-4 text-left transition hover:bg-blue-50/50",
+                  "grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_120px_120px_120px_120px] items-center gap-3 border-t border-slate-200 px-4 py-4 text-left hover:bg-blue-50/50",
                   selectedSubject?.id === subject.id ? "bg-blue-50" : "bg-white",
                 )}
               >
@@ -768,7 +935,7 @@ function SubjectsScreen({
                 <span className="text-sm font-semibold text-slate-700">{subject.groupCount}</span>
                 <span className="text-sm font-semibold text-slate-700">{subject.resourceCount}</span>
                 <span>
-                  <Badge tone={subject.status === "ACTIVE" ? "success" : "outline"}>{subject.status || "draft"}</Badge>
+                  <Badge tone={subject.status === "ACTIVE" || subject.status === "active" ? "success" : "outline"}>{getPublishStatusLabel(subject.status)}</Badge>
                 </span>
                 <span className="flex justify-end gap-2">
                   <Button
@@ -815,7 +982,7 @@ function SubjectsScreen({
               <InfoRow label="Nhóm học liệu" value={`${selectedSubject.groupCount} nhóm`} />
               <InfoRow label="Bài học" value={`${selectedSubject.lessonCount} bài`} />
               <InfoRow label="Tài liệu" value={`${selectedSubject.resourceCount} tài liệu`} />
-              <InfoRow label="Trạng thái" value={selectedSubject.status || "draft"} />
+              <InfoRow label="Trạng thái" value={getPublishStatusLabel(selectedSubject.status)} />
               <div className="grid grid-cols-2 gap-2">
                 <Button variant="outline" onClick={() => onEditSubject(selectedSubject)}>
                   <Pencil className="h-4 w-4" />
@@ -848,9 +1015,14 @@ function StructureScreen({
   onCreateChild,
   onEditSubject,
   onDeleteSubject,
-  onEditNode,
-  onDeleteNode,
+  onEditSelection,
+  onDeleteSelection,
+  onEditNodeSelection,
+  onDeleteNodeSelection,
   localContentItems,
+  onEditLocalContent,
+  onDeleteLocalContent,
+  onRefreshData,
   resources,
 }: {
   subjects: StudioSubject[];
@@ -864,14 +1036,23 @@ function StructureScreen({
   onCreateChild: () => void;
   onEditSubject: () => void;
   onDeleteSubject: () => void;
-  onEditNode: () => void;
-  onDeleteNode: () => void;
+  onEditSelection: () => void;
+  onDeleteSelection: () => void;
+  onEditNodeSelection: (node: StudioNode) => void;
+  onDeleteNodeSelection: (node: StudioNode) => void;
   localContentItems: LocalContentItem[];
+  onEditLocalContent: (item: LocalContentItem) => void;
+  onDeleteLocalContent: (itemId: string) => void;
+  onRefreshData: () => Promise<void>;
   resources: HocLieuResourceCard[];
 }) {
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
   const [treeQuery, setTreeQuery] = useState("");
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node?: StudioNode } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node?: StudioNode; localContent?: LocalContentItem; resource?: AttachedResourceItem; subject?: StudioSubject } | null>(null);
+  const [editingResource, setEditingResource] = useState<AttachedResourceItem | null>(null);
+  const [attachedResources, setAttachedResources] = useState<Record<string, AttachedResourceItem>>({});
+  const [selection, setSelection] = useState<StructureSelection>(null);
+  const deferredTreeQuery = useDeferredValue(treeQuery);
 
   useEffect(() => {
     setExpandedNodeIds(new Set(selectedSubject?.tree.map((node) => node.id) ?? []));
@@ -886,19 +1067,37 @@ function StructureScreen({
       return matchesResourceToLearningNode(resource, selectedNode as HocLieuLearningNode);
     });
   }, [resources, selectedNode, selectedSubject]);
-  const currentLocalContentItems = selectedNode?.optionId
-    ? localContentItems.filter((item) => item.parentOptionId === selectedNode.optionId)
-    : [];
+  const currentAttachedResources = useMemo(
+    () => currentResources.map((resource) => attachedResources[resource.id] ?? resource),
+    [attachedResources, currentResources],
+  );
+  const currentLocalContentItems = useMemo(
+    () => (selectedNode?.optionId ? localContentItems.filter((item) => item.parentOptionId === selectedNode.optionId) : []),
+    [localContentItems, selectedNode?.optionId],
+  );
   const totalAttachedItems = currentResources.length + currentLocalContentItems.length;
-  const selectedBreadcrumb = selectedSubject ? [selectedSubject.label, ...selectedPath.map((node) => node.label)] : [];
+  const showChildrenPanel = currentChildren.length > 0 || selectedNode?.kind !== "lesson";
   const filteredTree = useMemo(() => {
     if (!selectedSubject) {
       return [];
     }
-    return filterTree(selectedSubject.tree, treeQuery);
-  }, [selectedSubject, treeQuery]);
+    return filterTree(selectedSubject.tree, deferredTreeQuery);
+  }, [deferredTreeQuery, selectedSubject]);
   const visibleRows = useMemo(() => flattenVisibleNodes(filteredTree, expandedNodeIds), [filteredTree, expandedNodeIds]);
-  const canCreateChild = Boolean(selectedNode?.optionId);
+  const selectedChildRow = useMemo(
+    () => (selection?.type === "node" ? currentChildren.find((child) => child.id === selection.id) : undefined),
+    [currentChildren, selection],
+  );
+  const selectedLocalContent = useMemo(
+    () => (selection?.type === "local-content" ? currentLocalContentItems.find((item) => item.id === selection.id) : undefined),
+    [currentLocalContentItems, selection],
+  );
+  const selectedAttachedResource = useMemo(
+    () => (selection?.type === "resource" ? currentAttachedResources.find((item) => item.id === selection.id) : undefined),
+    [currentAttachedResources, selection],
+  );
+  const canEditSelection = Boolean(selectedChildRow || selectedLocalContent || selectedAttachedResource);
+  const canDeleteSelection = canEditSelection;
 
   useEffect(() => {
     if (!contextMenu) return;
@@ -911,7 +1110,51 @@ function StructureScreen({
     };
   }, [contextMenu]);
 
-  const toggleNode = (nodeId: string) => {
+  useEffect(() => {
+    if (!selection) return;
+    if (selection.type === "node" && currentChildren.some((child) => child.id === selection.id)) return;
+    if (selection.type === "local-content" && selectedLocalContent) return;
+    if (selection.type === "resource" && selectedAttachedResource) return;
+    setSelection(null);
+  }, [currentChildren, selectedAttachedResource, selectedLocalContent, selection]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const missingDetails = currentResources.filter((resource) => !attachedResources[resource.id]);
+    if (!missingDetails.length) return;
+
+    void Promise.all(
+      missingDetails.map(async (resource) => {
+        try {
+          const detail = await loadHocLieuResourceDetail(resource.id);
+          const asset = detail.assets[0];
+          return [
+            resource.id,
+            {
+              ...resource,
+              detail,
+              asset,
+              linkUrl: asset?.storageUrl || asset?.upstreamUrl,
+            } satisfies AttachedResourceItem,
+          ] as const;
+        } catch {
+          return [resource.id, { ...resource, linkUrl: undefined } satisfies AttachedResourceItem] as const;
+        }
+      }),
+    ).then((entries) => {
+      if (cancelled) return;
+      setAttachedResources((current) => ({
+        ...current,
+        ...Object.fromEntries(entries),
+      }));
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [attachedResources, currentResources]);
+
+  const toggleNode = useCallback((nodeId: string) => {
     setExpandedNodeIds((current) => {
       const next = new Set(current);
       if (next.has(nodeId)) {
@@ -921,303 +1164,364 @@ function StructureScreen({
       }
       return next;
     });
-  };
+  }, []);
 
-  const handleCreateChild = (node?: StudioNode) => {
+  const handleCreateChild = useCallback((node?: StudioNode) => {
     if (node) {
       onSelectNode(node.id);
     }
     onCreateChild();
-  };
+  }, [onCreateChild, onSelectNode]);
+  const handleDeleteResource = useCallback(async (resource: AttachedResourceItem) => {
+    await deleteHocLieuResource(resource.id);
+    setAttachedResources((current) => {
+      const next = { ...current };
+      delete next[resource.id];
+      return next;
+    });
+    await onRefreshData();
+  }, [onRefreshData]);
 
-  const openContextMenu = (event: MouseEvent, node?: StudioNode) => {
+  const handleOpenResourceLink = useCallback((resource: AttachedResourceItem) => {
+    const nextUrl = getDisplayLink(resource);
+    if (!nextUrl || typeof window === "undefined") return;
+    window.open(nextUrl, "_blank", "noopener,noreferrer");
+  }, []);
+
+  const handleEditSelection = useCallback(() => {
+    if (selectedAttachedResource) {
+      setEditingResource(selectedAttachedResource);
+      return;
+    }
+    if (selectedLocalContent) {
+      onEditLocalContent(selectedLocalContent);
+      return;
+    }
+    if (selectedChildRow) {
+      onEditNodeSelection(selectedChildRow);
+      return;
+    }
+    onEditSelection();
+  }, [onEditLocalContent, onEditNodeSelection, onEditSelection, selectedAttachedResource, selectedChildRow, selectedLocalContent]);
+
+  const handleDeleteSelection = useCallback(async () => {
+    if (selectedAttachedResource) {
+      await handleDeleteResource(selectedAttachedResource);
+      setSelection(null);
+      return;
+    }
+    if (selectedLocalContent) {
+      onDeleteLocalContent(selectedLocalContent.id);
+      setSelection(null);
+      return;
+    }
+    if (selectedChildRow) {
+      onDeleteNodeSelection(selectedChildRow);
+      return;
+    }
+    onDeleteSelection();
+  }, [handleDeleteResource, onDeleteLocalContent, onDeleteNodeSelection, onDeleteSelection, selectedAttachedResource, selectedChildRow, selectedLocalContent]);
+
+  const openContextMenu = useCallback((event: MouseEvent, node?: StudioNode, localContent?: LocalContentItem, resource?: AttachedResourceItem, subject?: StudioSubject) => {
     event.preventDefault();
     event.stopPropagation();
+    if (subject) {
+      onSelectSubject(subject.id);
+    }
     if (node) {
       onSelectNode(node.id);
+      setSelection({ type: "node", id: node.id });
+    }
+    if (localContent) {
+      setSelection({ type: "local-content", id: localContent.id });
+    }
+    if (resource) {
+      setSelection({ type: "resource", id: resource.id });
     }
     setContextMenu({
       x: Math.min(event.clientX, window.innerWidth - 240),
       y: Math.min(event.clientY, window.innerHeight - 260),
       node,
+      localContent,
+      resource,
+      subject,
     });
-  };
+  }, [onSelectNode, onSelectSubject]);
+
+  const selectRootNode = useCallback(() => {
+    const rootNodeId = selectedSubject?.tree[0]?.id;
+    if (rootNodeId) onSelectNode(rootNodeId);
+  }, [onSelectNode, selectedSubject?.tree]);
+  const selectedExplorerUrl = buildExplorerPathUrl(selectedSubject, selectedPath);
+  const explorerBreadcrumb = buildExplorerBreadcrumb(selectedSubject, selectedPath);
 
   return (
-    <div className="grid min-h-0 flex-1 gap-3 xl:grid-cols-[260px_minmax(0,1fr)] 2xl:grid-cols-[280px_minmax(0,1fr)]">
-      <aside className="min-h-0 self-stretch overflow-hidden rounded-2xl border border-slate-200 bg-white">
-        <div className="border-b border-slate-100 px-4 py-3">
-          <div className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--erg-blue)]">Bước 1</div>
-          <div className="mt-1 text-base font-bold text-slate-950">Chọn môn học</div>
-          <div className="mt-1 text-xs leading-5 text-slate-500">Mỗi môn có cây chủ đề và tài liệu riêng.</div>
-          <Button type="button" size="sm" onClick={onCreateSubject} className="mt-3 w-full bg-[var(--erg-blue)] hover:bg-blue-800">
-            <Plus className="h-4 w-4" />
-            Tạo môn mới
-          </Button>
+    <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white text-[13px] text-slate-900 shadow-sm">
+      <div className="flex h-12 items-center gap-2 border-b border-slate-200 bg-slate-50 px-3">
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#374151]" onClick={selectRootNode} disabled={!selectedSubject}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#9aa5b1]" disabled>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#374151]" onClick={() => void onRefreshData()}>
+          <RefreshCw className="h-4 w-4" />
+        </Button>
+        <div className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md bg-white px-2 shadow-[inset_0_0_0_1px_#e5e7eb]" title={explorerBreadcrumb.length ? selectedExplorerUrl : ""}>
+          {explorerBreadcrumb.length ? <Monitor className="mx-2 h-4 w-4 shrink-0 text-[#52616f]" /> : null}
+          {explorerBreadcrumb.map((label, index) => (
+            <span key={`${label}-${index}`} className="flex min-w-0 items-center">
+              {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
+              <span className={cn("truncate px-1.5 py-1 text-[13px]", index === explorerBreadcrumb.length - 1 ? "font-medium text-[#111827]" : "text-[#1f2937]")}>{label}</span>
+            </span>
+          ))}
         </div>
-        <div className="max-h-[calc(100vh-250px)] space-y-2 overflow-y-auto p-3">
-          {subjects.length ? subjects.map((subject) => (
-            <button
-              key={subject.id}
-              type="button"
-              onClick={() => onSelectSubject(subject.id)}
-              className={cn(
-                "flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition",
-                selectedSubject?.id === subject.id ? "border-[var(--erg-blue)] bg-blue-50" : "border-slate-200 bg-white hover:bg-slate-50",
-              )}
-            >
-              <span className="min-w-0">
-                <span className="block truncate font-semibold text-slate-950">{subject.label}</span>
-                <span className="text-xs text-slate-500">{subject.groupCount} nhóm · {subject.lessonCount} bài · {subject.resourceCount} tài liệu</span>
-              </span>
-              <ChevronRight className="h-4 w-4 text-slate-400" />
-            </button>
-          )) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-              Chưa có môn học. Bấm <b>Tạo môn mới</b> để bắt đầu.
-            </div>
-          )}
+        <div className="flex h-8 w-[280px] max-w-[28vw] items-center rounded-md bg-white px-3 shadow-[inset_0_0_0_1px_#e5e7eb]">
+          <Search className="mr-2 h-4 w-4 text-[#52616f]" />
+          <input
+            value={treeQuery}
+            onChange={(event) => setTreeQuery(event.target.value)}
+            placeholder={`Search ${selectedSubject?.label || "Resources"}`}
+            className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#64748b]"
+          />
         </div>
-      </aside>
+      </div>
 
-      <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_16px_42px_-34px_rgba(15,23,42,0.38)]">
-        <div className="p-3">
-          <div className="grid h-[calc(100vh-128px)] min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white xl:grid-cols-[minmax(320px,31%)_minmax(0,1fr)] 2xl:grid-cols-[minmax(360px,33%)_minmax(0,1fr)]">
-            <aside className="min-h-0 border-b border-slate-200 bg-slate-50/80 p-3 xl:border-b-0 xl:border-r">
-              <div className="flex items-center gap-3 rounded-xl bg-white p-3 shadow-sm shadow-slate-200/70">
-                <span className="grid h-10 w-10 place-items-center rounded-xl bg-blue-50 text-[var(--erg-blue)]">
-                  <BookOpen className="h-5 w-5" />
-                </span>
-                <div className="min-w-0">
-                  <div className="truncate">
-                    <span className="inline-flex items-center rounded-full bg-blue-100 px-3 py-1 text-sm font-extrabold tracking-[0.02em] text-[var(--erg-blue)]">
-                      {selectedSubject?.label || "Chưa chọn môn"}
-                    </span>
-                  </div>
-                  <div className="text-xs text-slate-500">Cấu trúc thật từ API</div>
-                </div>
-                {selectedSubject ? (
-                  <div className="ml-auto flex gap-1">
-                    <Button variant="ghost" size="sm" onClick={onEditSubject}>
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={onDeleteSubject}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+      <div className="flex h-12 items-center gap-1 border-b border-slate-200 bg-white px-3">
+        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" onClick={onCreateSubject}>
+          <Plus className="h-4 w-4" />
+          New
+        </Button>
+        <div className="mx-2 h-7 w-px bg-[#e5e7eb]" />
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" disabled title="Cut">
+          <Scissors className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={() => copyTextToClipboard(selectedExplorerUrl)} title="Copy URL">
+          <Copy className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" disabled title="Paste">
+          <Clipboard className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={handleEditSelection} disabled={!canEditSelection} title="Rename">
+          <Pencil className="h-4 w-4" />
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={() => void handleDeleteSelection()} disabled={!canDeleteSelection} title="Delete">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+        <div className="mx-2 h-7 w-px bg-[#e5e7eb]" />
+        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" onClick={onCreateRoot} disabled={!selectedSubject}>
+          <FolderPlus className="h-4 w-4" />
+          New folder
+        </Button>
+        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" disabled>
+          <ListTree className="h-4 w-4" />
+          View
+        </Button>
+        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#1f2937]" title="More">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+        <div className="ml-auto flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <ListTree className="h-4 w-4 text-[#2563eb]" />
+          <span>Details</span>
+        </div>
+      </div>
+
+      <div className="grid h-[calc(100vh-178px)] min-h-[560px] min-w-0 grid-cols-[242px_minmax(0,1fr)] overflow-hidden">
+        <aside
+          className="min-h-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#fbfbfb] px-1.5 py-1 [scrollbar-gutter:stable]"
+          onContextMenu={(event) => openContextMenu(event)}
+        >
+          <div className="space-y-0.5">
+            {subjects.length ? subjects.map((subject) => (
+              <div key={subject.id}>
+                <button
+                  type="button"
+                  onClick={() => onSelectSubject(subject.id)}
+                  onContextMenu={(event) => openContextMenu(event, undefined, undefined, undefined, subject)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px]",
+                    selectedSubject?.id === subject.id ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
+                  )}
+                >
+                  <ChevronRight className={cn("h-3.5 w-3.5 text-[#6b7280]", selectedSubject?.id === subject.id ? "rotate-90" : undefined)} />
+                  <Folder className="h-4 w-4 shrink-0 fill-[#f9c642] text-[#d99800]" />
+                  <span className="min-w-0 flex-1 truncate">{subject.label}</span>
+                </button>
+                {selectedSubject?.id === subject.id ? (
+                  <div className="ml-3 mt-0.5 space-y-0.5 pl-1">
+                    {visibleRows.length ? visibleRows.map(({ node, depth }) => (
+                      <ExplorerTreeRow
+                        key={node.id}
+                        node={node}
+                        depth={depth}
+                        selected={node.id === selectedNode?.id}
+                        expanded={expandedNodeIds.has(node.id)}
+                        onSelectNode={onSelectNode}
+                        onToggleNode={toggleNode}
+                        onCreateChild={handleCreateChild}
+                        onOpenContextMenu={openContextMenu}
+                      />
+                    )) : (
+                      <div className="px-2 py-3 text-xs text-slate-500">Không tìm thấy nội dung phù hợp.</div>
+                    )}
                   </div>
                 ) : null}
               </div>
-
-              <div className="mt-3">
-                <SearchInput value={treeQuery} onChange={setTreeQuery} placeholder="Tìm nhóm, chủ đề, unit" />
-              </div>
-
-              <button
-                type="button"
-                onClick={() => (selectedSubject?.tree[0] ? onSelectNode(selectedSubject.tree[0].id) : undefined)}
+            )) : (
+              <div
+                className="m-2 rounded-md border border-dashed border-slate-300 bg-slate-50 p-3 text-xs leading-5 text-slate-500"
                 onContextMenu={(event) => openContextMenu(event)}
-                className="mt-4 flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-white"
               >
-                <LibraryBig className="h-4 w-4 text-slate-500" />
-                Toàn bộ cấu trúc
-              </button>
-
-              <div className="mt-2 max-h-[calc(100vh-415px)] space-y-1 overflow-y-auto pr-1">
-                {visibleRows.length ? (
-                  visibleRows.map(({ node, depth }) => (
-                    <ExplorerTreeRow
-                      key={node.id}
-                      node={node}
-                      depth={depth}
-                      selectedNodeId={selectedNode?.id ?? ""}
-                      expanded={expandedNodeIds.has(node.id)}
-                      onSelectNode={onSelectNode}
-                      onToggleNode={toggleNode}
-                      onCreateChild={handleCreateChild}
-                      onOpenContextMenu={openContextMenu}
-                    />
-                  ))
-                ) : (
-                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-4 text-sm text-slate-500">Không tìm thấy nội dung phù hợp.</div>
-                )}
+                Chưa có môn học. Bấm New để bắt đầu.
               </div>
-            </aside>
+            )}
+          </div>
+        </aside>
 
-            <section className="min-h-0 min-w-0 overflow-y-auto p-4">
-              <div className="flex flex-col gap-3 border-b border-slate-200 pb-3 lg:flex-row lg:items-start lg:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                    {selectedBreadcrumb.length ? (
-                      selectedBreadcrumb.map((label, index) => (
-                        <span key={`${label}-${index}`} className="inline-flex items-center gap-2">
-                          {index > 0 ? <ChevronRight className="h-3.5 w-3.5 text-slate-300" /> : null}
-                          <span className={index === selectedBreadcrumb.length - 1 ? "text-[var(--erg-blue)]" : undefined}>{label}</span>
-                        </span>
-                      ))
-                    ) : (
-                      <span>Chọn môn để bắt đầu</span>
-                    )}
-                  </div>
-                  <h3 className="mt-1 truncate text-[22px] font-bold text-slate-950">{selectedNode?.label || selectedSubject?.label || "Cấu trúc học liệu"}</h3>
-                  <p className="mt-1 text-sm leading-6 text-slate-500">
-                    {selectedNode
-                      ? selectedNode.description || "Vị trí này chưa có mô tả. Bạn có thể tạo nội dung bên trong hoặc gắn tài liệu vào đây."
-                      : "Chọn một vị trí bên trái hoặc tạo nhóm học liệu đầu tiên cho môn học."}
-                  </p>
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  {selectedNode?.optionId ? (
-                    <>
-                      <Button variant="outline" onClick={onEditNode}>
-                        <Pencil className="h-4 w-4" />
-                        Sửa
-                      </Button>
-                      <Button variant="outline" onClick={onDeleteNode}>
-                        <Trash2 className="h-4 w-4" />
-                        Xóa
-                      </Button>
-                    </>
-                  ) : null}
-                  <Button variant="outline" onClick={onCreateRoot}>
-                    <FolderPlus className="h-4 w-4" />
-                    Tạo mới
-                  </Button>
-                </div>
-              </div>
-
-              <div className="mt-3 rounded-2xl border border-slate-200">
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                  <div>
-                    <div className="font-semibold text-slate-950">Bên trong vị trí đang chọn</div>
-                    <div className="text-xs text-slate-500">Các chủ đề, bài học hoặc unit con sẽ nằm ở đây.</div>
-                  </div>
-                  <Badge tone="outline">{currentChildren.length} mục</Badge>
-                </div>
-                <div className="grid grid-cols-[minmax(0,1fr)_120px_90px_120px] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-                  <span>Tên</span>
-                  <span>Loại</span>
-                  <span>Con</span>
-                  <span className="text-right">Thao tác</span>
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {currentChildren.length ? (
-                    currentChildren.map((child) => (
-                      <button
-                        key={child.id}
-                        type="button"
-                        onClick={() => onSelectNode(child.id)}
-                        className={cn(
-                          "grid w-full grid-cols-[minmax(0,1fr)_120px_90px_120px] items-center gap-3 px-4 py-3 text-left transition hover:bg-blue-50/60",
-                          child.id === selectedNode?.id ? "bg-blue-50" : "bg-white",
-                        )}
-                      >
-                        <span className="flex min-w-0 items-center gap-3">
-                          <span className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-500">{getNodeIcon(child, expandedNodeIds.has(child.id))}</span>
-                          <span className="min-w-0">
-                            <span className="block truncate font-semibold text-slate-950">{child.label}</span>
-                            <span className="block truncate text-xs text-slate-500">{child.description || "Chưa có mô tả"}</span>
-                          </span>
-                        </span>
-                        <Badge tone="secondary">{getNodeKindLabel(child.kind)}</Badge>
-                        <span className="text-sm font-semibold text-slate-600">{child.children.length}</span>
-                        <span className="flex justify-end gap-2">
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              if (child.optionId) handleCreateChild(child);
-                            }}
-                            onKeyDown={(event) => {
-                              if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                if (child.optionId) handleCreateChild(child);
-                              }
-                            }}
-                            className={cn(
-                              "inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 px-3 text-xs font-semibold text-slate-700 hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]",
-                              !child.optionId && "pointer-events-none text-slate-300",
-                            )}
-                          >
-                            + Con
-                          </span>
-                        </span>
-                      </button>
-                    ))
-                  ) : (
-                    <div className="flex min-h-[180px] flex-col items-center justify-center px-6 text-center">
-                      <span className="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-400">
-                        <Folder className="h-7 w-7" />
-                      </span>
-                      <div className="mt-4 font-semibold text-slate-950">Chưa có nội dung bên trong</div>
-                      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">Chọn Thêm bên trong để tạo chủ đề, bài học hoặc unit mới tại đúng vị trí này.</p>
-                      <Button onClick={() => handleCreateChild()} disabled={!canCreateChild} className="mt-4 bg-[var(--erg-blue)] hover:bg-blue-800">
-                        <Plus className="h-4 w-4" />
-                        Thêm bên trong
-                      </Button>
-                    </div>
+        <section
+          className="min-h-0 min-w-0 overflow-hidden bg-white"
+          onContextMenu={(event) => openContextMenu(event)}
+        >
+          <div className="grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
+            <span className="border-r border-[#e5e7eb] px-4 py-1.5">Name</span>
+            <span className="border-r border-[#e5e7eb] px-3 py-1.5">Date modified</span>
+            <span className="border-r border-[#e5e7eb] px-3 py-1.5">Type</span>
+            <span className="px-3 py-1.5">Size</span>
+          </div>
+          <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
+            {showChildrenPanel && currentChildren.map((child) => {
+              const childUrl = buildExplorerPathUrl(selectedSubject, selectedPath, child);
+              return (
+                <button
+                  key={child.id}
+                  type="button"
+                  onClick={() => setSelection({ type: "node", id: child.id })}
+                  onDoubleClick={() => onSelectNode(child.id)}
+                  onContextMenu={(event) => openContextMenu(event, child)}
+                  className={cn(
+                    "grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                    selection?.type === "node" && selection.id === child.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
                   )}
+                  title={childUrl}
+                >
+                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                    <span className="shrink-0 text-[#d99800]">{getNodeIcon(child, expandedNodeIds.has(child.id))}</span>
+                    <span className="truncate text-[#111827]">{child.label}</span>
+                  </span>
+                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(child.id)}</span>
+                  <span className="truncate px-3 text-[#4b5563]">File folder</span>
+                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(child)}</span>
+                </button>
+              );
+            })}
+            {currentLocalContentItems.map((item) => {
+              const link = getDisplayLink(item);
+              const itemUrl = link || buildExplorerPathUrl(selectedSubject, selectedPath, item);
+              return (
+                <div
+                  key={item.id}
+                  onClick={() => setSelection({ type: "local-content", id: item.id })}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelection({ type: "local-content", id: item.id });
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onContextMenu={(event) => openContextMenu(event, undefined, item)}
+                  className={cn(
+                    "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                    selection?.type === "local-content" && selection.id === item.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
+                  )}
+                  title={itemUrl}
+                >
+                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                    <span className="shrink-0 text-[#2563eb]">{item.kind === "lecture" ? <Presentation className="h-4 w-4" /> : <FileCheck className="h-4 w-4" />}</span>
+                    <span className="truncate text-[#111827]">{item.title}</span>
+                  </span>
+                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(item.id)}</span>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      if (link && typeof window !== "undefined") window.open(link, "_blank", "noopener,noreferrer");
+                    }}
+                    className="truncate px-3 text-left text-[#4b5563] hover:underline"
+                    title={itemUrl}
+                  >
+                    {item.kind === "lecture" ? "Microsoft PowerP..." : "Learning activity"}
+                  </button>
+                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(item)}</span>
                 </div>
-              </div>
-
-              <div className="mt-3 rounded-2xl border border-slate-200">
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-                  <div>
-                    <div className="font-semibold text-slate-950">Nội dung đã gắn tại đây</div>
-                    <div className="text-xs text-slate-500">Tài liệu, bài giảng và bài tập được thêm từ popup sẽ hiển thị tại đây.</div>
-                  </div>
-                  <Badge tone={totalAttachedItems ? "success" : "outline"}>{totalAttachedItems} mục</Badge>
+              );
+            })}
+            {currentAttachedResources.map((resource) => {
+              const resourceUrl = resource.linkUrl || buildExplorerPathUrl(selectedSubject, selectedPath, resource);
+              return (
+                <div
+                  key={resource.id}
+                  onClick={() => setSelection({ type: "resource", id: resource.id })}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setSelection({ type: "resource", id: resource.id });
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  onContextMenu={(event) => openContextMenu(event, undefined, undefined, resource)}
+                  className={cn(
+                    "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                    selection?.type === "resource" && selection.id === resource.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
+                  )}
+                  title={resourceUrl}
+                >
+                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                    <FileText className="h-4 w-4 shrink-0 text-[#2563eb]" />
+                    <span className="truncate text-[#111827]">{resource.title}</span>
+                  </span>
+                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleOpenResourceLink(resource);
+                    }}
+                    className="truncate px-3 text-left text-[#4b5563] hover:underline"
+                    title={resourceUrl}
+                  >
+                    {getResourceDisplayBadge(resource)}
+                  </button>
+                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
                 </div>
-                {totalAttachedItems ? (
-                  <div className="grid gap-2 p-3">
-                    {currentLocalContentItems.map((item) => (
-                      <div key={item.id} className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white text-[var(--erg-blue)]">
-                          {item.kind === "lecture" ? <Presentation className="h-5 w-5" /> : <FileCheck className="h-5 w-5" />}
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-semibold text-slate-950">{item.title}</div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <Badge tone="secondary">{item.kind === "lecture" ? "Bài giảng" : "Bài tập"}</Badge>
-                            {item.kind === "lecture" ? <span>Google Slides</span> : <span>{item.questionCount} câu hỏi</span>}
-                            {item.kind === "exercise" && item.durationMinutes ? <span>{item.durationMinutes} phút</span> : null}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                    {currentResources.map((resource) => (
-                      <div key={resource.id} className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-                        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-slate-100 text-[var(--erg-blue)]">
-                          <FileText className="h-5 w-5" />
-                        </span>
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-semibold text-slate-950">{resource.title}</div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                            <Badge tone="secondary">{resource.fileTypeBadge || resource.selectedFileType}</Badge>
-                            <span>{resource.status || "draft"}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="flex min-h-[160px] flex-col items-center justify-center px-6 text-center">
-                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-slate-100 text-slate-400">
-                      <FileText className="h-6 w-6" />
-                    </span>
-                    <div className="mt-3 font-semibold text-slate-950">Chưa có nội dung gắn vào mục này</div>
-                    <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500">Dùng nút Thêm bên trong để mở popup lớn và thêm tài liệu, bài giảng hoặc bài tập.</p>
-                  </div>
-                )}
+              );
+            })}
+            {!currentChildren.length && !totalAttachedItems ? (
+              <div className="flex h-full min-h-[340px] flex-col items-center justify-center text-center text-[13px]">
+                <Folder className="h-12 w-12 text-[#cbd5e1]" />
+                <div className="mt-3 font-semibold text-[#111827]">This folder is empty</div>
+                <p className="mt-1 max-w-sm text-[#64748b]">Dùng chuột phải hoặc nút New để tạo thư mục, bài học hoặc gắn tài liệu.</p>
               </div>
-            </section>
+            ) : null}
+          </div>
+        </section>
 
             {contextMenu ? (
               <StructureContextMenu
                 x={contextMenu.x}
                 y={contextMenu.y}
                 node={contextMenu.node}
+                localContent={contextMenu.localContent}
+                resource={contextMenu.resource}
+                subject={contextMenu.subject}
+                canCopyUrl={Boolean(contextMenu.node || contextMenu.localContent || contextMenu.resource || contextMenu.subject || selectedSubject)}
+                canCreateRoot={Boolean(contextMenu.subject || selectedSubject)}
+                canCreateChild={Boolean((contextMenu.node ?? selectedNode)?.optionId)}
+                onCreateSubject={() => {
+                  setContextMenu(null);
+                  onCreateSubject();
+                }}
                 onCreateRoot={() => {
                   setContextMenu(null);
                   onCreateRoot();
@@ -1226,11 +1530,69 @@ function StructureScreen({
                   setContextMenu(null);
                   handleCreateChild(contextMenu.node ?? selectedNode);
                 }}
+                onRefresh={() => {
+                  setContextMenu(null);
+                  void onRefreshData();
+                }}
+                onEdit={() => {
+                  setContextMenu(null);
+                  if (contextMenu.subject) {
+                    onEditSubject();
+                    return;
+                  }
+                  handleEditSelection();
+                }}
+                onDelete={() => {
+                  setContextMenu(null);
+                  if (contextMenu.subject) {
+                    onDeleteSubject();
+                    return;
+                  }
+                  void handleDeleteSelection();
+                }}
+                onOpen={() => {
+                  const targetResource = contextMenu.resource;
+                  const targetLocal = contextMenu.localContent;
+                  const targetNode = contextMenu.node;
+                  const targetSubject = contextMenu.subject;
+                  setContextMenu(null);
+                  if (targetSubject) {
+                    onSelectSubject(targetSubject.id);
+                    return;
+                  }
+                  if (targetResource) {
+                    handleOpenResourceLink(targetResource);
+                    return;
+                  }
+                  const localLink = targetLocal ? getDisplayLink(targetLocal) : undefined;
+                  if (localLink && typeof window !== "undefined") {
+                    window.open(localLink, "_blank", "noopener,noreferrer");
+                    return;
+                  }
+                  if (targetNode) onSelectNode(targetNode.id);
+                }}
+                onCopyUrl={() => {
+                  const target = contextMenu.node || contextMenu.localContent || contextMenu.resource;
+                  const link = contextMenu.resource ? getDisplayLink(contextMenu.resource) : contextMenu.localContent ? getDisplayLink(contextMenu.localContent) : undefined;
+                  const subjectPath = contextMenu.subject ? buildExplorerPathUrl(contextMenu.subject, []) : buildExplorerPathUrl(selectedSubject, selectedPath, target);
+                  copyTextToClipboard(link || subjectPath);
+                  setContextMenu(null);
+                }}
               />
             ) : null}
-          </div>
-        </div>
-      </section>
+            <ResourceEditDialog
+              target={editingResource}
+              onClose={() => setEditingResource(null)}
+              onSaved={async () => {
+                setEditingResource(null);
+                await onRefreshData();
+              }}
+            />
+      </div>
+      <div className="flex h-6 items-center justify-between border-t border-[#e5e7eb] bg-white px-3 text-[12px] text-[#334155]">
+        <span>{currentChildren.length + totalAttachedItems} items</span>
+        <span className="max-w-[60%] truncate" title={selectedExplorerUrl}>{selectedExplorerUrl}</span>
+      </div>
     </div>
   );
 }
@@ -1239,46 +1601,91 @@ function StructureContextMenu({
   x,
   y,
   node,
+  localContent,
+  resource,
+  subject,
+  canCopyUrl,
+  canCreateRoot,
+  canCreateChild,
+  onCreateSubject,
   onCreateRoot,
   onCreateChild,
+  onRefresh,
+  onEdit,
+  onDelete,
+  onOpen,
+  onCopyUrl,
 }: {
   x: number;
   y: number;
   node?: StudioNode;
+  localContent?: LocalContentItem;
+  resource?: AttachedResourceItem;
+  subject?: StudioSubject;
+  canCopyUrl: boolean;
+  canCreateRoot: boolean;
+  canCreateChild: boolean;
+  onCreateSubject: () => void;
   onCreateRoot: () => void;
   onCreateChild: () => void;
+  onRefresh: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+  onOpen: () => void;
+  onCopyUrl: () => void;
 }) {
-  const canCreateChild = Boolean(node?.optionId);
+  const hasTarget = Boolean(node || localContent || resource || subject);
+  const canOpen = Boolean(subject || node || resource?.linkUrl || (localContent && getDisplayLink(localContent)));
+  const targetTitle = node?.label || localContent?.title || resource?.title || subject?.label || "Vị trí hiện tại";
+  const targetType = node ? getNodeKindLabel(node.kind) : localContent ? (localContent.kind === "lecture" ? "Bài giảng" : "Bài tập") : resource ? getResourceDisplayBadge(resource) : subject ? "Môn học" : "Thư mục hiện tại";
   return (
     <div
-      className="fixed z-50 w-64 overflow-hidden rounded-2xl border border-slate-200 bg-white py-2 shadow-[0_24px_80px_-28px_rgba(15,23,42,0.55)]"
+      className="fixed z-50 w-[294px] overflow-hidden rounded-md border border-[#d8d8d8] bg-white py-1 text-[13px] text-[#1f1f1f] shadow-[0_8px_24px_rgba(15,23,42,0.18)]"
       style={{ left: x, top: y }}
       onClick={(event) => event.stopPropagation()}
     >
-      <div className="border-b border-slate-100 px-4 pb-2 pt-1">
-        <div className="truncate text-sm font-semibold text-slate-950">{node?.label || "Cấu trúc học liệu"}</div>
-        <div className="text-xs text-slate-500">{node ? getNodeKindLabel(node.kind) : "Root môn học"}</div>
+      <div className="border-b border-[#eeeeee] px-3 py-2">
+        <div className="truncate font-medium">{targetTitle}</div>
+        <div className="truncate text-[12px] text-[#6b7280]">{targetType}</div>
       </div>
-      <button type="button" onClick={onCreateRoot} className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50">
-        <FolderPlus className="h-4 w-4 text-[var(--erg-blue)]" />
-        Tạo chủ đề đầu tiên
+      <button type="button" onClick={onOpen} disabled={!canOpen} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
+        <ArrowUpRight className="h-4 w-4 text-[#374151]" />
+        Mở
+      </button>
+      <button type="button" onClick={onRefresh} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6]">
+        <RefreshCw className="h-4 w-4 text-[#374151]" />
+        Làm mới dữ liệu
+      </button>
+      <div className="my-1 h-px bg-[#eeeeee]" />
+      <button type="button" onClick={onEdit} disabled={!hasTarget} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
+        <Pencil className="h-4 w-4 text-[#374151]" />
+        Sửa tên / thông tin
+      </button>
+      <button type="button" onClick={onCopyUrl} disabled={!canCopyUrl} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
+        <Copy className="h-4 w-4 text-[#374151]" />
+        Copy đường dẫn
+      </button>
+      <button type="button" onClick={onDelete} disabled={!hasTarget} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
+        <Trash2 className="h-4 w-4 text-[#dc2626]" />
+        Xóa
+      </button>
+      <div className="my-1 h-px bg-[#eeeeee]" />
+      <button type="button" onClick={onCreateSubject} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6]">
+        <BookOpen className="h-4 w-4 text-[#374151]" />
+        Tạo môn học
+      </button>
+      <button type="button" onClick={onCreateRoot} disabled={!canCreateRoot} className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]">
+        <FolderPlus className="h-4 w-4 text-[#374151]" />
+        Tạo nhóm học liệu
       </button>
       <button
         type="button"
         onClick={onCreateChild}
         disabled={!canCreateChild}
-        className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300"
+        className="flex w-full items-center gap-3 px-3 py-1.5 text-left hover:bg-[#f3f4f6] disabled:cursor-not-allowed disabled:text-[#9ca3af]"
       >
-        <Plus className="h-4 w-4 text-[var(--erg-blue)]" />
+        <Plus className="h-4 w-4 text-[#374151]" />
         Thêm bên trong
-      </button>
-      <button type="button" disabled className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-slate-300">
-        <FileUp className="h-4 w-4" />
-        Gắn tài liệu vào đây
-      </button>
-      <button type="button" disabled className="flex w-full cursor-not-allowed items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-slate-300">
-        <Settings2 className="h-4 w-4" />
-        Sửa thông tin hiển thị
       </button>
     </div>
   );
@@ -1294,8 +1701,8 @@ function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; r
             <CardDescription>Cập nhật thông tin, trạng thái và nơi gắn tài liệu.</CardDescription>
           </div>
           <Button className="bg-[var(--erg-blue)] hover:bg-blue-800">
-            <FileUp className="h-4 w-4" />
-            Upload tài liệu
+            <LinkIcon className="h-4 w-4" />
+            Gắn link tài liệu
           </Button>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
@@ -1326,7 +1733,7 @@ function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; r
                 <div className="min-w-0 flex-1">
                   <div className="truncate font-semibold text-slate-950">{resource.title}</div>
                   <div className="mt-1 text-sm text-slate-500">
-                    {resource.fileTypeBadge || resource.selectedFileType} · {resource.status || "draft"}
+                    {resource.fileTypeBadge || resource.selectedFileType} · {getPublishStatusLabel(resource.status)}
                   </div>
                 </div>
                 <Button variant="outline" size="sm">
@@ -1362,7 +1769,8 @@ function UploadScreen({
   const location = buildResourceLocation(path);
   const [title, setTitle] = useState("");
   const [fileType, setFileType] = useState("PDF");
-  const [file, setFile] = useState<File | null>(null);
+  const [resourceUrl, setResourceUrl] = useState("");
+  const [totalSlides, setTotalSlides] = useState("");
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -1376,16 +1784,21 @@ function UploadScreen({
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!file || !subject || !location.categoryId) {
-      setMessage("Vui lòng chọn môn, vị trí có nhóm học liệu và file cần upload.");
+    const normalizedUrl = normalizeGoogleViewerUrl(resourceUrl);
+    if (!normalizedUrl || !subject || !location.categoryId) {
+      setMessage("Vui lòng chọn môn, vị trí có nhóm học liệu và dán link Google Drive/Google Slides.");
+      return;
+    }
+    const parsedTotalSlides = parsePositiveInteger(totalSlides);
+    if (fileType === "PPTX" && totalSlides.trim() && !parsedTotalSlides) {
+      setMessage("Tổng số slide phải là số nguyên lớn hơn 0.");
       return;
     }
     setSaving(true);
     setMessage("");
     try {
       await uploadHocLieuResource({
-        file,
-        title: title.trim() || file.name,
+        title: title.trim() || "Tài liệu Google Drive",
         selectedFileType: fileType,
         subjectId: subject.id,
         programSlug: subject.id,
@@ -1396,13 +1809,16 @@ function UploadScreen({
         documentTypeId: location.categoryId,
         status: "published",
         visibility: "public",
+        upstreamUrl: normalizedUrl,
+        totalSlides: parsedTotalSlides,
         canDownload: fileType !== "PPTX",
       });
-      setMessage("Đã upload và gắn tài liệu vào đúng vị trí trong cây học liệu.");
+      setMessage("Đã lưu link và gắn tài liệu vào đúng vị trí trong cây học liệu.");
       setTitle("");
-      setFile(null);
+      setResourceUrl("");
+      setTotalSlides("");
     } catch (error) {
-      setMessage(error instanceof Error ? error.message : "Không upload được tài liệu.");
+      setMessage(error instanceof Error ? error.message : "Không lưu được link tài liệu.");
     } finally {
       setSaving(false);
     }
@@ -1412,8 +1828,8 @@ function UploadScreen({
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
       <Card>
         <CardHeader>
-          <CardTitle>Upload tài liệu mới</CardTitle>
-          <CardDescription>Chọn môn, vị trí trong cấu trúc và loại tài liệu. File sẽ được gửi lên BE và gắn vào đúng node.</CardDescription>
+          <CardTitle>Gắn tài liệu bằng link</CardTitle>
+          <CardDescription>Chọn môn, vị trí trong cấu trúc và dán link Google Drive/Google Slides để giáo viên mở trực tiếp.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 md:grid-cols-2" onSubmit={handleUpload}>
@@ -1449,19 +1865,36 @@ function UploadScreen({
               </select>
             </Field>
             <div className="md:col-span-2">
-              <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 text-center transition hover:border-[var(--erg-blue)] hover:bg-blue-50">
-                <FileUp className="h-10 w-10 text-[var(--erg-blue)]" />
-                <div className="mt-4 font-semibold text-slate-950">{file ? file.name : "Kéo thả hoặc bấm để chọn file"}</div>
-                <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                  API thật: tạo resource, upload asset và mapping vào {location.categoryId ? "vị trí đang chọn" : "nhóm học liệu hợp lệ"}.
+              <Field label="Link Google Drive / Google Slides">
+                <Input
+                  value={resourceUrl}
+                  onChange={(event) => setResourceUrl(event.target.value)}
+                  placeholder="Dán link share, preview hoặc embed từ Google Drive"
+                />
+                <p className="text-xs leading-5 text-slate-500">
+                  FE sẽ lưu link vào asset, không upload file thật. Link Google Drive dạng `/file/d/.../view` sẽ được chuẩn hóa về `/preview`.
                 </p>
-                <input className="sr-only" type="file" onChange={(event) => setFile(event.target.files?.[0] ?? null)} />
-              </label>
+              </Field>
             </div>
+            {fileType === "PPTX" ? (
+              <div className="md:col-span-2">
+                <Field label="Tổng số slide">
+                  <Input
+                    value={totalSlides}
+                    onChange={(event) => setTotalSlides(event.target.value.replace(/[^\d]/g, ""))}
+                    inputMode="numeric"
+                    placeholder="Ví dụ: 20"
+                  />
+                  <p className="text-xs leading-5 text-slate-500">
+                    Dùng cho popup xác nhận khi giáo viên back hoặc tắt bài trình chiếu.
+                  </p>
+                </Field>
+              </div>
+            ) : null}
             {message ? <div className="md:col-span-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-900">{message}</div> : null}
             <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" disabled={saving || !file || !subject || !location.categoryId} className="bg-[var(--erg-blue)] hover:bg-blue-800">
-                {saving ? "Đang upload..." : "Upload và gắn tài liệu"}
+              <Button type="submit" disabled={saving || !resourceUrl.trim() || !subject || !location.categoryId} className="bg-[var(--erg-blue)] hover:bg-blue-800">
+                {saving ? "Đang lưu..." : "Lưu link và gắn tài liệu"}
               </Button>
             </div>
           </form>
@@ -1471,14 +1904,14 @@ function UploadScreen({
       <Card>
         <CardHeader>
           <CardTitle>Thông tin vị trí</CardTitle>
-          <CardDescription>Giúp giáo viên kiểm tra file sẽ được gắn vào đâu trước khi upload.</CardDescription>
+          <CardDescription>Giúp giáo viên kiểm tra link sẽ được gắn vào đâu trước khi lưu.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <InfoRow label="Môn" value={subject?.label ?? "Chưa chọn"} />
           <InfoRow label="Vị trí" value={pathLabel(subject?.label ?? "", path) || "Chưa chọn"} />
           <InfoRow label="Loại" value={node ? getNodeKindLabel(node.kind) : "Chưa chọn"} />
           <ChecklistItem label={location.categoryId ? "Đã xác định nhóm học liệu" : "Cần chọn một nhóm học liệu"} />
-          <ChecklistItem label={file ? "Đã chọn file" : "Chưa chọn file"} />
+          <ChecklistItem label={resourceUrl.trim() ? "Đã nhập link tài liệu" : "Chưa nhập link tài liệu"} />
         </CardContent>
       </Card>
     </div>
@@ -1496,6 +1929,12 @@ function buildResourceLocation(path: StudioNode[]) {
   return location;
 }
 
+function parsePositiveInteger(value: string) {
+  const normalized = Number(value.trim());
+  if (!Number.isInteger(normalized) || normalized <= 0) return undefined;
+  return normalized;
+}
+
 function pathLabel(subjectLabel: string, path: StudioNode[]) {
   return [subjectLabel, ...path.map((item) => item.label)].filter(Boolean).join(" / ");
 }
@@ -1504,8 +1943,8 @@ function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; res
   return (
     <div className="grid gap-5 lg:grid-cols-3">
       <PublishCard title="Môn học" value={subjects.length} description="Sẵn sàng đưa vào catalog." />
-      <PublishCard title="Tài liệu" value={resources.length} description="Đang có trong kho Hoclieu." />
-      <PublishCard title="Cần kiểm tra" value={resources.filter((item) => item.status !== "published").length} description="Chưa ở trạng thái published." />
+      <PublishCard title="Tài liệu" value={resources.length} description="Đang có trong kho học liệu." />
+      <PublishCard title="Cần kiểm tra" value={resources.filter((item) => item.status !== "published").length} description="Chưa ở trạng thái đã xuất bản." />
       <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle>Luồng xuất bản đề xuất</CardTitle>
@@ -1514,7 +1953,7 @@ function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; res
         <CardContent className="grid gap-4 md:grid-cols-4">
           <PublishStep icon={<BookOpen className="h-5 w-5" />} title="Môn học" description="Có tên, mô tả và trạng thái." />
           <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có nhóm học liệu, chủ đề và unit/lesson." />
-          <PublishStep icon={<FileUp className="h-5 w-5" />} title="Tài liệu" description="File đã upload và gắn đúng vị trí." />
+          <PublishStep icon={<LinkIcon className="h-5 w-5" />} title="Tài liệu" description="Link tài liệu đã được gắn đúng vị trí." />
           <PublishStep icon={<Settings2 className="h-5 w-5" />} title="Public" description="Kiểm tra visibility trước khi lên web." />
         </CardContent>
       </Card>
@@ -1522,10 +1961,10 @@ function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; res
   );
 }
 
-function ExplorerTreeRow({
+const ExplorerTreeRow = memo(function ExplorerTreeRow({
   node,
   depth = 0,
-  selectedNodeId,
+  selected,
   expanded,
   onSelectNode,
   onToggleNode,
@@ -1534,36 +1973,35 @@ function ExplorerTreeRow({
 }: {
   node: StudioNode;
   depth?: number;
-  selectedNodeId: string;
+  selected: boolean;
   expanded: boolean;
   onSelectNode: (id: string) => void;
   onToggleNode: (id: string) => void;
   onCreateChild: (node: StudioNode) => void;
   onOpenContextMenu: (event: MouseEvent, node: StudioNode) => void;
 }) {
-  const selected = node.id === selectedNodeId;
   const hasChildren = node.children.length > 0;
   return (
     <div
       className={cn(
-        "group grid grid-cols-[28px_minmax(0,1fr)_32px] items-center gap-2 rounded-2xl px-3 py-2 text-sm transition",
-        selected ? "bg-blue-100 text-[var(--erg-blue)]" : "text-slate-700 hover:bg-white",
+        "group grid grid-cols-[18px_minmax(0,1fr)_24px] items-center gap-1 rounded-sm py-0.5 text-[13px]",
+        selected ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
       )}
-      style={{ paddingLeft: `${12 + Math.min(depth, 8) * 20}px` }}
+      style={{ paddingLeft: `${4 + Math.min(depth, 8) * 18}px` }}
       onContextMenu={(event) => onOpenContextMenu(event, node)}
     >
       <button
         type="button"
         onClick={() => (hasChildren ? onToggleNode(node.id) : onSelectNode(node.id))}
-        className="grid h-7 w-7 place-items-center rounded-xl text-slate-400 hover:bg-slate-100"
+        className="grid h-6 w-5 place-items-center rounded text-[#6b7280]"
         aria-label={expanded ? "Thu gọn" : "Mở rộng"}
       >
-        {hasChildren ? (expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />) : <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />}
+        {hasChildren ? (expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />) : <span />}
       </button>
-      <button type="button" onClick={() => onSelectNode(node.id)} className="flex min-w-0 items-start gap-2 rounded-xl px-1 py-1 text-left">
-        <span className={cn("mt-0.5 shrink-0 text-slate-500", selected ? "text-[var(--erg-blue)]" : undefined)}>{getNodeIcon(node, expanded)}</span>
+      <button type="button" onClick={() => onSelectNode(node.id)} className="flex min-w-0 items-center gap-2 rounded px-1 py-1 text-left">
+        <span className={cn("shrink-0 text-[#d99800]", selected ? "text-[#d99800]" : undefined)}>{getNodeIcon(node, expanded)}</span>
         <span
-          className="line-clamp-2 break-words text-[15px] font-medium leading-5 text-slate-900"
+          className="truncate text-[13px] leading-5 text-[#111827]"
           title={node.label}
         >
           {node.label}
@@ -1573,14 +2011,14 @@ function ExplorerTreeRow({
         type="button"
         onClick={() => onCreateChild(node)}
         disabled={!node.optionId}
-        className="grid h-8 w-8 place-items-center rounded-xl text-slate-400 opacity-0 transition hover:bg-blue-50 hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:text-slate-200 group-hover:opacity-100"
+        className="grid h-6 w-6 place-items-center rounded text-[#9ca3af] opacity-0 hover:bg-[#dceeff] hover:text-[#2563eb] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1]"
         aria-label="Thêm nội dung bên trong"
       >
-        <Plus className="h-4 w-4" />
+        <Plus className="h-3.5 w-3.5" />
       </button>
     </div>
   );
-}
+});
 
 function getNodeIcon(node: StudioNode, expanded?: boolean) {
   const text = `${node.label} ${node.description ?? ""}`.toLowerCase();
@@ -1655,10 +2093,90 @@ function filterTree(nodes: StudioNode[], query: string): StudioNode[] {
     .filter(Boolean) as StudioNode[];
 }
 
-function formatFileSize(size: number) {
-  if (!Number.isFinite(size) || size <= 0) return "0 KB";
-  if (size < 1024 * 1024) return `${Math.max(1, Math.round(size / 1024))} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+function defaultStatusForOption(option: ContentDialogOptionId | null, isSubject: boolean) {
+  if (isSubject || option === "category" || option === "section" || option === null) {
+    return "active";
+  }
+  return "published";
+}
+
+function StatusSelectField({
+  value,
+  onChange,
+  taxonomy = false,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  taxonomy?: boolean;
+}) {
+  return (
+    <Field label="Trạng thái">
+      <select value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
+        <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
+        <option value="draft">Bản nháp</option>
+        <option value="hidden">Đã ẩn</option>
+      </select>
+    </Field>
+  );
+}
+
+function ContentTextFields({
+  titleLabel = "Tên hiển thị",
+  titlePlaceholder,
+  titleValue,
+  onTitleChange,
+  descriptionLabel = "Mô tả",
+  descriptionPlaceholder,
+  descriptionValue,
+  onDescriptionChange,
+  autoFocus = false,
+}: {
+  titleLabel?: string;
+  titlePlaceholder?: string;
+  titleValue: string;
+  onTitleChange: (value: string) => void;
+  descriptionLabel?: string;
+  descriptionPlaceholder?: string;
+  descriptionValue: string;
+  onDescriptionChange: (value: string) => void;
+  autoFocus?: boolean;
+}) {
+  return (
+    <>
+      <Field label={titleLabel}>
+        <Input value={titleValue} onChange={(event) => onTitleChange(event.target.value)} placeholder={titlePlaceholder} autoFocus={autoFocus} />
+      </Field>
+      <Field label={descriptionLabel}>
+        <textarea
+          value={descriptionValue}
+          onChange={(event) => onDescriptionChange(event.target.value)}
+          placeholder={descriptionPlaceholder}
+          className={cn(inputClassName, "min-h-24 py-3")}
+        />
+      </Field>
+    </>
+  );
+}
+
+function ContentLinkField({
+  label,
+  value,
+  onChange,
+  placeholder,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  hint?: string;
+}) {
+  return (
+    <Field label={label}>
+      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+      {hint ? <p className="text-xs leading-5 text-slate-500">{hint}</p> : null}
+    </Field>
+  );
 }
 
 function TaxonomyCreateDialog({
@@ -1691,7 +2209,8 @@ function TaxonomyCreateDialog({
     bookSeriesId?: string;
     topicId?: string;
     documentTypeId?: string;
-    selectedFileType: "LINK";
+    selectedFileType: "PPTX";
+    totalSlides?: number;
     status: string;
     visibility: string;
     canDownload: boolean;
@@ -1705,22 +2224,42 @@ function TaxonomyCreateDialog({
   const [description, setDescription] = useState("");
   const [kind, setKind] = useState<TaxonomyCreateKind>("category");
   const [slidesUrl, setSlidesUrl] = useState("");
+  const [slidesTotal, setSlidesTotal] = useState("");
   const [exerciseQuery, setExerciseQuery] = useState("");
   const [selectedExerciseIds, setSelectedExerciseIds] = useState<string[]>([]);
   const [resourceFileType, setResourceFileType] = useState("PDF");
-  const [resourceFile, setResourceFile] = useState<File | null>(null);
+  const [resourceUrl, setResourceUrl] = useState("");
+  const [resourceTotalSlides, setResourceTotalSlides] = useState("");
+  const [status, setStatus] = useState("active");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const open = Boolean(state);
   const isSubject = state?.mode === "subject";
-  const title = isSubject ? "Tạo môn học" : state?.mode === "root" ? "Tạo chủ đề đầu tiên" : "Thêm nội dung bên trong";
+  const title = isSubject
+    ? "Tạo môn học"
+    : state?.mode === "root"
+      ? "Tạo nhóm học liệu"
+      : selectedNode?.kind === "group"
+        ? "Tạo bài học"
+        : selectedNode?.kind === "lesson"
+          ? "Thêm tài liệu vào bài học"
+          : "Thêm nội dung bên trong";
   const descriptionText = isSubject
     ? "Môn học là cấp đầu tiên. Sau khi tạo, bạn sẽ xây dựng các nhóm học liệu, chủ đề và unit bên trong."
     : state?.mode === "root"
-      ? "Tạo cấp đầu tiên dưới môn học, ví dụ Sách mềm, Hợp phần bổ trợ, Level 1 hoặc nhóm học liệu chính."
-      : "Nội dung mới sẽ nằm bên trong chủ đề, bài học hoặc unit đang chọn.";
-  const availableOptions = getAvailableContentOptions(state?.mode ?? "subject", selectedNode?.kind as "group" | "lesson" | "folder" | undefined);
+      ? "Tạo một nhóm học liệu ở cấp đầu tiên dưới môn học, ví dụ Level 1, Level 2 hoặc Học phần bổ trợ."
+      : selectedNode?.kind === "group"
+        ? "Tạo bài học nằm bên trong nhóm học liệu đang chọn."
+        : selectedNode?.kind === "lesson"
+          ? "Chọn loại nội dung cần gắn vào bài học: bài giảng, bài tập hoặc tài liệu."
+          : "Nội dung mới sẽ nằm bên trong vị trí đang chọn.";
+  const selectedContentNodeKind =
+    selectedNode?.kind === "group" || selectedNode?.kind === "lesson" || selectedNode?.kind === "folder" ? selectedNode.kind : undefined;
+  const availableOptions = useMemo(
+    () => getAvailableContentOptions(state?.mode ?? "subject", selectedContentNodeKind),
+    [selectedContentNodeKind, state?.mode],
+  );
   const selectedOptionMeta = selectedOption ? getAddContentOptionMeta(selectedOption) : null;
   const resourceLocation = buildResourceLocation(selectedPath);
   const filteredExercises = filterMockExercises(mockExerciseLibrary, {
@@ -1733,19 +2272,23 @@ function TaxonomyCreateDialog({
 
   useEffect(() => {
     if (!open) return;
-    setStep(isSubject ? "details" : "pick");
-    setSelectedOption(isSubject ? "category" : null);
+    const autoOption = isSubject ? "category" : availableOptions.length === 1 ? availableOptions[0] : null;
+    setStep(autoOption ? "details" : "pick");
+    setSelectedOption(autoOption);
     setLabel("");
     setDescription("");
-    setKind("category");
+    setKind(autoOption === "section" ? "section" : "category");
     setSlidesUrl("");
+    setSlidesTotal("");
     setExerciseQuery("");
     setSelectedExerciseIds([]);
     setResourceFileType("PDF");
-    setResourceFile(null);
+    setResourceUrl("");
+    setResourceTotalSlides("");
+    setStatus(defaultStatusForOption(autoOption, isSubject));
     setError("");
     setSaving(false);
-  }, [isSubject, open, state?.mode]);
+  }, [availableOptions, isSubject, open, selectedNode?.kind, state?.mode]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -1758,6 +2301,8 @@ function TaxonomyCreateDialog({
         if (!trimmedLabel) throw new Error("Vui lòng nhập tên bài giảng.");
         if (!selectedSubject || !selectedNode?.optionId) throw new Error("Vui lòng chọn lesson hoặc bài học trước.");
         if (!normalizedSlidesUrl) throw new Error("Vui lòng dán link Google Slides.");
+        const parsedTotalSlides = parsePositiveInteger(slidesTotal);
+        if (slidesTotal.trim() && !parsedTotalSlides) throw new Error("Tổng số slide phải là số nguyên lớn hơn 0.");
         const resourceLocation = buildResourceLocation(selectedPath);
         if (!resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được nhóm học liệu để gắn bài giảng.");
         await onCreateLecture({
@@ -1771,10 +2316,11 @@ function TaxonomyCreateDialog({
           sectionId: resourceLocation.sectionId,
           bookSeriesId: resourceLocation.bookSeriesId,
           topicId: resourceLocation.topicId,
-          documentTypeId: resourceLocation.categoryId,
-          selectedFileType: "LINK",
-          status: "published",
-          visibility: "public",
+          documentTypeId: "lecture",
+          selectedFileType: "PPTX",
+          totalSlides: parsedTotalSlides,
+          status,
+          visibility: status === "hidden" ? "private" : "public",
           canDownload: false,
         });
         return;
@@ -1798,18 +2344,21 @@ function TaxonomyCreateDialog({
             sectionLabel: item.sectionLabel,
             questionCount: item.questionCount,
             durationMinutes: item.durationMinutes,
+            status,
           })),
         );
         return;
       }
 
       if (selectedOption === "resource") {
+        const normalizedResourceUrl = normalizeGoogleViewerUrl(resourceUrl);
         if (!selectedSubject || !selectedNode) throw new Error("Vui lòng chọn vị trí cần gắn tài liệu.");
         if (!resourceLocation.categoryId) throw new Error("Vị trí hiện tại chưa xác định được nhóm học liệu để gắn tài liệu.");
-        if (!resourceFile) throw new Error("Vui lòng chọn file cần upload.");
+        if (!normalizedResourceUrl) throw new Error("Vui lòng dán link Google Drive/Google Slides.");
+        const parsedTotalSlides = parsePositiveInteger(resourceTotalSlides);
+        if (resourceFileType === "PPTX" && resourceTotalSlides.trim() && !parsedTotalSlides) throw new Error("Tổng số slide phải là số nguyên lớn hơn 0.");
         await uploadHocLieuResource({
-          file: resourceFile,
-          title: label.trim() || resourceFile.name,
+          title: label.trim() || "Tài liệu Google Drive",
           description: description.trim(),
           selectedFileType: resourceFileType,
           subjectId: selectedSubject.id,
@@ -1818,9 +2367,11 @@ function TaxonomyCreateDialog({
           sectionId: resourceLocation.sectionId,
           bookSeriesId: resourceLocation.bookSeriesId,
           topicId: resourceLocation.topicId,
-          documentTypeId: resourceLocation.categoryId,
-          status: "published",
-          visibility: "public",
+          documentTypeId: resourceFileType,
+          status,
+          visibility: status === "hidden" ? "private" : "public",
+          upstreamUrl: normalizedResourceUrl,
+          totalSlides: parsedTotalSlides,
           canDownload: resourceFileType !== "PPTX",
         });
         await onUploadResource();
@@ -1842,7 +2393,7 @@ function TaxonomyCreateDialog({
       const payload: CreateTaxonomyPayload = {
         label: trimmedLabel,
         description: description.trim(),
-        status: "active",
+        status,
       };
 
       if (!isSubject && selectedSubject) {
@@ -1864,7 +2415,9 @@ function TaxonomyCreateDialog({
         }
       }
 
-      const created = normalizeTaxonomyOption(await createHocLieuTaxonomy(isSubject ? "subjects" : apiKindForNodeKind(resolvedKind), payload));
+      const created = normalizeTaxonomyOption(
+        await createHocLieuTaxonomy(isSubject ? "subjects" : apiKindForNodeKind(resolvedKind), payload),
+      );
       if (!created?.id) {
         throw new Error("BE đã tạo dữ liệu nhưng không trả về id hợp lệ.");
       }
@@ -1879,6 +2432,15 @@ function TaxonomyCreateDialog({
 
   function toggleExercise(exerciseId: string) {
     setSelectedExerciseIds((current) => (current.includes(exerciseId) ? current.filter((item) => item !== exerciseId) : [...current, exerciseId]));
+  }
+
+  function handleLectureTitleChange(value: string) {
+    if (isGoogleSlidesUrl(value)) {
+      setSlidesUrl(value);
+      setLabel("");
+      return;
+    }
+    setLabel(value);
   }
 
   return (
@@ -1920,7 +2482,7 @@ function TaxonomyCreateDialog({
                         }
                         setStep("details");
                       }}
-                      className="rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-[var(--erg-blue)] hover:bg-blue-50/40"
+                      className="rounded-2xl border border-slate-200 bg-white p-4 text-left hover:border-[var(--erg-blue)] hover:bg-blue-50/40"
                     >
                       <span className="flex items-start gap-3">
                         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-blue-50 text-[var(--erg-blue)]">{option.icon}</span>
@@ -1948,34 +2510,47 @@ function TaxonomyCreateDialog({
                       <div className="text-sm text-slate-500">{selectedOptionMeta.description}</div>
                     </div>
                   </div>
-                  <Button type="button" variant="outline" size="sm" onClick={() => setStep("pick")}>
-                    <ChevronLeft className="h-4 w-4" />
-                    Chọn lại
-                  </Button>
+                  {availableOptions.length > 1 ? (
+                    <Button type="button" variant="outline" size="sm" onClick={() => setStep("pick")}>
+                      <ChevronLeft className="h-4 w-4" />
+                      Chọn lại
+                    </Button>
+                  ) : null}
                 </div>
               ) : null}
 
               {selectedOption === "lecture" ? (
                 <>
-                  <Field label="Tên bài giảng">
-                    <Input value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Ví dụ: Bài giảng Bài 01" autoFocus />
-                  </Field>
-                  <Field label="Link Google Slides">
+                  <ContentTextFields
+                    titleLabel="Tên bài giảng"
+                    titlePlaceholder="Ví dụ: Bài giảng Bài 01"
+                    titleValue={label}
+                    onTitleChange={handleLectureTitleChange}
+                    descriptionLabel="Mô tả ngắn"
+                    descriptionPlaceholder="Ví dụ: Slide dùng cho tiết mở đầu, có note cho giáo viên"
+                    descriptionValue={description}
+                    onDescriptionChange={setDescription}
+                    autoFocus
+                  />
+                  <ContentLinkField
+                    label="Link Google Slides"
+                    value={slidesUrl}
+                    onChange={setSlidesUrl}
+                    placeholder="Dán link edit, publish hoặc embed của Google Slides"
+                    hint="Popup này lưu link Google Slides vào asset, không upload file thật lên server."
+                  />
+                  <Field label="Tổng số slide">
                     <Input
-                      value={slidesUrl}
-                      onChange={(event) => setSlidesUrl(event.target.value)}
-                      placeholder="Dán link edit, publish hoặc embed của Google Slides"
+                      value={slidesTotal}
+                      onChange={(event) => setSlidesTotal(event.target.value.replace(/[^\d]/g, ""))}
+                      inputMode="numeric"
+                      placeholder="Ví dụ: 20"
                     />
-                    <p className="text-xs leading-5 text-slate-500">Popup này ưu tiên link Google Slides. Nếu cần upload file, giáo viên vẫn có thể dùng khu vực Upload nâng cao.</p>
+                    <p className="text-xs leading-5 text-slate-500">
+                      Dùng cho popup xác nhận khi giáo viên back hoặc tắt bài trình chiếu.
+                    </p>
                   </Field>
-                  <Field label="Mô tả ngắn">
-                    <textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Ví dụ: Slide dùng cho tiết mở đầu, có note cho giáo viên"
-                      className={cn(inputClassName, "min-h-24 py-3")}
-                    />
-                  </Field>
+                  <StatusSelectField value={status} onChange={setStatus} />
                 </>
               ) : null}
 
@@ -1992,14 +2567,18 @@ function TaxonomyCreateDialog({
                       <Input value={selectedNode?.label ?? "Chưa chọn"} readOnly />
                     </Field>
                   </div>
-                  <Field label="Ghi chú cho lần gắn này">
-                    <textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Ví dụ: Giao cuối tiết hoặc dùng để luyện tập về nhà"
-                      className={cn(inputClassName, "min-h-24 py-3")}
-                    />
-                  </Field>
+                  <ContentTextFields
+                    titleLabel="Tên hiển thị"
+                    titlePlaceholder="Ví dụ: Bài tập luyện cuối tiết"
+                    titleValue={label}
+                    onTitleChange={setLabel}
+                    descriptionLabel="Ghi chú cho lần gắn này"
+                    descriptionPlaceholder="Ví dụ: Giao cuối tiết hoặc dùng để luyện tập về nhà"
+                    descriptionValue={description}
+                    onDescriptionChange={setDescription}
+                    autoFocus
+                  />
+                  <StatusSelectField value={status} onChange={setStatus} />
                   <div className="rounded-2xl border border-slate-200">
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                       <div className="font-semibold text-slate-950">Danh sách bài tập mock</div>
@@ -2013,7 +2592,7 @@ function TaxonomyCreateDialog({
                             type="button"
                             onClick={() => toggleExercise(item.id)}
                             className={cn(
-                              "rounded-2xl border p-3 text-left transition",
+                              "rounded-2xl border p-3 text-left",
                               selectedExerciseIds.includes(item.id) ? "border-[var(--erg-blue)] bg-blue-50" : "border-slate-200 bg-white hover:border-slate-300",
                             )}
                           >
@@ -2046,9 +2625,6 @@ function TaxonomyCreateDialog({
               {selectedOption === "resource" ? (
                 <>
                   <div className="grid gap-3 md:grid-cols-2">
-                    <Field label="Tên hiển thị">
-                      <Input value={label} onChange={(event) => setLabel(event.target.value)} placeholder={resourceFile?.name || "Ví dụ: Unit 1 - Lesson 1"} autoFocus />
-                    </Field>
                     <Field label="Loại tài liệu">
                       <select className={inputClassName} value={resourceFileType} onChange={(event) => setResourceFileType(event.target.value)}>
                         <option value="PDF">PDF / Giáo trình</option>
@@ -2061,20 +2637,44 @@ function TaxonomyCreateDialog({
                       </select>
                     </Field>
                     <div className="md:col-span-2">
-                      <Field label="Mô tả ngắn">
-                        <Input value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Ví dụ: Tài liệu dùng cho tiết mở đầu hoặc bài luyện tập" />
-                      </Field>
+                      <ContentTextFields
+                        titleLabel="Tên hiển thị"
+                        titlePlaceholder="Ví dụ: Unit 1 - Lesson 1"
+                        titleValue={label}
+                        onTitleChange={setLabel}
+                        descriptionLabel="Mô tả ngắn"
+                        descriptionPlaceholder="Ví dụ: Tài liệu dùng cho tiết mở đầu hoặc bài luyện tập"
+                        descriptionValue={description}
+                        onDescriptionChange={setDescription}
+                        autoFocus
+                      />
                     </div>
                     <div className="md:col-span-2">
-                      <label className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-5 text-center transition hover:border-[var(--erg-blue)] hover:bg-blue-50/60">
-                        <FileUp className="h-10 w-10 text-[var(--erg-blue)]" />
-                        <div className="mt-3 font-semibold text-slate-950">{resourceFile ? resourceFile.name : "Kéo thả hoặc bấm để chọn file"}</div>
-                        <div className="mt-1 text-xs text-slate-500">
-                          {resourceFile ? formatFileSize(resourceFile.size) : pathLabel(selectedSubject?.label ?? "", selectedPath)}
-                        </div>
-                        <div className="mt-1 text-xs text-slate-500">File sẽ được upload và gắn ngay vào vị trí đang chọn trong popup này.</div>
-                        <input className="sr-only" type="file" onChange={(event) => setResourceFile(event.target.files?.[0] ?? null)} />
-                      </label>
+                      <ContentLinkField
+                        label="Link Google Drive / Google Slides"
+                        value={resourceUrl}
+                        onChange={setResourceUrl}
+                        placeholder="Dán link share, preview hoặc embed từ Google Drive"
+                        hint={`Link sẽ được lưu vào asset của tài liệu tại ${pathLabel(selectedSubject?.label ?? "", selectedPath)}. Không upload file thật lên server.`}
+                      />
+                    </div>
+                    {resourceFileType === "PPTX" ? (
+                      <div className="md:col-span-2">
+                        <Field label="Tổng số slide">
+                          <Input
+                            value={resourceTotalSlides}
+                            onChange={(event) => setResourceTotalSlides(event.target.value.replace(/[^\d]/g, ""))}
+                            inputMode="numeric"
+                            placeholder="Ví dụ: 20"
+                          />
+                          <p className="text-xs leading-5 text-slate-500">
+                            Dùng cho popup đánh dấu khi giáo viên back/tắt trình chiếu.
+                          </p>
+                        </Field>
+                      </div>
+                    ) : null}
+                    <div className="md:col-span-2">
+                      <StatusSelectField value={status} onChange={setStatus} />
                     </div>
                   </div>
                 </>
@@ -2082,30 +2682,24 @@ function TaxonomyCreateDialog({
 
               {(!selectedOption || selectedOption === "category" || selectedOption === "section" || isSubject) ? (
                 <>
-                  <Field label={isSubject ? "Tên môn học" : "Tên hiển thị"}>
-                    <Input value={label} onChange={(event) => setLabel(event.target.value)} placeholder={isSubject ? "Ví dụ: IC3 GS6" : kind === "category" ? "Ví dụ: Chủ đề 1, Học phần bổ trợ" : "Ví dụ: Bài 01. Làm quen với máy tính"} autoFocus />
-                  </Field>
+                  <ContentTextFields
+                    titleLabel={isSubject ? "Tên môn học" : "Tên hiển thị"}
+                    titlePlaceholder={isSubject ? "Ví dụ: IC3 GS6" : kind === "category" ? "Ví dụ: Chủ đề 1, Học phần bổ trợ" : "Ví dụ: Bài 01. Làm quen với máy tính"}
+                    titleValue={label}
+                    onTitleChange={setLabel}
+                    descriptionLabel="Mô tả ngắn"
+                    descriptionPlaceholder="Giúp giáo viên hiểu mục này dùng để làm gì"
+                    descriptionValue={description}
+                    onDescriptionChange={setDescription}
+                    autoFocus
+                  />
 
                   {!isSubject ? (
-                    <Field label="Loại nội dung">
-                      <select value={kind} onChange={(event) => setKind(event.target.value as TaxonomyCreateKind)} className={inputClassName}>
-                        <option value="category">Nhóm học liệu</option>
-                        <option value="section">Bài học</option>
-                      </select>
-                      <p className="text-xs leading-5 text-slate-500">
-                        Mô hình mới chỉ còn <b>Nhóm học liệu</b> và <b>Bài học</b>. Slide thuyết trình, bài tập và tài liệu sẽ được gắn trực tiếp bên trong từng bài học.
-                      </p>
-                    </Field>
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                      Đang tạo: <b>{kind === "category" ? "Nhóm học liệu" : "Bài học"}</b>. Loại này được quyết định theo vị trí đang chọn trong cây.
+                    </div>
                   ) : null}
-
-                  <Field label="Mô tả ngắn">
-                    <textarea
-                      value={description}
-                      onChange={(event) => setDescription(event.target.value)}
-                      placeholder="Giúp giáo viên hiểu mục này dùng để làm gì"
-                      className={cn(inputClassName, "min-h-24 py-3")}
-                    />
-                  </Field>
+                  <StatusSelectField value={status} onChange={setStatus} taxonomy />
                 </>
               ) : null}
             </div>
@@ -2125,7 +2719,7 @@ function TaxonomyCreateDialog({
                   (selectedOption === "exercise"
                     ? !selectedExerciseIds.length
                     : selectedOption === "resource"
-                      ? !resourceFile
+                      ? !resourceUrl.trim()
                     : selectedOption === "lecture"
                       ? !label.trim() || !slidesUrl.trim()
                       : !label.trim())
@@ -2139,8 +2733,12 @@ function TaxonomyCreateDialog({
                     : selectedOption === "exercise"
                       ? "Gắn bài tập"
                       : selectedOption === "resource"
-                        ? "Upload tài liệu"
-                        : "Tạo mới"}
+                        ? "Gắn link tài liệu"
+                        : selectedOption === "category"
+                          ? "Tạo nhóm học liệu"
+                          : selectedOption === "section"
+                            ? "Tạo bài học"
+                            : "Tạo mới"}
               </Button>
             ) : null}
           </DialogFooter>
@@ -2222,23 +2820,20 @@ function TaxonomyEditDialog({
           <DialogDescription>Cập nhật tên, mô tả và trạng thái để trang Hoclieu hiển thị rõ ràng hơn.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Tên hiển thị">
-            <Input value={label} onChange={(event) => setLabel(event.target.value)} autoFocus />
-          </Field>
-          <Field label="Trạng thái">
-            <select value={status} onChange={(event) => setStatus(event.target.value)} className={inputClassName}>
-              <option value="active">Đang dùng</option>
-              <option value="draft">Bản nháp</option>
-              <option value="hidden">Ẩn khỏi Hoclieu</option>
-            </select>
-          </Field>
-          <Field label="Mô tả cho giáo viên/học sinh">
-            <textarea value={description} onChange={(event) => setDescription(event.target.value)} className={cn(inputClassName, "min-h-28 py-3")} />
-          </Field>
+          <ContentTextFields
+            titleLabel="Tên hiển thị"
+            titleValue={label}
+            onTitleChange={setLabel}
+            descriptionLabel="Mô tả cho giáo viên/học sinh"
+            descriptionValue={description}
+            onDescriptionChange={setDescription}
+            autoFocus
+          />
+          <StatusSelectField value={status} onChange={setStatus} taxonomy />
           <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
             <div className="font-semibold text-slate-950">Thông tin hiển thị trên Hoclieu</div>
             <p className="mt-1 text-sm leading-6 text-slate-500">
-              Cấu trúc lưu phần mô tả và ảnh đại diện. File thật như PDF/video/audio nên tạo ở phần Nội dung/Upload rồi gắn vào đúng vị trí.
+              Cấu trúc lưu phần mô tả và ảnh đại diện. Tài liệu thật sẽ được gắn bằng link Google Drive/Google Slides ở phần Nội dung hoặc màn Gắn link.
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <Field label="Ảnh bìa / thumbnail URL">
@@ -2263,6 +2858,165 @@ function TaxonomyEditDialog({
             <Button type="submit" disabled={saving || !label.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
               {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ResourceEditDialog({
+  target,
+  onClose,
+  onSaved,
+}: {
+  target: AttachedResourceItem | null;
+  onClose: () => void;
+  onSaved: () => Promise<void>;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [status, setStatus] = useState("published");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!target) return;
+    setTitle(target.title);
+    setDescription(target.detail?.description || "");
+    setLinkUrl(target.linkUrl || "");
+    setStatus(target.asset?.status || target.status || "published");
+    setSaving(false);
+    setError("");
+  }, [target]);
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!target) return;
+    setSaving(true);
+    setError("");
+    try {
+      const normalizedUrl = linkUrl.trim() ? normalizeGoogleViewerUrl(linkUrl) || linkUrl.trim() : undefined;
+      await updateHocLieuResource(target.id, {
+        title: title.trim(),
+        description: description.trim(),
+        status,
+        visibility: status === "hidden" ? "private" : "public",
+      });
+      if (target.asset?.id) {
+        await updateHocLieuAsset(target.asset.id, {
+          title: title.trim(),
+          storageUrl: normalizedUrl,
+          upstreamUrl: normalizedUrl,
+          status,
+        });
+      }
+      await onSaved();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "Không thể cập nhật tài liệu.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <Dialog open={Boolean(target)} onOpenChange={(nextOpen) => (!nextOpen ? onClose() : undefined)}>
+      <DialogContent className="max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Sửa tài liệu</DialogTitle>
+          <DialogDescription>Cập nhật tên, link và trạng thái hiển thị của tài liệu.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ContentTextFields
+            titleLabel="Tên hiển thị"
+            titleValue={title}
+            onTitleChange={setTitle}
+            descriptionLabel="Mô tả"
+            descriptionValue={description}
+            onDescriptionChange={setDescription}
+            autoFocus
+          />
+          <ContentLinkField
+            label="Link tài liệu"
+            value={linkUrl}
+            onChange={setLinkUrl}
+            placeholder="https://docs.google.com/... hoặc link PDF"
+          />
+          <StatusSelectField value={status} onChange={setStatus} />
+          {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Hủy</Button>
+            <Button type="submit" disabled={saving || !title.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
+              {saving ? "Đang lưu..." : "Lưu thay đổi"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function LocalContentEditDialog({
+  target,
+  onClose,
+  onSaved,
+}: {
+  target: LocalContentEditTarget;
+  onClose: () => void;
+  onSaved: (patch: Partial<LocalContentItem>) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [resourceUrl, setResourceUrl] = useState("");
+  const [status, setStatus] = useState("published");
+
+  useEffect(() => {
+    if (!target) return;
+    setTitle(target.title);
+    setDescription(target.description || "");
+    setResourceUrl(target.slidesUrl || target.resourceUrl || "");
+    setStatus(target.status || "published");
+  }, [target]);
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    onSaved({
+      title: title.trim(),
+      description: description.trim(),
+      slidesUrl: target?.kind === "lecture" ? resourceUrl.trim() : undefined,
+      resourceUrl: target?.kind === "exercise" ? resourceUrl.trim() : undefined,
+      status,
+    });
+  }
+
+  return (
+    <Dialog open={Boolean(target)} onOpenChange={(nextOpen) => (!nextOpen ? onClose() : undefined)}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Sửa {target?.kind === "exercise" ? "bài tập" : "bài giảng"}</DialogTitle>
+          <DialogDescription>Cập nhật nội dung hiển thị và trạng thái trong màn biên soạn.</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <ContentTextFields
+            titleLabel="Tên hiển thị"
+            titleValue={title}
+            onTitleChange={setTitle}
+            descriptionLabel="Mô tả"
+            descriptionValue={description}
+            onDescriptionChange={setDescription}
+            autoFocus
+          />
+          <ContentLinkField
+            label={target?.kind === "exercise" ? "Link tham chiếu" : "Link bài giảng"}
+            value={resourceUrl}
+            onChange={setResourceUrl}
+            placeholder="https://..."
+          />
+          <StatusSelectField value={status} onChange={setStatus} />
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
+            <Button type="submit" className="bg-[var(--erg-blue)] hover:bg-blue-800">Lưu thay đổi</Button>
           </DialogFooter>
         </form>
       </DialogContent>

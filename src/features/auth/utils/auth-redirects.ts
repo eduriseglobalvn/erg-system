@@ -1,4 +1,4 @@
-type PortalKey = "hoclieu" | "lms" | "elearning";
+type PortalKey = "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning";
 
 export function buildRedirectPath(pathname: string, search = "", hash = "") {
   return `${pathname || "/"}${search}${hash}`;
@@ -11,7 +11,7 @@ export function isAuthOnlyRedirect(portal: PortalKey, redirect: string) {
   }
 
   if (pathname === "/profile") {
-    return portal === "hoclieu" || portal === "lms";
+    return portal === "admin" || portal === "crm" || portal === "hoclieu" || portal === "lcms" || portal === "lms";
   }
 
   return portal === "hoclieu" && (pathname === "/cong-dong" || pathname.startsWith("/cong-dong/"));

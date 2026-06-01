@@ -58,13 +58,13 @@ export function NavMain({
                   className={cn(
                     "min-h-11 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-700 transition hover:bg-[#f1f3f6] hover:text-slate-950",
                     "data-[active=true]:bg-[#eeeeee] data-[active=true]:font-semibold data-[active=true]:text-slate-900",
-                    "group-data-[collapsible=icon]:!h-[74px] group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-1.5 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-2 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
+                    "group-data-[collapsible=icon]:!min-h-[92px] group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-2 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-3 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
                   )}
                 >
                   <span className={cn("grid size-6 shrink-0 place-items-center [&_svg]:size-[22px]", item.tone)}>
                     {item.icon}
                   </span>
-                  <span className="min-w-0 whitespace-normal break-words group-data-[collapsible=icon]:line-clamp-2 group-data-[collapsible=icon]:max-w-[64px]">
+                  <span className="min-w-0 whitespace-normal break-words text-center group-data-[collapsible=icon]:max-w-[78px] group-data-[collapsible=icon]:text-balance">
                     {item.title}
                   </span>
                 </SidebarMenuButton>
@@ -94,13 +94,13 @@ export function NavMain({
                     className={cn(
                       "min-h-11 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-700 transition hover:bg-[#f1f3f6] hover:text-slate-950",
                       "data-[active=true]:bg-[#eeeeee] data-[active=true]:font-semibold data-[active=true]:text-slate-900",
-                      "group-data-[collapsible=icon]:!h-[74px] group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-1.5 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-2 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
+                      "group-data-[collapsible=icon]:!min-h-[92px] group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-2 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-3 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
                     )}
                   >
                     <span className={cn("grid size-6 shrink-0 place-items-center [&_svg]:size-[22px]", item.tone)}>
                       {item.icon}
                     </span>
-                    <span className="min-w-0 whitespace-normal break-words group-data-[collapsible=icon]:line-clamp-2 group-data-[collapsible=icon]:max-w-[64px]">
+                    <span className="min-w-0 whitespace-normal break-words text-center group-data-[collapsible=icon]:max-w-[78px] group-data-[collapsible=icon]:text-balance">
                       {item.title}
                     </span>
                     <ChevronRightIcon className="ml-auto size-4 text-slate-400 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 group-data-[collapsible=icon]:hidden" fontSize="inherit" />

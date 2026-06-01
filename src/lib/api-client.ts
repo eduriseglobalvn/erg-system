@@ -1,5 +1,5 @@
 import { getApiBase } from "@/lib/platform";
-import { getStoredAccessToken, type StoredAuthSession } from "@/features/auth/api/auth-token-storage";
+import { getStoredAccessToken, resolveCurrentPortal, type StoredAuthSession } from "@/features/auth/api/auth-token-storage";
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
 export const AUTH_SESSION_REPLACED_EVENT = "erg-auth-session-replaced";
@@ -18,6 +18,7 @@ type ApiEnvelope<T> = {
 };
 
 type ApiRequestOptions = RequestInit & {
+  portal?: StoredAuthSession["portal"];
   skipAuthSessionEvent?: boolean;
 };
 
@@ -46,9 +47,8 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   }
 
   const headers = new Headers(init?.headers);
-  const portal = portalFromPath(path);
-  // Try to get token for specific portal, fallback to ANY available session (Teacher first, then Student)
-  const token = getStoredAccessToken(portal) || getStoredAccessToken();
+  const portal = init?.portal ?? portalFromPath(path);
+  const token = getStoredAccessToken(portal);
 
   if (!token && requiresAuth(path)) {
     const error = new ApiClientError("Authentication session is missing or expired.", "UNAUTHORIZED", 401);
@@ -62,9 +62,18 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   if (!headers.has("Content-Type") && init?.body !== undefined && !isFormDataBody) {
     headers.set("Content-Type", "application/json");
   }
+  if (!headers.has("X-Tenant-ID")) {
+    headers.set("X-Tenant-ID", import.meta.env.VITE_TENANT_ID?.trim() || "erg");
+  }
+  if (!headers.has("X-Request-ID")) {
+    headers.set("X-Request-ID", createRequestId());
+  }
 
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
+  }
+  if (portal && !headers.has("X-Portal")) {
+    headers.set("X-Portal", portal);
   }
 
   const url = `${apiBase}${path}`;
@@ -96,6 +105,7 @@ async function executeApiRequest<T>(url: string, headers: Headers, init?: ApiReq
     headers,
     cache: "no-store",
     credentials: init?.credentials ?? "include",
+    referrerPolicy: init?.referrerPolicy ?? "no-referrer",
   });
 
   const body = await readJson<ApiEnvelope<T> | T>(response);
@@ -187,10 +197,31 @@ function isUnauthorizedSessionError(status: number, code: string, message: strin
 
 function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
   const normalized = path.toLowerCase();
+  if (normalized.includes("/api/v1/admin/hoclieu")) return "lcms";
+  if (normalized.includes("/api/v1/hoclieu")) return "lms";
+  if (
+    normalized.includes("/api/v1/admin") ||
+    normalized.includes("/api/admin") ||
+    normalized.includes("/api/users") ||
+    normalized.includes("/api/v1/users") ||
+    normalized.includes("/api/v1/centers")
+  ) {
+    return currentBackOfficePortal();
+  }
+  if (normalized.includes("/api/v1/")) return "lms";
   if (normalized.includes("/api/lms")) return "lms";
   if (normalized.includes("/api/elearning")) return "elearning";
-  if (normalized.includes("/api/hoclieu")) return "hoclieu";
+  if (normalized.includes("/api/hoclieu")) return "lms";
   return undefined;
+}
+
+function currentBackOfficePortal(): StoredAuthSession["portal"] {
+  const portal = resolveCurrentPortal();
+  return portal === "crm" || portal === "lcms" ? portal : "admin";
+}
+
+export function getBackOfficePortal(): StoredAuthSession["portal"] {
+  return currentBackOfficePortal();
 }
 
 function requiresAuth(path: string) {
@@ -206,9 +237,14 @@ function requiresAuth(path: string) {
 function isPublicApiPath(path: string) {
   return (
     path === "/api/auth/login" ||
+    path === "/api/v1/auth/login" ||
+    path === "/api/v1/auth/register" ||
     path === "/api/lms/auth/login" ||
     path === "/api/lms/auth/register" ||
     path.startsWith("/api/lms/auth/providers/") ||
+    path === "/api/v1/hoclieu/home" ||
+    path === "/api/v1/hoclieu/programs" ||
+    path.startsWith("/api/v1/hoclieu/programs/") ||
     path === "/api/hoclieu/home" ||
     path === "/api/hoclieu/programs" ||
     path.startsWith("/api/hoclieu/programs/") ||
@@ -218,4 +254,12 @@ function isPublicApiPath(path: string) {
     path === "/api/hoclieu/community/posts" ||
     (path.startsWith("/api/hoclieu/community/posts/") && path.endsWith("/comments"))
   );
+}
+
+function createRequestId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }

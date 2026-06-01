@@ -1,17 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { loadHocLieuTaxonomies } from "@/features/admin-operations/api/hoclieu-authoring-api";
-import { loadHocLieuResourceForViewer, loadHocLieuResourcesBySubject } from "@/features/hoclieu/api/hoclieu-api";
+import {
+  loadHocLieuLibraryBootstrap,
+  loadHocLieuLibraryProgress,
+  loadHocLieuResourceForViewer,
+  mapLibraryResourceToHocLieuResource,
+  type HocLieuLibraryBootstrapDTO,
+  type HocLieuLibraryProgressDTO,
+} from "@/features/hoclieu/api/hoclieu-api";
 import type { HocLieuResource } from "@/features/hoclieu/api/library-data";
-import { getCurrentAcademicYear, loadHocLieuTeacherProgress } from "@/features/hoclieu/api/teacher-dashboard-api";
+import { getCurrentAcademicYear } from "@/features/hoclieu/api/teacher-dashboard-api";
 import { useHocLieuDashboardScope } from "@/features/hoclieu/hooks/use-hoclieu-dashboard-scope";
 import type { HocLieuTeacherProgressSummary } from "@/features/hoclieu/types/teacher-dashboard-types";
-import {
-  buildHocLieuLearningSubjects,
-  matchesResourceToLearningNode,
-  type HocLieuLearningSubject,
-} from "@/utils/hoclieu-learning-tree";
 
 type HocLieuLibraryLesson = {
   id: string;
@@ -42,14 +43,25 @@ type HocLieuLibrarySubject = {
   sections: HocLieuLibrarySection[];
 };
 
-const TAXONOMY_QUERY_KEY = ["hoclieu", "content-model"] as const;
-
 function emptyProgress(): HocLieuTeacherProgressSummary {
   return {
     progressRate: 0,
     taughtCount: 0,
     totalCount: 0,
     pendingCount: 0,
+  };
+}
+
+function progressFromRate(progressRate = 0, totalCount = 1): HocLieuTeacherProgressSummary {
+  const normalizedRate = Math.max(0, Math.min(100, progressRate));
+  const normalizedTotal = Math.max(0, totalCount);
+  const taughtCount = normalizedTotal > 0 ? Math.round((normalizedRate / 100) * normalizedTotal) : 0;
+
+  return {
+    progressRate: normalizedRate,
+    taughtCount,
+    totalCount: normalizedTotal,
+    pendingCount: Math.max(0, normalizedTotal - taughtCount),
   };
 }
 
@@ -66,86 +78,76 @@ function summarizeProgress(items: HocLieuTeacherProgressSummary[]): HocLieuTeach
   };
 }
 
-function toSections(
-  subject: HocLieuLearningSubject,
-  resources: HocLieuResource[],
-  progressByLessonId: Record<string, HocLieuTeacherProgressSummary>,
-): HocLieuLibrarySection[] {
-  return subject.tree.reduce<HocLieuLibrarySection[]>((sections, group) => {
-    const lessons = group.children
-      .filter((lesson) => lesson.kind === "lesson" && lesson.optionId)
-      .map((lesson) => {
-        const lessonId = lesson.optionId || lesson.id;
-        const lessonResources = resources
-          .filter((resource) => matchesResourceToLearningNode(resource, lesson))
-          .sort((left, right) => left.sortOrder - right.sortOrder || left.title.localeCompare(right.title, "vi"));
+export function toLibrarySubjects(
+  bootstrap: HocLieuLibraryBootstrapDTO | undefined,
+  progressByLessonId: Map<string, number> = new Map(),
+): HocLieuLibrarySubject[] {
+  if (!bootstrap?.subjects?.length) return [];
 
+  return bootstrap.subjects.map((subject) => {
+    const sections = subject.groups.map((group) => {
+      const lessons = group.lessons.map((lesson) => {
+        const resources = lesson.resources.map((resource, index) =>
+          mapLibraryResourceToHocLieuResource(resource, {
+            subjectId: subject.id,
+            groupId: group.id,
+            lessonId: lesson.id,
+            sortOrder: index + 1,
+          }),
+        );
+
+        const progressRate = progressByLessonId.get(lesson.id) ?? lesson.progressRate ?? 0;
         return {
-          id: lessonId,
+          id: lesson.id,
           title: lesson.label,
-          description: lesson.description,
-          resourceCount: lessonResources.length,
-          resources: lessonResources,
-          progress: progressByLessonId[lessonId] ?? emptyProgress(),
+          resourceCount: resources.length,
+          resources,
+          progress: progressFromRate(progressRate, resources.length || 1),
         } satisfies HocLieuLibraryLesson;
-      })
-      .filter((lesson) => lesson.resourceCount > 0 || lesson.progress.totalCount > 0);
+      });
 
-    if (!lessons.length) {
-      return sections;
-    }
-
-    sections.push({
-      id: group.optionId || group.id,
-      title: group.label,
-      description: group.description,
-      resourceCount: lessons.reduce((sum, lesson) => sum + lesson.resourceCount, 0),
-      lessonCount: lessons.length,
-      progress: summarizeProgress(lessons.map((lesson) => lesson.progress)),
-      lessons,
+      return {
+        id: group.id,
+        title: group.label,
+        resourceCount: lessons.reduce((sum, lesson) => sum + lesson.resourceCount, 0),
+        lessonCount: lessons.length,
+        progress: summarizeProgress(lessons.map((lesson) => lesson.progress)),
+        lessons,
+      } satisfies HocLieuLibrarySection;
     });
 
-    return sections;
-  }, []);
+    return {
+      id: subject.id,
+      label: subject.label,
+      groupCount: sections.length,
+      lessonCount: sections.reduce((sum, section) => sum + section.lessonCount, 0),
+      resourceCount: sections.reduce((sum, section) => sum + section.resourceCount, 0),
+      sections,
+    } satisfies HocLieuLibrarySubject;
+  });
 }
 
-async function openLibraryResource(resource: HocLieuResource, previewWindow?: Window | null) {
+async function openLibraryResource(resource: HocLieuResource) {
   const hydratedResource = await loadHocLieuResourceForViewer(resource);
   const targetUrl = hydratedResource.viewer.embedUrl || hydratedResource.viewer.secureEmbedUrl;
 
-  if (!targetUrl) {
-    previewWindow?.close();
+  if (!targetUrl && !hydratedResource.viewer.slides?.length) {
     throw new Error("Học liệu này chưa có đường dẫn mở từ hệ thống.");
   }
 
-  if (previewWindow && !previewWindow.closed) {
-    previewWindow.location.href = targetUrl;
-    return;
-  }
-
-  window.open(targetUrl, "_blank", "noopener,noreferrer");
+  return hydratedResource;
 }
 
-function toProgressMap(progress: Awaited<ReturnType<typeof loadHocLieuTeacherProgress>> | null | undefined) {
-  return Object.fromEntries(
-    (progress?.items ?? []).map((item) => [
-      item.id,
-      {
-        progressRate: item.progressRate,
-        taughtCount: item.status === "taught" ? 1 : 0,
-        totalCount: 1,
-        pendingCount: item.status === "taught" ? 0 : 1,
-      } satisfies HocLieuTeacherProgressSummary,
-    ]),
-  );
+function libraryBootstrapQueryKey(schoolId: string, academicYear: string) {
+  return ["hoclieu", "library-bootstrap", schoolId, academicYear] as const;
 }
 
-function subjectResourcesQueryKey(subjectId: string) {
-  return ["hoclieu", "subject-resources", subjectId] as const;
+export function libraryProgressQueryKey(schoolId: string, academicYear: string) {
+  return ["hoclieu", "library-progress", schoolId, academicYear] as const;
 }
 
-function subjectProgressQueryKey(subjectId: string, schoolId: string, academicYear: string) {
-  return ["hoclieu", "subject-progress", subjectId, schoolId, academicYear] as const;
+function progressMap(progress: HocLieuLibraryProgressDTO | undefined) {
+  return new Map((progress?.lessons ?? []).map((lesson) => [lesson.lessonId, lesson.progressRate]));
 }
 
 export function useHocLieuLibraryCatalog() {
@@ -160,15 +162,28 @@ export function useHocLieuLibraryCatalog() {
   const [searchValue, setSearchValue] = useState("");
   const [error, setError] = useState<string | null>(null);
 
-  const taxonomyQuery = useQuery({
-    queryKey: TAXONOMY_QUERY_KEY,
-    queryFn: loadHocLieuTaxonomies,
+  const libraryQuery = useQuery({
+    queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
+    queryFn: () => loadHocLieuLibraryBootstrap({ schoolId, academicYear }),
+    enabled: Boolean(schoolId),
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
   });
 
-  const firstSubjectId = taxonomyQuery.data?.subjects[0]?.id ?? "";
+  const progressQuery = useQuery({
+    queryKey: libraryProgressQueryKey(schoolId, academicYear),
+    queryFn: () => loadHocLieuLibraryProgress({ schoolId, academicYear }),
+    enabled: Boolean(schoolId),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+    placeholderData: (previousData) => previousData,
+  });
+
+  const subjects = useMemo(() => toLibrarySubjects(libraryQuery.data, progressMap(progressQuery.data)), [libraryQuery.data, progressQuery.data]);
+  const firstSubjectId = subjects[0]?.id ?? "";
   const effectiveSubjectId = selectedSubjectId || firstSubjectId;
 
   useEffect(() => {
@@ -177,46 +192,15 @@ export function useHocLieuLibraryCatalog() {
     }
   }, [firstSubjectId, selectedSubjectId]);
 
-  const resourcesQuery = useQuery({
-    queryKey: subjectResourcesQueryKey(effectiveSubjectId),
-    queryFn: () => loadHocLieuResourcesBySubject(effectiveSubjectId),
-    enabled: Boolean(effectiveSubjectId),
-    staleTime: 2 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
-  });
+  useEffect(() => {
+    if (!schoolId) return;
 
-  const progressQuery = useQuery({
-    queryKey: subjectProgressQueryKey(effectiveSubjectId, schoolId, academicYear),
-    queryFn: () => loadHocLieuTeacherProgress({ subjectId: effectiveSubjectId, schoolId, academicYear }).then((progress) => toProgressMap(progress)),
-    enabled: Boolean(effectiveSubjectId && schoolId),
-    staleTime: 60_000,
-    gcTime: 10 * 60_000,
-    refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
-  });
-
-  const subjects = useMemo(() => {
-    if (!taxonomyQuery.data) return [] as HocLieuLibrarySubject[];
-
-    const flattenedResources = resourcesQuery.data ?? [];
-
-    return buildHocLieuLearningSubjects(taxonomyQuery.data, flattenedResources).map((subject) => {
-      const subjectResources = subject.id === effectiveSubjectId ? flattenedResources : [];
-      const progressByLessonId = subject.id === effectiveSubjectId ? progressQuery.data ?? {} : {};
-
-      return {
-        id: subject.id,
-        label: subject.label,
-        description: subject.description,
-        groupCount: subject.groupCount,
-        lessonCount: subject.lessonCount,
-        resourceCount: subjectResources.length,
-        sections: toSections(subject, subjectResources, progressByLessonId),
-      };
+    void queryClient.prefetchQuery({
+      queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
+      queryFn: () => loadHocLieuLibraryBootstrap({ schoolId, academicYear }),
+      staleTime: 5 * 60_000,
     });
-  }, [effectiveSubjectId, progressQuery.data, resourcesQuery.data, taxonomyQuery.data]);
+  }, [academicYear, queryClient, schoolId]);
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === effectiveSubjectId) ?? subjects[0] ?? null,
@@ -304,40 +288,29 @@ export function useHocLieuLibraryCatalog() {
     [activeSection, selectedLessonId],
   );
 
-  const loading = taxonomyQuery.isLoading || (Boolean(effectiveSubjectId) && resourcesQuery.isLoading && !resourcesQuery.data);
-  const loadingSubject = !loading && (resourcesQuery.isFetching || progressQuery.isFetching);
+  const loading = !schoolId || (libraryQuery.isLoading && !libraryQuery.data);
+  const loadingSubject = libraryQuery.isFetching && Boolean(libraryQuery.data);
 
   useEffect(() => {
-    const nextError = taxonomyQuery.error || resourcesQuery.error || progressQuery.error;
+    const nextError = libraryQuery.error;
     if (!nextError) {
       setError(null);
       return;
     }
 
     setError(nextError instanceof Error ? nextError.message : "Không thể tải kho học liệu.");
-  }, [progressQuery.error, resourcesQuery.error, taxonomyQuery.error]);
+  }, [libraryQuery.error]);
 
   async function handleSelectSubject(subjectId: string) {
     setSelectedSubjectId(subjectId);
     setError(null);
-
-    void queryClient.prefetchQuery({
-      queryKey: subjectResourcesQueryKey(subjectId),
-      queryFn: () => loadHocLieuResourcesBySubject(subjectId),
-      staleTime: 2 * 60_000,
-    });
-
-    if (schoolId) {
-      void queryClient.prefetchQuery({
-        queryKey: subjectProgressQueryKey(subjectId, schoolId, academicYear),
-        queryFn: () => loadHocLieuTeacherProgress({ subjectId, schoolId, academicYear }).then((progress) => toProgressMap(progress)),
-        staleTime: 60_000,
-      });
-    }
   }
 
-  function handleSelectSection(sectionId: string) {
+  function handleSelectSection(subjectId: string, sectionId: string) {
+    setSelectedSubjectId(subjectId);
     setSelectedSectionId(sectionId);
+    setSelectedLessonId("");
+    setError(null);
   }
 
   function handleSelectLesson(lessonId: string) {
@@ -345,12 +318,12 @@ export function useHocLieuLibraryCatalog() {
   }
 
   async function handleOpenResource(resource: HocLieuResource) {
-    const previewWindow = window.open("", "_blank");
     try {
       setError(null);
-      await openLibraryResource(resource, previewWindow);
+      return await openLibraryResource(resource);
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Không thể mở học liệu.");
+      return null;
     }
   }
 
@@ -362,6 +335,7 @@ export function useHocLieuLibraryCatalog() {
     loading,
     loadingSubject,
     onOpenResource: handleOpenResource,
+    progressQueryKey: libraryProgressQueryKey(schoolId, academicYear),
     onSelectLesson: handleSelectLesson,
     onSelectSection: handleSelectSection,
     onSelectSubject: handleSelectSubject,

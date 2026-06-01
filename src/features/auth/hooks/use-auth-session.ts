@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 
 import {
   AUTH_ACCOUNT_CHANGED_EVENT,
@@ -8,7 +9,9 @@ import {
   saveServerAuthSession,
 } from "@/features/auth/api/auth-storage";
 import { authApi } from "@/features/auth/api/auth-api";
+import { clearTeacherSessionSnapshot, readStoredAuthSession, resolveCurrentPortal } from "@/features/auth/api/auth-token-storage";
 import { requestGoogleIdToken } from "@/features/auth/api/google-identity";
+import { logoutStudentSession } from "@/features/auth/api/student-auth-storage";
 import { useI18n } from "@/features/i18n";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT, hasApiBase } from "@/lib/api-client";
 import type {
@@ -21,6 +24,7 @@ import type {
   RegisterFormState,
   TeacherAccount,
 } from "@/features/auth/types/auth-types";
+import type { StoredAuthSession } from "@/features/auth/api/auth-token-storage";
 
 const defaultLoginForm: LoginFormState = {
   email: "",
@@ -59,22 +63,50 @@ function createProfileForm(account: TeacherAccount | null): ProfileFormState {
   };
 }
 
-export function useAuthSession() {
+export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
   const { t } = useI18n();
   const [mode, setMode] = useState<AuthMode>("login");
   const [accountTab, setAccountTab] = useState<AccountTab>("profile");
-  const [account, setAccount] = useState<TeacherAccount | null>(() => getCurrentAccount());
+  const [account, setAccount] = useState<TeacherAccount | null>(() => getCurrentAccount(portal));
   const [notice, setNotice] = useState<Notice | null>(null);
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loginForm, setLoginForm] = useState<LoginFormState>(defaultLoginForm);
   const [registerForm, setRegisterForm] = useState<RegisterFormState>(defaultRegisterForm);
-  const [profileForm, setProfileForm] = useState<ProfileFormState>(() => createProfileForm(getCurrentAccount()));
+  const [profileForm, setProfileForm] = useState<ProfileFormState>(() => createProfileForm(getCurrentAccount(portal)));
   const [passwordForm, setPasswordForm] = useState<PasswordFormState>(defaultPasswordForm);
+  const loginMutation = useMutation({
+    mutationKey: ["auth", "login"],
+    mutationFn: authApi.login,
+  });
+  const registerMutation = useMutation({
+    mutationKey: ["auth", "register"],
+    mutationFn: authApi.register,
+  });
+  const providerLoginMutation = useMutation({
+    mutationKey: ["auth", "provider-login"],
+    mutationFn: ({ provider, rememberMe, idToken, portal }: { provider: "google"; rememberMe: boolean; idToken: string; portal: "admin" | "crm" | "hoclieu" | "lcms" | "lms" }) =>
+      authApi.loginWithProvider(provider, rememberMe, idToken, portal),
+  });
+  const profileMutation = useMutation({
+    mutationKey: ["auth", "profile"],
+    mutationFn: ({ accountId, nextProfileForm }: { accountId: string; nextProfileForm: ProfileFormState }) =>
+      authApi.updateProfile(accountId, nextProfileForm),
+  });
+  const passwordMutation = useMutation({
+    mutationKey: ["auth", "password"],
+    mutationFn: ({ accountId, currentPassword, nextPassword }: { accountId: string; currentPassword: string; nextPassword: string }) =>
+      authApi.updatePassword(accountId, { currentPassword, nextPassword }),
+  });
+  const logoutMutation = useMutation({
+    mutationKey: ["auth", "logout"],
+    mutationFn: authApi.logout,
+  });
+  const [isHydratingProfile, setIsHydratingProfile] = useState(false);
 
   useEffect(() => {
     function handleAuthAccountChanged() {
-      const nextAccount = getCurrentAccount();
+      const nextAccount = getCurrentAccount(portal);
       setAccount(nextAccount);
       setProfileForm(createProfileForm(nextAccount));
       if (!nextAccount) {
@@ -84,7 +116,38 @@ export function useAuthSession() {
 
     window.addEventListener(AUTH_ACCOUNT_CHANGED_EVENT, handleAuthAccountChanged);
     return () => window.removeEventListener(AUTH_ACCOUNT_CHANGED_EVENT, handleAuthAccountChanged);
-  }, []);
+  }, [portal]);
+
+  useEffect(() => {
+    if (account || isHydratingProfile || !hasApiBase()) return;
+    const teacherSession = readStoredAuthSession(portal);
+    if (!teacherSession?.accessToken) return;
+
+    let isCancelled = false;
+    setIsHydratingProfile(true);
+
+    authApi.profile()
+      .then((profile) => {
+        if (isCancelled) return;
+        const nextAccount = saveServerAuthSession({ account: profile }, true, portal);
+        setAccount(nextAccount);
+        setProfileForm(createProfileForm(nextAccount));
+        setAccountTab("profile");
+      })
+      .catch(() => {
+        if (isCancelled) return;
+        logoutAccount();
+        setAccount(null);
+        setProfileForm(defaultProfileForm);
+      })
+      .finally(() => {
+        if (!isCancelled) setIsHydratingProfile(false);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [account, isHydratingProfile, portal]);
 
   useEffect(() => {
     function handleSessionReplaced() {
@@ -132,18 +195,20 @@ export function useAuthSession() {
     setNotice(nextNotice);
   }
 
-  async function login() {
+  async function login(portal: StoredAuthSession["portal"] = "lms") {
     if (!hasApiBase()) {
       throw new Error("API chưa được cấu hình nên không thể đăng nhập bằng tài khoản thật.");
     }
 
     const nextAccount = saveServerAuthSession(
-      await authApi.login({
+      await loginMutation.mutateAsync({
         email: loginForm.email,
         password: loginForm.password,
         rememberMe,
+        portal: portal === "elearning" ? "lms" : portal,
       }),
       rememberMe,
+      portal,
     );
 
     setAccount(nextAccount);
@@ -157,7 +222,7 @@ export function useAuthSession() {
     return nextAccount;
   }
 
-  async function register() {
+  async function register(portal: StoredAuthSession["portal"] = "lms") {
     if (!registerForm.fullName.trim() || !registerForm.email.trim() || !registerForm.department.trim()) {
       throw new Error(t("auth.errorMissingRegisterFields"));
     }
@@ -174,13 +239,22 @@ export function useAuthSession() {
       throw new Error("API chưa được cấu hình nên không thể đăng ký tài khoản thật.");
     }
 
+    await registerMutation.mutateAsync({
+      email: registerForm.email,
+      fullName: registerForm.fullName,
+      password: registerForm.password,
+      department: "ERG",
+    });
+
     const nextAccount = saveServerAuthSession(
-      await registerWithApiThenLogin({
+      await loginMutation.mutateAsync({
         email: registerForm.email,
-        fullName: registerForm.fullName,
         password: registerForm.password,
+        rememberMe: true,
+        portal: portal === "elearning" ? "lms" : portal,
       }),
       true,
+      portal,
     );
 
     setAccount(nextAccount);
@@ -193,13 +267,18 @@ export function useAuthSession() {
     return nextAccount;
   }
 
-  async function loginByProvider(provider: "google", providedIdToken?: string) {
+  async function loginByProvider(provider: "google", providedIdToken?: string, loginPortal: StoredAuthSession["portal"] = portal) {
     if (!hasApiBase()) {
       throw new Error("API chưa được cấu hình nên không thể đăng nhập bằng nhà cung cấp ngoài.");
     }
 
     const idToken = providedIdToken ?? (await requestGoogleIdToken());
-    const nextAccount = saveServerAuthSession(await authApi.loginWithProvider(provider, rememberMe, idToken), rememberMe);
+    const targetPortal = loginPortal === "elearning" ? "lms" : loginPortal ?? "lms";
+    const nextAccount = saveServerAuthSession(
+      await providerLoginMutation.mutateAsync({ provider, rememberMe, idToken, portal: targetPortal }),
+      rememberMe,
+      targetPortal,
+    );
     setAccount(nextAccount);
     setProfileForm(createProfileForm(nextAccount));
     setAccountTab("profile");
@@ -227,9 +306,10 @@ export function useAuthSession() {
 
     const nextAccount = saveServerAuthSession(
       {
-        account: await authApi.updateProfile(account.id, profileForm),
+        account: await profileMutation.mutateAsync({ accountId: account.id, nextProfileForm: profileForm }),
       },
       true,
+      portal,
     );
     setAccount(nextAccount);
     setProfileForm(createProfileForm(nextAccount));
@@ -253,12 +333,14 @@ export function useAuthSession() {
 
     const nextAccount = saveServerAuthSession(
       {
-        account: await authApi.updatePassword(account.id, {
+        account: await passwordMutation.mutateAsync({
+          accountId: account.id,
           currentPassword: passwordForm.currentPassword,
           nextPassword: passwordForm.nextPassword,
         }),
       },
       true,
+      portal,
     );
     setAccount(nextAccount);
     setProfileForm(createProfileForm(nextAccount));
@@ -267,6 +349,9 @@ export function useAuthSession() {
   }
 
   function signOut() {
+    void logoutMutation.mutateAsync().catch(() => undefined);
+    clearTeacherSessionSnapshot();
+    logoutStudentSession();
     logoutAccount();
     setAccount(null);
     setProfileForm(defaultProfileForm);
@@ -280,6 +365,7 @@ export function useAuthSession() {
     accountTab,
     setAccountTab,
     account,
+    isHydratingProfile,
     notice,
     setNotice,
     rememberMe,
@@ -305,19 +391,4 @@ export function useAuthSession() {
       signOut,
     },
   };
-}
-
-async function registerWithApiThenLogin(input: { email: string; fullName: string; password: string }) {
-  await authApi.register({
-    email: input.email,
-    fullName: input.fullName,
-    password: input.password,
-    department: "ERG",
-  });
-
-  return authApi.login({
-    email: input.email,
-    password: input.password,
-    rememberMe: true,
-  });
 }

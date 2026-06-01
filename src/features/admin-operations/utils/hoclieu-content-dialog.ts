@@ -61,6 +61,47 @@ export function normalizeGoogleSlidesUrl(input: string) {
   }
 }
 
+export function isGoogleSlidesUrl(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+
+  try {
+    const url = new URL(trimmed);
+    return url.hostname.toLowerCase().includes("docs.google.com") && url.pathname.includes("/presentation/");
+  } catch {
+    return false;
+  }
+}
+
+export function normalizeGoogleViewerUrl(input: string) {
+  const trimmed = input.trim();
+  if (!trimmed) return "";
+
+  try {
+    const url = new URL(trimmed);
+    const host = url.hostname.toLowerCase();
+    const pathname = url.pathname.replace(/\/$/, "");
+
+    if (host.includes("docs.google.com") && pathname.includes("/presentation/")) {
+      return normalizeGoogleSlidesUrl(trimmed);
+    }
+
+    if (host.includes("drive.google.com") && pathname.includes("/file/d/")) {
+      const previewPath = pathname.replace(/\/(view|edit|preview)$/i, "");
+      return `${url.origin}${previewPath}/preview`;
+    }
+
+    if (host.includes("docs.google.com") && /\/(document|spreadsheets|forms)\/d\//.test(pathname)) {
+      const previewPath = pathname.replace(/\/(edit|view|preview|pub)$/i, "");
+      return `${url.origin}${previewPath}/preview`;
+    }
+
+    return trimmed;
+  } catch {
+    return trimmed;
+  }
+}
+
 export function filterMockExercises(items: ExerciseLibraryItem[], context: ExerciseFilterContext) {
   const keyword = context.query.trim().toLowerCase();
   const subjectLabel = context.subjectLabel?.trim().toLowerCase();

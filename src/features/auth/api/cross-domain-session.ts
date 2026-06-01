@@ -164,7 +164,7 @@ export function hydrateSessionFromCookie(
     const session = {
       accessToken: urlToken,
       accountId,
-      portals: ["lms", "hoclieu"] as StoredAuthSession["portals"],
+      portals: ["crm", "lms", "lcms", "hoclieu"] as StoredAuthSession["portals"],
       portal: "lms" as StoredAuthSession["portal"],
       rememberMe: true,
       loggedInAt: new Date().toISOString(),

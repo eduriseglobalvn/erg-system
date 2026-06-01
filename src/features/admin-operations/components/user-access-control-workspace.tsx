@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   AlertCircle,
   BookOpen,
@@ -39,6 +40,7 @@ import {
   getAdminUser,
   updateAdminUserProfile,
   updateAdminUserStatus,
+  type AdminUserStatus,
   type AdminUserDetail,
 } from "@/features/admin-operations/api/user-admin-api";
 import { cn } from "@/lib/utils";
@@ -124,6 +126,7 @@ export function UserAccessControlWorkspace({
   defaultSection?: WorkspaceSection;
   scopeDescription?: string;
 }) {
+  const queryClient = useQueryClient();
   const [users, setUsers] = useState<AccessManagedUser[]>([]);
   const [options, setOptions] = useState<AccessManagementOptions | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -153,6 +156,20 @@ export function UserAccessControlWorkspace({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const profileMutation = useMutation({
+    mutationFn: ({ userId, draft }: { userId: string; draft: ProfileDraft }) => updateAdminUserProfile(userId, draft),
+  });
+  const rolesMutation = useMutation({
+    mutationFn: ({ userId, roles }: { userId: string; roles: string[] }) => assignAdminUserRoles(userId, roles),
+  });
+  const statusMutation = useMutation({
+    mutationFn: ({ userId, status }: { userId: string; status: AdminUserStatus }) => updateAdminUserStatus(userId, status),
+  });
+  const accessMutation = useMutation({
+    mutationFn: ({ userId, policies }: { userId: string; policies: UserAccessPolicy[] }) => saveUserAccess(userId, { policies }),
+  });
+
+
   useEffect(() => {
     setActiveSection(defaultSection);
   }, [defaultSection]);
@@ -163,8 +180,16 @@ export function UserAccessControlWorkspace({
     setError("");
 
     Promise.all([
-      listAccessManagedUsers({ search: query, status, page: 1, limit: 100 }),
-      getAccessManagementOptions(),
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "user-access", "users", query, status],
+        queryFn: () => listAccessManagedUsers({ search: query, status, page: 1, limit: 100 }),
+        staleTime: 60_000,
+      }),
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "user-access", "options"],
+        queryFn: getAccessManagementOptions,
+        staleTime: 60_000,
+      }),
     ])
       .then(([userList, accessOptions]) => {
         if (cancelled) return;
@@ -202,7 +227,18 @@ export function UserAccessControlWorkspace({
     setError("");
     setNotice("");
 
-    Promise.all([getUserAccess(selectedUserId), getAdminUser(selectedUserId)])
+    Promise.all([
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "user-access", "detail", selectedUserId, "access"],
+        queryFn: () => getUserAccess(selectedUserId),
+        staleTime: 60_000,
+      }),
+      queryClient.fetchQuery({
+        queryKey: ["admin-operations", "user-access", "detail", selectedUserId, "user"],
+        queryFn: () => getAdminUser(selectedUserId),
+        staleTime: 60_000,
+      }),
+    ])
       .then(([accessDetail, userDetail]) => {
         if (cancelled) return;
 
@@ -231,7 +267,12 @@ export function UserAccessControlWorkspace({
     }
 
     let cancelled = false;
-    previewUserAccess({ policies })
+    queryClient
+      .fetchQuery({
+        queryKey: ["admin-operations", "user-access", "preview", policies],
+        queryFn: () => previewUserAccess({ policies }),
+        staleTime: 30_000,
+      })
       .then((result) => {
         if (!cancelled) setEffective(result);
       })
@@ -251,7 +292,12 @@ export function UserAccessControlWorkspace({
 
     let cancelled = false;
     setLoadingScopes(true);
-    listAccessScopes({ scopeType: draft.scopeType, search: scopeSearch, page: 1, limit: 20 })
+    queryClient
+      .fetchQuery({
+        queryKey: ["admin-operations", "user-access", "scopes", draft.scopeType, scopeSearch],
+        queryFn: () => listAccessScopes({ scopeType: draft.scopeType, search: scopeSearch, page: 1, limit: 20 }),
+        staleTime: 60_000,
+      })
       .then((result) => {
         if (cancelled) return;
         setScopeResults(result.items);
@@ -342,7 +388,7 @@ export function UserAccessControlWorkspace({
     setError("");
     setNotice("");
     try {
-      applyUserDetail(await updateAdminUserProfile(selectedUserId, profileDraft));
+      applyUserDetail(await profileMutation.mutateAsync({ userId: selectedUserId, draft: profileDraft }));
       setNotice("Đã cập nhật thông tin thành viên.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể cập nhật thông tin thành viên.");
@@ -357,7 +403,7 @@ export function UserAccessControlWorkspace({
     setError("");
     setNotice("");
     try {
-      applyUserDetail(await assignAdminUserRoles(selectedUserId, roleDraft));
+      applyUserDetail(await rolesMutation.mutateAsync({ userId: selectedUserId, roles: roleDraft }));
       setNotice("Đã cập nhật vai trò đăng nhập.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể cập nhật vai trò.");
@@ -366,12 +412,12 @@ export function UserAccessControlWorkspace({
     }
   }
 
-  async function persistStatus(nextStatus: "ACTIVE" | "BLOCKED") {
+  async function persistStatus(nextStatus: AdminUserStatus) {
     if (!selectedUserId || rootAdmin) return;
     setError("");
     setNotice("");
     try {
-      applyUserDetail(await updateAdminUserStatus(selectedUserId, nextStatus));
+      applyUserDetail(await statusMutation.mutateAsync({ userId: selectedUserId, status: nextStatus }));
       setNotice(nextStatus === "ACTIVE" ? "Tài khoản đã được kích hoạt." : "Tài khoản đã được khóa.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể cập nhật trạng thái tài khoản.");
@@ -385,7 +431,7 @@ export function UserAccessControlWorkspace({
     setNotice("");
     try {
       const nextPolicies = mergeDraftPolicy(policies, policyFromDraft(draft, scopeResults));
-      const detail = await saveUserAccess(selectedUserId, { policies: nextPolicies });
+      const detail = await accessMutation.mutateAsync({ userId: selectedUserId, policies: nextPolicies });
       setPolicies(detail.policies);
       setEffective(detail.effective);
       setUsers((current) => sortUsers(current.map((user) => (user.id === detail.user.id ? detail.user : user))));
@@ -438,7 +484,9 @@ export function UserAccessControlWorkspace({
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
+              <option value="INACTIVE">Deactive/nghỉ việc</option>
               <option value="BLOCKED">Đã khóa</option>
+              <option value="BANNED">Banned</option>
               <option value="PENDING">Chờ kích hoạt</option>
             </select>
           </div>
@@ -466,7 +514,9 @@ export function UserAccessControlWorkspace({
                   rootAdmin={rootAdmin}
                   superAdmin={superAdmin}
                   onActivate={() => void persistStatus("ACTIVE")}
-                onDeactivate={() => void persistStatus("BLOCKED")}
+                  onDeactivate={() => void persistStatus("INACTIVE")}
+                  onBan={() => void persistStatus("BANNED")}
+                  onBlock={() => void persistStatus("BLOCKED")}
               />
 
               <div className="mt-5 flex flex-wrap gap-2 border-b border-slate-200">
@@ -582,6 +632,8 @@ function MemberDetailHeader({
   superAdmin,
   user,
   onActivate,
+  onBan,
+  onBlock,
   onDeactivate,
 }: {
   effective: EffectiveAccess | null;
@@ -590,6 +642,8 @@ function MemberDetailHeader({
   superAdmin: boolean;
   user: ReturnType<typeof mergeUser>;
   onActivate: () => void;
+  onBan: () => void;
+  onBlock: () => void;
   onDeactivate: () => void;
 }) {
   return (
@@ -639,6 +693,20 @@ function MemberDetailHeader({
             onClick={onDeactivate}
           >
             Deactive
+          </button>
+          <button
+            className="h-10 rounded-xl border border-orange-200 bg-white px-4 text-sm font-semibold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={rootAdmin || user.status === "BLOCKED"}
+            onClick={onBlock}
+          >
+            Block
+          </button>
+          <button
+            className="h-10 rounded-xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={rootAdmin || user.status === "BANNED"}
+            onClick={onBan}
+          >
+            Ban
           </button>
         </div>
       </div>
@@ -1420,8 +1488,11 @@ function statusLabel(status: string) {
   switch (status) {
     case "ACTIVE":
       return "Đang hoạt động";
-    case "BLOCKED":
+    case "INACTIVE":
+      return "Deactive/nghỉ việc";
     case "BANNED":
+      return "Banned";
+    case "BLOCKED":
     case "DISABLED":
       return "Đã khóa";
     case "PENDING":

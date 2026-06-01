@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 import {
-  Plus as PlusIcon,
   Bell as BellIcon,
   BookOpen as BookOpenIcon,
-  Shield as ShieldIcon,
+  ChevronDown as ChevronDownIcon,
   LayoutGrid as LayoutGridIcon,
-  ChevronDown as ChevronDownIcon,  LogOut as LogOutIcon,
+  LogOut as LogOutIcon,
+  Plus as PlusIcon,
+  School as SchoolIcon,
+  Settings as SettingsIcon,
+  Shield as ShieldIcon,
   User as UserIcon,
-  Settings as SettingsIcon
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { Avatar } from "@/components/ui/avatar";
-import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/features/auth/api/auth-storage";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/features/auth/api/auth-storage";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/classroom/types/classroom-types";
 import type { LmsEducationUnitDTO } from "@/features/dashboard/api/lms-dashboard-api";
 import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
@@ -32,6 +34,7 @@ interface DashboardContextBarProps {
   activePortal: "lms" | "hoclieu";
   canAccessGlobalErg: boolean;
   classes: ClassroomSnapshot[];
+  manageableUnits: LmsEducationUnitDTO[];
   managementScope: ManagementScope;
   onOpenLeaf: (leafId: DashboardLeaf["id"]) => void;
   onSelectClass: (classId: string) => void;
@@ -43,10 +46,55 @@ interface DashboardContextBarProps {
   selectedSchoolId?: string;
 }
 
+function getInitials(value: string) {
+  return value
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
+
+function ScopeAvatar({
+  kind,
+  label,
+  className,
+}: {
+  kind: "system" | "studio" | "school";
+  label: string;
+  className?: string;
+}) {
+  const baseClassName = cn("grid shrink-0 place-items-center", className);
+
+  if (kind === "system") {
+    return (
+      <div className={cn(baseClassName, "bg-blue-600 text-white")}>
+        <ShieldIcon className="size-5" />
+      </div>
+    );
+  }
+
+  if (kind === "studio") {
+    return (
+      <div className={cn(baseClassName, "bg-[var(--erg-blue)] text-white")}>
+        <BookOpenIcon className="size-5" />
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn(baseClassName, "bg-slate-100 text-slate-700 ring-1 ring-slate-200")}>
+      <span className="text-[11px] font-black tracking-tight">{getInitials(label) || <SchoolIcon className="size-4" />}</span>
+    </div>
+  );
+}
+
 export function DashboardContextBar({
   activePortal,
   canAccessGlobalErg,
   classes,
+  manageableUnits,
   managementScope,
   onOpenLeaf,
   onSelectClass,
@@ -60,11 +108,13 @@ export function DashboardContextBar({
   const isGlobalScope = managementScope.level === "global";
   const isHocLieuPortal = activePortal === "hoclieu";
   const ergSystemUnit = systemUnits.find((unit) => unit.code === "ERG-SYSTEM");
-  const hoclieuStudioUnit = systemUnits.find((unit) => unit.code === "HOCLIEU-STUDIO");
+  const hoclieuStudioUnit =
+    manageableUnits.find((unit) => unit.code === "HOCLIEU-STUDIO" || unit.name.toLowerCase().includes("hoclieu studio")) ??
+    systemUnits.find((unit) => unit.code === "HOCLIEU-STUDIO");
   const canOpenHocLieuStudio = canAccessGlobalErg || isHocLieuPortal || Boolean(hoclieuStudioUnit);
-  const selectedSchool = schools.find((s) => s.id === selectedSchoolId);
-  const selectedClass = classes.find((c) => c.id === selectedClassId);
-
+  const selectedSchool = schools.find((school) => school.id === selectedSchoolId);
+  const selectedClass = classes.find((classroom) => classroom.id === selectedClassId);
+  const scopeUnits = manageableUnits.filter((unit) => unit.type !== "system" && unit.code !== "HOCLIEU-STUDIO");
   const canSelectClass = activePortal === "lms" && !isGlobalScope && classes.length > 0;
   const [account, setAccount] = useState(() => getCurrentAccount());
 
@@ -73,31 +123,23 @@ export function DashboardContextBar({
     window.addEventListener(AUTH_ACCOUNT_CHANGED_EVENT, syncAccount);
     return () => window.removeEventListener(AUTH_ACCOUNT_CHANGED_EVENT, syncAccount);
   }, []);
+
   const accountName = account?.fullName || "Giáo viên ERG";
   const accountEmail = account?.email || "teacher@erg.edu.vn";
-  const accountAvatar = account?.avatarUrl || "/assets/images/mock-teacher-avatar.png";
-
-  const copy = {
-    classLabel: "Chọn lớp học",
-    contextLabel: "Phạm vi quản lý",
-    createEducationUnit: "Tạo cơ sở giáo dục",
-    createQuiz: "Tạo bài tập/quiz",
-    notifications: "Thông báo",
-    questionBank: "Ngân hàng câu hỏi",
-    schoolScope: "Cơ sở giáo dục",
-    schoolScopeDescription: "Quản lý dữ liệu cấp trường",
-    students: "Học sinh",
-    hoclieuStudio: "Hoclieu Studio",
-    hoclieuStudioDescription: "Quản trị kho học liệu",
-    systemScope: "Hệ thống ERG",
-    systemScopeDescription: "Toàn quyền quản trị hệ thống",
-    logout: "Đăng xuất",
-    profile: "Hồ sơ cá nhân",
-    settings: "Cài đặt"
-  };
+  const accountAvatar = account?.avatarUrl || "";
+  const scopeTitle = isHocLieuPortal
+    ? hoclieuStudioUnit?.name || "Hoclieu Studio"
+    : isGlobalScope
+      ? ergSystemUnit?.name || "Hệ thống ERG"
+      : selectedSchool?.name || "Chọn cơ sở";
+  const scopeSubtitle = isHocLieuPortal
+    ? hoclieuStudioUnit?.address || "Hệ thống học liệu"
+    : isGlobalScope
+      ? ergSystemUnit?.address || "Hệ thống ERG"
+      : "Cơ sở giáo dục";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.02)] backdrop-blur">
+    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
       <div className="flex min-h-16 w-full items-center justify-between gap-3 px-6 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <DropdownMenu>
@@ -105,121 +147,114 @@ export function DashboardContextBar({
               <button
                 type="button"
                 className={cn(
-                  "inline-flex h-12 max-w-full items-center gap-3 rounded-2xl border border-transparent px-2 text-left text-slate-950 outline-none transition",
-                  "hover:bg-slate-50 focus-visible:ring-4 focus-visible:ring-blue-100",
+                  "inline-flex h-12 max-w-full items-center gap-3 rounded-xl border border-transparent px-2 text-left text-slate-950 outline-none",
+                  "hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-blue-100",
                 )}
               >
-                <div className="relative">
-                  <Avatar className="size-10 rounded-xl border border-slate-200 shadow-sm ring-2 ring-white overflow-hidden">
-                    <img 
-                      src={isHocLieuPortal || isGlobalScope ? "/assets/images/erg-logo-circle.png" : selectedSchool?.logoURL ?? "/assets/images/school-placeholder.png"} 
-                      alt="Logo" 
-                      className="aspect-square h-full w-full object-cover"
-                    />
-                  </Avatar>
-                </div>
-                <div className="flex flex-col min-w-0 pr-1">
+                <ScopeAvatar kind={isHocLieuPortal ? "studio" : isGlobalScope ? "system" : "school"} label={scopeTitle} className="size-10 rounded-xl" />
+                <div className="min-w-0 pr-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="truncate text-[15px] font-extrabold tracking-tight text-slate-900 uppercase">
-                      {isHocLieuPortal ? (hoclieuStudioUnit?.name || "Hoclieu Studio") : isGlobalScope ? (ergSystemUnit?.name || "Hệ thống ERG") : (selectedSchool?.name || "Chọn cơ sở")}
-                    </span>
-                    <ChevronDownIcon className="size-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate text-[15px] font-extrabold uppercase tracking-tight text-slate-900">{scopeTitle}</span>
+                    <ChevronDownIcon className="size-3.5 shrink-0 text-slate-400" />
                   </div>
-                  <span className="truncate text-[10px] font-bold text-slate-500 uppercase tracking-widest opacity-80">
-                    {isHocLieuPortal ? (hoclieuStudioUnit?.address || "Hệ thống học liệu") : isGlobalScope ? (ergSystemUnit?.address || copy.systemScope) : copy.schoolScope}
-                  </span>
+                  <span className="truncate text-[10px] font-bold uppercase tracking-widest text-slate-500 opacity-80">{scopeSubtitle}</span>
                 </div>
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-80 rounded-2xl p-2 shadow-2xl ring-1 ring-slate-200">
+
+            <DropdownMenuContent align="start" className="w-80 rounded-xl border border-slate-200 bg-white p-2 shadow-sm data-open:animate-none data-closed:animate-none">
               <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
                 Phạm vi quản lý
               </DropdownMenuLabel>
-              {canAccessGlobalErg && (
-                <DropdownMenuItem 
+
+              {canAccessGlobalErg ? (
+                <DropdownMenuItem
                   onClick={() => onSelectScopeRoot("global")}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl p-3 transition cursor-pointer",
-                    activePortal === "lms" && isGlobalScope ? "bg-blue-50 text-blue-700" : "hover:bg-slate-50"
+                    "flex cursor-pointer items-center gap-3 rounded-xl p-3",
+                    activePortal === "lms" && isGlobalScope ? "bg-blue-50 text-blue-700" : "hover:bg-slate-50",
                   )}
                 >
-                  <div className="grid size-9 place-items-center rounded-lg bg-blue-600 text-white shadow-lg shadow-blue-100">
-                    <ShieldIcon className="size-5" />
-                  </div>
+                  <ScopeAvatar kind="system" label={ergSystemUnit?.name || "Hệ thống ERG"} className="size-9 rounded-lg" />
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold">{ergSystemUnit?.name || copy.systemScope}</span>
-                    <span className="text-[10px] opacity-70 uppercase font-bold tracking-tight">{ergSystemUnit?.address || copy.systemScopeDescription}</span>
+                    <span className="text-sm font-bold">{ergSystemUnit?.name || "Hệ thống ERG"}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tight opacity-70">
+                      {ergSystemUnit?.address || "Toàn quyền quản trị hệ thống"}
+                    </span>
                   </div>
                 </DropdownMenuItem>
-              )}
-              {canOpenHocLieuStudio && (
-                <DropdownMenuItem 
+              ) : null}
+
+              {canOpenHocLieuStudio ? (
+                <DropdownMenuItem
                   onClick={() => onSelectScopeRoot("hoclieu-studio")}
                   className={cn(
-                    "flex items-center gap-3 rounded-xl p-3 transition cursor-pointer",
-                    isHocLieuPortal ? "bg-indigo-50 text-[var(--erg-blue)]" : "hover:bg-slate-50"
+                    "flex cursor-pointer items-center gap-3 rounded-xl p-3",
+                    isHocLieuPortal ? "bg-indigo-50 text-[var(--erg-blue)]" : "hover:bg-slate-50",
                   )}
                 >
-                  <div className="grid size-9 place-items-center rounded-lg bg-[var(--erg-blue)] text-white shadow-lg shadow-blue-100">
-                    <BookOpenIcon className="size-5" />
-                  </div>
+                  <ScopeAvatar kind="studio" label={hoclieuStudioUnit?.name || "Hoclieu Studio"} className="size-9 rounded-lg" />
                   <div className="flex flex-col">
-                    <span className="text-sm font-bold">{hoclieuStudioUnit?.name || copy.hoclieuStudio}</span>
-                    <span className="text-[10px] opacity-70 uppercase font-bold tracking-tight">{hoclieuStudioUnit?.address || copy.hoclieuStudioDescription}</span>
+                    <span className="text-sm font-bold">{hoclieuStudioUnit?.name || "Hoclieu Studio"}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-tight opacity-70">
+                      {hoclieuStudioUnit?.address || "Quản trị kho học liệu"}
+                    </span>
                   </div>
                 </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator className="my-2" />
+              ) : null}
+
+              {scopeUnits.length ? <DropdownMenuSeparator className="my-2" /> : null}
+
               <div className="max-h-60 overflow-y-auto">
-                {schools.map((school) => (
+                {scopeUnits.map((unit) => (
                   <DropdownMenuItem
-                    key={school.id}
-                    onClick={() => onSelectScopeRoot(school.id)}
+                    key={unit.id}
+                    onClick={() => onSelectScopeRoot(unit.id)}
                     className={cn(
-                      "flex items-center gap-3 rounded-xl p-3 transition cursor-pointer mb-1",
-                      activePortal === "lms" && !isGlobalScope && selectedSchool?.id === school.id ? "bg-slate-100 text-slate-900" : "hover:bg-slate-50"
+                      "mb-1 flex cursor-pointer items-center gap-3 rounded-xl p-3",
+                      activePortal === "lms" && !isGlobalScope && selectedSchoolId === unit.id ? "bg-slate-100 text-slate-900" : "hover:bg-slate-50",
                     )}
                   >
-                    <Avatar className="size-9 rounded-lg border border-slate-200 overflow-hidden">
-                      <img src={school.logoURL ?? "/assets/images/school-placeholder.png"} alt={school.name} className="object-cover" />
-                    </Avatar>
-                    <div className="flex flex-col min-w-0">
-                      <span className="truncate text-sm font-bold text-slate-800">{school.name}</span>
-                      <span className="text-[10px] text-slate-500 uppercase font-bold tracking-tight">Cơ sở giáo dục</span>
+                    <ScopeAvatar kind="school" label={unit.name} className="size-9 rounded-lg" />
+                    <div className="min-w-0">
+                      <span className="block truncate text-sm font-bold text-slate-800">{unit.name}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-tight text-slate-500">
+                        {unit.type === "center" ? "Trung tâm" : "Cơ sở giáo dục"}
+                      </span>
                     </div>
                   </DropdownMenuItem>
                 ))}
               </div>
-              
-              {canAccessGlobalErg && (
+
+              {canAccessGlobalErg ? (
                 <>
                   <DropdownMenuSeparator className="my-2" />
                   <DropdownMenuItem
-                    className="flex items-center gap-3 rounded-xl p-3 text-emerald-700 hover:bg-emerald-50 cursor-pointer"
+                    className="flex cursor-pointer items-center gap-3 rounded-xl p-3 text-emerald-700 hover:bg-emerald-50"
                     onClick={() => onOpenLeaf("admin-create-unit")}
                   >
                     <div className="grid size-9 place-items-center rounded-lg bg-emerald-100 text-emerald-600">
                       <PlusIcon className="size-5" />
                     </div>
-                    <span className="text-sm font-bold">{copy.createEducationUnit}</span>
+                    <span className="text-sm font-bold">Tạo cơ sở giáo dục</span>
                   </DropdownMenuItem>
                 </>
-              )}
+              ) : null}
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {activePortal === "lms" && !isGlobalScope && (
+          {activePortal === "lms" && !isGlobalScope ? (
             <>
               <div className="h-8 w-px bg-slate-200" />
 
-              {canSelectClass && (
+              {canSelectClass ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
                       className={cn(
-                        "inline-flex h-11 items-center gap-2 rounded-2xl bg-slate-50 px-4 text-left transition hover:bg-slate-100 focus-visible:ring-4 focus-visible:ring-blue-100",
-                        "border border-slate-200/60 shadow-sm"
+                        "inline-flex h-11 items-center gap-2 rounded-2xl border border-slate-200/60 bg-slate-50 px-4 text-left hover:bg-slate-100",
+                        "focus-visible:ring-2 focus-visible:ring-blue-100",
                       )}
                     >
                       <div className="grid size-7 place-items-center rounded-lg bg-white text-blue-600 shadow-sm ring-1 ring-slate-200">
@@ -227,90 +262,101 @@ export function DashboardContextBar({
                       </div>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
-                          <span className="text-[13px] font-bold text-slate-800 leading-tight">
-                            {selectedClass?.className || copy.classLabel}
+                          <span className="text-[13px] font-bold leading-tight text-slate-800">
+                            {selectedClass?.className || "Chọn lớp học"}
                           </span>
                           <ChevronDownIcon className="size-3 text-slate-400" />
                         </div>
-                        {selectedClass && (
-                          <span className="text-[9px] font-bold text-slate-500 uppercase tracking-tighter">
-                            {selectedClass.studentCount} {copy.students}
+                        {selectedClass ? (
+                          <span className="text-[9px] font-bold uppercase tracking-tighter text-slate-500">
+                            {selectedClass.studentCount} học sinh
                           </span>
-                        )}
+                        ) : null}
                       </div>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 shadow-2xl ring-1 ring-slate-200">
+                  <DropdownMenuContent align="start" className="w-64 rounded-2xl p-2 shadow-sm ring-1 ring-slate-200">
                     <DropdownMenuLabel className="px-3 py-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
                       Lớp học đang quản lý
                     </DropdownMenuLabel>
-                    {classes.map((cls) => (
+                    {classes.map((classroom) => (
                       <DropdownMenuItem
-                        key={cls.id}
-                        onClick={() => onSelectClass(cls.id)}
+                        key={classroom.id}
+                        onClick={() => onSelectClass(classroom.id)}
                         className={cn(
-                          "flex items-center gap-3 rounded-xl p-3 transition cursor-pointer mb-1",
-                          selectedClassId === cls.id ? "bg-blue-50 text-blue-700 font-bold" : "hover:bg-slate-50"
+                          "mb-1 flex cursor-pointer items-center gap-3 rounded-xl p-3",
+                          selectedClassId === classroom.id ? "bg-blue-50 font-bold text-blue-700" : "hover:bg-slate-50",
                         )}
                       >
                         <div className="flex size-8 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold uppercase text-slate-600">
-                          {cls.className.substring(0, 2)}
+                          {classroom.className.substring(0, 2)}
                         </div>
-                        <span className="text-sm">{cls.className}</span>
+                        <span className="text-sm">{classroom.className}</span>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-              )}
+              ) : null}
             </>
-          )}
+          ) : null}
         </div>
 
         <div className="flex shrink-0 items-center gap-2">
-          <Button variant="ghost" size="icon" className="size-10 rounded-xl text-slate-500 hover:bg-slate-100" aria-label={copy.notifications}>
+          <Button variant="ghost" size="icon" className="size-10 rounded-xl text-slate-500 hover:bg-slate-100" aria-label="Thông báo">
             <BellIcon className="size-5" />
           </Button>
-          
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative size-10 rounded-full p-0 hover:bg-slate-100 focus-visible:ring-4 focus-visible:ring-blue-100">
+              <Button variant="ghost" className="relative size-10 rounded-full p-0 hover:bg-slate-100 focus-visible:ring-2 focus-visible:ring-blue-100">
                 <Avatar className="size-8 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm">
-                  <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
+                  {accountAvatar ? (
+                    <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
+                  ) : (
+                    <span className="grid h-full w-full place-items-center bg-[var(--erg-blue)] text-[11px] font-black text-white">
+                      {getInitials(accountName)}
+                    </span>
+                  )}
                 </Avatar>
                 <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white bg-emerald-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl">
+            <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm">
               <DropdownMenuLabel className="px-2 py-2">
                 <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
                   <Avatar className="size-12 overflow-hidden rounded-xl border border-white shadow-sm">
-                    <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
+                    {accountAvatar ? (
+                      <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
+                    ) : (
+                      <span className="grid h-full w-full place-items-center bg-[var(--erg-blue)] text-sm font-black text-white">
+                        {getInitials(accountName)}
+                      </span>
+                    )}
                   </Avatar>
                   <div className="min-w-0">
                     <span className="block truncate text-sm font-extrabold text-slate-950">{accountName}</span>
                     <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">{accountEmail}</span>
-                    <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">Online</span>
+                    <span className="mt-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-700">
+                      Online
+                    </span>
                   </div>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem asChild className="flex items-center gap-3 rounded-xl p-2.5 cursor-pointer hover:bg-slate-50">
+              <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-3 rounded-xl p-2.5 hover:bg-slate-50">
                 <Link to="/profile">
                   <UserIcon className="size-4 text-slate-500" />
-                  <span className="text-sm">{copy.profile}</span>
+                  <span className="text-sm">Hồ sơ cá nhân</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="flex items-center gap-3 rounded-xl p-2.5 cursor-pointer hover:bg-slate-50">
+              <DropdownMenuItem className="flex cursor-pointer items-center gap-3 rounded-xl p-2.5 hover:bg-slate-50">
                 <SettingsIcon className="size-4 text-slate-500" />
-                <span className="text-sm">{copy.settings}</span>
+                <span className="text-sm">Cài đặt</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="my-2" />
-              <DropdownMenuItem 
-                className="flex items-center gap-3 rounded-xl p-2.5 cursor-pointer text-red-600 hover:bg-red-50"
-                onClick={onLogout}
-              >
+              <DropdownMenuItem className="flex cursor-pointer items-center gap-3 rounded-xl p-2.5 text-red-600 hover:bg-red-50" onClick={onLogout}>
                 <LogOutIcon className="size-4" />
-                <span className="text-sm font-bold">{copy.logout}</span>
+                <span className="text-sm font-bold">Đăng xuất</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

@@ -363,73 +363,73 @@ function buildHocLieuStudioSectionsV2(genericDescription: string): DashboardGrou
   return [
     {
       iconKey: "materials",
-      title: "Chủ đề",
+      title: "Cấu trúc học liệu",
       items: [
         createLeaf(
           "admin-hoclieu-studio",
-          "Chủ đề học liệu",
-          "Chủ đề",
+          "Cấu trúc môn học",
+          "Cấu trúc học liệu",
           root,
-          "Tạo môn học, xây cây chủ đề và gắn tài liệu theo một luồng duy nhất.",
+          "Tạo môn học, nhóm học liệu, chủ đề và bài học theo một cây cấu trúc thống nhất.",
           "admin-internal-docs",
         ),
       ],
     },
     {
       iconKey: "docs",
-      title: "Tài liệu",
+      title: "Kho học liệu",
       items: [
         createLeaf(
           "admin-hoclieu-resources",
-          "Tài liệu",
-          "Tài liệu",
+          "Danh sách học liệu",
+          "Kho học liệu",
           root,
-          "Tra cứu và cập nhật học liệu để gắn vào các môn/chủ đề.",
+          "Tra cứu, rà soát và cập nhật tài liệu, bài giảng và bài tập đã có trong hệ thống.",
           "admin-internal-docs",
         ),
       ],
     },
     {
       iconKey: "admin",
-      title: "Upload",
+      title: "Nhập học liệu",
       items: [
         createLeaf(
           "admin-hoclieu-upload",
-          "Upload",
-          "Upload",
+          "Thêm bài giảng và tài liệu",
+          "Nhập học liệu",
           root,
-          "Upload tài liệu mới và chọn nơi gắn trong cây học liệu.",
+          "Thêm file, link Google Slides hoặc bài tập và gắn vào đúng vị trí trong cây học liệu.",
           "admin-internal-docs",
         ),
       ],
     },
     {
       iconKey: "members",
-      title: "Xuất bản",
+      title: "Kiểm tra xuất bản",
       items: [
         createLeaf(
           "admin-hoclieu-publish",
-          "Xuất bản",
-          "Xuất bản",
+          "Xuất bản học liệu",
+          "Kiểm tra xuất bản",
           root,
-          "Kiểm tra trạng thái sẵn sàng trước khi hiển thị trên Hoclieu.",
+          "Kiểm tra trạng thái sẵn sàng, nội dung còn thiếu và chất lượng trước khi xuất bản.",
           "admin-internal-docs",
         ),
       ],
     },
     {
       iconKey: "settings",
-      title: "Thiết lập",
+      title: "Cấu hình học liệu",
       items: [
         createLeaf(
           "admin-public-disclosure",
-          "Công khai",
-          "Thiết lập",
+          "Công khai học liệu",
+          "Cấu hình học liệu",
           root,
           "Quản lý PDF công khai, metadata, vị trí public và watermark trước khi xuất bản.",
           "admin-public-disclosure",
         ),
-        createLeaf("general-settings", "Thiết lập", "Thiết lập", root, genericDescription, "placeholder"),
+        createLeaf("general-settings", "Thiết lập chung", "Cấu hình học liệu", root, genericDescription, "placeholder"),
       ],
     },
   ];

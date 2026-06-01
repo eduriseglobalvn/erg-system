@@ -1,8 +1,11 @@
 import {
+  AUTH_SESSION_FALLBACK_MAX_AGE_MS,
   STUDENT_LOCAL_SESSION_KEY,
   STUDENT_TEMP_SESSION_KEY,
 } from "@/features/auth/api/auth-token-storage";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
+
+const AUTH_V1_BASE = "/api/v1/auth";
 
 export type StudentSession = {
   accessToken?: string;
@@ -44,9 +47,14 @@ export function getCurrentStudentSession() {
   if (!canUseStorage()) return null;
 
   const localSession = parseJson<StudentSession | null>(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY), null);
-  if (localSession) return localSession;
+  if (isValidStudentSession(localSession)) return localSession;
+  if (localSession) window.localStorage.removeItem(STUDENT_LOCAL_SESSION_KEY);
 
-  return parseJson<StudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
+  const tempSession = parseJson<StudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
+  if (isValidStudentSession(tempSession)) return tempSession;
+  if (tempSession) window.sessionStorage.removeItem(STUDENT_TEMP_SESSION_KEY);
+
+  return null;
 }
 
 export function loginStudent(input: StudentLoginInput) {
@@ -61,27 +69,35 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
   const response = await apiRequest<{
     user?: { email?: string; fullName?: string; id?: string };
     accessToken?: string;
+    access_token?: string;
     refreshToken?: string;
+    refresh_token?: string;
     expiresIn?: number;
-  }>("/api/auth/login", {
+    expires_in?: number;
+  }>(`${AUTH_V1_BASE}/login`, {
+    portal: "elearning",
     method: "POST",
     body: JSON.stringify({
       email: input.email,
       password: input.password,
       rememberMe: input.rememberMe,
+      portal: "elearning",
     }),
   });
 
+  const accessToken = response.accessToken ?? response.access_token;
+  const refreshToken = response.refreshToken ?? response.refresh_token;
+  const expiresIn = response.expiresIn ?? response.expires_in;
   const session: StudentSession = {
-    accessToken: response.accessToken,
+    accessToken,
     className: "",
     email: response.user?.email ?? input.email.trim().toLowerCase(),
-    expiresAt: response.expiresIn ? new Date(Date.now() + response.expiresIn * 1000).toISOString() : undefined,
+    expiresAt: expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : undefined,
     id: response.user?.id,
     loggedInAt: new Date().toISOString(),
     name: response.user?.fullName ?? input.email.trim(),
     portal: "elearning",
-    refreshToken: response.refreshToken,
+    refreshToken,
     rememberMe: input.rememberMe,
     viewerKind: "student",
   };
@@ -104,4 +120,19 @@ export function logoutStudentSession() {
 
   window.localStorage.removeItem(STUDENT_LOCAL_SESSION_KEY);
   window.sessionStorage.removeItem(STUDENT_TEMP_SESSION_KEY);
+}
+
+function isValidStudentSession(session: StudentSession | null | undefined): session is StudentSession {
+  if (!session?.accessToken) return false;
+
+  const expiresAt = session.expiresAt ? Date.parse(session.expiresAt) : null;
+  if (expiresAt && Number.isFinite(expiresAt) && expiresAt <= Date.now()) return false;
+
+  if (!expiresAt) {
+    const loggedInAt = Date.parse(session.loggedInAt);
+    if (!Number.isFinite(loggedInAt)) return false;
+    if (loggedInAt + AUTH_SESSION_FALLBACK_MAX_AGE_MS <= Date.now()) return false;
+  }
+
+  return true;
 }

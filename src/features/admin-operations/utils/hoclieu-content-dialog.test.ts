@@ -3,6 +3,7 @@ import { expect, test } from "vitest";
 import {
   filterMockExercises,
   getAvailableContentOptions,
+  isGoogleSlidesUrl,
   normalizeGoogleSlidesUrl,
   shouldShowContentOption,
   type ExerciseLibraryItem,
@@ -34,11 +35,13 @@ const mockExercises: ExerciseLibraryItem[] = [
 ];
 
 test("shows lecture and exercise options only for child content under topic or section", () => {
-  expect(getAvailableContentOptions("root", "category")).toEqual(["category", "topic", "section", "bookSeries"]);
-  expect(shouldShowContentOption("child", "lecture", "topic")).toBe(true);
-  expect(shouldShowContentOption("child", "exercise", "section")).toBe(true);
-  expect(shouldShowContentOption("child", "resource", "category")).toBe(true);
-  expect(shouldShowContentOption("child", "exercise", "category")).toBe(false);
+  expect(getAvailableContentOptions("root", "category")).toEqual(["category"]);
+  expect(getAvailableContentOptions("child", "group")).toEqual(["section"]);
+  expect(getAvailableContentOptions("child", "lesson")).toEqual(["lecture", "exercise", "resource"]);
+  expect(shouldShowContentOption("child", "lecture", "lesson")).toBe(true);
+  expect(shouldShowContentOption("child", "exercise", "lesson")).toBe(true);
+  expect(shouldShowContentOption("child", "resource", "lesson")).toBe(true);
+  expect(shouldShowContentOption("child", "exercise", "group")).toBe(false);
 });
 
 test("normalizes google slides viewer links to embed form", () => {
@@ -48,6 +51,12 @@ test("normalizes google slides viewer links to embed form", () => {
   expect(normalizeGoogleSlidesUrl("https://docs.google.com/presentation/d/abc123/embed")).toBe(
     "https://docs.google.com/presentation/d/abc123/embed",
   );
+});
+
+test("detects google slides links for LMS slide setup", () => {
+  expect(isGoogleSlidesUrl("https://docs.google.com/presentation/d/abc123/edit?usp=sharing")).toBe(true);
+  expect(isGoogleSlidesUrl("https://drive.google.com/file/d/abc123/view")).toBe(false);
+  expect(isGoogleSlidesUrl("Bai giang 1")).toBe(false);
 });
 
 test("filters mock exercises by subject, topic, section, and query", () => {

@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api-client";
+import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
 
 export type AdminUserDetail = {
   id: string;
@@ -44,11 +44,12 @@ export type AdminProfileUpdate = {
 };
 
 export function getAdminUser(userId: string) {
-  return apiRequest<AdminUserDetail>(`/api/users/${encodeURIComponent(userId)}`);
+  return apiRequest<AdminUserDetail>(`/api/users/${encodeURIComponent(userId)}`, { portal: getBackOfficePortal() });
 }
 
 export async function updateAdminUserProfile(userId: string, input: AdminProfileUpdate) {
   await apiRequest<AdminUserDetail>(`/api/lms/auth/accounts/${encodeURIComponent(userId)}/profile`, {
+    portal: getBackOfficePortal(),
     method: "PUT",
     body: JSON.stringify({
       fullName: input.fullName,
@@ -68,8 +69,11 @@ export async function updateAdminUserProfile(userId: string, input: AdminProfile
   return getAdminUser(userId);
 }
 
-export async function updateAdminUserStatus(userId: string, status: "ACTIVE" | "BLOCKED") {
+export type AdminUserStatus = "ACTIVE" | "BLOCKED" | "BANNED" | "INACTIVE";
+
+export async function updateAdminUserStatus(userId: string, status: AdminUserStatus) {
   await apiRequest<{ message: string }>(`/api/users/${encodeURIComponent(userId)}/status`, {
+    portal: getBackOfficePortal(),
     method: "PUT",
     body: JSON.stringify({ status }),
   });
@@ -79,6 +83,7 @@ export async function updateAdminUserStatus(userId: string, status: "ACTIVE" | "
 
 export async function assignAdminUserRoles(userId: string, roles: string[]) {
   await apiRequest<{ message: string }>(`/api/users/${encodeURIComponent(userId)}/roles`, {
+    portal: getBackOfficePortal(),
     method: "POST",
     body: JSON.stringify({ roles }),
   });

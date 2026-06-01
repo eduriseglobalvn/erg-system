@@ -1,10 +1,16 @@
 import { ApiClientError, apiRequest } from "@/lib/api-client";
 import type { AccountRole, AuthProvider, TeacherAccount } from "@/features/auth/types/auth-types";
 
+const AUTH_V1_BASE = "/api/v1/auth";
+
 export type LoginRequestDTO = {
   email: string;
   password: string;
   rememberMe: boolean;
+  portal?: "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning";
+  deviceId?: string;
+  deviceName?: string;
+  deviceFingerprint?: string;
 };
 
 export type RegisterRequestDTO = {
@@ -38,7 +44,7 @@ export type AuthSessionResponseDTO = {
   refreshToken?: string;
   expiresAt?: string;
   permissions?: string[];
-  portals?: Array<"hoclieu" | "lms" | "elearning" | "*">;
+  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 type BackendProfileResponseDTO = {
@@ -78,7 +84,7 @@ type BackendAuthSessionResponseDTO = {
   expiresIn?: number;
   expires_in?: number;
   permissions?: string[];
-  portals?: Array<"hoclieu" | "lms" | "elearning" | "*">;
+  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 type BackendTokenContainerDTO = {
@@ -96,7 +102,7 @@ type BackendTokenContainerDTO = {
 
 export const authApi = {
   async login(input: LoginRequestDTO) {
-    const result = await loginWithFallback(input);
+    const result = await loginAtPath(`${AUTH_V1_BASE}/login`, input);
     return normalizeAuthSession(result);
   },
 
@@ -109,7 +115,7 @@ export const authApi = {
   },
 
   logout() {
-    return apiRequest<void>("/api/lms/auth/logout", {
+    return apiRequest<void>(`${AUTH_V1_BASE}/logout`, {
       method: "POST",
     });
   },
@@ -156,40 +162,30 @@ export const authApi = {
     });
   },
 
-  async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string) {
+  async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string, portal: "admin" | "crm" | "hoclieu" | "lcms" | "lms" = "lms") {
     const result = await apiRequest<BackendAuthSessionResponseDTO>(`/api/lms/auth/providers/${provider}`, {
+      portal,
       method: "POST",
-      body: JSON.stringify({ rememberMe, idToken }),
+      body: JSON.stringify({ rememberMe, idToken, portal }),
     });
     return normalizeAuthSession(result);
   },
 };
 
-async function loginWithFallback(input: LoginRequestDTO) {
-  try {
-    return await loginAtPath("/api/lms/auth/login", input);
-  } catch (error) {
-    if (!shouldRetrySharedAuthLogin(error)) {
-      throw error;
-    }
-
-    return loginAtPath("/api/auth/login", input);
-  }
+export function shouldRetrySharedAuthLogin(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const status = error instanceof ApiClientError ? error.status : undefined;
+  if (status && status !== 401) return false;
+  const message = error.message.toLowerCase();
+  return message.includes("missing authorization") || message.includes("authorization header");
 }
 
 function loginAtPath(path: string, input: LoginRequestDTO) {
   return apiRequest<BackendAuthSessionResponseDTO>(path, {
+    portal: input.portal,
     method: "POST",
-    body: JSON.stringify(input),
+    body: JSON.stringify({ ...getLoginDeviceMetadata(), ...input }),
   });
-}
-
-export function shouldRetrySharedAuthLogin(error: unknown) {
-  return (
-    error instanceof ApiClientError &&
-    error.status === 401 &&
-    error.message.toLowerCase().includes("missing authorization header")
-  );
 }
 
 export function normalizeAuthSession(result: BackendAuthSessionResponseDTO): AuthSessionResponseDTO {
@@ -233,10 +229,14 @@ function readTokenValue(result: BackendAuthSessionResponseDTO, ...keys: Array<ke
 }
 
 function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountResponseDTO {
+  if (!profile?.id || !profile.email) {
+    throw new Error("Backend auth response is missing account profile data.");
+  }
+
   return {
-    id: profile?.id ?? "teacher-api",
-    fullName: profile?.fullName ?? profile?.full_name ?? "ERG Teacher",
-    email: profile?.email ?? "teacher@erg.vn",
+    id: profile.id,
+    fullName: profile.fullName ?? profile.full_name ?? profile.email,
+    email: profile.email,
     phone: profile?.phone ?? "",
     avatarUrl: profile?.avatarUrl ?? profile?.avatar_url ?? "",
     bio: profile?.bio ?? "",
@@ -282,6 +282,75 @@ function mapProvider(provider?: string): AuthProvider {
 function expiresInToDate(expiresIn?: number) {
   if (!expiresIn) return undefined;
   return new Date(Date.now() + expiresIn * 1000).toISOString();
+}
+
+const DEVICE_ID_STORAGE_KEY = "erg-device-id";
+
+function getLoginDeviceMetadata() {
+  const deviceId = getOrCreateDeviceId();
+  const deviceName = getDeviceName();
+
+  return {
+    deviceId,
+    deviceName,
+    deviceFingerprint: createDeviceFingerprint(deviceId, deviceName),
+  };
+}
+
+function getOrCreateDeviceId() {
+  const existing = readLocalStorage(DEVICE_ID_STORAGE_KEY);
+  if (existing) return existing;
+
+  const next = createRandomId("device");
+  writeLocalStorage(DEVICE_ID_STORAGE_KEY, next);
+  return next;
+}
+
+function getDeviceName() {
+  if (typeof navigator === "undefined") return "Unknown browser";
+
+  const platform = navigator.platform || "Unknown platform";
+  const userAgent = navigator.userAgent || "Unknown browser";
+  return `${platform} - ${userAgent}`;
+}
+
+function createDeviceFingerprint(deviceId: string, deviceName: string) {
+  const timezone = typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone ?? "" : "";
+  const language = typeof navigator !== "undefined" ? navigator.language ?? "" : "";
+  return hashString(`${deviceId}|${deviceName}|${timezone}|${language}`);
+}
+
+function hashString(value: string) {
+  let hash = 0;
+  for (let index = 0; index < value.length; index += 1) {
+    hash = (hash << 5) - hash + value.charCodeAt(index);
+    hash |= 0;
+  }
+  return `fp-${Math.abs(hash).toString(36)}`;
+}
+
+function createRandomId(prefix: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function readLocalStorage(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function writeLocalStorage(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Login still works if browser storage is blocked.
+  }
 }
 
 

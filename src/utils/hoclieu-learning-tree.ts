@@ -56,9 +56,7 @@ function sectionNode(section: HocLieuTaxonomyOption, fallbackLocation: HocLieuLe
     metadata: section.metadata,
     location: {
       categoryId: section.categoryId || fallbackLocation.categoryId,
-      topicId: section.topicId || fallbackLocation.topicId,
       sectionId: section.id,
-      bookSeriesId: section.bookSeriesId || fallbackLocation.bookSeriesId,
     },
     children: [],
   };
@@ -69,9 +67,7 @@ function groupNode(
   option: HocLieuTaxonomyOption,
   lessons: HocLieuTaxonomyOption[],
   location: HocLieuLearningLocation,
-): HocLieuLearningNode | null {
-  if (!lessons.length) return null;
-
+): HocLieuLearningNode {
   return {
     id: `group-${sourceKind}-${option.id}`,
     label: option.label,
@@ -100,43 +96,16 @@ export function buildHocLieuLearningSubjects(
 ): HocLieuLearningSubject[] {
   return sortOptions(model.subjects).map((subject) => {
     const categories = sortOptions(model.categories.filter((item) => belongsToSubject(item, subject.id)));
-    const topics = sortOptions(model.topics.filter((item) => belongsToSubject(item, subject.id)));
-    const bookSeries = sortOptions(model.bookSeries.filter((item) => belongsToSubject(item, subject.id)));
     const sections = sortOptions(model.sections.filter((item) => belongsToSubject(item, subject.id)));
 
     const usedSectionIds = new Set<string>();
     const groups: HocLieuLearningNode[] = [];
 
-    for (const topic of topics) {
-      const topicLessons = sections.filter((section) => section.topicId === topic.id);
-      const group = groupNode("topic", topic, topicLessons, {
-        categoryId: topic.categoryId,
-        topicId: topic.id,
-      });
-      if (!group) continue;
-      topicLessons.forEach((lesson) => usedSectionIds.add(lesson.id));
-      groups.push(group);
-    }
-
-    for (const item of bookSeries) {
-      const itemLessons = sections.filter((section) => section.bookSeriesId === item.id);
-      const group = groupNode("bookSeries", item, itemLessons, {
-        categoryId: item.categoryId,
-        bookSeriesId: item.id,
-      });
-      if (!group) continue;
-      itemLessons.forEach((lesson) => usedSectionIds.add(lesson.id));
-      groups.push(group);
-    }
-
     for (const category of categories) {
-      const categoryLessons = sections.filter(
-        (section) => section.categoryId === category.id && !section.topicId && !section.bookSeriesId && !usedSectionIds.has(section.id),
-      );
+      const categoryLessons = sections.filter((section) => section.categoryId === category.id && !usedSectionIds.has(section.id));
       const group = groupNode("category", category, categoryLessons, {
         categoryId: category.id,
       });
-      if (!group) continue;
       categoryLessons.forEach((lesson) => usedSectionIds.add(lesson.id));
       groups.push(group);
     }
@@ -208,9 +177,7 @@ export function matchesResourceToLearningNode(resource: HocLieuResourceCard | { 
   if (!node) return false;
   if (node.kind === "lesson") return resource.sectionId === node.location.sectionId;
   if (node.kind === "group") {
-    if (node.sourceKind === "category") return resource.categoryId === node.location.categoryId && !resource.topicId && !resource.bookSeriesId;
-    if (node.sourceKind === "topic") return resource.topicId === node.location.topicId;
-    if (node.sourceKind === "bookSeries") return resource.bookSeriesId === node.location.bookSeriesId;
+    if (node.sourceKind === "category") return resource.categoryId === node.location.categoryId;
   }
   return false;
 }

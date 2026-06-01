@@ -11,6 +11,7 @@ import type { DashboardLeaf } from "@/features/dashboard/types/dashboard-types";
 import { PublicDisclosureAdminWorkspace } from "@/features/public-disclosure";
 import { QuestionBankWorkspace } from "@/features/question-bank";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
+import { SeoCrmWorkspace } from "@/features/seo-crm";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
 
 export function DashboardContent({
@@ -54,6 +55,10 @@ export function DashboardContent({
         onOpenLeaf={onOpenLeaf}
       />
     );
+  }
+
+  if (activeLeaf.variant.startsWith("seo-")) {
+    return <SeoCrmWorkspace activeLeaf={activeLeaf} onOpenLeaf={onOpenLeaf} />;
   }
 
   if (activeLeaf.variant === "quiz-editor") {

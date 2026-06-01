@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -78,6 +79,7 @@ export function DashboardShell() {
   const apiBacked = hasApiBase();
   const storedContext = useMemo(readStoredDashboardContext, []);
   const [schools, setSchools] = useState<ClassroomSchool[]>(() => (apiBacked ? [] : classroomSchools));
+  const [manageableUnits, setManageableUnits] = useState<LmsEducationUnitDTO[]>([]);
   const [systemUnits, setSystemUnits] = useState<LmsEducationUnitDTO[]>([]);
   const [classes, setClasses] = useState<ClassroomSnapshot[]>(() => (apiBacked ? [] : classroomSnapshots));
   const [currentUserPermissions, setCurrentUserPermissions] = useState<DashboardUserPermissions>({
@@ -106,12 +108,20 @@ export function DashboardShell() {
     [dashboardSections],
   );
   const defaultLeaf = dashboardSections[0]?.items[0] ?? dashboardSections[1]!.items[0]!;
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeLeafId, setActiveLeafId] = useState(() => normalizeStoredLeafId(storedContext.activeLeafId) ?? defaultLeaf.id);
   const [createEducationUnitOpen, setCreateEducationUnitOpen] = useState(false);
   const [pendingQuestionImports, setPendingQuestionImports] = useState<QuestionBankQuestion[]>([]);
   const scopeSyncTimerRef = useRef<number | null>(null);
   const lastSyncedScopeRef = useRef<ManagementScope | null>(null);
+  const bootstrapQuery = useQuery({
+    queryKey: ["dashboard", "bootstrap"],
+    queryFn: loadLmsDashboardBootstrap,
+    enabled: apiBacked,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
   const activeLeaf = availableLeaves.find((leaf) => leaf.id === activeLeafId) ?? defaultLeaf;
   const allowedSchoolIds = currentUserPermissions.assignedCenterIds;
@@ -165,35 +175,23 @@ export function DashboardShell() {
   }, [activeLeaf.id, activePortal, managementScope]);
 
   useEffect(() => {
-    let isMounted = true;
+    if (!bootstrapQuery.data) return;
 
-    async function loadBootstrap() {
-      try {
-        // Step 1: Load main bootstrap (LMS data) first as it's critical for layout
-        const bootstrap = await loadLmsDashboardBootstrap();
-        
-        if (!isMounted) return;
-
-        setSchools(bootstrap.schools);
-        setSystemUnits(bootstrap.systemUnits);
-        setClasses(bootstrap.classes);
-        setCurrentUserPermissions(bootstrap.permissions);
-        lastSyncedScopeRef.current = bootstrap.managementScope;
-        if (!storedContext.managementScope) {
-          setManagementScope(bootstrap.managementScope);
-        }
-
-      } catch (error) {
-        console.error("Cannot load LMS bootstrap", error);
-      }
+    setSchools(bootstrapQuery.data.schools);
+    setManageableUnits(bootstrapQuery.data.manageableUnits);
+    setSystemUnits(bootstrapQuery.data.systemUnits);
+    setClasses(bootstrapQuery.data.classes);
+    setCurrentUserPermissions(bootstrapQuery.data.permissions);
+    lastSyncedScopeRef.current = bootstrapQuery.data.managementScope;
+    if (!storedContext.managementScope) {
+      setManagementScope(bootstrapQuery.data.managementScope);
     }
+  }, [bootstrapQuery.data, storedContext.managementScope]);
 
-    void loadBootstrap();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  useEffect(() => {
+    if (!bootstrapQuery.error) return;
+    console.error("Cannot load LMS bootstrap", bootstrapQuery.error);
+  }, [bootstrapQuery.error]);
 
   useEffect(() => {
     return () => {
@@ -350,6 +348,7 @@ export function DashboardShell() {
         onSelectScopeRoot={selectScopeRoot}
         onLogout={authActions.signOut}
         schools={visibleSchools}
+        manageableUnits={manageableUnits}
         systemUnits={systemUnits}
         selectedClassId={selectedClassId}
         selectedSchoolId={selectedSchoolId}

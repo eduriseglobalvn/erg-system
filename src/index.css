@@ -1,1 +1,211 @@
 /* Intentionally minimal. Global base styles live in src/styles/globals.css. */
+
+.google-calendar-shell {
+  color: #3c4043;
+}
+
+.teaching-calendar {
+  --fc-border-color: #dadce0;
+  --fc-page-bg-color: #ffffff;
+  --fc-neutral-bg-color: #ffffff;
+  --fc-today-bg-color: #e8f0fe;
+  --fc-now-indicator-color: #d93025;
+  color: #3c4043;
+  height: 100%;
+}
+
+.teaching-calendar .fc {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  font-family: inherit;
+  height: 100%;
+  min-height: 0;
+}
+
+.teaching-calendar .fc .fc-view-harness {
+  flex: 1;
+  min-height: 0;
+}
+
+.teaching-calendar .fc .fc-scrollgrid {
+  border-bottom: 0;
+  border-left: 1px solid #dadce0;
+  border-right: 0;
+  border-top: 0;
+}
+
+.teaching-calendar .fc .fc-col-header-cell {
+  background: #ffffff;
+  padding: 8px 0 7px;
+}
+
+.teaching-calendar .fc .fc-col-header-cell-cushion {
+  color: #5f6368;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.teaching-calendar .fc .fc-timegrid-axis,
+.teaching-calendar .fc .fc-timegrid-slot-label {
+  background: #ffffff;
+}
+
+.teaching-calendar .fc .fc-timegrid-slot {
+  height: 32px;
+}
+
+.teaching-calendar .fc .fc-timegrid-slot-label-cushion {
+  color: #70757a;
+  font-size: 10px;
+  font-weight: 400;
+  padding-right: 8px;
+}
+
+.teaching-calendar .fc .fc-daygrid-day-number {
+  color: #3c4043;
+  font-size: 12px;
+  padding: 6px 8px 2px;
+  text-decoration: none;
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-scrollgrid-sync-table {
+  height: 100% !important;
+  table-layout: fixed;
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-body,
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-body table {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-day {
+  height: calc(100% / 6);
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-day-frame {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-day-top {
+  flex: 0 0 auto;
+}
+
+.teaching-calendar .fc .fc-dayGridMonth-view .fc-daygrid-day-events {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.teaching-calendar .fc .fc-day-today .fc-daygrid-day-number {
+  align-items: center;
+  background: #1a73e8;
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  margin: 2px 4px 0 0;
+  min-width: 24px;
+  padding: 0 6px;
+}
+
+.teaching-calendar .fc .fc-timegrid-col.fc-day-today,
+.teaching-calendar .fc .fc-daygrid-day.fc-day-today {
+  background: #ffffff;
+}
+
+.teaching-calendar .fc .fc-timegrid-now-indicator-line {
+  border-color: #d93025;
+}
+
+.teaching-calendar .fc .fc-timegrid-now-indicator-arrow {
+  border-color: #d93025;
+}
+
+.teaching-calendar .fc .teaching-schedule-event {
+  border: 0;
+  border-left: 3px solid currentColor;
+  border-radius: 4px;
+  box-shadow: none;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.teaching-calendar .fc .teaching-schedule-event:hover {
+  filter: saturate(1.08);
+}
+
+.teaching-calendar .fc .fc-timegrid-event {
+  min-height: 22px;
+}
+
+.teaching-calendar .fc .fc-timegrid-event .fc-event-main {
+  padding: 1px 3px;
+}
+
+.teaching-calendar .fc .fc-daygrid-event.teaching-schedule-event {
+  border-left-width: 3px;
+  border-radius: 4px;
+  margin: 1px 4px;
+}
+
+.teaching-calendar .teaching-schedule-month-event {
+  align-items: center;
+  display: flex;
+  gap: 4px;
+  font-size: 11px;
+  line-height: 16px;
+  overflow: hidden;
+  padding: 0 2px;
+}
+
+.teaching-calendar .fc .fc-daygrid-day-frame {
+  padding: 0 2px 2px;
+}
+
+.teaching-calendar .fc .fc-daygrid-day-events {
+  margin-top: 0;
+}
+
+.teaching-calendar .fc .fc-more-link {
+  color: #3c4043;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.teaching-calendar .fc .fc-multimonth {
+  border: 0;
+  gap: 16px;
+  padding: 16px;
+}
+
+.teaching-calendar .fc .fc-multimonth-month {
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.teaching-calendar .fc .fc-multimonth-title {
+  color: #3c4043;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 12px;
+}
+
+@media (max-width: 920px) {
+  .teaching-calendar .fc .fc-scrollgrid {
+    border-left: 0;
+  }
+
+  .teaching-calendar .fc .fc-timegrid-slot {
+    height: 30px;
+  }
+}

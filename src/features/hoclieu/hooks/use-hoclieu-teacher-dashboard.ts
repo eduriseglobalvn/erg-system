@@ -7,7 +7,6 @@ import {
   listHocLieuRecentOpened,
   loadHocLieuTeacherProgress,
   toVietnameseRelativeTime,
-  trackHocLieuTeacherProgressEvent,
 } from "@/features/hoclieu/api/teacher-dashboard-api";
 import type { HocLieuResource } from "@/features/hoclieu/api/library-data";
 import { useHocLieuDashboardScope } from "@/features/hoclieu/hooks/use-hoclieu-dashboard-scope";
@@ -15,7 +14,6 @@ import type {
   HocLieuTeacherDashboardNode,
   HocLieuTeacherDashboardSubject,
   HocLieuTeacherProgressDetail,
-  HocLieuTeacherProgressEventType,
   HocLieuTeacherProgressSummary,
   HocLieuTeacherRecentLecture,
   HocLieuTeacherSubjectTree,
@@ -169,12 +167,6 @@ function resourcesForNode(resources: HocLieuResource[], node?: HocLieuLearningNo
   return resources.filter((resource) => matchesResourceToLearningNode(resource, node));
 }
 
-function progressEventNodeKind(node: HocLieuTeacherDashboardNode): Exclude<HocLieuTeacherDashboardNode["sourceKind"], undefined> {
-  if (node.sourceKind) return node.sourceKind;
-  if (node.kind === "lesson") return "section";
-  return "folder";
-}
-
 function applySubjectSummary(subjects: SubjectWithSummary[], subjectId: string, summary: HocLieuTeacherProgressSummary) {
   return subjects.map<SubjectWithSummary>((subject) => ({
     ...subject,
@@ -210,21 +202,15 @@ export function useHocLieuTeacherDashboard() {
     return path[path.length - 1] ?? null;
   }
 
-  async function openTeachingResource(resource: HocLieuResource, previewWindow?: Window | null) {
+  async function openTeachingResource(resource: HocLieuResource) {
     const hydratedResource = await loadHocLieuResourceForViewer(resource);
     const targetUrl = hydratedResource.viewer.embedUrl || hydratedResource.viewer.secureEmbedUrl;
 
-    if (!targetUrl) {
-      previewWindow?.close();
+    if (!targetUrl && !hydratedResource.viewer.slides?.length) {
       throw new Error("Học liệu này chưa có đường dẫn mở từ hệ thống.");
     }
 
-    if (previewWindow && !previewWindow.closed) {
-      previewWindow.location.href = targetUrl;
-      return;
-    }
-
-    window.open(targetUrl, "_blank", "noopener,noreferrer");
+    return hydratedResource;
   }
 
   useEffect(() => {
@@ -350,16 +336,6 @@ export function useHocLieuTeacherDashboard() {
   async function handleOpenNode(node: HocLieuTeacherDashboardNode) {
     if (!selectedSubjectId) return;
 
-    await trackHocLieuTeacherProgressEvent({
-      schoolId,
-      academicYear,
-      subjectId: selectedSubjectId,
-      nodeId: node.id,
-      nodeKind: progressEventNodeKind(node),
-      eventType: "open",
-      resourceId: node.resourceId,
-    }).catch(() => undefined);
-
     if (node.hasChildren) {
       await loadSubjectView(selectedSubjectId, node.id, node.id);
       return;
@@ -373,41 +349,12 @@ export function useHocLieuTeacherDashboard() {
     await loadSubjectView(selectedSubjectId, parentId ?? "", parentId ?? "");
   }
 
-  async function handleTrackTeaching(node: HocLieuTeacherDashboardNode, eventType: Exclude<HocLieuTeacherProgressEventType, "open">) {
-    if (!selectedSubjectId) return;
-
-    try {
-      await trackHocLieuTeacherProgressEvent({
-        schoolId,
-        academicYear,
-        subjectId: selectedSubjectId,
-        nodeId: node.id,
-        nodeKind: progressEventNodeKind(node),
-        eventType,
-        resourceId: node.resourceId,
-      });
-
-      const nextProgress = await loadHocLieuTeacherProgress({
-        subjectId: selectedSubjectId,
-        schoolId,
-        academicYear,
-      }).catch(() => null);
-
-      if (nextProgress) {
-        setSubjectProgressMap((current) => ({ ...current, [selectedSubjectId]: nextProgress }));
-      }
-
-      await loadSubjectView(selectedSubjectId, viewState.tree?.parentId ?? "", node.id, nextProgress);
-    } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Không thể cập nhật tiến độ dạy học.");
-    }
-  }
-
   async function handleOpenResource(resource: HocLieuResource) {
-    const previewWindow = window.open("", "_blank");
     try {
       setError(null);
-      await openTeachingResource(resource, previewWindow);
+      const hydratedResource = await openTeachingResource(resource);
+      const targetUrl = hydratedResource.viewer.embedUrl || hydratedResource.viewer.secureEmbedUrl;
+      window.open(targetUrl, "_blank", "noopener,noreferrer");
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : "Không thể mở học liệu đã gắn.");
     }
@@ -497,7 +444,6 @@ export function useHocLieuTeacherDashboard() {
     onSelectBreadcrumb: handleSelectBreadcrumb,
     onSelectNode: handleOpenNode,
     onSelectSubject: handleSelectSubject,
-    onTrackTeaching: handleTrackTeaching,
     recentLectures: visibleRecentLectures,
     rootNodes,
     schoolId,

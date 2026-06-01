@@ -90,3 +90,35 @@ test("allows teacher portals when a teacher session grants the teacher portal", 
     }),
   ).toBe(true);
 });
+
+test("allows CRM when the session has admin-style access", () => {
+  const teacherSession: StoredAuthSession = {
+    accessToken: "crm-token",
+    portal: "crm",
+    portals: ["crm"],
+  };
+
+  expect(
+    canAccessPortal({
+      portal: "crm",
+      teacherAccount: { ...teacherAccount, role: "admin" },
+      teacherSession,
+    }),
+  ).toBe(true);
+});
+
+test("allows LCMS with an LMS teacher session", () => {
+  const teacherSession: StoredAuthSession = {
+    accessToken: "lms-token",
+    portal: "lms",
+    portals: ["lms"],
+  };
+
+  expect(
+    canAccessPortal({
+      portal: "lcms",
+      teacherAccount,
+      teacherSession,
+    }),
+  ).toBe(true);
+});

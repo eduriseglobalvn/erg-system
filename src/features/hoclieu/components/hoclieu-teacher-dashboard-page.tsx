@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronLeft, Search } from "lucide-react";
+import { BookOpen, CheckCircle2, ChevronDown, ChevronLeft, FileText, FolderOpen, Search } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import type { HocLieuResource } from "@/features/hoclieu/api/library-data";
+import { HocLieuSlideViewerModal } from "@/features/hoclieu/components/hoclieu-slide-viewer-modal";
 import { useHocLieuLibraryCatalog } from "@/features/hoclieu/hooks/use-hoclieu-library-catalog";
 
 const themeStyles: Record<HocLieuResource["thumbnailTheme"], { banner: string; accent: string }> = {
@@ -44,6 +45,35 @@ function formatProgressRate(value?: number) {
   return `${Math.round(Math.max(0, Math.min(100, value ?? 0)))}%`;
 }
 
+function formatCount(value: number, label: string) {
+  return `${value} ${label}`;
+}
+
+function getLessonEyebrow(title: string) {
+  const match = title.match(/bài\s*\d+/i);
+  return match?.[0] ?? "Bài học";
+}
+
+function GoogleSlidesIcon({ className = "h-3.5 w-3.5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path fill="#F4B400" d="M6 2h8l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Z" />
+      <path fill="#FFE082" d="M14 2v4a1 1 0 0 0 1 1h4l-5-5Z" />
+      <path fill="#FFFFFF" d="M8 10.25h8v5.5H8v-5.5Zm1.25 1.25v3h5.5v-3h-5.5Z" />
+      <path fill="#FFFFFF" d="M10.9 17h2.2v1.25h-2.2z" />
+    </svg>
+  );
+}
+
+function isGoogleSlidesLecture(resource: HocLieuResource) {
+  return (
+    resource.launchMode === "google_slide_embed" ||
+    resource.fileType === "PPTX" ||
+    resource.resourceType === "slide" ||
+    resource.resourceType === "lecture_bank"
+  );
+}
+
 function SubjectRail({
   subjects,
   selectedSubjectId,
@@ -58,60 +88,60 @@ function SubjectRail({
   selectedSectionId: string;
   expandedSubjectIds: string[];
   onSelectSubject: (subjectId: string) => void;
-  onSelectSection: (sectionId: string) => void;
+  onSelectSection: (subjectId: string, sectionId: string) => void;
   onToggleSubject: (subjectId: string) => void;
 }) {
   return (
     <aside className="border-r border-slate-200 bg-white">
-      <div className="px-5 py-6">
-        <div className="border-b border-slate-200 pb-5">
+      <div className="sticky top-16 px-5 py-6">
+        <div className="rounded-2xl border border-slate-200 bg-slate-50/70 p-4">
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Danh mục</p>
-          <h2 className="mt-2 text-[19px] font-black tracking-tight text-slate-950">Kho học liệu</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-500">Chọn môn học và nhóm học liệu để mở nhanh đúng nội dung cần dùng.</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-slate-950">Kho học liệu</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-500">Chọn môn học, mở nhóm học liệu, rồi vào đúng bài cần dạy.</p>
         </div>
 
-        <div className="mt-5 space-y-3">
+        <div className="mt-4 space-y-2">
           {subjects.map((subject) => {
             const isActive = subject.id === selectedSubjectId;
             const isExpanded = expandedSubjectIds.includes(subject.id);
 
             return (
-              <div key={subject.id} className="border-b border-slate-100 pb-3 last:border-b-0">
-                <div className="flex items-start gap-3">
+              <div key={subject.id} className={`rounded-2xl border p-3 ${isActive ? "border-blue-200 bg-blue-50/70" : "border-transparent bg-white"}`}>
+                <div className="flex items-center gap-3">
                   <button type="button" onClick={() => onSelectSubject(subject.id)} className="min-w-0 flex-1 text-left">
                     <p className={`truncate text-[15px] font-black ${isActive ? "text-[#091f80]" : "text-slate-900"}`}>{subject.label}</p>
-                    <p className="mt-1 text-xs text-slate-500">{subject.resourceCount} học liệu</p>
+                    <p className="mt-1 text-xs font-medium text-slate-500">{formatCount(subject.resourceCount, "học liệu")}</p>
                   </button>
 
                   <div className="flex items-center gap-1">
-                    <span className="px-1 text-[11px] font-black text-slate-400">{subject.groupCount}</span>
+                    <span className="grid min-w-6 place-items-center rounded-full bg-white px-2 py-1 text-[11px] font-black text-[#091f80]">{subject.groupCount}</span>
                     <button
                       type="button"
                       aria-label={isExpanded ? "Thu gọn nhóm học liệu" : "Mở nhóm học liệu"}
                       onClick={() => onToggleSubject(subject.id)}
-                      className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-                        isExpanded ? "bg-slate-100 text-[#091f80]" : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                      className={`flex h-8 w-8 items-center justify-center rounded-full ${
+                        isExpanded ? "bg-white text-[#091f80]" : "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
                       }`}
                     >
-                      <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`h-4 w-4 ${isExpanded ? "rotate-180" : ""}`} />
                     </button>
                   </div>
                 </div>
 
                 {isExpanded ? (
-                  <div className="mt-3 pl-2">
-                    <div className="relative ml-2 pl-4 before:absolute before:bottom-2 before:left-0 before:top-2 before:w-px before:border-l before:border-dashed before:border-slate-300 before:content-['']">
+                  <div className="mt-3">
+                    <div className="relative ml-2 pl-4 before:absolute before:bottom-3 before:left-0 before:top-3 before:w-px before:border-l before:border-dashed before:border-blue-200 before:content-['']">
                       <div className="space-y-1">
                         {subject.sections.map((section) => {
-                          const isSelected = section.id === selectedSectionId;
+                          const isSelected = isActive && section.id === selectedSectionId;
 
                           return (
                             <button
                               key={section.id}
                               type="button"
-                              onClick={() => onSelectSection(section.id)}
-                              className={`relative flex w-full items-center justify-between gap-3 px-2 py-2 text-left text-sm transition before:absolute before:-left-4 before:top-1/2 before:w-3 before:-translate-y-1/2 before:border-t before:border-dashed before:border-slate-300 before:content-[''] ${
-                                isSelected ? "font-bold text-[#091f80]" : "text-slate-600 hover:text-slate-900"
+                              onClick={() => onSelectSection(subject.id, section.id)}
+                              className={`relative flex w-full items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-left text-sm before:absolute before:-left-4 before:top-1/2 before:w-3 before:-translate-y-1/2 before:border-t before:border-dashed before:border-blue-200 before:content-[''] ${
+                                isSelected ? "bg-white font-bold text-[#091f80]" : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                               }`}
                             >
                               <span className="flex min-w-0 items-center gap-2">
@@ -175,18 +205,24 @@ function LessonCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-[0_16px_38px_-32px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_26px_54px_-34px_rgba(15,23,42,0.35)]"
+      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left hover:border-blue-200"
     >
-      <div className="relative h-36 overflow-hidden bg-[linear-gradient(135deg,#dce8ff_0%,#edf3ff_55%,#ffffff_100%)]">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(9,31,128,0.08),transparent_36%)]" />
-        <div className="absolute left-4 top-4 rounded-full bg-white/85 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#091f80]">Bài học</div>
+      <div className="relative h-32 overflow-hidden bg-[linear-gradient(135deg,#eef5ff_0%,#dbeafe_55%,#bfdbfe_100%)]">
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.55)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.45)_1px,transparent_1px)] bg-[length:22px_22px] opacity-45" />
+        <div className="absolute left-4 top-4 inline-flex items-center gap-2 rounded-full bg-white/85 px-3 py-1 text-[11px] font-black uppercase tracking-[0.16em] text-[#091f80]">
+          <BookOpen className="h-3.5 w-3.5" />
+          {getLessonEyebrow(lesson.title)}
+        </div>
+        <div className="absolute bottom-4 right-4 grid h-12 w-12 place-items-center rounded-2xl bg-white/85 text-[#091f80]">
+          <FolderOpen className="h-6 w-6" />
+        </div>
       </div>
 
-      <div className="min-h-[150px] px-4 py-4">
-        <h3 className="line-clamp-2 text-[19px] font-black leading-7 text-slate-950">{lesson.title}</h3>
+      <div className="px-4 py-4">
+        <h3 className="line-clamp-2 min-h-[56px] text-[19px] font-black leading-7 text-slate-950">{lesson.title}</h3>
         <div className="mt-5 flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-          <span>Hoàn thành</span>
-          <span>{formatProgressRate(lesson.progress.progressRate)}</span>
+          <span>Tiến độ</span>
+          <span className="text-[#091f80]">{formatProgressRate(lesson.progress.progressRate)}</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full rounded-full bg-[#091f80]" style={{ width: formatProgressRate(lesson.progress.progressRate) }} />
@@ -194,8 +230,8 @@ function LessonCard({
       </div>
 
       <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-        <span className="text-sm font-bold text-slate-500">{lesson.resourceCount} học liệu</span>
-        <span className="text-xs font-black uppercase tracking-[0.12em] text-[#091f80] transition group-hover:translate-x-0.5">Xem bài</span>
+        <span className="text-sm font-bold text-slate-500">{formatCount(lesson.resourceCount, "học liệu")}</span>
+        <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-black uppercase tracking-[0.12em] text-[#091f80]">Mở bài</span>
       </div>
     </button>
   );
@@ -213,26 +249,33 @@ function ResourceCard({
   onOpen: (resource: HocLieuResource) => void;
 }) {
   const theme = themeStyles[resource.thumbnailTheme];
+  const shouldShowGoogleSlidesIcon = isGoogleSlidesLecture(resource);
 
   return (
     <button
       type="button"
       onClick={() => onOpen(resource)}
-      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-[0_16px_38px_-32px_rgba(15,23,42,0.45)] transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-[0_26px_54px_-34px_rgba(15,23,42,0.35)]"
+      className="group overflow-hidden rounded-2xl border border-slate-200 bg-white text-left hover:border-blue-200"
     >
-      <div className={`relative h-36 overflow-hidden ${theme.banner}`}>
+      <div className={`relative h-32 overflow-hidden ${theme.banner}`}>
         {resource.thumbnailUrl ? <img src={resource.thumbnailUrl} alt={resource.title} className="h-full w-full object-cover" /> : null}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_34%)]" />
-        <div className="absolute left-3 top-3 rounded-full bg-white/88 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-900">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.24),transparent_34%),linear-gradient(180deg,rgba(15,23,42,0.04),rgba(15,23,42,0.22))]" />
+        <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-[11px] font-black uppercase tracking-[0.12em] text-slate-900">
+          <FileText className="h-3.5 w-3.5" />
           {kindLabel}
         </div>
+        {shouldShowGoogleSlidesIcon ? (
+          <div className="absolute right-4 top-1/2 grid h-12 w-12 -translate-y-1/2 place-items-center rounded-2xl bg-white/90 shadow-sm ring-1 ring-blue-100">
+            <GoogleSlidesIcon className="h-7 w-7" />
+          </div>
+        ) : null}
       </div>
 
-      <div className="min-h-[136px] px-4 py-4">
-        <h3 className="line-clamp-3 text-[19px] font-black leading-7 text-slate-950">{resource.title}</h3>
-        <div className="mt-5 flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
-          <span>Hoàn thành</span>
-          <span>{formatProgressRate(progressRate)}</span>
+      <div className="px-4 py-4">
+        <h3 className="line-clamp-2 min-h-[56px] text-[18px] font-black leading-7 text-slate-950">{resource.title}</h3>
+        <div className="mt-4 flex items-center justify-between text-xs font-bold uppercase tracking-[0.12em] text-slate-400">
+          <span>Tiến độ</span>
+          <span className={theme.accent}>{formatProgressRate(progressRate)}</span>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
           <div className="h-full rounded-full bg-[#091f80]" style={{ width: formatProgressRate(progressRate) }} />
@@ -297,10 +340,20 @@ function partitionLessonResources(resources: HocLieuResource[]) {
   return { lectureResources, exerciseResources };
 }
 
+function isLaunchEndpoint(value: string) {
+  try {
+    const url = new URL(value, window.location.origin);
+    return url.pathname.replace(/\/$/, "").endsWith("/launch");
+  } catch {
+    return value.split("?")[0]?.replace(/\/$/, "").endsWith("/launch") ?? false;
+  }
+}
+
 export function HocLieuTeacherDashboardPage() {
   const {
     activeLesson,
     activeSection,
+    activeSubject,
     error,
     loading,
     loadingSubject,
@@ -318,6 +371,7 @@ export function HocLieuTeacherDashboardPage() {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [expandedSubjectIds, setExpandedSubjectIds] = useState<string[]>([]);
   const [isLessonDetailOpen, setIsLessonDetailOpen] = useState(false);
+  const [viewerState, setViewerState] = useState<{ resource: HocLieuResource; progressRate: number } | null>(null);
 
   useEffect(() => {
     function handleFocusSearch() {
@@ -357,10 +411,23 @@ export function HocLieuTeacherDashboardPage() {
     setIsLessonDetailOpen(false);
   }
 
+  async function handleOpenResource(resource: HocLieuResource) {
+    const hydratedResource = await onOpenResource(resource);
+    const viewerUrl = hydratedResource?.viewer.embedUrl || hydratedResource?.viewer.secureEmbedUrl;
+    const hasCustomSlides = (hydratedResource?.viewer.slides?.length ?? 0) > 0;
+
+    if (!hydratedResource || (!viewerUrl && !hasCustomSlides) || (viewerUrl && isLaunchEndpoint(viewerUrl))) return;
+
+    setViewerState({
+      resource: hydratedResource,
+      progressRate: activeLesson?.progress.progressRate ?? 0,
+    });
+  }
+
   return (
-    <div className="min-h-full bg-[#f7f9fc]">
-      <div className="w-full">
-        <div className="grid gap-0 xl:grid-cols-[264px_minmax(0,1fr)]">
+    <div className="min-h-[calc(100vh-64px)] bg-[linear-gradient(180deg,#f6f9ff_0%,#f8fafc_42%,#ffffff_100%)]">
+      <div className="min-h-[calc(100vh-64px)] w-full">
+        <div className="grid min-h-[calc(100vh-64px)] gap-0 xl:grid-cols-[280px_minmax(0,1fr)]">
           {loading && subjects.length === 0 ? (
             <SubjectRailSkeleton />
           ) : (
@@ -375,24 +442,41 @@ export function HocLieuTeacherDashboardPage() {
             />
           )}
 
-          <section className="min-w-0 px-7 py-5">
-            <div className="flex flex-col gap-5 border-b border-slate-200 pb-4 lg:flex-row lg:items-center lg:justify-end">
-              <div className="w-full max-w-[390px]">
-                <div className="relative">
-                  <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <input
-                    ref={searchInputRef}
-                    type="search"
-                    value={searchValue}
-                    onChange={(event) => setSearchValue(event.target.value)}
-                    placeholder="Tìm học liệu, nhóm hoặc bài học"
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#091f80] focus:ring-2 focus:ring-blue-100"
-                  />
+          <section className="min-w-0 px-7 py-6">
+            <div className="mb-6 rounded-3xl border border-slate-200 bg-white/90 px-6 py-5">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                <div className="min-w-0">
+                  <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Đang xem</p>
+                  <h1 className="mt-2 truncate text-[34px] font-black leading-tight tracking-tight text-slate-950">{activeSection?.title || activeSubject?.label || "Kho học liệu"}</h1>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-500">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-[#091f80]">
+                      <FolderOpen className="h-4 w-4" />
+                      {activeSubject?.label || "Chưa chọn môn"}
+                    </span>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                      <CheckCircle2 className="h-4 w-4" />
+                      {formatCount(totalVisibleResources, "học liệu")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="w-full max-w-[420px]">
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      ref={searchInputRef}
+                      type="search"
+                      value={searchValue}
+                      onChange={(event) => setSearchValue(event.target.value)}
+                      placeholder="Tìm học liệu, nhóm hoặc bài học"
+                      className="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-[#091f80] focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="pt-5">
+            <div>
               {error ? <div className="rounded-2xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm font-bold text-amber-700">{error}</div> : null}
 
               {loading ? (
@@ -413,7 +497,15 @@ export function HocLieuTeacherDashboardPage() {
                           <LessonGridSkeleton />
                         ) : (
                           <div className="space-y-5">
-                            <h2 className="text-[32px] font-black tracking-tight text-slate-950">{activeSection.title}</h2>
+                            <div className="flex flex-wrap items-end justify-between gap-3">
+                              <div>
+                                <h2 className="text-[28px] font-black tracking-tight text-slate-950">{activeSection.title}</h2>
+                                <p className="mt-1 text-sm font-medium text-slate-500">{formatCount(activeSection.lessons.length, "bài học")} trong nhóm này</p>
+                              </div>
+                              <span className="rounded-full bg-white px-3 py-1 text-xs font-black uppercase tracking-[0.14em] text-slate-400">
+                                {formatProgressRate(activeSection.progress.progressRate)}
+                              </span>
+                            </div>
                             <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
                               {activeSection.lessons.map((lesson) => (
                                 <LessonCard key={lesson.id} lesson={lesson} onOpen={() => handleOpenLesson(lesson.id)} />
@@ -445,7 +537,7 @@ export function HocLieuTeacherDashboardPage() {
                                   resource={resource}
                                   progressRate={activeLesson.progress.progressRate}
                                   kindLabel="Bài giảng"
-                                  onOpen={onOpenResource}
+                                  onOpen={(resource) => void handleOpenResource(resource)}
                                 />
                               ))}
                               {lessonResourceBuckets.exerciseResources.map((resource) => (
@@ -454,7 +546,7 @@ export function HocLieuTeacherDashboardPage() {
                                   resource={resource}
                                   progressRate={activeLesson.progress.progressRate}
                                   kindLabel="Bài tập"
-                                  onOpen={onOpenResource}
+                                  onOpen={(resource) => void handleOpenResource(resource)}
                                 />
                               ))}
                             </div>
@@ -475,6 +567,13 @@ export function HocLieuTeacherDashboardPage() {
           </section>
         </div>
       </div>
+      {viewerState ? (
+        <HocLieuSlideViewerModal
+          resource={viewerState.resource}
+          progressRate={viewerState.progressRate}
+          onClose={() => setViewerState(null)}
+        />
+      ) : null}
     </div>
   );
 }

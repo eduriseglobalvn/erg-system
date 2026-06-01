@@ -86,5 +86,3 @@ export type HocLieuTeacherProgressDetail = {
   summary: HocLieuTeacherProgressSummary;
   items: HocLieuTeacherProgressDetailItem[];
 };
-
-export type HocLieuTeacherProgressEventType = "open" | "start_teaching" | "mark_taught" | "complete";

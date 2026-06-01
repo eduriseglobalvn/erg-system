@@ -1,4 +1,4 @@
-import { apiRequest } from "@/lib/api-client";
+import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
 
 export type AccessScopeType = "system" | "center" | "school";
 
@@ -108,11 +108,11 @@ export async function listAccessManagedUsers(params: {
   search.set("page", String(params.page ?? 1));
   search.set("limit", String(params.limit ?? 20));
 
-  return apiRequest<AccessManagementUserList>(`/api/lms/access-management/users?${search.toString()}`);
+  return apiRequest<AccessManagementUserList>(`/api/lms/access-management/users?${search.toString()}`, { portal: getBackOfficePortal() });
 }
 
 export function getAccessManagementOptions() {
-  return apiRequest<AccessManagementOptions>("/api/lms/access-management/options");
+  return apiRequest<AccessManagementOptions>("/api/lms/access-management/options", { portal: getBackOfficePortal() });
 }
 
 export function listAccessScopes(params: {
@@ -127,15 +127,16 @@ export function listAccessScopes(params: {
   search.set("page", String(params.page ?? 1));
   search.set("limit", String(params.limit ?? 20));
 
-  return apiRequest<AccessScopeList>(`/api/lms/access-management/scopes?${search.toString()}`);
+  return apiRequest<AccessScopeList>(`/api/lms/access-management/scopes?${search.toString()}`, { portal: getBackOfficePortal() });
 }
 
 export function getUserAccess(userId: string) {
-  return apiRequest<UserAccessDetail>(`/api/lms/access-management/users/${encodeURIComponent(userId)}/access`);
+  return apiRequest<UserAccessDetail>(`/api/lms/access-management/users/${encodeURIComponent(userId)}/access`, { portal: getBackOfficePortal() });
 }
 
 export function saveUserAccess(userId: string, payload: SaveUserAccessRequest) {
   return apiRequest<UserAccessDetail>(`/api/lms/access-management/users/${encodeURIComponent(userId)}/access`, {
+    portal: getBackOfficePortal(),
     method: "PUT",
     body: JSON.stringify(payload),
   });
@@ -143,6 +144,7 @@ export function saveUserAccess(userId: string, payload: SaveUserAccessRequest) {
 
 export function previewUserAccess(payload: SaveUserAccessRequest) {
   return apiRequest<EffectiveAccess>("/api/lms/access-management/preview", {
+    portal: getBackOfficePortal(),
     method: "POST",
     body: JSON.stringify(payload),
   });

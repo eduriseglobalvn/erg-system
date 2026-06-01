@@ -15,6 +15,7 @@ export type HocLieuLaunchMode =
   | "pdf_reader"
   | "ebook_reader"
   | "google_slide_embed"
+  | "custom_slide_viewer"
   | "slide_image_proxy"
   | "video_player"
   | "audio_player"
@@ -60,6 +61,14 @@ export type HocLieuViewerUnit = {
   children?: Array<{ id: string; title: string; duration?: string }>;
 };
 
+export type HocLieuViewerSlide = {
+  id: string;
+  index: number;
+  title?: string;
+  imageUrl: string;
+  thumbnailUrl?: string;
+};
+
 export type HocLieuResource = {
   id: string;
   slug: string;
@@ -98,13 +107,17 @@ export type HocLieuResource = {
   isDownloadable: boolean;
   sortOrder: number;
   viewer: {
+    assetId?: string;
+    resourceId?: string;
     title: string;
     description: string;
     pageCount?: number;
     duration?: string;
     embedUrl?: string;
     secureEmbedUrl?: string;
+    launchUrl?: string;
     presentationTitle?: string;
+    slides?: HocLieuViewerSlide[];
     units?: HocLieuViewerUnit[];
   };
 };

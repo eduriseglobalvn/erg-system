@@ -1,5 +1,5 @@
-import { DashboardShell } from "@/features/dashboard";
+import { LmsTeacherShell } from "@/features/dashboard";
 
 export function DashboardPage() {
-  return <DashboardShell />;
+  return <LmsTeacherShell />;
 }

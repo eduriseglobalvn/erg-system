@@ -1,10 +1,11 @@
 export type StoredAuthSession = {
   accessToken?: string;
+  loggedInAt?: string;
   refreshToken?: string;
   expiresAt?: string;
   permissions?: string[];
-  portal?: "hoclieu" | "lms" | "elearning";
-  portals?: Array<"hoclieu" | "lms" | "elearning" | "*">;
+  portal?: "admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning";
+  portals?: Array<"admin" | "crm" | "hoclieu" | "lcms" | "lms" | "elearning" | "*">;
 };
 
 export type StoredAuthIdentity = StoredAuthSession & {
@@ -16,6 +17,8 @@ export const TEACHER_LOCAL_SESSION_KEY = "erg-learning.session";
 export const TEACHER_TEMP_SESSION_KEY = "erg-learning.session.temp";
 export const STUDENT_LOCAL_SESSION_KEY = "erg-learning.student-session";
 export const STUDENT_TEMP_SESSION_KEY = "erg-learning.student-session.temp";
+const MERGED_TEACHER_PORTALS = ["lms", "lcms", "hoclieu"] as const;
+export const AUTH_SESSION_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 let teacherSessionSnapshot: StoredAuthIdentity | null = null;
 
@@ -35,12 +38,20 @@ function parseJson<T>(value: string | null, fallback: T) {
 
 export function hasStoredAuthCredential(session: StoredAuthSession | null | undefined): session is StoredAuthSession {
   if (!session) return false;
+  if (!session.accessToken) return false;
 
-  if (session.expiresAt && Number.isFinite(Date.parse(session.expiresAt)) && Date.parse(session.expiresAt) <= Date.now()) {
+  const expiresAt = readSessionExpiry(session);
+  if (expiresAt && expiresAt <= Date.now()) {
     return false;
   }
 
-  return Boolean(session.accessToken || ("accountId" in session && session.accountId));
+  if (!expiresAt) {
+    const loggedInAt = parseDate(session.loggedInAt);
+    if (!loggedInAt) return false;
+    if (loggedInAt + AUTH_SESSION_FALLBACK_MAX_AGE_MS <= Date.now()) return false;
+  }
+
+  return true;
 }
 
 export function setTeacherSessionSnapshot(session: StoredAuthIdentity) {
@@ -58,10 +69,22 @@ export function readTeacherSessionSnapshot() {
 export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredAuthSession | null {
   if (!canUseStorage()) return null;
 
+  if (!portal) {
+    return readStoredAuthSession(resolveCurrentPortal());
+  }
+
   const teacherSessions = [
     teacherSessionSnapshot,
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(TEACHER_LOCAL_SESSION_KEY), null),
-    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(TEACHER_TEMP_SESSION_KEY), null),
+    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")), null),
+    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
+    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")), null),
+    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
+    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")), null),
+    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
+    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
+    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
+    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "hoclieu")), null),
+    parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "hoclieu")), null),
   ].filter(hasStoredAuthCredential);
 
   const studentSessions = [
@@ -69,19 +92,78 @@ export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): Sto
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null),
   ].filter(hasStoredAuthCredential);
 
-  if (!portal) {
-    return teacherSessions[0] ?? studentSessions[0] ?? null;
-  }
-
   if (portal === "elearning") {
-    return studentSessions.find((s) => s.portal === "elearning") ?? studentSessions[0] ?? teacherSessions[0] ?? null;
+    return studentSessions.find((session) => session.portal === "elearning") ?? studentSessions[0] ?? null;
   }
 
-  // LMS, HocLieu share the same teacher token — the backend uses a single JWT for all teacher portals.
-  // So for ANY teacher portal, just return the first teacher session that has a token.
-  return teacherSessions.find((s) => Boolean(s?.accessToken)) ?? teacherSessions[0] ?? null;
+  return teacherSessions.find((session) => sessionMatchesPortal(session, portal)) ?? null;
 }
 
 export function getStoredAccessToken(portal?: StoredAuthSession["portal"]) {
   return readStoredAuthSession(portal)?.accessToken;
+}
+
+export function portalSessionKey(baseKey: string, portal: Exclude<NonNullable<StoredAuthSession["portal"]>, "elearning">) {
+  return `${baseKey}.${portal}`;
+}
+
+export function resolveCurrentPortal(): NonNullable<StoredAuthSession["portal"]> {
+  if (!canUseStorage()) return "lms";
+
+  const host = window.location.hostname.toLowerCase();
+  const pathname = window.location.pathname.toLowerCase();
+  if (host.startsWith("crm.") || pathname.startsWith("/crm")) return "crm";
+  if (host.startsWith("admin.") || pathname.startsWith("/admin")) return "admin";
+  if (host.startsWith("elearning.") || pathname.startsWith("/student")) return "elearning";
+  if (host.startsWith("lcms.") || pathname.startsWith("/lcms")) return "lcms";
+  if (host.startsWith("hoclieu.")) return "hoclieu";
+  return "lms";
+}
+
+function sessionMatchesPortal(session: StoredAuthSession, portal: Exclude<NonNullable<StoredAuthSession["portal"]>, "elearning">) {
+  if (session.portal === portal) return true;
+
+  const portals = session.portals ?? [];
+  if (portals.includes("*") || portals.includes(portal)) return true;
+
+  return isMergedTeacherPortal(portal) && hasMergedTeacherPortalAccess(session);
+}
+
+function hasMergedTeacherPortalAccess(session: StoredAuthSession) {
+  if (session.portal && isMergedTeacherPortal(session.portal)) return true;
+
+  const portals = session.portals ?? [];
+  return portals.some(isMergedTeacherPortal);
+}
+
+function isMergedTeacherPortal(portal: StoredAuthSession["portal"] | "*"): portal is (typeof MERGED_TEACHER_PORTALS)[number] {
+  return portal === "lms" || portal === "lcms" || portal === "hoclieu";
+}
+
+function readSessionExpiry(session: StoredAuthSession) {
+  const storedExpiry = parseDate(session.expiresAt);
+  if (storedExpiry) return storedExpiry;
+
+  return readJwtExpiry(session.accessToken);
+}
+
+function parseDate(value?: string) {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function readJwtExpiry(token?: string) {
+  const payload = token?.split(".")[1];
+  if (!payload) return null;
+
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const decoded = window.atob(padded);
+    const claims = JSON.parse(decoded) as { exp?: unknown };
+    return typeof claims.exp === "number" ? claims.exp * 1000 : null;
+  } catch {
+    return null;
+  }
 }
