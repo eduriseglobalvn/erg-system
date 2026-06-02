@@ -13,8 +13,8 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar-context"
 import { ChevronRightIcon } from "@/components/icons"
 import { cn } from "@/lib/utils"
 

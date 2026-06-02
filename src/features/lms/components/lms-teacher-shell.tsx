@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
+﻿import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
@@ -33,19 +33,38 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
-import { AttendanceSheetPanel } from "@/features/lms/components/attendance-sheet-panel";
-import { ScoreSheetPanel } from "@/features/lms/components/score-sheet-panel";
-import { TeachingSchedulePanel } from "@/features/lms/components/teaching-schedule/teaching-schedule-panel";
-import { WeeklyClassLogPage } from "@/features/lms/weekly-class-log";
-import {
-  getCurrentAcademicYear,
-  LearningResourceDashboardScopeProvider,
-  LearningResourceLibraryPage,
-} from "@/features/lms/learning-resources";
+import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
+import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "students" | "resources" | "reports";
+
+const LearningResourceLibraryPage = lazy(() =>
+  import("@/features/lms/learning-resources/components/learning-resource-library-page").then((module) => ({
+    default: module.LearningResourceLibraryPage,
+  })),
+);
+const TeachingSchedulePanel = lazy(() =>
+  import("@/features/lms/components/teaching-schedule/teaching-schedule-panel").then((module) => ({
+    default: module.TeachingSchedulePanel,
+  })),
+);
+const WeeklyClassLogPage = lazy(() =>
+  import("@/features/lms/weekly-class-log").then((module) => ({
+    default: module.WeeklyClassLogPage,
+  })),
+);
+const ScoreSheetPanel = lazy(() =>
+  import("@/features/lms/components/score-sheet-panel").then((module) => ({
+    default: module.ScoreSheetPanel,
+  })),
+);
+const AttendanceSheetPanel = lazy(() =>
+  import("@/features/lms/components/attendance-sheet-panel").then((module) => ({
+    default: module.AttendanceSheetPanel,
+  })),
+);
 
 const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: typeof ClipboardList }> = [
   { id: "homework", label: "Giao bài", path: "/homework", icon: ClipboardList },
@@ -268,22 +287,32 @@ export function LmsTeacherShell() {
         <main className="min-h-0 flex-1 overflow-y-auto">
           {activeSection === "resources" ? (
             <LearningResourceDashboardScopeProvider value={learningResourceScope}>
-              <LearningResourceLibraryPage />
+              <Suspense fallback={null}>
+                <LearningResourceLibraryPage />
+              </Suspense>
             </LearningResourceDashboardScopeProvider>
           ) : activeSection === "schedule" ? (
             <div className="flex h-full min-h-[720px]">
-              <TeachingSchedulePanel selectedClass={selectedClass} teacherName={teacherName} />
+              <Suspense fallback={null}>
+                <TeachingSchedulePanel selectedClass={selectedClass} teacherName={teacherName} />
+              </Suspense>
             </div>
           ) : activeSection === "classLog" ? (
-            <WeeklyClassLogPage
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-              teacherName={teacherName}
-            />
+            <Suspense fallback={null}>
+              <WeeklyClassLogPage
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                teacherName={teacherName}
+              />
+            </Suspense>
           ) : activeSection === "score" ? (
-            <ScoreSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            <Suspense fallback={null}>
+              <ScoreSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            </Suspense>
           ) : activeSection === "attendance" ? (
-            <AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            <Suspense fallback={null}>
+              <AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            </Suspense>
           ) : (
             <TeacherWorkspaceFrame
               activeLabel={activeNav.label}

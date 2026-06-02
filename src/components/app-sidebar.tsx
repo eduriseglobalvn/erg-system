@@ -17,8 +17,8 @@ import { NavMain } from "@/components/nav-main";
 import {
   Sidebar,
   SidebarContent,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/sidebar-context";
 import type { DashboardGroup } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 
