@@ -4,9 +4,8 @@ import { EyeIcon } from "@/platform/auth/components/auth-icons";
 import {
   DividerText,
   Field,
-  inputClassName,
-  submitButtonClassName,
 } from "@/platform/auth/components/auth-shared";
+import { inputClassName, submitButtonClassName } from "@/platform/auth/components/auth-shared-styles";
 import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
 import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
 import type {

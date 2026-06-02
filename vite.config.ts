@@ -31,7 +31,7 @@ function localMuiIconShim(): Plugin {
 
       // Keep legacy MUI icon import paths working without installing the heavy MUI packages.
       return [
-        'import { createMuiIconShim } from "/src/components/mui-icon-shim.tsx";',
+        'import { createMuiIconShim } from "/src/components/mui-icon-shim.ts";',
         `export default createMuiIconShim(${JSON.stringify(displayName)});`,
       ].join("\n");
     },

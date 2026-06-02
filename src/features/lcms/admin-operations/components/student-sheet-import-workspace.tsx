@@ -85,6 +85,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
   const [targetClassId, setTargetClassId] = useState(() => (managementScope.level === "class" ? managementScope.classId : ""));
 
   useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
     if (managementScope.level === "global") {
       setTargetCenterId((current) => current || centers[0]?.id || "");
       return;
@@ -92,6 +93,8 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
 
     setTargetCenterId(managementScope.centerId);
     setTargetClassId(managementScope.level === "class" ? managementScope.classId : "");
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [centers, managementScope]);
 
   const targetClasses = useMemo(() => {

@@ -70,7 +70,8 @@ export function TeachingSchedulePanel({
   const [view, setView] = useState<TeachingScheduleView>("timeGridWeek");
 
   useEffect(() => {
-    setEvents(initialEvents);
+    const frameId = window.requestAnimationFrame(() => setEvents(initialEvents));
+    return () => window.cancelAnimationFrame(frameId);
   }, [initialEvents]);
 
   function openCreateDialog(selection: DateSelectArg) {

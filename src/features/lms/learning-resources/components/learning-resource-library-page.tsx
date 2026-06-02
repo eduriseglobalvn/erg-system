@@ -1235,9 +1235,12 @@ export function LearningResourceLibraryPage() {
   useEffect(() => {
     if (!routeGradeId || !LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)) return;
     const nextSelection = getDefaultSelectionForGrade(routeGradeId);
-    setActiveGradeId(nextSelection.gradeId);
-    setActiveSubjectId(nextSelection.subjectId);
-    setActiveCategoryId(nextSelection.categoryId);
+    const frameId = window.requestAnimationFrame(() => {
+      setActiveGradeId(nextSelection.gradeId);
+      setActiveSubjectId(nextSelection.subjectId);
+      setActiveCategoryId(nextSelection.categoryId);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [routeGradeId]);
 
   useEffect(() => {

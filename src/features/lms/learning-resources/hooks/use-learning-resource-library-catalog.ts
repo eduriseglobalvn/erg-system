@@ -11,7 +11,7 @@ import {
 } from "@/features/lms/learning-resources/api/learning-resource-api";
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
-import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
+import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/learning-resource-dashboard-scope-context";
 import type { LearningResourceTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
 
 type LearningResourceLibraryLesson = {
@@ -160,7 +160,7 @@ export function useLearningResourceLibraryCatalog() {
   const [selectedSectionId, setSelectedSectionId] = useState("");
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [resourceError, setResourceError] = useState<string | null>(null);
 
   const libraryQuery = useQuery({
     queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
@@ -184,13 +184,7 @@ export function useLearningResourceLibraryCatalog() {
 
   const subjects = useMemo(() => toLibrarySubjects(libraryQuery.data, progressMap(progressQuery.data)), [libraryQuery.data, progressQuery.data]);
   const firstSubjectId = subjects[0]?.id ?? "";
-  const effectiveSubjectId = selectedSubjectId || firstSubjectId;
-
-  useEffect(() => {
-    if (!selectedSubjectId && firstSubjectId) {
-      setSelectedSubjectId(firstSubjectId);
-    }
-  }, [firstSubjectId, selectedSubjectId]);
+  const effectiveSubjectId = subjects.some((subject) => subject.id === selectedSubjectId) ? selectedSubjectId : firstSubjectId;
 
   useEffect(() => {
     if (!schoolId) return;
@@ -206,17 +200,9 @@ export function useLearningResourceLibraryCatalog() {
     () => subjects.find((subject) => subject.id === effectiveSubjectId) ?? subjects[0] ?? null,
     [effectiveSubjectId, subjects],
   );
-
-  useEffect(() => {
-    if (!activeSubject) {
-      setSelectedSectionId("");
-      return;
-    }
-
-    if (!activeSubject.sections.some((section) => section.id === selectedSectionId)) {
-      setSelectedSectionId(activeSubject.sections[0]?.id ?? "");
-    }
-  }, [activeSubject, selectedSectionId]);
+  const effectiveSectionId = activeSubject?.sections.some((section) => section.id === selectedSectionId)
+    ? selectedSectionId
+    : activeSubject?.sections[0]?.id ?? "";
 
   const filteredSections = useMemo(() => {
     if (!activeSubject) return [] as LearningResourceLibrarySection[];
@@ -268,49 +254,37 @@ export function useLearningResourceLibraryCatalog() {
   }, [activeSubject, searchValue]);
 
   const activeSection = useMemo(
-    () => filteredSections.find((section) => section.id === selectedSectionId) ?? filteredSections[0] ?? null,
-    [filteredSections, selectedSectionId],
+    () => filteredSections.find((section) => section.id === effectiveSectionId) ?? filteredSections[0] ?? null,
+    [effectiveSectionId, filteredSections],
   );
-
-  useEffect(() => {
-    if (!activeSection) {
-      setSelectedLessonId("");
-      return;
-    }
-
-    if (!activeSection.lessons.some((lesson) => lesson.id === selectedLessonId)) {
-      setSelectedLessonId(activeSection.lessons[0]?.id ?? "");
-    }
-  }, [activeSection, selectedLessonId]);
+  const effectiveLessonId = activeSection?.lessons.some((lesson) => lesson.id === selectedLessonId)
+    ? selectedLessonId
+    : activeSection?.lessons[0]?.id ?? "";
 
   const activeLesson = useMemo(
-    () => activeSection?.lessons.find((lesson) => lesson.id === selectedLessonId) ?? activeSection?.lessons[0] ?? null,
-    [activeSection, selectedLessonId],
+    () => activeSection?.lessons.find((lesson) => lesson.id === effectiveLessonId) ?? activeSection?.lessons[0] ?? null,
+    [activeSection, effectiveLessonId],
   );
 
   const loading = !schoolId || (libraryQuery.isLoading && !libraryQuery.data);
   const loadingSubject = libraryQuery.isFetching && Boolean(libraryQuery.data);
-
-  useEffect(() => {
-    const nextError = libraryQuery.error;
-    if (!nextError) {
-      setError(null);
-      return;
-    }
-
-    setError(nextError instanceof Error ? nextError.message : "Không thể tải kho học liệu.");
-  }, [libraryQuery.error]);
+  const queryError = libraryQuery.error instanceof Error
+    ? libraryQuery.error.message
+    : libraryQuery.error
+      ? "Không thể tải kho học liệu."
+      : null;
+  const error = resourceError ?? queryError;
 
   async function handleSelectSubject(subjectId: string) {
     setSelectedSubjectId(subjectId);
-    setError(null);
+    setResourceError(null);
   }
 
   function handleSelectSection(subjectId: string, sectionId: string) {
     setSelectedSubjectId(subjectId);
     setSelectedSectionId(sectionId);
     setSelectedLessonId("");
-    setError(null);
+    setResourceError(null);
   }
 
   function handleSelectLesson(lessonId: string) {
@@ -319,10 +293,10 @@ export function useLearningResourceLibraryCatalog() {
 
   async function handleOpenResource(resource: LearningResourceResource) {
     try {
-      setError(null);
+      setResourceError(null);
       return await openLibraryResource(resource);
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : "Không thể mở học liệu.");
+      setResourceError(nextError instanceof Error ? nextError.message : "Không thể mở học liệu.");
       return null;
     }
   }
@@ -341,8 +315,8 @@ export function useLearningResourceLibraryCatalog() {
     onSelectSubject: handleSelectSubject,
     searchValue,
     sections: filteredSections,
-    selectedLessonId,
-    selectedSectionId,
+    selectedLessonId: effectiveLessonId,
+    selectedSectionId: effectiveSectionId,
     selectedSubjectId: effectiveSubjectId,
     setSearchValue,
     subjects,

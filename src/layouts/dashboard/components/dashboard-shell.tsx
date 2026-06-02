@@ -17,7 +17,7 @@ import {
   defaultClassId,
   defaultSchoolId,
 } from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-types";
 import {
   loadLmsDashboardBootstrap,
   updateLmsCurrentScope,
@@ -77,17 +77,51 @@ export function DashboardShell() {
   const { actions: authActions } = useAuthSession();
   const { t } = useI18n();
   const apiBacked = hasApiBase();
-  const storedContext = useMemo(readStoredDashboardContext, []);
-  const [schools, setSchools] = useState<ClassroomSchool[]>(() => (apiBacked ? [] : classroomSchools));
-  const [manageableUnits, setManageableUnits] = useState<LmsEducationUnitDTO[]>([]);
-  const [systemUnits, setSystemUnits] = useState<LmsEducationUnitDTO[]>([]);
-  const [classes, setClasses] = useState<ClassroomSnapshot[]>(() => (apiBacked ? [] : classroomSnapshots));
-  const [currentUserPermissions, setCurrentUserPermissions] = useState<DashboardUserPermissions>({
-    canAccessGlobalErg: !apiBacked,
-    assignedCenterIds: apiBacked ? [] : classroomSchools.map((school) => school.id),
+  const storedContext = useMemo(() => readStoredDashboardContext(), []);
+  const [createdSchools, setCreatedSchools] = useState<ClassroomSchool[]>([]);
+  const [createdCenterIds, setCreatedCenterIds] = useState<string[]>([]);
+  const [selectedManagementScope, setManagementScope] = useState<ManagementScope | null>(() =>
+    storedContext.managementScope ?? (apiBacked ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
+  );
+  const bootstrapQuery = useQuery({
+    queryKey: ["dashboard", "bootstrap"],
+    queryFn: loadLmsDashboardBootstrap,
+    enabled: apiBacked,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
   });
-  const [managementScope, setManagementScope] = useState<ManagementScope>(() =>
-    storedContext.managementScope ?? (apiBacked ? { level: "global" } : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
+  const bootstrapData = bootstrapQuery.data;
+  const bootstrapPermissions = useMemo<DashboardUserPermissions>(
+    () => bootstrapData?.permissions ?? {
+      canAccessGlobalErg: !apiBacked,
+      assignedCenterIds: apiBacked ? [] : classroomSchools.map((school) => school.id),
+    },
+    [apiBacked, bootstrapData?.permissions],
+  );
+  const schools = useMemo(() => {
+    const baseSchools = bootstrapData?.schools ?? (apiBacked ? [] : classroomSchools);
+    return createdSchools.reduce(
+      (nextSchools, school) => (nextSchools.some((item) => item.id === school.id) ? nextSchools : [...nextSchools, school]),
+      baseSchools,
+    );
+  }, [apiBacked, bootstrapData?.schools, createdSchools]);
+  const manageableUnits = bootstrapData?.manageableUnits ?? [];
+  const systemUnits = bootstrapData?.systemUnits ?? [];
+  const classes = bootstrapData?.classes ?? (apiBacked ? [] : classroomSnapshots);
+  const currentUserPermissions = useMemo<DashboardUserPermissions>(
+    () => ({
+      ...bootstrapPermissions,
+      assignedCenterIds: createdCenterIds.reduce(
+        (ids, centerId) => (ids.includes(centerId) ? ids : [...ids, centerId]),
+        bootstrapPermissions.assignedCenterIds,
+      ),
+    }),
+    [bootstrapPermissions, createdCenterIds],
+  );
+  const managementScope = useMemo<ManagementScope>(
+    () => selectedManagementScope ?? bootstrapData?.managementScope ?? { level: "global" },
+    [bootstrapData?.managementScope, selectedManagementScope],
   );
   const activePortal: DashboardPortal = "lms";
   const isSchoolScope = managementScope.level === "class";
@@ -112,14 +146,6 @@ export function DashboardShell() {
   const [pendingQuestionImports, setPendingQuestionImports] = useState<QuestionBankQuestion[]>([]);
   const scopeSyncTimerRef = useRef<number | null>(null);
   const lastSyncedScopeRef = useRef<ManagementScope | null>(null);
-  const bootstrapQuery = useQuery({
-    queryKey: ["dashboard", "bootstrap"],
-    queryFn: loadLmsDashboardBootstrap,
-    enabled: apiBacked,
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-  });
 
   const activeLeaf = availableLeaves.find((leaf) => leaf.id === activeLeafId) ?? defaultLeaf;
   const allowedSchoolIds = currentUserPermissions.assignedCenterIds;
@@ -159,12 +185,6 @@ export function DashboardShell() {
   }, []);
 
   useEffect(() => {
-    if (!availableLeaves.some((leaf) => leaf.id === activeLeafId)) {
-      setActiveLeafId(defaultLeaf.id);
-    }
-  }, [activeLeafId, availableLeaves, defaultLeaf.id]);
-
-  useEffect(() => {
     writeStoredDashboardContext({
       activeLeafId: activeLeaf.id,
       activePortal,
@@ -175,16 +195,8 @@ export function DashboardShell() {
   useEffect(() => {
     if (!bootstrapQuery.data) return;
 
-    setSchools(bootstrapQuery.data.schools);
-    setManageableUnits(bootstrapQuery.data.manageableUnits);
-    setSystemUnits(bootstrapQuery.data.systemUnits);
-    setClasses(bootstrapQuery.data.classes);
-    setCurrentUserPermissions(bootstrapQuery.data.permissions);
     lastSyncedScopeRef.current = bootstrapQuery.data.managementScope;
-    if (!storedContext.managementScope) {
-      setManagementScope(bootstrapQuery.data.managementScope);
-    }
-  }, [bootstrapQuery.data, storedContext.managementScope]);
+  }, [bootstrapQuery.data]);
 
   useEffect(() => {
     if (!bootstrapQuery.error) return;
@@ -290,13 +302,8 @@ export function DashboardShell() {
       flaggedStudents: 0,
     };
 
-    setSchools((current) => (current.some((school) => school.id === nextSchool.id) ? current : [...current, nextSchool]));
-    setCurrentUserPermissions((current) => ({
-      ...current,
-      assignedCenterIds: current.assignedCenterIds.includes(unit.id)
-        ? current.assignedCenterIds
-        : [...current.assignedCenterIds, unit.id],
-    }));
+    setCreatedSchools((current) => (current.some((school) => school.id === nextSchool.id) ? current : [...current, nextSchool]));
+    setCreatedCenterIds((current) => (current.includes(unit.id) ? current : [...current, unit.id]));
     setManagementScope({ level: "center", centerId: unit.id });
   }
 

@@ -95,7 +95,8 @@ export function ProfilePage() {
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get("tab");
     if (tab === "profile" || tab === "security") {
-      setActiveTab(tab);
+      const frameId = window.requestAnimationFrame(() => setActiveTab(tab));
+      return () => window.cancelAnimationFrame(frameId);
     }
   }, [location.search]);
 
@@ -919,7 +920,7 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-export async function createCroppedAvatarFile(crop: AvatarCropState) {
+async function createCroppedAvatarFile(crop: AvatarCropState) {
   if (!crop.image) throw new Error("Ảnh chưa sẵn sàng để crop.");
   const image = await loadImage(crop.previewUrl);
   const geometry = getAvatarGeometry({ width: image.naturalWidth, height: image.naturalHeight }, crop.zoom, crop.offset, CROP_PREVIEW_SIZE);

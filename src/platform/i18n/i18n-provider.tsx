@@ -1,6 +1,4 @@
 import {
-  createContext,
-  useContext,
   useMemo,
   useState,
   type PropsWithChildren,
@@ -11,17 +9,8 @@ import {
   setPreferredLocale,
   translate,
 } from "@/platform/i18n/translate";
-import type { Locale, MessageKey } from "@/platform/i18n/messages";
-
-type TranslateParams = Record<string, string | number>;
-
-type I18nContextValue = {
-  locale: Locale;
-  setLocale: (locale: Locale) => void;
-  t: (key: MessageKey, params?: TranslateParams) => string;
-};
-
-const I18nContext = createContext<I18nContextValue | null>(null);
+import type { Locale } from "@/platform/i18n/messages";
+import { I18nContext, type I18nContextValue } from "@/platform/i18n/i18n-context";
 
 export function I18nProvider({ children }: PropsWithChildren) {
   const [locale, setLocaleState] = useState<Locale>(() => getPreferredLocale());
@@ -39,13 +28,4 @@ export function I18nProvider({ children }: PropsWithChildren) {
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
-}
-
-export function useI18n() {
-  const context = useContext(I18nContext);
-  if (!context) {
-    throw new Error("useI18n must be used within I18nProvider.");
-  }
-
-  return context;
 }

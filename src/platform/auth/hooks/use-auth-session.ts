@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 
 import {
@@ -103,6 +103,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     mutationFn: authApi.logout,
   });
   const [isHydratingProfile, setIsHydratingProfile] = useState(false);
+  const hydratingProfileRef = useRef(false);
 
   useEffect(() => {
     function handleAuthAccountChanged() {
@@ -119,12 +120,15 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   }, [portal]);
 
   useEffect(() => {
-    if (account || isHydratingProfile || !hasApiBase()) return;
+    if (account || hydratingProfileRef.current || isHydratingProfile || !hasApiBase()) return;
     const teacherSession = readStoredAuthSession(portal);
     if (!teacherSession?.accessToken) return;
 
     let isCancelled = false;
-    setIsHydratingProfile(true);
+    hydratingProfileRef.current = true;
+    const hydrationFrameId = window.requestAnimationFrame(() => {
+      if (!isCancelled) setIsHydratingProfile(true);
+    });
 
     authApi.profile()
       .then((profile) => {
@@ -141,11 +145,14 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
         setProfileForm(defaultProfileForm);
       })
       .finally(() => {
+        hydratingProfileRef.current = false;
         if (!isCancelled) setIsHydratingProfile(false);
       });
 
     return () => {
       isCancelled = true;
+      window.cancelAnimationFrame(hydrationFrameId);
+      hydratingProfileRef.current = false;
     };
   }, [account, isHydratingProfile, portal]);
 

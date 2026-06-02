@@ -1,11 +1,9 @@
-﻿import { createContext, useContext, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
-type LearningResourceDashboardScopeValue = {
-  selectedSchoolId: string;
-  academicYear: string;
-};
-
-const LearningResourceDashboardScopeContext = createContext<LearningResourceDashboardScopeValue | null>(null);
+import {
+  LearningResourceDashboardScopeContext,
+  type LearningResourceDashboardScopeValue,
+} from "@/features/lms/learning-resources/hooks/learning-resource-dashboard-scope-context";
 
 export function LearningResourceDashboardScopeProvider({
   value,
@@ -15,8 +13,4 @@ export function LearningResourceDashboardScopeProvider({
   children: ReactNode;
 }) {
   return <LearningResourceDashboardScopeContext.Provider value={value}>{children}</LearningResourceDashboardScopeContext.Provider>;
-}
-
-export function useLearningResourceDashboardScope() {
-  return useContext(LearningResourceDashboardScopeContext);
 }

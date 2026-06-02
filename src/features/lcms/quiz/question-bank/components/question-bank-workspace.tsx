@@ -75,6 +75,7 @@ export function QuestionBankWorkspace({
     const data = questionBankQuery.data;
     if (!data) return;
 
+    const frameId = window.requestAnimationFrame(() => {
       const nextSubjects = data.subjects.length ? data.subjects : questionBankSubjects;
       const nextSubject = nextSubjects.find((subject) => subject.id === subjectId) ?? nextSubjects[0];
       const nextLevel = nextSubject.levels.find((level) => level.id === levelId) ?? nextSubject.levels[0];
@@ -86,6 +87,8 @@ export function QuestionBankWorkspace({
       setLevelId(nextLevel?.id ?? "");
       setTopicId("all");
       setAutoTopicIds(getDefaultAutoTopicIds(nextSubjects, nextSubject.id, nextLevel?.id ?? ""));
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [levelId, questionBankQuery.data, subjectId]);
 
   const activeSubject = useMemo(() => findQuestionBankSubject(subjects, subjectId), [subjectId, subjects]);

@@ -26,10 +26,6 @@ export function HotspotQuestion({
   const [zoom, setZoom] = useState(DEFAULT_MOBILE_ZOOM);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  if (!question.hotspotImage) {
-    return null;
-  }
-
   useEffect(() => {
     if (!editorOpen) {
       return;
@@ -42,6 +38,10 @@ export function HotspotQuestion({
 
     return () => window.cancelAnimationFrame(frameId);
   }, [editorOpen]);
+
+  if (!question.hotspotImage) {
+    return null;
+  }
 
   function resetEditorState(clearPoint: boolean) {
     setZoom(DEFAULT_MOBILE_ZOOM);

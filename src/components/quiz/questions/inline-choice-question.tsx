@@ -42,7 +42,8 @@ export function InlineChoiceQuestion({
       : null;
 
     if (!revealedBlank || !selected || selected === correct) {
-      setRevealedBlankId(null);
+      const frameId = window.requestAnimationFrame(() => setRevealedBlankId(null));
+      return () => window.cancelAnimationFrame(frameId);
     }
   }, [question.inlineBlanks, result?.correctInlineSelections, revealedBlankId, reviewMode, value.inlineSelections]);
 

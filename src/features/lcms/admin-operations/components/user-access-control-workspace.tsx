@@ -171,13 +171,17 @@ export function UserAccessControlWorkspace({
 
 
   useEffect(() => {
-    setActiveSection(defaultSection);
+    const frameId = window.requestAnimationFrame(() => setActiveSection(defaultSection));
+    return () => window.cancelAnimationFrame(frameId);
   }, [defaultSection]);
 
   useEffect(() => {
     let cancelled = false;
-    setLoadingUsers(true);
-    setError("");
+    const frameId = window.requestAnimationFrame(() => {
+      if (cancelled) return;
+      setLoadingUsers(true);
+      setError("");
+    });
 
     Promise.all([
       queryClient.fetchQuery({
@@ -209,23 +213,29 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(frameId);
     };
-  }, [query, status]);
+  }, [query, queryClient, status]);
 
   useEffect(() => {
     if (!selectedUserId) {
-      setSelectedUserDetail(null);
-      setPolicies([]);
-      setEffective(null);
-      setProfileDraft({ fullName: "", phone: "", jobTitle: "", avatarUrl: "", bio: "", gender: "", dateOfBirth: "", address: "", city: "", district: "", region: "" });
-      setRoleDraft([]);
-      return;
+      const frameId = window.requestAnimationFrame(() => {
+        setSelectedUserDetail(null);
+        setPolicies([]);
+        setEffective(null);
+        setProfileDraft({ fullName: "", phone: "", jobTitle: "", avatarUrl: "", bio: "", gender: "", dateOfBirth: "", address: "", city: "", district: "", region: "" });
+        setRoleDraft([]);
+      });
+      return () => window.cancelAnimationFrame(frameId);
     }
 
     let cancelled = false;
-    setLoadingDetail(true);
-    setError("");
-    setNotice("");
+    const frameId = window.requestAnimationFrame(() => {
+      if (cancelled) return;
+      setLoadingDetail(true);
+      setError("");
+      setNotice("");
+    });
 
     Promise.all([
       queryClient.fetchQuery({
@@ -256,14 +266,17 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(frameId);
     };
-  }, [selectedUserId]);
+  }, [queryClient, selectedUserId]);
 
   useEffect(() => {
     if (!policies.length) {
       const roleSource = selectedUserDetail ?? users.find((user) => user.id === selectedUserId);
-      setEffective(isSuperAdmin(roleSource) ? superAdminEffectiveAccess(options?.modules) : { highestScope: "none", modules: [], permissions: [] });
-      return;
+      const frameId = window.requestAnimationFrame(() => {
+        setEffective(isSuperAdmin(roleSource) ? superAdminEffectiveAccess(options?.modules) : { highestScope: "none", modules: [], permissions: [] });
+      });
+      return () => window.cancelAnimationFrame(frameId);
     }
 
     let cancelled = false;
@@ -281,17 +294,21 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [options?.modules, policies, selectedUserDetail, selectedUserId, users]);
+  }, [options?.modules, policies, queryClient, selectedUserDetail, selectedUserId, users]);
 
   useEffect(() => {
     if (!draft.scopeType) {
-      setScopeResults([]);
-      setScopeTotal(0);
-      return;
+      const frameId = window.requestAnimationFrame(() => {
+        setScopeResults([]);
+        setScopeTotal(0);
+      });
+      return () => window.cancelAnimationFrame(frameId);
     }
 
     let cancelled = false;
-    setLoadingScopes(true);
+    const frameId = window.requestAnimationFrame(() => {
+      if (!cancelled) setLoadingScopes(true);
+    });
     queryClient
       .fetchQuery({
         queryKey: ["admin-operations", "user-access", "scopes", draft.scopeType, scopeSearch],
@@ -312,8 +329,9 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
+      window.cancelAnimationFrame(frameId);
     };
-  }, [draft.scopeType, scopeSearch]);
+  }, [draft.scopeType, queryClient, scopeSearch]);
 
   const selectedListUser = users.find((user) => user.id === selectedUserId);
   const selectedUser = selectedUserId ? mergeUser(selectedListUser, selectedUserDetail) : null;

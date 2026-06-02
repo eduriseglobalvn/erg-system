@@ -69,8 +69,8 @@ export function LmsTeacherShell() {
   const location = useLocation();
   const apiBacked = hasApiBase();
   const activeSection = resolveSection(location.pathname);
-  const [selectedSchoolId, setSelectedSchoolId] = useState(defaultSchoolId);
-  const [selectedClassId, setSelectedClassId] = useState(defaultClassId);
+  const [requestedSchoolId, setSelectedSchoolId] = useState("");
+  const [requestedClassId, setSelectedClassId] = useState("");
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const bootstrapQuery = useQuery({
     queryKey: ["lms-teacher-shell", "bootstrap"],
@@ -82,10 +82,35 @@ export function LmsTeacherShell() {
   });
   const schools = bootstrapQuery.data?.schools.length ? bootstrapQuery.data.schools : classroomSchools;
   const classes = bootstrapQuery.data?.classes.length ? bootstrapQuery.data.classes : classroomSnapshots;
+  const bootstrapSelection = useMemo(() => {
+    const scope = bootstrapQuery.data?.managementScope;
+    const scopedSchoolId =
+      scope?.centerId && schools.some((school) => school.id === scope.centerId)
+        ? scope.centerId
+        : schools[0]?.id ?? defaultSchoolId;
+    const classInScope =
+      scope?.level === "class"
+        ? classes.find((classroom) => classroom.id === scope.classId && classroom.schoolId === scopedSchoolId)
+        : undefined;
+    const firstClassInSchool = classes.find((classroom) => classroom.schoolId === scopedSchoolId);
+
+    return {
+      schoolId: scopedSchoolId,
+      classId: classInScope?.id ?? firstClassInSchool?.id ?? classes[0]?.id ?? defaultClassId,
+    };
+  }, [bootstrapQuery.data?.managementScope, classes, schools]);
+  const selectedSchoolId = schools.some((school) => school.id === requestedSchoolId)
+    ? requestedSchoolId
+    : bootstrapSelection.schoolId;
   const selectedClassOptions = useMemo(
     () => classes.filter((classroom) => classroom.schoolId === selectedSchoolId),
     [classes, selectedSchoolId],
   );
+  const selectedClassId = selectedClassOptions.some((classroom) => classroom.id === requestedClassId)
+    ? requestedClassId
+    : selectedClassOptions.some((classroom) => classroom.id === bootstrapSelection.classId)
+      ? bootstrapSelection.classId
+      : selectedClassOptions[0]?.id ?? classes[0]?.id ?? defaultClassId;
   const selectedClass = selectedClassOptions.find((classroom) => classroom.id === selectedClassId) ?? selectedClassOptions[0];
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? classroomSchools[0];
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
@@ -100,37 +125,6 @@ export function LmsTeacherShell() {
     }),
     [selectedSchoolId],
   );
-
-  useEffect(() => {
-    if (!bootstrapQuery.data) return;
-
-    const nextSchools = bootstrapQuery.data.schools.length ? bootstrapQuery.data.schools : classroomSchools;
-    const nextClasses = bootstrapQuery.data.classes.length ? bootstrapQuery.data.classes : classroomSnapshots;
-    const scope = bootstrapQuery.data.managementScope;
-    const scopedSchoolId =
-      scope.centerId && nextSchools.some((school) => school.id === scope.centerId)
-        ? scope.centerId
-        : nextSchools[0]?.id ?? defaultSchoolId;
-    const classInScope =
-      scope.level === "class"
-        ? nextClasses.find((classroom) => classroom.id === scope.classId && classroom.schoolId === scopedSchoolId)
-        : undefined;
-    const firstClassInSchool = nextClasses.find((classroom) => classroom.schoolId === scopedSchoolId);
-
-    setSelectedSchoolId(scopedSchoolId);
-    setSelectedClassId(classInScope?.id ?? firstClassInSchool?.id ?? nextClasses[0]?.id ?? defaultClassId);
-  }, [bootstrapQuery.data]);
-
-  useEffect(() => {
-    if (!selectedClass || selectedClass.schoolId === selectedSchoolId) return;
-
-    const nextSchoolId = schools.some((school) => school.id === selectedClass.schoolId)
-      ? selectedClass.schoolId
-      : schools[0]?.id ?? defaultSchoolId;
-    const firstClass = classes.find((classroom) => classroom.schoolId === nextSchoolId);
-    setSelectedSchoolId(nextSchoolId);
-    setSelectedClassId(firstClass?.id ?? classes[0]?.id ?? defaultClassId);
-  }, [classes, schools, selectedClass, selectedSchoolId]);
 
   useEffect(() => {
     if (!bootstrapQuery.error) return;

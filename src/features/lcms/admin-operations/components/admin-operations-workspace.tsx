@@ -225,7 +225,7 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [keyword, typeFilter]);
+  }, [keyword, queryClient, typeFilter]);
 
   const selectedUnit = units.find((unit) => unit.id === selectedUnitId) ?? units[0];
   const sortedUnits = useMemo(() => sortEducationUnits(units), [units]);
@@ -424,7 +424,8 @@ function EducationUnitEditor({
   const centerOptions = units.filter((item) => item.type === "center" && item.id !== unit.id);
 
   useEffect(() => {
-    setDraft(unit);
+    const frameId = window.requestAnimationFrame(() => setDraft(unit));
+    return () => window.cancelAnimationFrame(frameId);
   }, [unit]);
 
   function updateDraft<K extends keyof LmsEducationUnitDTO>(key: K, value: LmsEducationUnitDTO[K]) {
@@ -616,8 +617,11 @@ function StudentManagement({
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    setCenterId(scopeCenterId);
-    setClassId(scopeClassId);
+    const frameId = window.requestAnimationFrame(() => {
+      setCenterId(scopeCenterId);
+      setClassId(scopeClassId);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [scopeCenterId, scopeClassId]);
 
   const classOptions = useMemo(() => {
@@ -679,7 +683,7 @@ function StudentManagement({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [centerId, classId, fallbackItems.length, keyword, status]);
+  }, [centerId, classId, fallbackItems.length, keyword, queryClient, status]);
 
   const displayStudents = errorMessage ? fallbackItems : students;
   const activeCount = displayStudents.filter((student) => student.status === "active").length;

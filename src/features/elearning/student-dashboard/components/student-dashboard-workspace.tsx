@@ -82,10 +82,18 @@ export function StudentDashboardWorkspace() {
   const [activePage, setActivePage] = useState<StudentPageKey>("overview");
   const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
   const [account, setAccount] = useState<ElearningViewerSession | null>(() => getCurrentElearningViewerSession());
-  const [dashboardProfile, setDashboardProfile] = useState<StudentDashboardProfile>(studentDashboardProfile);
-  const [assignments, setAssignments] = useState<StudentDashboardAssignment[]>(studentAssignments);
-  const [teacherAnnouncements, setTeacherAnnouncements] =
-    useState<StudentTeacherAnnouncement[]>(studentTeacherAnnouncements);
+  const studentDashboardQuery = useQuery({
+    queryKey: ["student-dashboard", account?.id ?? "anonymous"],
+    queryFn: loadStudentDashboardData,
+    staleTime: 5 * 60_000,
+    gcTime: 30 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const dashboardProfile = studentDashboardQuery.data?.profile ?? studentDashboardProfile;
+  const assignments = studentDashboardQuery.data?.assignments ?? studentAssignments;
+  const teacherAnnouncements = studentDashboardQuery.data?.teacherAnnouncements.length
+    ? studentDashboardQuery.data.teacherAnnouncements
+    : studentTeacherAnnouncements;
   const [discussionPosts, setDiscussionPosts] = useState<StudentDiscussionFeedPost[]>(() =>
     createInitialDiscussionFeedPosts(studentDiscussionThreads),
   );
@@ -133,31 +141,21 @@ export function StudentDashboardWorkspace() {
         copy.navItems.find((item) => item.key === activePage)?.label ??
         copy.accountTitle;
 
-  const studentDashboardQuery = useQuery({
-    queryKey: ["student-dashboard", account?.id ?? "anonymous"],
-    queryFn: loadStudentDashboardData,
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-  });
-
   useEffect(() => {
-    const data = studentDashboardQuery.data;
-    if (!data) return;
-        setDashboardProfile(data.profile);
-        setAssignments(data.assignments);
-        setTeacherAnnouncements(data.teacherAnnouncements.length ? data.teacherAnnouncements : studentTeacherAnnouncements);
-  }, [studentDashboardQuery.data]);
-
-  useEffect(() => {
+    let frameId: number | null = null;
     if (viewState.type === "quiz") {
-      setAnnouncementPopupOpen(false);
-      return;
+      frameId = window.requestAnimationFrame(() => setAnnouncementPopupOpen(false));
+      return () => {
+        if (frameId !== null) window.cancelAnimationFrame(frameId);
+      };
     }
 
     if (!latestAnnouncement) return;
     if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
-    setAnnouncementPopupOpen(true);
+    frameId = window.requestAnimationFrame(() => setAnnouncementPopupOpen(true));
+    return () => {
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
+    };
   }, [latestAnnouncement, viewState.type]);
 
   useEffect(() => {
@@ -211,11 +209,12 @@ export function StudentDashboardWorkspace() {
     if (activePage !== "announcements") return;
     if (teacherAnnouncements.length === 0) return;
 
-    setReadAnnouncementIds((currentIds) => {
+    const frameId = window.requestAnimationFrame(() => setReadAnnouncementIds((currentIds) => {
       const nextIds = new Set(currentIds);
       teacherAnnouncements.forEach((announcement) => nextIds.add(announcement.id));
       return Array.from(nextIds);
-    });
+    }));
+    return () => window.cancelAnimationFrame(frameId);
   }, [activePage, teacherAnnouncements]);
 
   useEffect(() => {

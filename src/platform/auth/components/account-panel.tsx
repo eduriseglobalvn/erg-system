@@ -7,10 +7,8 @@ import {
   Field,
   MetaBadge,
   MetaRow,
-  formatDate,
-  inputClassName,
-  submitButtonClassName,
 } from "@/platform/auth/components/auth-shared";
+import { formatDate, inputClassName, submitButtonClassName } from "@/platform/auth/components/auth-shared-styles";
 import type {
   AccountTab,
   PasswordFormState,

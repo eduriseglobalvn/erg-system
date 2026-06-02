@@ -39,7 +39,7 @@ export function LearningResourceSlideViewerModal({
   onClose: () => void;
 }) {
   const viewerUrl = resource.viewer.embedUrl || resource.viewer.secureEmbedUrl || "";
-  const slides = resource.viewer.slides ?? [];
+  const slides = useMemo(() => resource.viewer.slides ?? [], [resource.viewer.slides]);
   const hasCustomSlides = slides.length > 0;
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [drawingMode, setDrawingMode] = useState<DrawingMode>("cursor");
@@ -54,9 +54,12 @@ export function LearningResourceSlideViewerModal({
   const thumbnailSlides = useMemo(() => slides.slice(0, 18), [slides]);
 
   useEffect(() => {
-    setActiveSlideIndex(0);
-    setAnnotationsBySlide({});
-    setDrawingMode("cursor");
+    const frameId = window.requestAnimationFrame(() => {
+      setActiveSlideIndex(0);
+      setAnnotationsBySlide({});
+      setDrawingMode("cursor");
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [resource.id]);
 
   useEffect(() => {

@@ -307,12 +307,14 @@ export function ClassStudentsWorkspace({
   const canDeliver = selectedStudents.length > 0 && selectedAssignments.length > 0 && Boolean(dueDate);
 
   useEffect(() => {
-    setFocusedStudentId(null);
+    const frameId = window.requestAnimationFrame(() => setFocusedStudentId(null));
+    return () => window.cancelAnimationFrame(frameId);
   }, [deferredSearchValue, progressFilter, selectedClass?.id, statusFilter, subject]);
 
   useEffect(() => {
     if (selectedVisibleIds.length === 0) {
-      setAssignDialogOpen(false);
+      const frameId = window.requestAnimationFrame(() => setAssignDialogOpen(false));
+      return () => window.cancelAnimationFrame(frameId);
     }
   }, [selectedVisibleIds.length]);
 
@@ -1299,7 +1301,7 @@ const viCopy = {
   deliverAction: (count: number): string => (count > 0 ? `Giao bài cho ${count} học sinh` : "Chọn học sinh để giao bài"),
   recentTitle: "Đã giao gần đây",
   recentDescription: "Các lượt giao bài mới nhất để giáo viên kiểm tra lại nhanh.",
-  studentUnit: (_count: number): string => "học sinh",
+  studentUnit: (): string => "học sinh",
   submittedLabel: "Đã nộp",
   inProgressLabel: "Đang làm",
   reviewLabel: "Chờ chấm",

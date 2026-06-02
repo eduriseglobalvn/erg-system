@@ -50,6 +50,17 @@ import {
   inputClassName,
 } from "@/components/ui/dashboard-kit";
 import {
+  ChecklistItem,
+  ContentLinkField,
+  ContentTextFields,
+  Field,
+  InfoRow,
+  PublishCard,
+  PublishStep,
+  SearchInput,
+  StatusSelectField,
+} from "@/features/lcms/admin-operations/components/learning-resource-authoring-fields";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -643,7 +654,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const [localContentItems, setLocalContentItems] = useState<LocalContentItem[]>(mockExplorerLocalContent);
   const [editingLocalContent, setEditingLocalContent] = useState<LocalContentEditTarget>(null);
 
-  async function refreshData(options: { force?: boolean } = {}) {
+  const refreshData = useCallback(async (options: { force?: boolean } = {}) => {
     setLoading(true);
     try {
       if (options.force) {
@@ -673,17 +684,20 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
     } finally {
       setLoading(false);
     }
-  }
+  }, [queryClient]);
 
   useEffect(() => {
     let mounted = true;
-    void refreshData().finally(() => {
-      if (!mounted) return;
+    const frameId = window.requestAnimationFrame(() => {
+      void refreshData().finally(() => {
+        if (!mounted) return;
+      });
     });
     return () => {
       mounted = false;
+      window.cancelAnimationFrame(frameId);
     };
-  }, []);
+  }, [refreshData]);
 
   const subjects = useMemo(() => buildSubjects(model, resources), [model, resources]);
   const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId) ?? subjects[0];
@@ -692,6 +706,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const selectedPath = selectedSubject && selectedNode ? findPath(selectedSubject.tree, selectedNode.id) : [];
 
   useEffect(() => {
+    const frameId = window.requestAnimationFrame(() => {
     if (!selectedSubject && subjects[0]) {
       setSelectedSubjectId(subjects[0].id);
       setSelectedNodeId(subjects[0].tree[0]?.id ?? "");
@@ -700,6 +715,8 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
     if (selectedSubject && !subjects.some((subject) => subject.id === selectedSubjectId)) {
       setSelectedSubjectId(selectedSubject.id);
     }
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [selectedSubject, selectedSubjectId, subjects]);
 
   const filteredSubjects = useMemo(() => {
@@ -1055,10 +1072,14 @@ function StructureScreen({
   const deferredTreeQuery = useDeferredValue(treeQuery);
 
   useEffect(() => {
-    setExpandedNodeIds(new Set(selectedSubject?.tree.map((node) => node.id) ?? []));
+    const frameId = window.requestAnimationFrame(() => {
+      setExpandedNodeIds(new Set(selectedSubject?.tree.map((node) => node.id) ?? []));
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [selectedSubject?.id, selectedSubject?.tree]);
 
-  const currentChildren = selectedNode?.children ?? selectedSubject?.tree ?? [];
+  const currentChildren = useMemo(() => selectedNode?.children ?? selectedSubject?.tree ?? [], [selectedNode?.children, selectedSubject?.tree]);
+  const selectedNodeOptionId = selectedNode?.optionId;
   const currentResources = useMemo(() => {
     if (!selectedSubject) return [];
     if (!selectedNode?.optionId) return resources.filter((resource) => resource.subjectId === selectedSubject.id);
@@ -1072,8 +1093,8 @@ function StructureScreen({
     [attachedResources, currentResources],
   );
   const currentLocalContentItems = useMemo(
-    () => (selectedNode?.optionId ? localContentItems.filter((item) => item.parentOptionId === selectedNode.optionId) : []),
-    [localContentItems, selectedNode?.optionId],
+    () => (selectedNodeOptionId ? localContentItems.filter((item) => item.parentOptionId === selectedNodeOptionId) : []),
+    [localContentItems, selectedNodeOptionId],
   );
   const totalAttachedItems = currentResources.length + currentLocalContentItems.length;
   const showChildrenPanel = currentChildren.length > 0 || selectedNode?.kind !== "lesson";
@@ -1115,7 +1136,8 @@ function StructureScreen({
     if (selection.type === "node" && currentChildren.some((child) => child.id === selection.id)) return;
     if (selection.type === "local-content" && selectedLocalContent) return;
     if (selection.type === "resource" && selectedAttachedResource) return;
-    setSelection(null);
+    const frameId = window.requestAnimationFrame(() => setSelection(null));
+    return () => window.cancelAnimationFrame(frameId);
   }, [currentChildren, selectedAttachedResource, selectedLocalContent, selection]);
 
   useEffect(() => {
@@ -1762,7 +1784,7 @@ function UploadScreen({
 }) {
   const [subjectId, setSubjectId] = useState(selectedSubject?.id ?? "");
   const subject = subjects.find((item) => item.id === subjectId) ?? selectedSubject ?? subjects[0];
-  const subjectNodes = subject ? flattenNodes(subject.tree) : allNodes;
+  const subjectNodes = useMemo(() => (subject ? flattenNodes(subject.tree) : allNodes), [allNodes, subject]);
   const [nodeId, setNodeId] = useState(subjectNodes[0]?.id ?? "");
   const node = subjectNodes.find((item) => item.id === nodeId) ?? subjectNodes[0];
   const path = subject && node ? findPath(subject.tree, node.id) : [];
@@ -1775,12 +1797,16 @@ function UploadScreen({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!subjectId && selectedSubject?.id) setSubjectId(selectedSubject.id);
+    if (!subjectId && selectedSubject?.id) {
+      const frameId = window.requestAnimationFrame(() => setSubjectId(selectedSubject.id));
+      return () => window.cancelAnimationFrame(frameId);
+    }
   }, [selectedSubject?.id, subjectId]);
 
   useEffect(() => {
-    setNodeId(subjectNodes[0]?.id ?? "");
-  }, [subject?.id]);
+    const frameId = window.requestAnimationFrame(() => setNodeId(subjectNodes[0]?.id ?? ""));
+    return () => window.cancelAnimationFrame(frameId);
+  }, [subject?.id, subjectNodes]);
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -2100,85 +2126,6 @@ function defaultStatusForOption(option: ContentDialogOptionId | null, isSubject:
   return "published";
 }
 
-function StatusSelectField({
-  value,
-  onChange,
-  taxonomy = false,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  taxonomy?: boolean;
-}) {
-  return (
-    <Field label="Trạng thái">
-      <select value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
-        <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
-        <option value="draft">Bản nháp</option>
-        <option value="hidden">Đã ẩn</option>
-      </select>
-    </Field>
-  );
-}
-
-function ContentTextFields({
-  titleLabel = "Tên hiển thị",
-  titlePlaceholder,
-  titleValue,
-  onTitleChange,
-  descriptionLabel = "Mô tả",
-  descriptionPlaceholder,
-  descriptionValue,
-  onDescriptionChange,
-  autoFocus = false,
-}: {
-  titleLabel?: string;
-  titlePlaceholder?: string;
-  titleValue: string;
-  onTitleChange: (value: string) => void;
-  descriptionLabel?: string;
-  descriptionPlaceholder?: string;
-  descriptionValue: string;
-  onDescriptionChange: (value: string) => void;
-  autoFocus?: boolean;
-}) {
-  return (
-    <>
-      <Field label={titleLabel}>
-        <Input value={titleValue} onChange={(event) => onTitleChange(event.target.value)} placeholder={titlePlaceholder} autoFocus={autoFocus} />
-      </Field>
-      <Field label={descriptionLabel}>
-        <textarea
-          value={descriptionValue}
-          onChange={(event) => onDescriptionChange(event.target.value)}
-          placeholder={descriptionPlaceholder}
-          className={cn(inputClassName, "min-h-24 py-3")}
-        />
-      </Field>
-    </>
-  );
-}
-
-function ContentLinkField({
-  label,
-  value,
-  onChange,
-  placeholder,
-  hint,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  hint?: string;
-}) {
-  return (
-    <Field label={label}>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
-      {hint ? <p className="text-xs leading-5 text-slate-500">{hint}</p> : null}
-    </Field>
-  );
-}
-
 function TaxonomyCreateDialog({
   state,
   selectedSubject,
@@ -2272,22 +2219,25 @@ function TaxonomyCreateDialog({
 
   useEffect(() => {
     if (!open) return;
-    const autoOption = isSubject ? "category" : availableOptions.length === 1 ? availableOptions[0] : null;
-    setStep(autoOption ? "details" : "pick");
-    setSelectedOption(autoOption);
-    setLabel("");
-    setDescription("");
-    setKind(autoOption === "section" ? "section" : "category");
-    setSlidesUrl("");
-    setSlidesTotal("");
-    setExerciseQuery("");
-    setSelectedExerciseIds([]);
-    setResourceFileType("PDF");
-    setResourceUrl("");
-    setResourceTotalSlides("");
-    setStatus(defaultStatusForOption(autoOption, isSubject));
-    setError("");
-    setSaving(false);
+    const frameId = window.requestAnimationFrame(() => {
+      const autoOption = isSubject ? "category" : availableOptions.length === 1 ? availableOptions[0] : null;
+      setStep(autoOption ? "details" : "pick");
+      setSelectedOption(autoOption);
+      setLabel("");
+      setDescription("");
+      setKind(autoOption === "section" ? "section" : "category");
+      setSlidesUrl("");
+      setSlidesTotal("");
+      setExerciseQuery("");
+      setSelectedExerciseIds([]);
+      setResourceFileType("PDF");
+      setResourceUrl("");
+      setResourceTotalSlides("");
+      setStatus(defaultStatusForOption(autoOption, isSubject));
+      setError("");
+      setSaving(false);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [availableOptions, isSubject, open, selectedNode?.kind, state?.mode]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -2770,15 +2720,18 @@ function TaxonomyEditDialog({
 
   useEffect(() => {
     if (!target) return;
-    setLabel(target.label);
-    setDescription(target.description || "");
-    setStatus(target.status || "active");
-    setCoverImageUrl(target.metadata?.coverImageUrl || "");
-    setPresentationUrl(target.metadata?.presentationUrl || "");
-    setPdfUrl(target.metadata?.pdfUrl || "");
-    setExternalUrl(target.metadata?.externalUrl || "");
-    setError("");
-    setSaving(false);
+    const frameId = window.requestAnimationFrame(() => {
+      setLabel(target.label);
+      setDescription(target.description || "");
+      setStatus(target.status || "active");
+      setCoverImageUrl(target.metadata?.coverImageUrl || "");
+      setPresentationUrl(target.metadata?.presentationUrl || "");
+      setPdfUrl(target.metadata?.pdfUrl || "");
+      setExternalUrl(target.metadata?.externalUrl || "");
+      setError("");
+      setSaving(false);
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [target]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -2883,12 +2836,15 @@ function ResourceEditDialog({
 
   useEffect(() => {
     if (!target) return;
-    setTitle(target.title);
-    setDescription(target.detail?.description || "");
-    setLinkUrl(target.linkUrl || "");
-    setStatus(target.asset?.status || target.status || "published");
-    setSaving(false);
-    setError("");
+    const frameId = window.requestAnimationFrame(() => {
+      setTitle(target.title);
+      setDescription(target.detail?.description || "");
+      setLinkUrl(target.linkUrl || "");
+      setStatus(target.asset?.status || target.status || "published");
+      setSaving(false);
+      setError("");
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [target]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -2973,10 +2929,13 @@ function LocalContentEditDialog({
 
   useEffect(() => {
     if (!target) return;
-    setTitle(target.title);
-    setDescription(target.description || "");
-    setResourceUrl(target.slidesUrl || target.resourceUrl || "");
-    setStatus(target.status || "published");
+    const frameId = window.requestAnimationFrame(() => {
+      setTitle(target.title);
+      setDescription(target.description || "");
+      setResourceUrl(target.slidesUrl || target.resourceUrl || "");
+      setStatus(target.status || "published");
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [target]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -3038,8 +2997,11 @@ function TaxonomyDeleteDialog({
 
   useEffect(() => {
     if (!target) return;
-    setDeleting(false);
-    setError("");
+    const frameId = window.requestAnimationFrame(() => {
+      setDeleting(false);
+      setError("");
+    });
+    return () => window.cancelAnimationFrame(frameId);
   }, [target]);
 
   async function handleDelete() {
@@ -3072,63 +3034,5 @@ function TaxonomyDeleteDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  );
-}
-
-function SearchInput({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
-  return (
-    <div className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="pl-9" />
-    </div>
-  );
-}
-
-function InfoRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="font-semibold text-slate-950">{value}</span>
-    </div>
-  );
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function ChecklistItem({ label }: { label: string }) {
-  return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
-      <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-      <span className="text-sm font-medium text-slate-700">{label}</span>
-    </div>
-  );
-}
-
-function PublishCard({ title, value, description }: { title: string; value: number; description: string }) {
-  return (
-    <Card>
-      <CardContent className="py-5">
-        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{title}</div>
-        <div className="mt-2 text-3xl font-bold text-slate-950">{value}</div>
-        <p className="mt-1 text-sm text-slate-500">{description}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
-function PublishStep({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
-  return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4">
-      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-[var(--erg-blue)]">{icon}</span>
-      <div className="mt-4 font-semibold text-slate-950">{title}</div>
-      <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
-    </div>
   );
 }
