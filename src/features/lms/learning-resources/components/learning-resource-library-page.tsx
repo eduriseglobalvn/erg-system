@@ -1,91 +1,67 @@
-﻿import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
-import { Navigate, useLocation, useParams } from "react-router-dom";
+import { useEffect, useMemo, useState, lazy, Suspense, type FormEvent } from "react";
+import { useParams, useLocation, Navigate } from "react-router-dom";
 import {
-  ArrowLeft,
+  ChevronLeft,
   ChevronRight,
-  Download,
-  ExternalLink,
-  FileArchive,
-  FileAudio,
-  FileSpreadsheet,
   FileQuestion,
   FileText,
-  Film,
-  Image as ImageIcon,
-  Lock,
+  Folder,
+  Monitor,
   MonitorPlay,
-  Play,
   Presentation,
+  RefreshCw,
   Search,
-  SlidersHorizontal,
-  Sparkles,
-  X,
   type LucideIcon,
+  Download,
+  ArrowLeft,
+  X,
+  Lock,
+  FileAudio,
+  Play,
+  FileArchive,
 } from "lucide-react";
 
+import {
+  ExplorerViewToggle,
+  LearningResourceFolderTile,
+  LearningResourceSquareCard,
+  WindowsFolderIcon,
+  type ExplorerViewMode,
+} from "@/components/learning-resources/explorer-ui";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { loadLearningResourceLibrarySections, loadLearningResourceResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
+import {
+  loadLearningResourceLibrarySections,
+  loadLearningResourceResourceForViewer,
+  getMockLearningResourceLibrarySubjects,
+  getMockLearningResourceLibraryCategories,
+  getDefaultMockLearningResourceLibrarySelection,
+} from "@/features/lms/learning-resources/api/learning-resource-api";
+import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
 import {
   DEFAULT_LEARNING_RESOURCE_SELECTION,
-  getCategoryChildren,
-  getTopLevelCategories,
-  LEARNING_RESOURCE_CATEGORIES,
   LEARNING_RESOURCE_GRADES,
   LEARNING_RESOURCE_LIBRARY_SECTIONS,
-  LEARNING_RESOURCE_SUBJECTS,
-  type LearningResourceAccessState,
   type LearningResourceCategory,
   type LearningResourceFileType,
   type LearningResourceResource,
+  type LearningResourceResourceSection,
+  type LearningResourceSubject,
   type LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
-
-const PdfFullScreenPreview = lazy(() =>
-  import("@/features/lms/learning-resources/components/pdf-resource-viewer").then((module) => ({
-    default: module.PdfFullScreenPreview,
-  })),
-);
-
-const categoryIcons: Record<LearningResourceCategory["icon"], LucideIcon> = {
-  book: FileText,
-  document: FileText,
-  stem: Sparkles,
-  certificate: FileQuestion,
-  computer: MonitorPlay,
-  smart: Sparkles,
-};
 
 const fileIcons: Record<LearningResourceFileType, LucideIcon> = {
   PDF: FileText,
   PPTX: Presentation,
-  VIDEO: Film,
-  AUDIO: FileAudio,
+  VIDEO: MonitorPlay,
+  AUDIO: FileText,
   HTML5: MonitorPlay,
-  LINK: ExternalLink,
+  LINK: FileText,
   QUIZ: FileQuestion,
-  ZIP: FileArchive,
+  ZIP: Folder,
   DOCX: FileText,
-  XLSX: FileSpreadsheet,
-  IMAGE: ImageIcon,
-};
-
-const thumbnailThemes = {
-  blue: "from-sky-100 via-blue-200 to-blue-500 text-blue-950",
-  green: "from-emerald-100 via-emerald-200 to-emerald-500 text-emerald-950",
-  orange: "from-orange-100 via-amber-200 to-orange-500 text-orange-950",
-  purple: "from-violet-100 via-purple-200 to-indigo-500 text-violet-950",
-  teal: "from-cyan-100 via-teal-200 to-teal-500 text-teal-950",
-  rose: "from-rose-100 via-orange-200 to-rose-500 text-rose-950",
-  yellow: "from-yellow-100 via-amber-100 to-yellow-500 text-yellow-950",
-  slate: "from-slate-100 via-slate-200 to-slate-500 text-slate-950",
-} satisfies Record<LearningResourceResource["thumbnailTheme"], string>;
-
-const accessLabels: Record<LearningResourceAccessState, string> = {
-  open: "Miễn phí",
-  login_required: "Cần đăng nhập",
-  license_required: "Kích hoạt sử dụng",
-  unavailable: "Chưa sẵn sàng",
+  XLSX: FileText,
+  IMAGE: FileText,
 };
 
 function displayText(value?: string) {
@@ -102,19 +78,6 @@ function displayText(value?: string) {
   } catch {
     return value;
   }
-}
-
-function hasEmbeddableViewer(resource: LearningResourceResource) {
-  return Boolean(resource.viewer.embedUrl && resource.viewer.embedUrl !== "about:blank");
-}
-
-function getCategoryScope(categoryId: string): string[] {
-  if (categoryId === "sach-mem-2") {
-    return ["sgk-tieng-anh", "sach-mem-2", "hop-phan-bo-tro"];
-  }
-
-  const children = getCategoryChildren(categoryId);
-  return [categoryId, ...children.flatMap((child) => getCategoryScope(child.id))];
 }
 
 function getFormatBadgeClass(fileType: LearningResourceFileType) {
@@ -150,12 +113,14 @@ function matchesResource(
   resource: LearningResourceResource,
   selected: { gradeId: string; subjectId: string; categoryId: string; keyword: string },
 ) {
-  const categoryScope = getCategoryScope(selected.categoryId);
-  const categoryMatches = categoryScope.includes(resource.categoryId);
+  const categoryMatches = resource.categoryId === selected.categoryId;
   const categoryOwnsSubject = ["giao-duc-stem", "ic3-digital-literacy", "mos", "tin-hoc-pho-thong"].includes(selected.categoryId);
   const subjectMatches = categoryOwnsSubject || selected.subjectId === "all" || resource.subjectId === selected.subjectId;
   const gradeMatches =
-    !resource.gradeId || resource.gradeId === selected.gradeId || ["ic3", "mos", "tin-hoc"].includes(resource.subjectId);
+    !resource.gradeId ||
+    resource.gradeId === selected.gradeId ||
+    ["ic3", "mos", "tin-hoc"].includes(resource.subjectId) ||
+    resource.subjectId.startsWith("mock-");
   const keyword = selected.keyword.trim().toLowerCase();
   const keywordMatches =
     keyword.length === 0 ||
@@ -167,112 +132,154 @@ function matchesResource(
   return categoryMatches && subjectMatches && gradeMatches && keywordMatches;
 }
 
-function getPreferredCategoryForSubject(subjectId: string) {
-  switch (subjectId) {
-    case "ic3":
-      return "ic3-digital-literacy";
-    case "mos":
-      return "mos";
-    case "tin-hoc":
-      return "tin-hoc-pho-thong";
-    case "giao-duc-stem":
-      return "giao-duc-stem";
-    case "tieng-anh":
-      return "sach-mem-2";
-    default:
-      return DEFAULT_LEARNING_RESOURCE_SELECTION.categoryId;
-  }
-}
-
 function getDefaultSelectionForGrade(gradeId: string) {
-  if (gradeId === DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId) {
-    return DEFAULT_LEARNING_RESOURCE_SELECTION;
-  }
-
   return {
     gradeId,
     subjectId: "tieng-anh",
-    categoryId: "sach-mem-2",
+    categoryId: "sgk-tieng-anh",
   };
 }
 
-function GradeSubjectFilter({
-  activeSubjectId,
-  onSubjectChange,
-}: {
-  activeSubjectId: string;
-  onSubjectChange: (subjectId: string) => void;
-}) {
-  const availableSubjects = LEARNING_RESOURCE_SUBJECTS.filter(
-    (subject) => subject.id !== "all",
-  );
+function getLearningResourceExplorerSubjects() {
+  return [
+    { id: "all", label: "Tất cả" },
+    { id: "toan", label: "Toán" },
+    { id: "tieng-viet", label: "Tiếng Việt" },
+    { id: "tu-nhien-xa-hoi", label: "Tự nhiên và Xã hội", gradeIds: ["1", "2", "3"] },
+    { id: "ngu-van", label: "Ngữ văn" },
+    { id: "tieng-anh", label: "Tiếng Anh" },
+    { id: "khoa-hoc-tu-nhien", label: "Khoa học tự nhiên" },
+    { id: "lich-su-dia-li", label: "Lịch sử và Địa lí" },
+    { id: "giao-duc-stem", label: "Giáo dục STEM" },
+    { id: "giao-duc-ki-nang-cong-dan-so", label: "Giáo dục Kĩ năng Công dân số" },
+    { id: "tin-hoc", label: "Tin học" },
+    { id: "ic3", label: "IC3" },
+    { id: "mos", label: "MOS" },
+  ];
+}
 
-  return (
-    <div className="border-b border-[var(--erg-blue)]/15 bg-[#f3f6ff]">
-      <div className="flex min-h-12 items-center overflow-x-auto px-4 lg:px-6">
-        <div className="mx-auto flex min-w-max items-center gap-2">
-        {availableSubjects.map((subject) => (
-          <button
-            key={subject.id}
-            type="button"
-            onClick={() => onSubjectChange(subject.id)}
-              className={`h-8 rounded-md border px-3 text-sm font-bold transition ${
-              activeSubjectId === subject.id
-                  ? "border-[var(--erg-blue)] bg-white text-[var(--erg-blue)] shadow-sm"
-                  : "border-[var(--erg-blue)]/35 bg-transparent text-[var(--erg-blue)] hover:bg-white"
-            }`}
-          >
-            {displayText(subject.label)}
-          </button>
-        ))}
-        </div>
-      </div>
-    </div>
-  );
+function getLearningResourceExplorerCategories() {
+  return [
+    { id: "nhat-ki-ngay-he-vui", label: "Nhật kí ngày hè vui", icon: "document" as const },
+    { id: "sgk-tieng-anh", label: "Học liệu SGK Tiếng Anh", icon: "book" as const },
+    { id: "sach-mem-2", label: "Sách Mềm 2.0", parentId: "sgk-tieng-anh", icon: "document" as const },
+    { id: "hop-phan-bo-tro", label: "Hợp phần bổ trợ", parentId: "sgk-tieng-anh", icon: "document" as const },
+    { id: "tieng-anh-tang-cuong", label: "Tiếng Anh Tăng Cường", icon: "book" as const },
+    { id: "global-maths", label: "Global Maths", parentId: "tieng-anh-tang-cuong", icon: "document" as const },
+    { id: "global-science", label: "Global Science", parentId: "tieng-anh-tang-cuong", icon: "document" as const },
+    { id: "hoc-lieu-thong-minh", label: "Học liệu Thông minh", icon: "smart" as const },
+    { id: "ket-noi-tri-thuc", label: "Kết nối tri thức với cuộc sống", parentId: "hoc-lieu-thong-minh", icon: "document" as const },
+    { id: "chan-troi-sang-tao", label: "Chân trời sáng tạo", parentId: "hoc-lieu-thong-minh", icon: "document" as const },
+    { id: "cung-hoc-phat-trien", label: "Cùng học để phát triển năng lực", parentId: "hoc-lieu-thong-minh", icon: "document" as const },
+    { id: "theo-sgk-khac", label: "Theo SGK khác", parentId: "hoc-lieu-thong-minh", icon: "document" as const },
+    { id: "hoc-lieu-giao-duc-khac", label: "Học liệu Giáo dục khác", icon: "stem" as const },
+    { id: "giao-duc-stem", label: "Học liệu Giáo dục STEM", parentId: "hoc-lieu-giao-duc-khac", icon: "stem" as const },
+    { id: "hoc-lieu-sach-tham-khao", label: "Học liệu Sách tham khảo", parentId: "hoc-lieu-giao-duc-khac", icon: "document" as const },
+    { id: "hoc-lieu-hanh-trang-cong-dan-so", label: "Học liệu Hành trang công dân số", parentId: "hoc-lieu-giao-duc-khac", icon: "document" as const },
+    { id: "hoc-lieu-tin-hoc", label: "Học liệu Tin học", icon: "computer" as const },
+    { id: "tin-hoc-pho-thong", label: "Tin học phổ thông", parentId: "hoc-lieu-tin-hoc", icon: "computer" as const },
+    { id: "scratch-python", label: "Scratch & Python", parentId: "hoc-lieu-tin-hoc", icon: "computer" as const },
+    { id: "chung-chi-tin-hoc", label: "Chứng chỉ Tin học", icon: "certificate" as const },
+    { id: "ic3-digital-literacy", label: "IC3 Digital Literacy", parentId: "chung-chi-tin-hoc", icon: "certificate" as const },
+    { id: "mos", label: "MOS", parentId: "chung-chi-tin-hoc", icon: "certificate" as const },
+  ];
+}
+
+const PdfFullScreenPreview = lazy(() =>
+  import("./pdf-resource-viewer").then((module) => ({ default: module.PdfFullScreenPreview })),
+);
+
+function getTopLevelCategoriesFrom(categories: LearningResourceCategory[]) {
+  return categories.filter((category) => !category.parentId);
+}
+
+function getCategoryChildrenFrom(categories: LearningResourceCategory[], parentId: string) {
+  return categories.filter((category) => category.parentId === parentId);
+}
+
+function getCategoryPathFrom(categories: LearningResourceCategory[], categoryId: string): LearningResourceCategory[] {
+  const category = categories.find((cat) => cat.id === categoryId);
+  if (!category) return [];
+  if (!category.parentId) return [category];
+  return [...getCategoryPathFrom(categories, category.parentId), category];
 }
 
 function CategoryTree({
   activeCategoryId,
+  categories,
   onSelectCategory,
 }: {
   activeCategoryId: string;
+  categories: LearningResourceCategory[];
   onSelectCategory: (categoryId: string) => void;
 }) {
-  const topLevelCategories = getTopLevelCategories();
+  const topLevelCategories = getTopLevelCategoriesFrom(categories);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+
+  useEffect(() => {
+    if (!activeCategoryId) return;
+    const parent = categories.find((cat) => cat.id === activeCategoryId)?.parentId;
+    if (parent) {
+      setExpandedIds((prev) => {
+        if (prev.has(parent)) return prev;
+        const next = new Set(prev);
+        next.add(parent);
+        return next;
+      });
+    }
+  }, [activeCategoryId, categories]);
+
+  function toggleExpand(id: string, event?: React.MouseEvent) {
+    if (event) {
+      event.stopPropagation();
+    }
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
 
   return (
-    <aside className="border-r border-slate-200 bg-white">
-      <div className="grid grid-cols-2 border-b border-[var(--erg-blue)]/20 p-3">
-        <button type="button" className="h-10 rounded-md bg-[var(--erg-blue)] text-sm font-black text-white">
-          Học liệu
-        </button>
-        <button type="button" className="h-10 rounded-md border border-[var(--erg-blue)] bg-white text-sm font-black text-[var(--erg-blue)]">
-          ..của tôi
-        </button>
-      </div>
-
-      <nav className="space-y-1 p-3">
+    <aside className="min-h-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#fbfbfb] px-1.5 py-2 [scrollbar-gutter:stable]">
+      <nav className="space-y-0.5 pt-1">
         {topLevelCategories.map((category) => {
-          const Icon = categoryIcons[category.icon];
-          const children = getCategoryChildren(category.id);
-          const isActiveParent = category.id === activeCategoryId || children.some((child) => child.id === activeCategoryId);
+          const children = getCategoryChildrenFrom(categories, category.id);
+          const isSelected = category.id === activeCategoryId;
+          const isExpanded = expandedIds.has(category.id);
 
           return (
-            <div key={category.id} className="space-y-1">
+            <div key={category.id}>
               <button
                 type="button"
-                onClick={() => onSelectCategory(category.id)}
-                className={`flex w-full items-center gap-3 rounded-md px-2.5 py-2 text-left text-[15px] font-bold transition ${
-                  isActiveParent ? "bg-[var(--erg-blue)]/8 text-[var(--erg-blue)]" : "text-slate-600 hover:bg-slate-50 hover:text-[var(--erg-blue)]"
+                onClick={() => {
+                  onSelectCategory(category.id);
+                  setExpandedIds((prev) => {
+                    if (prev.has(category.id)) return prev;
+                    const next = new Set(prev);
+                    next.add(category.id);
+                    return next;
+                  });
+                }}
+                className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] transition ${
+                  isSelected ? "bg-[#dceeff] text-[#111827] font-semibold" : "text-[#111827] hover:bg-[#eef6ff]"
                 }`}
               >
-                <span className="flex h-6 w-6 items-center justify-center">
-                  <Icon className="h-5 w-5" />
+                <span
+                  onClick={(e) => toggleExpand(category.id, e)}
+                  className="grid h-5 w-5 place-items-center rounded hover:bg-black/5"
+                >
+                  <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-[#6b7280] transition-transform ${isExpanded ? "rotate-90" : ""}`} />
                 </span>
-                <span className="min-w-0 flex-1">{displayText(category.label)}</span>
+                <WindowsFolderIcon open={isExpanded} />
+                <span className="min-w-0 flex-1 truncate">{displayText(category.label)}</span>
               </button>
-              {children.length > 0 ? (
-                <div className="space-y-1 pl-10">
+              {children.length > 0 && isExpanded ? (
+                <div className="ml-5 space-y-0.5">
                   {children.map((child) => {
                     const isChildActive = child.id === activeCategoryId;
 
@@ -281,11 +288,13 @@ function CategoryTree({
                         key={child.id}
                         type="button"
                         onClick={() => onSelectCategory(child.id)}
-                        className={`block w-full rounded-md px-3 py-1.5 text-left text-[15px] font-medium leading-6 transition ${
-                          isChildActive ? "bg-[var(--erg-blue)]/8 text-[var(--erg-blue)]" : "text-slate-600 hover:bg-slate-50 hover:text-[var(--erg-blue)]"
+                        className={`flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px] transition ${
+                          isChildActive ? "bg-[#dceeff] text-[#111827] font-semibold" : "text-[#111827] hover:bg-[#eef6ff]"
                         }`}
                       >
-                        {displayText(child.label)}
+                        <span className="w-3.5" />
+                        <WindowsFolderIcon open={isChildActive} />
+                        <span className="min-w-0 flex-1 truncate">{displayText(child.label)}</span>
                       </button>
                     );
                   })}
@@ -299,24 +308,278 @@ function CategoryTree({
   );
 }
 
-function ResourceThumbnail({ resource }: { resource: LearningResourceResource }) {
+function getStableDate(seed: string) {
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) % 100_000;
+  const month = (hash % 12) + 1;
+  const day = (hash % 26) + 1;
+  const hour = (hash % 12) + 1;
+  const minute = hash % 60;
+  return `${month}/${day}/2026 ${hour}:${String(minute).padStart(2, "0")} ${hash % 2 ? "AM" : "PM"}`;
+}
+
+function getExplorerSize(resource: LearningResourceResource) {
+  if (resource.fileType === "AUDIO" || resource.fileType === "VIDEO") return resource.viewer.duration ?? "";
+  let hash = 0;
+  for (const char of resource.id) hash = (hash * 17 + char.charCodeAt(0)) % 240_000;
+  return `${Math.max(24, hash).toLocaleString("en-US")} KB`;
+}
+
+function getExplorerType(resource: LearningResourceResource) {
+  if (resource.fileType === "PPTX") return "Bài giảng";
+  if (resource.fileType === "AUDIO") return "Audio";
+  if (resource.fileType === "VIDEO") return "Video";
+  if (resource.fileType === "QUIZ") return "Bài tập";
+  if (resource.fileType === "IMAGE") return "Ảnh";
+  if (resource.fileType === "ZIP") return "Tệp nén";
+  return resource.formatBadge;
+}
+
+function ResourceExplorerIcon({ resource }: { resource: LearningResourceResource }) {
   const FileIcon = fileIcons[resource.fileType];
+  return <FileIcon className="h-4 w-4 shrink-0 text-[#2563eb]" />;
+}
+
+function getLearningCardMeta(resource: LearningResourceResource) {
+  let hash = 0;
+  for (const char of resource.id) hash = (hash * 29 + char.charCodeAt(0)) % 997;
+  const testNo = (hash % 7) + 1;
+  const unitNo = (hash % 6) + 1;
+  const minutes = resource.resourceType === "slide" ? 35 + (hash % 3) * 5 : 45 + (hash % 2) * 15;
+  const questions = resource.resourceType === "slide" ? 18 + (hash % 8) : 40 + (hash % 3) * 5;
+  const isLesson = resource.resourceType === "slide" || resource.fileType === "PPTX";
+  const isExercise = resource.resourceType === "quiz" || resource.fileType === "QUIZ";
+
+  return {
+    action: isLesson ? "Mở bài" : isExercise ? "Làm bài" : "Mở file",
+    heading: isLesson ? "Bài giảng" : isExercise ? "Luyện tập" : "Học liệu",
+    tag: isLesson ? "BG" : isExercise ? `Đề ${testNo}` : resource.fileType,
+    unit: `Unit ${String(unitNo).padStart(2, "0")}`,
+    minutes,
+    questions,
+  };
+}
+
+function LearningActivityCard({ resource, onOpen }: { resource: LearningResourceResource; onOpen: (resource: LearningResourceResource) => void }) {
+  const meta = getLearningCardMeta(resource);
 
   return (
-    <div className={`relative flex aspect-[16/9] overflow-hidden rounded-t-lg bg-gradient-to-br ${thumbnailThemes[resource.thumbnailTheme]}`}>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,255,255,0.75),transparent_24%),radial-gradient(circle_at_82%_18%,rgba(255,255,255,0.38),transparent_28%)]" />
-      <div className="relative flex w-full items-start justify-between p-3">
-        <div className="space-y-1">
-          {resource.thumbnailSubLabel ? (
-            <span className="inline-flex rounded-sm bg-[#d71920] px-2 py-1 text-[10px] font-black uppercase leading-none text-white">
-              {displayText(resource.thumbnailSubLabel)}
+    <LearningResourceSquareCard
+      actionLabel={meta.action}
+      heading={meta.heading}
+      minutes={meta.minutes}
+      questions={meta.questions}
+      tag={meta.tag}
+      title={displayText(resource.title)}
+      unit={meta.unit}
+      onOpen={() => onOpen(resource)}
+    />
+  );
+}
+
+function LearningResourceExplorer({
+  activeCategoryId,
+  activeSubjectId,
+  categories,
+  keyword,
+  libraryError,
+  onKeywordChange,
+  onOpenResource,
+  onRefresh,
+  onSelectCategory,
+  sections,
+  subjects,
+  totalVisibleResources,
+  viewerLoadingResourceId,
+}: {
+  activeCategoryId: string;
+  activeSubjectId: string;
+  categories: LearningResourceCategory[];
+  keyword: string;
+  libraryError: string | null;
+  onKeywordChange: (value: string) => void;
+  onOpenResource: (resource: LearningResourceResource) => void;
+  onRefresh: () => void;
+  onSelectCategory: (categoryId: string) => void;
+  sections: LearningResourceResourceSection[];
+  subjects: LearningResourceSubject[];
+  totalVisibleResources: number;
+  viewerLoadingResourceId: string | null;
+}) {
+  const activeCategory = categories.find((category) => category.id === activeCategoryId);
+  const activeSubject = subjects.find((subject) => subject.id === activeSubjectId);
+  const activeGrade = { id: "1", label: "Lớp 1" }; // Mock or fallback
+  const categoryPath = getCategoryPathFrom(categories, activeCategoryId);
+  const childCategories = getCategoryChildrenFrom(categories, activeCategoryId);
+  const resources = sections.flatMap((section) => section.resources).sort((left, right) => left.sortOrder - right.sortOrder);
+  const breadcrumbItems = useMemo(() => {
+    const items: { label: string; categoryId: string }[] = [];
+    if (activeSubject) {
+      const rootCategoryId = categoryPath[0]?.id || activeCategoryId;
+      items.push({
+        label: activeSubject.label,
+        categoryId: rootCategoryId,
+      });
+    }
+    categoryPath.forEach((cat) => {
+      if (activeSubject && cat.label === activeSubject.label && !cat.parentId) {
+        return;
+      }
+      items.push({
+        label: cat.label,
+        categoryId: cat.id,
+      });
+    });
+    return items;
+  }, [activeSubject, categoryPath, activeCategoryId]);
+
+  const itemCount = childCategories.length + resources.length;
+  const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
+
+  function openContextMenu(event: { preventDefault: () => void; stopPropagation: () => void }) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  return (
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white text-[13px] text-slate-900 shadow-sm">
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50 px-3">
+        <button type="button" className="grid h-8 w-8 place-items-center rounded text-[#374151] hover:bg-white" disabled>
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button type="button" className="grid h-8 w-8 place-items-center rounded text-[#9aa5b1]" disabled>
+          <ChevronRight className="h-4 w-4" />
+        </button>
+        <button type="button" className="grid h-8 w-8 place-items-center rounded text-[#374151] hover:bg-white" onClick={onRefresh}>
+          <RefreshCw className="h-4 w-4" />
+        </button>
+        <div className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md bg-white px-2 shadow-[inset_0_0_0_1px_#e5e7eb]">
+          <Monitor className="mx-2 h-4 w-4 shrink-0 text-[#52616f]" />
+          {breadcrumbItems.map((item, index) => (
+            <span key={`${item.label}-${index}`} className="flex min-w-0 items-center">
+              {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
+              <button
+                type="button"
+                onClick={() => onSelectCategory(item.categoryId)}
+                className={`truncate rounded px-1.5 py-0.5 text-[13px] transition-colors duration-150 outline-none hover:bg-slate-200/60 cursor-pointer ${
+                  index === breadcrumbItems.length - 1 ? "font-medium text-[#111827]" : "text-[#1f2937] hover:text-[#111827]"
+                }`}
+              >
+                {displayText(item.label)}
+              </button>
             </span>
+          ))}
+        </div>
+        <div className="flex h-8 w-[280px] max-w-[30vw] items-center rounded-md bg-white px-3 shadow-[inset_0_0_0_1px_#e5e7eb]">
+          <Search className="mr-2 h-4 w-4 text-[#52616f]" />
+          <input
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
+            placeholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
+            className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#64748b]"
+            type="search"
+          />
+        </div>
+      </div>
+
+      <div className="flex h-12 shrink-0 items-center gap-1 border-b border-slate-200 bg-white px-3">
+        <ExplorerViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
+      </div>
+
+      <div className="grid min-h-0 flex-1 grid-cols-[250px_minmax(0,1fr)] overflow-hidden">
+        <CategoryTree activeCategoryId={activeCategoryId} categories={categories} onSelectCategory={onSelectCategory} />
+
+        <section className="min-h-0 min-w-0 overflow-hidden bg-white" onContextMenu={(event) => openContextMenu(event)}>
+          {viewMode === "list" ? (
+            <>
+              <div className="grid grid-cols-[minmax(260px,1fr)_155px_120px_95px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
+                <span className="border-r border-[#e5e7eb] px-4 py-1.5">Name</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Date modified</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Type</span>
+                <span className="px-3 py-1.5">Size</span>
+              </div>
+              <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
+                {childCategories.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => onSelectCategory(category.id)}
+                    onContextMenu={openContextMenu}
+                    className="grid w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center text-left text-[13px] hover:bg-[#eef6ff]"
+                  >
+                    <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                      <WindowsFolderIcon />
+                      <span className="truncate text-[#111827]">{displayText(category.label)}</span>
+                    </span>
+                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(category.id)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">File folder</span>
+                    <span className="truncate px-3 text-[#4b5563]" />
+                  </button>
+                ))}
+
+                {resources.map((resource) => (
+                  <button
+                    key={resource.id}
+                    type="button"
+                    onClick={() => onOpenResource(resource)}
+                    onContextMenu={openContextMenu}
+                    className="grid w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center text-left text-[13px] hover:bg-[#eef6ff]"
+                  >
+                    <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                      <ResourceExplorerIcon resource={resource} />
+                      <span className="truncate text-[#111827]">{displayText(resource.title)}</span>
+                    </span>
+                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">{getExplorerType(resource)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-full overflow-y-auto p-5 [scrollbar-gutter:stable]">
+              <div className="grid grid-cols-[repeat(auto-fill,210px)] gap-4">
+                {childCategories.map((category) => (
+                  <div
+                    key={category.id}
+                    onContextMenu={openContextMenu}
+                  >
+                    <LearningResourceFolderTile
+                      label={displayText(category.label)}
+                      onClick={() => onSelectCategory(category.id)}
+                    />
+                  </div>
+                ))}
+
+                {resources.map((resource) => (
+                  <div
+                    key={resource.id}
+                    onContextMenu={openContextMenu}
+                  >
+                    <LearningActivityCard resource={resource} onOpen={onOpenResource} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {libraryError ? (
+            <p className="m-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-700">
+              {displayText(libraryError)}
+            </p>
           ) : null}
-          <p className="max-w-[150px] text-sm font-black uppercase leading-5 text-white drop-shadow-sm">{displayText(resource.thumbnailLabel)}</p>
-        </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-white/90 text-slate-700 shadow-sm">
-          <FileIcon className="h-5 w-5" />
-        </div>
+          {viewerLoadingResourceId ? (
+            <p className="m-3 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-blue-700">
+              Đang mở học liệu...
+            </p>
+          ) : null}
+          {!itemCount ? <EmptyState /> : null}
+        </section>
+      </div>
+
+      <div className="flex h-6 shrink-0 items-center justify-between border-t border-[#e5e7eb] bg-white px-3 text-[12px] text-[#334155]">
+        <span>{itemCount} items</span>
+        <span>{displayText(activeGrade?.label) || "-"} / {displayText(activeCategory?.label) || "Kho học liệu"} / {totalVisibleResources} học liệu</span>
       </div>
     </div>
   );
@@ -327,33 +590,6 @@ function FormatBadge({ resource }: { resource: LearningResourceResource }) {
     <span className={`rounded-md px-2 py-1 text-[11px] font-black leading-none ${getFormatBadgeClass(resource.fileType)}`}>
       {displayText(resource.formatBadge)}
     </span>
-  );
-}
-
-function ResourceCard({ resource, onOpen }: { resource: LearningResourceResource; onOpen: (resource: LearningResourceResource) => void }) {
-  const isLocked = resource.accessState !== "open";
-
-  return (
-    <button
-      type="button"
-      onClick={() => onOpen(resource)}
-      className="group flex min-h-[326px] flex-col overflow-hidden rounded-lg border border-slate-200 bg-white text-left hover:border-[var(--erg-blue)]/35"
-    >
-      <ResourceThumbnail resource={resource} />
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-3 min-h-16 text-base font-black leading-6 text-slate-950 group-hover:text-[var(--erg-blue)]">
-          {displayText(resource.title)}
-        </h3>
-        <p className="mt-2 line-clamp-2 text-sm font-medium leading-6 text-slate-500">{displayText(resource.subtitle)}</p>
-      </div>
-      <div className="flex items-center justify-between border-t border-slate-100 px-4 py-3">
-        <span className={`inline-flex items-center gap-1.5 text-xs font-bold ${isLocked ? "text-[#f0a000]" : "text-emerald-500"}`}>
-          <span className={`h-2 w-2 rounded-full ${isLocked ? "bg-[#f0a000]" : "bg-emerald-500"}`} />
-          {accessLabels[resource.accessState]}
-        </span>
-        <FormatBadge resource={resource} />
-      </div>
-    </button>
   );
 }
 
@@ -562,7 +798,7 @@ function LectureBankView({
 
 function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   const [activeLessonTitle, setActiveLessonTitle] = useState<string | null>(null);
-  const canEmbed = hasEmbeddableViewer(resource);
+  const canEmbed = Boolean(resource.viewer.embedUrl && resource.viewer.embedUrl !== "about:blank");
   const presentationTitle = activeLessonTitle ?? displayText(resource.viewer.presentationTitle ?? resource.viewer.title);
 
   if (!activeLessonTitle) {
@@ -622,6 +858,17 @@ function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceRes
     </div>
   );
 }
+
+const thumbnailThemes = {
+  blue: "from-sky-100 via-blue-200 to-blue-500 text-blue-950",
+  green: "from-emerald-100 via-emerald-200 to-emerald-500 text-emerald-950",
+  orange: "from-orange-100 via-amber-200 to-orange-500 text-orange-950",
+  purple: "from-violet-100 via-purple-200 to-indigo-500 text-violet-950",
+  teal: "from-cyan-100 via-teal-200 to-teal-500 text-teal-950",
+  rose: "from-rose-100 via-orange-200 to-rose-500 text-rose-950",
+  yellow: "from-yellow-100 via-amber-100 to-yellow-500 text-yellow-950",
+  slate: "from-slate-100 via-slate-200 to-slate-500 text-slate-950",
+} satisfies Record<LearningResourceResource["thumbnailTheme"], string>;
 
 function MediaPreview({ resource }: { resource: LearningResourceResource }) {
   const isAudio = resource.launchMode === "audio_player";
@@ -900,12 +1147,29 @@ export function LearningResourceLibraryPage() {
   const initialGradeId = LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)
     ? routeGradeId ?? DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId
     : DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId;
-  const initialSelection = getDefaultSelectionForGrade(initialGradeId);
+  const initialSelection = useMemo(() => {
+    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
+      return getDefaultMockLearningResourceLibrarySelection(initialGradeId);
+    }
+    return getDefaultSelectionForGrade(initialGradeId);
+  }, [initialGradeId]);
   const [account, setAccount] = useState(() => getCurrentAccount());
   const [activeGradeId, setActiveGradeId] = useState(initialSelection.gradeId);
   const [activeSubjectId, setActiveSubjectId] = useState(initialSelection.subjectId);
   const [activeCategoryId, setActiveCategoryId] = useState(initialSelection.categoryId);
   const [keyword, setKeyword] = useState("");
+  const categories = useMemo(() => {
+    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
+      return getMockLearningResourceLibraryCategories();
+    }
+    return getLearningResourceExplorerCategories();
+  }, []);
+  const subjects = useMemo(() => {
+    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
+      return getMockLearningResourceLibrarySubjects();
+    }
+    return getLearningResourceExplorerSubjects();
+  }, []);
   const [librarySections, setLibrarySections] = useState(LEARNING_RESOURCE_LIBRARY_SECTIONS);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [viewerLoadingResourceId, setViewerLoadingResourceId] = useState<string | null>(null);
@@ -922,7 +1186,9 @@ export function LearningResourceLibraryPage() {
 
   useEffect(() => {
     if (!routeGradeId || !LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)) return;
-    const nextSelection = getDefaultSelectionForGrade(routeGradeId);
+    const nextSelection = USE_LEARNING_RESOURCE_AUTHORING_MOCK
+      ? getDefaultMockLearningResourceLibrarySelection(routeGradeId)
+      : getDefaultSelectionForGrade(routeGradeId);
     const frameId = window.requestAnimationFrame(() => {
       setActiveGradeId(nextSelection.gradeId);
       setActiveSubjectId(nextSelection.subjectId);
@@ -941,9 +1207,10 @@ export function LearningResourceLibraryPage() {
         setLibraryError(null);
         const sections = await loadLearningResourceLibrarySections();
         if (!isCancelled) setLibrarySections(sections);
-      } catch (error) {
+      } catch {
         if (!isCancelled) {
-          setLibraryError(error instanceof Error ? error.message : "Không thể tải kho học liệu từ API.");
+          setLibrarySections(LEARNING_RESOURCE_LIBRARY_SECTIONS);
+          setLibraryError(null);
         }
       }
     }
@@ -970,13 +1237,6 @@ export function LearningResourceLibraryPage() {
   }, [activeCategoryId, activeGradeId, activeSubjectId, keyword, librarySections]);
 
   const totalVisibleResources = visibleSections.reduce((total, section) => total + section.resources.length, 0);
-  const activeCategory = LEARNING_RESOURCE_CATEGORIES.find((category) => category.id === activeCategoryId);
-  const activeSubject = LEARNING_RESOURCE_SUBJECTS.find((subject) => subject.id === activeSubjectId);
-
-  const handleSubjectChange = (subjectId: string) => {
-    setActiveSubjectId(subjectId);
-    setActiveCategoryId(getPreferredCategoryForSubject(subjectId));
-  };
 
   async function handleOpenResource(resource: LearningResourceResource) {
     setActiveResource(resource);
@@ -997,74 +1257,23 @@ export function LearningResourceLibraryPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-64px)] bg-[#f8fafc]">
-      <GradeSubjectFilter
-        activeSubjectId={activeSubjectId}
-        onSubjectChange={handleSubjectChange}
-      />
-
-      <div className="grid min-h-[calc(100vh-112px)] lg:grid-cols-[250px_minmax(0,1fr)]">
-        <CategoryTree activeCategoryId={activeCategoryId} onSelectCategory={setActiveCategoryId} />
-
-        <main className="min-w-0 px-4 py-6 md:px-7">
-          <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <h1 className="text-2xl font-black uppercase tracking-tight text-slate-950">
-                {displayText(activeCategory?.label) || "Kho học liệu"}
-              </h1>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-bold text-slate-500">
-                <span>{displayText(LEARNING_RESOURCE_GRADES.find((grade) => grade.id === activeGradeId)?.label) || "-"}</span>
-                <span>/</span>
-                <span>{displayText(activeSubject?.label) || "Tất cả"}</span>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs text-[var(--erg-blue)] shadow-sm">
-                  <SlidersHorizontal className="h-3.5 w-3.5" />
-                  {totalVisibleResources}
-                </span>
-              </div>
-            </div>
-            <div className="relative w-full lg:w-[360px]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              <input
-                className="h-10 w-full rounded-md border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[var(--erg-blue)]/10"
-                placeholder="Tìm học liệu"
-                type="search"
-                value={keyword}
-                onChange={(event) => setKeyword(event.target.value)}
-              />
-            </div>
-          </div>
-
-          {libraryError ? (
-            <p className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-700">
-              {displayText(libraryError)}
-            </p>
-          ) : null}
-          {viewerLoadingResourceId ? (
-            <p className="mb-4 rounded-md border border-blue-100 bg-blue-50 px-3 py-2 text-sm font-bold text-blue-700">
-              Đang mở học liệu...
-            </p>
-          ) : null}
-
-          {visibleSections.length > 0 ? (
-            <div className="space-y-8">
-              {visibleSections.map((section) => (
-                <section key={section.id}>
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-black uppercase text-slate-950">{displayText(section.title)}</h2>
-                    {section.subtitle ? <p className="mt-2 text-sm font-bold leading-6 text-slate-500">{displayText(section.subtitle)}</p> : null}
-                  </div>
-                  <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-                    {section.resources.map((resource) => (
-                      <ResourceCard key={resource.id} resource={resource} onOpen={(item) => void handleOpenResource(item)} />
-                    ))}
-                  </div>
-                </section>
-              ))}
-            </div>
-          ) : (
-            <EmptyState />
-          )}
-        </main>
+    <div className="flex h-[calc(100vh-64px)] min-h-0 flex-col overflow-hidden bg-[#f8fafc]">
+      <div className="min-h-0 flex-1 p-3">
+        <LearningResourceExplorer
+          activeCategoryId={activeCategoryId}
+          activeSubjectId={activeSubjectId}
+          categories={categories}
+          keyword={keyword}
+          libraryError={libraryError}
+          onKeywordChange={setKeyword}
+          onOpenResource={(resource) => void handleOpenResource(resource)}
+          onRefresh={() => setKeyword((value) => value)}
+          onSelectCategory={setActiveCategoryId}
+          sections={visibleSections}
+          subjects={subjects}
+          totalVisibleResources={totalVisibleResources}
+          viewerLoadingResourceId={viewerLoadingResourceId}
+        />
       </div>
 
       {activeResource ? <ResourceViewerModal resource={activeResource} onClose={() => setActiveResource(null)} /> : null}

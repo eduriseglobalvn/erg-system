@@ -33,21 +33,6 @@ export type StudentListItem = {
   lastActivityAt?: string | null;
 };
 
-export type StudentListResponse = {
-  items: StudentListItem[];
-  nextCursor?: string;
-  total?: number;
-};
-
-export type ListStudentsParams = {
-  centerId?: string;
-  classId?: string;
-  keyword?: string;
-  status?: string;
-  limit?: number;
-  cursor?: string;
-};
-
 export type BulkStudentAccountResponse = {
   created: number;
   skipped: number;
@@ -72,16 +57,4 @@ export function bulkCreateStudentAccounts(input: BulkStudentAccountRequest) {
     method: "POST",
     body: JSON.stringify(input),
   });
-}
-
-export function listLmsStudents(params: ListStudentsParams = {}) {
-  const searchParams = new URLSearchParams();
-
-  Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === null || value === "") return;
-    searchParams.set(key, String(value));
-  });
-
-  const query = searchParams.toString();
-  return apiRequest<StudentListResponse>(`/api/lms/students${query ? `?${query}` : ""}`);
 }

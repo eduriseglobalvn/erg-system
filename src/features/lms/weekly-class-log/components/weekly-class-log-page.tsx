@@ -22,7 +22,10 @@ type StudentMentionOption = {
   name: string;
 };
 
-const STORAGE_KEY = "erg:lms:weekly-class-log:v1";
+type PeriodCompletionState = "empty" | "complete" | "incomplete";
+
+const STORAGE_KEY = "erg:lms:weekly-class-log:v3";
+const morningPeriodCount = 5;
 const periodFields: Array<keyof WeeklyClassLogPeriod> = [
   "className",
   "ppct",
@@ -33,7 +36,7 @@ const periodFields: Array<keyof WeeklyClassLogPeriod> = [
   "teacherSignature",
 ];
 
-export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherName }: WeeklyClassLogPageProps) {
+export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLogPageProps) {
   const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(() => loadStoredWeeks());
   const [selectedWeekId, setSelectedWeekId] = useState(weeks[0]?.id ?? "");
   const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
@@ -59,10 +62,6 @@ export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherN
     );
   }
 
-  function updateWeek(patch: Partial<WeeklyClassLogWeek>) {
-    if (isLocked) return;
-    patchSelectedWeek((week) => ({ ...week, ...patch, status: "draft" }));
-  }
 
   function updateDay(dayId: string, value: string) {
     if (isLocked) return;
@@ -99,15 +98,22 @@ export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherN
   return (
     <section className="flex min-h-full bg-white text-slate-950" data-testid="weekly-class-log-page">
       <div className="min-w-0 flex-1 px-3 py-3 md:px-5 md:py-4">
-        <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-black uppercase tracking-tight">Sổ đầu bài theo tuần</h1>
-            <p className="mt-1 text-sm font-semibold text-slate-500">
-              {selectedSchoolName} · {selectedClass?.className ?? "Lớp học"} · GVCN: {teacherName}
-            </p>
-          </div>
+        <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
+          <h1 className="text-2xl font-black uppercase tracking-tight">Sổ Đầu Bài</h1>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="ml-auto flex flex-wrap items-center gap-2">
+            <select
+              value={selectedWeek.id}
+              onChange={(event) => setSelectedWeekId(event.target.value)}
+              className="h-10 min-w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 outline-none transition hover:border-blue-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              aria-label="Chọn tuần"
+            >
+              {weeks.map((week) => (
+                <option key={week.id} value={week.id}>
+                  {week.label} · {compactWeekDateRange(week)}
+                </option>
+              ))}
+            </select>
             <button
               type="button"
               onClick={() => goToWeek(1)}
@@ -125,38 +131,14 @@ export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherN
               Tuần sau
             </button>
           </div>
-
-          <div className="flex min-w-full gap-1.5 overflow-x-auto rounded-xl border border-slate-200 bg-slate-50 p-1">
-            {weeks.map((week) => (
-              <button
-                key={week.id}
-                type="button"
-                onClick={() => setSelectedWeekId(week.id)}
-                className={cn(
-                  "h-9 shrink-0 rounded-lg px-3 text-xs font-black transition",
-                  week.id === selectedWeek.id
-                    ? "bg-white text-[#1967d2] shadow-sm ring-1 ring-blue-100"
-                    : "text-slate-600 hover:bg-white/80",
-                )}
-              >
-                {week.label} <span className="font-semibold text-slate-400">{compactWeekDateRange(week)}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="grid min-w-full grid-cols-1 gap-3 text-sm font-semibold sm:min-w-[520px] sm:grid-cols-3 sm:gap-6 sm:text-center">
-            <EditableHeaderField disabled={isLocked} label="Tuần" value={selectedWeek.label} onChange={(value) => updateWeek({ label: value })} />
-            <EditableHeaderField disabled={isLocked} label="Từ ngày" value={selectedWeek.fromDate} onChange={(value) => updateWeek({ fromDate: value })} />
-            <EditableHeaderField disabled={isLocked} label="Đến ngày" value={selectedWeek.toDate} onChange={(value) => updateWeek({ toDate: value })} />
-          </div>
         </div>
-
         <div className="overflow-auto border border-black bg-white">
-          <div className="grid min-w-[1320px] grid-cols-[minmax(0,1fr)_260px]">
+          <div className="grid min-w-[1380px] grid-cols-[minmax(0,1fr)_260px]">
             <table className="w-full table-fixed border-collapse text-[12px] leading-tight">
               <colgroup>
                 <col className="w-[80px]" />
-                <col className="w-[44px]" />
+                  <col className="w-[64px]" />
+                  <col className="w-[44px]" />
                 <col className="w-[70px]" />
                 <col className="w-[52px]" />
                 <col className="w-[110px]" />
@@ -168,6 +150,7 @@ export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherN
               <thead>
                 <tr>
                   <HeaderCell>Thứ, ngày</HeaderCell>
+                  <HeaderCell>Buổi</HeaderCell>
                   <HeaderCell>Tiết</HeaderCell>
                   <HeaderCell>Lớp</HeaderCell>
                   <HeaderCell>Tiết PPCT</HeaderCell>
@@ -176,13 +159,6 @@ export function WeeklyClassLogPage({ selectedClass, selectedSchoolName, teacherN
                   <HeaderCell>Nhận xét</HeaderCell>
                   <HeaderCell>Kỷ luật</HeaderCell>
                   <HeaderCell>GV dạy kí tên</HeaderCell>
-                </tr>
-                <tr className="h-7 italic">
-                  {Array.from({ length: 9 }, (_, index) => (
-                    <td key={index} className="border border-black text-center">
-                      {index + 1}
-                    </td>
-                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -223,12 +199,13 @@ function DayRows({
   studentMentionOptions: StudentMentionOption[];
   teacherName: string;
 }) {
+  const dayState = getGroupedPeriodState(day.periods);
   return (
     <>
       {day.periods.map((period, index) => (
-        <tr key={period.id} className="h-8 align-top">
+        <tr key={period.id} className={cn("h-8 align-top", periodRowClass(getPeriodCompletionState(period)))}>
           {index === 0 ? (
-            <td rowSpan={day.periods.length} className="border border-black px-2 text-center align-middle">
+            <td rowSpan={day.periods.length} className={cn("border border-black px-2 text-center align-middle", periodRowClass(dayState))}>
               <div>{day.label}</div>
               <input
                 value={day.date}
@@ -238,7 +215,12 @@ function DayRows({
               />
             </td>
           ) : null}
-          <td className="border border-black border-b-dotted px-1.5 py-1 text-center">{index + 1}</td>
+          {index === 0 || index === morningPeriodCount ? (
+            <td rowSpan={morningPeriodCount} className={cn("border border-black px-1.5 py-1 text-center align-middle font-black", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
+              {index === 0 ? "Sáng" : "Chiều"}
+            </td>
+          ) : null}
+          <td className={cn("border border-black border-b-dotted px-1.5 py-1 text-center", periodRowClass(getPeriodCompletionState(period)))}>{(index % morningPeriodCount) + 1}</td>
           {periodFields.map((field) => (
             <EditableCell
               key={field}
@@ -246,6 +228,7 @@ function DayRows({
               disabled={disabled || field === "teacherSignature"}
               field={field}
               mentionOptions={isStudentMentionField(field) ? studentMentionOptions : undefined}
+              rowState={getPeriodCompletionState(period)}
               value={field === "teacherSignature" ? getTeacherSignature(period, teacherName) : period[field]}
               onChange={(value) => onUpdatePeriod(day.id, period.id, field, value)}
             />
@@ -347,6 +330,7 @@ function EditableCell({
   field,
   mentionOptions,
   onChange,
+  rowState,
   value,
 }: {
   center?: boolean;
@@ -354,6 +338,7 @@ function EditableCell({
   field: keyof WeeklyClassLogPeriod;
   mentionOptions?: StudentMentionOption[];
   onChange: (value: string) => void;
+  rowState: PeriodCompletionState;
   value: string;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -418,7 +403,7 @@ function EditableCell({
 
   if (field === "disciplineScore") {
     return (
-      <td className="border border-black border-b-dotted p-0 focus-within:bg-blue-50">
+      <td className={cn("border border-black border-b-dotted p-0 focus-within:bg-blue-50", periodRowClass(rowState))}>
         <select
           value={value}
           disabled={disabled}
@@ -434,7 +419,7 @@ function EditableCell({
   }
 
   return (
-    <td className="relative overflow-visible border border-black border-b-dotted p-0 focus-within:bg-blue-50">
+    <td className={cn("relative overflow-visible border border-black border-b-dotted p-0 focus-within:bg-blue-50", periodRowClass(rowState))}>
       {mentionOptions?.length && !isFocused ? (
         <div
           aria-hidden="true"
@@ -488,30 +473,6 @@ function EditableCell({
   );
 }
 
-function EditableHeaderField({
-  disabled,
-  label,
-  onChange,
-  value,
-}: {
-  disabled: boolean;
-  label: string;
-  onChange: (value: string) => void;
-  value: string;
-}) {
-  return (
-    <label className="flex items-end gap-2">
-      <span>{label}:</span>
-      <input
-        value={value}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.value)}
-        className="min-w-0 flex-1 border-0 border-b border-dotted border-slate-700 bg-transparent text-center outline-none focus:border-blue-500 disabled:text-slate-500"
-      />
-    </label>
-  );
-}
-
 function loadStoredWeeks() {
   if (typeof window === "undefined") return migrateWeeks(weeklyClassLogWeeks);
 
@@ -558,7 +519,8 @@ function normalizeWeekSignatures(week: WeeklyClassLogWeek, teacherName: string) 
 }
 
 function normalizeDisciplineValue(value: string) {
-  if (value === "Đạt" || value === "Chưa đạt") return value;
+  if (value === "Đạt") return "Đạt";
+  if (value === "Chưa đạt") return "Chưa đạt";
   return value ? "Đạt" : "";
 }
 
@@ -575,6 +537,26 @@ function isPeriodComplete(period: WeeklyClassLogPeriod) {
       period.comment.trim() &&
       period.disciplineScore.trim(),
   );
+}
+
+function getPeriodCompletionState(period: WeeklyClassLogPeriod): PeriodCompletionState {
+  const requiredValues = [period.className, period.ppct, period.lesson, period.comment, period.disciplineScore];
+  const hasAnyValue = [...requiredValues, period.absent].some((value) => value.trim());
+  if (!hasAnyValue) return "empty";
+  return requiredValues.every((value) => value.trim()) ? "complete" : "incomplete";
+}
+
+function getGroupedPeriodState(periods: WeeklyClassLogPeriod[]): PeriodCompletionState {
+  const states = periods.map(getPeriodCompletionState);
+  if (states.some((state) => state === "incomplete")) return "empty";
+  if (states.some((state) => state === "complete")) return "complete";
+  return "empty";
+}
+
+function periodRowClass(state: PeriodCompletionState) {
+  if (state === "complete") return "bg-emerald-50";
+  if (state === "incomplete") return "bg-rose-50";
+  return "bg-white";
 }
 
 function buildWeeklySummary(week: WeeklyClassLogWeek): WeeklyClassLogSummary {
@@ -687,3 +669,4 @@ function resizeTextarea(textarea: HTMLTextAreaElement | null) {
 function compactWeekDateRange(week: WeeklyClassLogWeek) {
   return `${week.fromDate.slice(0, 5)} - ${week.toDate.slice(0, 5)}`;
 }
+

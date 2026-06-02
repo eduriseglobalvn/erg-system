@@ -6,7 +6,6 @@ import {
   ClipboardList,
   Database,
   FileCheck2,
-  GraduationCap,
   LayoutDashboard,
   LogOut,
   Search,
@@ -57,15 +56,6 @@ const lcmsNavItems: LcmsNavItem[] = [
     description: "Tạo, sửa và theo dõi trạng thái vận hành của trường, trung tâm và cơ sở giáo dục.",
     variant: "admin-centers",
     icon: Building2,
-  },
-  {
-    id: "admin-students",
-    path: "/students",
-    title: "Lớp & Học sinh",
-    section: "Tổ chức",
-    description: "Tra cứu học sinh, lớp học và dữ liệu học tập theo phạm vi toàn hệ thống.",
-    variant: "admin-students",
-    icon: GraduationCap,
   },
   {
     id: "admin-sheet-import",

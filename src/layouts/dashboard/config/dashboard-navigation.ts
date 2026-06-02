@@ -30,17 +30,25 @@ function createLeaf(
 function buildQuizSection(root: string, genericDescription: string): DashboardGroup {
   return {
     iconKey: "materials",
-    title: "Quiz",
+    title: "Nội dung nguồn",
     items: [
-      createLeaf("question-bank", "Ngân hàng câu hỏi", "Quiz", root, genericDescription, "question-bank"),
-      createLeaf("quiz-bank", "Quiz bank", "Quiz", root, genericDescription, "quiz-bank"),
+      createLeaf("question-bank", "Ngân hàng câu hỏi", "Nội dung nguồn", root, genericDescription, "question-bank"),
+      createLeaf("quiz-bank", "Quiz bank", "Nội dung nguồn", root, genericDescription, "quiz-bank"),
       createLeaf(
         "course-modules",
         "Tạo quiz",
-        "Quiz",
+        "Nội dung nguồn",
         root,
         "Tạo quiz nhanh từ ngân hàng câu hỏi hoặc import đã chọn.",
         "quiz-editor",
+      ),
+      createLeaf(
+        "admin-learning-resources",
+        "Quản trị học liệu",
+        "Nội dung nguồn",
+        root,
+        "Quản lý cây học liệu và tài nguyên theo giao diện explorer.",
+        "admin-internal-docs",
       ),
     ],
   };
@@ -75,14 +83,6 @@ function buildSystemSections(genericDescription: string): DashboardGroup[] {
           root,
           "Thêm mới, chỉnh sửa và theo dõi trạng thái vận hành của từng trung tâm hoặc trường.",
           "admin-centers",
-        ),
-        createLeaf(
-          "admin-students",
-          "Học sinh",
-          "Quản lý trường & lớp",
-          root,
-          "Tra cứu học sinh theo toàn hệ thống, trung tâm, trường hoặc lớp.",
-          "admin-students",
         ),
         createLeaf(
           "admin-sheet-import",
@@ -163,14 +163,6 @@ function buildCenterSections(genericDescription: string, showMemberManagement: b
           root,
           "Theo dõi trường, lớp và trạng thái vận hành trong phạm vi trung tâm.",
           "admin-centers",
-        ),
-        createLeaf(
-          "admin-students",
-          "Học sinh",
-          "Quản lý trường & lớp",
-          root,
-          "Tra cứu học sinh theo trường và lớp trong phạm vi trung tâm.",
-          "admin-students",
         ),
         createLeaf(
           "admin-sheet-import",

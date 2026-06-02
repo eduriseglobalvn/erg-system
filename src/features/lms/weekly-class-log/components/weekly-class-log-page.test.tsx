@@ -12,7 +12,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-test("edits class log cells, auto signs complete rows, and switches weeks with compact chips", async () => {
+test("edits class log cells, auto signs complete rows, and switches weeks with compact controls", async () => {
   render(
     <WeeklyClassLogPage
       selectedSchoolName="Trường Tiểu học ERG"
@@ -32,9 +32,9 @@ test("edits class log cells, auto signs complete rows, and switches weeks with c
 
   fireEvent.click(screen.getByRole("button", { name: "Tuần trước" }));
 
-  expect(screen.getByDisplayValue("Tuần 22")).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: /Tuần 23/ }));
-  expect(screen.getByDisplayValue("Tuần 23")).toBeInTheDocument();
+  expect(screen.getByLabelText("Chọn tuần")).toHaveValue("week-2026-05-25");
+  fireEvent.change(screen.getByLabelText("Chọn tuần"), { target: { value: "week-2026-06-01" } });
+  expect(screen.getByLabelText("Chọn tuần")).toHaveValue("week-2026-06-01");
 });
 
 test("suggests students with spaces in the query and highlights selected mentions", async () => {

@@ -6,7 +6,7 @@ import type { ClassroomSnapshot, ClassroomStudent, StudentStatus } from "@/featu
 import { StudentAttendanceContextMenu } from "@/features/lms/components/student-attendance-context-menu";
 import { cn } from "@/lib/utils";
 
-type AttendanceStatus = "present" | "absent" | "late" | "excused";
+type AttendanceStatus = "present" | "absent" | "late" | "excused" | "";
 type SessionPart = "Tiết 1" | "Tiết 2";
 
 type AttendanceColumn = {
@@ -15,6 +15,7 @@ type AttendanceColumn = {
   date: string;
   fullDate: string;
   isFocusDate: boolean;
+  isFutureDate: boolean;
   lessonIndex: number;
   session: SessionPart;
 };
@@ -24,6 +25,7 @@ type AttendanceDayGroup = {
   day: string;
   date: string;
   isFocusDate: boolean;
+  isFutureDate: boolean;
   columns: AttendanceColumn[];
 };
 
@@ -121,7 +123,7 @@ const curriculumProgram: CurriculumItem[] = [
 export function AttendanceSheetPanel({ selectedClass, students }: AttendanceSheetPanelProps) {
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedDate, setSelectedDate] = useState(formatInputDate(new Date()));
+  const [selectedDate, setSelectedDate] = useState(getTodayInputDate());
   const [sessionFilter, setSessionFilter] = useState<"Tất cả tiết" | SessionPart>("Tất cả tiết");
   const [savedAt, setSavedAt] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; student: ClassroomStudent } | null>(null);
@@ -129,6 +131,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
   const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentDraft>>({});
   const [notice, setNotice] = useState<string | null>(null);
 
+  const todayInputDate = getTodayInputDate();
   const dateColumns = useMemo(() => buildAttendanceColumns(selectedDate), [selectedDate]);
   const visibleColumns = dateColumns.filter((column) => sessionFilter === "Tất cả tiết" || column.session === sessionFilter);
   const visibleDayGroups = useMemo(() => groupAttendanceColumnsByDate(visibleColumns), [visibleColumns]);
@@ -141,12 +144,15 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
     return students.filter((student) => student.name.toLowerCase().includes(normalizedQuery));
   }, [searchQuery, students]);
 
-  function statusFor(studentId: string, studentIndex: number, columnId: string, columnIndex: number) {
-    return attendanceOverrides[attendanceKey(studentId, columnId)] ?? getMockAttendanceStatus(studentIndex, columnIndex);
+  function statusFor(studentId: string, studentIndex: number, column: AttendanceColumn, columnIndex: number) {
+    if (column.isFutureDate) return "";
+    return attendanceOverrides[attendanceKey(studentId, column.id)] ?? getMockAttendanceStatus(studentIndex, columnIndex);
   }
 
-  function updateAttendance(studentId: string, studentIndex: number, columnId: string, columnIndex: number) {
-    const key = attendanceKey(studentId, columnId);
+  function updateAttendance(studentId: string, studentIndex: number, column: AttendanceColumn, columnIndex: number) {
+    if (column.isFutureDate) return;
+
+    const key = attendanceKey(studentId, column.id);
     const currentStatus = attendanceOverrides[key] ?? getMockAttendanceStatus(studentIndex, columnIndex);
     setAttendanceOverrides((current) => ({
       ...current,
@@ -173,7 +179,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
   function exportCsv() {
     const header = ["STT", "Học sinh", "Tổng vắng", ...visibleColumns.map((column) => `${column.day} ${column.date} ${column.session}`)];
     const rows = filteredStudents.map((student, studentIndex) => {
-      const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column.id, columnIndex));
+      const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column, columnIndex));
       const summary = attendanceSummary(statuses);
       return [String(studentIndex + 1), student.name, String(summary.absent), ...statuses.map((status) => attendanceText(status))];
     });
@@ -236,8 +242,9 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
               type="date"
               aria-label="Chọn ngày trọng tâm"
               value={selectedDate}
+              max={todayInputDate}
               onChange={(event) => {
-                setSelectedDate(event.target.value);
+                setSelectedDate(clampInputDateToToday(event.target.value));
                 setSavedAt(null);
               }}
               className="h-7 w-8 cursor-pointer rounded bg-transparent text-transparent outline-none"
@@ -303,7 +310,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
               </thead>
               <tbody>
                 {filteredStudents.map((student, studentIndex) => {
-                  const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column.id, columnIndex));
+                  const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column, columnIndex));
                   const summary = attendanceSummary(statuses);
                   return (
                     <tr key={student.id} className="group">
@@ -329,13 +336,14 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                       {visibleColumns.map((column, columnIndex) => {
                         const status = statuses[columnIndex];
                         return (
-                          <td key={column.id} className={cn("h-7 border-b border-r border-blue-100 px-1 text-center group-hover:!bg-blue-50", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status))}>
+                          <td key={column.id} className={cn("h-7 border-b border-r border-blue-100 px-1 text-center group-hover:!bg-blue-50", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status), column.isFutureDate && "bg-slate-50 text-slate-300")}>
                             <button
                               type="button"
-                              onClick={() => updateAttendance(student.id, studentIndex, column.id, columnIndex)}
-                              className="h-6 w-full rounded text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-200"
+                              onClick={() => updateAttendance(student.id, studentIndex, column, columnIndex)}
+                              disabled={column.isFutureDate}
+                              className="h-6 w-full rounded text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed"
                               aria-label={`${student.name} ${column.day} ${column.session}`}
-                              title="Bấm để đổi trạng thái"
+                              title={column.isFutureDate ? "Ngày chưa tới, chưa thể điểm danh" : "Bấm để đổi trạng thái"}
                             >
                               {attendanceLabel(status)}
                             </button>
@@ -545,22 +553,36 @@ function attendanceKey(studentId: string, columnId: string) {
 }
 
 function buildAttendanceColumns(focusDateValue: string): AttendanceColumn[] {
-  const focusDate = parseDateInput(focusDateValue);
-  return Array.from({ length: 7 }).flatMap((_, index) => {
-    const dayOffset = index - 3;
-    const currentDate = addDays(focusDate, dayOffset);
-    const id = formatInputDate(currentDate);
-    const lessons = lessonsForDate(currentDate);
-    return lessons.map((session, lessonIndex) => ({
-      id: `${id}-${lessonIndex + 1}`,
-      day: weekdayLabel(currentDate),
-      date: formatShortDate(currentDate),
-      fullDate: formatFullDate(currentDate),
-      isFocusDate: dayOffset === 0,
-      lessonIndex: lessonIndex + 1,
-      session,
-    }));
-  });
+  const focusDate = minDate(parseDateInput(focusDateValue), todayStart());
+  const startDate = addDays(focusDate, -3);
+  const attendedDayCount = daysBetween(startDate, focusDate) + 1;
+  const attendedColumns = Array.from({ length: attendedDayCount }).flatMap((_, index) =>
+    buildAttendanceColumnsForDate(addDays(startDate, index), focusDate),
+  );
+  const futureColumns: AttendanceColumn[] = [];
+
+  for (let futureOffset = 1; futureColumns.length < 5; futureOffset += 1) {
+    const currentDate = addDays(focusDate, futureOffset);
+    const nextColumns = buildAttendanceColumnsForDate(currentDate, focusDate);
+    const availableSlots = 5 - futureColumns.length;
+    futureColumns.push(...nextColumns.slice(0, availableSlots));
+  }
+
+  return [...attendedColumns, ...futureColumns];
+}
+
+function buildAttendanceColumnsForDate(currentDate: Date, focusDate: Date): AttendanceColumn[] {
+  const id = formatInputDate(currentDate);
+  return lessonsForDate(currentDate).map((session, lessonIndex) => ({
+    id: `${id}-${lessonIndex + 1}`,
+    day: weekdayLabel(currentDate),
+    date: formatShortDate(currentDate),
+    fullDate: formatFullDate(currentDate),
+    isFocusDate: isSameDate(currentDate, focusDate),
+    isFutureDate: currentDate > todayStart(),
+    lessonIndex: lessonIndex + 1,
+    session,
+  }));
 }
 
 function groupAttendanceColumnsByDate(columns: AttendanceColumn[]): AttendanceDayGroup[] {
@@ -576,6 +598,7 @@ function groupAttendanceColumnsByDate(columns: AttendanceColumn[]): AttendanceDa
       day: column.day,
       date: column.date,
       isFocusDate: column.isFocusDate,
+      isFutureDate: column.isFutureDate,
       columns: [column],
     });
     return groups;
@@ -596,7 +619,7 @@ function lessonsForDate(date: Date): SessionPart[] {
 
 function countLessonsThroughDate(selectedDateValue: string) {
   const startDate = parseDateInput(COURSE_START_DATE);
-  const endDate = parseDateInput(selectedDateValue);
+  const endDate = minDate(parseDateInput(selectedDateValue), todayStart());
   if (endDate < startDate) return 0;
 
   let total = 0;
@@ -627,6 +650,7 @@ function nextStudentStatus(status: StudentStatus): StudentStatus {
 }
 
 function attendanceLabel(status: AttendanceStatus) {
+  if (!status) return "";
   if (status === "absent") return "V";
   if (status === "late") return "M";
   if (status === "excused") return "P";
@@ -634,6 +658,7 @@ function attendanceLabel(status: AttendanceStatus) {
 }
 
 function attendanceText(status: AttendanceStatus) {
+  if (!status) return "";
   if (status === "absent") return "Vắng";
   if (status === "late") return "Đi muộn";
   if (status === "excused") return "Có phép";
@@ -641,6 +666,7 @@ function attendanceText(status: AttendanceStatus) {
 }
 
 function attendanceCellClass(status: AttendanceStatus) {
+  if (!status) return "bg-slate-50 text-slate-300";
   if (status === "absent") return "bg-rose-50 text-rose-700";
   if (status === "late") return "bg-amber-50 text-amber-700";
   if (status === "excused") return "bg-sky-50 text-sky-700";
@@ -649,6 +675,7 @@ function attendanceCellClass(status: AttendanceStatus) {
 
 function focusAttendanceCellClass(status: AttendanceStatus) {
   const edge = "border-x-2 border-x-blue-300";
+  if (!status) return cn(edge, "bg-slate-50");
   if (status === "absent") return cn(edge, "bg-rose-100/80");
   if (status === "late") return cn(edge, "bg-amber-100/80");
   if (status === "excused") return cn(edge, "bg-sky-100/80");
@@ -686,6 +713,33 @@ function parseDateInput(value: string) {
   const parsed = new Date(`${value}T00:00:00`);
   if (!Number.isNaN(parsed.getTime())) return parsed;
   return new Date();
+}
+
+function todayStart() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today;
+}
+
+function getTodayInputDate() {
+  return formatInputDate(todayStart());
+}
+
+function clampInputDateToToday(value: string) {
+  return formatInputDate(minDate(parseDateInput(value), todayStart()));
+}
+
+function minDate(firstDate: Date, secondDate: Date) {
+  return firstDate <= secondDate ? firstDate : secondDate;
+}
+
+function isSameDate(firstDate: Date, secondDate: Date) {
+  return formatInputDate(firstDate) === formatInputDate(secondDate);
+}
+
+function daysBetween(startDate: Date, endDate: Date) {
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  return Math.max(0, Math.round((endDate.getTime() - startDate.getTime()) / millisecondsPerDay));
 }
 
 function addDays(date: Date, amount: number) {

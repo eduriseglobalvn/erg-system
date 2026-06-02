@@ -3,7 +3,6 @@
   | "admin-centers"
   | "admin-create-unit"
   | "admin-members"
-  | "admin-students"
   | "admin-sheet-import"
   | "admin-internal-docs"
   | "admin-public-disclosure"

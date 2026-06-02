@@ -29,7 +29,7 @@ export type StudioSubject = LearningResourceSubject;
 
 export type TaxonomyCreateMode = "subject" | "root" | "child";
 export type TaxonomyCreateKind = "category" | "section";
-export type TaxonomyDialogState = { mode: TaxonomyCreateMode } | null;
+export type TaxonomyDialogState = { mode: TaxonomyCreateMode; initialOption?: "category" | "section" | "lecture" | "exercise" | "resource" } | null;
 
 export type LocalContentKind = "lecture" | "exercise";
 export type LocalContentItem = {

@@ -14,12 +14,11 @@ import {
   GraduationCap,
   MoreVertical,
   Search,
-  UserRound,
   UsersRound,
 } from "lucide-react";
 
 import { Avatar } from "@/components/ui/avatar";
-import { Badge, Button, Input, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
 import { ERG_ASSETS } from "@/config/seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -38,7 +37,7 @@ import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
-type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "students" | "resources" | "reports";
+type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
 
 const LearningResourceLibraryPage = lazy(() =>
   import("@/features/lms/learning-resources/components/learning-resource-library-page").then((module) => ({
@@ -72,7 +71,6 @@ const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: ty
   { id: "attendance", label: "Điểm danh", path: "/attendance", icon: CalendarCheck },
   { id: "schedule", label: "Lịch giảng dạy", path: "/calendar", icon: CalendarDays },
   { id: "classLog", label: "Sổ đầu bài", path: "/class-log", icon: BookOpenCheck },
-  { id: "students", label: "Học sinh", path: "/students", icon: UserRound },
   { id: "resources", label: "Tài nguyên", path: "/resources", icon: BookOpen },
   { id: "reports", label: "Báo cáo", path: "/reports", icon: FileText },
 ];
@@ -320,7 +318,6 @@ export function LmsTeacherShell() {
               selectedSchoolName={selectedSchoolName}
             >
               {activeSection === "homework" ? <HomeworkPanel selectedClass={selectedClass} /> : null}
-              {activeSection === "students" ? <StudentsPanel selectedClass={selectedClass} /> : null}
               {activeSection === "reports" ? <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} /> : null}
             </TeacherWorkspaceFrame>
           )}
@@ -646,35 +643,6 @@ function attendanceSummary(studentId: string, columnIds: string[], overrides: Re
 }
 
 void AttendancePanel;
-
-function StudentsPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot }) {
-  const students = getClassStudents(selectedClass?.id);
-  return (
-    <>
-      <FilterBar primaryPlaceholder="Tìm học sinh" filters={["Trạng thái", "Tiến độ", "Điểm trung bình"]} />
-      <section className="grid gap-4 xl:grid-cols-3">
-        {students.slice(0, 12).map((student) => (
-          <article key={student.id} className="rounded-xl border border-slate-200 bg-white p-5">
-            <div className="flex items-start gap-3">
-              <Avatar className="grid h-12 w-12 place-items-center rounded-xl bg-blue-50 text-sm font-black text-[#0b6fcf]">{student.avatarSeed}</Avatar>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-black text-slate-950">{student.name}</h3>
-                <p className="mt-1 text-sm text-slate-500">{student.currentAssignment}</p>
-              </div>
-              <Badge tone={student.status === "support" ? "warning" : student.status === "ahead" ? "success" : "secondary"}>{student.status}</Badge>
-            </div>
-            <div className="mt-4 flex items-center justify-between text-sm font-bold">
-              <span className="text-slate-500">Tiến độ</span>
-              <span>{student.progressRate}%</span>
-            </div>
-            <ProgressBar value={student.progressRate} className="mt-2 h-2" />
-            <p className="mt-4 text-sm leading-6 text-slate-500">{student.mentorNote}</p>
-          </article>
-        ))}
-      </section>
-    </>
-  );
-}
 
 function ReportsPanel({ selectedClass, selectedSchoolName }: { selectedClass?: ClassroomSnapshot; selectedSchoolName: string }) {
   return (

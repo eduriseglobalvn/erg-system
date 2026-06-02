@@ -6,7 +6,6 @@ import {
   BookMarked,
   BookOpen,
   CheckCircle2,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Clipboard,
@@ -16,7 +15,6 @@ import {
   FileText,
   Folder,
   FolderPlus,
-  FolderOpen,
   GraduationCap,
   Headphones,
   HelpCircle,
@@ -35,6 +33,7 @@ import {
   Scissors,
   Trash2,
   Video,
+  FileQuestion,
 } from "lucide-react";
 
 import {
@@ -87,6 +86,12 @@ import {
   TaxonomyEditDialog,
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs";
 import { mockExerciseLibrary } from "@/features/lcms/admin-operations/api/mock-exercise-library";
+import {
+  USE_LEARNING_RESOURCE_AUTHORING_MOCK,
+  mockLearningResourceAuthoringLocalContent as mockExplorerLocalContent,
+  mockLearningResourceAuthoringResources as mockExplorerResources,
+  mockLearningResourceAuthoringTaxonomy as mockExplorerModel,
+} from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import {
   filterMockExercises,
@@ -112,9 +117,14 @@ import type {
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { cn } from "@/lib/utils";
 import {
+  WindowsFolderIcon,
+  ExplorerViewToggle,
+  LearningResourceFolderTile,
+  LearningResourceSquareCard,
+  type ExplorerViewMode,
+} from "@/components/learning-resources/explorer-ui";
+import {
   buildLearningResourceSubjects,
-  matchesResourceToLearningNode,
-  type LearningResourceNode,
 } from "@/features/lms/learning-resources/domain/learning-resource-tree";
 
 const emptyModel: LearningResourceTaxonomyResponse = {
@@ -127,216 +137,6 @@ const emptyModel: LearningResourceTaxonomyResponse = {
   fileTypes: [],
   designerPresets: [],
 };
-
-const mockExplorerModel: LearningResourceTaxonomyResponse = {
-  ...emptyModel,
-  subjects: [
-    {
-      id: "mock-ic3-gs6",
-      label: "IC3 GS6",
-      slug: "ic3-gs6",
-      description: "Mock môn học IC3 GS6 với các level học liệu.",
-      status: "active",
-    },
-    {
-      id: "mock-ai-iig-subject",
-      label: "AI - IIG",
-      slug: "ai-iig",
-      description: "Mock môn học AI và chứng chỉ IIG.",
-      status: "active",
-    },
-  ],
-  categories: [
-    {
-      id: "mock-ic3-level-1",
-      label: "Level 1",
-      slug: "level-1",
-      subjectId: "mock-ic3-gs6",
-      description: "Nền tảng máy tính và thao tác cơ bản.",
-      sortOrder: 1,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-level-2",
-      label: "Level 2",
-      slug: "level-2",
-      subjectId: "mock-ic3-gs6",
-      description: "Ứng dụng văn phòng và Internet.",
-      sortOrder: 2,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-level-3",
-      label: "Level 3",
-      slug: "level-3",
-      subjectId: "mock-ic3-gs6",
-      description: "Ôn tập, kiểm tra và luyện chứng chỉ.",
-      sortOrder: 3,
-      status: "active",
-    },
-    {
-      id: "mock-ai-foundation",
-      label: "AI Foundation",
-      slug: "ai-foundation",
-      subjectId: "mock-ai-iig-subject",
-      description: "Nhóm học liệu AI cơ bản.",
-      sortOrder: 1,
-      status: "active",
-    },
-  ],
-  sections: [
-    {
-      id: "mock-ic3-lv1-intro",
-      label: "01. Làm quen với máy tính",
-      slug: "lam-quen-voi-may-tinh",
-      subjectId: "mock-ic3-gs6",
-      categoryId: "mock-ic3-level-1",
-      description: "Khái niệm thiết bị, hệ điều hành và quản lý tệp.",
-      sortOrder: 1,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-lv1-files",
-      label: "02. Quản lý thư mục và tệp",
-      slug: "quan-ly-thu-muc-va-tep",
-      subjectId: "mock-ic3-gs6",
-      categoryId: "mock-ic3-level-1",
-      description: "Tổ chức file, folder và tài nguyên học tập.",
-      sortOrder: 2,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-lv2-office",
-      label: "01. Word, Excel, PowerPoint",
-      slug: "word-excel-powerpoint",
-      subjectId: "mock-ic3-gs6",
-      categoryId: "mock-ic3-level-2",
-      description: "Thực hành bộ ứng dụng văn phòng.",
-      sortOrder: 1,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-lv2-internet",
-      label: "02. Internet và an toàn số",
-      slug: "internet-va-an-toan-so",
-      subjectId: "mock-ic3-gs6",
-      categoryId: "mock-ic3-level-2",
-      description: "Tìm kiếm, email và an toàn trực tuyến.",
-      sortOrder: 2,
-      status: "active",
-    },
-    {
-      id: "mock-ic3-lv3-practice",
-      label: "01. Ôn tập chứng chỉ",
-      slug: "on-tap-chung-chi",
-      subjectId: "mock-ic3-gs6",
-      categoryId: "mock-ic3-level-3",
-      description: "Đề luyện tập tổng hợp.",
-      sortOrder: 1,
-      status: "active",
-    },
-    {
-      id: "mock-ai-overview",
-      label: "01. Tổng quan AI trong học tập",
-      slug: "ai-overview",
-      subjectId: "mock-ai-iig-subject",
-      categoryId: "mock-ai-foundation",
-      description: "Bài mở đầu về AI cho học sinh.",
-      sortOrder: 1,
-      status: "active",
-    },
-  ],
-};
-
-const mockExplorerResources: LearningResourceResourceCard[] = [
-  {
-    id: "mock-resource-ai-slides",
-    slug: "slide-ai-overview",
-    title: "Slide - Tổng quan AI trong học tập",
-    programSlug: "ai-iig",
-    subjectId: "mock-ai-iig-subject",
-    categoryId: "mock-ai-foundation",
-    sectionId: "mock-ai-overview",
-    selectedFileType: "PPTX",
-    fileTypeBadge: "PPTX",
-    launchMode: "external",
-    priceType: "free",
-    accessState: "open",
-    visibility: "public",
-    status: "published",
-    canDownload: false,
-  },
-  {
-    id: "mock-resource-ic3-pdf",
-    slug: "ic3-gs6-final-guide",
-    title: "Level 1 - tài liệu hướng dẫn",
-    programSlug: "ic3-gs6",
-    subjectId: "mock-ic3-gs6",
-    categoryId: "mock-ic3-level-1",
-    sectionId: "mock-ic3-lv1-intro",
-    selectedFileType: "PDF",
-    fileTypeBadge: "PDF",
-    launchMode: "external",
-    priceType: "free",
-    accessState: "open",
-    visibility: "public",
-    status: "published",
-    canDownload: true,
-  },
-  {
-    id: "mock-resource-practice",
-    slug: "on-tap-lv1",
-    title: "Bộ câu hỏi ôn tập Level 3",
-    programSlug: "ic3-gs6",
-    subjectId: "mock-ic3-gs6",
-    categoryId: "mock-ic3-level-3",
-    sectionId: "mock-ic3-lv3-practice",
-    selectedFileType: "HTML5",
-    fileTypeBadge: "Quiz",
-    launchMode: "internal",
-    priceType: "free",
-    accessState: "open",
-    visibility: "public",
-    status: "published",
-    canDownload: false,
-  },
-];
-
-const mockExplorerLocalContent: LocalContentItem[] = [
-  {
-    id: "mock-local-ai-slides",
-    kind: "lecture",
-    subjectId: "mock-ai-iig-subject",
-    parentNodeId: "lesson-mock-ai-overview",
-    parentOptionId: "mock-ai-overview",
-    title: "Bài giảng Google Slides - Tổng quan AI",
-    description: "Mock link mở trực tiếp trong tab mới.",
-    slidesUrl: "https://docs.google.com/presentation/d/mock-ai-overview/preview",
-    status: "published",
-  },
-  {
-    id: "mock-local-ai-exercise",
-    kind: "exercise",
-    subjectId: "mock-ic3-gs6",
-    parentNodeId: "lesson-mock-ic3-lv1-files",
-    parentOptionId: "mock-ic3-lv1-files",
-    title: "Bài tập: Sắp xếp thư mục đúng chuẩn",
-    description: "Mock bài tập nội bộ.",
-    questionCount: 12,
-    durationMinutes: 20,
-    status: "published",
-  },
-  {
-    id: "mock-local-ic3-slides",
-    kind: "lecture",
-    subjectId: "mock-ic3-gs6",
-    parentNodeId: "lesson-mock-ic3-lv2-office",
-    parentOptionId: "mock-ic3-lv2-office",
-    title: "Level 2 - Slide Word Excel PowerPoint",
-    slidesUrl: "https://docs.google.com/presentation/d/mock-ic3-final/preview",
-    status: "published",
-  },
-];
 
 const screenMeta: Record<string, { title: string; description: string; icon: ReactNode }> = {
   "admin-learning-resources": {
@@ -561,10 +361,7 @@ function buildExplorerPathUrl(subject?: StudioSubject, path: StudioNode[] = [], 
   return `${origin}/${segments.join("/")}`;
 }
 
-function buildExplorerBreadcrumb(subject?: StudioSubject, path: StudioNode[] = []) {
-  if (!subject) return [];
-  return [subject.label, ...path.map((item) => item.label)].filter(Boolean);
-}
+
 
 function copyTextToClipboard(value: string) {
   if (typeof navigator === "undefined" || !navigator.clipboard) return;
@@ -590,6 +387,29 @@ function getExplorerSize(value: StudioNode | LocalContentItem | AttachedResource
   return `${Math.max(24, hash).toLocaleString("en-US")} KB`;
 }
 
+function getResourceCardMeta(id: string, _title: string, fileType: string) {
+  const safeId = String(id || "");
+  const safeFileType = String(fileType || "PDF");
+  let hash = 0;
+  for (const char of safeId) hash = (hash * 29 + char.charCodeAt(0)) % 997;
+  const testNo = (hash % 7) + 1;
+  const unitNo = (hash % 6) + 1;
+  const isLecture = safeFileType === "PPTX" || safeFileType === "LECTURE";
+  const isExercise = safeFileType === "QUIZ" || safeFileType === "EXERCISE";
+
+  const minutes = isLecture ? 35 + (hash % 3) * 5 : 45 + (hash % 2) * 15;
+  const questions = isLecture ? 18 + (hash % 8) : 40 + (hash % 3) * 5;
+
+  return {
+    actionLabel: isLecture ? "Mở bài" : isExercise ? "Làm bài" : "Mở file",
+    heading: isLecture ? "Bài giảng" : isExercise ? "Luyện tập" : "Học liệu",
+    tag: isLecture ? "BG" : isExercise ? `Đề ${testNo}` : fileType,
+    unit: `Unit ${String(unitNo).padStart(2, "0")}`,
+    minutes,
+    questions,
+  };
+}
+
 export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
   const queryClient = useQueryClient();
   const [model, setModel] = useState<LearningResourceTaxonomyResponse>(emptyModel);
@@ -607,6 +427,13 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const refreshData = useCallback(async (options: { force?: boolean } = {}) => {
     setLoading(true);
     try {
+      if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
+        setModel(mockExplorerModel);
+        setResources(mockExplorerResources);
+        setLocalContentItems(mockExplorerLocalContent);
+        return mockExplorerModel;
+      }
+
       if (options.force) {
         await queryClient.invalidateQueries({ queryKey: ["admin-operations", "learning-resources-v2"] });
         await queryClient.invalidateQueries({ queryKey: ["admin-operations", "learning-resources-v2"] });
@@ -652,14 +479,14 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const subjects = useMemo(() => buildSubjects(model, resources), [model, resources]);
   const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId) ?? subjects[0];
   const allNodes = selectedSubject ? flattenNodes(selectedSubject.tree) : [];
-  const selectedNode = selectedSubject ? findNode(selectedSubject.tree, selectedNodeId) ?? allNodes[0] : undefined;
+  const selectedNode = selectedSubject && selectedNodeId ? findNode(selectedSubject.tree, selectedNodeId) : undefined;
   const selectedPath = selectedSubject && selectedNode ? findPath(selectedSubject.tree, selectedNode.id) : [];
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
     if (!selectedSubject && subjects[0]) {
       setSelectedSubjectId(subjects[0].id);
-      setSelectedNodeId(subjects[0].tree[0]?.id ?? "");
+      setSelectedNodeId("");
       return;
     }
     if (selectedSubject && !subjects.some((subject) => subject.id === selectedSubjectId)) {
@@ -696,12 +523,13 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const selectedNodeTarget = useMemo(() => toEditTargetFromNode(selectedNode), [selectedNode]);
   const openCreateSubjectDialog = useCallback(() => setDialogState({ mode: "subject" }), []);
   const openCreateRootDialog = useCallback(() => setDialogState({ mode: "root" }), []);
-  const openCreateChildDialog = useCallback(() => setDialogState({ mode: "child" }), []);
+  const openCreateChildDialog = useCallback((option?: "section" | "lecture" | "exercise") => {
+    setDialogState({ mode: "child", initialOption: option });
+  }, []);
   const selectStructureSubject = useCallback((subjectId: string) => {
-    const nextSubject = subjects.find((subject) => subject.id === subjectId);
     setSelectedSubjectId(subjectId);
-    setSelectedNodeId(nextSubject?.tree[0]?.id ?? "");
-  }, [subjects]);
+    setSelectedNodeId("");
+  }, []);
   const editSelectedSubject = useCallback(() => {
     if (selectedSubjectTarget) setEditTarget(selectedSubjectTarget);
   }, [selectedSubjectTarget]);
@@ -777,6 +605,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
       {currentScreen === "upload" ? <UploadScreen subjects={subjects} selectedSubject={selectedSubject} allNodes={allNodes} /> : null}
       {currentScreen === "publish" ? <PublishScreen subjects={subjects} resources={resources} /> : null}
       <TaxonomyCreateDialog
+        key={dialogState ? `open-${dialogState.mode}-${dialogState.initialOption ?? ""}` : "closed"}
         state={dialogState}
         selectedSubject={selectedSubject}
         selectedNode={selectedNode}
@@ -970,6 +799,59 @@ function SubjectsScreen({
   );
 }
 
+function SubjectTreeSection({
+  subject,
+  treeQuery,
+  selectedNode,
+  expandedNodeIds,
+  onSelectNode,
+  onToggleNode,
+  onCreateChild,
+  onOpenContextMenu,
+  selectedSubjectId,
+}: {
+  subject: StudioSubject;
+  treeQuery: string;
+  selectedNode?: StudioNode;
+  expandedNodeIds: Set<string>;
+  onSelectNode: (nodeId: string) => void;
+  onToggleNode: (nodeId: string) => void;
+  onCreateChild: (node: StudioNode) => void;
+  onOpenContextMenu: (event: MouseEvent, node?: StudioNode, localContent?: LocalContentItem, resource?: AttachedResourceItem, subject?: StudioSubject) => void;
+  selectedSubjectId: string;
+}) {
+  const visibleRows = useMemo(() => {
+    const baseTree = filterTree(subject.tree, treeQuery);
+    const treeWithoutLessons = baseTree.map((node) => ({
+      ...node,
+      children: [], // Hide lessons from the sidebar tree view to match LMS
+    }));
+    return flattenVisibleNodes(treeWithoutLessons, expandedNodeIds);
+  }, [subject.tree, treeQuery, expandedNodeIds]);
+
+  return (
+    <div className="ml-5 space-y-0.5">
+      {visibleRows.length ? (
+        visibleRows.map(({ node, depth }) => (
+          <ExplorerTreeRow
+            key={node.id}
+            node={node}
+            depth={depth}
+            selected={subject.id === selectedSubjectId && node.id === selectedNode?.id}
+            expanded={expandedNodeIds.has(node.id)}
+            onSelectNode={onSelectNode}
+            onToggleNode={onToggleNode}
+            onCreateChild={onCreateChild}
+            onOpenContextMenu={(event, node) => onOpenContextMenu(event, node, undefined, undefined, undefined)}
+          />
+        ))
+      ) : (
+        <div className="px-2 py-3 text-xs text-slate-500">Không tìm thấy nội dung phù hợp.</div>
+      )}
+    </div>
+  );
+}
+
 function StructureScreen({
   subjects,
   selectedSubject,
@@ -1000,7 +882,7 @@ function StructureScreen({
   onSelectNode: (id: string) => void;
   onCreateSubject: () => void;
   onCreateRoot: () => void;
-  onCreateChild: () => void;
+  onCreateChild: (option?: "section" | "lecture" | "exercise") => void;
   onEditSubject: () => void;
   onDeleteSubject: () => void;
   onEditSelection: () => void;
@@ -1014,12 +896,25 @@ function StructureScreen({
   resources: LearningResourceResourceCard[];
 }) {
   const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
+  const [expandedSubjectIds, setExpandedSubjectIds] = useState<Set<string>>(new Set());
   const [treeQuery, setTreeQuery] = useState("");
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; node?: StudioNode; localContent?: LocalContentItem; resource?: AttachedResourceItem; subject?: StudioSubject } | null>(null);
   const [editingResource, setEditingResource] = useState<AttachedResourceItem | null>(null);
   const [attachedResources, setAttachedResources] = useState<Record<string, AttachedResourceItem>>({});
   const [selection, setSelection] = useState<StructureSelection>(null);
+  const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
   const deferredTreeQuery = useDeferredValue(treeQuery);
+
+  useEffect(() => {
+    if (selectedSubject) {
+      setExpandedSubjectIds((prev) => {
+        if (prev.has(selectedSubject.id)) return prev;
+        const next = new Set(prev);
+        next.add(selectedSubject.id);
+        return next;
+      });
+    }
+  }, [selectedSubject]);
 
   useEffect(() => {
     const frameId = window.requestAnimationFrame(() => {
@@ -1030,14 +925,25 @@ function StructureScreen({
 
   const currentChildren = useMemo(() => selectedNode?.children ?? selectedSubject?.tree ?? [], [selectedNode?.children, selectedSubject?.tree]);
   const selectedNodeOptionId = selectedNode?.optionId;
+
   const currentResources = useMemo(() => {
     if (!selectedSubject) return [];
-    if (!selectedNode?.optionId) return resources.filter((resource) => resource.subjectId === selectedSubject.id);
+    if (!selectedNode) {
+      // Subject root level: only show resources directly attached to the subject, not inside any category or lesson
+      return resources.filter((resource) => resource.subjectId === selectedSubject.id && !resource.categoryId && !resource.sectionId);
+    }
     return resources.filter((resource) => {
       if (resource.subjectId !== selectedSubject.id) return false;
-      return matchesResourceToLearningNode(resource, selectedNode as LearningResourceNode);
+      if (selectedNode.kind === "lesson") {
+        return resource.sectionId === selectedNode.optionId;
+      }
+      if (selectedNode.kind === "group") {
+        return resource.categoryId === selectedNode.optionId && !resource.sectionId;
+      }
+      return false;
     });
   }, [resources, selectedNode, selectedSubject]);
+
   const currentAttachedResources = useMemo(
     () => currentResources.map((resource) => attachedResources[resource.id] ?? resource),
     [attachedResources, currentResources],
@@ -1048,13 +954,17 @@ function StructureScreen({
   );
   const totalAttachedItems = currentResources.length + currentLocalContentItems.length;
   const showChildrenPanel = currentChildren.length > 0 || selectedNode?.kind !== "lesson";
-  const filteredTree = useMemo(() => {
-    if (!selectedSubject) {
-      return [];
+
+  const handleGoBack = useCallback(() => {
+    if (!selectedNode) return;
+    if (selectedPath.length > 1) {
+      const parentNode = selectedPath[selectedPath.length - 2];
+      onSelectNode(parentNode.id);
+    } else {
+      onSelectNode("");
     }
-    return filterTree(selectedSubject.tree, deferredTreeQuery);
-  }, [deferredTreeQuery, selectedSubject]);
-  const visibleRows = useMemo(() => flattenVisibleNodes(filteredTree, expandedNodeIds), [filteredTree, expandedNodeIds]);
+  }, [selectedNode, selectedPath, onSelectNode]);
+
   const selectedChildRow = useMemo(
     () => (selection?.type === "node" ? currentChildren.find((child) => child.id === selection.id) : undefined),
     [currentChildren, selection],
@@ -1220,17 +1130,28 @@ function StructureScreen({
     });
   }, [onSelectNode, onSelectSubject]);
 
-  const selectRootNode = useCallback(() => {
-    const rootNodeId = selectedSubject?.tree[0]?.id;
-    if (rootNodeId) onSelectNode(rootNodeId);
-  }, [onSelectNode, selectedSubject?.tree]);
   const selectedExplorerUrl = buildExplorerPathUrl(selectedSubject, selectedPath);
-  const explorerBreadcrumb = buildExplorerBreadcrumb(selectedSubject, selectedPath);
+  const breadcrumbItems = useMemo(() => {
+    const items: { label: string; onClick: () => void }[] = [];
+    if (selectedSubject) {
+      items.push({
+        label: selectedSubject.label,
+        onClick: () => onSelectSubject(selectedSubject.id),
+      });
+    }
+    selectedPath.forEach((node) => {
+      items.push({
+        label: node.label,
+        onClick: () => onSelectNode(node.id),
+      });
+    });
+    return items;
+  }, [selectedSubject, selectedPath, onSelectSubject, onSelectNode]);
 
   return (
     <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white text-[13px] text-slate-900 shadow-sm">
       <div className="flex h-12 items-center gap-2 border-b border-slate-200 bg-slate-50 px-3">
-        <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#374151]" onClick={selectRootNode} disabled={!selectedSubject}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#374151]" onClick={handleGoBack} disabled={!selectedNode}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#9aa5b1]" disabled>
@@ -1239,12 +1160,21 @@ function StructureScreen({
         <Button variant="ghost" size="icon" className="h-8 w-8 rounded text-[#374151]" onClick={() => void onRefreshData()}>
           <RefreshCw className="h-4 w-4" />
         </Button>
-        <div className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md bg-white px-2 shadow-[inset_0_0_0_1px_#e5e7eb]" title={explorerBreadcrumb.length ? selectedExplorerUrl : ""}>
-          {explorerBreadcrumb.length ? <Monitor className="mx-2 h-4 w-4 shrink-0 text-[#52616f]" /> : null}
-          {explorerBreadcrumb.map((label, index) => (
-            <span key={`${label}-${index}`} className="flex min-w-0 items-center">
+        <div className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md bg-white px-2 shadow-[inset_0_0_0_1px_#e5e7eb]" title={breadcrumbItems.length ? selectedExplorerUrl : ""}>
+          {breadcrumbItems.length ? <Monitor className="mx-2 h-4 w-4 shrink-0 text-[#52616f]" /> : null}
+          {breadcrumbItems.map((item, index) => (
+            <span key={`${item.label}-${index}`} className="flex min-w-0 items-center">
               {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
-              <span className={cn("truncate px-1.5 py-1 text-[13px]", index === explorerBreadcrumb.length - 1 ? "font-medium text-[#111827]" : "text-[#1f2937]")}>{label}</span>
+              <button
+                type="button"
+                onClick={item.onClick}
+                className={cn(
+                  "truncate rounded px-1.5 py-0.5 text-[13px] transition-colors duration-150 outline-none hover:bg-slate-200/60 cursor-pointer text-left",
+                  index === breadcrumbItems.length - 1 ? "font-medium text-[#111827]" : "text-[#1f2937] hover:text-[#111827]"
+                )}
+              >
+                {item.label}
+              </button>
             </span>
           ))}
         </div>
@@ -1259,48 +1189,101 @@ function StructureScreen({
         </div>
       </div>
 
-      <div className="flex h-12 items-center gap-1 border-b border-slate-200 bg-white px-3">
-        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" onClick={onCreateSubject}>
-          <Plus className="h-4 w-4" />
-          New
-        </Button>
-        <div className="mx-2 h-7 w-px bg-[#e5e7eb]" />
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" disabled title="Cut">
-          <Scissors className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={() => copyTextToClipboard(selectedExplorerUrl)} title="Copy URL">
-          <Copy className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" disabled title="Paste">
-          <Clipboard className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={handleEditSelection} disabled={!canEditSelection} title="Rename">
-          <Pencil className="h-4 w-4" />
-        </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#8aa6c1]" onClick={() => void handleDeleteSelection()} disabled={!canDeleteSelection} title="Delete">
-          <Trash2 className="h-4 w-4" />
-        </Button>
-        <div className="mx-2 h-7 w-px bg-[#e5e7eb]" />
-        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" onClick={onCreateRoot} disabled={!selectedSubject}>
-          <FolderPlus className="h-4 w-4" />
+      <div className="flex h-12 shrink-0 items-center gap-1 border-b border-slate-200 bg-white px-3">
+        <button
+          type="button"
+          onClick={() => {
+            if (!selectedSubject) {
+              onCreateSubject();
+            } else {
+              onCreateRoot();
+            }
+          }}
+          className="inline-flex h-9 items-center gap-2 rounded px-2 text-[#1f2937] hover:bg-[#eef6ff]"
+        >
+          <Folder className="h-4 w-4" />
           New folder
-        </Button>
-        <Button variant="ghost" size="sm" className="h-9 rounded px-2 text-[#1f2937]" disabled>
-          <ListTree className="h-4 w-4" />
-          View
-        </Button>
-        <Button variant="ghost" size="icon" className="h-9 w-9 rounded text-[#1f2937]" title="More">
+        </button>
+        <button
+          type="button"
+          disabled={selectedNode?.kind !== "group" && selectedNode?.kind !== "lesson"}
+          onClick={() => {
+            if (selectedNode?.kind === "group") {
+              onCreateChild("section");
+            } else {
+              onCreateChild("lecture");
+            }
+          }}
+          className="inline-flex h-9 items-center gap-2 rounded px-2 text-[#1f2937] hover:bg-[#eef6ff] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Presentation className="h-4 w-4" />
+          Thêm bài giảng
+        </button>
+        <button
+          type="button"
+          disabled={selectedNode?.kind !== "lesson"}
+          onClick={() => onCreateChild("exercise")}
+          className="inline-flex h-9 items-center gap-2 rounded px-2 text-[#1f2937] hover:bg-[#eef6ff] disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <FileQuestion className="h-4 w-4" />
+          Thêm bài tập
+        </button>
+        <div className="mx-2 h-7 w-px bg-[#e5e7eb]" />
+        <button
+          type="button"
+          className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff] disabled:opacity-50"
+          title="Cut"
+          disabled
+        >
+          <Scissors className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => copyTextToClipboard(selectedExplorerUrl)}
+          className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff]"
+          title="Copy URL"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff]"
+          disabled
+          title="Paste"
+        >
+          <Clipboard className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={handleEditSelection}
+          disabled={!canEditSelection}
+          className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff] disabled:opacity-50"
+          title="Rename"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => void handleDeleteSelection()}
+          disabled={!canDeleteSelection}
+          className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff] disabled:opacity-50"
+          title="Delete"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          className="grid h-9 w-9 place-items-center rounded text-[#1f2937] hover:bg-[#eef6ff]"
+          title="More"
+        >
           <MoreHorizontal className="h-4 w-4" />
-        </Button>
-        <div className="ml-auto flex items-center gap-2 text-xs font-semibold text-slate-500">
-          <ListTree className="h-4 w-4 text-[#2563eb]" />
-          <span>Details</span>
-        </div>
+        </button>
+        <ExplorerViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
       </div>
 
-      <div className="grid h-[calc(100vh-178px)] min-h-[560px] min-w-0 grid-cols-[242px_minmax(0,1fr)] overflow-hidden">
+      <div className="grid h-[calc(100vh-178px)] min-h-[560px] min-w-0 grid-cols-[250px_minmax(0,1fr)] overflow-hidden">
         <aside
-          className="min-h-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#fbfbfb] px-1.5 py-1 [scrollbar-gutter:stable]"
+          className="min-h-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#fbfbfb] px-1.5 py-2 [scrollbar-gutter:stable]"
           onContextMenu={(event) => openContextMenu(event)}
         >
           <div className="space-y-0.5">
@@ -1308,35 +1291,43 @@ function StructureScreen({
               <div key={subject.id}>
                 <button
                   type="button"
-                  onClick={() => onSelectSubject(subject.id)}
+                  onClick={() => {
+                    onSelectSubject(subject.id);
+                    setExpandedSubjectIds((prev) => {
+                      const next = new Set(prev);
+                      if (next.has(subject.id)) {
+                        next.delete(subject.id);
+                      } else {
+                        next.add(subject.id);
+                      }
+                      return next;
+                    });
+                  }}
                   onContextMenu={(event) => openContextMenu(event, undefined, undefined, undefined, subject)}
                   className={cn(
                     "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px]",
-                    selectedSubject?.id === subject.id ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
+                    selectedSubject?.id === subject.id && !selectedNode?.id ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
                   )}
                 >
-                  <ChevronRight className={cn("h-3.5 w-3.5 text-[#6b7280]", selectedSubject?.id === subject.id ? "rotate-90" : undefined)} />
-                  <Folder className="h-4 w-4 shrink-0 fill-[#f9c642] text-[#d99800]" />
+                  <ChevronRight className={cn("h-3.5 w-3.5 text-[#6b7280] shrink-0 transition-transform duration-150", expandedSubjectIds.has(subject.id) ? "rotate-90" : undefined)} />
+                  <WindowsFolderIcon open={expandedSubjectIds.has(subject.id)} />
                   <span className="min-w-0 flex-1 truncate">{subject.label}</span>
                 </button>
-                {selectedSubject?.id === subject.id ? (
-                  <div className="ml-3 mt-0.5 space-y-0.5 pl-1">
-                    {visibleRows.length ? visibleRows.map(({ node, depth }) => (
-                      <ExplorerTreeRow
-                        key={node.id}
-                        node={node}
-                        depth={depth}
-                        selected={node.id === selectedNode?.id}
-                        expanded={expandedNodeIds.has(node.id)}
-                        onSelectNode={onSelectNode}
-                        onToggleNode={toggleNode}
-                        onCreateChild={handleCreateChild}
-                        onOpenContextMenu={openContextMenu}
-                      />
-                    )) : (
-                      <div className="px-2 py-3 text-xs text-slate-500">Không tìm thấy nội dung phù hợp.</div>
-                    )}
-                  </div>
+                {expandedSubjectIds.has(subject.id) ? (
+                  <SubjectTreeSection
+                    subject={subject}
+                    treeQuery={deferredTreeQuery}
+                    selectedNode={selectedNode}
+                    expandedNodeIds={expandedNodeIds}
+                    onSelectNode={(nodeId) => {
+                      onSelectSubject(subject.id);
+                      onSelectNode(nodeId);
+                    }}
+                    onToggleNode={toggleNode}
+                    onCreateChild={handleCreateChild}
+                    onOpenContextMenu={openContextMenu}
+                    selectedSubjectId={selectedSubject?.id ?? ""}
+                  />
                 ) : null}
               </div>
             )) : (
@@ -1354,130 +1345,216 @@ function StructureScreen({
           className="min-h-0 min-w-0 overflow-hidden bg-white"
           onContextMenu={(event) => openContextMenu(event)}
         >
-          <div className="grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
-            <span className="border-r border-[#e5e7eb] px-4 py-1.5">Name</span>
-            <span className="border-r border-[#e5e7eb] px-3 py-1.5">Date modified</span>
-            <span className="border-r border-[#e5e7eb] px-3 py-1.5">Type</span>
-            <span className="px-3 py-1.5">Size</span>
-          </div>
-          <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
-            {showChildrenPanel && currentChildren.map((child) => {
-              const childUrl = buildExplorerPathUrl(selectedSubject, selectedPath, child);
-              return (
-                <button
-                  key={child.id}
-                  type="button"
-                  onClick={() => setSelection({ type: "node", id: child.id })}
-                  onDoubleClick={() => onSelectNode(child.id)}
-                  onContextMenu={(event) => openContextMenu(event, child)}
-                  className={cn(
-                    "grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
-                    selection?.type === "node" && selection.id === child.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
-                  )}
-                  title={childUrl}
-                >
-                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
-                    <span className="shrink-0 text-[#d99800]">{getNodeIcon(child, expandedNodeIds.has(child.id))}</span>
-                    <span className="truncate text-[#111827]">{child.label}</span>
-                  </span>
-                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(child.id)}</span>
-                  <span className="truncate px-3 text-[#4b5563]">File folder</span>
-                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(child)}</span>
-                </button>
-              );
-            })}
-            {currentLocalContentItems.map((item) => {
-              const link = getDisplayLink(item);
-              const itemUrl = link || buildExplorerPathUrl(selectedSubject, selectedPath, item);
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setSelection({ type: "local-content", id: item.id })}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setSelection({ type: "local-content", id: item.id });
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onContextMenu={(event) => openContextMenu(event, undefined, item)}
-                  className={cn(
-                    "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
-                    selection?.type === "local-content" && selection.id === item.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
-                  )}
-                  title={itemUrl}
-                >
-                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
-                    <span className="shrink-0 text-[#2563eb]">{item.kind === "lecture" ? <Presentation className="h-4 w-4" /> : <FileCheck className="h-4 w-4" />}</span>
-                    <span className="truncate text-[#111827]">{item.title}</span>
-                  </span>
-                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(item.id)}</span>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      if (link && typeof window !== "undefined") window.open(link, "_blank", "noopener,noreferrer");
-                    }}
-                    className="truncate px-3 text-left text-[#4b5563] hover:underline"
-                    title={itemUrl}
-                  >
-                    {item.kind === "lecture" ? "Microsoft PowerP..." : "Learning activity"}
-                  </button>
-                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(item)}</span>
-                </div>
-              );
-            })}
-            {currentAttachedResources.map((resource) => {
-              const resourceUrl = resource.linkUrl || buildExplorerPathUrl(selectedSubject, selectedPath, resource);
-              return (
-                <div
-                  key={resource.id}
-                  onClick={() => setSelection({ type: "resource", id: resource.id })}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      setSelection({ type: "resource", id: resource.id });
-                    }
-                  }}
-                  role="button"
-                  tabIndex={0}
-                  onContextMenu={(event) => openContextMenu(event, undefined, undefined, resource)}
-                  className={cn(
-                    "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
-                    selection?.type === "resource" && selection.id === resource.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
-                  )}
-                  title={resourceUrl}
-                >
-                  <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
-                    <FileText className="h-4 w-4 shrink-0 text-[#2563eb]" />
-                    <span className="truncate text-[#111827]">{resource.title}</span>
-                  </span>
-                  <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
-                  <button
-                    type="button"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      handleOpenResourceLink(resource);
-                    }}
-                    className="truncate px-3 text-left text-[#4b5563] hover:underline"
-                    title={resourceUrl}
-                  >
-                    {getResourceDisplayBadge(resource)}
-                  </button>
-                  <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
-                </div>
-              );
-            })}
-            {!currentChildren.length && !totalAttachedItems ? (
-              <div className="flex h-full min-h-[340px] flex-col items-center justify-center text-center text-[13px]">
-                <Folder className="h-12 w-12 text-[#cbd5e1]" />
-                <div className="mt-3 font-semibold text-[#111827]">This folder is empty</div>
-                <p className="mt-1 max-w-sm text-[#64748b]">Dùng chuột phải hoặc nút New để tạo thư mục, bài học hoặc gắn tài liệu.</p>
+          {viewMode === "list" ? (
+            <>
+              <div className="grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
+                <span className="border-r border-[#e5e7eb] px-4 py-1.5">Name</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Date modified</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Type</span>
+                <span className="px-3 py-1.5">Size</span>
               </div>
-            ) : null}
-          </div>
-        </section>
+              <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
+                {showChildrenPanel && currentChildren.map((child) => {
+                  const childUrl = buildExplorerPathUrl(selectedSubject, selectedPath, child);
+                  return (
+                    <button
+                      key={child.id}
+                      type="button"
+                      onClick={() => setSelection({ type: "node", id: child.id })}
+                      onDoubleClick={() => onSelectNode(child.id)}
+                      onContextMenu={(event) => openContextMenu(event, child)}
+                      className={cn(
+                        "grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                        selection?.type === "node" && selection.id === child.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
+                      )}
+                      title={childUrl}
+                    >
+                      <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                        <span className="shrink-0 text-[#d99800]">{getNodeIcon(child, expandedNodeIds.has(child.id))}</span>
+                        <span className="truncate text-[#111827]">{child.label}</span>
+                      </span>
+                      <span className="truncate px-3 text-[#4b5563]">{getStableDate(child.id)}</span>
+                      <span className="truncate px-3 text-[#4b5563]">File folder</span>
+                      <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(child)}</span>
+                    </button>
+                  );
+                })}
+                {currentLocalContentItems.map((item) => {
+                  const link = getDisplayLink(item);
+                  const itemUrl = link || buildExplorerPathUrl(selectedSubject, selectedPath, item);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelection({ type: "local-content", id: item.id })}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setSelection({ type: "local-content", id: item.id });
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onContextMenu={(event) => openContextMenu(event, undefined, item)}
+                      className={cn(
+                        "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                        selection?.type === "local-content" && selection.id === item.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
+                      )}
+                      title={itemUrl}
+                    >
+                      <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                        <span className="shrink-0 text-[#2563eb]">{item.kind === "lecture" ? <Presentation className="h-4 w-4" /> : <FileCheck className="h-4 w-4" />}</span>
+                        <span className="truncate text-[#111827]">{item.title}</span>
+                      </span>
+                      <span className="truncate px-3 text-[#4b5563]">{getStableDate(item.id)}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          if (link && typeof window !== "undefined") window.open(link, "_blank", "noopener,noreferrer");
+                        }}
+                        className="truncate px-3 text-left text-[#4b5563] hover:underline"
+                        title={itemUrl}
+                      >
+                        {item.kind === "lecture" ? "Microsoft PowerP..." : "Learning activity"}
+                      </button>
+                      <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(item)}</span>
+                    </div>
+                  );
+                })}
+                {currentAttachedResources.map((resource) => {
+                  const resourceUrl = resource.linkUrl || buildExplorerPathUrl(selectedSubject, selectedPath, resource);
+                  return (
+                    <div
+                      key={resource.id}
+                      onClick={() => setSelection({ type: "resource", id: resource.id })}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          setSelection({ type: "resource", id: resource.id });
+                        }
+                      }}
+                      role="button"
+                      tabIndex={0}
+                      onContextMenu={(event) => openContextMenu(event, undefined, undefined, resource)}
+                      className={cn(
+                        "grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center text-left text-[13px] hover:bg-[#eef6ff]",
+                        selection?.type === "resource" && selection.id === resource.id ? "bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]" : "bg-white",
+                      )}
+                      title={resourceUrl}
+                    >
+                      <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
+                        <FileText className="h-4 w-4 shrink-0 text-[#2563eb]" />
+                        <span className="truncate text-[#111827]">{resource.title}</span>
+                      </span>
+                      <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
+                      <button
+                        type="button"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleOpenResourceLink(resource);
+                        }}
+                        className="truncate px-3 text-left text-[#4b5563] hover:underline"
+                        title={resourceUrl}
+                      >
+                        {getResourceDisplayBadge(resource)}
+                      </button>
+                      <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
+                    </div>
+                  );
+                })}
+                {!currentChildren.length && !totalAttachedItems ? (
+                  <div className="flex h-full min-h-[340px] flex-col items-center justify-center text-center text-[13px]">
+                    <Folder className="h-12 w-12 text-[#cbd5e1]" />
+                    <div className="mt-3 font-semibold text-[#111827]">This folder is empty</div>
+                    <p className="mt-1 max-w-sm text-[#64748b]">Dùng chuột phải hoặc nút New để tạo thư mục, bài học hoặc gắn tài liệu.</p>
+                  </div>
+                ) : null}
+              </div>
+            </>
+          ) : (
+              <div className="h-full overflow-y-auto p-5 [scrollbar-gutter:stable]">
+                <div className="grid grid-cols-[repeat(auto-fill,210px)] gap-4">
+                  {showChildrenPanel && currentChildren.map((child) => (
+                    <div
+                      key={child.id}
+                      onContextMenu={(event) => openContextMenu(event, child)}
+                    >
+                      <LearningResourceFolderTile
+                        label={child.label}
+                        selected={selection?.type === "node" && selection.id === child.id}
+                        onClick={() => setSelection({ type: "node", id: child.id })}
+                        onDoubleClick={() => onSelectNode(child.id)}
+                      />
+                    </div>
+                  ))}
+
+                  {currentLocalContentItems.map((item) => {
+                    const meta = getResourceCardMeta(item.id, item.title, item.kind === "lecture" ? "PPTX" : "QUIZ");
+                    return (
+                      <div
+                        key={item.id}
+                        onContextMenu={(event) => openContextMenu(event, undefined, item)}
+                        className={cn(
+                          selection?.type === "local-content" && selection.id === item.id ? "ring-2 ring-[#33b653] rounded-2xl" : "",
+                        )}
+                      >
+                        <LearningResourceSquareCard
+                          actionLabel={meta.actionLabel}
+                          heading={meta.heading}
+                          minutes={meta.minutes}
+                          questions={meta.questions}
+                          tag={meta.tag}
+                          title={item.title}
+                          unit={meta.unit}
+                          onOpen={() => {
+                            setSelection({ type: "local-content", id: item.id });
+                            const link = getDisplayLink(item);
+                            if (link && typeof window !== "undefined") window.open(link, "_blank", "noopener,noreferrer");
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+
+                  {currentAttachedResources.map((resource) => {
+                    const fileType = resource.fileTypeBadge || resource.selectedFileType || "PDF";
+                    const meta = getResourceCardMeta(resource.id, resource.title, fileType);
+                    return (
+                      <div
+                        key={resource.id}
+                        onContextMenu={(event) => openContextMenu(event, undefined, undefined, resource)}
+                        className={cn(
+                          selection?.type === "resource" && selection.id === resource.id ? "ring-2 ring-[#33b653] rounded-2xl" : "",
+                        )}
+                      >
+                        <LearningResourceSquareCard
+                          actionLabel={meta.actionLabel}
+                          heading={meta.heading}
+                          minutes={meta.minutes}
+                          questions={meta.questions}
+                          tag={meta.tag}
+                          title={resource.title}
+                          unit={meta.unit}
+                          onOpen={() => {
+                            setSelection({ type: "resource", id: resource.id });
+                            handleOpenResourceLink(resource);
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+
+                  {!currentChildren.length && !totalAttachedItems ? (
+                    <div className="flex h-full min-h-[340px] w-full flex-col items-center justify-center text-center text-[13px] col-span-full">
+                      <Folder className="h-12 w-12 text-[#cbd5e1]" />
+                      <div className="mt-3 font-semibold text-[#111827]">This folder is empty</div>
+                      <p className="mt-1 max-w-sm text-[#64748b]">Dùng chuột phải hoặc nút New để tạo thư mục, bài học hoặc gắn tài liệu.</p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            )}
+          </section>
 
             {contextMenu ? (
               <StructureContextMenu
@@ -1960,34 +2037,43 @@ const ExplorerTreeRow = memo(function ExplorerTreeRow({
   return (
     <div
       className={cn(
-        "group grid grid-cols-[18px_minmax(0,1fr)_24px] items-center gap-1 rounded-sm py-0.5 text-[13px]",
+        "group relative flex items-center justify-between gap-1.5 rounded-sm py-1.5 px-2 text-[13px] transition",
         selected ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
       )}
-      style={{ paddingLeft: `${4 + Math.min(depth, 8) * 18}px` }}
+      style={{ paddingLeft: `${8 + Math.min(depth, 8) * 14}px` }}
       onContextMenu={(event) => onOpenContextMenu(event, node)}
     >
-      <button
-        type="button"
-        onClick={() => (hasChildren ? onToggleNode(node.id) : onSelectNode(node.id))}
-        className="grid h-6 w-5 place-items-center rounded text-[#6b7280]"
-        aria-label={expanded ? "Thu gọn" : "Mở rộng"}
-      >
-        {hasChildren ? (expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />) : <span />}
-      </button>
-      <button type="button" onClick={() => onSelectNode(node.id)} className="flex min-w-0 items-center gap-2 rounded px-1 py-1 text-left">
-        <span className={cn("shrink-0 text-[#d99800]", selected ? "text-[#d99800]" : undefined)}>{getNodeIcon(node, expanded)}</span>
-        <span
-          className="truncate text-[13px] leading-5 text-[#111827]"
-          title={node.label}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={() => onToggleNode(node.id)}
+            className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#6b7280] hover:bg-slate-200/50"
+            aria-label={expanded ? "Thu gọn" : "Mở rộng"}
+          >
+            <ChevronRight className={cn("h-3.5 w-3.5 transition-transform duration-150", expanded ? "rotate-90" : undefined)} />
+          </button>
+        ) : (
+          <span className="w-3.5 shrink-0" />
+        )}
+        <button
+          type="button"
+          onClick={() => onSelectNode(node.id)}
+          className="flex min-w-0 flex-1 items-center gap-2 text-left pr-8"
         >
-          {node.label}
-        </span>
-      </button>
+          <span className="shrink-0">
+            {getNodeIcon(node, selected || expanded)}
+          </span>
+          <span className="truncate font-medium text-[#111827]" title={node.label}>
+            {node.label}
+          </span>
+        </button>
+      </div>
       <button
         type="button"
         onClick={() => onCreateChild(node)}
         disabled={!node.optionId}
-        className="grid h-6 w-6 place-items-center rounded text-[#9ca3af] opacity-0 hover:bg-[#dceeff] hover:text-[#2563eb] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1]"
+        className="absolute right-2 top-1/2 -translate-y-1/2 shadow-sm bg-white/80 backdrop-blur-sm grid h-6 w-6 shrink-0 place-items-center rounded text-[#9ca3af] opacity-0 hover:bg-white hover:text-[#2563eb] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1] transition-opacity"
         aria-label="Thêm nội dung bên trong"
       >
         <Plus className="h-3.5 w-3.5" />
@@ -2026,7 +2112,7 @@ function getNodeIcon(node: StudioNode, expanded?: boolean) {
     return <GraduationCap className="h-4 w-4" />;
   }
   if (node.kind === "group" || node.kind === "folder") {
-    return expanded ? <FolderOpen className="h-4 w-4" /> : <Folder className="h-4 w-4" />;
+    return <WindowsFolderIcon open={expanded} />;
   }
   if (node.kind === "lesson") {
     return <FileText className="h-4 w-4" />;
@@ -2170,7 +2256,7 @@ function TaxonomyCreateDialog({
   useEffect(() => {
     if (!open) return;
     const frameId = window.requestAnimationFrame(() => {
-      const autoOption = isSubject ? "category" : availableOptions.length === 1 ? availableOptions[0] : null;
+      const autoOption = state?.initialOption || (isSubject ? "category" : availableOptions.length === 1 ? availableOptions[0] : null);
       setStep(autoOption ? "details" : "pick");
       setSelectedOption(autoOption);
       setLabel("");
@@ -2188,7 +2274,7 @@ function TaxonomyCreateDialog({
       setSaving(false);
     });
     return () => window.cancelAnimationFrame(frameId);
-  }, [availableOptions, isSubject, open, selectedNode?.kind, state?.mode]);
+  }, [availableOptions, isSubject, open, selectedNode?.kind, state?.mode, state?.initialOption]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

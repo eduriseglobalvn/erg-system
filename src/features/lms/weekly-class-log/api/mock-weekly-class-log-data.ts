@@ -2,6 +2,7 @@ import type { WeeklyClassLogDay, WeeklyClassLogSummary, WeeklyClassLogWeek } fro
 
 const dayLabels = ["Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6"];
 const classNames = ["6A1", "6A2", "7A1", "7A2", "8A1"];
+const periodsPerDay = 10;
 
 export const weeklyClassLogWeeks: WeeklyClassLogWeek[] = [
   createWeek({
@@ -69,21 +70,27 @@ function createDays(seedOffset: number): WeeklyClassLogDay[] {
     id: `day-${dayIndex + 2}`,
     label,
     date: getDateLabel(seedOffset, dayIndex),
-    periods: Array.from({ length: 5 }, (_, periodIndex) => ({
-      id: `day-${dayIndex + 2}-period-${periodIndex + 1}`,
-      className: periodIndex < 3 ? classNames[(dayIndex + periodIndex + seedOffset) % classNames.length] : "",
-      subject: "",
-      ppct: periodIndex < 3 ? String((seedOffset + 1) * 10 + dayIndex * 5 + periodIndex + 1).padStart(2, "0") : "",
-      absent: "",
-      lesson: periodIndex < 3 ? "Nội dung bài học, hoạt động thực hành và phần việc giao trên LMS." : "",
-      comment: periodIndex < 3 ? "Lớp học ổn định, học sinh hoàn thành nhiệm vụ trong tiết." : "",
-      learningScore: "",
-      disciplineScore: periodIndex < 3 ? "Đạt" : "",
-      hygieneScore: "",
-      totalScore: "",
-      teacherSignature: "",
-    })),
+    periods: Array.from({ length: periodsPerDay }, (_, periodIndex) => createPeriod(seedOffset, dayIndex, periodIndex)),
   }));
+}
+
+function createPeriod(seedOffset: number, dayIndex: number, periodIndex: number) {
+  const filled = periodIndex < 3 || (periodIndex >= 5 && periodIndex < 8);
+  const incomplete = periodIndex === 3 || periodIndex === 8;
+  return {
+    id: `day-${dayIndex + 2}-period-${periodIndex + 1}`,
+    className: filled || incomplete ? classNames[(dayIndex + periodIndex + seedOffset) % classNames.length] : "",
+    subject: "",
+    ppct: filled ? String((seedOffset + 1) * 10 + dayIndex * 10 + periodIndex + 1).padStart(2, "0") : "",
+    absent: "",
+    lesson: filled ? "Nội dung bài học, hoạt động thực hành và phần việc giao trên LMS." : "",
+    comment: filled ? "Lớp học ổn định, học sinh hoàn thành nhiệm vụ trong tiết." : "",
+    learningScore: "",
+    disciplineScore: filled ? "Đạt" : "",
+    hygieneScore: "",
+    totalScore: "",
+    teacherSignature: "",
+  };
 }
 
 function getDateLabel(seedOffset: number, dayIndex: number) {

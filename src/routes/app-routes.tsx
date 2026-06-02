@@ -145,7 +145,6 @@ export function AppRoutes() {
               />
               {[
                 "schools",
-                "students",
                 "import",
                 "users",
                 "questions",
@@ -198,7 +197,7 @@ export function AppRoutes() {
                   }
                 />
               ))}
-              {["schools", "students", "import", "users", "questions", "quiz-bank", "quiz-editor", "resources", "legal", "settings"].map((path) => (
+              {["schools", "import", "users", "questions", "quiz-bank", "quiz-editor", "resources", "legal", "settings"].map((path) => (
                 <Route
                   key={path}
                   path={path}
@@ -218,7 +217,7 @@ export function AppRoutes() {
                   </PortalAuthGate>
                 }
               />
-              {["homework", "score", "attendance", "calendar", "class-log", "students", "resources", "reports"].map((path) => (
+              {["homework", "score", "attendance", "calendar", "class-log", "resources", "reports"].map((path) => (
                 <Route
                   key={path}
                   path={path}

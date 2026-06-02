@@ -14,7 +14,6 @@ import {
 import { StudentSheetImportWorkspace } from "@/features/lcms/admin-operations/components/student-sheet-import-workspace";
 import { UserAccessControlWorkspace } from "@/features/lcms/admin-operations/components/user-access-control-workspace";
 import { LearningResourceAuthoringWorkspace } from "@/features/lcms/admin-operations/components/learning-resource-authoring-workspace";
-import { listLmsStudents, type StudentListItem } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import {
   listEducationUnits,
   updateEducationUnit,
@@ -60,7 +59,7 @@ export function AdminOperationsWorkspace({
 
   if (activeLeaf.variant === "admin-internal-docs") {
     return (
-      <main className="h-full min-h-0 overflow-y-auto bg-[#f6f8fb] p-2 lg:p-3">
+      <main className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f6f8fb]">
         <InternalDocsWorkspace activeLeaf={activeLeaf} />
       </main>
     );
@@ -91,14 +90,6 @@ export function AdminOperationsWorkspace({
         />
       ) : null}
       {activeLeaf.variant === "admin-centers" ? <CenterManagement onCreateUnit={() => onOpenLeaf("admin-create-unit")} /> : null}
-      {activeLeaf.variant === "admin-students" ? (
-        <StudentManagement
-          managementScope={managementScope}
-          centers={scopedCenters}
-          classes={scopedClasses}
-          fallbackStudents={scopedStudents}
-        />
-      ) : null}
       {activeLeaf.variant === "admin-sheet-import" ? (
         <SheetImportWorkspace managementScope={managementScope} centers={scopedCenters} classes={scopedClasses} />
       ) : null}
@@ -125,10 +116,6 @@ function getAdminActions(activeLeaf: DashboardLeaf, onOpenLeaf: (leafId: string)
 
   if (activeLeaf.variant === "admin-members") {
     return <Button>Thêm thành viên</Button>;
-  }
-
-  if (activeLeaf.variant === "admin-students") {
-    return <Button variant="outline">Tải mẫu import</Button>;
   }
 
   return <Button variant="outline">Xuất báo cáo</Button>;
@@ -593,210 +580,6 @@ function unitActiveClassName(type?: string) {
   return "border-blue-300 bg-gradient-to-r from-red-50/80 to-emerald-50/80";
 }
 
-function StudentManagement({
-  managementScope,
-  centers,
-  classes,
-  fallbackStudents,
-}: {
-  managementScope: ManagementScope;
-  centers: ClassroomSchool[];
-  classes: ClassroomSnapshot[];
-  fallbackStudents: typeof classroomStudents;
-}) {
-  const queryClient = useQueryClient();
-  const scopeCenterId = managementScope.level === "global" ? "" : managementScope.centerId;
-  const scopeClassId = managementScope.level === "class" ? managementScope.classId : "";
-  const [keyword, setKeyword] = useState("");
-  const [centerId, setCenterId] = useState(scopeCenterId);
-  const [classId, setClassId] = useState(scopeClassId);
-  const [status, setStatus] = useState("");
-  const [students, setStudents] = useState<StudentListItem[]>([]);
-  const [total, setTotal] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
-      setCenterId(scopeCenterId);
-      setClassId(scopeClassId);
-    });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [scopeCenterId, scopeClassId]);
-
-  const classOptions = useMemo(() => {
-    return classes.filter((classroom) => !centerId || classroom.schoolId === centerId);
-  }, [centerId, classes]);
-
-  const fallbackItems = useMemo<StudentListItem[]>(() => {
-    return fallbackStudents.map((student) => ({
-      id: student.id,
-      fullName: student.name,
-      username: student.id,
-      centerId: student.schoolId,
-      centerName: student.schoolName,
-      classId: student.classId,
-      className: student.className,
-      status: "active",
-      averageScore: student.averageScore,
-      completedAssignments: null,
-      lastActivityAt: null,
-    }));
-  }, [fallbackStudents]);
-
-  useEffect(() => {
-    let cancelled = false;
-    const timeoutId = window.setTimeout(() => {
-      setIsLoading(true);
-      setErrorMessage("");
-
-      void queryClient
-        .fetchQuery({
-          queryKey: ["admin-operations", "students", centerId, classId, keyword, status],
-          queryFn: () =>
-            listLmsStudents({
-              centerId: centerId || undefined,
-              classId: classId || undefined,
-              keyword: keyword.trim() || undefined,
-              status: status || undefined,
-              limit: 100,
-            }),
-          staleTime: 60_000,
-        })
-        .then((response) => {
-          if (cancelled) return;
-          setStudents(response.items ?? []);
-          setTotal(response.total ?? response.items?.length ?? 0);
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          setStudents([]);
-          setTotal(fallbackItems.length);
-          setErrorMessage(error instanceof Error ? error.message : "Không tải được danh sách học sinh từ BE.");
-        })
-        .finally(() => {
-          if (!cancelled) setIsLoading(false);
-        });
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
-  }, [centerId, classId, fallbackItems.length, keyword, queryClient, status]);
-
-  const displayStudents = errorMessage ? fallbackItems : students;
-  const activeCount = displayStudents.filter((student) => student.status === "active").length;
-
-  return (
-    <DashboardSectionCard
-      title="Quản lý học sinh"
-      description="Danh sách lấy từ BE, lọc theo hệ thống, trung tâm/trường và lớp trong phạm vi đang chọn."
-      action={<Button variant="outline">Tải mẫu import</Button>}
-    >
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[minmax(240px,1fr)_220px_220px_170px]">
-        <Input
-          value={keyword}
-          onChange={(event) => setKeyword(event.target.value)}
-          placeholder="Tìm theo tên, username, lớp..."
-          aria-label="Tìm học sinh"
-        />
-        <select
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
-          value={centerId}
-          onChange={(event) => {
-            setCenterId(event.target.value);
-            setClassId("");
-          }}
-          disabled={managementScope.level !== "global" && centers.length <= 1}
-        >
-          {managementScope.level === "global" ? <option value="">Tất cả trung tâm/trường</option> : null}
-          {centers.map((center) => (
-            <option key={center.id} value={center.id}>
-              {center.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
-          value={classId}
-          onChange={(event) => setClassId(event.target.value)}
-          disabled={managementScope.level === "class"}
-        >
-          <option value="">Tất cả lớp</option>
-          {classOptions.map((classroom) => (
-            <option key={classroom.id} value={classroom.id}>
-              {classroom.className}
-            </option>
-          ))}
-        </select>
-        <select
-          className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
-          value={status}
-          onChange={(event) => setStatus(event.target.value)}
-        >
-          <option value="">Tất cả trạng thái</option>
-          <option value="active">Đang hoạt động</option>
-          <option value="archived">Đã lưu trữ</option>
-        </select>
-      </div>
-
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <DashboardMetricCard label="Tổng học sinh" value={String(total || displayStudents.length)} detail="theo bộ lọc hiện tại" tone="blue" />
-        <DashboardMetricCard label="Đang hoạt động" value={String(activeCount)} detail="tài khoản có thể đăng nhập" tone="emerald" />
-        <DashboardMetricCard label="Nguồn dữ liệu" value={errorMessage ? "Dự phòng" : "BE"} detail={isLoading ? "đang tải lại" : "đã đồng bộ"} tone={errorMessage ? "amber" : "violet"} />
-      </div>
-
-      {errorMessage ? (
-        <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-700">
-          {errorMessage} Đang hiển thị dữ liệu dự phòng để không làm gián đoạn thao tác.
-        </div>
-      ) : null}
-
-      <div className="mt-4 max-h-[620px] overflow-auto rounded-2xl border border-slate-200">
-        <div className="hidden grid-cols-[minmax(240px,1.2fr)_180px_180px_130px_150px] gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 lg:grid">
-          <span>Học sinh</span>
-          <span>Trung tâm/trường</span>
-          <span>Lớp</span>
-          <span>Điểm TB</span>
-          <span>Trạng thái</span>
-        </div>
-        <div className="divide-y divide-slate-200 bg-white">
-          {displayStudents.map((student) => (
-            <article
-              key={student.id}
-              className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(240px,1.2fr)_180px_180px_130px_150px] lg:items-center"
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-xs font-semibold text-blue-700">
-                  {getInitials(student.fullName)}
-                </div>
-                <div className="min-w-0">
-                  <h3 className="truncate font-semibold text-slate-950">{student.fullName}</h3>
-                  <p className="truncate text-sm text-slate-500">{student.username || "Chưa có username"}</p>
-                </div>
-              </div>
-              <FieldValue label="Trung tâm/trường" value={student.centerName || "Chưa gán"} />
-              <FieldValue label="Lớp" value={student.className || "Chưa gán"} />
-              <FieldValue label="Điểm TB" value={formatScore(student.averageScore)} />
-              <div>
-                <Badge tone={student.status === "active" ? "success" : "outline"}>
-                  {student.status === "active" ? "Đang hoạt động" : student.status || "Chưa rõ"}
-                </Badge>
-              </div>
-            </article>
-          ))}
-
-          {!displayStudents.length ? (
-            <div className="px-4 py-10 text-center text-sm text-slate-500">
-              {isLoading ? "Đang tải danh sách học sinh..." : "Chưa có học sinh phù hợp với bộ lọc."}
-            </div>
-          ) : null}
-        </div>
-      </div>
-    </DashboardSectionCard>
-  );
-}
 function SheetImportWorkspace({
   managementScope,
   centers,
@@ -810,7 +593,11 @@ function SheetImportWorkspace({
 }
 
 function InternalDocsWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }) {
-  return <LearningResourceAuthoringWorkspace activeLeaf={activeLeaf} />;
+  return (
+    <div className="h-full min-h-0 p-3">
+      <LearningResourceAuthoringWorkspace activeLeaf={activeLeaf} />
+    </div>
+  );
 }
 
 function CenterRow({ center }: { center: ClassroomSchool }) {
@@ -843,17 +630,6 @@ function ActionItem({ detail, title }: { detail: string; title: string }) {
       <p className="mt-1 text-sm leading-6 text-slate-500">{detail}</p>
     </div>
   );
-}
-
-function formatScore(value?: number | null) {
-  return typeof value === "number" ? value.toFixed(1) : "-";
-}
-
-function getInitials(value: string) {
-  const parts = value.trim().split(/\s+/).filter(Boolean);
-  const first = parts.at(0)?.charAt(0) ?? "H";
-  const last = parts.length > 1 ? parts.at(-1)?.charAt(0) : "";
-  return `${first}${last}`.toUpperCase();
 }
 
 function FieldValue({ label, value }: { label: string; value: string }) {

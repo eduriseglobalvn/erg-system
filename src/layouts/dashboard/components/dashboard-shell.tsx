@@ -59,7 +59,7 @@ function writeStoredDashboardContext(value: StoredDashboardContext) {
 }
 
 function normalizeStoredLeafId(leafId?: string) {
-  if (leafId === "admin-learning-structure" || leafId === "admin-learning-resources") return "admin-internal-docs";
+  if (leafId === "admin-learning-structure" || leafId === "admin-internal-docs") return "admin-learning-resources";
   return leafId;
 }
 

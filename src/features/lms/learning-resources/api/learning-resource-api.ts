@@ -1,13 +1,20 @@
 ﻿import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import {
+  USE_LEARNING_RESOURCE_AUTHORING_MOCK,
+  mockLearningResourceAuthoringResources,
+  mockLearningResourceAuthoringTaxonomy,
+} from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
+import {
   LEARNING_RESOURCE_CATEGORIES,
   LEARNING_RESOURCE_LIBRARY_SECTIONS,
   type LearningResourceAccessState,
+  type LearningResourceCategory,
   type LearningResourceFileType,
   type LearningResourceLaunchMode,
   type LearningResourcePriceType,
   type LearningResourceResource,
   type LearningResourceResourceSection,
+  type LearningResourceSubject,
   type LearningResourceViewerSlide,
   type LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
@@ -143,6 +150,91 @@ export type LearningResourceLibraryProgressDTO = {
   }>;
 };
 
+type LearningResourceExplorerOperationBase = {
+  actorId?: string;
+  schoolId?: string;
+  academicYear?: string;
+  subjectId?: string;
+  categoryId?: string;
+  sectionId?: string;
+  clientRequestId?: string;
+};
+
+export type CreateLearningResourceFolderOperation = LearningResourceExplorerOperationBase & {
+  type: "create_folder";
+  name: string;
+  parentId?: string;
+};
+
+export type CreateLearningResourceLectureOperation = LearningResourceExplorerOperationBase & {
+  type: "create_lecture";
+  title: string;
+  parentId?: string;
+  fileType?: LearningResourceFileType | string;
+  launchUrl?: string;
+  assetId?: string;
+  resourceId?: string;
+};
+
+export type CreateLearningResourceExerciseOperation = LearningResourceExplorerOperationBase & {
+  type: "create_exercise";
+  title: string;
+  parentId?: string;
+  fileType?: LearningResourceFileType | string;
+  launchUrl?: string;
+  assetId?: string;
+  resourceId?: string;
+};
+
+export type MoveLearningResourceExplorerItemOperation = LearningResourceExplorerOperationBase & {
+  type: "move";
+  targetId: string;
+  destinationParentId: string;
+  previousParentId?: string;
+};
+
+export type CopyLearningResourceExplorerItemOperation = LearningResourceExplorerOperationBase & {
+  type: "copy";
+  targetId: string;
+  destinationParentId: string;
+};
+
+export type RenameLearningResourceExplorerItemOperation = LearningResourceExplorerOperationBase & {
+  type: "rename";
+  targetId: string;
+  name: string;
+};
+
+export type DeleteLearningResourceExplorerItemOperation = LearningResourceExplorerOperationBase & {
+  type: "delete";
+  targetId: string;
+};
+
+export type LearningResourceExplorerOperation =
+  | CreateLearningResourceFolderOperation
+  | CreateLearningResourceLectureOperation
+  | CreateLearningResourceExerciseOperation
+  | MoveLearningResourceExplorerItemOperation
+  | CopyLearningResourceExplorerItemOperation
+  | RenameLearningResourceExplorerItemOperation
+  | DeleteLearningResourceExplorerItemOperation;
+
+export type LearningResourceExplorerOperationItem = {
+  id: string;
+  type: "folder" | "lecture" | "exercise" | "resource";
+  name: string;
+  parentId?: string;
+};
+
+export type LearningResourceExplorerOperationResult = {
+  operationId: string;
+  status: "saved" | "mock_saved";
+  operation: LearningResourceExplorerOperation;
+  item?: LearningResourceExplorerOperationItem;
+  affectedIds?: string[];
+  savedAt?: string;
+};
+
 export async function loadLearningResourceLibraryBootstrap(input: { schoolId: string; academicYear: string }) {
   if (!hasApiBase()) {
     return mockLibraryBootstrap(input);
@@ -165,7 +257,47 @@ export async function loadLearningResourceLibraryProgress(input: { schoolId: str
   return apiRequest<LearningResourceLibraryProgressDTO>(`/api/v1/hoclieu/library/progress?${search.toString()}`);
 }
 
+export async function saveExplorerOperation(operation: LearningResourceExplorerOperation): Promise<LearningResourceExplorerOperationResult> {
+  if (!hasApiBase()) {
+    return mockSaveExplorerOperation(operation);
+  }
+
+  return apiRequest<LearningResourceExplorerOperationResult>("/api/v1/hoclieu/library/explorer/operations", {
+    method: "POST",
+    body: JSON.stringify(operation),
+  });
+}
+
+export function saveCreateFolderOperation(input: Omit<CreateLearningResourceFolderOperation, "type">) {
+  return saveExplorerOperation({ type: "create_folder", ...input });
+}
+
+export function saveCreateLectureOperation(input: Omit<CreateLearningResourceLectureOperation, "type">) {
+  return saveExplorerOperation({ type: "create_lecture", ...input });
+}
+
+export function saveCreateExerciseOperation(input: Omit<CreateLearningResourceExerciseOperation, "type">) {
+  return saveExplorerOperation({ type: "create_exercise", ...input });
+}
+
+export function saveMoveExplorerItemOperation(input: Omit<MoveLearningResourceExplorerItemOperation, "type">) {
+  return saveExplorerOperation({ type: "move", ...input });
+}
+
+export function saveCopyExplorerItemOperation(input: Omit<CopyLearningResourceExplorerItemOperation, "type">) {
+  return saveExplorerOperation({ type: "copy", ...input });
+}
+
+export function saveRenameExplorerItemOperation(input: Omit<RenameLearningResourceExplorerItemOperation, "type">) {
+  return saveExplorerOperation({ type: "rename", ...input });
+}
+
+export function saveDeleteExplorerItemOperation(input: Omit<DeleteLearningResourceExplorerItemOperation, "type">) {
+  return saveExplorerOperation({ type: "delete", ...input });
+}
+
 export async function loadLearningResourceLibrarySections(): Promise<LearningResourceResourceSection[]> {
+  if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) return getMockLearningResourceLibrarySections();
   if (!hasApiBase()) return LEARNING_RESOURCE_LIBRARY_SECTIONS;
 
   const result = await listLearningResourceResources({ limit: 100 });
@@ -174,6 +306,12 @@ export async function loadLearningResourceLibrarySections(): Promise<LearningRes
 }
 
 export async function loadLearningResourceResourcesBySubject(subjectId: string): Promise<LearningResourceResource[]> {
+  if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
+    return getMockLearningResourceLibrarySections()
+      .flatMap((section) => section.resources)
+      .filter((resource) => resource.subjectId === subjectId);
+  }
+
   if (!hasApiBase()) {
     return LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
   }
@@ -184,6 +322,7 @@ export async function loadLearningResourceResourcesBySubject(subjectId: string):
 }
 
 export async function loadLearningResourceResourceForViewer(resource: LearningResourceResource): Promise<LearningResourceResource> {
+  if (USE_LEARNING_RESOURCE_AUTHORING_MOCK && resource.id.startsWith("mock-")) return resource;
   if (!hasApiBase()) return resource;
   if (resource.viewer.launchUrl) {
     if (!isApiLaunchUrl(resource.viewer.launchUrl)) {
@@ -265,6 +404,43 @@ export function mapLibraryResourceToLearningResourceResource(
   };
 }
 
+export function getMockLearningResourceLibrarySubjects(): LearningResourceSubject[] {
+  return mockLearningResourceAuthoringTaxonomy.subjects.map((subject) => ({
+    id: subject.id,
+    label: subject.label,
+  }));
+}
+
+export function getMockLearningResourceLibraryCategories(): LearningResourceCategory[] {
+  const subjectRoots: LearningResourceCategory[] = mockLearningResourceAuthoringTaxonomy.subjects.map((subject) => ({
+    id: subject.id,
+    label: subject.label,
+    icon: subject.id === "mock-stem" ? "stem" : "certificate",
+  }));
+  const categoryFolders: LearningResourceCategory[] = mockLearningResourceAuthoringTaxonomy.categories.map((category) => ({
+    id: category.id,
+    label: category.label,
+    parentId: category.subjectId,
+    icon: category.subjectId === "mock-stem" ? "stem" : "certificate",
+  }));
+
+  return [...subjectRoots, ...categoryFolders];
+}
+
+export function getDefaultMockLearningResourceLibrarySelection(gradeId: string) {
+  const subjectId = mockLearningResourceAuthoringTaxonomy.subjects[0]?.id ?? "mock-ic3-gs6";
+
+  return {
+    gradeId,
+    subjectId,
+    categoryId: subjectId,
+  };
+}
+
+function getMockLearningResourceLibrarySections(): LearningResourceResourceSection[] {
+  return groupCardsBySection(mockLearningResourceAuthoringResources.map((resource, index) => mapCardToResource(resource, index)));
+}
+
 function groupCardsBySection(resources: LearningResourceResource[]): LearningResourceResourceSection[] {
   const sectionMap = new Map<string, LearningResourceResourceSection>();
 
@@ -276,11 +452,16 @@ function groupCardsBySection(resources: LearningResourceResource[]): LearningRes
       continue;
     }
 
-    const mockSection = LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId);
+    const sectionTitle = USE_LEARNING_RESOURCE_AUTHORING_MOCK
+      ? mockLearningResourceAuthoringTaxonomy.sections.find((item) => item.id === resource.sectionId)?.label
+      : LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId)?.title;
+    const sectionSubtitle = USE_LEARNING_RESOURCE_AUTHORING_MOCK
+      ? undefined
+      : LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId)?.subtitle;
     sectionMap.set(resource.sectionId, {
       id: resource.sectionId,
-      title: mockSection?.title ?? categoryLabel(resource.categoryId),
-      subtitle: mockSection?.subtitle,
+      title: sectionTitle ?? categoryLabel(resource.categoryId),
+      subtitle: sectionSubtitle,
       gradeId: resource.gradeId,
       subjectId: resource.subjectId,
       categoryId: resource.categoryId,
@@ -621,3 +802,55 @@ function mockLibraryBootstrap(input: { schoolId: string; academicYear: string })
     subjects,
   };
 }
+
+async function mockSaveExplorerOperation(operation: LearningResourceExplorerOperation): Promise<LearningResourceExplorerOperationResult> {
+  await Promise.resolve();
+
+  return {
+    operationId: `mock-explorer-op-${operation.type}-${mockOperationSuffix(operation)}`,
+    status: "mock_saved",
+    operation,
+    item: mockOperationItem(operation),
+    affectedIds: "targetId" in operation ? [operation.targetId] : undefined,
+    savedAt: new Date(0).toISOString(),
+  };
+}
+
+function mockOperationItem(operation: LearningResourceExplorerOperation): LearningResourceExplorerOperationItem | undefined {
+  if (operation.type === "create_folder") {
+    return {
+      id: `folder-${slugify(operation.name)}`,
+      type: "folder",
+      name: operation.name,
+      parentId: operation.parentId,
+    };
+  }
+
+  if (operation.type === "create_lecture" || operation.type === "create_exercise") {
+    return {
+      id: `${operation.type === "create_lecture" ? "lecture" : "exercise"}-${slugify(operation.title)}`,
+      type: operation.type === "create_lecture" ? "lecture" : "exercise",
+      name: operation.title,
+      parentId: operation.parentId,
+    };
+  }
+
+  if (operation.type === "rename") {
+    return {
+      id: operation.targetId,
+      type: "resource",
+      name: operation.name,
+    };
+  }
+
+  return undefined;
+}
+
+function mockOperationSuffix(operation: LearningResourceExplorerOperation) {
+  if ("clientRequestId" in operation && operation.clientRequestId) return slugify(operation.clientRequestId);
+  if ("name" in operation) return slugify(operation.name);
+  if ("title" in operation) return slugify(operation.title);
+  if ("targetId" in operation) return slugify(operation.targetId);
+  return "operation";
+}
+
