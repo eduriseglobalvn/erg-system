@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+﻿import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent } from "react";
 import { Navigate, useLocation, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,7 +13,6 @@ import {
   Film,
   Image as ImageIcon,
   Lock,
-  Maximize2,
   MonitorPlay,
   Play,
   Presentation,
@@ -21,13 +20,10 @@ import {
   SlidersHorizontal,
   Sparkles,
   X,
-  ZoomIn,
-  ZoomOut,
   type LucideIcon,
 } from "lucide-react";
 
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
-import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { loadLearningResourceLibrarySections, loadLearningResourceResourceForViewer } from "@/features/lms/learning-resources/api/learning-resource-api";
 import {
@@ -45,24 +41,11 @@ import {
   type LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
 
-type PdfJsModule = typeof import("pdfjs-dist");
-type PdfLoadingTask = ReturnType<PdfJsModule["getDocument"]>;
-
-let pdfJsPromise: Promise<PdfJsModule> | null = null;
-
-async function loadPdfJs() {
-  if (!pdfJsPromise) {
-    pdfJsPromise = Promise.all([
-      import("pdfjs-dist"),
-      import("pdfjs-dist/build/pdf.worker.mjs?url"),
-    ]).then(([pdfJs, worker]) => {
-      pdfJs.GlobalWorkerOptions.workerSrc = worker.default;
-      return pdfJs;
-    });
-  }
-
-  return pdfJsPromise;
-}
+const PdfFullScreenPreview = lazy(() =>
+  import("@/features/lms/learning-resources/components/pdf-resource-viewer").then((module) => ({
+    default: module.PdfFullScreenPreview,
+  })),
+);
 
 const categoryIcons: Record<LearningResourceCategory["icon"], LucideIcon> = {
   book: FileText,
@@ -386,305 +369,6 @@ function EmptyState() {
   );
 }
 
-function base64ToUint8Array(value: string) {
-  const binary = window.atob(value.trim());
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return bytes;
-}
-
-function getDefaultViewerUnits(resource: LearningResourceResource): LearningResourceViewerUnit[] {
-  if (resource.viewer.units?.length) return resource.viewer.units;
-
-  if (resource.subjectId === "tieng-anh") {
-    return [
-      {
-        id: "unit-1",
-        title: "Unit 1: My new school",
-        children: [
-          { id: "lesson-1", title: "Unit 1_Lesson 1_Period 1" },
-          { id: "lesson-2", title: "Unit 1_Lesson 2_Period 2" },
-          { id: "lesson-3", title: "Unit 1_Lesson 3_Period 3" },
-        ],
-      },
-      { id: "unit-2", title: "Unit 2: My house" },
-      { id: "unit-3", title: "Unit 3: My friends" },
-      { id: "unit-4", title: "Unit 4: My neighbourhood" },
-      { id: "unit-5", title: "Unit 5: Natural wonders of Viet Nam" },
-      { id: "unit-6", title: "Unit 6: Our Tet holiday" },
-      { id: "unit-7", title: "Unit 7: Television" },
-      { id: "unit-8", title: "Unit 8: Sports and Games" },
-      { id: "unit-9", title: "Unit 9: Cities of the World" },
-    ];
-  }
-
-  return [
-    {
-      id: "module-1",
-      title: displayText(resource.viewer.title),
-      children: [
-        { id: "part-1", title: "Lesson 1 - GETTING STARTED" },
-        { id: "part-2", title: "Lesson 2 - PRACTICE" },
-        { id: "part-3", title: "Lesson 3 - REVIEW" },
-      ],
-    },
-  ];
-}
-
-function PdfLessonBankView({
-  resource,
-  onClose,
-  onOpenLesson,
-}: {
-  resource: LearningResourceResource;
-  onClose: () => void;
-  onOpenLesson: (title: string) => void;
-}) {
-  const units = getDefaultViewerUnits(resource);
-  const theme = getLectureDeckTheme(resource);
-  const deckLabel = getLectureDeckLabel(resource);
-
-  return (
-    <div className={`fixed inset-0 z-[240] overflow-hidden bg-gradient-to-br ${theme.background}`}>
-      <button
-        type="button"
-        onClick={onClose}
-        className="fixed left-0 top-7 z-10 flex h-16 w-24 items-center justify-center rounded-r-full bg-white/95 text-[var(--erg-blue)] shadow-lg shadow-slate-950/15 transition hover:w-28"
-        aria-label="Quay lại kho học liệu"
-      >
-        <span className="text-center text-xs font-black leading-4">
-          ERG
-          <br />
-          Hub
-        </span>
-      </button>
-      <main className="relative mx-auto my-8 flex h-[calc(100vh-64px)] w-[min(1350px,calc(100vw-120px))] flex-col overflow-hidden rounded-xl bg-white shadow-md">
-        <header className={`relative min-h-[200px] shrink-0 overflow-hidden bg-gradient-to-r ${theme.panel} px-7 py-7 text-white`}>
-          <div className="absolute right-10 top-5 hidden h-36 w-48 rounded-lg border-4 border-white/70 bg-white/25 rotate-3 lg:block" />
-          <div className="absolute right-6 top-9 hidden rounded-2xl bg-white px-4 py-2 text-2xl font-black text-orange-500 shadow-xl lg:block">
-            Global
-            <br />
-            Success
-          </div>
-          <div className="relative max-w-3xl">
-            <p className="text-5xl font-black uppercase leading-none text-white drop-shadow-sm sm:text-6xl">{deckLabel}</p>
-            <h1 className="mt-8 text-3xl font-black uppercase leading-tight text-white sm:text-4xl">{displayText(resource.viewer.title)}</h1>
-          </div>
-        </header>
-
-        <section className="grid flex-1 gap-8 overflow-y-auto p-8 lg:grid-cols-2">
-          {units.map((unit, index) => (
-            <LectureUnitCard key={unit.id} unit={unit} index={index} theme={theme} onOpenLesson={onOpenLesson} />
-          ))}
-        </section>
-      </main>
-    </div>
-  );
-}
-
-function PdfFullScreenPreview({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
-  const canEmbed = hasEmbeddableViewer(resource);
-  const viewerSrc = resource.viewer.secureEmbedUrl ?? resource.viewer.embedUrl ?? "";
-  const [activeLessonTitle, setActiveLessonTitle] = useState<string | null>(null);
-  const [zoom, setZoom] = useState(1);
-  const viewerRootRef = useRef<HTMLDivElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const [renderState, setRenderState] = useState<"idle" | "loading" | "ready" | "error">("idle");
-
-  useEffect(() => {
-    const previousOverflow = document.body.style.overflow;
-    const previousOverscroll = document.body.style.overscrollBehavior;
-
-    document.body.style.overflow = "hidden";
-    document.body.style.overscrollBehavior = "none";
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.body.style.overscrollBehavior = previousOverscroll;
-    };
-  }, []);
-
-  useEffect(() => {
-    const container = canvasContainerRef.current;
-
-    if (!activeLessonTitle || !canEmbed || !container) return undefined;
-
-    const viewerContainer = container;
-    let isCancelled = false;
-    let loadingTask: PdfLoadingTask | null = null;
-
-    async function createLoadingTask() {
-      const source = viewerSrc.split("#")[0];
-      const pdfJs = await loadPdfJs();
-
-      if (source.endsWith(".b64")) {
-        const response = await fetch(source, { cache: "force-cache" });
-
-        if (!response.ok) {
-          throw new Error("Cannot load encoded PDF asset");
-        }
-
-        return pdfJs.getDocument({ data: base64ToUint8Array(await response.text()) });
-      }
-
-      const token = getStoredAccessToken();
-      const response = await fetch(source, {
-        cache: "no-store",
-        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-      });
-
-      if (!response.ok) {
-        throw new Error("Cannot load protected PDF asset");
-      }
-
-      return pdfJs.getDocument({ data: new Uint8Array(await response.arrayBuffer()) });
-    }
-
-    async function renderPdf() {
-      setRenderState("loading");
-      viewerContainer.replaceChildren();
-
-      try {
-        loadingTask = await createLoadingTask();
-        const pdf = await loadingTask.promise;
-
-        for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-          if (isCancelled) return;
-
-          const page = await pdf.getPage(pageNumber);
-          const baseViewport = page.getViewport({ scale: 1 });
-          const availableWidth = Math.min(viewerContainer.clientWidth - 32, 980);
-          const scale = Math.max(0.8, Math.min(1.45, availableWidth / baseViewport.width)) * zoom;
-          const viewport = page.getViewport({ scale });
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-          const outputScale = window.devicePixelRatio || 1;
-
-          if (!context) continue;
-
-          canvas.width = Math.floor(viewport.width * outputScale);
-          canvas.height = Math.floor(viewport.height * outputScale);
-          canvas.style.width = `${Math.floor(viewport.width)}px`;
-          canvas.style.height = `${Math.floor(viewport.height)}px`;
-          canvas.className = "mx-auto mb-6 block max-w-full rounded-sm bg-white shadow-lg shadow-slate-950/12";
-          viewerContainer.appendChild(canvas);
-
-          await page.render({
-            canvas,
-            canvasContext: context,
-            viewport,
-            transform: outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : undefined,
-          }).promise;
-
-          if (pageNumber === 1 && !isCancelled) setRenderState("ready");
-        }
-
-        if (!isCancelled) setRenderState("ready");
-      } catch {
-        if (!isCancelled) setRenderState("error");
-      }
-    }
-
-    void renderPdf();
-
-    return () => {
-      isCancelled = true;
-      loadingTask?.destroy();
-      viewerContainer.replaceChildren();
-    };
-  }, [activeLessonTitle, canEmbed, viewerSrc, zoom]);
-
-  async function toggleFullscreen() {
-    const element = viewerRootRef.current;
-
-    if (!element) return;
-
-    if (document.fullscreenElement) {
-      await document.exitFullscreen();
-      return;
-    }
-
-    await element.requestFullscreen();
-  }
-
-  if (!activeLessonTitle) {
-    return <PdfLessonBankView resource={resource} onClose={onClose} onOpenLesson={setActiveLessonTitle} />;
-  }
-
-  return (
-    <div ref={viewerRootRef} className="fixed inset-0 z-[240] overflow-hidden bg-[#f3f4f6]">
-      <div className="flex h-12 items-center justify-between bg-[#3b3b3b] px-5 text-white shadow-sm">
-        <div className="flex min-w-0 items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setActiveLessonTitle(null)}
-            className="-ml-1 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white/90 transition hover:bg-white/10 hover:text-white"
-            aria-label="Quay lại danh sách bài"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-          <h1 className="truncate text-sm font-black tracking-tight">{activeLessonTitle}</h1>
-        </div>
-        <div className="flex items-center gap-1 text-white/90">
-          <button
-            type="button"
-            onClick={() => setZoom((value) => Math.max(0.75, Number((value - 0.1).toFixed(2))))}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="Thu nhỏ PDF"
-          >
-            <ZoomOut className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setZoom((value) => Math.min(1.8, Number((value + 0.1).toFixed(2))))}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="Phóng to PDF"
-          >
-            <ZoomIn className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => void toggleFullscreen()}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full transition hover:bg-white/10"
-            aria-label="Mở toàn màn hình"
-          >
-            <Maximize2 className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-      {canEmbed ? (
-        <div className="h-[calc(100vh-48px)] overflow-y-auto bg-slate-100 px-4 py-6">
-          {renderState === "loading" ? (
-            <div className="mx-auto mb-6 max-w-[980px] rounded-xl border border-slate-200 bg-white p-5 text-sm font-bold text-slate-500 shadow-sm">
-              Đang tải tài liệu...
-            </div>
-          ) : null}
-          {renderState === "error" ? (
-            <div className="mx-auto max-w-[720px] rounded-xl border border-rose-200 bg-white p-6 text-sm font-bold text-rose-600 shadow-sm">
-              Không thể mở PDF. BE cần trả file dạng `application/pdf` qua viewer endpoint cùng domain.
-            </div>
-          ) : null}
-          <div ref={canvasContainerRef} className="mx-auto max-w-[1100px]" />
-        </div>
-      ) : (
-        <div className="flex h-[calc(100vh-48px)] items-center justify-center p-6">
-          <div className={`flex aspect-[3/4] w-[280px] flex-col justify-between rounded-2xl bg-gradient-to-br ${thumbnailThemes[resource.thumbnailTheme]} p-8 text-center shadow-xl`}>
-            <div>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-white/80">{displayText(resource.formatBadge)}</p>
-              <h4 className="mt-8 text-3xl font-black leading-tight text-white drop-shadow-sm">{displayText(resource.title)}</h4>
-            </div>
-            <p className="text-sm font-bold text-white/80">{resource.viewer.pageCount ?? 1} pages</p>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 function formatLessonTitle(value: string) {
   const text = displayText(value);
   const match = text.match(/Lesson\s+(\d+).*Period\s+(\d+)/i);
@@ -990,7 +674,11 @@ function FallbackPreview({ resource }: { resource: LearningResourceResource }) {
 
 function ResourceViewerModal({ resource, onClose }: { resource: LearningResourceResource; onClose: () => void }) {
   if (resource.launchMode === "pdf_reader" || resource.launchMode === "ebook_reader") {
-    return <PdfFullScreenPreview resource={resource} onClose={onClose} />;
+    return (
+      <Suspense fallback={null}>
+        <PdfFullScreenPreview resource={resource} onClose={onClose} />
+      </Suspense>
+    );
   }
 
   if (resource.launchMode === "google_slide_embed" || resource.launchMode === "slide_image_proxy") {
