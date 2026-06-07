@@ -230,6 +230,7 @@ export function ProgressBar({
       data-slot="progress"
       value={clampedValue}
       max={100}
+      aria-valuenow={clampedValue}
       className={cn(
         "h-2 w-full rounded-full bg-[var(--muted)] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-[var(--primary)] [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-[var(--primary)]",
         className,
