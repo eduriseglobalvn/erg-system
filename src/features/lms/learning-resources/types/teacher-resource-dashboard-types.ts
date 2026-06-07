@@ -1,4 +1,4 @@
-﻿export type LearningResourceManagedSchool = {
+export type LearningResourceManagedSchool = {
   id: string;
   name: string;
   principal: string;

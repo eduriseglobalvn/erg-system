@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/routes/router-compat";
 
 import { ERG_ASSETS, getSeoForLocation } from "@/config/seo";
 

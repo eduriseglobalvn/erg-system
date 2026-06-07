@@ -1,4 +1,10 @@
 import type { AttemptSession, AttemptSyncPayload } from "@/lib/types";
+import {
+  getPersistedJsonValue,
+  listPersistedJsonKeys,
+  removePersistedJsonValue,
+  setPersistedJsonValue,
+} from "@/stores/persisted-store";
 
 const SESSION_PREFIX = "erg:attempt-session:";
 const OUTBOX_PREFIX = "erg:attempt-sync:";
@@ -26,7 +32,7 @@ export const browserAttemptStore: AttemptStore = {
       return [];
     }
 
-    return Object.keys(window.localStorage)
+    return listPersistedJsonKeys(OUTBOX_PREFIX)
       .filter((key) => key.startsWith(OUTBOX_PREFIX))
       .map((key) => readJson<AttemptSyncPayload>(key))
       .filter((payload): payload is AttemptSyncPayload => Boolean(payload));
@@ -36,7 +42,7 @@ export const browserAttemptStore: AttemptStore = {
       return;
     }
 
-    window.localStorage.removeItem(`${OUTBOX_PREFIX}${attemptId}`);
+    removePersistedJsonValue(`${OUTBOX_PREFIX}${attemptId}`);
   },
 };
 
@@ -45,17 +51,7 @@ function readJson<T>(key: string): T | null {
     return null;
   }
 
-  const raw = window.localStorage.getItem(key);
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    window.localStorage.removeItem(key);
-    return null;
-  }
+  return getPersistedJsonValue<T | null>(key, null);
 }
 
 function writeJson(key: string, value: unknown) {
@@ -63,11 +59,7 @@ function writeJson(key: string, value: unknown) {
     return;
   }
 
-  try {
-    window.localStorage.setItem(key, JSON.stringify(value));
-  } catch {
-    // Tauri will replace this store with SQLite; browser quota errors should not block grading.
-  }
+  setPersistedJsonValue(key, value);
 }
 
 function canUseLocalStorage() {

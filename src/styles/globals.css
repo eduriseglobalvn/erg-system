@@ -1,32 +1,34 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&family=Manrope:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=Nunito:wght@400;600;700&family=Playfair+Display:wght@400;600;700&family=Source+Sans+3:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Oswald:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./shadcn-utilities.css";
-@import "@fontsource-variable/geist";
 
 @custom-variant dark (&:is(.dark *));
 
 @layer base {
   :root {
-    --font-app: "Geist Variable", "Segoe UI", Arial, Helvetica, sans-serif;
+    --font-app: "Segoe UI Variable", "Segoe UI", "Aptos", "Geist Variable", Arial, Helvetica, sans-serif;
     --font-editor-ui: var(--font-app);
-    --font-lora: "Lora", Georgia, serif;
-    --font-oswald: "Oswald", "Geist Variable", Arial, sans-serif;
-    --erg-blue: #00008b;
+    --erg-blue: #0f6cbd;
     --erg-red: #cc0022;
-    --erg-bg: #f8fafc;
+    --erg-blue-oklch: oklch(0.53 0.156 253.2);
+    --erg-red-oklch: oklch(0.45 0.205 23.92);
+    --erg-blue-hover: #115ea3;
+    --erg-blue-light: #ebf3fc;
+    --erg-blue-ring: rgb(15 108 189 / 15%);
+    --erg-red-hover: #a8001c;
+    --erg-red-light: #fff1f3;
+    --erg-bg: #f7f8fa;
     --erg-surface: #ffffff;
-    --erg-surface-soft: #f1f5f9;
-    --erg-border: #e2e8f0;
-    --erg-text: #0f172a;
-    --erg-muted: #64748b;
-    --erg-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
-    --erg-shadow-lg: 0 30px 90px -20px rgba(15, 23, 42, 0.24);
+    --erg-surface-soft: #f3f4f6;
+    --erg-border: #e0e4ea;
+    --erg-text: #242424;
+    --erg-muted: #616161;
+    --erg-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    --erg-shadow-raised: 0 4px 12px rgba(0, 0, 0, 0.12);
   }
 
   ::selection {
-    background: rgb(0 0 139 / 12%);
+    background: rgb(15 108 189 / 14%);
   }
   * {
     @apply border-border outline-ring/50;
@@ -48,13 +50,13 @@
 
   body {
     @apply m-0 antialiased;
-    background:
-      radial-gradient(circle at top left, rgb(0 0 139 / 0.05), transparent 28%),
-      radial-gradient(circle at bottom right, rgb(204 0 34 / 0.04), transparent 24%),
-      var(--erg-bg);
+    background: var(--erg-bg);
     color: var(--erg-text);
     font-family: var(--font-app);
-    letter-spacing: -0.01em;
+    font-size: 14px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
   }
 
   * {
@@ -70,6 +72,11 @@
   select,
   textarea {
     font: inherit;
+  }
+
+  strong,
+  b {
+    font-weight: 600;
   }
 
   button {
@@ -98,8 +105,6 @@
 @theme inline {
   --font-heading: var(--font-sans);
   --font-sans: var(--font-app);
-  --font-lora: var(--font-lora);
-  --font-oswald: var(--font-oswald);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -147,7 +152,7 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: var(--erg-blue-oklch);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -155,24 +160,24 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: var(--erg-red-oklch);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.62 0.19 264.052);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
+  --radius: 0.5rem;
+  --sidebar: #f6f8fb;
+  --sidebar-foreground: #334155;
+  --sidebar-primary: var(--erg-blue-oklch);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #242424;
+  --sidebar-border: #d9e0ea;
+  --sidebar-ring: rgb(15 108 189 / 18%);
 }
 
 .dark {
@@ -182,15 +187,15 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
+  --primary: oklch(0.78 0.16 264.052);
+  --primary-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.66 0.19 23.92);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -201,7 +206,7 @@
   --chart-5: oklch(0.269 0 0);
   --sidebar: oklch(0.205 0 0);
   --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary: oklch(0.78 0.16 264.052);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.269 0 0);
   --sidebar-accent-foreground: oklch(0.985 0 0);
@@ -210,10 +215,6 @@
 }
 
 @layer utilities {
-  .shadow-3xl {
-    box-shadow: 0 35px 90px -28px rgb(15 23 42 / 0.32);
-  }
-
   .animate-fade-in {
     animation: learning-resource-fade-in 0.5s ease both;
   }
@@ -228,6 +229,559 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .lms-system-toast {
+    animation: lms-system-toast-enter 0.48s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+    max-width: calc(100vw - 32px) !important;
+    width: min(360px, calc(100vw - 32px)) !important;
+  }
+
+  [data-sonner-toaster][data-x-position="right"] {
+    right: 16px !important;
+  }
+
+  .lms-system-toast[data-removed="true"],
+  .lms-system-toast[data-swipe="end"] {
+    animation: lms-system-toast-exit 0.26s ease-in both !important;
+  }
+
+  @keyframes lms-system-toast-enter {
+    from {
+      opacity: 0;
+      transform: translate3d(32px, 0, 0);
+    }
+
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+  }
+
+  @keyframes lms-system-toast-exit {
+    from {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translate3d(32px, 0, 0);
+    }
+  }
+}
+
+@layer components {
+  .lms-teacher-shell {
+    letter-spacing: 0;
+  }
+
+  .lms-teacher-shell .font-bold {
+    font-weight: 500;
+  }
+
+  .lms-teacher-shell .tracking-tight,
+  .lms-teacher-shell [class*="tracking-["] {
+    letter-spacing: 0;
+  }
+
+  .lms-teacher-shell .uppercase {
+    text-transform: none;
+  }
+
+  .lms-teacher-shell .bg-sky-50,
+  .lms-teacher-shell .bg-sky-100,
+  .lms-teacher-shell .hover\:bg-sky-50:hover {
+    background-color: #ebf3fc !important;
+  }
+
+  .lms-teacher-shell .bg-sky-500,
+  .lms-teacher-shell .bg-sky-600 {
+    background-color: var(--erg-blue) !important;
+  }
+
+  .lms-teacher-shell .text-sky-600,
+  .lms-teacher-shell .text-sky-700,
+  .lms-teacher-shell .hover\:text-sky-700:hover {
+    color: var(--erg-blue) !important;
+  }
+
+  .lms-teacher-shell .border-sky-200 {
+    border-color: #b8d6fa !important;
+  }
+
+  .lms-teacher-shell th {
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .lms-teacher-shell td {
+    font-weight: 400;
+  }
+
+  .lms-teacher-shell table button,
+  .lms-teacher-shell td .font-bold {
+    font-weight: 500;
+  }
+
+  .lms-teacher-shell .lms-modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: rgb(255 255 255 / 0.98);
+    backdrop-filter: blur(8px);
+  }
+
+  .erg-fluent-root select,
+  .lms-teacher-shell select {
+    appearance: none;
+    min-height: 40px;
+    border: 1px solid #cfd7e3 !important;
+    border-radius: 8px !important;
+    background-color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.75 10 12.25l4.5-4.5' stroke='%23334155' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    background-position: right 10px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.06) !important;
+    color: #242424 !important;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    padding-left: 12px !important;
+    padding-right: 34px !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
+  .erg-fluent-root select:hover,
+  .lms-teacher-shell select:hover {
+    border-color: #b8c4d4 !important;
+    background-color: #fbfcfe !important;
+  }
+
+  .erg-fluent-root select:focus,
+  .lms-teacher-shell select:focus {
+    border-color: var(--erg-blue) !important;
+    box-shadow: 0 0 0 3px rgb(15 108 189 / 0.14) !important;
+    outline: none !important;
+  }
+
+  .erg-fluent-root select option,
+  .lms-teacher-shell select option {
+    background: #ffffff;
+    color: #242424;
+    font-size: 14px;
+    font-weight: 400;
+  }
+
+  .erg-fluent-root select option:checked,
+  .lms-teacher-shell select option:checked {
+    background: linear-gradient(var(--erg-blue), var(--erg-blue));
+    color: #ffffff;
+  }
+
+  .erg-fluent-root select[data-classification-select="true"],
+  .lms-teacher-shell select[data-classification-select="true"] {
+    min-height: 32px;
+    border-radius: 10px !important;
+    background-position: right 11px center !important;
+    background-size: 14px 14px !important;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.62), 0 1px 2px rgb(15 23 42 / 0.06) !important;
+    font-size: 12px;
+    font-weight: 700;
+    padding-left: 12px !important;
+    padding-right: 30px !important;
+  }
+
+  .erg-fluent-root select[data-classification="A"],
+  .lms-teacher-shell select[data-classification="A"] {
+    border-color: #7dd3a7 !important;
+    background-color: #e8f8ef !important;
+    color: #047857 !important;
+  }
+
+  .erg-fluent-root select[data-classification="B"],
+  .lms-teacher-shell select[data-classification="B"] {
+    border-color: #8ec5ff !important;
+    background-color: #eaf4ff !important;
+    color: #0f6cbd !important;
+  }
+
+  .erg-fluent-root select[data-classification="C"],
+  .lms-teacher-shell select[data-classification="C"] {
+    border-color: #cbd5e1 !important;
+    background-color: #f8fafc !important;
+    color: #475569 !important;
+  }
+
+  .erg-fluent-root select[data-classification="D"],
+  .lms-teacher-shell select[data-classification="D"] {
+    border-color: #f6c453 !important;
+    background-color: #fff7db !important;
+    color: #a16207 !important;
+  }
+
+  .erg-fluent-root select[data-classification="E"],
+  .lms-teacher-shell select[data-classification="E"] {
+    border-color: #fb7185 !important;
+    background-color: #fff1f3 !important;
+    color: #be123c !important;
+  }
+
+  .erg-fluent-root select[data-classification-select="true"]:hover,
+  .lms-teacher-shell select[data-classification-select="true"]:hover {
+    filter: saturate(1.04) brightness(0.99);
+  }
+
+  .erg-fluent-root select[data-classification-select="true"]:focus,
+  .lms-teacher-shell select[data-classification-select="true"]:focus {
+    box-shadow: 0 0 0 2px rgb(15 108 189 / 0.16), 0 1px 2px rgb(15 23 42 / 0.06) !important;
+  }
+
+  .erg-fluent-root input[placeholder*="Tìm"],
+  .erg-fluent-root input[placeholder*="Tim"],
+  .erg-fluent-root input[placeholder*="Search"],
+  .erg-fluent-root input[placeholder*="search"],
+  .erg-fluent-root input[type="search"],
+  .lms-teacher-shell input[placeholder*="Tìm"],
+  .lms-teacher-shell input[placeholder*="Tim"],
+  .lms-teacher-shell input[placeholder*="Search"],
+  .lms-teacher-shell input[placeholder*="search"],
+  .lms-teacher-shell input[type="search"] {
+    min-height: 40px;
+    border: 1px solid #cfd7e3 !important;
+    border-radius: 8px !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
+    color: #242424 !important;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px !important;
+    padding-right: 12px !important;
+    text-align: left !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
+  .erg-fluent-root .relative:has(> svg.pointer-events-none.absolute):not(:has(> svg.lucide-search)) > input,
+  .lms-teacher-shell .relative:has(> svg.pointer-events-none.absolute):not(:has(> svg.lucide-search)) > input {
+    padding-left: 42px !important;
+  }
+
+  .erg-fluent-root input[placeholder*="Tìm"]::placeholder,
+  .erg-fluent-root input[placeholder*="Tim"]::placeholder,
+  .erg-fluent-root input[placeholder*="Search"]::placeholder,
+  .erg-fluent-root input[placeholder*="search"]::placeholder,
+  .erg-fluent-root input[type="search"]::placeholder,
+  .lms-teacher-shell input[placeholder*="Tìm"]::placeholder,
+  .lms-teacher-shell input[placeholder*="Tim"]::placeholder,
+  .lms-teacher-shell input[placeholder*="Search"]::placeholder,
+  .lms-teacher-shell input[placeholder*="search"]::placeholder,
+  .lms-teacher-shell input[type="search"]::placeholder {
+    color: #64748b;
+  }
+
+  .erg-fluent-root input[placeholder*="Tìm"]:focus,
+  .erg-fluent-root input[placeholder*="Tim"]:focus,
+  .erg-fluent-root input[placeholder*="Search"]:focus,
+  .erg-fluent-root input[placeholder*="search"]:focus,
+  .erg-fluent-root input[type="search"]:focus,
+  .lms-teacher-shell input[placeholder*="Tìm"]:focus,
+  .lms-teacher-shell input[placeholder*="Tim"]:focus,
+  .lms-teacher-shell input[placeholder*="Search"]:focus,
+  .lms-teacher-shell input[placeholder*="search"]:focus,
+  .lms-teacher-shell input[type="search"]:focus {
+    border-color: var(--erg-blue) !important;
+    box-shadow: 0 0 0 1px var(--erg-blue), 0 1px 2px rgb(15 23 42 / 0.05) !important;
+    outline: none !important;
+  }
+
+  .erg-fluent-root .relative:has(> input[placeholder*="Tìm"]) > svg.pointer-events-none.absolute,
+  .erg-fluent-root .relative:has(> input[placeholder*="Tim"]) > svg.pointer-events-none.absolute,
+  .erg-fluent-root .relative:has(> input[placeholder*="Search"]) > svg.pointer-events-none.absolute,
+  .erg-fluent-root .relative:has(> input[placeholder*="search"]) > svg.pointer-events-none.absolute,
+  .erg-fluent-root .relative:has(> input[type="search"]) > svg.pointer-events-none.absolute,
+  .lms-teacher-shell .relative:has(> input[placeholder*="Tìm"]) > svg.pointer-events-none.absolute,
+  .lms-teacher-shell .relative:has(> input[placeholder*="Tim"]) > svg.pointer-events-none.absolute,
+  .lms-teacher-shell .relative:has(> input[placeholder*="Search"]) > svg.pointer-events-none.absolute,
+  .lms-teacher-shell .relative:has(> input[placeholder*="search"]) > svg.pointer-events-none.absolute,
+  .lms-teacher-shell .relative:has(> input[type="search"]) > svg.pointer-events-none.absolute {
+    bottom: 0 !important;
+    left: 14px !important;
+    margin-block: auto !important;
+    top: 0 !important;
+    width: 16px !important;
+    height: 16px !important;
+    color: #94a3b8 !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .erg-fluent-root .fui-Input:has(input[placeholder*="TÃ¬m"]),
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Tim"]),
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Search"]),
+  .erg-fluent-root .fui-Input:has(input[placeholder*="search"]),
+  .erg-fluent-root .fui-Input:has(input[type="search"]),
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="TÃ¬m"]),
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Tim"]),
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Search"]),
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="search"]),
+  .lms-teacher-shell .fui-Input:has(input[type="search"]) {
+    border: 1px solid #cfd7e3 !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
+    outline: none !important;
+  }
+
+  .erg-fluent-root .fui-Input:has(input[placeholder*="TÃ¬m"]):focus-within,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Tim"]):focus-within,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Search"]):focus-within,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="search"]):focus-within,
+  .erg-fluent-root .fui-Input:has(input[type="search"]):focus-within,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="TÃ¬m"]):focus-within,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Tim"]):focus-within,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Search"]):focus-within,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="search"]):focus-within,
+  .lms-teacher-shell .fui-Input:has(input[type="search"]):focus-within {
+    border-color: var(--erg-blue) !important;
+    box-shadow: 0 0 0 1px var(--erg-blue), 0 1px 2px rgb(15 23 42 / 0.05) !important;
+  }
+
+  .erg-fluent-root .fui-Input:has(input[placeholder*="TÃ¬m"])::after,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Tim"])::after,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="Search"])::after,
+  .erg-fluent-root .fui-Input:has(input[placeholder*="search"])::after,
+  .erg-fluent-root .fui-Input:has(input[type="search"])::after,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="TÃ¬m"])::after,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Tim"])::after,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="Search"])::after,
+  .lms-teacher-shell .fui-Input:has(input[placeholder*="search"])::after,
+  .lms-teacher-shell .fui-Input:has(input[type="search"])::after {
+    display: none !important;
+  }
+
+  .erg-fluent-root .fui-Input input[placeholder*="TÃ¬m"],
+  .erg-fluent-root .fui-Input input[placeholder*="Tim"],
+  .erg-fluent-root .fui-Input input[placeholder*="Search"],
+  .erg-fluent-root .fui-Input input[placeholder*="search"],
+  .erg-fluent-root .fui-Input input[type="search"],
+  .lms-teacher-shell .fui-Input input[placeholder*="TÃ¬m"],
+  .lms-teacher-shell .fui-Input input[placeholder*="Tim"],
+  .lms-teacher-shell .fui-Input input[placeholder*="Search"],
+  .lms-teacher-shell .fui-Input input[placeholder*="search"],
+  .lms-teacher-shell .fui-Input input[type="search"] {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    padding: 0 !important;
+  }
+
+  .erg-fluent-root .relative:has(> svg.lucide-search):has(> input),
+  .lms-teacher-shell .relative:has(> svg.lucide-search):has(> input) {
+    display: flex !important;
+    min-height: 40px;
+    align-items: center !important;
+    border: 1px solid #cfd7e3;
+    border-radius: 8px;
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+    background-position: 14px center;
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding: 0 12px 0 36px;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05);
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
+  .erg-fluent-root .relative:has(> svg.lucide-search):has(> input):focus-within,
+  .lms-teacher-shell .relative:has(> svg.lucide-search):has(> input):focus-within {
+    border-color: var(--erg-blue);
+    box-shadow: 0 0 0 1px var(--erg-blue), 0 1px 2px rgb(15 23 42 / 0.05);
+  }
+
+  .erg-fluent-root .relative:has(> svg.lucide-search):has(> input) > svg.lucide-search,
+  .lms-teacher-shell .relative:has(> svg.lucide-search):has(> input) > svg.lucide-search {
+    display: none !important;
+  }
+
+  .erg-fluent-root .relative:has(> svg.lucide-search):has(> input) > input,
+  .lms-teacher-shell .relative:has(> svg.lucide-search):has(> input) > input {
+    min-height: 0 !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: #242424 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    outline: none !important;
+  }
+
+  .relative:has(> svg.lucide-search):has(> input) {
+    display: flex !important;
+    min-height: 40px !important;
+    align-items: center !important;
+    border: 1px solid #cfd7e3 !important;
+    border-radius: 8px !important;
+    background-color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E") !important;
+    background-position: 14px center !important;
+    background-repeat: no-repeat !important;
+    background-size: 16px 16px !important;
+    padding: 0 12px 0 36px !important;
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.05) !important;
+    transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+  }
+
+  .relative:has(> svg.lucide-search):has(> input):focus-within {
+    border-color: var(--erg-blue) !important;
+    box-shadow: 0 0 0 1px var(--erg-blue), 0 1px 2px rgb(15 23 42 / 0.05) !important;
+  }
+
+  .relative:has(> svg.lucide-search):has(> input) > svg.lucide-search {
+    display: none !important;
+  }
+
+  .relative:has(> svg.lucide-search):has(> input) > input {
+    min-height: 0 !important;
+    height: auto !important;
+    flex: 1 1 auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #242424 !important;
+    font-size: 14px !important;
+    font-weight: 400 !important;
+    line-height: 20px !important;
+    outline: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    text-align: left !important;
+  }
+
+  .erg-fluent-root .relative:has(> svg.pointer-events-none.absolute.lucide-search):has(> input) > input,
+  .lms-teacher-shell .relative:has(> svg.pointer-events-none.absolute.lucide-search):has(> input) > input,
+  .erg-fluent-root .relative:has(> svg.lucide-search):has(> input) > input,
+  .lms-teacher-shell .relative:has(> svg.lucide-search):has(> input) > input {
+    padding-left: 0 !important;
+  }
+
+  .erg-fluent-root {
+    min-height: 100vh;
+    background: var(--erg-bg);
+    color: var(--erg-text);
+    font-family: var(--font-app);
+    font-size: 14px;
+  }
+
+  .erg-fluent-root * {
+    font-family: inherit;
+  }
+
+  .erg-fluent-root .font-bold {
+    font-weight: 500;
+  }
+
+  .erg-fluent-root .font-black,
+  .erg-fluent-root .font-extrabold {
+    font-weight: 600;
+  }
+
+  .erg-fluent-root .tracking-tight,
+  .erg-fluent-root [class*="tracking-["] {
+    letter-spacing: 0;
+  }
+
+  .erg-fluent-root .rounded-xl,
+  .erg-fluent-root .rounded-2xl,
+  .erg-fluent-root .rounded-3xl,
+  .erg-fluent-root [class*="rounded-[1"],
+  .erg-fluent-root [class*="rounded-[2"],
+  .erg-fluent-root [class*="rounded-[3"] {
+    border-radius: 8px;
+  }
+
+  .erg-fluent-root .shadow-md,
+  .erg-fluent-root .shadow-lg,
+  .erg-fluent-root .shadow-xl,
+  .erg-fluent-root .shadow-2xl,
+  .erg-fluent-root [class*="shadow-["] {
+    box-shadow: var(--erg-shadow);
+  }
+
+  .erg-fluent-root [class*="bg-[linear-gradient"],
+  .erg-fluent-root [class*="bg-[radial-gradient"] {
+    background-image: none;
+    background-color: var(--erg-surface);
+  }
+
+  .erg-fluent-root h1,
+  .erg-fluent-root h2,
+  .erg-fluent-root h3 {
+    letter-spacing: 0;
+    font-weight: 600;
+  }
+
+  .erg-fluent-root h1 {
+    font-size: clamp(1.25rem, 1.05rem + 0.6vw, 1.5rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .erg-fluent-root h2 {
+    font-size: clamp(1.125rem, 1rem + 0.35vw, 1.25rem) !important;
+    line-height: 1.3 !important;
+  }
+
+  .erg-fluent-root h3 {
+    font-size: 1rem !important;
+    line-height: 1.35 !important;
+  }
+
+  .erg-fluent-root .uppercase {
+    text-transform: none;
+  }
+
+  .erg-fluent-root table {
+    border-color: #e2e8f0;
+  }
+
+  .erg-fluent-root th {
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  .erg-fluent-root [data-sidebar="sidebar"],
+  .erg-fluent-root [data-slot="sidebar-inner"] {
+    background: var(--sidebar);
+    border-color: var(--sidebar-border);
+  }
+
+  .erg-fluent-root [data-sidebar="group-label"] {
+    color: #475569;
+    font-weight: 600;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .erg-fluent-root [data-sidebar="menu-button"],
+  .erg-fluent-root [data-sidebar="menu-sub-button"] {
+    font-weight: 600;
+  }
+
+  .erg-fluent-root [data-sidebar="menu-button"][data-active="true"],
+  .erg-fluent-root [data-sidebar="menu-sub-button"][data-active="true"] {
+    background: #ffffff;
+    border-color: #b8d6fa;
+    color: var(--erg-blue);
+    box-shadow: var(--erg-shadow);
   }
 }
 @keyframes student-announcement-popup-countdown {

@@ -1,4 +1,4 @@
-﻿export const ERG_BRAND_NAME = "Trung Tam Ngoai Ngu Tin Hoc ERG";
+export const ERG_BRAND_NAME = "Trung Tam Ngoai Ngu Tin Hoc ERG";
 export const ERG_BRAND_SUFFIX = "Trung Tam Ngoai Ngu - Tin Hoc ERG";
 
 export const ERG_ASSETS = {

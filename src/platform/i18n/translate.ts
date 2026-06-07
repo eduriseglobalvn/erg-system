@@ -1,15 +1,12 @@
 import { messages, type Locale, type MessageKey } from "@/platform/i18n/messages";
+import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 
 const STORAGE_KEY = "erg-learning.locale";
 
 type TranslateParams = Record<string, string | number>;
 
 export function getPreferredLocale(): Locale {
-  if (typeof window === "undefined") {
-    return "vi";
-  }
-
-  const stored = window.localStorage.getItem(STORAGE_KEY);
+  const stored = getPersistedJsonValue<Locale | string>(STORAGE_KEY, "vi");
   if (stored === "vi" || stored === "en") {
     return stored;
   }
@@ -19,8 +16,7 @@ export function getPreferredLocale(): Locale {
 }
 
 export function setPreferredLocale(locale: Locale) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, locale);
+  setPersistedJsonValue(STORAGE_KEY, locale);
 }
 
 export function translate(

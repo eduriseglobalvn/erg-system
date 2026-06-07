@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import {
@@ -29,6 +30,8 @@ import type { ContentScope, DashboardUserPermissions, ManagementScope } from "@/
 
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";
+import { useDebouncedCallback } from "@/hooks/use-paced-callback";
+import { createPersistedStore } from "@/stores/persisted-store";
 
 const COMPACT_DASHBOARD_BREAKPOINT = 1280;
 const SCOPE_SYNC_DEBOUNCE_MS = 250;
@@ -41,21 +44,14 @@ type StoredDashboardContext = {
   managementScope?: ManagementScope;
 };
 
+const dashboardContextStore = createPersistedStore<StoredDashboardContext>(DASHBOARD_CONTEXT_STORAGE_KEY, {});
+
 function readStoredDashboardContext(): StoredDashboardContext {
-  if (typeof window === "undefined") return {};
-  try {
-    const raw = window.localStorage.getItem(DASHBOARD_CONTEXT_STORAGE_KEY);
-    if (!raw) return {};
-    const value = JSON.parse(raw) as StoredDashboardContext;
-    return value && typeof value === "object" ? value : {};
-  } catch {
-    return {};
-  }
+  return dashboardContextStore.get();
 }
 
 function writeStoredDashboardContext(value: StoredDashboardContext) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(DASHBOARD_CONTEXT_STORAGE_KEY, JSON.stringify(value));
+  dashboardContextStore.set(value);
 }
 
 function normalizeStoredLeafId(leafId?: string) {
@@ -84,7 +80,7 @@ export function DashboardShell() {
     storedContext.managementScope ?? (apiBacked ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
   );
   const bootstrapQuery = useQuery({
-    queryKey: ["dashboard", "bootstrap"],
+    queryKey: queryKeys.dashboard.bootstrap(),
     queryFn: loadLmsDashboardBootstrap,
     enabled: apiBacked,
     staleTime: 5 * 60_000,
@@ -144,8 +140,16 @@ export function DashboardShell() {
   const [activeLeafId, setActiveLeafId] = useState(() => normalizeStoredLeafId(storedContext.activeLeafId) ?? defaultLeaf.id);
   const [createEducationUnitOpen, setCreateEducationUnitOpen] = useState(false);
   const [pendingQuestionImports, setPendingQuestionImports] = useState<QuestionBankQuestion[]>([]);
-  const scopeSyncTimerRef = useRef<number | null>(null);
   const lastSyncedScopeRef = useRef<ManagementScope | null>(null);
+  const syncScope = useDebouncedCallback((nextScope: ManagementScope) => {
+    lastSyncedScopeRef.current = nextScope;
+    void updateLmsCurrentScope(nextScope).catch(() => {
+      // Keep the UI optimistic; the next successful selection will re-sync the server scope.
+      if (scopesEqual(lastSyncedScopeRef.current, nextScope)) {
+        lastSyncedScopeRef.current = null;
+      }
+    });
+  }, SCOPE_SYNC_DEBOUNCE_MS);
 
   const activeLeaf = availableLeaves.find((leaf) => leaf.id === activeLeafId) ?? defaultLeaf;
   const allowedSchoolIds = currentUserPermissions.assignedCenterIds;
@@ -203,14 +207,6 @@ export function DashboardShell() {
     console.error("Cannot load LMS bootstrap", bootstrapQuery.error);
   }, [bootstrapQuery.error]);
 
-  useEffect(() => {
-    return () => {
-      if (scopeSyncTimerRef.current) {
-        window.clearTimeout(scopeSyncTimerRef.current);
-      }
-    };
-  }, []);
-
   function openLeaf(leafId: string) {
     if (leafId === "admin-create-unit") {
       if (currentUserPermissions.canAccessGlobalErg) {
@@ -236,20 +232,7 @@ export function DashboardShell() {
       return;
     }
 
-    if (scopeSyncTimerRef.current) {
-      window.clearTimeout(scopeSyncTimerRef.current);
-    }
-
-    scopeSyncTimerRef.current = window.setTimeout(() => {
-      lastSyncedScopeRef.current = nextScope;
-      void updateLmsCurrentScope(nextScope).catch(() => {
-        // Keep the UI optimistic; the next successful selection will re-sync the server scope.
-        if (scopesEqual(lastSyncedScopeRef.current, nextScope)) {
-          lastSyncedScopeRef.current = null;
-        }
-      });
-      scopeSyncTimerRef.current = null;
-    }, SCOPE_SYNC_DEBOUNCE_MS);
+    syncScope.run(nextScope);
   }
 
   function selectScopeRoot(value: string) {

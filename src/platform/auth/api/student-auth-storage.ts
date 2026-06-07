@@ -4,6 +4,11 @@ import {
   STUDENT_TEMP_SESSION_KEY,
 } from "@/platform/auth/api/auth-token-storage";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
+import {
+  getPersistedJsonValue,
+  removePersistedJsonValue,
+  setPersistedJsonValue,
+} from "@/stores/persisted-store";
 
 const AUTH_V1_BASE = "/api/v1/auth";
 
@@ -46,9 +51,9 @@ function parseJson<T>(value: string | null, fallback: T) {
 export function getCurrentStudentSession() {
   if (!canUseStorage()) return null;
 
-  const localSession = parseJson<StudentSession | null>(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY), null);
+  const localSession = getPersistedJsonValue<StudentSession | null>(STUDENT_LOCAL_SESSION_KEY, null);
   if (isValidStudentSession(localSession)) return localSession;
-  if (localSession) window.localStorage.removeItem(STUDENT_LOCAL_SESSION_KEY);
+  if (localSession) removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
 
   const tempSession = parseJson<StudentSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null);
   if (isValidStudentSession(tempSession)) return tempSession;
@@ -105,20 +110,20 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
   if (!canUseStorage()) return session;
 
   if (input.rememberMe) {
-    window.localStorage.setItem(STUDENT_LOCAL_SESSION_KEY, JSON.stringify(session));
+    setPersistedJsonValue(STUDENT_LOCAL_SESSION_KEY, session);
     window.sessionStorage.removeItem(STUDENT_TEMP_SESSION_KEY);
     return session;
   }
 
   window.sessionStorage.setItem(STUDENT_TEMP_SESSION_KEY, JSON.stringify(session));
-  window.localStorage.removeItem(STUDENT_LOCAL_SESSION_KEY);
+  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
   return session;
 }
 
 export function logoutStudentSession() {
   if (!canUseStorage()) return;
 
-  window.localStorage.removeItem(STUDENT_LOCAL_SESSION_KEY);
+  removePersistedJsonValue(STUDENT_LOCAL_SESSION_KEY);
   window.sessionStorage.removeItem(STUDENT_TEMP_SESSION_KEY);
 }
 

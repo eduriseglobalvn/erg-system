@@ -24,7 +24,8 @@ import type {
   QuizEditorGroup,
   SelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
+import { cn } from "@/utils/cn";
+import { AppSelect } from "@/components/ui/app-select";
 
 type OutlineProps = {
   quizTitle: string;
@@ -152,14 +153,14 @@ export function QuizEditorOutline({
 
       <div className="classic-editor__manager-filter">
         <label className="classic-editor__manager-filter-label">{t("quiz.sortQuestionsBy")}</label>
-        <select
+        <AppSelect
           value={groupingMode}
           onChange={(event) => onChangeGroupingMode(event.target.value as QuestionManagerGrouping)}
           className="classic-editor__select classic-editor__manager-filter-select"
         >
           <option value="type">{t("quiz.sortModeType")}</option>
           <option value="group">{t("quiz.sortModeGroup")}</option>
-        </select>
+        </AppSelect>
       </div>
 
       <FormOutline

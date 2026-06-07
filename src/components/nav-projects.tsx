@@ -56,7 +56,7 @@ export function NavProjects({
               <DropdownMenuTrigger asChild>
                 <SidebarMenuAction
                   showOnHover
-                  className="aria-expanded:bg-muted"
+                  className="text-slate-500 hover:bg-white hover:text-[var(--erg-blue)] aria-expanded:bg-white aria-expanded:text-[var(--erg-blue)] aria-expanded:shadow-sm"
                 >
                   <MoreHorizIcon />
                   <span className="sr-only">{t("common.more")}</span>
@@ -68,16 +68,16 @@ export function NavProjects({
                 align={isMobile ? "end" : "start"}
               >
                 <DropdownMenuItem>
-                  <FolderIcon className="text-muted-foreground" fontSize="inherit" />
+                  <FolderIcon className="text-slate-500" fontSize="inherit" />
                   <span>{t("common.viewProject")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <ArrowForwardIcon className="text-muted-foreground" fontSize="inherit" />
+                  <ArrowForwardIcon className="text-slate-500" fontSize="inherit" />
                   <span>{t("common.shareProject")}</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
-                  <DeleteOutlinedIcon className="text-muted-foreground" fontSize="inherit" />
+                  <DeleteOutlinedIcon className="text-slate-500" fontSize="inherit" />
                   <span>{t("common.deleteProject")}</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -85,8 +85,8 @@ export function NavProjects({
           </SidebarMenuItem>
         ))}
         <SidebarMenuItem>
-            <SidebarMenuButton className="text-sidebar-foreground/70">
-              <MoreHorizIcon className="text-sidebar-foreground/70" fontSize="inherit" />
+            <SidebarMenuButton className="text-slate-500 hover:text-[var(--erg-blue)]">
+              <MoreHorizIcon className="text-slate-500" fontSize="inherit" />
               <span>{t("common.more")}</span>
             </SidebarMenuButton>
         </SidebarMenuItem>

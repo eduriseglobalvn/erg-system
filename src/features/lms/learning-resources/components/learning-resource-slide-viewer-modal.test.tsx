@@ -1,4 +1,4 @@
-﻿import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";

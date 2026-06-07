@@ -118,7 +118,7 @@ export const readinessCopy: Record<QuestionDemoReadiness, { label: string; class
   },
   "authoring-ready": {
     label: "Mock + authoring",
-    className: "border-blue-200 bg-blue-50 text-blue-700",
+    className: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
   },
   "mock-only": {
     label: "Mock rubric",

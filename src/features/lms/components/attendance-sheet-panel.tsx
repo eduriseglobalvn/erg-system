@@ -1,10 +1,22 @@
-﻿import { useMemo, useState, type ReactNode } from "react";
-import { Download, LockKeyhole, RotateCcw, Save, Search, UserRound, X } from "lucide-react";
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+import {
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+  type ColumnDef,
+} from "@tanstack/react-table";
+import { Download, Search } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button, Input } from "@/components/ui/dashboard-kit";
+import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
 import type { ClassroomSnapshot, ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
+import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { StudentAttendanceContextMenu } from "@/features/lms/components/student-attendance-context-menu";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useVirtualList } from "@/hooks/use-virtual-list";
 import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 type AttendanceStatus = "present" | "absent" | "late" | "excused" | "";
 type SessionPart = "Tiết 1" | "Tiết 2";
@@ -44,12 +56,6 @@ type AttendanceSheetPanelProps = {
 };
 
 const COURSE_START_DATE = "2026-05-29";
-
-const statusLabels: Record<StudentStatus, string> = {
-  ahead: "Vượt tiến độ",
-  steady: "Ổn định",
-  support: "Cần hỗ trợ",
-};
 
 type CurriculumItem = {
   topic: string;
@@ -123,26 +129,65 @@ const curriculumProgram: CurriculumItem[] = [
 export function AttendanceSheetPanel({ selectedClass, students }: AttendanceSheetPanelProps) {
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
   const [selectedDate, setSelectedDate] = useState(getTodayInputDate());
-  const [sessionFilter, setSessionFilter] = useState<"Tất cả tiết" | SessionPart>("Tất cả tiết");
-  const [savedAt, setSavedAt] = useState<string | null>(null);
+  const [attendancePaneWidth, setAttendancePaneWidth] = useState(68);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; student: ClassroomStudent } | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentDraft>>({});
   const [notice, setNotice] = useState<string | null>(null);
+  const splitPaneRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
   const todayInputDate = getTodayInputDate();
   const dateColumns = useMemo(() => buildAttendanceColumns(selectedDate), [selectedDate]);
-  const visibleColumns = dateColumns.filter((column) => sessionFilter === "Tất cả tiết" || column.session === sessionFilter);
+  const visibleColumns = dateColumns;
   const visibleDayGroups = useMemo(() => groupAttendanceColumnsByDate(visibleColumns), [visibleColumns]);
   const dateRangeLabel = `${dateColumns[0]?.date ?? ""} - ${dateColumns[dateColumns.length - 1]?.date ?? ""}`;
   const taughtLessonCount = countLessonsThroughDate(selectedDate);
   const selectedStudent = students.find((student) => student.id === selectedStudentId) ?? null;
-  const filteredStudents = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
-    if (!normalizedQuery) return students;
-    return students.filter((student) => student.name.toLowerCase().includes(normalizedQuery));
-  }, [searchQuery, students]);
+  const attendanceTableColumns = useMemo<ColumnDef<ClassroomStudent>[]>(
+    () => [
+      {
+        accessorFn: (student) => student.name,
+        id: "student",
+      },
+    ],
+    [],
+  );
+  const attendanceTable = useReactTable({
+    columns: attendanceTableColumns,
+    data: students,
+    enableGlobalFilter: true,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, filterValue) => {
+      const normalizedQuery = String(filterValue ?? "").trim().toLowerCase();
+      return !normalizedQuery || row.original.name.toLowerCase().includes(normalizedQuery);
+    },
+    state: {
+      globalFilter: debouncedSearchQuery,
+    },
+  });
+  const filteredStudentRows = attendanceTable.getRowModel().rows;
+  const filteredStudents = filteredStudentRows.map((row) => row.original);
+  const rowVirtualizer = useVirtualList({
+    count: filteredStudents.length,
+    estimateSize: 28,
+    overscan: 10,
+    scrollRef: tableScrollRef,
+  });
+  const measuredVirtualRows = rowVirtualizer.getVirtualItems();
+  const virtualRows = measuredVirtualRows.length
+    ? measuredVirtualRows
+    : Array.from({ length: Math.min(filteredStudents.length, 20) }, (_, index) => ({
+        end: (index + 1) * 28,
+        index,
+        start: index * 28,
+      }));
+  const virtualTotalSize = Math.max(rowVirtualizer.getTotalSize(), filteredStudents.length * 28);
+  const tableColumnCount = 3 + visibleColumns.length;
 
   function statusFor(studentId: string, studentIndex: number, column: AttendanceColumn, columnIndex: number) {
     if (column.isFutureDate) return "";
@@ -158,28 +203,13 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       ...current,
       [key]: nextAttendanceStatus(currentStatus),
     }));
-    setSavedAt(null);
-  }
-
-  function resetVisibleAttendance() {
-    const visibleKeys = new Set<string>();
-    filteredStudents.forEach((student) => {
-      visibleColumns.forEach((column) => visibleKeys.add(attendanceKey(student.id, column.id)));
-    });
-    setAttendanceOverrides((current) => Object.fromEntries(Object.entries(current).filter(([key]) => !visibleKeys.has(key))));
-    setSavedAt(null);
-  }
-
-  function saveAttendance() {
-    const storageKey = `lms-attendance:${selectedClass?.id ?? "all"}:${selectedDate}`;
-    window.localStorage.setItem(storageKey, JSON.stringify({ overrides: attendanceOverrides, studentDrafts, savedAt: new Date().toISOString() }));
-    setSavedAt(new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }));
   }
 
   function exportCsv() {
     const header = ["STT", "Học sinh", "Tổng vắng", ...visibleColumns.map((column) => `${column.day} ${column.date} ${column.session}`)];
-    const rows = filteredStudents.map((student, studentIndex) => {
-      const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column, columnIndex));
+    const rows = filteredStudentRows.map((row, studentIndex) => {
+      const student = row.original;
+      const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, row.index, column, columnIndex));
       const summary = attendanceSummary(statuses);
       return [String(studentIndex + 1), student.name, String(summary.absent), ...statuses.map((status) => attendanceText(status))];
     });
@@ -212,20 +242,47 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
 
   function showAction(message: string) {
     setNotice(message);
+    toast.info(message);
+  }
+
+  function startPaneResize(event: ReactPointerEvent<HTMLButtonElement>) {
+    const container = splitPaneRef.current;
+    if (!container) return;
+
+    event.preventDefault();
+    const rect = container.getBoundingClientRect();
+
+    function updatePaneWidth(clientX: number) {
+      const nextWidth = ((clientX - rect.left) / rect.width) * 100;
+      setAttendancePaneWidth(Math.min(82, Math.max(30, nextWidth)));
+    }
+
+    function handlePointerMove(pointerEvent: PointerEvent) {
+      updatePaneWidth(pointerEvent.clientX);
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    }
+
+    updatePaneWidth(event.clientX);
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-2 p-2">
       <section className="shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
         <div className="flex flex-wrap items-center gap-1.5">
-          <div className="mr-auto min-w-[220px] border-b border-slate-900 pb-1 pr-6 text-[12px] italic leading-5 text-[#001d63]">
+          <div className="mr-auto min-w-[220px] border-b border-slate-900 pb-1 pr-6 text-[12px] italic leading-5 text-[var(--erg-blue)]">
             <div>Gv phụ trách: <span className="font-semibold">{selectedClass?.homeroomTeacher ?? ""}</span></div>
             <div className="flex items-center gap-10">
               <span>Số tiết đã dạy:</span>
-              <span className="font-black not-italic text-red-600">{taughtLessonCount}</span>
+              <span className="font-semibold not-italic text-red-600">{taughtLessonCount}</span>
             </div>
           </div>
-          {notice ? <span className="rounded bg-blue-50 px-2 py-1 text-[11px] font-bold text-blue-700">{notice}</span> : null}
+          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[11px] font-medium text-[var(--erg-blue)]">{notice}</span> : null}
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
             <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
             <Input
@@ -235,7 +292,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
               className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
             />
           </div>
-          <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700">
+          <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700">
             <span className="text-slate-500">Ngày</span>
             <span className="min-w-[74px] text-slate-800">{formatFullDate(parseDateInput(selectedDate))}</span>
             <input
@@ -243,74 +300,78 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
               aria-label="Chọn ngày trọng tâm"
               value={selectedDate}
               max={todayInputDate}
-              onChange={(event) => {
-                setSelectedDate(clampInputDateToToday(event.target.value));
-                setSavedAt(null);
-              }}
+              onChange={(event) => setSelectedDate(clampInputDateToToday(event.target.value))}
               className="h-7 w-8 cursor-pointer rounded bg-transparent text-transparent outline-none"
             />
           </label>
-          <select
-            value={sessionFilter}
-            onChange={(event) => setSessionFilter(event.target.value as "Tất cả tiết" | SessionPart)}
-            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700 outline-none"
-          >
-            <option>Tất cả tiết</option>
-            <option>Tiết 1</option>
-            <option>Tiết 2</option>
-          </select>
-          <Button type="button" variant="outline" onClick={resetVisibleAttendance} className="h-8 rounded-md px-2.5 text-xs">
-            <RotateCcw className="h-3.5 w-3.5" />
-            Đặt lại
-          </Button>
           <Button type="button" variant="outline" onClick={exportCsv} className="h-8 rounded-md px-2.5 text-xs">
             <Download className="h-3.5 w-3.5" />
             Xuất CSV
           </Button>
-          <Button type="button" onClick={saveAttendance} className="h-8 rounded-md bg-slate-950 px-2.5 text-xs font-black text-white">
-            <Save className="h-3.5 w-3.5" />
-            Lưu
-          </Button>
+          <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700">
+            <span className="text-slate-500">Môn</span>
+            <AppSelect
+              aria-label="Chọn môn học"
+              value={selectedSubject}
+              onChange={(event) => setSelectedSubject(event.target.value)}
+              className="h-7 bg-transparent font-medium text-slate-800 outline-none"
+            >
+              {lmsSubjectOptions.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </AppSelect>
+          </label>
         </div>
       </section>
 
-      <div className="grid min-h-0 flex-1 gap-2 xl:grid-cols-[minmax(0,1fr)_minmax(360px,1fr)]">
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+      <div ref={splitPaneRef} className="grid min-h-0 flex-1 gap-2 xl:flex xl:gap-0">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white xl:flex-none" style={{ flexBasis: `${attendancePaneWidth}%` }}>
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
-            <h2 className="text-sm font-black text-slate-950">Điểm danh {dateRangeLabel}</h2>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold">
-              {savedAt ? <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Đã lưu {savedAt}</span> : null}
+            <h2 className="text-sm font-semibold text-slate-950">Điểm danh {dateRangeLabel}</h2>
+            <div className="flex items-center gap-1.5 text-[10px] font-medium">
               <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
               <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
               <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
-              <span className="rounded bg-sky-50 px-1.5 py-0.5 text-sky-700">Có phép</span>
+              <span className="rounded bg-[var(--erg-blue-light)] px-1.5 py-0.5 text-[var(--erg-blue)]">Có phép</span>
             </div>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto">
-            <table className="min-w-[790px] border-separate border-spacing-0 text-[11px]">
+          <div ref={tableScrollRef} className="min-h-0 flex-1 overflow-auto">
+            <table className="w-full min-w-[790px] border-separate border-spacing-0 text-[11px]">
               <thead>
-                <tr className="bg-[#f8fbff] text-[10px] font-black uppercase text-[#1d4ed8]">
+                <tr className="bg-slate-50 text-[10px] font-semibold text-slate-500">
                   <AttendanceHeaderCell rowSpan={2} className="sticky left-0 top-0 z-40 w-9">STT</AttendanceHeaderCell>
                   <AttendanceHeaderCell rowSpan={2} className="sticky left-9 top-0 z-40 w-40 text-left">Học sinh</AttendanceHeaderCell>
                   <AttendanceHeaderCell rowSpan={2} className="sticky left-[196px] top-0 z-40 w-[62px]">Tổng vắng</AttendanceHeaderCell>
                   {visibleDayGroups.map((group) => (
-                    <AttendanceHeaderCell key={group.id} colSpan={group.columns.length} className={cn("sticky top-0 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-t-2 border-blue-300 bg-blue-100 text-blue-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]")}>
+                    <AttendanceHeaderCell key={group.id} colSpan={group.columns.length} className={cn("sticky top-0 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-t-2 border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)] shadow-sm")}>
                       <span className="block">{group.day}</span>
-                      <span className="mt-0.5 block text-[10px] font-bold normal-case text-slate-500">{group.date}</span>
+                      <span className="mt-0.5 block text-[10px] font-medium normal-case text-slate-500">{group.date}</span>
                     </AttendanceHeaderCell>
                   ))}
                 </tr>
-                <tr className="bg-[#f8fbff] text-[10px] font-black uppercase text-[#1d4ed8]">
+                <tr className="bg-slate-50 text-[10px] font-semibold text-slate-500">
                   {visibleDayGroups.map((group) => (
-                    <AttendanceHeaderCell key={`${group.id}-lessons`} colSpan={group.columns.length} className={cn("sticky top-8 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-blue-300 bg-blue-100 text-blue-800")}>
+                    <AttendanceHeaderCell key={`${group.id}-lessons`} colSpan={group.columns.length} className={cn("sticky top-8 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}>
                       {group.columns.length}
                     </AttendanceHeaderCell>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((student, studentIndex) => {
-                  const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, studentIndex, column, columnIndex));
+                {virtualRows[0]?.start ? (
+                  <tr aria-hidden="true">
+                    <td colSpan={tableColumnCount} style={{ height: virtualRows[0].start }} />
+                  </tr>
+                ) : null}
+                {virtualRows.map((virtualRow) => {
+                  const studentIndex = virtualRow.index;
+                  const studentRow = filteredStudentRows[studentIndex];
+                  const student = studentRow?.original;
+                  if (!student) return null;
+                  const sourceStudentIndex = studentRow.index;
+                  const statuses = visibleColumns.map((column, columnIndex) => statusFor(student.id, sourceStudentIndex, column, columnIndex));
                   const summary = attendanceSummary(statuses);
                   return (
                     <tr key={student.id} className="group">
@@ -318,7 +379,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                       <AttendanceStickyCell className="left-9 z-20 w-40">
                         <button
                           type="button"
-                          className="max-w-[136px] truncate text-left font-bold text-[#2563eb] hover:underline"
+                          className="max-w-[136px] truncate text-left font-medium text-[var(--erg-blue)] hover:underline"
                           onClick={() => openStudentDetail(student)}
                           onContextMenu={(event) => {
                             event.preventDefault();
@@ -329,19 +390,19 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                         </button>
                       </AttendanceStickyCell>
                       <AttendanceStickyCell className="left-[196px] z-20 w-[62px] text-center">
-                        <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-black", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
+                        <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
                           {summary.absent}
                         </span>
                       </AttendanceStickyCell>
                       {visibleColumns.map((column, columnIndex) => {
                         const status = statuses[columnIndex];
                         return (
-                          <td key={column.id} className={cn("h-7 border-b border-r border-blue-100 px-1 text-center group-hover:!bg-blue-50", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status), column.isFutureDate && "bg-slate-50 text-slate-300")}>
+                          <td key={column.id} className={cn("h-7 border-b border-r border-slate-100 px-1 text-center group-hover:!bg-[var(--erg-blue-light)]", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status), column.isFutureDate && "bg-slate-100 text-slate-400")}>
                             <button
                               type="button"
-                              onClick={() => updateAttendance(student.id, studentIndex, column, columnIndex)}
+                              onClick={() => updateAttendance(student.id, sourceStudentIndex, column, columnIndex)}
                               disabled={column.isFutureDate}
-                              className="h-6 w-full rounded text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-200 disabled:cursor-not-allowed"
+                              className="h-6 w-full rounded text-[11px] font-semibold outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:cursor-not-allowed"
                               aria-label={`${student.name} ${column.day} ${column.session}`}
                               title={column.isFutureDate ? "Ngày chưa tới, chưa thể điểm danh" : "Bấm để đổi trạng thái"}
                             >
@@ -353,12 +414,28 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                     </tr>
                   );
                 })}
+                {virtualTotalSize - (virtualRows.at(-1)?.end ?? 0) > 0 ? (
+                  <tr aria-hidden="true">
+                    <td colSpan={tableColumnCount} style={{ height: virtualTotalSize - (virtualRows.at(-1)?.end ?? 0) }} />
+                  </tr>
+                ) : null}
               </tbody>
             </table>
           </div>
         </section>
 
-        <CurriculumDistributionPanel selectedDate={selectedDate} taughtLessonCount={taughtLessonCount} />
+        <button
+          type="button"
+          aria-label="Kéo để điều chỉnh kích thước hai bảng"
+          onPointerDown={startPaneResize}
+          className="group hidden w-3 shrink-0 cursor-col-resize items-center justify-center xl:flex"
+        >
+          <span className="h-16 w-1 rounded-full bg-[#b8d6fa] transition group-hover:bg-slate-500" />
+        </button>
+
+        <div className="min-h-0 min-w-[260px] xl:flex xl:flex-1">
+          <CurriculumDistributionPanel taughtLessonCount={taughtLessonCount} />
+        </div>
       </div>
 
       <StudentAttendanceContextMenu
@@ -377,10 +454,17 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       />
 
       {selectedStudent ? (
-        <StudentDetailDrawer
+        <StudentProfileDetailDrawer
           draft={studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent)}
           onClose={() => setSelectedStudentId(null)}
           onUpdate={(patch) => updateStudentDraft(selectedStudent.id, patch)}
+          onStatusChange={(status) => updateStudentDraft(selectedStudent.id, { status })}
+          statusOptions={[
+            { label: "Vượt tiến độ", value: "ahead" },
+            { label: "Ổn định", value: "steady" },
+            { label: "Cần hỗ trợ", value: "support" },
+          ]}
+          statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent)).status}
           student={selectedStudent}
         />
       ) : null}
@@ -388,27 +472,29 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
   );
 }
 
-function CurriculumDistributionPanel({ selectedDate, taughtLessonCount }: { selectedDate: string; taughtLessonCount: number }) {
+function CurriculumDistributionPanel({ taughtLessonCount }: { taughtLessonCount: number }) {
   const topicSpans = getCurriculumTopicSpans(curriculumProgram);
   return (
-    <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
       <div className="border-b border-slate-200 px-3 py-2">
         <div className="flex items-center justify-between gap-2">
           <div>
-            <h2 className="text-sm font-black uppercase text-[#001d63]">Khung chương trình tin học quốc tế</h2>
-            <p className="mt-0.5 text-xs font-black text-[#001d63]">IC3 GS6 Level 3 - Tin học 8</p>
+            <h2 className="text-sm font-semibold text-[var(--erg-blue)]">Khung chương trình tin học quốc tế</h2>
           </div>
-          <span className="rounded bg-blue-50 px-2 py-1 text-[11px] font-black text-blue-700">{taughtLessonCount} tiết đã điểm danh</span>
         </div>
-        <p className="mt-1 text-[11px] font-semibold text-slate-500">Ngày trọng tâm {formatFullDate(parseDateInput(selectedDate))}</p>
       </div>
       <div className="min-h-0 flex-1 overflow-auto bg-white p-2">
-        <table className="w-full min-w-[560px] border-collapse text-[12px] text-[#001d63]">
+        <table className="w-full table-fixed border-collapse text-[12px] text-[var(--erg-blue)]">
+          <colgroup>
+            <col className="w-32" />
+            <col className="w-12" />
+            <col />
+          </colgroup>
           <thead className="sticky top-0 z-10 bg-white">
             <tr>
-              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Chủ đề</th>
-              <th className="w-12 border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Tiết</th>
-              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-bold">Tên bài học</th>
+              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Chủ đề</th>
+              <th className="w-12 border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Tiết</th>
+              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Tên bài học</th>
             </tr>
           </thead>
           <tbody>
@@ -416,14 +502,14 @@ function CurriculumDistributionPanel({ selectedDate, taughtLessonCount }: { sele
               const isCurrent = item.period === taughtLessonCount;
               const isDone = item.period < taughtLessonCount;
               return (
-                <tr key={item.period} className={cn(isCurrent && "bg-blue-50", isDone && !isCurrent && "bg-emerald-50/30")}>
+                <tr key={item.period} className={cn(isCurrent && "bg-[var(--erg-blue-light)]", isDone && !isCurrent && "bg-emerald-50/30")}>
                   {topicSpans.firstRows.get(item.topic) === index ? (
-                    <td rowSpan={topicSpans.counts.get(item.topic)} className="w-32 border border-slate-900 px-2 py-1 text-center align-middle font-semibold">
+                    <td rowSpan={topicSpans.counts.get(item.topic)} className="w-32 break-words border border-slate-900 px-2 py-1 text-center align-middle font-semibold leading-5">
                       {item.topic}
                     </td>
                   ) : null}
                   <td className="border border-slate-900 px-2 py-1 text-center italic">{item.period}</td>
-                  <td className={cn("border border-slate-900 px-2 py-1 font-normal", isCurrent && "font-bold ring-2 ring-inset ring-emerald-500")}>
+                  <td className={cn("break-words border border-slate-900 px-2 py-1 font-normal leading-5 whitespace-normal", isCurrent && "font-medium ring-2 ring-inset ring-emerald-500")}>
                     {item.title}
                   </td>
                 </tr>
@@ -433,76 +519,6 @@ function CurriculumDistributionPanel({ selectedDate, taughtLessonCount }: { sele
         </table>
       </div>
     </section>
-  );
-}
-
-function StudentDetailDrawer({
-  draft,
-  onClose,
-  onUpdate,
-  student,
-}: {
-  draft: StudentDraft;
-  onClose: () => void;
-  onUpdate: (patch: Partial<StudentDraft>) => void;
-  student: ClassroomStudent;
-}) {
-  return (
-    <>
-      <button type="button" aria-label="Đóng chi tiết học sinh" className="fixed inset-0 z-[90] bg-slate-950/20" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-[100] flex h-screen w-[420px] max-w-[calc(100vw-20px)] flex-col border-l border-slate-200 bg-white shadow-2xl">
-        <div className="flex items-start justify-between gap-3 border-b border-slate-200 p-4">
-          <div>
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-blue-700">
-              <UserRound className="h-5 w-5" />
-            </div>
-            <h2 className="mt-3 text-lg font-black text-slate-950">Chi tiết học sinh</h2>
-            <p className="text-xs font-semibold text-slate-500">{student.className} · {student.schoolName}</p>
-          </div>
-          <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-slate-100" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="min-h-0 flex-1 overflow-auto p-4">
-          <div className="grid gap-3">
-            <Field label="Họ tên">
-              <input value={draft.name} onChange={(event) => onUpdate({ name: event.target.value })} className={detailInputClass} />
-            </Field>
-            <Field label="Username">
-              <input value={draft.username} onChange={(event) => onUpdate({ username: event.target.value })} className={detailInputClass} />
-            </Field>
-            <Field label="Password">
-              <div className="relative">
-                <LockKeyhole className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <input value={draft.password} onChange={(event) => onUpdate({ password: event.target.value })} className={cn(detailInputClass, "pl-8")} />
-              </div>
-            </Field>
-            <Field label="Trạng thái">
-              <select value={draft.status} onChange={(event) => onUpdate({ status: event.target.value as StudentStatus })} className={detailInputClass}>
-                <option value="ahead">Vượt tiến độ</option>
-                <option value="steady">Ổn định</option>
-                <option value="support">Cần hỗ trợ</option>
-              </select>
-            </Field>
-            <Field label="Ghi chú">
-              <textarea value={draft.note} onChange={(event) => onUpdate({ note: event.target.value })} className={cn(detailInputClass, "min-h-28 py-2 leading-5")} />
-            </Field>
-          </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
-            <MiniMetric label="Điểm TB" value={`${student.averageScore}`} />
-            <MiniMetric label="Bài hoàn thành" value={`${student.completedAssignments}`} />
-            <MiniMetric label="Streak" value={`${student.streakDays} ngày`} />
-          </div>
-        </div>
-        <div className="flex items-center justify-between gap-2 border-t border-slate-200 p-3">
-          <span className="text-xs font-bold text-slate-500">{statusLabels[draft.status]}</span>
-          <Button type="button" onClick={onClose} className="h-9 rounded-md px-3 text-xs">
-            Lưu thông tin
-          </Button>
-        </div>
-      </aside>
-    </>
   );
 }
 
@@ -518,35 +534,15 @@ function AttendanceHeaderCell({
   rowSpan?: number;
 }) {
   return (
-    <th colSpan={colSpan} rowSpan={rowSpan} className={cn("h-8 border-b border-r border-blue-200 bg-[#f8fbff] px-1.5 text-center align-middle", className)}>
+    <th colSpan={colSpan} rowSpan={rowSpan} className={cn("h-8 border-b border-r border-slate-200 bg-slate-50 px-1.5 text-center align-middle", className)}>
       {children}
     </th>
   );
 }
 
 function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("sticky h-7 border-b border-r border-blue-100 bg-white px-1.5 align-middle group-hover:bg-blue-50", className)}>{children}</td>;
+  return <td className={cn("sticky h-7 border-b border-r border-slate-100 bg-white px-1.5 align-middle group-hover:bg-slate-50", className)}>{children}</td>;
 }
-
-function Field({ children, label }: { children: ReactNode; label: string }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-[11px] font-black uppercase text-slate-500">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function MiniMetric({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
-      <div className="text-[10px] font-bold uppercase text-slate-400">{label}</div>
-      <div className="mt-0.5 truncate text-xs font-black text-slate-900">{value}</div>
-    </div>
-  );
-}
-
-const detailInputClass = "h-9 w-full rounded-md border border-slate-200 bg-white px-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-blue-300 focus:ring-2 focus:ring-blue-100";
 
 function attendanceKey(studentId: string, columnId: string) {
   return `${studentId}:${columnId}`;
@@ -650,7 +646,7 @@ function nextStudentStatus(status: StudentStatus): StudentStatus {
 }
 
 function attendanceLabel(status: AttendanceStatus) {
-  if (!status) return "";
+  if (!status) return "—";
   if (status === "absent") return "V";
   if (status === "late") return "M";
   if (status === "excused") return "P";
@@ -658,7 +654,7 @@ function attendanceLabel(status: AttendanceStatus) {
 }
 
 function attendanceText(status: AttendanceStatus) {
-  if (!status) return "";
+  if (!status) return "Chưa điểm danh";
   if (status === "absent") return "Vắng";
   if (status === "late") return "Đi muộn";
   if (status === "excused") return "Có phép";
@@ -666,20 +662,20 @@ function attendanceText(status: AttendanceStatus) {
 }
 
 function attendanceCellClass(status: AttendanceStatus) {
-  if (!status) return "bg-slate-50 text-slate-300";
+  if (!status) return "bg-slate-100 text-slate-400";
   if (status === "absent") return "bg-rose-50 text-rose-700";
   if (status === "late") return "bg-amber-50 text-amber-700";
-  if (status === "excused") return "bg-sky-50 text-sky-700";
+  if (status === "excused") return "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]";
   return "bg-emerald-50 text-emerald-700";
 }
 
 function focusAttendanceCellClass(status: AttendanceStatus) {
-  const edge = "border-x-2 border-x-blue-300";
-  if (!status) return cn(edge, "bg-slate-50");
+  const edge = "border-x-2 border-x-[#b8d6fa]";
+  if (!status) return cn(edge, "bg-slate-100");
   if (status === "absent") return cn(edge, "bg-rose-100/80");
   if (status === "late") return cn(edge, "bg-amber-100/80");
-  if (status === "excused") return cn(edge, "bg-sky-100/80");
-  return cn(edge, "bg-blue-50");
+  if (status === "excused") return cn(edge, "bg-[var(--erg-blue-light)]");
+  return cn(edge, "bg-[var(--erg-blue-light)]");
 }
 
 function attendanceSummary(statuses: AttendanceStatus[]) {

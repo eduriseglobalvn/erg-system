@@ -1,4 +1,4 @@
-﻿type PortalKey = "admin" | "crm" | "lcms" | "lms" | "elearning";
+type PortalKey = "admin" | "crm" | "lcms" | "lms" | "elearning";
 
 export function buildRedirectPath(pathname: string, search = "", hash = "") {
   return `${pathname || "/"}${search}${hash}`;

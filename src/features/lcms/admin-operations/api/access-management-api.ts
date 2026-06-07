@@ -1,4 +1,4 @@
-﻿import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
+import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
 
 export type AccessScopeType = "system" | "center" | "school";
 

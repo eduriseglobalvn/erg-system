@@ -44,16 +44,19 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    dedupe: ["react", "react-dom"],
   },
   test: {
     environment: "jsdom",
     exclude: ["**/node_modules/**", "**/dist/**", "**/.codex-chrome-*/**"],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
+    testTimeout: 10_000,
   },
   server: {
     host: "0.0.0.0",
     port: 3001,
+    strictPort: true,
     proxy: {
       "/api": {
         target: "http://localhost:8080",

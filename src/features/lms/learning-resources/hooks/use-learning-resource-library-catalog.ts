@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
@@ -13,6 +13,7 @@ import type { LearningResourceResource } from "@/features/lms/learning-resources
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/learning-resource-dashboard-scope-context";
 import type { LearningResourceTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 type LearningResourceLibraryLesson = {
   id: string;
@@ -161,6 +162,7 @@ export function useLearningResourceLibraryCatalog() {
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [resourceError, setResourceError] = useState<string | null>(null);
+  const debouncedSearchValue = useDebouncedValue(searchValue);
 
   const libraryQuery = useQuery({
     queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
@@ -207,7 +209,7 @@ export function useLearningResourceLibraryCatalog() {
   const filteredSections = useMemo(() => {
     if (!activeSubject) return [] as LearningResourceLibrarySection[];
 
-    const query = searchValue.trim().toLowerCase();
+    const query = debouncedSearchValue.trim().toLowerCase();
     if (!query) {
       return activeSubject.sections;
     }
@@ -251,7 +253,7 @@ export function useLearningResourceLibraryCatalog() {
         };
       })
       .filter((section) => section.lessonCount > 0);
-  }, [activeSubject, searchValue]);
+  }, [activeSubject, debouncedSearchValue]);
 
   const activeSection = useMemo(
     () => filteredSections.find((section) => section.id === effectiveSectionId) ?? filteredSections[0] ?? null,

@@ -1,10 +1,11 @@
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 import { AppSeo } from "@/components/seo/app-seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { useEffect } from "react";
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "@/routes/router-compat";
 
 export function RootLayout() {
   const location = useLocation();
@@ -35,6 +36,7 @@ export function RootLayout() {
     <TooltipProvider>
       <AppSeo />
       <Outlet />
+      <Toaster richColors position="top-right" />
     </TooltipProvider>
   );
 }

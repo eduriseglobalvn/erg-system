@@ -182,7 +182,7 @@ function SidebarInset({ className, ...props }: React.ComponentProps<"main">) {
     <main
       data-slot="sidebar-inset"
       className={cn(
-        "relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
+        "relative flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ml-0 md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ml-2",
         className
       )}
       {...props}
@@ -342,13 +342,13 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm ring-sidebar-ring outline-hidden transition-[width,height,padding] group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:bg-sidebar-accent hover:text-sidebar-accent-foreground focus-visible:ring-2 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:hover:bg-sidebar-accent data-open:hover:text-sidebar-accent-foreground data-active:bg-sidebar-accent data-active:font-medium data-active:text-sidebar-accent-foreground [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate group-data-[collapsible=icon]:[&>span:last-child]:overflow-visible group-data-[collapsible=icon]:[&>span:last-child]:whitespace-normal group-data-[collapsible=icon]:[&>span:last-child]:text-clip",
+  "peer/menu-button group/menu-button relative flex w-full items-center gap-2 overflow-hidden rounded-md border border-transparent p-2 text-left text-sm font-semibold text-slate-700 ring-[var(--erg-blue-ring)] outline-hidden transition-[width,height,padding,background-color,border-color,color,box-shadow] before:absolute before:left-0 before:top-1.5 before:h-[calc(100%-12px)] before:w-1 before:rounded-r-full before:bg-transparent before:transition-colors group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:border-[#d9e0ea] hover:bg-white hover:text-[#242424] hover:shadow-sm focus-visible:ring-2 active:border-[#b8d6fa] active:bg-white active:text-[var(--erg-blue)] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:border-[#b8d6fa] data-open:bg-white data-open:text-[var(--erg-blue)] data-open:shadow-sm data-active:border-[#b8d6fa] data-active:bg-white data-active:text-[var(--erg-blue)] data-active:shadow-sm data-active:before:bg-[var(--erg-blue)] [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate group-data-[collapsible=icon]:before:hidden group-data-[collapsible=icon]:[&>span:last-child]:overflow-visible group-data-[collapsible=icon]:[&>span:last-child]:whitespace-normal group-data-[collapsible=icon]:[&>span:last-child]:text-clip",
   {
     variants: {
       variant: {
-        default: "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+        default: "hover:border-[#d9e0ea] hover:bg-white hover:text-[#242424]",
         outline:
-          "bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-sidebar-accent-foreground hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]",
+          "border-[#d9e0ea] bg-white shadow-sm hover:border-[#b8d6fa] hover:bg-white hover:text-[var(--erg-blue)] hover:shadow-sm",
       },
       size: {
         default: "h-8 text-sm",

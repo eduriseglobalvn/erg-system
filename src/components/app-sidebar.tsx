@@ -48,11 +48,11 @@ export function AppSidebar({
     <Sidebar
       variant="inset"
       collapsible="icon"
-      className="relative overflow-visible border-r border-[#edf1f7] bg-white shadow-[8px_0_24px_-28px_rgba(15,23,42,0.45)] group-data-[collapsible=icon]:px-0"
+      className="relative overflow-visible border-r border-[#d0d7e2] bg-[#f6f8fb] shadow-[1px_0_0_rgba(15,23,42,0.04)] group-data-[collapsible=icon]:px-0"
       {...props}
     >
       <SidebarEdgeToggle />
-      <SidebarContent className="h-full min-h-0 overflow-y-auto overscroll-contain px-3 py-4 pb-10 group-data-[collapsible=icon]:overflow-visible group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-5">
+      <SidebarContent className="h-full min-h-0 overflow-y-auto overscroll-contain px-2.5 py-4 pb-10 group-data-[collapsible=icon]:overflow-visible group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-5">
         <NavMain items={navMain} activeLeafId={activeLeafId} onSelectLeaf={onSelectLeaf} />
       </SidebarContent>
     </Sidebar>
@@ -69,7 +69,7 @@ function SidebarEdgeToggle() {
       type="button"
       onClick={toggleSidebar}
       aria-label={isExpanded ? t("sidebar.collapseMenu") : t("sidebar.expandMenu")}
-      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-slate-200 bg-white text-slate-600 shadow-[0_10px_28px_-14px_rgba(15,23,42,0.35)] ring-4 ring-background transition hover:bg-slate-50 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-100"
+      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#c8d1dc] bg-white text-slate-600 shadow-sm ring-2 ring-[#f7f8fa] transition hover:bg-white hover:text-[var(--erg-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]"
     >
       {isExpanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
     </button>

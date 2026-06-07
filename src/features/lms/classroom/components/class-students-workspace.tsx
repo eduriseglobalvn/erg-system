@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -15,6 +15,8 @@ import {
   getSchoolSnapshots,
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { useI18n } from "@/platform/i18n";
 import {
   AssignmentDialog,
@@ -23,6 +25,7 @@ import {
   StudentDataTable,
   StudentDetailCard,
 } from "./class-students-workspace.parts";
+import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 import { assignmentCatalog, assignmentSubjects } from "./class-students-workspace.constants";
 import { enCopy, viCopy } from "./class-students-workspace.copy";
 import type { DeliveryBatch, ProgressFilter, StatusFilter } from "./class-students-workspace.types";
@@ -52,6 +55,9 @@ export function ClassStudentsWorkspace({
   const [searchValue, setSearchValue] = useState("");
   const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
   const [focusedStudentId, setFocusedStudentId] = useState<string | null>(null);
+  const [detailStudentId, setDetailStudentId] = useState<string | null>(null);
+  const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentProfileDetailDraft>>({});
+  const [studentStatusDrafts, setStudentStatusDrafts] = useState<Record<string, "ahead" | "steady" | "support">>({});
   const [assignDialogOpen, setAssignDialogOpen] = useState(false);
   const [selectedSubjectId, setSelectedSubjectId] = useState(assignmentSubjects[0]?.id ?? "");
   const [selectedLevelId, setSelectedLevelId] = useState(assignmentSubjects[0]?.levels[0]?.id ?? "");
@@ -61,7 +67,8 @@ export function ClassStudentsWorkspace({
   const [dueDate, setDueDate] = useState("2026-04-30T20:30");
   const [teacherNote, setTeacherNote] = useState("");
   const [recentBatches, setRecentBatches] = useState<DeliveryBatch[]>([]);
-  const deferredSearchValue = useDeferredValue(searchValue);
+  const debouncedSearchValue = useDebouncedValue(searchValue);
+  const paceStateUpdate = usePacedStateBatch();
 
   const selectedClass =
     classroomSnapshots.find((snapshot) => snapshot.id === selectedClassId && snapshot.schoolId === selectedSchoolId) ??
@@ -77,7 +84,7 @@ export function ClassStudentsWorkspace({
   );
 
   const visibleStudents = useMemo(() => {
-    const keyword = deferredSearchValue.trim().toLowerCase();
+    const keyword = debouncedSearchValue.trim().toLowerCase();
 
     return schoolStudents.filter((student) => {
       const currentAssignmentSubject = getStudentAssignmentSubject(student);
@@ -95,13 +102,14 @@ export function ClassStudentsWorkspace({
 
       return matchesClass && matchesSubject && matchesStatus && matchesProgress && matchesKeyword;
     });
-  }, [deferredSearchValue, progressFilter, schoolStudents, selectedClass, statusFilter, subject]);
+  }, [debouncedSearchValue, progressFilter, schoolStudents, selectedClass, statusFilter, subject]);
 
   const visibleStudentIds = visibleStudents.map((student) => student.id);
   const selectedVisibleIds = selectedStudentIds.filter((id) => visibleStudentIds.includes(id));
   const selectedStudents = visibleStudents.filter((student) => selectedVisibleIds.includes(student.id));
   const focusedStudent =
     visibleStudents.find((student) => student.id === focusedStudentId) ?? selectedStudents[0] ?? visibleStudents[0] ?? null;
+  const detailStudent = schoolStudents.find((student) => student.id === detailStudentId) ?? null;
   const supportCount = visibleStudents.filter((student) => student.status === "support").length;
   const allVisibleSelected = visibleStudents.length > 0 && selectedVisibleIds.length === visibleStudents.length;
   const selectedSubject = assignmentSubjects.find((subjectItem) => subjectItem.id === selectedSubjectId) ?? assignmentSubjects[0];
@@ -111,21 +119,43 @@ export function ClassStudentsWorkspace({
   const canDeliver = selectedStudents.length > 0 && selectedAssignments.length > 0 && Boolean(dueDate);
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => setFocusedStudentId(null));
-    return () => window.cancelAnimationFrame(frameId);
-  }, [deferredSearchValue, progressFilter, selectedClass?.id, statusFilter, subject]);
+    paceStateUpdate(() => setFocusedStudentId(null));
+  }, [debouncedSearchValue, paceStateUpdate, progressFilter, selectedClass?.id, statusFilter, subject]);
 
   useEffect(() => {
     if (selectedVisibleIds.length === 0) {
-      const frameId = window.requestAnimationFrame(() => setAssignDialogOpen(false));
-      return () => window.cancelAnimationFrame(frameId);
+      paceStateUpdate(() => setAssignDialogOpen(false));
     }
-  }, [selectedVisibleIds.length]);
+  }, [paceStateUpdate, selectedVisibleIds.length]);
 
   function toggleStudent(studentId: string) {
     setSelectedStudentIds((current) =>
       current.includes(studentId) ? current.filter((id) => id !== studentId) : [...current, studentId],
     );
+  }
+
+  function openStudentDetail(studentId: string) {
+    const student = schoolStudents.find((item) => item.id === studentId);
+    if (!student) return;
+    setFocusedStudentId(studentId);
+    setDetailStudentId(studentId);
+    setStudentDrafts((current) => ({
+      ...current,
+      [studentId]: current[studentId] ?? createStudentProfileDraft(student),
+    }));
+    setStudentStatusDrafts((current) => ({
+      ...current,
+      [studentId]: current[studentId] ?? student.status,
+    }));
+  }
+
+  function updateStudentDraft(studentId: string, patch: Partial<StudentProfileDetailDraft>) {
+    const student = schoolStudents.find((item) => item.id === studentId);
+    if (!student) return;
+    setStudentDrafts((current) => ({
+      ...current,
+      [studentId]: { ...(current[studentId] ?? createStudentProfileDraft(student)), ...patch },
+    }));
   }
 
   function toggleVisibleStudents() {
@@ -272,7 +302,7 @@ export function ClassStudentsWorkspace({
           <StudentDataTable
             copy={copy}
             focusedStudentId={focusedStudent?.id ?? null}
-            onFocusStudent={setFocusedStudentId}
+            onFocusStudent={openStudentDetail}
             onToggleStudent={toggleStudent}
             selectedIds={selectedVisibleIds}
             students={visibleStudents}
@@ -285,9 +315,9 @@ export function ClassStudentsWorkspace({
           <DashboardSectionCard title={copy.recentTitle} description={copy.recentDescription}>
             <div className="space-y-3">
               {(recentBatches.length ? recentBatches : getInitialBatches(copy)).map((batch) => (
-                <div key={batch.id} className="rounded-[20px] border border-slate-200 bg-white p-4">
+                <div key={batch.id} className="rounded-lg border border-[#e0e4ea] bg-white p-4">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
                       <CheckCircleOutlineOutlinedIcon fontSize="small" />
                     </span>
                     <div className="min-w-0">
@@ -331,6 +361,39 @@ export function ClassStudentsWorkspace({
         subjects={assignmentSubjects}
         topics={selectedLevel?.topics ?? []}
       />
+      {detailStudent ? (
+        <StudentProfileDetailDrawer
+          draft={studentDrafts[detailStudent.id] ?? createStudentProfileDraft(detailStudent)}
+          onClose={() => setDetailStudentId(null)}
+          onUpdate={(patch) => updateStudentDraft(detailStudent.id, patch)}
+          onStatusChange={(status) => setStudentStatusDrafts((current) => ({ ...current, [detailStudent.id]: status }))}
+          statusOptions={[
+            { label: copy.status.ahead, value: "ahead" },
+            { label: copy.status.steady, value: "steady" },
+            { label: copy.status.support, value: "support" },
+          ]}
+          statusValue={studentStatusDrafts[detailStudent.id] ?? detailStudent.status}
+          student={detailStudent}
+        />
+      ) : null}
     </DashboardPageShell>
   );
+}
+
+function createStudentProfileDraft(student: { avatarSeed: string; id: string; mentorNote: string; name: string }) {
+  const baseUsername = removeVietnameseMarks(student.name).toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
+  return {
+    name: student.name,
+    username: baseUsername || student.id,
+    password: `${student.avatarSeed.toLowerCase()}@2026`,
+    note: student.mentorNote,
+  };
+}
+
+function removeVietnameseMarks(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D");
 }

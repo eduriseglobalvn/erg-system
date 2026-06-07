@@ -1,4 +1,4 @@
-﻿import { useMemo, useState, type FormEvent } from "react";
+import { useMemo, useState } from "react";
 import {
   Camera,
   Gift,
@@ -12,8 +12,14 @@ import {
   Sticker,
   X,
 } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
 
 import { SocialReactionAction, SocialReactionCountBadge, SocialReactionSummary } from "@/components/social-reactions";
+import {
+  Avatar as ShadcnAvatar,
+  AvatarFallback,
+} from "@/components/ui/avatar";
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { Button } from "@/components/ui/dashboard-kit";
 import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type {
@@ -69,37 +75,48 @@ export function StudentDiscussionFeed({
   );
   const selectedPost = posts.find((post) => post.id === selectedPostId) ?? null;
   const firstName = studentName.trim().split(" ").slice(-1)[0] ?? studentName;
+  const postForm = useForm({
+    defaultValues: {
+      content: postDraft,
+    },
+    onSubmit: () => {
+      const content = postDraft.trim();
+      if (!content && postAttachments.length === 0) return;
+
+      onCreatePost(content, postAttachments);
+      setPostDraft("");
+      setPostAttachments([]);
+      postForm.reset();
+    },
+  });
 
   async function handlePostAttachmentChange(files: FileList | null) {
     const nextAttachments = await createImageAttachments(files);
     setPostAttachments((current) => [...current, ...nextAttachments]);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const content = postDraft.trim();
-    if (!content && postAttachments.length === 0) return;
-
-    onCreatePost(content, postAttachments);
-    setPostDraft("");
-    setPostAttachments([]);
-  }
-
   return (
     <section className="mx-auto w-full max-w-[1680px] px-4 py-5">
       <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,920px)_260px] 2xl:grid-cols-[280px_minmax(0,980px)_280px] xl:items-start xl:justify-center">
-        <aside className="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.45)] xl:block">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">ERG Social</div>
-          <h1 className="mt-2 text-2xl font-semibold leading-tight text-[var(--erg-blue)]">{copy.discussionTitle}</h1>
+        <aside className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm xl:block">
+          <div className="text-xs font-semibold text-slate-400">ERG Social</div>
+          <h1 className="mt-2 text-xl font-semibold leading-tight text-[var(--erg-blue)]">{copy.discussionTitle}</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">{copy.discussionDescription}</p>
-          <div className="mt-4 rounded-xl bg-slate-50 p-3">
-            <div className="text-xs font-semibold uppercase text-slate-400">Lớp học</div>
+          <div className="mt-4 rounded-lg bg-slate-50 p-3">
+            <div className="text-xs font-semibold text-slate-400">Lớp học</div>
             <div className="mt-1 text-sm font-semibold text-slate-900">{studentClass}</div>
           </div>
         </aside>
 
         <div className="min-w-0 space-y-4">
-          <form className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_64px_-48px_rgba(15,23,42,0.45)]" onSubmit={handleSubmit}>
+          <TsForm
+            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void postForm.handleSubmit();
+            }}
+          >
             <div className="flex items-center gap-3 border-b border-slate-100 p-4">
               <Avatar initials={getInitials(studentName)} size="lg" />
               <button
@@ -112,13 +129,31 @@ export function StudentDiscussionFeed({
             </div>
 
             <div className="p-4">
-              <textarea
-                id="student-discussion-post-box"
-                className="min-h-24 w-full resize-none rounded-xl border border-transparent bg-white px-2 py-2 text-[15px] leading-7 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-200 focus:bg-slate-50"
-                placeholder="Chia sẻ câu hỏi, bài khó, mẹo học hoặc ảnh bài làm..."
-                value={postDraft}
-                onChange={(event) => setPostDraft(event.target.value)}
-              />
+              <postForm.Field
+                name="content"
+                validators={{
+                  onChange: ({ value }) =>
+                    value.trim() || postAttachments.length > 0 ? undefined : "Nhập nội dung hoặc đính kèm ảnh trước khi đăng.",
+                }}
+              >
+                {(field) => (
+                  <>
+                    <textarea
+                      id="student-discussion-post-box"
+                      className="min-h-24 w-full resize-none rounded-lg border border-transparent bg-white px-2 py-2 text-[15px] leading-7 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-200 focus:bg-slate-50"
+                      placeholder="Chia sẻ câu hỏi, bài khó, mẹo học hoặc ảnh bài làm..."
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        setPostDraft(event.target.value);
+                      }}
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    />
+                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                  </>
+                )}
+              </postForm.Field>
               <AttachmentPreview
                 attachments={postAttachments}
                 removeLabel={copy.discussionRemoveAttachment}
@@ -136,7 +171,7 @@ export function StudentDiscussionFeed({
                 onChange={handlePostAttachmentChange}
               />
               <Button
-                className="rounded-full bg-[var(--erg-blue)] px-5 text-white shadow-[0_12px_26px_-18px_rgba(17,24,146,0.8)] hover:bg-[#081187]"
+                className="rounded-full bg-[var(--erg-blue)] px-5 text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
                 disabled={!postDraft.trim() && postAttachments.length === 0}
                 type="submit"
               >
@@ -144,7 +179,7 @@ export function StudentDiscussionFeed({
                 {copy.discussionPostAction}
               </Button>
             </div>
-          </form>
+          </TsForm>
 
           {sortedPosts.length > 0 ? (
             sortedPosts.map((post) => (
@@ -159,18 +194,18 @@ export function StudentDiscussionFeed({
               />
             ))
           ) : (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center">
+            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
               <h2 className="text-lg font-semibold text-[var(--erg-blue)]">{copy.discussionEmptyTitle}</h2>
               <p className="mt-2 text-sm text-slate-500">{copy.discussionEmptyDescription}</p>
             </div>
           )}
         </div>
 
-        <aside className="hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_18px_60px_-48px_rgba(15,23,42,0.45)] xl:block">
+        <aside className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm xl:block">
           <div className="text-sm font-semibold text-slate-950">Đang nổi bật</div>
           <div className="mt-3 space-y-3">
             {sortedPosts.slice(0, 3).map((post) => (
-              <button key={post.id} className="block w-full rounded-xl bg-slate-50 p-3 text-left transition hover:bg-slate-100" type="button" onClick={() => setSelectedPostId(post.id)}>
+              <button key={post.id} className="block w-full rounded-lg bg-slate-50 p-3 text-left transition hover:bg-slate-100" type="button" onClick={() => setSelectedPostId(post.id)}>
                 <div className="line-clamp-2 text-sm font-semibold leading-5 text-slate-900">{post.content}</div>
                 <div className="mt-2 text-xs text-slate-500">{getCommentCount(post.comments)} bình luận</div>
               </button>
@@ -230,7 +265,7 @@ function PostCard({
 
   return (
     <article
-      className="scroll-mt-24 overflow-visible rounded-2xl border border-slate-200 bg-white shadow-[0_20px_64px_-48px_rgba(15,23,42,0.45)]"
+      className="scroll-mt-24 overflow-visible rounded-lg border border-slate-200 bg-white shadow-sm"
       id={getPostDomId(post.id)}
     >
       <header className="flex items-start justify-between gap-3 p-4">
@@ -239,7 +274,7 @@ function PostCard({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h2 className="font-semibold leading-5 text-slate-950">{post.authorName}</h2>
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-[var(--erg-blue)]">
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-[var(--erg-blue)]">
                 {post.className}
               </span>
             </div>
@@ -298,7 +333,7 @@ function PostCard({
         <div className="flex gap-2">
           <Avatar initials="VL" size="sm" />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 rounded-2xl bg-white px-3 py-2 ring-1 ring-slate-200 focus-within:ring-[var(--erg-blue)]/25">
+            <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-200 focus-within:ring-[var(--erg-blue)]/25">
               <input
                 id={`comment-input-${post.id}`}
                 className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -312,7 +347,7 @@ function PostCard({
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`comment-image-${post.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
               <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[#081187] disabled:bg-slate-300"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[var(--erg-blue-hover)] disabled:bg-slate-300"
                 disabled={!commentDraft.trim() && commentAttachments.length === 0}
                 type="button"
                 onClick={submitComment}
@@ -373,9 +408,9 @@ function PostDetailDialog({
 
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 px-3 py-4 backdrop-blur-sm">
-      <article className="flex max-h-[92vh] w-full max-w-[880px] flex-col overflow-hidden rounded-2xl bg-white shadow-[0_28px_100px_-40px_rgba(15,23,42,0.75)]">
+      <article className="flex max-h-[92vh] w-full max-w-[880px] flex-col overflow-hidden rounded-lg bg-white shadow-sm">
         <header className="relative shrink-0 border-b border-slate-200 px-14 py-3 text-center">
-          <h2 className="line-clamp-2 text-xl font-bold leading-tight text-slate-950">Bài viết của {post.authorName}</h2>
+          <h2 className="line-clamp-2 text-lg font-medium leading-tight text-slate-950">Bài viết của {post.authorName}</h2>
           <button
             className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
             type="button"
@@ -392,7 +427,7 @@ function PostDetailDialog({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold leading-5 text-slate-950">{post.authorName}</h3>
-                  <span className="text-sm font-semibold text-blue-600">· Theo dõi</span>
+                  <span className="text-sm font-semibold text-[var(--erg-blue)]">· Theo dõi</span>
                 </div>
                 <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
                   <span>{post.createdAtLabel}</span>
@@ -457,7 +492,7 @@ function PostDetailDialog({
           <div className="flex gap-2">
             <Avatar initials={getInitials(studentName)} size="sm" />
             <div className="min-w-0 flex-1">
-              <div className="flex min-h-12 items-center gap-2 rounded-2xl bg-slate-100 px-3 py-2">
+              <div className="flex min-h-12 items-center gap-2 rounded-lg bg-slate-100 px-3 py-2">
                 <input
                   id={`modal-comment-input-${post.id}`}
                   className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-500"
@@ -542,7 +577,7 @@ function CommentItem({
     >
       <Avatar initials={comment.authorInitials} size="sm" />
       <div className="min-w-0 flex-1">
-        <div className="inline-block max-w-full rounded-[18px] bg-slate-100 px-3 py-2">
+        <div className="inline-block max-w-full rounded-lg bg-slate-100 px-3 py-2">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-950">
             <span>{comment.authorName}</span>
             {depth === 1 ? <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] text-slate-600">Tác giả</span> : null}
@@ -567,7 +602,7 @@ function CommentItem({
 
         {isReplying ? (
           <div className="mt-2">
-            <div className="flex items-center gap-2 rounded-2xl bg-slate-100 px-3 py-2 focus-within:ring-2 focus-within:ring-[var(--erg-blue)]/20">
+            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 focus-within:ring-2 focus-within:ring-[var(--erg-blue)]/20">
               <input
                 className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-500"
                 placeholder={`Trả lời ${comment.authorName}...`}
@@ -580,7 +615,7 @@ function CommentItem({
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`reply-image-${comment.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
               <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[#081187] disabled:bg-slate-300"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[var(--erg-blue-hover)] disabled:bg-slate-300"
                 disabled={!replyDraft.trim() && replyAttachments.length === 0}
                 type="button"
                 onClick={submitReply}
@@ -710,7 +745,7 @@ function AttachmentPreview({
   return (
     <div className={cn("mt-3 grid gap-2", compact ? "grid-cols-[repeat(auto-fill,minmax(56px,1fr))]" : "grid-cols-2")}>
       {attachments.map((attachment) => (
-        <div key={attachment.id} className={cn("group relative overflow-hidden rounded-xl bg-slate-100", compact ? "h-14" : "h-40")}>
+        <div key={attachment.id} className={cn("group relative overflow-hidden rounded-lg bg-slate-100", compact ? "h-14" : "h-40")}>
           <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
           <button
             className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-slate-950/75 text-white opacity-90 transition hover:bg-slate-950"
@@ -750,7 +785,7 @@ function AttachmentGrid({
   }
 
   return (
-    <div className={cn("mt-3 grid overflow-hidden rounded-xl border border-slate-200", compact ? "max-w-[260px] grid-cols-2" : "grid-cols-2")}>
+    <div className={cn("mt-3 grid overflow-hidden rounded-lg border border-slate-200", compact ? "max-w-[260px] grid-cols-2" : "grid-cols-2")}>
       {attachments.slice(0, 4).map((attachment, index) => (
         <a key={attachment.id} className={cn("relative block bg-slate-100", compact ? "h-24" : "h-48")} href={attachment.url} rel="noreferrer" target="_blank">
           <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
@@ -775,14 +810,16 @@ function ModerationNotice({ compact, copy }: { compact?: boolean; copy: Discussi
 
 function Avatar({ initials, size }: { initials: string; size: "sm" | "lg" }) {
   return (
-    <span
-      className={cn(
-        "grid shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] font-semibold text-white ring-2 ring-white",
-        size === "lg" ? "h-11 w-11 text-sm" : "h-8 w-8 text-xs",
-      )}
-    >
-      {initials}
-    </span>
+    <ShadcnAvatar className={cn("shrink-0 rounded-full ring-2 ring-white", size === "lg" ? "size-11" : "size-8")}>
+      <AvatarFallback
+        className={cn(
+          "rounded-full bg-[var(--erg-blue)] font-semibold text-white",
+          size === "lg" ? "text-sm" : "text-xs",
+        )}
+      >
+        {initials}
+      </AvatarFallback>
+    </ShadcnAvatar>
   );
 }
 

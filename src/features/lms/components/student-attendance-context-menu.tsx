@@ -1,4 +1,4 @@
-﻿import { FileText, MessageSquarePlus, UserPlus, UserRoundCheck } from "lucide-react";
+import { FileText, MessageSquarePlus, UserPlus, UserRoundCheck } from "lucide-react";
 
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
@@ -37,12 +37,12 @@ export function StudentAttendanceContextMenu({
     <>
       <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
       <div
-        className="fixed z-[80] w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-xl shadow-slate-900/15"
+        className="fixed z-[80] w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-sm shadow-slate-900/15"
         style={{ left: menu.x, top: menu.y }}
         role="menu"
       >
         <div className="border-b border-slate-100 px-3 py-2">
-          <div className="truncate text-xs font-black text-slate-950">{menu.student.name}</div>
+          <div className="truncate text-xs font-semibold text-slate-950">{menu.student.name}</div>
           <div className="mt-0.5 text-[11px] font-semibold text-slate-500">{menu.student.className}</div>
         </div>
         {actions.map((action) => {
@@ -51,7 +51,7 @@ export function StudentAttendanceContextMenu({
             <button
               key={action.label}
               type="button"
-              className={cn("flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-700")}
+              className={cn("flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]")}
               onClick={() => {
                 action.onClick();
                 onClose();

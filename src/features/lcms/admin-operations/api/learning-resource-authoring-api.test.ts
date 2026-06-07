@@ -1,4 +1,4 @@
-﻿import { beforeEach, expect, test, vi } from "vitest";
+import { beforeEach, expect, test, vi } from "vitest";
 
 const apiRequestMock = vi.hoisted(() => vi.fn());
 

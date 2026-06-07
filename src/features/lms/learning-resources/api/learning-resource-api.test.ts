@@ -1,4 +1,4 @@
-﻿import { test, expect } from "vitest";
+import { test, expect } from "vitest";
 
 import { mapLibraryResourceToLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-api";
 

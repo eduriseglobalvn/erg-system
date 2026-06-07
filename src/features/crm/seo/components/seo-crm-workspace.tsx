@@ -30,8 +30,10 @@ import {
   seoSchoolLeads,
 } from "@/features/crm/seo/api/seo-crm-api";
 import type { SeoLeadStatus, SeoOpportunity, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 type SeoCrmWorkspaceProps = {
   activeLeaf: DashboardLeaf;
@@ -74,12 +76,13 @@ export function SeoCrmWorkspace({ activeLeaf, onOpenLeaf }: SeoCrmWorkspaceProps
   const [selectedLeadId, setSelectedLeadId] = useState(seoSchoolLeads[0]?.id ?? "");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const debouncedQuery = useDebouncedValue(query);
   const selectedLead = leads.find((lead) => lead.id === selectedLeadId) ?? leads[0];
   const selectedOpportunity = seoOpportunities.find((opportunity) => opportunity.leadId === selectedLead?.id) ?? seoOpportunities[0];
   const filteredLeads = useMemo(
     () =>
       leads.filter((lead) => {
-        const keyword = query.trim().toLowerCase();
+        const keyword = debouncedQuery.trim().toLowerCase();
         const matchesQuery =
           !keyword ||
           lead.schoolName.toLowerCase().includes(keyword) ||
@@ -88,7 +91,7 @@ export function SeoCrmWorkspace({ activeLeaf, onOpenLeaf }: SeoCrmWorkspaceProps
         const matchesStatus = statusFilter === "all" || lead.status === statusFilter;
         return matchesQuery && matchesStatus;
       }),
-    [leads, query, statusFilter],
+    [debouncedQuery, leads, statusFilter],
   );
 
   function updateLeadStatus(leadId: string, status: SeoLeadStatus) {
@@ -154,7 +157,7 @@ function SeoScopeSummary({ leads }: { leads: SeoSchoolLead[] }) {
   return (
     <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Luồng dữ liệu</p>
+        <p className="text-xs font-semibold text-slate-400">Luồng dữ liệu</p>
         <p className="mt-1 text-sm font-semibold text-slate-950">
           SEO tạo lead và P&L trước, quản lý trung tâm chỉ nhận quyền vận hành khi trường chuyển Active.
         </p>
@@ -200,9 +203,9 @@ function SeoOverview({
             {pipelineStatuses.map((status) => {
               const statusLeads = leads.filter((lead) => lead.status === status);
               return (
-                <section key={status} className="rounded-2xl border border-slate-200 bg-slate-50 p-3">
+                <section key={status} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs font-black uppercase tracking-[0.14em] text-slate-500">{statusLabelMap[status]}</span>
+                    <span className="text-xs font-semibold text-slate-500">{statusLabelMap[status]}</span>
                     <Badge tone={statusToneMap[status]}>{statusLeads.length}</Badge>
                   </div>
                   <div className="mt-3 space-y-2">
@@ -214,7 +217,7 @@ function SeoOverview({
                           onSelectLead(lead.id);
                           onOpenLeaf("seo-schools");
                         }}
-                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-blue-200 hover:bg-blue-50"
+                        className="w-full rounded-lg border border-slate-200 bg-white p-3 text-left transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]"
                       >
                         <div className="font-semibold text-slate-950">{lead.schoolName}</div>
                         <div className="mt-1 text-xs text-slate-500">{lead.expectedClasses} lớp · {lead.probability}% chốt</div>
@@ -236,10 +239,10 @@ function SeoOverview({
                   key={followUp.id}
                   type="button"
                   onClick={() => lead ? onSelectLead(lead.id) : undefined}
-                  className="w-full rounded-2xl border border-slate-200 bg-white p-4 text-left transition hover:border-blue-200 hover:bg-blue-50"
+                  className="w-full rounded-lg border border-slate-200 bg-white p-4 text-left transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                    <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
                       <CalendarClock className="size-4" />
                     </span>
                     <span className="min-w-0">
@@ -284,16 +287,16 @@ function SeoSchoolPipeline({
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
             <Input value={query} onChange={(event) => onQueryChange(event.target.value)} className="pl-9" placeholder="Tìm trường, quận, người liên hệ..." />
           </label>
-          <select
+          <AppSelect
             value={statusFilter}
             onChange={(event) => onStatusFilterChange(event.target.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+            className="h-11 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-4 focus:ring-[var(--erg-blue-ring)]"
           >
             <option value="all">Tất cả tình trạng</option>
             {([...pipelineStatuses, "paused", "lost"] as SeoLeadStatus[]).map((status) => (
               <option key={status} value={status}>{statusLabelMap[status]}</option>
             ))}
-          </select>
+          </AppSelect>
         </div>
         <div className="mt-4 max-h-[650px] space-y-3 overflow-y-auto pr-1">
           {filteredLeads.map((lead) => (
@@ -302,8 +305,8 @@ function SeoSchoolPipeline({
               type="button"
               onClick={() => onSelectLead(lead.id)}
               className={cn(
-                "w-full rounded-2xl border bg-white p-4 text-left transition hover:border-blue-200 hover:bg-blue-50",
-                selectedLead?.id === lead.id ? "border-blue-300 ring-4 ring-blue-50" : "border-slate-200",
+                "w-full rounded-lg border bg-white p-4 text-left transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]",
+                selectedLead?.id === lead.id ? "border-[#b8d6fa] ring-4 ring-[var(--erg-blue-ring)]" : "border-slate-200",
               )}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -353,17 +356,17 @@ function SchoolLeadDetail({
           <InfoLine label="Lần chăm sóc gần nhất" value={formatDate(lead.lastTouchAt)} />
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+        <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-center justify-between gap-4">
             <span className="text-sm font-semibold text-slate-950">Xác suất chốt</span>
-            <span className="text-sm font-black text-slate-950">{lead.probability}%</span>
+            <span className="text-sm font-semibold text-slate-950">{lead.probability}%</span>
           </div>
-          <ProgressBar value={lead.probability} className="mt-3" indicatorClassName="bg-blue-600" />
+          <ProgressBar value={lead.probability} className="mt-3" indicatorClassName="bg-[var(--erg-blue)]" />
         </div>
 
         <div>
           <h3 className="text-sm font-semibold text-slate-950">Ghi chú tư vấn</h3>
-          <p className="mt-2 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">{lead.notes}</p>
+          <p className="mt-2 rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">{lead.notes}</p>
         </div>
 
         <div>
@@ -373,18 +376,18 @@ function SchoolLeadDetail({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-4">
+        <div className="rounded-lg border border-slate-200 bg-white p-4">
           <label className="grid gap-1.5">
-            <span className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">Cập nhật tình trạng</span>
-            <select
+            <span className="text-xs font-semibold text-slate-400">Cập nhật tình trạng</span>
+            <AppSelect
               value={lead.status}
               onChange={(event) => onUpdateLeadStatus(lead.id, event.target.value as SeoLeadStatus)}
-              className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-100"
+              className="h-11 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-4 focus:ring-[var(--erg-blue-ring)]"
             >
               {([...pipelineStatuses, "paused", "lost"] as SeoLeadStatus[]).map((status) => (
                 <option key={status} value={status}>{statusLabelMap[status]}</option>
               ))}
-            </select>
+            </AppSelect>
           </label>
         </div>
       </div>
@@ -416,8 +419,8 @@ function SeoPnlWorkspace({
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
         <div className="space-y-4">
           <DashboardSectionCard title={`P&L ${opportunity.code}`} description={`${lead.schoolName} · năm học ${opportunity.academicYear} · bắt đầu ${opportunity.startMonth}`}>
-            <div className="overflow-hidden rounded-2xl border border-slate-200">
-              <div className="grid grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_0.8fr_0.6fr_0.9fr] gap-3 bg-slate-50 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+            <div className="overflow-hidden rounded-lg border border-slate-200">
+              <div className="grid grid-cols-[1.4fr_0.8fr_0.6fr_0.6fr_0.8fr_0.6fr_0.9fr] gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-400">
                 <span>Chương trình</span>
                 <span>Gói</span>
                 <span>Lớp</span>
@@ -443,8 +446,8 @@ function SeoPnlWorkspace({
           </DashboardSectionCard>
 
           <DashboardSectionCard title="Dự trù chi phí" description="Các dòng bắt buộc sẽ đi kèm checklist bàn giao để trung tâm chuẩn bị vận hành.">
-            <div className="overflow-hidden rounded-2xl border border-slate-200">
-              <div className="grid grid-cols-[0.8fr_1.5fr_0.5fr_0.8fr_0.7fr_0.9fr] gap-3 bg-slate-50 px-4 py-3 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+            <div className="overflow-hidden rounded-lg border border-slate-200">
+              <div className="grid grid-cols-[0.8fr_1.5fr_0.5fr_0.8fr_0.7fr_0.9fr] gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold text-slate-400">
                 <span>Loại</span>
                 <span>Diễn giải</span>
                 <span>SL</span>
@@ -503,10 +506,10 @@ function SeoFollowUpWorkspace({ leads, onSelectLead }: { leads: SeoSchoolLead[];
         {visibleFollowUps.map((followUp) => {
           const lead = leads.find((item) => item.id === followUp.leadId);
           return (
-            <article key={followUp.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+            <article key={followUp.id} className="rounded-lg border border-slate-200 bg-white p-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 gap-3">
-                  <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700">
+                  <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
                     {followUp.type === "call" ? <PhoneCall className="size-5" /> : <CalendarClock className="size-5" />}
                   </span>
                   <div className="min-w-0">
@@ -558,7 +561,7 @@ function SeoHandoverWorkspace({
             const ready = doneCount >= checklist.length - 1;
 
             return (
-              <article key={lead.id} className="rounded-2xl border border-slate-200 bg-white p-4">
+              <article key={lead.id} className="rounded-lg border border-slate-200 bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <h3 className="font-semibold text-slate-950">{lead.schoolName}</h3>
@@ -586,7 +589,7 @@ function SeoHandoverWorkspace({
             );
           })}
           {!requests.length ? (
-            <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center text-sm text-slate-500">
               Chưa có trường nào ở trạng thái chờ triển khai.
             </div>
           ) : null}
@@ -608,8 +611,8 @@ function SeoHandoverWorkspace({
 
 function HandoverPermission({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3">
-      <span className="grid size-9 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-3">
+      <span className="grid size-9 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
         <CheckCircle2 className="size-4" />
       </span>
       <span className="text-sm font-semibold text-slate-800">{label}</span>
@@ -619,17 +622,17 @@ function HandoverPermission({ label }: { label: string }) {
 
 function DecisionLine({ label, ok, value }: { label: string; ok: boolean; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white p-3">
+    <div className="flex items-center justify-between gap-4 rounded-lg border border-slate-200 bg-white p-3">
       <span className="text-sm font-semibold text-slate-700">{label}</span>
-      <span className={cn("text-sm font-black", ok ? "text-emerald-700" : "text-rose-700")}>{value}</span>
+      <span className={cn("text-sm font-semibold", ok ? "text-emerald-700" : "text-rose-700")}>{value}</span>
     </div>
   );
 }
 
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4">
-      <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{label}</div>
+    <div className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="text-xs font-semibold text-slate-400">{label}</div>
       <div className="mt-2 text-sm font-semibold text-slate-950">{value}</div>
     </div>
   );
@@ -638,7 +641,7 @@ function InfoLine({ label, value }: { label: string; value: string }) {
 function MiniValue({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[11px] font-black uppercase tracking-[0.14em] text-slate-400">{label}</div>
+      <div className="text-[11px] font-semibold text-slate-400">{label}</div>
       <div className="mt-1 text-sm font-semibold text-slate-950">{value}</div>
     </div>
   );

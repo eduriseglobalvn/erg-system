@@ -45,7 +45,8 @@ import type {
   QuizEditorTextStyle,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getSlideKindLabelKey } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
+import { cn } from "@/utils/cn";
+import { AppSelect } from "@/components/ui/app-select";
 
 type QuestionEditorDialogProps = {
   open: boolean;
@@ -319,7 +320,7 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-text-format">
             <div className="classic-editor__question-editor-controls">
               <div className="classic-editor__question-editor-font-row">
-                <select
+                <AppSelect
                   value={resolvedTextStyle.fontFamily}
                   onChange={(event) => updateTextStyle({ fontFamily: event.target.value })}
                   className="classic-editor__question-editor-select is-font"
@@ -330,8 +331,8 @@ export function QuestionEditorDialog({
                       {font}
                     </option>
                   ))}
-                </select>
-                <select
+                </AppSelect>
+                <AppSelect
                   value={resolvedTextStyle.fontSize}
                   onChange={(event) => updateTextStyle({ fontSize: Number(event.target.value) })}
                   className="classic-editor__question-editor-select is-size"
@@ -341,7 +342,7 @@ export function QuestionEditorDialog({
                       {size}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </div>
               <div className="classic-editor__question-editor-format-row">
                 <button
@@ -407,19 +408,19 @@ export function QuestionEditorDialog({
               <label className="classic-editor__question-editor-row-label">
                 <RateReviewOutlinedIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
                 <span>{t("common.feedback")}</span>
-                <select
+                <AppSelect
                   value={feedbackValue}
                   onChange={(event) => updateOptions({ feedback: event.target.value })}
                   className="classic-editor__question-editor-select"
                 >
                   <option value="By Question">{t("quiz.byQuestion")}</option>
                   <option value="By Result">{t("common.byResult")}</option>
-                </select>
+                </AppSelect>
               </label>
               <label className="classic-editor__question-editor-row-label">
                 <AltRouteIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
                 <span>{t("common.branching")}</span>
-                <select
+                <AppSelect
                   value={branchingValue}
                   onChange={(event) => updateOptions({ branching: event.target.value })}
                   className="classic-editor__question-editor-select"
@@ -427,7 +428,7 @@ export function QuestionEditorDialog({
                   <option value="None">{t("common.none")}</option>
                   <option value="By Result">{t("common.byResult")}</option>
                   <option value="Next Question">{t("quiz.nextQuestion")}</option>
-                </select>
+                </AppSelect>
               </label>
             </div>
             <span className="classic-editor__question-editor-group-label">{t("common.feedback")}</span>

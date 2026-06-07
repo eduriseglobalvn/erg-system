@@ -1,4 +1,4 @@
-﻿import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type {
   StudentDiscussionAuthor,
   StudentDiscussionComment,

@@ -1,4 +1,4 @@
-﻿import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 
 import { getTeachingScheduleCalendarColor } from "./teaching-schedule-calendars";
 import type { TeachingScheduleDraft, TeachingScheduleEvent, TeachingScheduleStatus } from "./teaching-schedule-types";

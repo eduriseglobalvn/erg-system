@@ -33,14 +33,14 @@ export function DragDropQuestion({
             const assignedItems = items.filter((item) => placements[item.id] === target.id);
 
             return (
-              <div key={target.id} className="min-h-40 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-4">
-                <div className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+              <div key={target.id} className="min-h-40 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-4">
+                <div className="text-sm font-semibold text-slate-500">
                   {target.label}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {assignedItems.length ? (
                     assignedItems.map((item) => (
-                      <span key={item.id} className="rounded-xl bg-white px-3 py-2 text-sm font-black text-slate-700 shadow-sm">
+                      <span key={item.id} className="rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-700 shadow-sm">
                         {item.label}
                       </span>
                     ))
@@ -64,7 +64,7 @@ export function DragDropQuestion({
               <div
                 key={item.id}
                 className={cn(
-                  "rounded-2xl border-2 bg-white p-4 transition",
+                  "rounded-lg border-2 bg-white p-4 transition",
                   reviewMode
                     ? isCorrect
                       ? "border-emerald-300"
@@ -73,9 +73,9 @@ export function DragDropQuestion({
                 )}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-lg font-black text-slate-900">{item.label}</span>
+                  <span className="text-lg font-semibold text-slate-900">{item.label}</span>
                   {reviewMode && !isCorrect ? (
-                    <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-emerald-700">
+                    <span className="rounded-md bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                       Đúng: {correctTarget?.label}
                     </span>
                   ) : null}
@@ -87,7 +87,7 @@ export function DragDropQuestion({
                       type="button"
                       disabled={submitted}
                       className={cn(
-                        "min-h-10 rounded-xl border px-3 text-sm font-black transition hover:-translate-y-0.5 disabled:cursor-default",
+                        "min-h-10 rounded-lg border px-3 text-sm font-semibold transition  disabled:cursor-default",
                         selectedTargetId === target.id
                           ? "border-[var(--quiz-accent-start)] bg-[var(--quiz-option-selected-bg)]"
                           : "border-slate-200 bg-slate-50",

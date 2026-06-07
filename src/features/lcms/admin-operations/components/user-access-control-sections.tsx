@@ -18,6 +18,7 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import type {
   AccessManagedUser,
   AccessModule,
@@ -29,7 +30,8 @@ import type {
 } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { DraftPolicy, ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
 import { formatDateTime, initials, isSuperAdmin, mergeUser, statusLabel } from "@/features/lcms/admin-operations/utils/user-access-control-utils";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 const scopeLabels: Record<AccessScopeType | "none", string> = {
   system: "Hệ thống",
@@ -79,23 +81,23 @@ export function MemberRow({ active, user, onClick }: { active: boolean; user: Ac
   return (
     <button
       className={cn(
-        "mb-2 flex w-full items-start gap-3 rounded-2xl border p-3 text-left transition",
+        "mb-2 flex w-full items-start gap-3 rounded-lg border p-3 text-left transition",
         active
-          ? "border-[var(--erg-blue)] bg-[var(--erg-blue)] text-white shadow-lg shadow-slate-200"
-          : "border-slate-200 bg-white text-slate-950 hover:border-slate-300 hover:bg-white",
+          ? "border-[#b8d6fa] bg-[#ebf3fc] text-[#0f5ea8]"
+          : "border-[#e0e4ea] bg-white text-slate-950 hover:border-[#b8d6fa] hover:bg-[#f7f8fa]",
       )}
       onClick={onClick}
     >
-      <Avatar className="size-11 rounded-2xl">
+      <Avatar className="size-10 rounded-lg">
         <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-        <AvatarFallback className="rounded-2xl bg-[rgb(0_0_139_/_0.08)] text-xs font-bold text-[var(--erg-blue)]">
+        <AvatarFallback className="rounded-lg bg-[#ebf3fc] text-xs font-semibold text-[var(--erg-blue)]">
           {initials(user.fullName || user.email)}
         </AvatarFallback>
       </Avatar>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="truncate text-sm font-semibold">{user.fullName || user.email}</span>
-          {superAdmin ? <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">SUPER</span> : null}
+          {superAdmin ? <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800">SUPER</span> : null}
         </span>
         <span className={cn("mt-1 block truncate text-xs", active ? "text-slate-300" : "text-slate-500")}>{user.email}</span>
         <span className={cn("mt-1 block truncate text-xs", active ? "text-slate-300" : "text-slate-500")}>
@@ -133,18 +135,18 @@ export function MemberDetailHeader({
   onDeactivate: () => void;
 }) {
   return (
-    <section className="rounded-[20px] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5">
+    <section className="rounded-lg border border-[#e0e4ea] bg-white p-5">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <Avatar className="size-16 rounded-[20px]">
+          <Avatar className="size-14 rounded-lg">
             <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-            <AvatarFallback className="rounded-[20px] bg-[rgb(0_0_139_/_0.08)] text-base font-bold text-[var(--erg-blue)]">
+            <AvatarFallback className="rounded-lg bg-[#ebf3fc] text-base font-semibold text-[var(--erg-blue)]">
               {initials(user.fullName || user.email)}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="truncate text-2xl font-semibold tracking-tight text-slate-950">{user.fullName || user.email}</h3>
+              <h3 className="truncate text-xl font-semibold text-slate-950">{user.fullName || user.email}</h3>
               {superAdmin ? <Badge className="rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-100">Super Admin</Badge> : null}
               <Badge variant="outline" className="rounded-lg border-slate-200 bg-white">
                 {statusLabel(user.status)}
@@ -160,35 +162,35 @@ export function MemberDetailHeader({
                 {user.isProfileCompleted ? "Đã hoàn tất onboarding" : "Cần onboarding"}
               </span>
               <span className="rounded-lg bg-white px-2.5 py-1 ring-1 ring-slate-200">
-                {loading ? "Đang tính quyền..." : `Quyền cao nhất: ${scopeLabels[effective?.highestScope ?? "none"]}`}
+                {loading ? <Skeleton className="h-4 w-32" aria-label="Dang tinh quyen" /> : `Quyền cao nhất: ${scopeLabels[effective?.highestScope ?? "none"]}`}
               </span>
             </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
-            className="h-10 rounded-xl border border-emerald-200 bg-white px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded-md border border-emerald-200 bg-white px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={rootAdmin || user.status === "ACTIVE"}
             onClick={onActivate}
           >
             Active
           </button>
           <button
-            className="h-10 rounded-xl border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded-md border border-red-200 bg-white px-4 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={rootAdmin || user.status !== "ACTIVE"}
             onClick={onDeactivate}
           >
             Deactive
           </button>
           <button
-            className="h-10 rounded-xl border border-orange-200 bg-white px-4 text-sm font-semibold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded-md border border-orange-200 bg-white px-4 text-sm font-semibold text-orange-700 transition hover:bg-orange-50 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={rootAdmin || user.status === "BLOCKED"}
             onClick={onBlock}
           >
             Block
           </button>
           <button
-            className="h-10 rounded-xl border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="h-9 rounded-md border border-rose-200 bg-white px-4 text-sm font-semibold text-rose-700 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-50"
             disabled={rootAdmin || user.status === "BANNED"}
             onClick={onBan}
           >
@@ -217,17 +219,17 @@ export function ProfileSection({
 
   return (
     <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_300px]">
-      <div className="rounded-[22px] border border-[var(--erg-border)] bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[#e0e4ea] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-lg font-bold text-[var(--erg-text)]">Hồ sơ thành viên</p>
+            <p className="text-lg font-medium text-[var(--erg-text)]">Hồ sơ thành viên</p>
             <p className="mt-1 text-sm text-[var(--erg-text-muted)]">Admin có thể cập nhật thông tin định danh và thông tin vận hành lấy trực tiếp từ BE.</p>
           </div>
           <button
             type="button"
             onClick={onSave}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-2xl bg-[var(--erg-ink)] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center gap-2 rounded-md bg-[var(--erg-blue)] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save className="h-4 w-4" />
             {saving ? "Đang lưu" : "Lưu hồ sơ"}
@@ -248,12 +250,12 @@ export function ProfileSection({
             <input value={draft.jobTitle} onChange={(event) => update("jobTitle", event.target.value)} className="erg-input" placeholder="Giáo viên, quản trị viên..." />
           </Field>
           <Field label="Giới tính">
-            <select value={draft.gender} onChange={(event) => update("gender", event.target.value)} className="erg-input">
+            <AppSelect value={draft.gender} onChange={(event) => update("gender", event.target.value)} className="erg-input">
               <option value="">Chưa cập nhật</option>
               <option value="male">Nam</option>
               <option value="female">Nữ</option>
               <option value="other">Khác</option>
-            </select>
+            </AppSelect>
           </Field>
           <Field label="Ngày sinh">
             <input type="date" value={draft.dateOfBirth} onChange={(event) => update("dateOfBirth", event.target.value)} className="erg-input" />
@@ -279,8 +281,8 @@ export function ProfileSection({
         </div>
       </div>
 
-      <div className="rounded-[22px] border border-[var(--erg-border)] bg-white p-5 shadow-sm">
-        <p className="text-base font-bold text-[var(--erg-text)]">Thông tin tài khoản</p>
+      <div className="rounded-lg border border-[#e0e4ea] bg-white p-5 shadow-sm">
+        <p className="text-base font-medium text-[var(--erg-text)]">Thông tin tài khoản</p>
         <div className="mt-4 space-y-3 text-sm">
           <InfoLine label="Trạng thái" value={statusLabel(user.status)} />
           <InfoLine label="Onboarding" value={user.isProfileCompleted ? "Đã hoàn tất" : "Cần onboarding"} />
@@ -327,7 +329,7 @@ export function RolesSection({
   }
 
   return (
-    <section className="rounded-2xl border border-slate-200 p-5">
+    <section className="rounded-lg border border-[#e0e4ea] p-5">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <h4 className="text-lg font-semibold text-slate-950">Vai trò đăng nhập</h4>
@@ -345,8 +347,8 @@ export function RolesSection({
             <button
               key={role.id}
               className={cn(
-                "min-h-[110px] rounded-2xl border p-4 text-left transition",
-                checked ? "border-[var(--erg-blue)] bg-[rgb(0_0_139_/_0.07)] ring-4 ring-[rgb(0_0_139_/_0.08)]" : "border-slate-200 bg-white hover:bg-slate-50",
+                "min-h-[110px] rounded-lg border p-4 text-left transition",
+                checked ? "border-[#b8d6fa] bg-[#ebf3fc] ring-2 ring-[var(--erg-blue)]/15" : "border-[#e0e4ea] bg-white hover:bg-[#f7f8fa]",
               )}
               onClick={() => {
                 if (!protectedSuper) toggle(role.id);
@@ -415,10 +417,10 @@ export function AccessSection({
 
   return (
     <section className="space-y-5">
-      <div className="rounded-[22px] border border-[var(--erg-border)] bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[#e0e4ea] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-lg font-bold text-[var(--erg-text)]">Cấp quyền truy cập</p>
+            <p className="text-lg font-medium text-[var(--erg-text)]">Cấp quyền truy cập</p>
             <p className="mt-1 text-sm text-[var(--erg-text-muted)]">Chọn phạm vi, nhóm quyền và module. Danh sách trung tâm/trường dùng tìm kiếm để không bị rối khi dữ liệu lớn.</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -426,7 +428,7 @@ export function AccessSection({
               type="button"
               onClick={onAddPolicy}
               disabled={!canAdd || saving}
-              className="inline-flex h-10 items-center justify-center rounded-xl border border-[var(--erg-border)] bg-white px-4 text-sm font-bold text-[var(--erg-text)] transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-[#d1d1d1] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Thêm quyền
             </button>
@@ -456,8 +458,8 @@ export function AccessSection({
           </div>
 
           {selectedScope || selectedRole ? (
-            <div className="rounded-2xl border border-[var(--erg-border)] bg-[var(--erg-blue-soft)] px-4 py-3 text-sm text-[var(--erg-text)]">
-              {selectedScope ? <span className="font-bold text-[var(--erg-blue)]">{selectedScope.name}</span> : null}
+            <div className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] px-4 py-3 text-sm text-slate-800">
+              {selectedScope ? <span className="font-medium text-[var(--erg-blue)]">{selectedScope.name}</span> : null}
               {selectedScope && selectedRole ? <span> · </span> : null}
               {selectedRole ? <span>{selectedRole.name}</span> : null}
             </div>
@@ -465,16 +467,16 @@ export function AccessSection({
         </div>
       </div>
 
-      <div className="rounded-[22px] border border-[var(--erg-border)] bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[#e0e4ea] bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-lg font-bold text-[var(--erg-text)]">Quyền đã cấp</p>
+            <p className="text-lg font-medium text-[var(--erg-text)]">Quyền đã cấp</p>
             <p className="mt-1 text-sm text-[var(--erg-text-muted)]">Các dòng bên dưới là quyền sẽ được lưu cho thành viên.</p>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs font-bold">
-            <span className="rounded-full border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Cao nhất: {scopeLabels[highestScope]}</span>
-            <span className="rounded-full border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Module: {moduleCount}</span>
-            <span className="rounded-full border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Permission: {permissionCount}</span>
+          <div className="flex flex-wrap gap-2 text-xs font-medium">
+            <span className="rounded-md border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Cao nhất: {scopeLabels[highestScope]}</span>
+            <span className="rounded-md border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Module: {moduleCount}</span>
+            <span className="rounded-md border border-[var(--erg-border)] bg-white px-3 py-1 text-[var(--erg-text)]">Permission: {permissionCount}</span>
           </div>
         </div>
 
@@ -495,7 +497,7 @@ export function AccessSection({
         ) : null}
 
         {effective?.warnings?.length ? (
-          <div className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm font-medium text-amber-900">
             {effective.warnings.join(". ")}
           </div>
         ) : null}
@@ -514,7 +516,7 @@ function SegmentedScope({ value, onChange }: { value: AccessScopeType | ""; onCh
             key={scopeType}
             title={scopeHelp[scopeType]}
             className={cn(
-              "inline-flex h-10 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition",
+              "inline-flex h-10 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition",
               value === scopeType ? "border-[var(--erg-blue)] bg-[var(--erg-blue)] text-white" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50",
             )}
             onClick={() => onChange(scopeType)}
@@ -546,19 +548,19 @@ function SearchableScopePicker({
   onSelect: (scopeId: string) => void;
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3">
+    <div className="rounded-lg border border-slate-200 bg-white p-3">
       <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <label className="relative block md:w-[360px]">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
-            className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-4 focus:ring-[rgb(0_0_139_/_0.08)]"
+            className="h-10 w-full rounded-md border border-[#cfd7e3] bg-[#f6f8fb] pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             placeholder="Tìm trung tâm hoặc trường"
             value={search}
             onChange={(event) => onSearch(event.target.value)}
           />
         </label>
         <span className="text-xs font-semibold text-slate-500">
-          {loading ? "Đang tải..." : `${scopes.length}/${total} phạm vi`}
+          {loading ? <Skeleton className="h-4 w-20" aria-label="Dang tai pham vi" /> : `${scopes.length}/${total} phạm vi`}
         </span>
       </div>
 
@@ -568,7 +570,7 @@ function SearchableScopePicker({
         </div>
       ) : null}
 
-      <div className="mt-3 max-h-[260px] overflow-auto rounded-xl border border-slate-200">
+      <div className="mt-3 max-h-[260px] overflow-auto rounded-lg border border-slate-200">
         {scopes.map((scope) => {
           const Icon = scopeIcons[scope.scopeType];
           const checked = selectedId === scope.scopeId;
@@ -583,7 +585,7 @@ function SearchableScopePicker({
             >
               <div
                 className={cn(
-                  "grid size-9 shrink-0 place-items-center rounded-xl ring-1",
+                  "grid size-9 shrink-0 place-items-center rounded-lg ring-1",
                   checked ? "bg-[var(--erg-blue)] text-white ring-[var(--erg-blue)]" : "bg-white text-slate-700 ring-slate-200",
                 )}
               >
@@ -610,14 +612,14 @@ function CompactRolePicker({ roles, value, onSelect }: { roles: AccessRoleGroup[
   const selectedRole = roles.find((role) => role.id === value);
 
   return (
-    <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[150px_minmax(0,1fr)] md:items-start">
+    <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-[150px_minmax(0,1fr)] md:items-start">
       <div>
         <p className="text-sm font-semibold text-slate-950">Nhóm quyền</p>
         <p className="mt-1 text-xs text-slate-500">Chọn một vai trò</p>
       </div>
       <div className="min-w-0">
-        <select
-          className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-4 focus:ring-[rgb(0_0_139_/_0.08)]"
+        <AppSelect
+          className="h-10 w-full rounded-md border border-[#cfd7e3] bg-[#f6f8fb] px-3 text-sm font-semibold text-[#242424] outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           value={value}
           onChange={(event) => onSelect(event.target.value)}
         >
@@ -627,7 +629,7 @@ function CompactRolePicker({ roles, value, onSelect }: { roles: AccessRoleGroup[
               {role.name}
             </option>
           ))}
-        </select>
+        </AppSelect>
         {selectedRole ? <p className="mt-2 text-xs leading-5 text-slate-500">{selectedRole.description}</p> : null}
       </div>
     </div>
@@ -640,7 +642,7 @@ function CompactModulePicker({ modules, selected, onChange }: { modules: AccessM
   }
 
   return (
-    <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-3 md:grid-cols-[150px_minmax(0,1fr)] md:items-start">
+    <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-3 md:grid-cols-[150px_minmax(0,1fr)] md:items-start">
       <div>
         <p className="text-sm font-semibold text-slate-950">Module</p>
         <p className="mt-1 text-xs text-slate-500">Chọn khu vực truy cập</p>
@@ -653,7 +655,7 @@ function CompactModulePicker({ modules, selected, onChange }: { modules: AccessM
             <button
               key={module.id}
               className={cn(
-                "inline-flex h-9 items-center gap-2 rounded-xl border px-3 text-sm font-semibold transition",
+                "inline-flex h-9 items-center gap-2 rounded-lg border px-3 text-sm font-semibold transition",
                 checked
                   ? "border-[var(--erg-blue)] bg-[rgb(0_0_139_/_0.07)] text-[var(--erg-blue)]"
                   : "border-slate-200 bg-slate-50 text-slate-700 hover:bg-white",
@@ -685,9 +687,9 @@ function PolicyRow({
 }) {
   const Icon = scopeIcons[policy.scopeType];
   return (
-    <article className="grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_96px] lg:items-center">
+    <article className="grid gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)_96px] lg:items-center">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="grid size-10 shrink-0 place-items-center rounded-xl bg-white text-slate-700 ring-1 ring-slate-200">
+        <div className="grid size-10 shrink-0 place-items-center rounded-lg bg-white text-slate-700 ring-1 ring-slate-200">
           <Icon className="size-5" />
         </div>
         <div className="min-w-0">
@@ -706,7 +708,7 @@ function PolicyRow({
         </div>
       </div>
       <button
-        className="inline-flex h-9 items-center justify-center gap-2 rounded-xl border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50"
+        className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 text-sm font-semibold text-red-700 transition hover:bg-red-50"
         onClick={onRemove}
       >
         <Trash2 className="size-4" />
@@ -728,7 +730,7 @@ function Field({ children, label, className }: { children: ReactNode; label: str
 function SaveButton({ children, saving, onClick }: { children: ReactNode; saving: boolean; onClick: () => void }) {
   return (
     <button
-      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[rgb(0_0_110)] disabled:cursor-not-allowed disabled:opacity-60"
+      className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[rgb(0_0_110)] disabled:cursor-not-allowed disabled:opacity-60"
       disabled={saving}
       onClick={onClick}
     >
@@ -749,7 +751,7 @@ export function HeaderMetric({ label, value }: { label: string; value: string })
 
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-white px-3 py-2 text-sm ring-1 ring-slate-200">
+    <div className="flex items-start justify-between gap-4 rounded-lg bg-white px-3 py-2 text-sm ring-1 ring-slate-200">
       <span className="font-medium text-slate-500">{label}</span>
       <span className="max-w-[180px] text-right font-semibold text-slate-950">{value}</span>
     </div>
@@ -760,7 +762,7 @@ export function Banner({ children, tone }: { children: ReactNode; tone: "error" 
   return (
     <div
       className={cn(
-        "mt-4 flex items-start gap-2 rounded-xl border px-3 py-2 text-sm font-medium",
+        "mt-4 flex items-start gap-2 rounded-lg border px-3 py-2 text-sm font-medium",
         tone === "error" ? "border-red-200 bg-red-50 text-red-700" : "border-emerald-200 bg-emerald-50 text-emerald-700",
       )}
     >
@@ -772,15 +774,16 @@ export function Banner({ children, tone }: { children: ReactNode; tone: "error" 
 
 export function LoadingBlock({ label }: { label: string }) {
   return (
-    <div className="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white p-5 text-sm font-medium text-slate-500">
-      <Loader2 className="size-4 animate-spin" />
-      {label}
+    <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-5" aria-label={label}>
+      <Skeleton className="h-4 w-44" />
+      <Skeleton className="h-3 w-full" />
+      <Skeleton className="h-3 w-2/3" />
     </div>
   );
 }
 
 export function EmptyBlock({ label }: { label: string }) {
-  return <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">{label}</div>;
+  return <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">{label}</div>;
 }
 
 function MiniBadge({ active, children }: { active: boolean; children: ReactNode }) {
@@ -790,3 +793,4 @@ function MiniBadge({ active, children }: { active: boolean; children: ReactNode 
     </span>
   );
 }
+

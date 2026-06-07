@@ -1,4 +1,4 @@
-﻿import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import {
   USE_LEARNING_RESOURCE_AUTHORING_MOCK,
   mockLearningResourceAuthoringResources,

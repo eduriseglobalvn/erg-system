@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { ShieldAlert } from "lucide-react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "@/routes/router-compat";
 
 import { ERG_ASSETS } from "@/config/seo";
 import { authApi } from "@/platform/auth/api/auth-api";
@@ -48,25 +48,25 @@ export function AccessDeniedPage() {
   }
 
   return (
-    <main className="grid min-h-svh place-items-center bg-[linear-gradient(135deg,#f7fbff_0%,#eef4ff_52%,#fff8f8_100%)] px-4 py-10 text-slate-950">
-      <section className="w-full max-w-[780px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_30px_100px_-55px_rgba(15,23,42,0.55)]">
+    <main className="grid min-h-svh place-items-center bg-[var(--erg-bg)] px-4 py-10 text-slate-950">
+      <section className="w-full max-w-[780px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
         <div className="grid md:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="bg-[linear-gradient(155deg,var(--erg-blue)_0%,#2435a7_55%,#a3134f_130%)] p-8 text-white">
+          <aside className="bg-[var(--erg-blue)] p-8 text-white">
             <img alt="ERG" className="h-12 w-fit rounded-lg bg-white px-3 py-2 object-contain" src={ERG_ASSETS.logo} />
-            <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/12 ring-1 ring-white/20">
+            <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-lg bg-white/12 ring-1 ring-white/20">
               <ShieldAlert className="h-8 w-8" />
             </div>
-            <p className="mt-6 text-[11px] font-black uppercase tracking-[0.22em] text-white/60">Access denied</p>
-            <h1 className="mt-3 text-3xl font-black leading-tight">Tài khoản chưa có quyền truy cập.</h1>
+            <p className="mt-6 text-[11px] font-semibold text-white/60">Access denied</p>
+            <h1 className="mt-3 text-xl font-semibold leading-tight">Tài khoản chưa có quyền truy cập.</h1>
           </aside>
 
           <div className="p-8 sm:p-10">
-            <p className="text-sm font-black uppercase tracking-[0.18em] text-[var(--erg-red)]">Không đủ quyền</p>
-            <h2 className="mt-3 text-2xl font-black tracking-tight">Không thể vào {portalLabel}</h2>
+            <p className="text-sm font-semibold text-[var(--erg-red)]">Không đủ quyền</p>
+            <h2 className="mt-3 text-xl font-semibold">Không thể vào {portalLabel}</h2>
             <p className="mt-4 text-sm leading-7 text-slate-600">
               {email ? (
                 <>
-                  Tài khoản <span className="font-bold text-slate-950">{email}</span> đã đăng nhập thành công nhưng chưa được cấp quyền vào {portalLabel}.
+                  Tài khoản <span className="font-semibold text-slate-950">{email}</span> đã đăng nhập thành công nhưng chưa được cấp quyền vào {portalLabel}.
                 </>
               ) : (
                 <>Tài khoản hiện tại chưa được cấp quyền vào {portalLabel}.</>
@@ -78,13 +78,13 @@ export function AccessDeniedPage() {
               <button
                 type="button"
                 onClick={loginAgain}
-                className="h-12 rounded-xl bg-[var(--erg-blue)] px-5 text-sm font-black text-white shadow-[0_18px_38px_-28px_rgba(0,0,139,0.75)] transition hover:bg-blue-900"
+                className="h-12 rounded-lg bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)]"
               >
                 Đăng nhập tài khoản khác
               </button>
               <Link
                 to="/"
-                className="inline-flex h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-black text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
+                className="inline-flex h-12 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
               >
                 Về trang chủ
               </Link>

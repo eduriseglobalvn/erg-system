@@ -57,25 +57,25 @@ type ExplorerViewToggleProps = {
 
 export function ExplorerViewToggle({ viewMode, onViewModeChange }: ExplorerViewToggleProps) {
   return (
-    <div className="ml-auto flex items-center overflow-hidden rounded-md border border-[#d7dee8] bg-white">
+    <div className="ml-auto flex h-8 items-center overflow-hidden rounded-md border border-[#d1d1d1] bg-white shadow-sm">
       <button
         type="button"
-        title="Grid view"
+        title="Dạng lưới"
         aria-pressed={viewMode === "grid"}
         onClick={() => onViewModeChange("grid")}
-        className={`grid h-8 w-9 place-items-center border-r border-[#d7dee8] ${
-          viewMode === "grid" ? "bg-[#e8f3ff] text-[#0b6fcf]" : "text-[#52616f] hover:bg-[#f4f8fc]"
+        className={`grid h-8 w-9 place-items-center border-r border-[#d1d1d1] transition ${
+          viewMode === "grid" ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-600 hover:bg-[#f7f8fa]"
         }`}
       >
         <LayoutGrid className="h-4 w-4" />
       </button>
       <button
         type="button"
-        title="List view"
+        title="Dạng danh sách"
         aria-pressed={viewMode === "list"}
         onClick={() => onViewModeChange("list")}
-        className={`grid h-8 w-9 place-items-center ${
-          viewMode === "list" ? "bg-[#e8f3ff] text-[#0b6fcf]" : "text-[#52616f] hover:bg-[#f4f8fc]"
+        className={`grid h-8 w-9 place-items-center transition ${
+          viewMode === "list" ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-600 hover:bg-[#f7f8fa]"
         }`}
       >
         <List className="h-4 w-4" />
@@ -110,10 +110,10 @@ export function LearningResourceFolderTile({
       onContextMenu={onContextMenu}
       onDoubleClick={onDoubleClick}
       title={title}
-      className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-xl border px-4 text-center transition focus:outline-none ${
+      className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-lg border px-4 text-center transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] ${
         selected
-          ? "border-[#8dc7ff] bg-[#dceeff] shadow-sm ring-1 ring-inset ring-[#8dc7ff]"
-          : "border-[#b9dcff] bg-[#e5f3ff] hover:border-[#8dc7ff] hover:bg-[#dceeff]"
+          ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] shadow-sm ring-1 ring-inset ring-[#b8d6fa]"
+          : "border-[#d1d1d1] bg-white hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
       }`}
     >
       <span className="absolute inset-x-0 top-[45%] flex -translate-y-1/2 items-center justify-center">
@@ -121,7 +121,7 @@ export function LearningResourceFolderTile({
           <WindowsFolderIcon size="lg" open={open} />
         </span>
       </span>
-      <span className="absolute inset-x-4 bottom-5 line-clamp-2 text-[13px] font-medium leading-5 text-[#111827]">
+      <span className="absolute inset-x-4 bottom-5 line-clamp-2 text-[13px] font-medium leading-5 text-slate-900">
         {label}
       </span>
     </button>
@@ -155,25 +155,22 @@ export function LearningResourceSquareCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex aspect-[4/5] w-full overflow-hidden rounded-2xl border border-[#d9dee7] bg-white text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#33b653]"
+      className="group flex aspect-[4/5] w-full overflow-hidden rounded-lg border border-[#d1d1d1] bg-white text-left shadow-sm transition hover:border-[#b8d6fa] hover:bg-[#f7fbff] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
     >
       <span className="flex h-full w-full flex-col">
-        <span className="relative h-[50%] shrink-0 overflow-hidden bg-[#ffc20a]">
-          <span className="absolute inset-0 bg-[radial-gradient(circle_at_14%_20%,rgba(255,255,255,0.75)_0_2px,transparent_3px),radial-gradient(circle_at_82%_28%,rgba(255,255,255,0.65)_0_2px,transparent_3px),linear-gradient(155deg,#ffd91f_0%,#ffbd00_58%,#ff9f00_100%)]" />
-          <span className="absolute -right-8 top-0 h-24 w-28 rotate-12 rounded-[26px] bg-[#ff65b8]/70" />
-          <span className="absolute left-4 top-4 h-11 w-8 -rotate-12 rounded-md bg-[#5344d9] shadow-md">
-            <span className="absolute left-2 top-2 h-6 w-4 rounded-sm bg-[#6657f0]" />
-            <span className="absolute bottom-1 left-2 h-1 w-4 rounded-full bg-[#ffde59]" />
+        <span className="relative h-[50%] shrink-0 overflow-hidden border-b border-[#e0e4ea] bg-[#f7f8fa]">
+          <span className="absolute left-4 top-4 flex h-11 w-8 items-center justify-center rounded-md border border-[#b8d6fa] bg-[#ebf3fc] text-[var(--erg-blue)] shadow-sm">
+            <span className="h-6 w-4 rounded-sm border border-[#b8d6fa] bg-white" />
           </span>
-          <span className="absolute right-0 top-2 rounded-l-md bg-[#ef3434] px-3 py-1 text-xs font-black text-white shadow">
+          <span className="absolute right-0 top-2 rounded-l-md bg-[var(--erg-blue)] px-3 py-1 text-[11px] font-semibold text-white shadow-sm">
             {tag}
           </span>
-          <span className="absolute left-0 right-0 top-[34px] text-center text-[20px] font-black italic leading-6 text-white [text-shadow:0_3px_0_#0877ff,0_5px_8px_rgba(0,0,0,0.28)]">
+          <span className="absolute left-6 right-6 top-[58px] text-center text-base font-semibold leading-6 text-slate-900">
             {heading}
             <br />
             {unit}
           </span>
-          <span className="absolute inset-x-0 bottom-0 flex h-7 items-center justify-center gap-3 bg-black/35 text-[11px] font-black text-white">
+          <span className="absolute inset-x-0 bottom-0 flex h-7 items-center justify-center gap-3 border-t border-[#e0e4ea] bg-white text-[11px] font-semibold text-slate-600">
             <span className="inline-flex items-center gap-1">
               <Timer className="h-3.5 w-3.5 fill-white" />
               {minutes} Phút
@@ -184,15 +181,15 @@ export function LearningResourceSquareCard({
         </span>
         <span className="flex min-h-0 flex-1 flex-col justify-between px-4 py-3">
           <span className="flex flex-col min-h-0 flex-1 justify-start">
-            <span className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-[#fff2d6] px-2.5 py-1 text-[11px] font-bold text-[#f59e0b]">
-              <span className="h-2.5 w-2.5 rounded-full border-[3px] border-[#fbbf24]" />
+            <span className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-md bg-[#fff2d6] px-2.5 py-1 text-[11px] font-medium text-[#f59e0b]">
+              <span className="h-2.5 w-2.5 rounded-md border-[3px] border-[#fbbf24]" />
               {statusLabel}
             </span>
-            <span className="line-clamp-2 text-[14px] font-black leading-5 text-[#5f6673]">
+            <span className="line-clamp-2 text-[13px] font-medium leading-5 text-[#242424]">
               {title}
             </span>
           </span>
-          <span className="inline-flex h-9 w-fit items-center gap-2 rounded-full bg-[#33b653] px-4 text-sm font-black text-white shadow-sm transition group-hover:bg-[#27a545]">
+          <span className="inline-flex h-8 w-fit items-center gap-2 rounded-md bg-[var(--erg-blue)] px-3 text-[13px] font-semibold text-white shadow-sm transition group-hover:bg-[var(--erg-blue-hover)]">
             <Play className="h-4 w-4 fill-white" />
             {actionLabel}
           </span>

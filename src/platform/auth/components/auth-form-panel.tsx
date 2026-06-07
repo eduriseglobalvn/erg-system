@@ -1,11 +1,13 @@
-﻿import { useRef, type FormEvent, type KeyboardEvent } from "react";
+import { useRef, type FormEvent, type KeyboardEvent } from "react";
 
 import { EyeIcon } from "@/platform/auth/components/auth-icons";
+import { useForm } from "@tanstack/react-form";
 import {
   DividerText,
   Field,
 } from "@/platform/auth/components/auth-shared";
 import { inputClassName, submitButtonClassName } from "@/platform/auth/components/auth-shared-styles";
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
 import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
 import type {
@@ -67,6 +69,14 @@ export function AuthFormPanel({
   const effectiveMode = allowRegister ? mode : "login";
   const hasSocialLogin = allowGoogle;
   const passwordInputRef = useRef<HTMLInputElement>(null);
+  const loginTanstackForm = useForm({
+    defaultValues: loginForm,
+    onSubmit: () => onLoginSubmit(createHandledSubmitEvent()),
+  });
+  const registerTanstackForm = useForm({
+    defaultValues: registerForm,
+    onSubmit: () => onRegisterSubmit(createHandledSubmitEvent()),
+  });
 
   if (mobileVariant) {
     return (
@@ -104,7 +114,7 @@ export function AuthFormPanel({
   }
 
   const titleStyle = mobileVariant
-    ? ({ color: "#020617", fontSize: 24, fontWeight: 900, letterSpacing: "-0.03em", lineHeight: 1.12 } as const)
+    ? ({ color: "#242424", fontSize: 20, fontWeight: 600, letterSpacing: 0, lineHeight: 1.25 } as const)
     : undefined;
   const subtitleStyle = mobileVariant
     ? ({ color: "#64748b", fontSize: 14, lineHeight: 1.7, marginTop: 10, maxWidth: 320 } as const)
@@ -112,9 +122,9 @@ export function AuthFormPanel({
   const formCardStyle = mobileVariant
     ? ({
         backgroundColor: "#ffffff",
-        border: "1px solid #e2e8f0",
-        borderRadius: 24,
-        boxShadow: "0 24px 52px -42px rgba(15,23,42,0.24)",
+        border: "1px solid #d9e0ea",
+        borderRadius: 8,
+        boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
         marginTop: allowRegister ? 14 : 0,
         padding: "22px 18px",
       } as const)
@@ -122,36 +132,36 @@ export function AuthFormPanel({
   const inputStyle = mobileVariant
     ? ({
         backgroundColor: "#ffffff",
-        border: "1px solid #cbd5e1",
-        borderRadius: 14,
-        color: "#0f172a",
-        fontSize: 16,
-        height: 52,
-        padding: "0 16px",
+        border: "1px solid #cfd7e3",
+        borderRadius: 6,
+        color: "#242424",
+        fontSize: 14,
+        height: 40,
+        padding: "0 12px",
         width: "100%",
       } as const)
     : undefined;
   const passwordInputStyle = mobileVariant
     ? ({
         backgroundColor: "#ffffff",
-        border: "1px solid #cbd5e1",
-        borderRadius: 14,
-        color: "#0f172a",
-        fontSize: 16,
-        height: 52,
-        padding: "0 48px 0 16px",
+        border: "1px solid #cfd7e3",
+        borderRadius: 6,
+        color: "#242424",
+        fontSize: 14,
+        height: 40,
+        padding: "0 42px 0 12px",
         width: "100%",
       } as const)
     : undefined;
   const submitStyle = mobileVariant
     ? ({
         backgroundColor: "var(--erg-blue)",
-        borderRadius: 16,
+        borderRadius: 6,
         color: "#fff",
         display: "inline-flex",
-        fontSize: 16,
-        fontWeight: 700,
-        height: 52,
+        fontSize: 14,
+        fontWeight: 600,
+        height: 40,
         justifyContent: "center",
         width: "100%",
       } as const)
@@ -160,7 +170,7 @@ export function AuthFormPanel({
     ? ({
         backgroundColor: "#f8fafc",
         border: "1px solid #e2e8f0",
-        borderRadius: 16,
+        borderRadius: 8,
         color: "#475569",
         fontSize: 14,
         lineHeight: 1.7,
@@ -172,7 +182,7 @@ export function AuthFormPanel({
   return (
     <div className="w-full" style={{ width: "100%" }}>
       {allowRegister ? (
-      <div className="rounded-xl border border-slate-200 bg-white/80 p-1 shadow-sm backdrop-blur" style={{ backdropFilter: "blur(10px)", backgroundColor: "rgba(255,255,255,0.88)", border: "1px solid #e2e8f0", borderRadius: 16, padding: 4 }}>
+      <div className="rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] p-1 shadow-sm" style={{ backgroundColor: "#f6f8fb", border: "1px solid #cfd7e3", borderRadius: 8, padding: 4 }}>
         <div className="grid grid-cols-2 gap-1" style={{ display: "grid", gap: 4, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           {[
             { id: "login" as const, label: t("auth.login") },
@@ -183,12 +193,12 @@ export function AuthFormPanel({
               type="button"
               onClick={() => onModeChange(item.id)}
               className={cn(
-                "h-11 rounded-xl px-4 text-sm font-bold transition",
+                "relative h-10 rounded-md border border-transparent px-4 text-sm font-semibold transition",
                 mode === item.id
-                  ? "bg-[var(--erg-blue)] text-white shadow-sm"
-                  : "text-slate-500 hover:bg-white hover:text-[var(--erg-blue)]",
+                  ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm after:absolute after:inset-x-6 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[var(--erg-blue)]"
+                  : "text-slate-600 hover:bg-white hover:text-slate-950",
               )}
-              style={{ borderRadius: 12, fontSize: 14, fontWeight: 700, height: 44, padding: "0 16px" }}
+              style={{ borderRadius: 6, fontSize: 14, fontWeight: 600, height: 40, padding: "0 16px" }}
             >
               {item.label}
             </button>
@@ -197,11 +207,11 @@ export function AuthFormPanel({
       </div>
       ) : null}
 
-      <div className={cn("rounded-xl border border-slate-200 bg-white px-5 py-6 shadow-[0_24px_70px_-46px_rgba(15,23,42,0.55)] sm:px-7", allowRegister ? "mt-4" : "mt-0")} style={formCardStyle}>
+      <div className={cn("rounded-lg border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-7", allowRegister ? "mt-4" : "mt-0")} style={formCardStyle}>
         {effectiveMode === "login" ? (
           <>
             <div className="text-left" style={{ textAlign: "left" }}>
-              <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl" style={titleStyle}>
+              <h2 className="text-lg font-semibold text-[#242424] sm:text-xl" style={titleStyle}>
                 {loginTitle ?? t("auth.loginTeacherHub")}
               </h2>
               <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500" style={subtitleStyle}>
@@ -227,63 +237,97 @@ export function AuthFormPanel({
             </>
             ) : null}
 
-            <form className="mt-5 space-y-4" style={{ marginTop: 20 }} onSubmit={onLoginSubmit}>
-              <Field label={credentialLabel ?? t("auth.email")}>
-                <input
-                  className={inputClassName}
-                  style={inputStyle}
-                  value={loginForm.email}
-                  onChange={(event) =>
-                    onLoginFormChange({
-                      ...loginForm,
-                      email: event.target.value,
-                    })
-                  }
-                  placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
-                  type="text"
-                  autoComplete="username"
-                  onKeyDown={focusPasswordFromEmail}
-                />
-              </Field>
-
-              <Field
-                label={t("auth.password")}
-                action={
-                  <button
-                    type="button"
-                    className="font-semibold text-[var(--erg-blue)] hover:text-blue-800"
-                    onClick={onForgotPassword}
-                  >
-                    {t("auth.forgotPassword")}
-                  </button>
-                }
+            <TsForm
+              className="mt-5 space-y-4"
+              style={{ marginTop: 20 }}
+              onSubmit={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void loginTanstackForm.handleSubmit();
+              }}
+            >
+              <loginTanstackForm.Field
+                name="email"
+                validators={{
+                  onChange: ({ value }) => validateCredential(value, credentialLabel ?? t("auth.email")),
+                }}
               >
-                <div className="relative">
-                  <input
-                    ref={passwordInputRef}
-                    className={cn(inputClassName, "pr-12")}
-                    style={passwordInputStyle}
-                    value={loginForm.password}
-                    onChange={(event) =>
-                      onLoginFormChange({
-                        ...loginForm,
-                        password: event.target.value,
-                      })
+                {(field) => (
+                  <Field label={credentialLabel ?? t("auth.email")}>
+                    <input
+                      className={inputClassName}
+                      style={inputStyle}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        onLoginFormChange({
+                          ...loginForm,
+                          email: event.target.value,
+                        });
+                      }}
+                      placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
+                      type="text"
+                      autoComplete="username"
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                      onKeyDown={focusPasswordFromEmail}
+                    />
+                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                  </Field>
+                )}
+              </loginTanstackForm.Field>
+
+              <loginTanstackForm.Field
+                name="password"
+                validators={{
+                  onChange: ({ value }) => validatePassword(value),
+                }}
+              >
+                {(field) => (
+                  <Field
+                    label={t("auth.password")}
+                    action={
+                      <button
+                        type="button"
+                        className="font-semibold text-[var(--erg-blue)] hover:text-[var(--erg-blue-hover)]"
+                        onClick={onForgotPassword}
+                      >
+                        {t("auth.forgotPassword")}
+                      </button>
                     }
-                    placeholder={t("auth.enterPassword")}
-                    type={showPassword ? "text" : "password"}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    onClick={onShowPasswordToggle}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                    aria-label={t("auth.showHidePassword")}
                   >
-                    <EyeIcon open={showPassword} />
-                  </button>
-                </div>
-              </Field>
+                    <div className="relative">
+                      <input
+                        ref={passwordInputRef}
+                        className={cn(inputClassName, "pr-12")}
+                        style={passwordInputStyle}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => {
+                          field.handleChange(event.target.value);
+                          onLoginFormChange({
+                            ...loginForm,
+                            password: event.target.value,
+                          });
+                        }}
+                        placeholder={t("auth.enterPassword")}
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                      />
+                      <button
+                        type="button"
+                        onClick={onShowPasswordToggle}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                        aria-label={t("auth.showHidePassword")}
+                      >
+                        <EyeIcon open={showPassword} />
+                      </button>
+                    </div>
+                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                  </Field>
+                )}
+              </loginTanstackForm.Field>
 
               <label className="inline-flex items-center gap-2.5 text-sm font-medium text-slate-700">
                 <input
@@ -296,10 +340,14 @@ export function AuthFormPanel({
                 {t("auth.rememberMe")}
               </label>
 
-              <button className={submitButtonClassName} style={submitStyle} type="submit">
-                {t("auth.login")}
-              </button>
-            </form>
+              <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+                {([canSubmit, isSubmitting]) => (
+                  <button className={submitButtonClassName} disabled={!canSubmit || isSubmitting} style={submitStyle} type="submit">
+                    {t("auth.login")}
+                  </button>
+                )}
+              </loginTanstackForm.Subscribe>
+            </TsForm>
 
             {loginFootnote ? (
               <p className="mt-5 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600" style={footnoteStyle}>
@@ -323,7 +371,7 @@ export function AuthFormPanel({
         ) : (
           <>
             <div className="text-center">
-              <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+              <h2 className="text-lg font-semibold text-[#242424] sm:text-xl">
                 {t("auth.createTeacherAccount")}
               </h2>
               <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
@@ -331,36 +379,69 @@ export function AuthFormPanel({
               </p>
             </div>
 
-            <form className="mt-6 space-y-4" onSubmit={onRegisterSubmit}>
-              <Field label={t("auth.fullName")}>
-                <input
-                  className={inputClassName}
-                  value={registerForm.fullName}
-                  onChange={(event) =>
-                    onRegisterFormChange({
-                      ...registerForm,
-                      fullName: event.target.value,
-                    })
-                  }
-                  placeholder={t("auth.placeholderName")}
-                  type="text"
-                />
-              </Field>
+            <TsForm
+              className="mt-6 space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                event.stopPropagation();
+                void registerTanstackForm.handleSubmit();
+              }}
+            >
+              <registerTanstackForm.Field
+                name="fullName"
+                validators={{
+                  onChange: ({ value }) => validateRequired(value, t("auth.fullName")),
+                }}
+              >
+                {(field) => (
+                  <Field label={t("auth.fullName")}>
+                    <input
+                      className={inputClassName}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        onRegisterFormChange({
+                          ...registerForm,
+                          fullName: event.target.value,
+                        });
+                      }}
+                      placeholder={t("auth.placeholderName")}
+                      type="text"
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    />
+                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                  </Field>
+                )}
+              </registerTanstackForm.Field>
 
-              <Field label={t("auth.internalEmail")}>
-                <input
-                  className={inputClassName}
-                  value={registerForm.email}
-                  onChange={(event) =>
-                    onRegisterFormChange({
-                      ...registerForm,
-                      email: event.target.value,
-                    })
-                  }
-                  placeholder={t("auth.placeholderWorkEmail")}
-                  type="email"
-                />
-              </Field>
+              <registerTanstackForm.Field
+                name="email"
+                validators={{
+                  onChange: ({ value }) => validateEmail(value),
+                }}
+              >
+                {(field) => (
+                  <Field label={t("auth.internalEmail")}>
+                    <input
+                      className={inputClassName}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        onRegisterFormChange({
+                          ...registerForm,
+                          email: event.target.value,
+                        });
+                      }}
+                      placeholder={t("auth.placeholderWorkEmail")}
+                      type="email"
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    />
+                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                  </Field>
+                )}
+              </registerTanstackForm.Field>
 
               <Field label={t("auth.department")}>
                 <input
@@ -378,40 +459,73 @@ export function AuthFormPanel({
               </Field>
 
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label={t("auth.password")}>
-                  <input
-                    className={inputClassName}
-                    value={registerForm.password}
-                    onChange={(event) =>
-                      onRegisterFormChange({
-                        ...registerForm,
-                        password: event.target.value,
-                      })
-                    }
-                    placeholder={t("auth.placeholderPasswordMin")}
-                    type="password"
-                  />
-                </Field>
-                <Field label={t("auth.confirmPassword")}>
-                  <input
-                    className={inputClassName}
-                    value={registerForm.confirmPassword}
-                    onChange={(event) =>
-                      onRegisterFormChange({
-                        ...registerForm,
-                        confirmPassword: event.target.value,
-                      })
-                    }
-                    placeholder={t("auth.placeholderConfirmPassword")}
-                    type="password"
-                  />
-                </Field>
+                <registerTanstackForm.Field
+                  name="password"
+                  validators={{
+                    onChange: ({ value }) => validatePassword(value),
+                  }}
+                >
+                  {(field) => (
+                    <Field label={t("auth.password")}>
+                      <input
+                        className={inputClassName}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => {
+                          field.handleChange(event.target.value);
+                          onRegisterFormChange({
+                            ...registerForm,
+                            password: event.target.value,
+                          });
+                        }}
+                        placeholder={t("auth.placeholderPasswordMin")}
+                        type="password"
+                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                      />
+                      <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                    </Field>
+                  )}
+                </registerTanstackForm.Field>
+                <registerTanstackForm.Field
+                  name="confirmPassword"
+                  validators={{
+                    onChange: ({ value, fieldApi }) => {
+                      const password = fieldApi.form.getFieldValue("password");
+                      return value === password ? undefined : "Mật khẩu xác nhận chưa khớp.";
+                    },
+                  }}
+                >
+                  {(field) => (
+                    <Field label={t("auth.confirmPassword")}>
+                      <input
+                        className={inputClassName}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(event) => {
+                          field.handleChange(event.target.value);
+                          onRegisterFormChange({
+                            ...registerForm,
+                            confirmPassword: event.target.value,
+                          });
+                        }}
+                        placeholder={t("auth.placeholderConfirmPassword")}
+                        type="password"
+                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                      />
+                      <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+                    </Field>
+                  )}
+                </registerTanstackForm.Field>
               </div>
 
-              <button className={submitButtonClassName} type="submit">
-                {t("auth.createAccount")}
-              </button>
-            </form>
+              <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+                {([canSubmit, isSubmitting]) => (
+                  <button className={submitButtonClassName} disabled={!canSubmit || isSubmitting} type="submit">
+                    {t("auth.createAccount")}
+                  </button>
+                )}
+              </registerTanstackForm.Subscribe>
+            </TsForm>
 
             <div className="mt-5 text-center text-sm text-slate-600">
               {t("auth.hasAccount")}
@@ -428,4 +542,32 @@ export function AuthFormPanel({
       </div>
     </div>
   );
+}
+
+function createHandledSubmitEvent() {
+  return {
+    preventDefault() {},
+    stopPropagation() {},
+  } as FormEvent<HTMLFormElement>;
+}
+
+function validateRequired(value: string, label: string) {
+  return value.trim() ? undefined : `${label} là bắt buộc.`;
+}
+
+function validateCredential(value: string, label: string) {
+  const requiredMessage = validateRequired(value, label);
+  if (requiredMessage) return requiredMessage;
+  if (label.toLowerCase().includes("email")) return validateEmail(value);
+  return undefined;
+}
+
+function validateEmail(value: string) {
+  if (!value.trim()) return "Email là bắt buộc.";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? undefined : "Email không hợp lệ.";
+}
+
+function validatePassword(value: string) {
+  if (!value) return "Mật khẩu là bắt buộc.";
+  return value.length >= 6 ? undefined : "Mật khẩu tối thiểu 6 ký tự.";
 }

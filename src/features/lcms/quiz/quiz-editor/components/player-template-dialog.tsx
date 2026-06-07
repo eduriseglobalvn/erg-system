@@ -13,7 +13,8 @@ import type {
   QuizInformationPage,
   QuizPlayerTemplate,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
+import { cn } from "@/utils/cn";
+import { AppSelect } from "@/components/ui/app-select";
 
 type PlayerTemplatePreviewScreen = "info" | "question";
 
@@ -85,7 +86,7 @@ export function PlayerTemplateDialog({
         <div className="classic-editor__player-template-layout">
           <section className="classic-editor__player-template-themes">
             <div className="classic-editor__property-section-title">{t("common.player")}</div>
-            <div className="rounded-[18px] border border-[#d7e0eb] bg-white px-4 py-4 text-sm leading-6 text-[#526179]">
+            <div className="rounded-lg border border-[#d7e0eb] bg-white px-4 py-4 text-sm leading-6 text-[#526179]">
               {t("quiz.playerTemplate")} hiện dùng một giao diện mặc định thống nhất để giáo viên tập trung vào bố cục, điều hướng và trải nghiệm làm bài.
             </div>
           </section>
@@ -97,7 +98,7 @@ export function PlayerTemplateDialog({
                 <div className="classic-editor__property-grid is-two">
                   <label className="classic-editor__property-field">
                     <span>{t("quiz.playerTemplateLayout")}</span>
-                    <select
+                    <AppSelect
                       value={draft.layout}
                       onChange={(event) =>
                         setDraft((current) => ({
@@ -110,12 +111,12 @@ export function PlayerTemplateDialog({
                       <option value="classic">{t("quiz.playerTemplateLayoutClassic")}</option>
                       <option value="focus">{t("quiz.playerTemplateLayoutFocus")}</option>
                       <option value="split">{t("quiz.playerTemplateLayoutSplit")}</option>
-                    </select>
+                    </AppSelect>
                   </label>
 
                   <label className="classic-editor__property-field">
                     <span>{t("quiz.playerTemplateSize")}</span>
-                    <select
+                    <AppSelect
                       value={draft.playerSize}
                       onChange={(event) =>
                         setDraft((current) => ({
@@ -127,7 +128,7 @@ export function PlayerTemplateDialog({
                     >
                       <option value="standard">{t("quiz.playerTemplateSizeStandard")}</option>
                       <option value="wide">{t("quiz.playerTemplateSizeWide")}</option>
-                    </select>
+                    </AppSelect>
                   </label>
                 </div>
 
@@ -307,10 +308,7 @@ export function PlayerTemplateDialog({
 
                             <div
                               className="classic-editor__student-preview-hero-card"
-                              style={{
-                                background:
-                                  "radial-gradient(circle at top left, rgba(255,255,255,0.4), transparent 30%), linear-gradient(145deg, var(--quiz-accent-start) 0%, var(--quiz-accent-end) 55%, #0f172a 100%)",
-                              }}
+                              style={{ backgroundColor: resolvedTheme.accentStart }}
                             >
                               <div>
                                 <span style={{ color: resolvedTheme.accentStart }}>LUYỆN TẬP</span>

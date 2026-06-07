@@ -165,9 +165,9 @@ function LeaderboardRow({
   rank: number;
 }) {
   return (
-    <article className="rounded-[24px] border border-slate-200 bg-white p-4">
+    <article className="rounded-lg border border-[#e0e4ea] bg-white p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-slate-950 text-sm font-semibold text-white">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
           #{rank}
         </div>
         <div className="min-w-0 flex-1">
@@ -190,7 +190,7 @@ function LeaderboardRow({
 
 function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: ClassroomSnapshot }) {
   return (
-    <article className="rounded-[22px] border border-slate-200 bg-white p-4">
+    <article className="rounded-lg border border-[#e0e4ea] bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-slate-950">{snapshot.className}</div>
@@ -217,7 +217,7 @@ function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: Classr
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 px-3 py-2">
+    <div className="rounded-lg bg-[#fafbfc] px-3 py-2">
       <div className="text-xs font-medium text-slate-500">{label}</div>
       <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
     </div>
@@ -226,7 +226,7 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
 
 function InsightCard({ body, title }: { body: string; title: string }) {
   return (
-    <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
       <div className="text-sm font-semibold text-slate-950">{title}</div>
       <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
     </div>

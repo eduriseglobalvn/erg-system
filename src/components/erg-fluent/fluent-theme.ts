@@ -1,0 +1,43 @@
+import { createLightTheme, type BrandVariants, type Theme } from "@fluentui/react-components";
+
+const ergBrand: BrandVariants = {
+  10: "#02040F",
+  20: "#07133E",
+  30: "#0B1F66",
+  40: "#102B8B",
+  50: "#1539A8",
+  60: "#1F4DBD",
+  70: "#3365CD",
+  80: "#527EDB",
+  90: "#7599E7",
+  100: "#98B4F0",
+  110: "#B8CCF7",
+  120: "#D3E0FB",
+  130: "#E8EFFD",
+  140: "#F3F7FE",
+  150: "#F8FAFF",
+  160: "#FCFDFF",
+};
+
+export const ergFluentTheme: Theme = {
+  ...createLightTheme(ergBrand),
+  colorNeutralBackground1: "#FFFFFF",
+  colorNeutralBackground2: "#F8FAFC",
+  colorNeutralBackground3: "#F3F6FA",
+  colorNeutralBackground4: "#EEF2F7",
+  colorNeutralForeground1: "#1F2937",
+  colorNeutralForeground2: "#374151",
+  colorNeutralForeground3: "#64748B",
+  colorNeutralStroke1: "#E2E8F0",
+  colorNeutralStroke2: "#CBD5E1",
+  colorBrandBackground: "#0F6CBD",
+  colorBrandBackgroundHover: "#0B5CAB",
+  colorBrandBackgroundPressed: "#084D91",
+  colorBrandForeground1: "#0F6CBD",
+  borderRadiusSmall: "4px",
+  borderRadiusMedium: "6px",
+  borderRadiusLarge: "8px",
+  borderRadiusXLarge: "10px",
+  fontFamilyBase: '"Segoe UI Variable", "Segoe UI", "Aptos", "Geist Variable", Arial, Helvetica, sans-serif',
+  fontFamilyMonospace: '"Segoe UI Mono", Consolas, monospace',
+};

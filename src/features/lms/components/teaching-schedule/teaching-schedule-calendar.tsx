@@ -1,4 +1,4 @@
-﻿import type { DateSelectArg, DatesSetArg, EventChangeArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
+import type { DateSelectArg, DatesSetArg, EventChangeArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
 import viLocale from "@fullcalendar/core/locales/vi";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import type { DateClickArg } from "@fullcalendar/interaction";
@@ -28,11 +28,13 @@ function getTeachingScheduleEventClassNames() {
 
 function renderTeachingScheduleEvent(info: EventContentArg) {
   const meta = info.event.extendedProps as TeachingScheduleMeta;
+  const schoolColor = meta.schoolColor ?? info.event.borderColor;
   const compactView = info.view.type === "dayGridMonth" || info.view.type === "multiMonthYear";
 
   if (compactView) {
     return (
-      <div className="teaching-schedule-month-event min-w-0">
+      <div className="teaching-schedule-month-event flex min-w-0 items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: schoolColor }} />
         <span className="font-semibold">{info.timeText}</span>
         <span className="truncate">{info.event.title}</span>
       </div>
@@ -43,7 +45,11 @@ function renderTeachingScheduleEvent(info: EventContentArg) {
     <div className="min-w-0 px-1 py-0.5">
       <div className="truncate text-[10px] font-semibold leading-3">{info.timeText}</div>
       <div className="truncate text-[11px] font-semibold leading-4">{info.event.title}</div>
-      <div className="truncate text-[10px] leading-3 opacity-85">{meta.school}</div>
+      <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[10px] leading-3">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: schoolColor }} />
+        <span className="truncate opacity-85">{meta.school}</span>
+      </div>
+      <div className="truncate text-[10px] leading-3 opacity-75">{meta.subjectLabel ?? "Môn học"}</div>
       <div className="truncate text-[10px] leading-3 opacity-75">
         {meta.room} · {meta.lesson}
       </div>
@@ -96,7 +102,7 @@ export function TeachingScheduleCalendar({
         showNonCurrentDates
         stickyHeaderDates
         height="100%"
-        slotMinTime="00:00:00"
+        slotMinTime="07:00:00"
         slotMaxTime="24:00:00"
         scrollTime="07:00:00"
         slotDuration="00:30:00"

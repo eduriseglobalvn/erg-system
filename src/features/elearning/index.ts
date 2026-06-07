@@ -1,2 +1,2 @@
-﻿export { StudentDashboardWorkspace } from "@/features/elearning/student-dashboard";
+export { StudentDashboardWorkspace } from "@/features/elearning/student-dashboard";
 

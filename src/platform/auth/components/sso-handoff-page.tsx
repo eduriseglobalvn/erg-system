@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/routes/router-compat";
 
 import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 import { normalizeSsoReturnTo } from "@/platform/auth/utils/sso-return-to";

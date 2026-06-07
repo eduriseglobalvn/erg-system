@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 
 import { toLibrarySubjects } from "@/features/lms/learning-resources/hooks/use-learning-resource-library-catalog";
 

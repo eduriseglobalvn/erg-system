@@ -26,7 +26,8 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorTextStyle } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
+import { cn } from "@/utils/cn";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function SharedTextFormatControls({
   value,
@@ -55,7 +56,7 @@ export function SharedTextFormatControls({
 
       <div className="classic-editor__shared-text-column">
         <div className="classic-editor__shared-text-control-row">
-          <select
+          <AppSelect
             value={value.fontFamily}
             disabled={disabled}
             onChange={(event) => onUpdate({ fontFamily: event.target.value })}
@@ -67,9 +68,9 @@ export function SharedTextFormatControls({
                 {font}
               </option>
             ))}
-          </select>
+          </AppSelect>
 
-          <select
+          <AppSelect
             value={value.fontSize}
             disabled={disabled}
             onChange={(event) => onUpdate({ fontSize: Number(event.target.value) })}
@@ -80,7 +81,7 @@ export function SharedTextFormatControls({
                 {size}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </div>
 
         <div className="classic-editor__shared-text-format-row">

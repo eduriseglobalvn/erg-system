@@ -88,7 +88,7 @@ export const GoogleSignInButton = memo(function GoogleSignInButton({ label, onCr
       {/* Nút Custom Đẹp mắt của ERG */}
       <div
         className={cn(
-          "flex h-full w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-4 font-bold text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm active:scale-[0.98]",
+          "flex h-full w-full items-center justify-center gap-3 rounded-lg border border-slate-200 bg-white px-4 font-semibold text-slate-700 transition-all duration-300 hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm active:scale-[0.98]",
           isError && "opacity-50 grayscale"
         )}
       >
@@ -114,7 +114,7 @@ export const GoogleSignInButton = memo(function GoogleSignInButton({ label, onCr
         
         {!isLoaded && !isError && (
           <div className="absolute inset-0 flex items-center justify-center bg-white">
-             <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-blue-500" />
+             <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[var(--erg-blue)]" />
           </div>
         )}
       </div>

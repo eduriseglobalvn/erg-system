@@ -55,11 +55,11 @@ export function StudentDashboardMobileOverview({
   return (
     <section className="px-4 py-4">
       <div className="space-y-3.5">
-        <Card className="overflow-hidden rounded-[28px] border border-slate-200/80 bg-white p-5 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
-          <div className="inline-flex rounded-full bg-[#eef3fd] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#1557ff]">
+        <Card className="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
+          <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[10px] font-semibold text-[var(--erg-blue)]">
             {heroEyebrow}
           </div>
-          <h1 className="mt-4 text-[27px] font-semibold leading-[1.12] tracking-[-0.03em] text-[#0f172a]">
+          <h1 className="mt-4 text-[27px] font-semibold leading-[1.12]  text-[#0f172a]">
             {heroTitle}
           </h1>
           <p className="mt-3 text-[14px] leading-6 text-slate-600">{heroDescription}</p>
@@ -72,14 +72,14 @@ export function StudentDashboardMobileOverview({
 
           <div className="mt-4 flex gap-3">
             <Button
-              className="h-10 flex-1 rounded-2xl bg-[#1557ff] text-[14px] font-semibold text-white shadow-[0_8px_20px_rgba(21,87,255,0.22)] hover:bg-[#0f48dd]"
+              className="h-10 flex-1 rounded-lg bg-[var(--erg-blue)] text-[14px] font-semibold text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {primaryAction}
             </Button>
             <Button
               variant="outline"
-              className="h-10 rounded-2xl border-slate-200 bg-white px-4 text-[14px] font-medium text-slate-700"
+              className="h-10 rounded-lg border-slate-200 bg-white px-4 text-[14px] font-medium text-slate-700"
               onClick={() => onPageChange("assignments")}
             >
               {secondaryAction}
@@ -87,12 +87,12 @@ export function StudentDashboardMobileOverview({
           </div>
         </Card>
 
-        <Card className="rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-2">
             {announcement?.isPinned ? <Capsule>{announcementPinnedLabel}</Capsule> : null}
             <Capsule>{announcement?.targetLabel ?? profile.className}</Capsule>
           </div>
-          <h2 className="mt-4 text-[20px] font-semibold leading-[1.15] tracking-[-0.02em] text-slate-900">
+          <h2 className="mt-4 text-[20px] font-semibold leading-[1.15]  text-slate-900">
             {announcement?.title ?? "Lịch học và bài ưu tiên tuần này"}
           </h2>
           <p className="mt-3 text-[14px] leading-6 text-slate-600">
@@ -106,17 +106,17 @@ export function StudentDashboardMobileOverview({
 
           <Button
             variant="outline"
-            className="mt-4 h-10 w-full rounded-2xl border-slate-200 bg-white text-[14px] font-medium text-slate-700"
+            className="mt-4 h-10 w-full rounded-lg border-slate-200 bg-white text-[14px] font-medium text-slate-700"
             onClick={() => onPageChange("announcements")}
           >
             Thông báo giáo viên
           </Button>
         </Card>
 
-        <Card className="rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none tracking-[-0.02em] text-slate-900">{todayTitle}</div>
-            <button type="button" className="text-[13px] font-semibold text-[#1557ff]" onClick={() => onPageChange("assignments")}>
+            <div className="text-[20px] font-semibold leading-none  text-slate-900">{todayTitle}</div>
+            <button type="button" className="text-[13px] font-semibold text-[var(--erg-blue)]" onClick={() => onPageChange("assignments")}>
               {secondaryAction}
             </button>
           </div>
@@ -125,11 +125,11 @@ export function StudentDashboardMobileOverview({
             {openAssignments.slice(0, 3).map((assignment) => (
               <article
                 key={assignment.id}
-                className="rounded-[22px] border border-slate-200 bg-[#fafbff] p-4"
+                className="rounded-lg border border-slate-200 bg-[#fafbff] p-4"
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
                       <Capsule>{assignment.statusLabel}</Capsule>
                       <Capsule>{assignment.subjectLabel}</Capsule>
                     </div>
@@ -138,7 +138,7 @@ export function StudentDashboardMobileOverview({
                   </div>
                   <button
                     type="button"
-                    className="grid h-10 min-w-10 place-items-center rounded-2xl bg-[#1557ff] px-3 text-white shadow-sm"
+                    className="grid h-10 min-w-10 place-items-center rounded-lg bg-[var(--erg-blue)] px-3 text-white shadow-sm"
                     onClick={() => onOpenAssignment(assignment.id)}
                   >
                     <TaskAltOutlinedIcon fontSize="small" />
@@ -146,14 +146,14 @@ export function StudentDashboardMobileOverview({
                 </div>
 
                 <div className="mt-4">
-                  <div className="flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <div className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-400">
                     <span>Progress</span>
                     <span>{assignment.progressRate}%</span>
                   </div>
                   <ProgressBar
                     value={assignment.progressRate}
                     className="mt-2 h-2 bg-slate-100"
-                    indicatorClassName={assignment.status === "overdue" ? "bg-[var(--erg-red)]" : "bg-[#1557ff]"}
+                    indicatorClassName={assignment.status === "overdue" ? "bg-[var(--erg-red)]" : "bg-[var(--erg-blue)]"}
                   />
                   <p className="mt-3 text-[14px] leading-6 text-slate-600">{assignment.focusNote}</p>
                 </div>
@@ -162,10 +162,10 @@ export function StudentDashboardMobileOverview({
           </div>
         </Card>
 
-        <Card className="rounded-[28px] border border-slate-200/80 bg-white p-4 shadow-[0_8px_24px_rgba(15,23,42,0.06)]">
+        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none tracking-[-0.02em] text-slate-900">{discussionSectionTitle}</div>
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-2xl bg-[#eef3fd] text-[#1557ff]" onClick={() => onPageChange("discussion")}>
+            <div className="text-[20px] font-semibold leading-none  text-slate-900">{discussionSectionTitle}</div>
+            <button type="button" className="grid h-9 w-9 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]" onClick={() => onPageChange("discussion")}>
               <ForumOutlinedIcon fontSize="small" />
             </button>
           </div>
@@ -175,7 +175,7 @@ export function StudentDashboardMobileOverview({
               <button
                 key={post.id}
                 type="button"
-                className="w-full rounded-[22px] border border-slate-200 bg-[#fafbff] px-4 py-4 text-left transition hover:bg-white"
+                className="w-full rounded-lg border border-slate-200 bg-[#fafbff] px-4 py-4 text-left transition hover:bg-white"
                 onClick={() => onPageChange("discussion")}
               >
                 <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
@@ -185,7 +185,7 @@ export function StudentDashboardMobileOverview({
                   <span>{post.createdAtLabel}</span>
                 </div>
                 <p className="mt-3 line-clamp-2 whitespace-pre-line text-[14px] leading-6 text-slate-700">{post.content}</p>
-                <div className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                <div className="mt-3 text-xs font-semibold text-slate-400">
                   {post.commentCount} replies
                 </div>
               </button>
@@ -199,7 +199,7 @@ export function StudentDashboardMobileOverview({
 
 function Capsule({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold text-slate-500">
       {children}
     </span>
   );
@@ -207,9 +207,9 @@ function Capsule({ children }: { children: string }) {
 
 function MobileStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[18px] border border-slate-200 bg-[#fbfcff] px-3 py-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</div>
-      <div className="mt-1 text-[28px] font-semibold leading-none tracking-[-0.03em] text-[#1557ff]">{value}</div>
+    <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
+      <div className="text-[10px] font-semibold text-slate-400">{label}</div>
+      <div className="mt-1 text-[28px] font-semibold leading-none  text-[var(--erg-blue)]">{value}</div>
     </div>
   );
 }

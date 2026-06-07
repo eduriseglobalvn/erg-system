@@ -92,7 +92,7 @@ export function SequenceQuestion({
                 <SequenceRowTarget key={item.id} rowId={item.id}>
                   <div className={`flex items-start ${isMobile ? "gap-2" : "gap-3 sm:gap-4"}`}>
                     <span
-                      className={isMobile ? "w-6 flex-none pt-2 text-right text-[18px] font-semibold" : "w-11 flex-none text-right text-3xl font-medium sm:w-14 sm:text-[44px]"}
+                      className={isMobile ? "w-6 flex-none pt-2 text-right text-[18px] font-semibold" : "w-11 flex-none text-right text-xl font-medium sm:w-14 sm:text-2xl"}
                       style={{ color: "var(--quiz-option-text)" }}
                     >
                       {index + 1}.
@@ -129,7 +129,7 @@ function SequenceRowTarget({
   const { isOver, setNodeRef } = useDroppable({ id: `sequence-row:${rowId}` });
 
   return (
-    <div ref={setNodeRef} className="rounded-xl" style={isOver ? { backgroundColor: "var(--quiz-option-selected-bg)" } : undefined}>
+    <div ref={setNodeRef} className="rounded-lg" style={isOver ? { backgroundColor: "var(--quiz-option-selected-bg)" } : undefined}>
       {children}
     </div>
   );
@@ -208,7 +208,7 @@ function SequenceCard({
 }) {
   const stateClass =
     overlay || active
-      ? "border-[#c6b66a] bg-[#fff0a8] shadow-[0_10px_26px_rgba(98,89,34,0.22)]"
+      ? "border-[#c6b66a] bg-[#fff0a8] shadow-sm"
       : correct
         ? "border-[#8fb37f] bg-[#f4fff0]"
         : incorrect
@@ -228,7 +228,7 @@ function SequenceCard({
     >
       {reviewIndex ? (
         <span
-          className="shrink-0 font-black"
+          className="shrink-0 font-semibold"
           style={{ color: correct ? "#78b816" : incorrect ? "#e65a4d" : "currentColor" }}
         >
           {reviewIndex}.
@@ -236,7 +236,7 @@ function SequenceCard({
       ) : null}
       <span className="min-w-0 flex-1">{item.label}</span>
       {!overlay ? (
-        <span aria-hidden="true" className={compact ? "text-slate-400" : "text-xl tracking-[-0.16em] text-slate-400"}>
+        <span aria-hidden="true" className={compact ? "text-slate-400" : "text-xl text-slate-400"}>
           {compact ? <GripVertical className="h-4 w-4" /> : "⋮⋮"}
         </span>
       ) : null}

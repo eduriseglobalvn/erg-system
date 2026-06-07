@@ -70,5 +70,5 @@ test("suggests students with spaces in the query and highlights selected mention
 
   expect((absentCell as HTMLTextAreaElement).value).toContain("Võ Ngọc Linh");
   expect((absentCell as HTMLTextAreaElement).value).not.toContain("@Võ Ngọc Linh");
-  expect(container.querySelector(".text-sky-600")?.textContent).toBe("Võ Ngọc Linh");
+  expect(container.querySelector(".text-\\[var\\(--erg-blue\\)\\]")?.textContent).toBe("Võ Ngọc Linh");
 });

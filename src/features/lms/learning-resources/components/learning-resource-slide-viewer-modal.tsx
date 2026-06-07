@@ -1,7 +1,8 @@
-﻿import { useEffect, useMemo, useState, type PointerEvent } from "react";
+import { useEffect, useMemo, useState, type PointerEvent } from "react";
 import { ChevronLeft, ChevronRight, Eraser, MousePointer2, PenLine, RotateCcw, X } from "lucide-react";
 
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 
 type DrawPoint = {
   x: number;
@@ -52,15 +53,15 @@ export function LearningResourceSlideViewerModal({
   const canGoPrevious = hasCustomSlides && activeSlideIndex > 0;
   const canGoNext = hasCustomSlides && activeSlideIndex < slides.length - 1;
   const thumbnailSlides = useMemo(() => slides.slice(0, 18), [slides]);
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setActiveSlideIndex(0);
       setAnnotationsBySlide({});
       setDrawingMode("cursor");
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [resource.id]);
+  }, [paceStateUpdate, resource.id]);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -149,7 +150,7 @@ export function LearningResourceSlideViewerModal({
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-bold">{resource.title}</h2>
+            <h2 className="truncate text-sm font-medium">{resource.title}</h2>
             <p className="truncate text-xs text-white/65">{slideCounter}</p>
           </div>
         </div>
@@ -160,7 +161,7 @@ export function LearningResourceSlideViewerModal({
               <button
                 type="button"
                 onClick={() => setDrawingMode((current) => (current === "pen" ? "cursor" : "pen"))}
-                className={`inline-flex h-9 items-center gap-2 rounded-full px-3 text-xs font-bold ${
+                className={`inline-flex h-9 items-center gap-2 rounded-md px-3 text-xs font-medium ${
                   drawingMode === "pen" ? "bg-white text-slate-950" : "text-white/85 hover:bg-white/10"
                 }`}
               >
@@ -170,7 +171,7 @@ export function LearningResourceSlideViewerModal({
               <button
                 type="button"
                 onClick={clearCurrentSlideAnnotations}
-                className="inline-flex h-9 items-center gap-2 rounded-full px-3 text-xs font-bold text-white/85 hover:bg-white/10"
+                className="inline-flex h-9 items-center gap-2 rounded-md px-3 text-xs font-medium text-white/85 hover:bg-white/10"
               >
                 <Eraser className="h-4 w-4" />
                 Xóa nét
@@ -198,7 +199,7 @@ export function LearningResourceSlideViewerModal({
                     className={`block w-full overflow-hidden rounded-lg border text-left ${isActive ? "border-white bg-white" : "border-white/10 bg-white/10"}`}
                   >
                     <img src={slide.thumbnailUrl || slide.imageUrl} alt={slide.title || `Slide ${index + 1}`} className="aspect-video w-full object-cover" />
-                    <span className={`block px-2 py-1 text-center text-[11px] font-black ${isActive ? "text-[#091f80]" : "text-white/70"}`}>{index + 1}</span>
+                    <span className={`block px-2 py-1 text-center text-[11px] font-semibold ${isActive ? "text-[#091f80]" : "text-white/70"}`}>{index + 1}</span>
                   </button>
                 );
               })}
@@ -206,9 +207,9 @@ export function LearningResourceSlideViewerModal({
           </aside>
 
           <section className="relative min-h-0 p-4">
-            <div className="absolute left-4 top-4 z-10 rounded-full bg-black/55 px-3 py-1 text-xs font-bold text-white/80">{activeSlideTitle}</div>
+            <div className="absolute left-4 top-4 z-10 rounded-md bg-black/55 px-3 py-1 text-xs font-medium text-white/80">{activeSlideTitle}</div>
             <div className="flex h-full items-center justify-center">
-              <div className="relative aspect-video max-h-full w-full max-w-[1500px] overflow-hidden rounded-xl bg-black shadow-2xl">
+              <div className="relative aspect-video max-h-full w-full max-w-[1500px] overflow-hidden rounded-lg bg-black shadow-sm">
                 <img src={activeSlide?.imageUrl} alt={activeSlideTitle} className="h-full w-full object-contain" draggable={false} />
                 <svg
                   className={`absolute inset-0 h-full w-full ${drawingMode === "pen" ? "cursor-crosshair" : "pointer-events-none"}`}
@@ -226,7 +227,7 @@ export function LearningResourceSlideViewerModal({
               </div>
             </div>
 
-            <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-3 py-2 shadow-lg">
+            <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm">
               <button
                 type="button"
                 disabled={!canGoPrevious}
@@ -235,7 +236,7 @@ export function LearningResourceSlideViewerModal({
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <span className="min-w-20 text-center text-sm font-black text-slate-900">
+              <span className="min-w-20 text-center text-sm font-semibold text-slate-900">
                 {activeSlideIndex + 1} / {slides.length}
               </span>
               <button
@@ -259,7 +260,7 @@ export function LearningResourceSlideViewerModal({
         </main>
       ) : (
         <main className="min-h-0 flex-1 p-4">
-          <div className="relative h-full overflow-hidden rounded-2xl bg-black">
+          <div className="relative h-full overflow-hidden rounded-lg bg-black">
             <iframe
               src={viewerUrl}
               title={resource.title}

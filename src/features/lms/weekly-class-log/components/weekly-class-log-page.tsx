@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { weeklyClassLogWeeks } from "@/features/lms/weekly-class-log/api/mock-weekly-class-log-data";
 import type {
   WeeklyClassLogDay,
@@ -10,6 +11,8 @@ import type {
   WeeklyClassLogWeek,
 } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
 import { cn } from "@/lib/utils";
+import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
+import { AppSelect } from "@/components/ui/app-select";
 
 type WeeklyClassLogPageProps = {
   selectedClass?: ClassroomSnapshot;
@@ -39,6 +42,7 @@ const periodFields: Array<keyof WeeklyClassLogPeriod> = [
 export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLogPageProps) {
   const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(() => loadStoredWeeks());
   const [selectedWeekId, setSelectedWeekId] = useState(weeks[0]?.id ?? "");
+  const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
   const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
   const selectedWeekIndex = weeks.findIndex((week) => week.id === selectedWeek.id);
   const computedSummary = useMemo(() => buildWeeklySummary(selectedWeek), [selectedWeek]);
@@ -53,7 +57,7 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
   const isLocked = selectedWeek.status === "locked";
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(weeks));
+    setPersistedJsonValue(STORAGE_KEY, weeks);
   }, [weeks]);
 
   function patchSelectedWeek(updater: (week: WeeklyClassLogWeek) => WeeklyClassLogWeek) {
@@ -99,13 +103,25 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
     <section className="flex min-h-full bg-white text-slate-950" data-testid="weekly-class-log-page">
       <div className="min-w-0 flex-1 px-3 py-3 md:px-5 md:py-4">
         <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
-          <h1 className="text-2xl font-black uppercase tracking-tight">Sổ Đầu Bài</h1>
+          <h1 className="text-xl font-semibold tracking-normal">Sổ Đầu Bài</h1>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <select
+            <AppSelect
+              value={selectedSubject}
+              onChange={(event) => setSelectedSubject(event.target.value)}
+              className="h-10 min-w-40 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-200 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+              aria-label="Chọn môn học"
+            >
+              {lmsSubjectOptions.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </AppSelect>
+            <AppSelect
               value={selectedWeek.id}
               onChange={(event) => setSelectedWeekId(event.target.value)}
-              className="h-10 min-w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm font-black text-slate-800 outline-none transition hover:border-blue-200 focus:border-blue-300 focus:ring-2 focus:ring-blue-100"
+              className="h-10 min-w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-200 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               aria-label="Chọn tuần"
             >
               {weeks.map((week) => (
@@ -113,12 +129,12 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
                   {week.label} · {compactWeekDateRange(week)}
                 </option>
               ))}
-            </select>
+            </AppSelect>
             <button
               type="button"
               onClick={() => goToWeek(1)}
               disabled={selectedWeekIndex >= weeks.length - 1}
-              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Tuần trước
             </button>
@@ -126,7 +142,7 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
               type="button"
               onClick={() => goToWeek(-1)}
               disabled={selectedWeekIndex <= 0}
-              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Tuần sau
             </button>
@@ -216,7 +232,7 @@ function DayRows({
             </td>
           ) : null}
           {index === 0 || index === morningPeriodCount ? (
-            <td rowSpan={morningPeriodCount} className={cn("border border-black px-1.5 py-1 text-center align-middle font-black", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
+            <td rowSpan={morningPeriodCount} className={cn("border border-black px-1.5 py-1 text-center align-middle font-semibold", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
               {index === 0 ? "Sáng" : "Chiều"}
             </td>
           ) : null}
@@ -262,7 +278,7 @@ function WeeklySummary({
 
   return (
     <aside className="border-l border-black text-[12px]">
-      <div className="border-b border-black py-3 text-center text-sm font-black uppercase">Tổng kết tuần</div>
+      <div className="border-b border-black py-3 text-center text-sm font-semibold">Tổng kết tuần</div>
       <div className="min-h-[312px] border-b border-black px-3 py-2">
         {rows.map((row) => (
           <label key={row.field} className="flex min-h-7 items-center gap-1 border-b border-dotted border-slate-500 py-1">
@@ -297,12 +313,12 @@ function SummaryTextArea({
 }) {
   return (
     <>
-      <div className="border-b border-black py-2 text-center text-sm font-black">{label}</div>
+      <div className="border-b border-black py-2 text-center text-sm font-semibold">{label}</div>
       <textarea
         value={value}
         disabled
         readOnly
-        className="h-28 w-full resize-none bg-transparent px-3 py-2 leading-7 outline-none disabled:text-slate-700 [background-image:repeating-linear-gradient(to_bottom,transparent_0,transparent_27px,#64748b_28px)]"
+        className="h-28 w-full resize-none bg-transparent px-3 py-2 leading-7 outline-none disabled:text-slate-700"
       />
     </>
   );
@@ -403,8 +419,8 @@ function EditableCell({
 
   if (field === "disciplineScore") {
     return (
-      <td className={cn("border border-black border-b-dotted p-0 focus-within:bg-blue-50", periodRowClass(rowState))}>
-        <select
+      <td className={cn("border border-black border-b-dotted p-0 focus-within:bg-[var(--erg-blue-light)]", periodRowClass(rowState))}>
+        <AppSelect
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
@@ -413,13 +429,13 @@ function EditableCell({
           <option value=""></option>
           <option value="Đạt">Đạt</option>
           <option value="Chưa đạt">Chưa đạt</option>
-        </select>
+        </AppSelect>
       </td>
     );
   }
 
   return (
-    <td className={cn("relative overflow-visible border border-black border-b-dotted p-0 focus-within:bg-blue-50", periodRowClass(rowState))}>
+    <td className={cn("relative overflow-visible border border-black border-b-dotted p-0 focus-within:bg-[var(--erg-blue-light)]", periodRowClass(rowState))}>
       {mentionOptions?.length && !isFocused ? (
         <div
           aria-hidden="true"
@@ -448,12 +464,12 @@ function EditableCell({
         className={cn(
           "relative block h-auto min-h-8 w-full resize-none overflow-hidden bg-transparent px-1.5 py-1 leading-5 outline-none disabled:text-slate-500",
           mentionOptions?.length && !isFocused ? "text-transparent caret-slate-950" : "text-slate-950",
-          !mentionOptions?.length && "focus:bg-blue-50",
+          !mentionOptions?.length && "focus:bg-[var(--erg-blue-light)]",
           center && "text-center",
         )}
       />
       {filteredMentionOptions.length ? (
-        <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-xl">
+        <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-sm">
           {filteredMentionOptions.map((student) => (
             <button
               key={student.id}
@@ -462,7 +478,7 @@ function EditableCell({
                 event.preventDefault();
                 insertMention(student.name);
               }}
-              className="block w-full truncate px-3 py-2 text-left text-xs font-bold text-slate-700 hover:bg-blue-50 hover:text-[#1967d2]"
+              className="block w-full truncate px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[var(--erg-blue)]"
             >
               @{student.name}
             </button>
@@ -474,16 +490,8 @@ function EditableCell({
 }
 
 function loadStoredWeeks() {
-  if (typeof window === "undefined") return migrateWeeks(weeklyClassLogWeeks);
-
-  try {
-    const storedValue = window.localStorage.getItem(STORAGE_KEY);
-    if (!storedValue) return migrateWeeks(weeklyClassLogWeeks);
-    const parsed = JSON.parse(storedValue) as WeeklyClassLogWeek[];
-    return Array.isArray(parsed) && parsed.length ? migrateWeeks(parsed) : migrateWeeks(weeklyClassLogWeeks);
-  } catch {
-    return migrateWeeks(weeklyClassLogWeeks);
-  }
+  const storedWeeks = getPersistedJsonValue<WeeklyClassLogWeek[]>(STORAGE_KEY, weeklyClassLogWeeks);
+  return Array.isArray(storedWeeks) && storedWeeks.length ? migrateWeeks(storedWeeks) : migrateWeeks(weeklyClassLogWeeks);
 }
 
 function migrateWeeks(weeks: WeeklyClassLogWeek[]) {
@@ -653,7 +661,7 @@ function renderMentionText(value: string, mentionOptions: StudentMentionOption[]
     typeof part === "string" ? (
       <span key={partIndex}>{part}</span>
     ) : (
-      <span key={partIndex} className="font-bold text-sky-600">
+      <span key={partIndex} className="font-medium text-[var(--erg-blue)]">
         {part.mention}
       </span>
     ),

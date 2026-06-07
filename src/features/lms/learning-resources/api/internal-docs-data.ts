@@ -1,4 +1,4 @@
-﻿export type InternalDocumentTypeId = "slides" | "textbook" | "program-plan" | "lesson-plan";
+export type InternalDocumentTypeId = "slides" | "textbook" | "program-plan" | "lesson-plan";
 
 export type InternalDocumentType = {
   id: InternalDocumentTypeId;

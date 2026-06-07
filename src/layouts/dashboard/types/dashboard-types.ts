@@ -1,4 +1,4 @@
-﻿export type DashboardLeafVariant =
+export type DashboardLeafVariant =
   | "admin-overview"
   | "admin-centers"
   | "admin-create-unit"

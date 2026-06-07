@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { InlineChoiceSelect, QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { AnswerPayload } from "@/lib/types";
 
 export function InlineChoiceQuestion({
@@ -15,6 +16,7 @@ export function InlineChoiceQuestion({
 }: QuestionComponentProps) {
   const isMobile = useIsMobile();
   const [revealedBlankId, setRevealedBlankId] = useState<string | null>(null);
+  const paceStateUpdate = usePacedStateBatch();
   const revealedWrongBlank = reviewMode
     ? question.inlineBlanks?.find((blank) => {
         if (blank.id !== revealedBlankId) {
@@ -42,10 +44,9 @@ export function InlineChoiceQuestion({
       : null;
 
     if (!revealedBlank || !selected || selected === correct) {
-      const frameId = window.requestAnimationFrame(() => setRevealedBlankId(null));
-      return () => window.cancelAnimationFrame(frameId);
+      paceStateUpdate(() => setRevealedBlankId(null));
     }
-  }, [question.inlineBlanks, result?.correctInlineSelections, revealedBlankId, reviewMode, value.inlineSelections]);
+  }, [paceStateUpdate, question.inlineBlanks, result?.correctInlineSelections, revealedBlankId, reviewMode, value.inlineSelections]);
 
   function handleChange(nextValue: AnswerPayload) {
     setRevealedBlankId(null);
@@ -91,10 +92,10 @@ export function InlineChoiceQuestion({
           </div>
         ))}
         {revealedWrongBlank && revealedWrongCorrectValue ? (
-          <div className={`${isMobile ? "rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm" : "ml-[min(44vw,520px)] mt-1 w-[244px] rounded-lg border border-slate-200 bg-white px-7 py-6 shadow-[0_18px_42px_rgba(15,23,42,0.16)]"}`}>
-            <div className={`${isMobile ? "text-sm font-bold text-slate-900" : "text-xl font-black text-slate-950"}`}>Correct Answers</div>
+          <div className={`${isMobile ? "rounded-md border border-slate-200 bg-white px-4 py-3 shadow-sm" : "ml-[min(44vw,520px)] mt-1 w-[244px] rounded-lg border border-slate-200 bg-white px-7 py-6 shadow-sm"}`}>
+            <div className={`${isMobile ? "text-sm font-semibold text-slate-900" : "text-xl font-semibold text-slate-950"}`}>Correct Answers</div>
             <div className={`${isMobile ? "mt-2 flex items-center gap-2 text-sm font-medium text-slate-700" : "mt-5 flex items-center gap-3 text-base font-semibold text-slate-800"}`}>
-              <span className={`${isMobile ? "grid h-5 w-5 place-items-center rounded-full bg-[#78b816] text-xs font-black text-white" : "grid h-7 w-7 place-items-center rounded-full bg-[#78b816] text-sm font-black text-white"}`}>
+              <span className={`${isMobile ? "grid h-5 w-5 place-items-center rounded-full bg-[#78b816] text-xs font-semibold text-white" : "grid h-7 w-7 place-items-center rounded-full bg-[#78b816] text-sm font-semibold text-white"}`}>
                 ✓
               </span>
               <span>{formatInlineValue(revealedWrongCorrectValue)}</span>

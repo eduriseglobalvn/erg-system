@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Eye, EyeOff, Loader2, Sparkles, X } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
 
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { GoogleIcon } from "@/platform/auth/components/auth-icons";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { cn } from "@/lib/utils";
@@ -72,39 +74,38 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
       onMouseDown={() => onOpenChange(false)}
     >
       <div
-        className="relative grid max-h-[92vh] w-full max-w-[1024px] overflow-hidden rounded-[10px] border border-slate-200 bg-white shadow-[0_30px_90px_-28px_rgba(15,23,42,0.45)] md:grid-cols-[1.05fr_minmax(0,1fr)]"
+        className="relative grid max-h-[92vh] w-full max-w-[1024px] overflow-hidden rounded-[10px] border border-slate-200 bg-white shadow-sm md:grid-cols-[1.05fr_minmax(0,1fr)]"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <button
           aria-label="Đóng"
-          className="absolute right-4 top-4 z-20 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+          className="absolute right-4 top-4 z-20 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
           type="button"
           onClick={() => onOpenChange(false)}
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="relative hidden overflow-hidden bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.2),_transparent_36%),linear-gradient(145deg,#00008b_0%,#1d4ed8_45%,#cc0022_100%)] p-10 text-white md:flex md:flex-col">
-          <div className="absolute inset-0 bg-[linear-gradient(180deg,transparent_0%,rgba(2,6,23,0.18)_100%)]" />
+        <div className="relative hidden overflow-hidden bg-[var(--erg-blue)] p-8 text-white md:flex md:flex-col">
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.24em] text-white/80">
+            <div className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-[11px] font-semibold text-white/80">
               <Sparkles className="h-3.5 w-3.5" />
               Teacher Hub Access
             </div>
-            <h2 className="mt-8 max-w-md text-4xl font-black leading-tight">
+            <h2 className="mt-6 max-w-md text-xl font-semibold leading-tight">
               Cổng dành riêng cho giảng viên ERG.
             </h2>
-            <p className="mt-5 max-w-md text-sm leading-7 text-white/80">
+            <p className="mt-4 max-w-md text-sm leading-6 text-white/80">
               Đăng nhập bằng email nội bộ hoặc Google để truy cập kho học liệu, bài giảng và không gian làm việc của giáo viên.
             </p>
 
-            <div className="mt-10 space-y-4">
+            <div className="mt-8 space-y-3">
               {[
                 "Đăng nhập thường và Google dùng cùng một phiên hệ thống.",
                 "Tài khoản mới có thể đăng ký ngay trong hộp thoại này.",
                 "Sau khi xác thực, bạn sẽ quay lại đúng Teacher Hub hiện tại.",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/15 bg-white/10 px-4 py-3">
+                <div key={item} className="flex items-start gap-3 rounded-lg border border-white/15 bg-white/10 px-4 py-3">
                   <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-white" />
                   <p className="text-sm leading-6 text-white/85">{item}</p>
                 </div>
@@ -114,7 +115,7 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
         </div>
 
         <div className="max-h-[92vh] overflow-y-auto bg-white p-4 sm:p-8">
-          <div className="mr-8 grid grid-cols-2 rounded-full bg-slate-100 p-1">
+          <div className="mr-8 grid grid-cols-2 rounded-lg border border-slate-200 bg-slate-50 p-1">
             {[
               { mode: "login" as const, label: "Đăng nhập" },
               { mode: "register" as const, label: "Đăng ký" },
@@ -122,10 +123,10 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
               <button
                 key={item.mode}
                 className={cn(
-                  "rounded-full px-6 py-2 text-sm font-bold transition",
+                  "rounded-md px-5 py-2 text-sm font-semibold transition",
                   auth.mode === item.mode
-                    ? "bg-white text-[#00008b] shadow-[0_1px_4px_rgba(15,23,42,0.16)]"
-                    : "text-slate-950 hover:text-[#00008b]",
+                    ? "bg-white text-[var(--erg-blue)] shadow-sm"
+                    : "text-slate-950 hover:text-[var(--erg-blue)]",
                 )}
                 type="button"
                 onClick={() => {
@@ -138,16 +139,16 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
             ))}
           </div>
 
-          <div className="mt-8 rounded-[16px] border border-slate-200 bg-white px-6 py-7 shadow-[0_18px_45px_-38px_rgba(15,23,42,0.35)]">
+          <div className="mt-8 rounded-lg border border-slate-200 bg-white px-6 py-7 shadow-sm">
             {auth.notice ? (
               <div
                 className={cn(
-                  "mb-5 rounded-xl border px-4 py-3 text-sm font-medium",
+                  "mb-5 rounded-lg border px-4 py-3 text-sm font-medium",
                   auth.notice.tone === "success"
                     ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                     : auth.notice.tone === "error"
                       ? "border-rose-200 bg-rose-50 text-rose-700"
-                      : "border-blue-200 bg-blue-50 text-blue-700",
+                      : "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
                 )}
               >
                 {auth.notice.message}
@@ -225,10 +226,15 @@ function TeacherLoginForm({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onSwitchToSignup: () => void;
 }) {
+  const form = useForm({
+    defaultValues: { email, password },
+    onSubmit: () => onSubmit(createHandledSubmitEvent()),
+  });
+
   return (
     <>
       <div className="text-center">
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-950">Đăng nhập Teacher Hub</h2>
+        <h2 className="text-xl font-semibold  text-slate-950">Đăng nhập Teacher Hub</h2>
         <p className="mt-3 text-sm leading-6 text-slate-500">Sử dụng email nội bộ hoặc Google để vào cổng giảng viên.</p>
       </div>
 
@@ -238,18 +244,47 @@ function TeacherLoginForm({
 
       <DividerText text="Hoặc tiếp tục với" />
 
-      <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-        <AuthField label="Email">
-          <input
-            autoComplete="username"
-            className={authInputClassName}
-            placeholder="m@example.com"
-            type="email"
-            value={email}
-            onChange={(event) => onEmailChange(event.target.value)}
-          />
-        </AuthField>
+      <TsForm
+        className="mt-6 space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <form.Field
+          name="email"
+          validators={{
+            onChange: ({ value }) => validateEmail(value),
+          }}
+        >
+          {(field) => (
+            <AuthField label="Email">
+              <input
+                autoComplete="username"
+                className={authInputClassName}
+                placeholder="m@example.com"
+                type="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                  onEmailChange(event.target.value);
+                }}
+                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </AuthField>
+          )}
+        </form.Field>
 
+        <form.Field
+          name="password"
+          validators={{
+            onChange: ({ value }) => validatePassword(value),
+          }}
+        >
+          {(field) => (
         <AuthField
           label="Mật khẩu"
           action={
@@ -261,27 +296,39 @@ function TeacherLoginForm({
           <PasswordInput
             autoComplete="current-password"
             showPassword={showPassword}
-            value={password}
-            onChange={onPasswordChange}
+            value={field.state.value}
+            invalid={field.state.meta.errors.length > 0}
+            onBlur={field.handleBlur}
+            onChange={(value) => {
+              field.handleChange(value);
+              onPasswordChange(value);
+            }}
             onShowPasswordToggle={onShowPasswordToggle}
           />
+          <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
         </AuthField>
+          )}
+        </form.Field>
 
         <label className="inline-flex items-center gap-3 text-sm text-slate-700">
           <input
             checked={rememberMe}
-            className="h-4 w-4 rounded border-slate-300 accent-[#00008b]"
+            className="h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
             type="checkbox"
             onChange={(event) => onRememberMeChange(event.target.checked)}
           />
           Ghi nhớ đăng nhập
         </label>
 
-        <button className={authSubmitClassName} disabled={isSubmitting} type="submit">
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+          {([canSubmit, formSubmitting]) => (
+        <button className={authSubmitClassName} disabled={!canSubmit || isSubmitting || formSubmitting} type="submit">
+          {isSubmitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
           Đăng nhập
         </button>
-      </form>
+          )}
+        </form.Subscribe>
+      </TsForm>
 
       <div className="mt-5 text-center text-sm text-slate-600">
         Chưa có tài khoản?{" "}
@@ -326,61 +373,134 @@ function TeacherRegisterForm({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onSwitchToLogin: () => void;
 }) {
+  const form = useForm({
+    defaultValues: { fullName, email, password, confirmPassword },
+    onSubmit: () => onSubmit(createHandledSubmitEvent()),
+  });
+
   return (
     <>
-      <div className="text-center">
-        <h2 className="text-xl font-semibold tracking-[-0.02em] text-slate-950">Đăng ký tài khoản giảng viên</h2>
-        <p className="mt-3 text-sm leading-6 text-slate-500">Tạo tài khoản mới để truy cập kho học liệu và công cụ nội bộ.</p>
-      </div>
+      <TsForm
+        className="mt-6 space-y-5"
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <form.Field
+          name="fullName"
+          validators={{
+            onChange: ({ value }) => (value.trim() ? undefined : "Ho ten la bat buoc."),
+          }}
+        >
+          {(field) => (
+            <AuthField label="Ho va ten">
+              <input
+                autoComplete="name"
+                className={authInputClassName}
+                placeholder="Nguyen Van A"
+                type="text"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                  onFullNameChange(event.target.value);
+                }}
+                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </AuthField>
+          )}
+        </form.Field>
 
-      <form className="mt-6 space-y-5" onSubmit={onSubmit}>
-        <AuthField label="Họ và tên">
-          <input
-            autoComplete="name"
-            className={authInputClassName}
-            placeholder="Nguyễn Văn A"
-            type="text"
-            value={fullName}
-            onChange={(event) => onFullNameChange(event.target.value)}
-          />
-        </AuthField>
+        <form.Field
+          name="email"
+          validators={{
+            onChange: ({ value }) => validateEmail(value),
+          }}
+        >
+          {(field) => (
+            <AuthField label="Email">
+              <input
+                autoComplete="email"
+                className={authInputClassName}
+                placeholder="m@example.com"
+                type="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                  onEmailChange(event.target.value);
+                }}
+                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </AuthField>
+          )}
+        </form.Field>
 
-        <AuthField label="Email">
-          <input
-            autoComplete="email"
-            className={authInputClassName}
-            placeholder="m@example.com"
-            type="email"
-            value={email}
-            onChange={(event) => onEmailChange(event.target.value)}
-          />
-        </AuthField>
+        <form.Field
+          name="password"
+          validators={{
+            onChange: ({ value }) => validatePassword(value),
+          }}
+        >
+          {(field) => (
+            <AuthField label="Mat khau">
+              <PasswordInput
+                autoComplete="new-password"
+                showPassword={showPassword}
+                value={field.state.value}
+                invalid={field.state.meta.errors.length > 0}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onPasswordChange(value);
+                }}
+                onShowPasswordToggle={onShowPasswordToggle}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </AuthField>
+          )}
+        </form.Field>
 
-        <AuthField label="Mật khẩu">
-          <PasswordInput
-            autoComplete="new-password"
-            showPassword={showPassword}
-            value={password}
-            onChange={onPasswordChange}
-            onShowPasswordToggle={onShowPasswordToggle}
-          />
-        </AuthField>
+        <form.Field
+          name="confirmPassword"
+          validators={{
+            onChangeListenTo: ["password"],
+            onChange: ({ fieldApi, value }) =>
+              value === fieldApi.form.getFieldValue("password") ? undefined : "Mat khau xac nhan chua khop.",
+          }}
+        >
+          {(field) => (
+            <AuthField label="Xac nhan mat khau">
+              <PasswordInput
+                autoComplete="new-password"
+                showPassword={showConfirmPassword}
+                value={field.state.value}
+                invalid={field.state.meta.errors.length > 0}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onConfirmPasswordChange(value);
+                }}
+                onShowPasswordToggle={onShowConfirmPasswordToggle}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </AuthField>
+          )}
+        </form.Field>
 
-        <AuthField label="Xác nhận mật khẩu">
-          <PasswordInput
-            autoComplete="new-password"
-            showPassword={showConfirmPassword}
-            value={confirmPassword}
-            onChange={onConfirmPasswordChange}
-            onShowPasswordToggle={onShowConfirmPasswordToggle}
-          />
-        </AuthField>
-
-        <button className={authSubmitClassName} disabled={isSubmitting} type="submit">
-          {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          Tạo tài khoản
-        </button>
-      </form>
+        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+          {([canSubmit, formSubmitting]) => (
+            <button className={authSubmitClassName} disabled={!canSubmit || isSubmitting || formSubmitting} type="submit">
+              {isSubmitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+              Tao tai khoan
+            </button>
+          )}
+        </form.Subscribe>
+      </TsForm>
 
       <div className="mt-5 text-center text-sm text-slate-600">
         Đã có tài khoản?{" "}
@@ -437,12 +557,16 @@ function DividerText({ text }: { text: string }) {
 
 function PasswordInput({
   autoComplete,
+  invalid,
+  onBlur,
   showPassword,
   value,
   onChange,
   onShowPasswordToggle,
 }: {
   autoComplete: string;
+  invalid?: boolean;
+  onBlur?: () => void;
   showPassword: boolean;
   value: string;
   onChange: (value: string) => void;
@@ -451,10 +575,12 @@ function PasswordInput({
   return (
     <div className="relative">
       <input
+        aria-invalid={invalid ? "true" : undefined}
         autoComplete={autoComplete}
         className={cn(authInputClassName, "pr-10")}
         type={showPassword ? "text" : "password"}
         value={value}
+        onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
       />
       <button
@@ -469,8 +595,25 @@ function PasswordInput({
   );
 }
 
+function createHandledSubmitEvent() {
+  return {
+    preventDefault() {},
+    stopPropagation() {},
+  } as FormEvent<HTMLFormElement>;
+}
+
+function validateEmail(value: string) {
+  if (!value.trim()) return "Email là bắt buộc.";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? undefined : "Email không hợp lệ.";
+}
+
+function validatePassword(value: string) {
+  if (!value) return "Mật khẩu là bắt buộc.";
+  return value.length >= 6 ? undefined : "Mật khẩu tối thiểu 6 ký tự.";
+}
+
 const authInputClassName =
-  "h-9 w-full rounded-md border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-slate-300 focus:ring-4 focus:ring-slate-100";
+  "h-9 w-full rounded-md border border-[#cfd7e3] bg-white px-3 text-sm text-[#242424] outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
 const authSubmitClassName =
-  "inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-[#00008b] px-5 text-sm font-semibold text-white shadow-[0_18px_40px_-24px_rgba(0,0,139,0.45)] transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-70";
+  "inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-70";

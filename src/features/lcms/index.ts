@@ -1,2 +1,2 @@
-﻿export { LcmsPortalShell } from "@/features/lcms/components/lcms-portal-shell";
+export { LcmsPortalShell } from "@/features/lcms/components/lcms-portal-shell";
 

@@ -56,12 +56,12 @@ export function NavMain({
                   isActive={Boolean(item.isActive)}
                   onClick={() => onSelectLeaf(firstLeafId)}
                   className={cn(
-                    "min-h-11 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-700 transition hover:bg-[#f1f3f6] hover:text-slate-950",
-                    "data-[active=true]:bg-[#eeeeee] data-[active=true]:font-semibold data-[active=true]:text-slate-900",
+                    "relative min-h-11 rounded-md border border-transparent px-3 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:border-[#dbe2ea] hover:bg-white hover:text-slate-950 hover:shadow-sm",
+                    "data-[active=true]:border-[#b8d6fa] data-[active=true]:bg-white data-[active=true]:text-slate-950 data-[active=true]:shadow-sm data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-2 data-[active=true]:before:h-7 data-[active=true]:before:w-1 data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-[var(--erg-blue)]",
                     "group-data-[collapsible=icon]:!min-h-[92px] group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-2 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-3 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
                   )}
                 >
-                  <span className={cn("grid size-6 shrink-0 place-items-center [&_svg]:size-[22px]", item.tone)}>
+                  <span className={cn("grid size-7 shrink-0 place-items-center rounded-md bg-white text-slate-600 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.24)] data-[active=true]:bg-[var(--erg-blue-light)] [&_svg]:size-[20px]", item.tone)}>
                     {item.icon}
                   </span>
                   <span className="min-w-0 whitespace-normal break-words text-center group-data-[collapsible=icon]:max-w-[78px] group-data-[collapsible=icon]:text-balance">
@@ -92,12 +92,12 @@ export function NavMain({
                       onSelectLeaf(firstLeafId)
                     }}
                     className={cn(
-                      "min-h-11 rounded-xl px-3 py-2.5 text-[14px] font-medium text-slate-700 transition hover:bg-[#f1f3f6] hover:text-slate-950",
-                      "data-[active=true]:bg-[#eeeeee] data-[active=true]:font-semibold data-[active=true]:text-slate-900",
+                      "relative min-h-11 rounded-md border border-transparent px-3 py-2.5 text-[14px] font-semibold text-slate-700 transition hover:border-[#dbe2ea] hover:bg-white hover:text-slate-950 hover:shadow-sm",
+                      "data-[active=true]:border-[#b8d6fa] data-[active=true]:bg-white data-[active=true]:text-slate-950 data-[active=true]:shadow-sm data-[active=true]:before:absolute data-[active=true]:before:left-0 data-[active=true]:before:top-2 data-[active=true]:before:h-7 data-[active=true]:before:w-1 data-[active=true]:before:rounded-r-full data-[active=true]:before:bg-[var(--erg-blue)]",
                       "group-data-[collapsible=icon]:!min-h-[92px] group-data-[collapsible=icon]:!h-auto group-data-[collapsible=icon]:!w-full group-data-[collapsible=icon]:!flex-col group-data-[collapsible=icon]:!items-center group-data-[collapsible=icon]:!justify-center group-data-[collapsible=icon]:!gap-2 group-data-[collapsible=icon]:!rounded-none group-data-[collapsible=icon]:!px-1 group-data-[collapsible=icon]:!py-3 group-data-[collapsible=icon]:text-center group-data-[collapsible=icon]:text-[13px] group-data-[collapsible=icon]:leading-4",
                     )}
                   >
-                    <span className={cn("grid size-6 shrink-0 place-items-center [&_svg]:size-[22px]", item.tone)}>
+                    <span className={cn("grid size-7 shrink-0 place-items-center rounded-md bg-white text-slate-600 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.24)] [&_svg]:size-[20px]", item.tone)}>
                       {item.icon}
                     </span>
                     <span className="min-w-0 whitespace-normal break-words text-center group-data-[collapsible=icon]:max-w-[78px] group-data-[collapsible=icon]:text-balance">
@@ -107,13 +107,13 @@ export function NavMain({
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
-                  <SidebarMenuSub className="ml-5 border-l-0 px-0 py-1">
+                  <SidebarMenuSub className="ml-5 border-l border-[#dbe2ea] px-2 py-1">
                     {item.items?.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton
                           asChild
                           isActive={subItem.leafId === activeLeafId}
-                          className="min-h-8 rounded-lg px-3 text-[13px] font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-950 data-[active=true]:bg-[#eeeeee] data-[active=true]:font-semibold data-[active=true]:text-slate-900"
+                          className="min-h-8 rounded-md px-3 text-[13px] font-semibold text-slate-600 hover:bg-white hover:text-slate-950 data-[active=true]:bg-white data-[active=true]:font-semibold data-[active=true]:text-[var(--erg-blue)] data-[active=true]:shadow-[inset_3px_0_0_var(--erg-blue)]"
                         >
                           <button type="button" onClick={() => onSelectLeaf(subItem.leafId)}>
                             <span>{subItem.title}</span>
@@ -124,8 +124,8 @@ export function NavMain({
                   </SidebarMenuSub>
                 </CollapsibleContent>
                 {item.items?.length ? (
-                  <div className="pointer-events-none absolute left-full top-0 z-50 ml-0 hidden min-w-56 rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-[0_20px_45px_-24px_rgba(15,23,42,0.45)] group-data-[collapsible=icon]:group-hover/menu-item:block group-data-[collapsible=icon]:pointer-events-auto">
-                    <div className="px-3 py-2 text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">
+                  <div className="pointer-events-none absolute left-full top-0 z-50 ml-0 hidden min-w-56 rounded-lg border border-[#d1d9e6] bg-white p-2 text-left shadow-sm group-data-[collapsible=icon]:group-hover/menu-item:block group-data-[collapsible=icon]:pointer-events-auto">
+                    <div className="px-3 py-2 text-xs font-semibold text-slate-500">
                       {item.title}
                     </div>
                     <div className="grid gap-1">
@@ -135,8 +135,8 @@ export function NavMain({
                           type="button"
                           onClick={() => onSelectLeaf(subItem.leafId)}
                           className={cn(
-                            "rounded-xl px-3 py-2 text-left text-sm font-medium transition hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-100",
-                            subItem.leafId === activeLeafId ? "bg-[#eeeeee] text-slate-950" : "text-slate-600",
+                            "rounded-md px-3 py-2 text-left text-sm font-semibold transition hover:bg-[#f7f8fa] hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]",
+                            subItem.leafId === activeLeafId ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-600",
                           )}
                         >
                           {subItem.title}

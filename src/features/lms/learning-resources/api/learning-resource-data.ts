@@ -1,4 +1,4 @@
-﻿export type LearningResourceFileType =
+export type LearningResourceFileType =
   | "PDF"
   | "PPTX"
   | "VIDEO"

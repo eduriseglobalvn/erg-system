@@ -1,4 +1,4 @@
-﻿export const LCMS_PORTAL_HOST = "lcms.erg.edu.vn:3001";
+export const LCMS_PORTAL_HOST = "lcms.erg.edu.vn:3001";
 export const LMS_PORTAL_HOST = "lms.erg.edu.vn:3001";
 export const CRM_PORTAL_HOST = "crm.erg.edu.vn:3001";
 export const ELEARNING_PORTAL_HOST = "elearning.erg.edu.vn:3001";

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode, type SyntheticEvent } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "@/routes/router-compat";
 import {
   ArrowLeft,
   BadgeCheck,
@@ -22,14 +22,16 @@ import {
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { authApi } from "@/platform/auth/api/auth-api";
 import { getCurrentAccount, saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 
 const inputClassName =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0A48FF] focus:ring-4 focus:ring-blue-100";
+  "h-10 w-full rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 const textareaClassName =
-  "min-h-28 w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[#0A48FF] focus:ring-4 focus:ring-blue-100";
+  "min-h-28 w-full rounded-md border border-[#d1d1d1] bg-white px-3 py-3 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 const mutedInputClassName = `${inputClassName} bg-slate-50 text-slate-500`;
 
 type ProfileFormState = {
@@ -91,14 +93,14 @@ export function ProfilePage() {
   const [securityNotice, setSecurityNotice] = useState<Notice | null>(null);
   const [avatarCrop, setAvatarCrop] = useState<AvatarCropState | null>(null);
   const avatarInputRef = useRef<HTMLInputElement | null>(null);
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     const tab = new URLSearchParams(location.search).get("tab");
     if (tab === "profile" || tab === "security") {
-      const frameId = window.requestAnimationFrame(() => setActiveTab(tab));
-      return () => window.cancelAnimationFrame(frameId);
+      paceStateUpdate(() => setActiveTab(tab));
     }
-  }, [location.search]);
+  }, [location.search, paceStateUpdate]);
 
   useEffect(() => {
     let cancelled = false;
@@ -271,11 +273,11 @@ export function ProfilePage() {
   const primaryDisabled = activeTab === "security" ? !canChangePassword || isSavingPassword : !account || isSavingProfile;
 
   return (
-    <main className="min-h-screen bg-[#eef3f8] px-4 py-6 text-slate-950 lg:px-8">
+    <main className="min-h-screen bg-[#f7f8fa] px-4 py-5 text-slate-950 lg:px-8">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
-        <header className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div className="h-1.5 bg-gradient-to-r from-[#0A48FF] via-[#0A48FF] to-[#E31B23]" /><div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
+        <header className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div className="h-1.5 bg-[var(--erg-blue)]" /><div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-10 rounded-xl bg-white">
+            <Button asChild variant="outline" className="h-10 rounded-lg bg-white">
               <Link to="/">
                 <ArrowLeft className="size-4" />
                 Quay lại LMS
@@ -283,14 +285,14 @@ export function ProfilePage() {
             </Button>
             <div className="hidden h-10 w-px bg-slate-200 sm:block" />
             <div>
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-[#E31B23]">ERG account</p>
-              <h1 className="text-2xl font-black tracking-tight text-slate-950">Hồ sơ và bảo mật</h1>
+              <p className="text-xs font-semibold text-[var(--erg-red)]">ERG account</p>
+              <h1 className="text-lg font-semibold text-slate-950">Hồ sơ và bảo mật</h1>
             </div>
           </div>
           <Button
             onClick={() => void primaryAction()}
             disabled={primaryDisabled}
-            className="h-11 rounded-xl bg-[#06143A] px-5 text-white shadow-sm hover:bg-[#102257]"
+            className="h-10 rounded-md bg-[var(--erg-blue)] px-4 text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
           >
             {activeTab === "security" ? (
               isSavingPassword ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />
@@ -305,26 +307,27 @@ export function ProfilePage() {
         </header>
 
         {isLoading ? (
-          <div className="rounded-lg border border-blue-100 bg-blue-50 px-5 py-3 text-sm font-semibold text-blue-700">
-            Đang đồng bộ hồ sơ mới nhất từ BE...
+          <div className="grid gap-2 rounded-lg border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-5 py-3" aria-hidden="true">
+            <Skeleton className="h-4 w-64 bg-[var(--erg-blue-light)]" />
+            <Skeleton className="h-3 w-40 bg-[var(--erg-blue-light)]" />
           </div>
         ) : null}
 
         <div className="grid gap-5 lg:grid-cols-[340px_minmax(0,1fr)]">
-          <aside className="h-fit rounded-lg border border-slate-200 bg-white p-5 shadow-sm lg:sticky lg:top-6">
+          <aside className="h-fit rounded-lg border border-[#e0e4ea] bg-white p-4 shadow-sm lg:sticky lg:top-5">
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
-                  <Avatar className="size-24 overflow-hidden rounded-lg border-4 border-white bg-blue-50 shadow-lg">
+                  <Avatar className="size-20 overflow-hidden rounded-lg border-4 border-white bg-[var(--erg-blue-light)] shadow-sm">
                     {avatarUrl ? (
                       <img src={avatarUrl} alt={form.fullName || "Avatar"} className="h-full w-full object-cover" />
                     ) : (
-                      <div className="grid h-full w-full place-items-center text-2xl font-black text-[#0A48FF]">{initials}</div>
+                      <div className="grid h-full w-full place-items-center text-lg font-semibold text-[var(--erg-blue)]">{initials}</div>
                     )}
                   </Avatar>
                   <button
                     aria-label="Upload avatar"
-                    className="absolute -bottom-2 -right-2 grid size-10 place-items-center rounded-xl border-4 border-slate-50 bg-white text-[#0A48FF] shadow-md transition hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="absolute -bottom-2 -right-2 grid size-10 place-items-center rounded-lg border-4 border-slate-50 bg-white text-[var(--erg-blue)] shadow-sm transition hover:bg-[var(--erg-blue-light)] disabled:cursor-not-allowed disabled:opacity-70"
                     type="button"
                     disabled={!account || isUploadingAvatar}
                     onClick={() => avatarInputRef.current?.click()}
@@ -344,9 +347,9 @@ export function ProfilePage() {
                   />
                 </div>
                 <div className="min-w-0 pt-1">
-                  <h2 className="truncate text-xl font-black text-slate-950">{form.fullName || account?.email || "Tài khoản ERG"}</h2>
+                  <h2 className="truncate text-lg font-semibold text-slate-950">{form.fullName || account?.email || "Tài khoản ERG"}</h2>
                   <p className="mt-1 truncate text-sm font-medium text-slate-500">{account?.email}</p>
-                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                  <span className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
                     <CheckCircle2 className="size-3.5" />
                     {account?.status === "ACTIVE" ? "Đang hoạt động" : account?.status || "Chưa rõ"}
                   </span>
@@ -354,12 +357,12 @@ export function ProfilePage() {
               </div>
 
               <div className="mt-5 rounded-lg bg-white p-3">
-                <div className="flex items-center justify-between text-xs font-bold text-slate-500">
+                <div className="flex items-center justify-between text-xs font-medium text-slate-500">
                   <span>Hoàn thiện hồ sơ</span>
                   <span>{completionPercent}%</span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-[#0A48FF] transition-all" style={{ width: `${completionPercent}%` }} />
+                  <div className="h-full rounded-full bg-[var(--erg-blue)] transition" style={{ width: `${completionPercent}%` }} />
                 </div>
               </div>
             </div>
@@ -424,7 +427,7 @@ function ProfileFormPanel({ account, form, isSaving, notice, onSave, onUpdate }:
         title="Hồ sơ hiển thị trong LMS"
         description="Thông tin này dùng cho lời chào, phân quyền, danh sách thành viên và các luồng quản trị."
         action={
-          <Button onClick={() => void onSave()} disabled={!account || isSaving} className="h-10 rounded-xl bg-[#0A48FF] px-4 text-white hover:bg-[#083bd1]">
+          <Button onClick={() => void onSave()} disabled={!account || isSaving} className="h-10 rounded-lg bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
             {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             Lưu hồ sơ
           </Button>
@@ -491,7 +494,7 @@ function SecurityPanel({
           title="Đổi mật khẩu đăng nhập"
           description="Mật khẩu mới được gửi thẳng tới BE và chỉ cho phép đổi mật khẩu của chính tài khoản đang đăng nhập."
           action={
-            <Button onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} className="h-10 rounded-xl bg-[#06143A] px-4 text-white hover:bg-[#102257]">
+            <Button onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} className="h-10 rounded-md bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
               Đổi mật khẩu
             </Button>
@@ -527,13 +530,13 @@ function SecurityPanel({
         </div>
 
         <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-center justify-between gap-3 text-sm font-bold text-slate-700">
+          <div className="flex items-center justify-between gap-3 text-sm font-medium text-slate-700">
             <span>Độ mạnh mật khẩu mới</span>
             <span>{passwordScoreLabel(passwordScore)}</span>
           </div>
           <div className="mt-3 grid grid-cols-4 gap-2">
             {[0, 1, 2, 3].map((index) => (
-              <div key={index} className={`h-2 rounded-full ${index < passwordScore ? "bg-[#0A48FF]" : "bg-slate-200"}`} />
+              <div key={index} className={`h-2 rounded-full ${index < passwordScore ? "bg-[var(--erg-blue)]" : "bg-slate-200"}`} />
             ))}
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-500">
@@ -626,9 +629,9 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
   return (
     <Dialog open={Boolean(crop)} onOpenChange={(open) => (!open ? onClose() : undefined)}>
       <DialogContent className="max-w-[760px] gap-0 overflow-hidden rounded-lg p-0" showCloseButton={!isUploading}>
-        <div className="h-1.5 bg-gradient-to-r from-[#0A48FF] to-[#E31B23]" />
+        <div className="h-1.5 bg-[var(--erg-blue)]" />
         <DialogHeader className="border-b border-slate-200 px-6 py-5">
-          <DialogTitle className="text-xl font-black">Căn chỉnh ảnh đại diện</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Căn chỉnh ảnh đại diện</DialogTitle>
           <DialogDescription>Kéo ảnh để đặt khuôn mặt vào giữa khung, điều chỉnh zoom rồi lưu lên R2.</DialogDescription>
         </DialogHeader>
 
@@ -673,7 +676,7 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
                   }}
                 />
               ) : null}
-              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0_47%,rgba(15,23,42,0.72)_48%)]" />
+              <div className="pointer-events-none absolute inset-0 bg-slate-950/70" />
               <div className="pointer-events-none absolute left-1/2 top-1/2 size-[240px] -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white" />
             </div>
             <p className="text-center text-sm font-medium text-slate-500">Ảnh sau khi lưu sẽ được crop vuông 512px và BE tối ưu lại trước khi đưa lên R2.</p>
@@ -683,7 +686,7 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Preview</p>
+                  <p className="text-xs font-semibold text-slate-400">Preview</p>
                   <p className="mt-1 text-sm font-semibold text-slate-600">Hiển thị trong LMS</p>
                 </div>
                 <div className="size-20 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm">
@@ -713,12 +716,12 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
             </div>
 
             <div>
-              <div className="flex items-center justify-between text-sm font-bold text-slate-700">
+              <div className="flex items-center justify-between text-sm font-medium text-slate-700">
                 <span>Zoom</span>
                 <span>{Math.round((crop?.zoom ?? 1) * 100)}%</span>
               </div>
               <input
-                className="mt-3 h-2 w-full accent-[#0A48FF]"
+                className="mt-3 h-2 w-full accent-[var(--erg-blue)]"
                 type="range"
                 min={1}
                 max={3}
@@ -737,8 +740,8 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
               </div>
             </div>
 
-            <div className="rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm font-semibold leading-6 text-blue-800">
-              Đường dẫn R2 sau khi lưu: <span className="font-black">avatar/{"{userID}"}/...</span>
+            <div className="rounded-lg border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-4 py-3 text-sm font-semibold leading-6 text-[var(--erg-blue)]">
+              Đường dẫn R2 sau khi lưu: <span className="font-semibold">avatar/{"{userID}"}/...</span>
             </div>
           </div>
         </div>
@@ -747,7 +750,7 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
           <Button type="button" variant="outline" className="rounded-lg" onClick={onClose} disabled={isUploading}>
             Hủy
           </Button>
-          <Button type="button" className="rounded-lg bg-[#06143A] text-white hover:bg-[#102257]" onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
+          <Button type="button" className="rounded-md bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
             {isUploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
             Lưu avatar
           </Button>
@@ -760,10 +763,10 @@ function SectionHeader({ action, description, eyebrow, icon, title }: { action?:
   return (
     <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 md:flex-row md:items-start md:justify-between">
       <div className="flex gap-3">
-        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-blue-50 text-[#0A48FF]">{icon}</div>
+        <div className="grid size-11 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">{icon}</div>
         <div>
-          <p className="text-xs font-black uppercase tracking-[0.16em] text-[#E31B23]">{eyebrow}</p>
-          <h2 className="mt-1 text-xl font-black text-slate-950">{title}</h2>
+          <p className="text-xs font-semibold text-[var(--erg-red)]">{eyebrow}</p>
+          <h2 className="mt-1 text-base font-semibold text-slate-950">{title}</h2>
           <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">{description}</p>
         </div>
       </div>
@@ -775,7 +778,7 @@ function SectionHeader({ action, description, eyebrow, icon, title }: { action?:
 function Field({ children, className, icon, label }: { children: ReactNode; className?: string; icon: ReactNode; label: string }) {
   return (
     <label className={className}>
-      <span className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-[0.12em] text-slate-400">
+      <span className="mb-2 flex items-center gap-2 text-xs font-semibold text-slate-400">
         {icon}
         {label}
       </span>
@@ -812,14 +815,14 @@ function ProfileTabButton({ active, description, icon, onClick, title }: { activ
   return (
     <button
       className={`flex items-center gap-3 rounded-lg border px-4 py-3 text-left transition ${
-        active ? "border-[#0A48FF] bg-blue-50 text-[#0A48FF] shadow-sm" : "border-transparent bg-white text-slate-700 hover:border-slate-200 hover:bg-slate-50"
+        active ? "border-[var(--erg-blue)] bg-[var(--erg-blue-light)] text-[var(--erg-blue)] shadow-sm" : "border-transparent bg-white text-slate-700 hover:border-slate-200 hover:bg-slate-50"
       }`}
       type="button"
       onClick={onClick}
     >
-      <span className={`grid size-9 place-items-center rounded-xl ${active ? "bg-white" : "bg-slate-50"}`}>{icon}</span>
+      <span className={`grid size-9 place-items-center rounded-lg ${active ? "bg-white" : "bg-slate-50"}`}>{icon}</span>
       <span className="min-w-0">
-        <span className="block text-sm font-black">{title}</span>
+        <span className="block text-sm font-semibold">{title}</span>
         <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">{description}</span>
       </span>
     </button>
@@ -843,11 +846,11 @@ function NoticeBox({ notice }: { notice: Notice | null }) {
 
 function ProfileLine({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2">
-      <span className="text-[#0A48FF]">{icon}</span>
+    <div className="flex items-center gap-3 rounded-lg bg-slate-50 px-3 py-2">
+      <span className="text-[var(--erg-blue)]">{icon}</span>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-slate-400">{label}</p>
-        <p className="truncate text-sm font-bold text-slate-900">{value}</p>
+        <p className="text-[11px] font-medium text-slate-400">{label}</p>
+        <p className="truncate text-sm font-medium text-slate-900">{value}</p>
       </div>
     </div>
   );
@@ -856,8 +859,8 @@ function ProfileLine({ icon, label, value }: { icon: ReactNode; label: string; v
 function InfoTile({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-      <p className="text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-black text-slate-950">{value}</p>
+      <p className="text-xs font-medium text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-950">{value}</p>
     </div>
   );
 }

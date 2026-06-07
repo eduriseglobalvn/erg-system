@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { useSidebar } from "@/components/ui/sidebar-context"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { useI18n } from "@/platform/i18n"
 import {
   ArrowDownwardIcon,
@@ -53,15 +54,17 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              className="border-[#d9e0ea] bg-white/70 shadow-sm hover:border-[#b8d6fa] hover:bg-white data-[state=open]:border-[#b8d6fa] data-[state=open]:bg-white data-[state=open]:text-[var(--erg-blue)] data-[state=open]:shadow-sm"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">{fallback}</AvatarFallback>
+                <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-white">
+                  {fallback}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate font-semibold text-[#242424]">{user.name}</span>
+                <span className="truncate text-xs font-medium text-[#616161]">{user.email}</span>
               </div>
               <span className="ml-auto inline-flex flex-col">
                 <ArrowUpwardIcon className="size-3" fontSize="inherit" />
@@ -79,11 +82,13 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">{fallback}</AvatarFallback>
+                  <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-white">
+                    {fallback}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate font-semibold text-[#242424]">{user.name}</span>
+                  <span className="truncate text-xs font-medium text-[#616161]">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -103,34 +108,27 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs text-muted-foreground">
+            <DropdownMenuLabel className="text-xs font-semibold text-[#616161]">
               {t("locale.language")}
             </DropdownMenuLabel>
             <div className="px-2 pb-2">
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setLocale("vi")}
-                  className={
-                    locale === "vi"
-                      ? "inline-flex h-9 items-center justify-center rounded-md bg-muted px-3 text-sm font-medium text-foreground"
-                      : "inline-flex h-9 items-center justify-center rounded-md border border-transparent px-3 text-sm text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
-                  }
-                >
+              <ToggleGroup
+                type="single"
+                value={locale}
+                onValueChange={(value) => {
+                  if (value === "vi" || value === "en") setLocale(value)
+                }}
+                className="grid w-full grid-cols-2 gap-2"
+                size="lg"
+                variant="outline"
+              >
+                <ToggleGroupItem value="vi" aria-label="Tiếng Việt" className="h-9 rounded-md text-sm">
                   VI
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setLocale("en")}
-                  className={
-                    locale === "en"
-                      ? "inline-flex h-9 items-center justify-center rounded-md bg-muted px-3 text-sm font-medium text-foreground"
-                      : "inline-flex h-9 items-center justify-center rounded-md border border-transparent px-3 text-sm text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
-                  }
-                >
+                </ToggleGroupItem>
+                <ToggleGroupItem value="en" aria-label="English" className="h-9 rounded-md text-sm">
                   EN
-                </button>
-              </div>
+                </ToggleGroupItem>
+              </ToggleGroup>
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem>

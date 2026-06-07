@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 
 import { isAllowedSsoReturnHost, normalizeSsoReturnTo } from "./sso-return-to";
 

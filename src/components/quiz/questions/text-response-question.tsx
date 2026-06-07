@@ -60,7 +60,7 @@ export function NumericQuestion({
           value={value.numericValue ?? ""}
           disabled={submitted}
           onChange={(event) => onChange({ numericValue: event.target.value })}
-          className="min-h-16 rounded-xl border-2 bg-white px-5 text-2xl font-black outline-none transition focus:ring-4 disabled:cursor-default"
+          className="min-h-16 rounded-lg border-2 bg-white px-5 text-xl font-semibold outline-none transition focus:ring-4 disabled:cursor-default"
           style={{
             borderColor: isCorrect ? "#78b816" : reviewMode ? "#ef6b5f" : "var(--quiz-canvas-border)",
             color: "var(--quiz-option-text)",
@@ -68,11 +68,11 @@ export function NumericQuestion({
           }}
           placeholder="Nhập số"
         />
-        <div className="grid min-h-16 place-items-center rounded-xl border-2 border-slate-200 bg-slate-50 px-5 text-lg font-black text-slate-600">
+        <div className="grid min-h-16 place-items-center rounded-lg border-2 border-slate-200 bg-slate-50 px-5 text-lg font-semibold text-slate-600">
           {question.numericAnswer?.unit ?? "đơn vị"}
         </div>
         {reviewMode && result?.correctNumericValue ? (
-          <div className="sm:col-span-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-800">
+          <div className="sm:col-span-2 rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800">
             Đáp án đúng: {result.correctNumericValue}
           </div>
         ) : null}
@@ -95,7 +95,7 @@ export function EssayQuestion({
           value={value.essayText ?? ""}
           disabled={submitted}
           onChange={(event) => onChange({ essayText: event.target.value })}
-          className="min-h-52 w-full resize-y rounded-xl border-2 bg-white p-5 text-xl font-medium leading-8 outline-none transition focus:ring-4 disabled:cursor-default"
+          className="min-h-52 w-full resize-y rounded-lg border-2 bg-white p-5 text-xl font-medium leading-8 outline-none transition focus:ring-4 disabled:cursor-default"
           style={{
             borderColor: reviewMode ? "#78b816" : "var(--quiz-canvas-border)",
             color: "var(--quiz-option-text)",
@@ -103,13 +103,13 @@ export function EssayQuestion({
           }}
           placeholder="Viết câu trả lời của em..."
         />
-        <div className="rounded-xl border border-slate-200 bg-white px-4 py-4">
-          <div className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-4">
+          <div className="text-sm font-semibold text-slate-500">
             Rubric gợi ý
           </div>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
             {(question.essayRubric ?? []).map((item) => (
-              <div key={item.id} className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+              <div key={item.id} className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
                 {item.label}: {item.points}đ
               </div>
             ))}
@@ -136,7 +136,7 @@ function TextBlankQuestion({
     <QuestionBodyWithImage question={question}>
       <div className={`grid ${isMobile ? "gap-3" : "gap-4"}`}>
         {variant === "blank" && !isMobile ? (
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-base font-bold leading-8 text-slate-600">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-base font-medium leading-8 text-slate-600">
             Điền từng ô còn trống bên dưới. Hệ thống mock sẽ chấm theo đáp án mẫu đã khai báo.
           </div>
         ) : null}
@@ -149,12 +149,12 @@ function TextBlankQuestion({
 
           return (
             <label key={blank.id} className={`grid ${isMobile ? "gap-1.5" : "gap-2"}`}>
-              <span className="text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+              <span className="text-sm font-semibold text-slate-500">
                 {variant === "blank" ? `Ô trống ${index + 1}` : blank.label}
               </span>
               <div className={`flex flex-wrap items-end ${isMobile ? "gap-x-2 gap-y-1" : "items-center gap-3"}`}>
                 {blank.prefix ? (
-                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "text-xl font-bold text-slate-700"}`}>
+                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "text-lg font-medium text-slate-700"}`}>
                     {blank.prefix}
                   </span>
                 ) : null}
@@ -172,7 +172,7 @@ function TextBlankQuestion({
                   className={
                     isMobile
                       ? "min-h-8 max-w-full border-0 border-b-2 bg-transparent px-1 pb-1 text-[18px] font-semibold outline-none disabled:cursor-default"
-                      : "min-h-14 min-w-[220px] flex-1 rounded-xl border-2 bg-white px-4 text-xl font-black outline-none transition focus:ring-4 disabled:cursor-default"
+                      : "min-h-14 min-w-[220px] flex-1 rounded-lg border-2 bg-white px-4 text-lg font-semibold outline-none transition focus:ring-4 disabled:cursor-default"
                   }
                   style={
                     isMobile
@@ -190,7 +190,7 @@ function TextBlankQuestion({
                   placeholder={isMobile ? "....." : blank.placeholder ?? "Nhập câu trả lời"}
                 />
                 {blank.suffix ? (
-                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "text-xl font-bold text-slate-700"}`}>
+                  <span className={`${isMobile ? "text-[18px] font-semibold text-slate-700" : "text-lg font-medium text-slate-700"}`}>
                     {blank.suffix}
                   </span>
                 ) : null}

@@ -1,7 +1,7 @@
 export {
   LearningResourceLibraryPage,
-  LearningResourceLoginPage,
 } from "@/features/lms/learning-resources/components/learning-resource-library-page";
+export { LearningResourceLoginPage } from "@/features/lms/learning-resources/components/learning-resource-login-page";
 export {
   LearningResourceDashboardScopeProvider,
 } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";

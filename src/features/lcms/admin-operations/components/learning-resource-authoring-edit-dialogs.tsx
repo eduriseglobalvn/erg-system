@@ -1,5 +1,6 @@
-﻿import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
+import { TsForm } from "@/components/ui/tanstack-form";
 import { Button, Input } from "@/components/ui/dashboard-kit";
 import {
   Dialog,
@@ -21,6 +22,7 @@ import {
   Field,
   StatusSelectField,
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-fields";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type {
   AttachedResourceItem,
   LocalContentEditTarget,
@@ -50,10 +52,11 @@ export function TaxonomyEditDialog({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const showPresentationField = Boolean(target && target.kind === "section");
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     if (!target) return;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setLabel(target.label);
       setDescription(target.description || "");
       setStatus(target.status || "active");
@@ -64,8 +67,7 @@ export function TaxonomyEditDialog({
       setError("");
       setSaving(false);
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [target]);
+  }, [paceStateUpdate, target]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -105,7 +107,7 @@ export function TaxonomyEditDialog({
           <DialogTitle>Sửa {target?.kind === "subject" ? "môn học" : "nội dung học liệu"}</DialogTitle>
           <DialogDescription>Cập nhật tên, mô tả và trạng thái để LMS hiển thị rõ ràng hơn.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <TsForm onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
             titleLabel="Tên hiển thị"
             titleValue={label}
@@ -116,7 +118,7 @@ export function TaxonomyEditDialog({
             autoFocus
           />
           <StatusSelectField value={status} onChange={setStatus} taxonomy />
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
             <div className="font-semibold text-slate-950">Thông tin hiển thị trên LMS</div>
             <p className="mt-1 text-sm leading-6 text-slate-500">
               Cấu trúc lưu phần mô tả và ảnh đại diện. Tài liệu thật sẽ được gắn bằng link Google Drive/Google Slides ở phần Nội dung hoặc màn Gắn link.
@@ -138,14 +140,14 @@ export function TaxonomyEditDialog({
               </Field>
             </div>
           </div>
-          {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
+          {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Hủy</Button>
-            <Button type="submit" disabled={saving || !label.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
+            <Button type="submit" disabled={saving || !label.trim()} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
               {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </DialogFooter>
-        </form>
+        </TsForm>
       </DialogContent>
     </Dialog>
   );
@@ -166,10 +168,11 @@ export function ResourceEditDialog({
   const [status, setStatus] = useState("published");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     if (!target) return;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setTitle(target.title);
       setDescription(target.detail?.description || "");
       setLinkUrl(target.linkUrl || "");
@@ -177,25 +180,29 @@ export function ResourceEditDialog({
       setSaving(false);
       setError("");
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [target]);
+  }, [paceStateUpdate, target]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!target) return;
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) {
+      setError("Vui lòng nhập tên hiển thị.");
+      return;
+    }
     setSaving(true);
     setError("");
     try {
       const normalizedUrl = linkUrl.trim() ? normalizeGoogleViewerUrl(linkUrl) || linkUrl.trim() : undefined;
       await updateLearningResourceResource(target.id, {
-        title: title.trim(),
+        title: trimmedTitle,
         description: description.trim(),
         status,
         visibility: status === "hidden" ? "private" : "public",
       });
       if (target.asset?.id) {
         await updateLearningResourceAsset(target.asset.id, {
-          title: title.trim(),
+          title: trimmedTitle,
           storageUrl: normalizedUrl,
           upstreamUrl: normalizedUrl,
           status,
@@ -216,7 +223,7 @@ export function ResourceEditDialog({
           <DialogTitle>Sửa tài liệu</DialogTitle>
           <DialogDescription>Cập nhật tên, link và trạng thái hiển thị của tài liệu.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <TsForm onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
             titleLabel="Tên hiển thị"
             titleValue={title}
@@ -233,14 +240,14 @@ export function ResourceEditDialog({
             placeholder="https://docs.google.com/... hoặc link PDF"
           />
           <StatusSelectField value={status} onChange={setStatus} />
-          {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
+          {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} disabled={saving}>Hủy</Button>
-            <Button type="submit" disabled={saving || !title.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
+            <Button type="submit" disabled={saving || !title.trim()} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
               {saving ? "Đang lưu..." : "Lưu thay đổi"}
             </Button>
           </DialogFooter>
-        </form>
+        </TsForm>
       </DialogContent>
     </Dialog>
   );
@@ -259,22 +266,24 @@ export function LocalContentEditDialog({
   const [description, setDescription] = useState("");
   const [resourceUrl, setResourceUrl] = useState("");
   const [status, setStatus] = useState("published");
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     if (!target) return;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setTitle(target.title);
       setDescription(target.description || "");
       setResourceUrl(target.slidesUrl || target.resourceUrl || "");
       setStatus(target.status || "published");
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [target]);
+  }, [paceStateUpdate, target]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const trimmedTitle = title.trim();
+    if (!trimmedTitle) return;
     onSaved({
-      title: title.trim(),
+      title: trimmedTitle,
       description: description.trim(),
       slidesUrl: target?.kind === "lecture" ? resourceUrl.trim() : undefined,
       resourceUrl: target?.kind === "exercise" ? resourceUrl.trim() : undefined,
@@ -289,7 +298,7 @@ export function LocalContentEditDialog({
           <DialogTitle>Sửa {target?.kind === "exercise" ? "bài tập" : "bài giảng"}</DialogTitle>
           <DialogDescription>Cập nhật nội dung hiển thị và trạng thái trong màn biên soạn.</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <TsForm onSubmit={handleSubmit} className="space-y-4">
           <ContentTextFields
             titleLabel="Tên hiển thị"
             titleValue={title}
@@ -308,9 +317,9 @@ export function LocalContentEditDialog({
           <StatusSelectField value={status} onChange={setStatus} />
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Hủy</Button>
-            <Button type="submit" className="bg-[var(--erg-blue)] hover:bg-blue-800">Lưu thay đổi</Button>
+            <Button type="submit" disabled={!title.trim()} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">Lưu thay đổi</Button>
           </DialogFooter>
-        </form>
+        </TsForm>
       </DialogContent>
     </Dialog>
   );
@@ -327,15 +336,15 @@ export function TaxonomyDeleteDialog({
 }) {
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     if (!target) return;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setDeleting(false);
       setError("");
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [target]);
+  }, [paceStateUpdate, target]);
 
   async function handleDelete() {
     if (!target) return;
@@ -358,7 +367,7 @@ export function TaxonomyDeleteDialog({
           <DialogTitle>Xóa {target?.label}</DialogTitle>
           <DialogDescription>Thao tác này xóa nội dung khỏi DB. Nếu mục có cấp dưới hoặc tài liệu liên quan, bạn nên chuyển dữ liệu trước khi xóa.</DialogDescription>
         </DialogHeader>
-        {error ? <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
+        {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onClose} disabled={deleting}>Hủy</Button>
           <Button type="button" variant="danger" onClick={handleDelete} disabled={deleting}>
