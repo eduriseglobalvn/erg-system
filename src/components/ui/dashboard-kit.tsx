@@ -1,65 +1,74 @@
 import type {
   ButtonHTMLAttributes,
-  ComponentProps,
   HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
 } from "react";
 
-import {
-  Badge as FluentBadge,
-  Button as FluentButton,
-  Card as FluentCard,
-  ProgressBar as FluentProgressBar,
-  Switch as FluentSwitch,
-  Textarea as FluentTextarea,
-  Text,
-  Title3,
-  type ButtonProps as FluentButtonProps,
-  type TextareaProps as FluentTextareaProps,
-} from "@fluentui/react-components";
 import { cn } from "@/lib/utils";
 
+// Backward-compatible input class name — used by LCMS features
 export const inputClassName =
-  "block h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-slate-400 focus:ring-2 focus:ring-slate-200/80 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500";
+  "block h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150 placeholder:text-[var(--muted-foreground)] hover:border-[var(--muted-foreground)]/20 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)] disabled:cursor-not-allowed disabled:bg-[var(--muted)] disabled:opacity-60";
 
-type CardProps = ComponentProps<typeof FluentCard>;
+// ---------------------------------------------------------------------------
+// ERG Design System — Dashboard Kit
+// "Soft Editorial" — warm neutrals, teal accent, refined spacing.
+// Pure HTML + CSS. Zero Fluent/Radix dependencies.
+// ---------------------------------------------------------------------------
 
-export function Card({ className, ...props }: CardProps) {
+/* ---------------------------------------------------------------------------
+   Card
+   --------------------------------------------------------------------------- */
+export function Card({
+  className,
+  ...props
+}: HTMLAttributes<HTMLDivElement>) {
   return (
-    <FluentCard
+    <div
       data-slot="card"
-      appearance="filled-alternative"
-      className={cn("rounded-lg border border-slate-200/90 bg-white p-0 shadow-sm shadow-slate-200/20", className)}
+      className={cn(
+        "rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-[var(--shadow-sm)]",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div data-slot="card-header" className={cn("flex flex-col gap-2 p-4", className)} {...props} />;
+  return (
+    <div data-slot="card-header" className={cn("flex flex-col gap-1.5 pb-5", className)} {...props} />
+  );
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div data-slot="card-content" className={cn("px-4 pb-4", className)} {...props} />;
+  return <div data-slot="card-content" className={cn("", className)} {...props} />;
 }
 
 export function CardTitle({ className, children, ...props }: HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <Title3 data-slot="card-title" as="h3" block className={cn("text-base font-semibold tracking-normal text-slate-950", className)} {...props}>
+    <h3
+      data-slot="card-title"
+      className={cn("font-[var(--font-heading)] text-lg font-semibold tracking-[-0.01em] text-[var(--foreground)]", className)}
+      {...props}
+    >
       {children}
-    </Title3>
+    </h3>
   );
 }
 
 export function CardDescription({ className, children, ...props }: HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <Text data-slot="card-description" as="p" block className={cn("text-sm leading-6 text-slate-500", className)} {...props}>
+    <p data-slot="card-description" className={cn("text-sm leading-relaxed text-[var(--muted-foreground)]", className)} {...props}>
       {children}
-    </Text>
+    </p>
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Badge
+   --------------------------------------------------------------------------- */
 type BadgeTone =
   | "default"
   | "primary"
@@ -68,6 +77,16 @@ type BadgeTone =
   | "warning"
   | "danger"
   | "outline";
+
+const badgeToneClasses: Record<BadgeTone, string> = {
+  default: "border-[var(--border)] bg-[var(--muted)] text-[var(--foreground)]",
+  primary: "border-primary/15 bg-primary text-primary-foreground",
+  secondary: "border-teal-200/60 bg-[var(--accent-soft)] text-[var(--primary)]",
+  success: "border-emerald-200/60 bg-emerald-50 text-emerald-700",
+  warning: "border-amber-200/60 bg-amber-50 text-amber-700",
+  danger: "border-rose-200/60 bg-rose-50 text-rose-700",
+  outline: "border-[var(--border)] bg-transparent text-[var(--muted-foreground)]",
+};
 
 export function Badge({
   className,
@@ -78,31 +97,22 @@ export function Badge({
   tone?: BadgeTone;
   children: ReactNode;
 }) {
-  const toneClass =
-    tone === "primary"
-      ? "border border-slate-900/10 bg-primary text-primary-foreground"
-      : tone === "secondary"
-        ? "border border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]"
-        : tone === "success"
-          ? "border border-emerald-200 bg-emerald-50 text-emerald-700"
-          : tone === "warning"
-            ? "border border-amber-200 bg-amber-50 text-amber-700"
-            : tone === "danger"
-              ? "border border-rose-200 bg-rose-50 text-rose-700"
-              : tone === "outline"
-                ? "border border-slate-200 bg-white text-slate-600"
-                : "border border-slate-200 bg-slate-100 text-slate-700";
-
   return (
-    <FluentBadge
-      appearance="tint"
-      className={cn("inline-flex min-h-6 items-center justify-center rounded-md px-2.5 py-1 text-xs font-medium tracking-normal", toneClass, className)}
+    <span
+      className={cn(
+        "inline-flex min-h-[26px] items-center justify-center rounded-lg border px-2.5 py-1 text-xs font-semibold tracking-normal",
+        badgeToneClasses[tone],
+        className,
+      )}
     >
       {children}
-    </FluentBadge>
+    </span>
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Button
+   --------------------------------------------------------------------------- */
 type ButtonVariant = "default" | "secondary" | "outline" | "ghost" | "danger";
 type ButtonSize = "sm" | "md" | "lg" | "icon";
 
@@ -111,20 +121,25 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> & {
   size?: ButtonSize;
 };
 
-const buttonVariantMap = {
-  default: "primary",
-  secondary: "secondary",
-  outline: "outline",
-  ghost: "subtle",
-  danger: "primary",
-} satisfies Record<ButtonVariant, FluentButtonProps["appearance"]>;
+const btnVariantClasses: Record<ButtonVariant, string> = {
+  default:
+    "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] font-semibold",
+  secondary:
+    "bg-[var(--accent-soft)] text-[var(--primary)] hover:bg-[var(--accent-soft-hover)] active:opacity-90 font-semibold",
+  outline:
+    "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] shadow-[var(--shadow-xs)] font-semibold",
+  ghost:
+    "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] font-semibold",
+  danger:
+    "bg-[var(--destructive)] text-white hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] font-semibold",
+};
 
-const buttonSizeMap = {
-  sm: "small",
-  md: "medium",
-  lg: "large",
-  icon: "medium",
-} satisfies Record<ButtonSize, FluentButtonProps["size"]>;
+const btnSizeClasses: Record<ButtonSize, string> = {
+  sm: "h-9 rounded-[10px] px-3 text-sm",
+  md: "h-10 rounded-[10px] px-4 text-sm",
+  lg: "h-11 rounded-[10px] px-5 text-sm",
+  icon: "size-9 rounded-[10px]",
+};
 
 export function Button({
   className,
@@ -134,17 +149,12 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <FluentButton
+    <button
       type={type}
-      appearance={buttonVariantMap[variant]}
-      size={buttonSizeMap[size]}
       className={cn(
-        "gap-2 font-medium",
-        size === "md" ? "h-10 rounded-lg px-3.5 text-sm" : null,
-        size === "lg" ? "h-11 rounded-lg px-4 text-sm" : null,
-        size === "sm" ? "h-9 rounded-lg px-3 text-sm" : null,
-        size === "icon" ? "size-9 rounded-lg" : null,
-        variant === "danger" ? "bg-rose-600 text-white hover:bg-rose-700" : null,
+        "inline-flex items-center justify-center gap-2 font-medium transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-40",
+        btnVariantClasses[variant],
+        btnSizeClasses[size],
         className,
       )}
       {...props}
@@ -152,22 +162,62 @@ export function Button({
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Input
+   --------------------------------------------------------------------------- */
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(inputClassName, className)} {...props} />;
+  return (
+    <input
+      className={cn(
+        "block h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150",
+        "placeholder:text-[var(--muted-foreground)]",
+        "hover:border-[var(--muted-foreground)]/20",
+        "focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]",
+        "disabled:cursor-not-allowed disabled:bg-[var(--muted)] disabled:opacity-60",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
-export function Textarea({ className, ...props }: FluentTextareaProps) {
-  return <FluentTextarea className={cn(inputClassName, "min-h-[132px] py-3", className)} {...props} />;
+/* ---------------------------------------------------------------------------
+   Textarea
+   --------------------------------------------------------------------------- */
+export function Textarea({ className, ...props }: InputHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <textarea
+      className={cn(
+        "block min-h-[132px] w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 py-3 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150",
+        "placeholder:text-[var(--muted-foreground)]",
+        "hover:border-[var(--muted-foreground)]/20",
+        "focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]",
+        "disabled:cursor-not-allowed disabled:bg-[var(--muted)] disabled:opacity-60",
+        className,
+      )}
+      {...props}
+    />
+  );
 }
 
+/* ---------------------------------------------------------------------------
+   Separator
+   --------------------------------------------------------------------------- */
 export function Separator({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("h-px w-full bg-slate-200", className)} {...props} />;
+  return (
+    <div
+      className={cn("h-px w-full bg-[var(--border)]", className)}
+      {...props}
+    />
+  );
 }
 
+/* ---------------------------------------------------------------------------
+   ProgressBar
+   --------------------------------------------------------------------------- */
 export function ProgressBar({
   value,
   className,
-  indicatorClassName,
 }: {
   value: number;
   className?: string;
@@ -176,15 +226,21 @@ export function ProgressBar({
   const clampedValue = Math.max(0, Math.min(100, value));
 
   return (
-    <FluentProgressBar
+    <progress
       data-slot="progress"
       value={clampedValue}
       max={100}
-      className={cn("h-2.5 bg-slate-200", className, indicatorClassName)}
+      className={cn(
+        "h-2 w-full rounded-full bg-[var(--muted)] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-[var(--primary)] [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-[var(--primary)]",
+        className,
+      )}
     />
   );
 }
 
+/* ---------------------------------------------------------------------------
+   Switch
+   --------------------------------------------------------------------------- */
 export function Switch({
   checked,
   onCheckedChange,
@@ -199,16 +255,52 @@ export function Switch({
   "aria-label"?: string;
 }) {
   return (
-    <FluentSwitch
-      checked={checked}
-      onChange={(_, data) => onCheckedChange(Boolean(data.checked))}
-      disabled={disabled}
-      aria-label={ariaLabel}
-      className={cn("h-7 w-12 data-[state=checked]:bg-primary", className)}
+    <label
+      className={cn(
+        "relative inline-flex h-7 w-12 cursor-pointer items-center rounded-full transition-all duration-150",
+        checked
+          ? "bg-[var(--primary)]"
+          : "bg-[var(--border)] hover:bg-[var(--muted-foreground)]/20",
+        disabled && "cursor-not-allowed opacity-40",
+        className,
+      )}
+    >
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onCheckedChange(event.target.checked)}
+        disabled={disabled}
+        aria-label={ariaLabel}
+        className="sr-only"
+      />
+      <span
+        className={cn(
+          "inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-150",
+          checked ? "translate-x-6" : "translate-x-1",
+        )}
+      />
+    </label>
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Skeleton
+   --------------------------------------------------------------------------- */
+export function Skeleton({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn(
+        "animate-pulse rounded-md bg-[var(--muted)]",
+        className,
+      )}
+      {...props}
     />
   );
 }
 
+/* ---------------------------------------------------------------------------
+   EmptyState
+   --------------------------------------------------------------------------- */
 export function EmptyState({
   title,
   description,
@@ -223,15 +315,15 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        "flex min-h-[220px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center",
+        "flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-[var(--border)] bg-[var(--muted)]/50 px-6 py-12 text-center",
         className,
       )}
     >
       <div className="max-w-sm">
-        <h4 className="text-base font-semibold text-slate-900">{title}</h4>
-        <p className="mt-2 text-sm leading-6 text-slate-500">{description}</p>
+        <h4 className="font-[var(--font-heading)] text-base font-semibold text-[var(--foreground)]">{title}</h4>
+        <p className="mt-2 text-sm leading-relaxed text-[var(--muted-foreground)]">{description}</p>
       </div>
-      {action ? <div className="mt-4">{action}</div> : null}
+      {action ? <div className="mt-5">{action}</div> : null}
     </div>
   );
 }

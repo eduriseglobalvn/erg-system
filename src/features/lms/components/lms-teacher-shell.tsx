@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, memo, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@/routes/router-compat";
 import {
@@ -16,9 +16,7 @@ import {
   UsersRound,
 } from "lucide-react";
 
-import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ERG_ASSETS } from "@/config/seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -34,18 +32,9 @@ import type { ClassroomSnapshot, ClassroomStudent, AssignmentRun } from "@/featu
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
-import { AssignHomeworkPage } from "@/features/lms/components/assign-homework-page";
-import { HomeworkFloatingMenu } from "@/features/lms/components/homework-floating-menu";
-import { LmsAccountPage } from "@/features/lms/components/lms-account-page";
-import { LmsLoginLogsPage } from "@/features/lms/components/lms-login-logs-page";
-import { LmsNotificationCenter } from "@/features/lms/components/lms-notification-center";
-import { LmsNotificationDetailPage } from "@/features/lms/components/lms-notification-detail-page";
-import { ExerciseBankPage } from "@/features/lms/components/exercise-bank-page";
-import { StudentGroupsPage } from "@/features/lms/components/student-groups-page";
-import { ClassManagementPage } from "@/features/lms/classroom/components/class-management-page";
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
-import { AppSelect } from "@/components/ui/app-select";
+import { LmsSelect } from "@/components/ui/lms-kit";
 
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
 
@@ -72,6 +61,51 @@ const ScoreSheetPanel = lazy(() =>
 const AttendanceSheetPanel = lazy(() =>
   import("@/features/lms/components/attendance-sheet-panel").then((module) => ({
     default: module.AttendanceSheetPanel,
+  })),
+);
+const AssignHomeworkPage = lazy(() =>
+  import("@/features/lms/components/assign-homework-page").then((module) => ({
+    default: module.AssignHomeworkPage,
+  })),
+);
+const ExerciseBankPage = lazy(() =>
+  import("@/features/lms/components/exercise-bank-page").then((module) => ({
+    default: module.ExerciseBankPage,
+  })),
+);
+const StudentGroupsPage = lazy(() =>
+  import("@/features/lms/components/student-groups-page").then((module) => ({
+    default: module.StudentGroupsPage,
+  })),
+);
+const ClassManagementPage = lazy(() =>
+  import("@/features/lms/classroom/components/class-management-page").then((module) => ({
+    default: module.ClassManagementPage,
+  })),
+);
+const HomeworkFloatingMenu = lazy(() =>
+  import("@/features/lms/components/homework-floating-menu").then((module) => ({
+    default: module.HomeworkFloatingMenu,
+  })),
+);
+const LmsAccountPage = lazy(() =>
+  import("@/features/lms/components/lms-account-page").then((module) => ({
+    default: module.LmsAccountPage,
+  })),
+);
+const LmsLoginLogsPage = lazy(() =>
+  import("@/features/lms/components/lms-login-logs-page").then((module) => ({
+    default: module.LmsLoginLogsPage,
+  })),
+);
+const LmsNotificationCenter = lazy(() =>
+  import("@/features/lms/components/lms-notification-center").then((module) => ({
+    default: module.LmsNotificationCenter,
+  })),
+);
+const LmsNotificationDetailPage = lazy(() =>
+  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
+    default: module.LmsNotificationDetailPage,
   })),
 );
 
@@ -173,12 +207,12 @@ export function LmsTeacherShell() {
   }
 
   return (
-    <div className="lms-teacher-shell flex h-screen max-h-screen overflow-hidden bg-[var(--erg-bg)] text-slate-950">
+    <div className="lms-teacher-shell flex h-screen max-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 shrink-0 border-b border-[#d9e0ea] bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.03)] backdrop-blur-xl">
+        <header className="sticky top-0 z-40 shrink-0 border-b border-[var(--border)] bg-[var(--card)]/95 shadow-[var(--shadow-xs)] backdrop-blur-xl">
           <div className="flex h-16 items-center gap-3 px-4 xl:px-5">
-            <button type="button" onClick={() => navigate("/homework")} className="group flex h-12 shrink-0 items-center rounded-lg px-1.5 transition hover:bg-[#f7f8fa]">
+            <button type="button" onClick={() => navigate("/homework")} className="group flex h-12 shrink-0 items-center rounded-[10px] px-1.5 transition hover:bg-[var(--surface-hover)]">
               <span className="flex h-11 w-[112px] items-center overflow-hidden">
                 <img src={ERG_ASSETS.logo} alt="ERG EduRise Global" className="h-10 w-auto max-w-full object-contain" />
               </span>
@@ -194,12 +228,12 @@ export function LmsTeacherShell() {
                     type="button"
                     onClick={() => navigate(item.path)}
                     className={cn(
-                      "relative inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-semibold text-slate-600 transition-colors duration-150 hover:bg-[#f7f9fc] hover:text-slate-950",
-                      "after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--erg-blue)] after:transition-transform",
-                      active && "text-[var(--erg-blue)] after:scale-x-100",
+                      "relative inline-flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold text-[var(--muted-foreground)] transition-colors duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]",
+                      "after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--primary)] after:transition-transform",
+                      active && "text-[var(--primary)] after:scale-x-100",
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[var(--erg-blue)]" : "text-slate-500")} />
+                    <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]")} />
                     {item.label}
                   </button>
                 );
@@ -207,70 +241,65 @@ export function LmsTeacherShell() {
             </nav>
 
             <div className="ml-auto flex shrink-0 items-center gap-2.5">
-              <Select value={selectedSchoolId} onValueChange={selectSchool}>
-                <SelectTrigger
-                  aria-label="Chọn trường"
-                  className="hidden h-10 w-[230px] rounded-lg border-[#d9e0ea] bg-white px-3 text-sm font-medium text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:border-[#c3cad5] lg:flex"
-                >
-                  <SelectValue placeholder="Chọn trường" />
-                </SelectTrigger>
-                <SelectContent position="popper" align="start" className="w-[230px] p-1 shadow-lg shadow-slate-900/10">
-                  {schools.map((school) => (
-                    <SelectItem key={school.id} value={school.id} className="font-medium">
-                      {school.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Select value={selectedClass?.id ?? ""} onValueChange={setSelectedClassId} disabled={!selectedClassOptions.length}>
-                <SelectTrigger
-                  aria-label="Chọn lớp"
-                  className="h-10 min-w-[132px] rounded-lg border-[#d9e0ea] bg-white px-3 text-sm font-medium text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:border-[#c3cad5]"
-                >
-                  <SelectValue placeholder="Chọn lớp" />
-                </SelectTrigger>
-                <SelectContent position="popper" align="start" className="min-w-[132px] p-1 shadow-lg shadow-slate-900/10">
-                  {selectedClassOptions.length ? (
-                    selectedClassOptions.map((classroom) => (
-                      <SelectItem key={classroom.id} value={classroom.id} className="font-medium">
-                        {classroom.className}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="empty" disabled>
-                      Chưa có lớp
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
+              <LmsSelect
+                aria-label="Chọn trường"
+                value={selectedSchoolId}
+                onChange={(event) => selectSchool(event.target.value)}
+                className="hidden w-[230px] lg:block"
+              >
+                {schools.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+              </LmsSelect>
+              <LmsSelect
+                aria-label="Chọn lớp"
+                value={selectedClass?.id ?? ""}
+                onChange={(event) => setSelectedClassId(event.target.value)}
+                disabled={!selectedClassOptions.length}
+                className="min-w-[132px]"
+              >
+                {selectedClassOptions.length ? (
+                  selectedClassOptions.map((classroom) => (
+                    <option key={classroom.id} value={classroom.id}>
+                      {classroom.className}
+                    </option>
+                  ))
+                ) : (
+                  <option value="empty" disabled>
+                    Chưa có lớp
+                  </option>
+                )}
+              </LmsSelect>
               <LmsNotificationCenter />
               <div className="relative">
                 <button
                   type="button"
                   onClick={() => setAccountMenuOpen((open) => !open)}
-                  className="rounded-lg outline-none transition hover:brightness-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--erg-blue)]/20"
+                  className="rounded-[10px] outline-none transition hover:brightness-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--primary)]/20"
                   aria-label="Tài khoản giáo viên"
                   aria-expanded={accountMenuOpen}
                 >
                   <OnlineTeacherAvatar avatarUrl={teacherAvatar} name={teacherName} />
                 </button>
                 {accountMenuOpen ? (
-                  <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+                  <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+                    <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
                       <OnlineTeacherAvatar avatarUrl={teacherAvatar} name={teacherName} />
                       <div className="min-w-0">
-                        <div className="truncate text-sm font-semibold text-slate-950">{teacherName}</div>
-                        <div className="truncate text-xs font-semibold text-slate-500">{teacherEmail}</div>
+                        <div className="truncate text-sm font-semibold text-[var(--foreground)]">{teacherName}</div>
+                        <div className="truncate text-xs font-semibold text-[var(--muted-foreground)]">{teacherEmail}</div>
                       </div>
                     </div>
                     <div className="p-2">
-                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account"); }} className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account"); }} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-hover)]">
                         Quản lý tài khoản
                       </button>
-                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account/login-logs"); }} className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50">
+                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account/login-logs"); }} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-hover)]">
                         Lịch sử đăng nhập
                       </button>
-                      <button type="button" onClick={signOut} className="w-full rounded-md px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50">
+                      <button type="button" onClick={signOut} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50">
                         Đăng xuất
                       </button>
                     </div>
@@ -280,15 +309,15 @@ export function LmsTeacherShell() {
             </div>
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto border-t border-[#edf1f6] bg-white px-3 py-2 xl:hidden">
+          <div className="flex gap-1.5 overflow-x-auto border-t border-[var(--border)] bg-[var(--card)] px-3 py-2 xl:hidden">
             {lmsNavItems.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => navigate(item.path)}
                 className={cn(
-                  "relative whitespace-nowrap rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-[#f7f9fc] after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--erg-blue)] after:transition-transform",
-                  activeSection === item.id ? "text-[var(--erg-blue)] after:scale-x-100" : "text-slate-600",
+                  "relative whitespace-nowrap rounded-[10px] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--surface-hover)] after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--primary)] after:transition-transform",
+                  activeSection === item.id ? "text-[var(--primary)] after:scale-x-100" : "text-[var(--muted-foreground)]",
                 )}
               >
                 {item.label}
@@ -317,61 +346,69 @@ export function LmsTeacherShell() {
               onBack={() => navigate("/homework")}
             />
           ) : pathname === "/homework/assign" ? (
-            <AssignHomeworkPage
-              classes={classes}
-              selectedClass={selectedClass}
-              onBack={() => navigate("/homework")}
-              onCreateAssignment={(title, subject) => {
-                const newRun: AssignmentRun = {
-                  id: `assignment-${Date.now()}`,
-                  title: title,
-                  subjectLabel: subject,
-                  targetLevel: selectedClass?.className ?? "Cả lớp",
-                  activeClasses: 1,
-                  completionRate: 0,
-                  submittedCount: 0,
-                  inProgressCount: 0,
-                  needsReviewCount: 0,
-                  dueLabel: "Hạn nộp sau 7 ngày",
-                };
-                setRuns([newRun, ...runs]);
-                navigate("/homework");
-              }}
-            />
+            <Suspense fallback={null}>
+              <AssignHomeworkPage
+                classes={classes}
+                selectedClass={selectedClass}
+                onBack={() => navigate("/homework")}
+                onCreateAssignment={(title, subject) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: title,
+                    subjectLabel: subject,
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
           ) : pathname === "/homework/student-groups" ? (
-            <StudentGroupsPage
-              classes={classes}
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-              onBack={() => navigate("/homework")}
-            />
+            <Suspense fallback={null}>
+              <StudentGroupsPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                onBack={() => navigate("/homework")}
+              />
+            </Suspense>
           ) : pathname === "/classes" ? (
-            <ClassManagementPage
-              classes={classes}
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-              students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
-            />
+            <Suspense fallback={null}>
+              <ClassManagementPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+              />
+            </Suspense>
           ) : pathname === "/homework/exercise-bank" ? (
-            <ExerciseBankPage
-              onBack={() => navigate("/homework")}
-              onAssign={(exerciseTitle) => {
-                const newRun: AssignmentRun = {
-                  id: `assignment-${Date.now()}`,
-                  title: exerciseTitle,
-                  subjectLabel: "Kho bài tập",
-                  targetLevel: selectedClass?.className ?? "Cả lớp",
-                  activeClasses: 1,
-                  completionRate: 0,
-                  submittedCount: 0,
-                  inProgressCount: 0,
-                  needsReviewCount: 0,
-                  dueLabel: "Hạn nộp sau 7 ngày",
-                };
-                setRuns([newRun, ...runs]);
-                navigate("/homework");
-              }}
-            />
+            <Suspense fallback={null}>
+              <ExerciseBankPage
+                onBack={() => navigate("/homework")}
+                onAssign={(exerciseTitle) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: exerciseTitle,
+                    subjectLabel: "Kho bài tập",
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
           ) : pathname === "/homework/progress" ? (
             <ClassManagementPage
               classes={classes}
@@ -461,12 +498,12 @@ function TeacherWorkspaceFrame({
 }) {
   return (
     <div className="flex min-h-full flex-col gap-5 px-5 py-6 xl:px-8">
-      <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="text-sm font-medium text-slate-400">Trang chủ / <span className="text-slate-600">{activeLabel}</span></div>
-            <h1 className="mt-3 text-xl font-semibold tracking-normal text-slate-950">{selectedClass?.className ?? "Lớp học"}</h1>
-            <p className="mt-1 text-sm font-semibold text-slate-500">{selectedSchoolName} - {selectedClass?.studentCount ?? 0} học sinh</p>
+            <div className="text-sm font-medium text-[var(--muted-foreground)]">Trang chủ / <span className="text-[var(--foreground)]">{activeLabel}</span></div>
+            <h1 className="mt-3 font-[var(--font-heading)] text-xl font-semibold tracking-[-0.01em] text-[var(--foreground)]">{selectedClass?.className ?? "Lớp học"}</h1>
+            <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">{selectedSchoolName} - {selectedClass?.studentCount ?? 0} học sinh</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline">Xuất dữ liệu</Button>
@@ -485,19 +522,19 @@ function TeacherWorkspaceFrame({
   );
 }
 
-function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; label: string; value: string }) {
+const ClassStat = memo(function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-[var(--erg-blue)] shadow-sm">
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)] px-4 py-3">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-[var(--card)] text-[var(--primary)] shadow-[var(--shadow-xs)]">
         <Icon className="h-5 w-5" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-xs font-medium text-slate-500">{label}</span>
-        <span className="mt-1 block truncate text-base font-semibold text-slate-950">{value}</span>
+        <span className="block truncate text-xs font-medium text-[var(--muted-foreground)]">{label}</span>
+        <span className="mt-1 block truncate text-base font-semibold text-[var(--foreground)]">{value}</span>
       </span>
     </div>
   );
-}
+});
 
 function HomeworkPanel({
   selectedClass,
@@ -517,24 +554,24 @@ function HomeworkPanel({
         filters={["Môn học", "Học kỳ", "Trạng thái", "Loại bài", "Tính điểm", "Đối tượng giao"]}
         onAssign={onAssign}
       />
-      <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+      <section className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
         <div className="overflow-x-auto">
           <div className="min-w-[1180px]">
             <TableHeader columns="grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px]" labels={["STT", "Tên bài", "Môn học", "Loại bài", "Đối tượng", "Thời gian làm bài", "Trạng thái", ""]} />
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-[var(--border)]">
               {runs.map((assignment, index) => (
-                <article key={assignment.id} className="grid grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px] items-center gap-3 px-4 py-4 text-sm transition hover:bg-slate-50/80">
-                  <span className="font-semibold text-slate-400">{String(index + 1).padStart(2, "0")}</span>
+                <article key={assignment.id} className="grid grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px] items-center gap-3 px-4 py-4 text-sm transition hover:bg-[var(--surface-hover)]">
+                  <span className="font-semibold text-[var(--muted-foreground)]">{String(index + 1).padStart(2, "0")}</span>
                   <div className="min-w-0">
-                    <button type="button" onClick={() => onViewProgress(assignment.id)} className="truncate text-left font-semibold text-[#1677d2] hover:text-[#0b5fb3]">{assignment.title}</button>
-                    <p className="mt-1 text-xs font-semibold text-slate-400">Công bố điểm tự động</p>
+                    <button type="button" onClick={() => onViewProgress(assignment.id)} className="truncate text-left font-semibold text-[var(--primary)] hover:text-[var(--primary)]/80">{assignment.title}</button>
+                    <p className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">Công bố điểm tự động</p>
                   </div>
-                  <span className="font-semibold text-slate-700">{assignment.subjectLabel}</span>
-                  <span className="text-slate-600">{index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}</span>
-                  <span className="font-semibold text-slate-700">{selectedClass?.className ?? "Cả lớp"}</span>
-                  <span className="leading-6 text-slate-600">21/05/2026 10:{50 + index}<br />28/05/2026 10:{50 + index}</span>
+                  <span className="font-semibold text-[var(--foreground)]">{assignment.subjectLabel}</span>
+                  <span className="text-[var(--muted-foreground)]">{index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}</span>
+                  <span className="font-semibold text-[var(--foreground)]">{selectedClass?.className ?? "Cả lớp"}</span>
+                  <span className="leading-6 text-[var(--muted-foreground)]">21/05/2026 10:{50 + index}<br />28/05/2026 10:{50 + index}</span>
                   <Badge tone={index > 3 ? "danger" : "success"} className="justify-self-start">{index > 3 ? "Đã kết thúc" : "Đang diễn ra"}</Badge>
-                  <button type="button" onClick={() => onViewProgress(assignment.id)} aria-label="Mở thao tác" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm">
+                  <button type="button" onClick={() => onViewProgress(assignment.id)} aria-label="Mở thao tác" className="grid h-9 w-9 place-items-center rounded-[10px] text-[var(--muted-foreground)] hover:bg-[var(--card)] hover:text-[var(--foreground)] hover:shadow-[var(--shadow-xs)]">
                     <MoreVertical className="h-5 w-5" />
                   </button>
                 </article>
@@ -558,18 +595,18 @@ function LegacyAttendancePanel({ selectedClass }: { selectedClass?: ClassroomSna
         <Button variant="outline">⬺</Button>
         <Button>Tuần này</Button>
       </div>
-      <div className="overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="grid grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] bg-[#50a8e8] text-sm font-semibold text-white">
+      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+        <div className="grid grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] bg-[var(--primary)] text-sm font-semibold text-[var(--primary-foreground)]">
           <div className="px-4 py-4">STT</div>
           <div className="px-4 py-4">Học sinh</div>
           {days.map((day) => <div key={day} className="whitespace-pre-line px-4 py-4 text-center">{day}</div>)}
         </div>
         {students.slice(0, 10).map((student, index) => (
-          <div key={student.id} className="grid min-h-20 grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] border-t border-slate-100 text-sm">
-            <div className="px-4 py-5 text-slate-500">{index + 1}</div>
-            <div className="px-4 py-5 font-medium text-[var(--erg-blue)]">{student.name}</div>
+          <div key={student.id} className="grid min-h-20 grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] border-t border-[var(--border)] text-sm">
+            <div className="px-4 py-5 text-[var(--muted-foreground)]">{index + 1}</div>
+            <div className="px-4 py-5 font-medium text-[var(--primary)]">{student.name}</div>
             {days.map((day, dayIndex) => (
-              <div key={day} className={cn("px-4 py-5 text-center font-medium", dayIndex === 6 && "bg-[var(--erg-blue-light)]")}>
+              <div key={day} className={cn("px-4 py-5 text-center font-medium", dayIndex === 6 && "bg-[var(--accent-soft)]")}>
                 {dayIndex > 0 && dayIndex < 5 ? <span className={dayIndex === 2 && index === 1 ? "text-rose-600" : "text-emerald-600"}>●</span> : null}{" "}
                 {dayIndex > 0 && dayIndex < 5 ? "1/1" : ""}
               </div>
@@ -596,19 +633,19 @@ function AttendancePanel({
 }) {
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [sessionFilter, setSessionFilter] = useState("Tat ca buoi");
+  const [sessionFilter, setSessionFilter] = useState("Tất cả buổi");
   const attendanceColumns = [
-    { id: "mon-am", day: "Thu Hai", date: "18/05", session: "Sang" },
-    { id: "mon-pm", day: "Thu Hai", date: "18/05", session: "Chieu" },
-    { id: "tue-am", day: "Thu Ba", date: "19/05", session: "Sang" },
-    { id: "wed-am", day: "Thu Tu", date: "20/05", session: "Sang" },
-    { id: "thu-am", day: "Thu Nam", date: "21/05", session: "Sang" },
-    { id: "fri-am", day: "Thu Sau", date: "22/05", session: "Sang" },
-    { id: "fri-pm", day: "Thu Sau", date: "22/05", session: "Chieu" },
-    { id: "sat-am", day: "Thu Bay", date: "23/05", session: "Sang" },
+    { id: "mon-am", day: "Thứ Hai", date: "18/05", session: "Sáng" },
+    { id: "mon-pm", day: "Thứ Hai", date: "18/05", session: "Chiều" },
+    { id: "tue-am", day: "Thứ Ba", date: "19/05", session: "Sáng" },
+    { id: "wed-am", day: "Thứ Tư", date: "20/05", session: "Sáng" },
+    { id: "thu-am", day: "Thứ Năm", date: "21/05", session: "Sáng" },
+    { id: "fri-am", day: "Thứ Sáu", date: "22/05", session: "Sáng" },
+    { id: "fri-pm", day: "Thứ Sáu", date: "22/05", session: "Chiều" },
+    { id: "sat-am", day: "Thứ Bảy", date: "23/05", session: "Sáng" },
   ];
   const filteredStudents = students.filter((student) => student.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  const visibleColumns = attendanceColumns.filter((column) => sessionFilter === "Tat ca buoi" || column.session === sessionFilter);
+  const visibleColumns = attendanceColumns.filter((column) => sessionFilter === "Tất cả buổi" || column.session === sessionFilter);
 
   function updateAttendance(studentId: string, columnId: string) {
     const key = `${studentId}:${columnId}`;
@@ -620,63 +657,63 @@ function AttendancePanel({
 
   return (
     <div className="flex min-h-full flex-col gap-2 px-2 py-2 xl:px-3">
-      <section className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 shadow-[var(--shadow-sm)]">
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="mr-auto min-w-[190px]">
-            <div className="text-sm font-semibold leading-5 text-slate-950">{selectedClass?.className ?? "Lop hoc"}</div>
-            <div className="text-[11px] font-semibold text-slate-500">
+            <div className="text-sm font-semibold leading-5 text-[var(--foreground)]">{selectedClass?.className ?? "Lớp hoc"}</div>
+            <div className="text-[11px] font-semibold text-[var(--muted-foreground)]">
               {selectedSchoolName} · {students.length} hoc sinh · {visibleColumns.length} cot diem danh
             </div>
           </div>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted-foreground)]" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Tim hoc sinh"
-              className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
+              placeholder="Tìm học sinh"
+              className="h-8 border-[var(--border)] bg-[var(--muted)] pl-8 text-xs shadow-none focus:bg-[var(--card)]"
             />
           </div>
-          <AppSelect className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none">
-            <option>Tuan 12 (18/05 - 24/05)</option>
-            <option>Tuan 13 (25/05 - 31/05)</option>
-          </AppSelect>
-          <AppSelect
+          <LmsSelect className="h-9 min-w-[150px] text-[13px]">
+            <option>Tuần 12 (18/05 - 24/05)</option>
+            <option>Tuần 13 (25/05 - 31/05)</option>
+          </LmsSelect>
+          <LmsSelect
             value={sessionFilter}
             onChange={(event) => setSessionFilter(event.target.value)}
-            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none"
+            className="h-9 min-w-[132px] text-[13px]"
           >
-            <option>Tat ca buoi</option>
-            <option>Sang</option>
-            <option>Chieu</option>
-          </AppSelect>
+            <option>Tất cả buổi</option>
+            <option>Sáng</option>
+            <option>Chiều</option>
+          </LmsSelect>
             <Button variant="outline">Xuất dữ liệu</Button>
-          <Button className="h-8 rounded-md bg-slate-950 px-2.5 text-xs font-semibold text-white">Luu diem danh</Button>
+          <Button className="h-8 rounded-[10px] px-2.5 text-xs font-semibold">Lưu điểm danh</Button>
         </div>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
-          <h2 className="text-sm font-semibold text-slate-950">Bang diem danh theo tuan</h2>
+      <section className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-2.5 py-1.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Bảng điểm danh theo tuần</h2>
           <div className="flex items-center gap-1.5 text-[10px] font-medium">
-            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Co mat</span>
-            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Di muon</span>
-            <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vang</span>
-            <span className="rounded bg-[var(--erg-blue-light)] px-1.5 py-0.5 text-[var(--erg-blue)]">Co phep</span>
+            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
+            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
+            <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
+            <span className="rounded bg-[var(--accent-soft)] px-1.5 py-0.5 text-[var(--primary)]">Có phép</span>
           </div>
         </div>
         <div className="max-h-[620px] overflow-auto">
           <table className="min-w-[1500px] border-separate border-spacing-0 text-[11px]">
             <thead>
-              <tr className="bg-slate-50 text-[11px] font-semibold text-slate-500">
+              <tr className="bg-[var(--muted)]/70 text-[11px] font-semibold text-[var(--muted-foreground)]">
                 <AttendanceHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Hoc sinh</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[234px] top-0 z-40 w-[66px]">Lop</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[300px] top-0 z-40 w-[76px]">Tong</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Học sinh</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[234px] top-0 z-40 w-[66px]">Lớp</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[300px] top-0 z-40 w-[76px]">Tổng</AttendanceHeaderCell>
                 {visibleColumns.map((column) => (
                   <AttendanceHeaderCell key={column.id} className="sticky top-0 z-30 w-[136px]">
                     <span className="block">{column.day}</span>
-                    <span className="mt-0.5 block text-[10px] font-medium normal-case text-slate-500">{column.date} · {column.session}</span>
+                    <span className="mt-0.5 block text-[10px] font-medium normal-case text-[var(--muted-foreground)]">{column.date} · {column.session}</span>
                   </AttendanceHeaderCell>
                 ))}
               </tr>
@@ -686,14 +723,14 @@ function AttendancePanel({
                 const summary = attendanceSummary(student.id, visibleColumns.map((column) => column.id), attendanceOverrides, index);
                 return (
                   <tr key={student.id} className="group">
-                    <AttendanceStickyCell className="left-0 z-20 w-[44px] text-center text-slate-500">{index + 1}</AttendanceStickyCell>
+                    <AttendanceStickyCell className="left-0 z-20 w-[44px] text-center text-[var(--muted-foreground)]">{index + 1}</AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[44px] z-20 w-[190px]">
-                      <button type="button" className="max-w-[166px] truncate text-left font-medium text-[var(--erg-blue)] hover:underline">
+                      <button type="button" className="max-w-[166px] truncate text-left font-medium text-[var(--primary)] hover:underline">
                         {student.name}
                       </button>
                     </AttendanceStickyCell>
-                    <AttendanceStickyCell className="left-[234px] z-20 w-[66px] text-center font-semibold text-slate-600">
-                      {student.className.replace("Lớp ", "").replace("Lop ", "")}
+                    <AttendanceStickyCell className="left-[234px] z-20 w-[66px] text-center font-semibold text-[var(--muted-foreground)]">
+                      {student.className.replace("Lớp ", "").replace("Lớp ", "")}
                     </AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[300px] z-20 w-[76px] text-center">
                       <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
@@ -703,11 +740,11 @@ function AttendancePanel({
                     {visibleColumns.map((column, columnIndex) => {
                       const status = attendanceOverrides[`${student.id}:${column.id}`] ?? getMockAttendanceStatus(index, columnIndex);
                       return (
-                        <td key={column.id} className={cn("h-7 border-b border-r border-slate-100 px-1 text-center group-hover:!bg-[var(--erg-blue-light)]", attendanceCellClass(status))}>
+                        <td key={column.id} className={cn("h-7 border-b border-r border-[var(--border)] px-1 text-center group-hover:!bg-[var(--accent-soft)]", attendanceCellClass(status))}>
                           <button
                             type="button"
                             onClick={() => updateAttendance(student.id, column.id)}
-                            className="h-6 w-full rounded text-[11px] font-semibold outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                            className="h-6 w-full rounded text-[11px] font-semibold outline-none focus:ring-2 focus:ring-[var(--ring)]"
                             aria-label={`${student.name} ${column.day} ${column.session}`}
                           >
                             {attendanceLabel(status)}
@@ -726,21 +763,21 @@ function AttendancePanel({
   );
 }
 
-function AttendanceHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
+const AttendanceHeaderCell = memo(function AttendanceHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <th className={cn("h-8 border-b border-r border-slate-200 bg-[#f8fbff] px-1.5 text-center align-middle", className)}>
+    <th className={cn("h-8 border-b border-r border-[var(--border)] bg-[var(--muted)]/70 px-1.5 text-center align-middle", className)}>
       {children}
     </th>
   );
-}
+});
 
-function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
+const AttendanceStickyCell = memo(function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("sticky h-7 border-b border-r border-slate-100 bg-white px-1.5 align-middle group-hover:bg-[var(--erg-blue-light)]", className)}>
+    <td className={cn("sticky h-7 border-b border-r border-[var(--border)] bg-[var(--card)] px-1.5 align-middle group-hover:bg-[var(--accent-soft)]", className)}>
       {children}
     </td>
   );
-}
+});
 
 function getMockAttendanceStatus(studentIndex: number, columnIndex: number): AttendanceStatus {
   if ((studentIndex + columnIndex) % 17 === 0) return "late";
@@ -766,7 +803,7 @@ function attendanceLabel(status: AttendanceStatus) {
 function attendanceCellClass(status: AttendanceStatus) {
   if (status === "absent") return "bg-rose-50 text-rose-700";
   if (status === "late") return "bg-amber-50 text-amber-700";
-  if (status === "excused") return "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]";
+  if (status === "excused") return "bg-[var(--accent-soft)] text-[var(--primary)]";
   return "bg-emerald-50 text-emerald-700";
 }
 
@@ -800,56 +837,53 @@ function FilterBar({
   onAssign: () => void;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/40">
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow-sm)]">
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[280px] flex-1 xl:max-w-[520px]">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <Input placeholder={primaryPlaceholder} className="border-slate-200 bg-slate-50 pl-10 shadow-none focus:bg-white" />
+          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+          <Input placeholder={primaryPlaceholder} className="pl-10 shadow-none" />
         </div>
         {filters.map((filter) => (
-          <AppSelect key={filter} className="h-11 min-w-[150px] rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition hover:border-slate-300 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]">
+          <LmsSelect key={filter} className="h-11 min-w-[150px]">
             <option>{filter}</option>
-          </AppSelect>
+          </LmsSelect>
         ))}
         <Button variant="outline">Đặt lại</Button>
-        <Button className="ml-auto bg-[#06112f] hover:bg-[#111d42]" onClick={onAssign}>Giao bài</Button>
+        <Button className="ml-auto" onClick={onAssign}>Giao bài</Button>
       </div>
     </div>
   );
 }
 function TableHeader({ columns, labels }: { columns: string; labels: string[] }) {
   return (
-    <div className={cn("grid gap-3 border-b border-slate-200 bg-slate-50 px-4 py-4 text-xs font-semibold text-slate-500", columns)}>
+    <div className={cn("grid gap-3 border-b border-[var(--border)] bg-[var(--muted)]/70 px-4 py-4 text-xs font-semibold text-[var(--muted-foreground)]", columns)}>
       {labels.map((label) => <span key={label}>{label}</span>)}
     </div>
   );
 }
 
-function Metric({ detail, label, value }: { detail: string; label: string; value: string }) {
+const Metric = memo(function Metric({ detail, label, value }: { detail: string; label: string; value: string }) {
   return (
-    <article className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
-      <div className="text-xs font-semibold text-slate-400">{label}</div>
-      <div className="mt-3 text-xl font-semibold text-slate-950">{value}</div>
-      <div className="mt-2 text-sm text-slate-500">{detail}</div>
+    <article className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
+      <div className="text-xs font-semibold text-[var(--muted-foreground)]">{label}</div>
+      <div className="mt-3 text-xl font-semibold text-[var(--foreground)]">{value}</div>
+      <div className="mt-2 text-sm text-[var(--muted-foreground)]">{detail}</div>
     </article>
   );
-}
+});
 
 function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);
 }
 
-function OnlineTeacherAvatar({ avatarUrl, name }: { avatarUrl: string; name: string }) {
+const OnlineTeacherAvatar = memo(function OnlineTeacherAvatar({ avatarUrl, name }: { avatarUrl: string; name: string }) {
   return (
-    <Avatar size="lg" className="size-11 overflow-visible rounded-full bg-slate-950 shadow-sm ring-2 ring-white">
-      <AvatarImage src={avatarUrl} alt={name} />
-      <AvatarFallback className="bg-slate-800 text-xs font-semibold text-white">
-        {getInitials(name)}
-      </AvatarFallback>
-      <AvatarBadge className="size-3.5 border border-white bg-emerald-500 ring-2 ring-white" aria-label="Đang online" />
-    </Avatar>
+    <span className="relative grid size-11 place-items-center overflow-visible rounded-full bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-xs)] ring-2 ring-[var(--card)]">
+      {avatarUrl ? <img src={avatarUrl} alt={name} className="size-full rounded-full object-cover" /> : getInitials(name)}
+      <span className="absolute bottom-0 right-0 size-3.5 rounded-full border border-[var(--card)] bg-emerald-500 ring-2 ring-[var(--card)]" aria-label="Đang online" />
+    </span>
   );
-}
+});
 
 function getInitials(value: string) {
   return value

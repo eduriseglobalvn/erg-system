@@ -12,7 +12,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-[13px]", className)}
+        className={cn("w-full caption-bottom text-[13px] leading-5", className)}
         {...props}
       />
     </div>
@@ -44,8 +44,8 @@ function TableFooter({ className, ...props }: React.ComponentProps<"tfoot">) {
     <tfoot
       data-slot="table-footer"
       className={cn(
-        "border-t border-[#e0e4ea] bg-[#f6f8fb] font-medium [&>tr]:last:border-b-0",
-        className
+        "border-t border-[var(--border)] bg-[var(--muted)]/50 font-medium [&>tr]:last:border-b-0",
+        className,
       )}
       {...props}
     />
@@ -57,8 +57,8 @@ function TableRow({ className, ...props }: React.ComponentProps<"tr">) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b border-[#edf1f5] transition-colors hover:bg-[#f6f8fb] has-aria-expanded:bg-[#f6f8fb] data-[state=selected]:bg-[var(--erg-blue-light)]",
-        className
+        "border-b border-[var(--border)] transition-colors hover:bg-[var(--surface-hover)] data-[state=selected]:bg-[var(--accent-soft)]",
+        className,
       )}
       {...props}
     />
@@ -70,8 +70,9 @@ function TableHead({ className, ...props }: React.ComponentProps<"th">) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-9 bg-[#f6f8fb] px-2 text-left align-middle text-[11px] font-semibold tracking-normal whitespace-nowrap text-[#616161] [&:has([role=checkbox])]:pr-0",
-        className
+        "h-10 bg-[var(--muted)]/70 px-4 text-left align-middle text-[12px] font-semibold tracking-normal whitespace-nowrap text-[var(--muted-foreground)]",
+        "[&:has([role=checkbox])]:pr-0",
+        className,
       )}
       {...props}
     />
@@ -83,8 +84,9 @@ function TableCell({ className, ...props }: React.ComponentProps<"td">) {
     <td
       data-slot="table-cell"
       className={cn(
-        "h-9 px-2 py-1.5 align-middle whitespace-nowrap text-[#424242] [&:has([role=checkbox])]:pr-0",
-        className
+        "h-10 px-4 py-2 align-middle whitespace-nowrap text-[13px] font-medium text-[var(--foreground)]",
+        "[&:has([role=checkbox])]:pr-0",
+        className,
       )}
       {...props}
     />
@@ -98,7 +100,7 @@ function TableCaption({
   return (
     <caption
       data-slot="table-caption"
-      className={cn("mt-4 text-sm text-[#616161]", className)}
+      className={cn("mt-4 text-sm text-[var(--muted-foreground)]", className)}
       {...props}
     />
   )

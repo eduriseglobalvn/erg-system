@@ -18,6 +18,12 @@ type GroupModel = {
 
 type AppSelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "children" | "multiple" | "size"> & {
   children?: ReactNode;
+  /**
+   * When "native", renders a lightweight native <select> element instead of Radix Select.
+   * Use this for high-frequency renders (table cells, repeated filter bars).
+   * Defaults to "custom" (Radix Select).
+   */
+  variant?: "custom" | "native";
 };
 
 export function AppSelect({
@@ -29,6 +35,7 @@ export function AppSelect({
   onChange,
   style,
   value,
+  variant = "custom",
   ...props
 }: AppSelectProps) {
   const groups = useMemo(() => parseSelectChildren(children), [children]);
@@ -38,6 +45,35 @@ export function AppSelect({
   const selectedValue = value === undefined ? uncontrolledValue : normalizeValue(String(value));
   const isClassificationSelect = (props as Record<string, unknown>)["data-classification-select"] === "true" || (props as Record<string, unknown>)["data-classification-select"] === true;
   const triggerProps = pickTriggerProps(props);
+
+  // Lightweight native <select> path – no Radix runtime overhead
+  if (variant === "native") {
+    const nativeValue = value === undefined ? uncontrolledValue : String(value);
+    return (
+      <select
+        aria-label={ariaLabel}
+        disabled={disabled}
+        style={style}
+        value={nativeValue}
+        onChange={(event) => {
+          if (value === undefined) setUncontrolledValue(event.target.value);
+          onChange?.(event as unknown as ChangeEvent<HTMLSelectElement>);
+        }}
+        className={cn(
+          "erg-select-native h-10 min-w-[150px] rounded-lg text-sm font-medium",
+          isClassificationSelect && "erg-grade-pill min-w-0 justify-center px-5 text-center",
+          className,
+        )}
+        {...triggerProps}
+      >
+        {flatOptions.map((option) => (
+          <option key={option.value} value={option.value} disabled={option.disabled}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    );
+  }
 
   function handleValueChange(nextValue: string) {
     const nativeValue = denormalizeValue(nextValue);
@@ -52,7 +88,7 @@ export function AppSelect({
         hideIcon={isClassificationSelect}
         style={style}
         className={cn(
-          "h-10 min-w-[150px] rounded-lg border-[#d9e0ea] bg-white px-3 text-sm font-medium text-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:border-[#c3cad5]",
+          "h-10 min-w-[150px] rounded-[10px] border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] hover:border-[var(--muted-foreground)]/30",
           isClassificationSelect && "relative min-w-0 justify-center px-5 text-center shadow-none *:data-[slot=select-value]:w-full *:data-[slot=select-value]:justify-center",
           className,
         )}

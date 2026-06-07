@@ -10,12 +10,11 @@ import {
   type SortingState,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowDownAZ, ArrowUpAZ, ChevronLeft, ChevronRight, Columns3, Search } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, ChevronLeft, ChevronRight, Columns3 } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+import { LmsCheckbox, LmsSearchInput } from "@/components/ui/lms-kit";
 import {
   Table,
   TableBody,
@@ -45,9 +44,9 @@ type DataTableProps<TData, TValue> = {
 export function DataTable<TData, TValue>({
   columns,
   data,
-  emptyLabel = "Khong co du lieu.",
+  emptyLabel = "Không có dữ liệu.",
   className,
-  filterPlaceholder = "Tim kiem",
+  filterPlaceholder = "Tìm kiếm",
   getRowId,
   loading = false,
   pageSize = 10,
@@ -70,15 +69,15 @@ export function DataTable<TData, TValue>({
         enableResizing: false,
         enableSorting: false,
         header: ({ table }) => (
-          <Checkbox
-            aria-label="Chon tat ca"
+          <LmsCheckbox
+            aria-label="Chọn tất cả"
             checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
             onCheckedChange={(value) => table.toggleAllPageRowsSelected(Boolean(value))}
           />
         ),
         cell: ({ row }) => (
-          <Checkbox
-            aria-label="Chon dong"
+          <LmsCheckbox
+            aria-label="Chọn dòng"
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(Boolean(value))}
           />
@@ -136,16 +135,16 @@ export function DataTable<TData, TValue>({
   const renderedRows = virtualized ? virtualRows.map((virtualRow) => rows[virtualRow.index]).filter(Boolean) : rows;
   const virtualTotalSize = Math.max(rowVirtualizer.getTotalSize(), rows.length * 44);
   const visibleColumns = table.getAllLeafColumns().filter((column) => column.getCanHide());
+  const selectedRowCount = Object.values(rowSelection).filter(Boolean).length;
 
   return (
-    <div className={cn("overflow-hidden rounded-lg border border-[#e0e4ea] bg-white shadow-sm", className)}>
-      <div className="flex flex-wrap items-center gap-2 border-b border-slate-200 p-3">
+    <div className={cn("overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]", className)}>
+      <div className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-[var(--muted)]/40 p-3">
         {searchable ? (
-          <div className="relative min-w-56 flex-1">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <Input
+          <div className="min-w-56 flex-1">
+            <LmsSearchInput
               aria-label={filterPlaceholder}
-              className="h-9 pl-9"
+              className="h-9"
               placeholder={filterPlaceholder}
               value={globalFilter}
               onChange={(event) => {
@@ -159,12 +158,12 @@ export function DataTable<TData, TValue>({
           <details className="relative">
             <summary className="inline-flex h-9 cursor-pointer list-none items-center gap-2 rounded-md border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">
               <Columns3 className="h-4 w-4" />
-              Cot
+              Cột
             </summary>
-            <div className="absolute right-0 z-20 mt-2 grid min-w-44 gap-1 rounded-md border border-[#d1d1d1] bg-white p-2 shadow-sm">
+            <div className="absolute right-0 z-20 mt-2 grid min-w-44 gap-1 rounded-xl border border-[var(--border)] bg-[var(--card)] p-2 shadow-[var(--shadow-md)]">
               {visibleColumns.map((column) => (
                 <label key={column.id} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm font-medium hover:bg-slate-50">
-                  <Checkbox
+                  <LmsCheckbox
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
                   />
@@ -203,7 +202,7 @@ export function DataTable<TData, TValue>({
                         )}
                         {header.column.getCanResize() ? (
                           <button
-                            aria-label="Doi co cot"
+                            aria-label="Đổi cỡ cột"
                             className="h-6 w-1 cursor-col-resize rounded bg-slate-200 opacity-0 transition hover:opacity-100"
                             type="button"
                             onDoubleClick={() => header.column.resetSize()}
@@ -265,8 +264,8 @@ export function DataTable<TData, TValue>({
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-3 py-2 text-sm text-slate-600">
         <span>
-          {table.getFilteredRowModel().rows.length} dong
-          {selectable ? `, ${table.getSelectedRowModel().rows.length} da chon` : ""}
+          {table.getFilteredRowModel().rows.length} dòng
+          {selectable ? `, ${selectedRowCount} ?? ch?n` : ""}
         </span>
         <div className="flex items-center gap-2">
           <Button

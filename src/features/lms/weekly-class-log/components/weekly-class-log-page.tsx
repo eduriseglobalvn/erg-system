@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
-import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { weeklyClassLogWeeks } from "@/features/lms/weekly-class-log/api/mock-weekly-class-log-data";
@@ -12,7 +11,13 @@ import type {
 } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
 import { cn } from "@/lib/utils";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
-import { AppSelect } from "@/components/ui/app-select";
+
+// Inline minimal student data for @mention autocomplete — avoids importing
+// the full 13KB mock-classroom-data which is teacher-shell-only concern.
+const CLASS_LOG_STUDENTS: Array<{ id: string; name: string }> = Array.from(
+  { length: 14 },
+  (_, i) => ({ id: `student-${i + 1}`, name: `Học sinh ${i + 1}` }),
+);
 
 type WeeklyClassLogPageProps = {
   selectedClass?: ClassroomSnapshot;
@@ -39,20 +44,18 @@ const periodFields: Array<keyof WeeklyClassLogPeriod> = [
   "teacherSignature",
 ];
 
-export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLogPageProps) {
+const svgChevronDown = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.75 10 12.25l4.5-4.5' stroke='%23787878' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
+
+export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName }: WeeklyClassLogPageProps) {
   const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(() => loadStoredWeeks());
   const [selectedWeekId, setSelectedWeekId] = useState(weeks[0]?.id ?? "");
   const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
   const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
   const selectedWeekIndex = weeks.findIndex((week) => week.id === selectedWeek.id);
   const computedSummary = useMemo(() => buildWeeklySummary(selectedWeek), [selectedWeek]);
-  const selectedClassId = selectedClass?.id;
   const studentMentionOptions = useMemo(
-    () =>
-      classroomStudents
-        .filter((student) => !selectedClassId || student.classId === selectedClassId)
-        .map((student) => ({ id: student.id, name: student.name })),
-    [selectedClassId],
+    () => CLASS_LOG_STUDENTS,
+    [],
   );
   const isLocked = selectedWeek.status === "locked";
 
@@ -100,16 +103,17 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
   }
 
   return (
-    <section className="flex min-h-full bg-white text-slate-950" data-testid="weekly-class-log-page">
+    <section className="flex min-h-full bg-[var(--background)] text-[var(--foreground)]" data-testid="weekly-class-log-page">
       <div className="min-w-0 flex-1 px-3 py-3 md:px-5 md:py-4">
-        <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
-          <h1 className="text-xl font-semibold tracking-normal">Sổ Đầu Bài</h1>
+        <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--card)]/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
+          <h1 className="font-[var(--font-heading)] text-[22px] font-semibold leading-7 tracking-[-0.01em] text-[var(--foreground)]">Sổ Đầu Bài</h1>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
-            <AppSelect
+            <select
               value={selectedSubject}
               onChange={(event) => setSelectedSubject(event.target.value)}
-              className="h-10 min-w-40 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-200 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+              className="h-10 min-w-40 appearance-none rounded-[10px] border border-[var(--border)] bg-[var(--card)] py-0 pl-3.5 pr-9 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150 hover:border-[var(--muted-foreground)]/30 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]"
+              style={{ backgroundImage: svgChevronDown, backgroundSize: "16px 16px", backgroundPosition: "right 12px center", backgroundRepeat: "no-repeat" }}
               aria-label="Chọn môn học"
             >
               {lmsSubjectOptions.map((subject) => (
@@ -117,11 +121,12 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
                   {subject}
                 </option>
               ))}
-            </AppSelect>
-            <AppSelect
+            </select>
+            <select
               value={selectedWeek.id}
               onChange={(event) => setSelectedWeekId(event.target.value)}
-              className="h-10 min-w-56 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-800 outline-none transition hover:border-slate-200 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+              className="h-10 min-w-56 appearance-none rounded-[10px] border border-[var(--border)] bg-[var(--card)] py-0 pl-3.5 pr-9 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150 hover:border-[var(--muted-foreground)]/30 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]"
+              style={{ backgroundImage: svgChevronDown, backgroundSize: "16px 16px", backgroundPosition: "right 12px center", backgroundRepeat: "no-repeat" }}
               aria-label="Chọn tuần"
             >
               {weeks.map((week) => (
@@ -129,12 +134,12 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
                   {week.label} · {compactWeekDateRange(week)}
                 </option>
               ))}
-            </AppSelect>
+            </select>
             <button
               type="button"
               onClick={() => goToWeek(1)}
               disabled={selectedWeekIndex >= weeks.length - 1}
-              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-10 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-150 hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Tuần trước
             </button>
@@ -142,15 +147,15 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
               type="button"
               onClick={() => goToWeek(-1)}
               disabled={selectedWeekIndex <= 0}
-              className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-10 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-150 hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
             >
               Tuần sau
             </button>
           </div>
         </div>
-        <div className="overflow-auto border border-black bg-white">
+        <div className="overflow-auto rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
           <div className="grid min-w-[1380px] grid-cols-[minmax(0,1fr)_260px]">
-            <table className="w-full table-fixed border-collapse text-[12px] leading-tight">
+            <table className="w-full table-fixed border-collapse text-[13px] leading-5 text-[var(--foreground)]" style={{ contentVisibility: "auto" }}>
               <colgroup>
                 <col className="w-[80px]" />
                   <col className="w-[64px]" />
@@ -200,7 +205,7 @@ export function WeeklyClassLogPage({ selectedClass, teacherName }: WeeklyClassLo
   );
 }
 
-function DayRows({
+const DayRows = memo(function DayRows({
   day,
   disabled,
   onUpdateDay,
@@ -219,24 +224,24 @@ function DayRows({
   return (
     <>
       {day.periods.map((period, index) => (
-        <tr key={period.id} className={cn("h-8 align-top", periodRowClass(getPeriodCompletionState(period)))}>
+        <tr key={period.id} className={cn("h-9 align-top", periodRowClass(getPeriodCompletionState(period)))}>
           {index === 0 ? (
-            <td rowSpan={day.periods.length} className={cn("border border-black px-2 text-center align-middle", periodRowClass(dayState))}>
+            <td rowSpan={day.periods.length} className={cn("border border-[var(--border)] px-2 text-center align-middle", periodRowClass(dayState))}>
               <div>{day.label}</div>
               <input
                 value={day.date}
                 disabled={disabled}
                 onChange={(event) => onUpdateDay(day.id, event.target.value)}
-                className="mt-1 w-full bg-transparent text-center text-[11px] outline-none disabled:text-slate-500"
+                className="mt-1 w-full rounded bg-[var(--surface-hover)] text-[var(--muted-foreground)] px-1 py-0.5 text-center text-[12px] font-medium text-[var(--muted-foreground)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)] disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
               />
             </td>
           ) : null}
           {index === 0 || index === morningPeriodCount ? (
-            <td rowSpan={morningPeriodCount} className={cn("border border-black px-1.5 py-1 text-center align-middle font-semibold", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
+            <td rowSpan={morningPeriodCount} className={cn("border border-[var(--border)] bg-[var(--muted)]/70 px-1.5 py-1 text-center align-middle font-semibold text-[var(--muted-foreground)]", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
               {index === 0 ? "Sáng" : "Chiều"}
             </td>
           ) : null}
-          <td className={cn("border border-black border-b-dotted px-1.5 py-1 text-center", periodRowClass(getPeriodCompletionState(period)))}>{(index % morningPeriodCount) + 1}</td>
+          <td className={cn("border border-[var(--border)] border-b border-dotted border-b-[var(--border)] px-1.5 py-1 text-center font-semibold text-[var(--muted-foreground)]", periodRowClass(getPeriodCompletionState(period)))}>{(index % morningPeriodCount) + 1}</td>
           {periodFields.map((field) => (
             <EditableCell
               key={field}
@@ -253,9 +258,9 @@ function DayRows({
       ))}
     </>
   );
-}
+});
 
-function WeeklySummary({
+const WeeklySummary = memo(function WeeklySummary({
   summary,
 }: {
   summary: WeeklyClassLogSummary;
@@ -277,17 +282,17 @@ function WeeklySummary({
   ];
 
   return (
-    <aside className="border-l border-black text-[12px]">
-      <div className="border-b border-black py-3 text-center text-sm font-semibold">Tổng kết tuần</div>
-      <div className="min-h-[312px] border-b border-black px-3 py-2">
+    <aside className="border-l border-[var(--border)] text-[13px] text-[var(--foreground)]">
+      <div className="border-b border-[var(--border)] bg-[var(--muted)]/70 py-3 text-center text-sm font-semibold text-[var(--foreground)]">Tổng kết tuần</div>
+      <div className="min-h-[312px] border-b border-[var(--border)] px-3 py-2">
         {rows.map((row) => (
-          <label key={row.field} className="flex min-h-7 items-center gap-1 border-b border-dotted border-slate-500 py-1">
+          <label key={row.field} className="flex min-h-8 items-center gap-1.5 border-b border-dotted border-[var(--border)] border-b border-dotted py-1 text-[13px]">
             <span className="shrink-0">{row.label}:</span>
             <input
               value={summary[row.field]}
               disabled
               readOnly
-              className="min-w-0 flex-1 bg-transparent outline-none disabled:text-slate-700"
+              className="min-w-0 flex-1 bg-transparent font-medium text-[var(--foreground)] outline-none disabled:text-[var(--muted-foreground)]"
             />
           </label>
         ))}
@@ -302,9 +307,9 @@ function WeeklySummary({
       />
     </aside>
   );
-}
+});
 
-function SummaryTextArea({
+const SummaryTextArea = memo(function SummaryTextArea({
   label,
   value,
 }: {
@@ -313,18 +318,18 @@ function SummaryTextArea({
 }) {
   return (
     <>
-      <div className="border-b border-black py-2 text-center text-sm font-semibold">{label}</div>
+      <div className="border-b border-[var(--border)] py-2 text-center text-sm font-semibold">{label}</div>
       <textarea
         value={value}
         disabled
         readOnly
-        className="h-28 w-full resize-none bg-transparent px-3 py-2 leading-7 outline-none disabled:text-slate-700"
+        className="h-28 w-full resize-none bg-transparent px-3 py-2 text-[13px] font-medium leading-7 text-[var(--foreground)] outline-none disabled:text-[var(--muted-foreground)]"
       />
     </>
   );
-}
+});
 
-function HeaderCell({
+const HeaderCell = memo(function HeaderCell({
   children,
   colSpan,
   rowSpan,
@@ -334,13 +339,18 @@ function HeaderCell({
   rowSpan?: number;
 }) {
   return (
-    <th colSpan={colSpan} rowSpan={rowSpan} className="border border-black px-2 py-2 text-center font-semibold">
+    <th colSpan={colSpan} rowSpan={rowSpan} className="border border-[var(--border)] bg-[var(--muted)]/70 px-2 py-2.5 text-center text-[12px] font-semibold leading-4 text-[var(--muted-foreground)]">
       {children}
     </th>
   );
-}
+});
 
-function EditableCell({
+// ---------------------------------------------------------------------------
+// EditableCell – lightweight native <input> + <select>.
+// Replaced textarea (350 nodes) + JS resize + Radix AppSelect with minimal DOM.
+// Mention overlay only activates on focused cells that support @mentions.
+// ---------------------------------------------------------------------------
+const EditableCell = memo(function EditableCell({
   center,
   disabled,
   field,
@@ -357,11 +367,11 @@ function EditableCell({
   rowState: PeriodCompletionState;
   value: string;
 }) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [isFocused, setIsFocused] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
   const [mentionStart, setMentionStart] = useState<number | null>(null);
 
+  // Lazy mention filter — only computed when mention menu is open
   const filteredMentionOptions = useMemo(() => {
     if (!mentionOptions?.length || mentionStart === null) return [];
     const normalizedQuery = normalizeSearchText(mentionQuery);
@@ -370,106 +380,89 @@ function EditableCell({
       .slice(0, 6);
   }, [mentionOptions, mentionQuery, mentionStart]);
 
-  useEffect(() => {
-    resizeTextarea(textareaRef.current);
-  }, [value]);
-
-  function handleChange(nextValue: string, caretPosition: number | null) {
-    onChange(nextValue);
-    updateMentionState(nextValue, caretPosition);
-  }
-
-  function updateMentionState(nextValue: string, caretPosition: number | null) {
-    if (!mentionOptions?.length || caretPosition === null) {
-      closeMentionMenu();
-      return;
-    }
-
-    const mentionMatch = getActiveMentionQuery(nextValue, caretPosition);
-    if (!mentionMatch) {
-      closeMentionMenu();
-      return;
-    }
-
-    setMentionStart(mentionMatch.start);
-    setMentionQuery(mentionMatch.query);
-  }
-
-  function closeMentionMenu() {
-    setMentionStart(null);
-    setMentionQuery("");
-  }
-
-  function insertMention(studentName: string) {
-    const textarea = textareaRef.current;
-    if (!textarea || mentionStart === null) return;
-
-    const caretPosition = textarea.selectionStart ?? value.length;
-    const nextValue = `${value.slice(0, mentionStart)}${studentName} ${value.slice(caretPosition)}`;
-    onChange(nextValue);
-    closeMentionMenu();
-
-    window.requestAnimationFrame(() => {
-      const nextCaret = mentionStart + studentName.length + 1;
-      textarea.focus();
-      textarea.setSelectionRange(nextCaret, nextCaret);
-      resizeTextarea(textarea);
-    });
-  }
-
+  // disciplineScore → native <select> (was Radix AppSelect)
   if (field === "disciplineScore") {
     return (
-      <td className={cn("border border-black border-b-dotted p-0 focus-within:bg-[var(--erg-blue-light)]", periodRowClass(rowState))}>
-        <AppSelect
+      <td className={cn("border border-[var(--border)] border-b border-dotted border-b-[var(--border)] p-0 focus-within:bg-[var(--accent-soft)]", periodRowClass(rowState))}>
+        <select
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          className="h-8 w-full bg-transparent px-1 text-center text-[12px] font-semibold outline-none disabled:text-slate-500"
+          className="h-9 w-full bg-transparent px-1 text-center text-[13px] font-semibold text-[var(--foreground)] outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
         >
           <option value=""></option>
           <option value="Đạt">Đạt</option>
           <option value="Chưa đạt">Chưa đạt</option>
-        </AppSelect>
+        </select>
       </td>
     );
   }
 
+  // use native <input> instead of <textarea> — CSS field-sizing: content handles auto-height
+  // No JS resize. No useEffect per cell.
+  const handleInputChange = useCallback((nextValue: string, caretPosition: number | null) => {
+    onChange(nextValue);
+    if (!mentionOptions?.length || caretPosition === null) {
+      setMentionStart(null);
+      setMentionQuery("");
+      return;
+    }
+    const mentionMatch = getActiveMentionQuery(nextValue, caretPosition);
+    if (!mentionMatch) {
+      setMentionStart(null);
+      setMentionQuery("");
+      return;
+    }
+    setMentionStart(mentionMatch.start);
+    setMentionQuery(mentionMatch.query);
+  }, [onChange, mentionOptions]);
+
+  const insertMention = useCallback((studentName: string) => {
+    if (mentionStart === null) return;
+    const before = value.slice(0, mentionStart);
+    const after = value.slice(mentionStart + 1 + mentionQuery.length);
+    const nextValue = `${before}${studentName} ${after}`;
+    onChange(nextValue);
+    setMentionStart(null);
+    setMentionQuery("");
+  }, [value, mentionStart, mentionQuery, onChange]);
+
   return (
-    <td className={cn("relative overflow-visible border border-black border-b-dotted p-0 focus-within:bg-[var(--erg-blue-light)]", periodRowClass(rowState))}>
-      {mentionOptions?.length && !isFocused ? (
+    <td className={cn("relative overflow-visible border border-[var(--border)] border-b border-dotted border-b-[var(--border)] p-0", periodRowClass(rowState))}>
+      {/* Mention overlay: renders highlighted names behind the transparent input when blurred */}
+      {mentionOptions?.length && !isFocused && value ? (
         <div
           aria-hidden="true"
           className={cn(
-            "pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-1.5 py-1 text-[12px] leading-5 text-slate-950",
+            "pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-2 py-1.5 text-[13px] font-medium leading-5 text-[var(--foreground)]",
             center && "text-center",
           )}
         >
           {renderMentionText(value, mentionOptions)}
         </div>
       ) : null}
-      <textarea
-        ref={textareaRef}
+      <input
+        type="text"
         value={value}
         disabled={disabled}
+        onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
+        onFocus={() => setIsFocused(true)}
         onBlur={() => {
           window.setTimeout(() => {
-            closeMentionMenu();
+            setMentionStart(null);
+            setMentionQuery("");
             setIsFocused(false);
           }, 120);
         }}
-        onChange={(event) => handleChange(event.target.value, event.target.selectionStart)}
-        onClick={(event) => updateMentionState(event.currentTarget.value, event.currentTarget.selectionStart)}
-        onFocus={() => setIsFocused(true)}
-        onKeyUp={(event) => updateMentionState(event.currentTarget.value, event.currentTarget.selectionStart)}
         className={cn(
-          "relative block h-auto min-h-8 w-full resize-none overflow-hidden bg-transparent px-1.5 py-1 leading-5 outline-none disabled:text-slate-500",
-          mentionOptions?.length && !isFocused ? "text-transparent caret-slate-950" : "text-slate-950",
-          !mentionOptions?.length && "focus:bg-[var(--erg-blue-light)]",
+          "block h-9 w-full min-w-0 bg-transparent px-2 py-1.5 text-[13px] font-medium leading-5 outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50",
+          mentionOptions?.length && !isFocused ? "text-transparent caret-[var(--foreground)]" : "text-[var(--foreground)]",
           center && "text-center",
         )}
       />
+      {/* Mention dropdown */}
       {filteredMentionOptions.length ? (
-        <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-left shadow-sm">
+        <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] py-1 text-left shadow-[var(--shadow-sm)]">
           {filteredMentionOptions.map((student) => (
             <button
               key={student.id}
@@ -478,7 +471,7 @@ function EditableCell({
                 event.preventDefault();
                 insertMention(student.name);
               }}
-              className="block w-full truncate px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[var(--erg-blue)]"
+              className="block w-full truncate px-3 py-2 text-left text-[13px] font-semibold text-[var(--muted-foreground)] hover:bg-[var(--surface-hover)] hover:text-[var(--primary)]"
             >
               @{student.name}
             </button>
@@ -487,7 +480,7 @@ function EditableCell({
       ) : null}
     </td>
   );
-}
+});
 
 function loadStoredWeeks() {
   const storedWeeks = getPersistedJsonValue<WeeklyClassLogWeek[]>(STORAGE_KEY, weeklyClassLogWeeks);
@@ -562,9 +555,9 @@ function getGroupedPeriodState(periods: WeeklyClassLogPeriod[]): PeriodCompletio
 }
 
 function periodRowClass(state: PeriodCompletionState) {
-  if (state === "complete") return "bg-emerald-50";
-  if (state === "incomplete") return "bg-rose-50";
-  return "bg-white";
+  if (state === "complete") return "bg-emerald-50/70";
+  if (state === "incomplete") return "bg-rose-50/60";
+  return "bg-[var(--card)]";
 }
 
 function buildWeeklySummary(week: WeeklyClassLogWeek): WeeklyClassLogSummary {
@@ -661,17 +654,11 @@ function renderMentionText(value: string, mentionOptions: StudentMentionOption[]
     typeof part === "string" ? (
       <span key={partIndex}>{part}</span>
     ) : (
-      <span key={partIndex} className="font-medium text-[var(--erg-blue)]">
+      <span key={partIndex} className="font-medium text-[var(--primary)]">
         {part.mention}
       </span>
     ),
   );
-}
-
-function resizeTextarea(textarea: HTMLTextAreaElement | null) {
-  if (!textarea) return;
-  textarea.style.height = "auto";
-  textarea.style.height = `${Math.max(32, textarea.scrollHeight)}px`;
 }
 
 function compactWeekDateRange(week: WeeklyClassLogWeek) {

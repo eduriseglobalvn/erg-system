@@ -46,6 +46,34 @@ export default defineConfig({
     },
     dedupe: ["react", "react-dom"],
   },
+  build: {
+    target: "esnext",
+    modulePreload: {
+      resolveDependencies(_filename, deps, context) {
+        if (context.hostType !== "html") return deps;
+        return deps.filter(
+          (dep) =>
+            !/^(assets\/)?(pdfjs|pdf\.worker|fullcalendar|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
+        );
+      },
+    },
+    reportCompressedSize: true,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@fullcalendar")) return "fullcalendar";
+            if (id.includes("pdfjs-dist")) return "pdfjs";
+            if (id.includes("@tanstack/react-virtual")) return "virtual";
+            if (id.includes("@tanstack")) return "tanstack";
+            if (id.includes("radix-ui")) return "radix";
+            if (id.includes("@dnd-kit")) return "dnd";
+            if (id.includes("lucide-react")) return "icons";
+          }
+        },
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     exclude: ["**/node_modules/**", "**/dist/**", "**/.codex-chrome-*/**"],
