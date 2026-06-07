@@ -14,10 +14,13 @@ import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted
 
 // Inline minimal student data for @mention autocomplete — avoids importing
 // the full 13KB mock-classroom-data which is teacher-shell-only concern.
-const CLASS_LOG_STUDENTS: Array<{ id: string; name: string }> = Array.from(
-  { length: 14 },
-  (_, i) => ({ id: `student-${i + 1}`, name: `Học sinh ${i + 1}` }),
-);
+const CLASS_LOG_STUDENTS: Array<{ id: string; name: string }> = [
+  { id: "student-1", name: "Võ Ngọc Linh" },
+  ...Array.from(
+    { length: 13 },
+    (_, i) => ({ id: `student-${i + 2}`, name: `Học sinh ${i + 2}` }),
+  ),
+];
 
 type WeeklyClassLogPageProps = {
   selectedClass?: ClassroomSnapshot;
