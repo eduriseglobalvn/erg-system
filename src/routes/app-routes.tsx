@@ -16,6 +16,7 @@ import {
   LCMS_PORTAL_HOST,
   LCMS_PORTAL_HOSTS,
   LMS_PORTAL_HOST,
+  LMS_PORTAL_HOSTS,
   shouldRedirectLocalPortal,
 } from "@/config/portal-urls";
 import { shouldUseHashRouter } from "@/lib/platform";
@@ -137,7 +138,7 @@ function AppRoutesContent() {
   const isRoot = path === "";
   const isLcmsPortal = isLcmsPortalHost();
   const isCrmPortal = isPortalHost(CRM_PORTAL_HOSTS);
-  const isLmsPortal = isPortalHost(LMS_PORTAL_HOST);
+  const isLmsPortal = isPortalHost(LMS_PORTAL_HOSTS);
   const isElearningPortal = isPortalHost(ELEARNING_PORTAL_HOSTS);
 
   let element: ReactNode;

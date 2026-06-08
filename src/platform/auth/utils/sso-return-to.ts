@@ -1,19 +1,17 @@
 import {
-  CRM_PORTAL_HOST,
-  ELEARNING_PORTAL_HOST,
-  ELEARNING_VUONG_PORTAL_HOST,
-  LCMS_PORTAL_HOST,
-  LMS_PORTAL_HOST,
+  CRM_PORTAL_HOSTS,
+  ELEARNING_PORTAL_HOSTS,
+  LCMS_PORTAL_HOSTS,
+  LMS_PORTAL_HOSTS,
 } from "@/config/portal-urls";
 
 const LOGIN_PATH = "/login";
 const LOCALHOSTS = new Set(["localhost", "127.0.0.1"]);
 const ALLOWED_PORTAL_HOSTS = new Set([
-  CRM_PORTAL_HOST,
-  ELEARNING_PORTAL_HOST,
-  ELEARNING_VUONG_PORTAL_HOST,
-  LCMS_PORTAL_HOST,
-  LMS_PORTAL_HOST,
+  ...CRM_PORTAL_HOSTS,
+  ...ELEARNING_PORTAL_HOSTS,
+  ...LCMS_PORTAL_HOSTS,
+  ...LMS_PORTAL_HOSTS,
 ].map((host) => host.toLowerCase()));
 
 export function normalizeSsoReturnTo(rawReturnTo: string) {
