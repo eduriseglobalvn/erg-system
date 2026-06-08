@@ -46,6 +46,8 @@ type LoginInput = {
 const ACCOUNTS_KEY = "erg-learning.accounts";
 export const AUTH_ACCOUNT_CHANGED_EVENT = "erg-auth-account-changed";
 const defaultAccounts: TeacherAccount[] = [];
+const MOCK_ADMIN_ACCOUNT_ID = "mock-admin-account";
+const MOCK_ADMIN_EMAIL = "admin@erg.edu.vn";
 
 function canUseStorage() {
   return typeof window !== "undefined";
@@ -336,6 +338,45 @@ export function loginWithPassword(input: LoginInput) {
     rememberMe: input.rememberMe,
     loggedInAt: new Date().toISOString(),
     portal: "lms",
+  });
+  notifyAuthAccountChanged();
+
+  return nextAccount;
+}
+
+export function loginWithMockAdmin({
+  portal = "lms",
+  rememberMe,
+}: {
+  portal?: StoredAuthSession["portal"];
+  rememberMe: boolean;
+}) {
+  const now = new Date();
+  const nextAccount = saveAccount({
+    id: MOCK_ADMIN_ACCOUNT_ID,
+    fullName: "Admin ERG",
+    email: MOCK_ADMIN_EMAIL,
+    password: "",
+    role: "admin",
+    provider: "password",
+    department: "ERG",
+    title: "Quản trị viên",
+    features: ["LMS", "LCMS", "CRM", "Elearning", "Quản trị hệ thống"],
+    isProfileCompleted: true,
+    status: "active",
+    createdAt: now.toISOString(),
+    lastLoginAt: now.toISOString(),
+  });
+
+  writeSession({
+    accountId: nextAccount.id,
+    rememberMe,
+    loggedInAt: now.toISOString(),
+    accessToken: "mock-admin-fe-access-token",
+    expiresAt: new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString(),
+    portal: portal === "elearning" ? "lms" : portal,
+    portals: ["*"],
+    permissions: ["*"],
   });
   notifyAuthAccountChanged();
 
