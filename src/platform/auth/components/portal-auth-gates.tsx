@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "@/routes/router-compat";
+import { useForm } from "@tanstack/react-form";
 import {
   BarChart3,
   BookOpenCheck,
@@ -28,6 +29,7 @@ import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApiClientError } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 
 type PortalKey = NonNullable<StoredAuthSession["portal"]>;
 type AuthSession = ReturnType<typeof useAuthSession>;
@@ -80,10 +82,13 @@ export function PortalAuthGate({ children, portal }: PortalAuthGateProps) {
   const location = useLocation();
   const redirect = buildRedirectPath(location.pathname, location.search, location.hash);
   const studentSession = getCurrentStudentSession();
-  const teacherSession = readStoredAuthSession(portal);
+  const teacherAccount = portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
+  const teacherSession = portal === "elearning"
+    ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
+    : readStoredAuthSession(portal);
 
-  if (canAccessPortal({ portal, studentSession, teacherAccount: auth.account, teacherSession })) {
-    if (needsOnboarding(auth.account)) {
+  if (canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })) {
+    if (needsOnboarding(teacherAccount)) {
       return (
         <PortalLoginShell copy={getPortalLoginCopy(portal)}>
           <NoticeBanner notice={auth.notice} />
@@ -95,8 +100,8 @@ export function PortalAuthGate({ children, portal }: PortalAuthGateProps) {
     return <>{children}</>;
   }
 
-  if (auth.account) {
-    return <Navigate replace to={accessDeniedPath(portal, auth.account.email, redirect)} />;
+  if (teacherAccount) {
+    return <Navigate replace to={accessDeniedPath(portal, teacherAccount.email, redirect)} />;
   }
 
   return <Navigate replace to={`/login?redirect=${encodeURIComponent(redirect)}`} />;
@@ -129,9 +134,12 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     description: description ?? copy.description,
   };
   const studentSession = getCurrentStudentSession();
-  const teacherSession = readStoredAuthSession(portal);
+  const teacherAccount = portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
+  const teacherSession = portal === "elearning"
+    ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
+    : readStoredAuthSession(portal);
 
-  if (canAccessPortal({ portal, studentSession, teacherAccount: auth.account, teacherSession })) {
+  if (canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })) {
     return <Navigate replace to={redirect} />;
   }
   if (portal !== "elearning" && auth.account && isAuthOnlyRedirect(portal, redirect)) {
@@ -327,6 +335,10 @@ function sanitizeRedirect(value: string | null, fallback = "/") {
   return value;
 }
 
+function validateRequired(value: string, label: string) {
+  return value.trim() ? undefined : `${label} là bắt buộc.`;
+}
+
 function defaultPortalRedirect(portal: PortalKey) {
   if (portal === "lcms") return "/resources";
   if (portal === "admin" || portal === "crm") return "/";
@@ -461,11 +473,11 @@ function PortalLoginShell({ children, copy }: { children: ReactNode; copy: Porta
 
   return (
     <main
-      className="grid min-h-svh place-items-center overflow-hidden bg-[linear-gradient(135deg,#f7fbff_0%,#eef4ff_52%,#fff8f8_100%)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8"
+      className="grid min-h-svh place-items-center overflow-hidden bg-[var(--erg-bg)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8"
       style={{ paddingBottom: isMobile ? 24 : undefined, paddingTop: isMobile ? 24 : undefined }}
     >
       <section
-        className="grid w-full max-w-[1060px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_30px_100px_-55px_rgba(15,23,42,0.55)] lg:grid-cols-[minmax(0,1fr)_minmax(360px,430px)]"
+        className="grid w-full max-w-[1060px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(360px,430px)]"
         style={{
           display: "grid",
           gridTemplateColumns: isMobile ? "minmax(0,1fr)" : undefined,
@@ -474,46 +486,44 @@ function PortalLoginShell({ children, copy }: { children: ReactNode; copy: Porta
         }}
       >
         {!isMobile ? (
-        <aside className="relative hidden min-h-[620px] overflow-hidden bg-[linear-gradient(155deg,var(--erg-blue)_0%,#2435a7_52%,#a3134f_130%)] p-8 text-white lg:block">
-          <div className="absolute left-10 top-16 h-28 w-28 rounded-full bg-white/10 blur-2xl" />
-          <div className="absolute bottom-10 right-8 h-36 w-36 rounded-full bg-red-300/20 blur-3xl" />
+        <aside className="relative hidden min-h-[620px] overflow-hidden bg-[var(--erg-blue)] p-8 text-white lg:block">
           <div className="relative z-10 flex h-full flex-col">
             <img alt="ERG" className="h-12 w-fit rounded-lg bg-white px-3 py-2 object-contain" src={ERG_ASSETS.logo} />
 
-            <div className="mt-8 inline-flex w-fit rounded-full border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white/85">
+            <div className="mt-8 inline-flex w-fit rounded-md border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-semibold text-white/85">
               {copy.badge}
             </div>
-            <h1 className="mt-5 max-w-xl text-4xl font-black leading-tight tracking-tight text-white">
+            <h1 className="mt-5 max-w-xl text-xl font-semibold leading-tight text-white">
               {copy.title}
             </h1>
-            <p className="mt-4 max-w-lg text-base leading-7 text-white/78">{copy.description}</p>
+            <p className="mt-3 max-w-lg text-sm leading-6 text-white/78">{copy.description}</p>
 
             <div className="mt-8 grid gap-4 sm:grid-cols-3">
               {copy.trustItems.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <div key={item.label} className="rounded-xl border border-white/12 bg-white/10 px-4 py-4 shadow-[0_18px_38px_-30px_rgba(0,0,0,0.5)] backdrop-blur">
+                  <div key={item.label} className="rounded-lg border border-white/12 bg-white/10 px-4 py-4 shadow-sm backdrop-blur">
                     <Icon className="h-5 w-5 text-white" />
-                    <p className="mt-3 text-xs font-black text-white">{item.label}</p>
+                    <p className="mt-3 text-xs font-semibold text-white">{item.label}</p>
                     <p className="mt-1 text-[11px] font-semibold text-white/58">{item.caption}</p>
                   </div>
                 );
               })}
             </div>
 
-            <div className="mt-7 rounded-2xl border border-white/12 bg-white/12 p-5 shadow-[0_24px_60px_-36px_rgba(0,0,0,0.55)] backdrop-blur">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/50">{copy.visualKicker}</p>
-              <h2 className="mt-3 max-w-md text-2xl font-black leading-tight text-white">{copy.visualTitle}</h2>
+            <div className="mt-7 rounded-lg border border-white/12 bg-white/12 p-5 shadow-sm backdrop-blur">
+              <p className="text-[11px] font-semibold text-white/50">{copy.visualKicker}</p>
+              <h2 className="mt-3 max-w-md text-lg font-semibold leading-tight text-white">{copy.visualTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-white/68">{copy.visualDescription}</p>
 
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
                 {copy.metrics.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <div key={item.label} className="rounded-xl bg-white px-4 py-3 text-slate-950">
-                      <Icon className="h-4 w-4 text-[var(--erg-red)]" />
-                      <p className="mt-3 text-xl font-black">{item.value}</p>
-                      <p className="mt-1 text-xs font-bold text-slate-500">{item.label}</p>
+                    <div key={item.label} className="rounded-lg bg-white px-4 py-3 text-slate-950">
+                      <Icon className="h-4 w-4 text-[var(--erg-blue)]" />
+                      <p className="mt-3 text-lg font-semibold">{item.value}</p>
+                      <p className="mt-1 text-xs font-semibold text-slate-500">{item.label}</p>
                     </div>
                   );
                 })}
@@ -534,8 +544,8 @@ function PortalLoginShell({ children, copy }: { children: ReactNode; copy: Porta
             >
               <img alt="ERG" className="h-11 w-auto object-contain" src={ERG_ASSETS.logo} style={{ height: 42, width: "auto", objectFit: "contain" }} />
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--erg-blue)]" style={{ color: "var(--erg-blue)", fontSize: 10, fontWeight: 900, letterSpacing: "0.2em", textTransform: "uppercase" }}>{copy.badge}</p>
-                <p className="text-sm font-bold text-slate-500" style={{ color: "#64748b", fontSize: 14, fontWeight: 700, marginTop: 4 }}>{copy.mobileLabel}</p>
+                <p className="text-[10px] font-semibold text-[var(--erg-blue)]" style={{ color: "var(--erg-blue)", fontSize: 10, fontWeight: 600, letterSpacing: 0, textTransform: "none" }}>{copy.badge}</p>
+                <p className="text-sm font-semibold text-slate-500" style={{ color: "#64748b", fontSize: 14, fontWeight: 600, marginTop: 4 }}>{copy.mobileLabel}</p>
               </div>
             </div>
             {children}
@@ -552,12 +562,12 @@ function NoticeBanner({ notice }: { notice: AuthSession["notice"] }) {
   return (
     <div
       className={cn(
-        "mb-4 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm",
+        "mb-4 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
         notice.tone === "success"
           ? "border-emerald-200 bg-emerald-50 text-emerald-700"
           : notice.tone === "error"
             ? "border-rose-200 bg-rose-50 text-rose-700"
-            : "border-blue-200 bg-blue-50 text-blue-700",
+            : "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
       )}
     >
       {notice.message}
@@ -566,63 +576,105 @@ function NoticeBanner({ notice }: { notice: AuthSession["notice"] }) {
 }
 
 function OnboardingPanel({ auth }: { auth: AuthSession }) {
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    void safely(auth, () => auth.actions.saveProfile());
-  }
+  const form = useForm({
+    defaultValues: auth.profileForm,
+    onSubmit: () => {
+      void safely(auth, () => auth.actions.saveProfile());
+    },
+  });
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="inline-flex rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-semibold text-[var(--erg-blue)]">
         Onboarding
       </div>
-      <h2 className="mt-4 text-2xl font-black tracking-tight text-slate-950">Hoàn tất hồ sơ trước khi vào LMS</h2>
+      <h2 className="mt-4 text-lg font-semibold text-[#242424]">Hoàn tất hồ sơ trước khi vào LMS</h2>
       <p className="mt-2 text-sm leading-7 text-slate-500">
         Lần đầu đăng nhập cần có họ tên và số điện thoại để admin ERG quản lý phân quyền, hỗ trợ tài khoản và đối soát lớp học.
       </p>
 
-      <form className="mt-6 space-y-4" onSubmit={submit}>
-        <label className="grid gap-2 text-sm font-bold text-slate-700">
-          Họ và tên
-          <input
-            className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
-            required
-            value={auth.profileForm.fullName}
-            onChange={(event) => auth.setProfileForm({ ...auth.profileForm, fullName: event.target.value })}
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-bold text-slate-700">
-          Số điện thoại
-          <input
-            className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
-            inputMode="tel"
-            required
-            value={auth.profileForm.phone}
-            onChange={(event) => auth.setProfileForm({ ...auth.profileForm, phone: event.target.value })}
-          />
-        </label>
-        <label className="grid gap-2 text-sm font-bold text-slate-700">
+      <TsForm
+        className="mt-6 space-y-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
+        <form.Field
+          name="fullName"
+          validators={{
+            onChange: ({ value }) => validateRequired(value, "Họ và tên"),
+          }}
+        >
+          {(field) => (
+            <label className="grid gap-2 text-sm font-medium text-slate-700">
+              Họ và tên
+              <input
+                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                  auth.setProfileForm({ ...auth.profileForm, fullName: event.target.value });
+                }}
+                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </label>
+          )}
+        </form.Field>
+        <form.Field
+          name="phone"
+          validators={{
+            onChange: ({ value }) => validateRequired(value, "Số điện thoại"),
+          }}
+        >
+          {(field) => (
+            <label className="grid gap-2 text-sm font-medium text-slate-700">
+              Số điện thoại
+              <input
+                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                inputMode="tel"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => {
+                  field.handleChange(event.target.value);
+                  auth.setProfileForm({ ...auth.profileForm, phone: event.target.value });
+                }}
+                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+              />
+              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
+            </label>
+          )}
+        </form.Field>
+        <label className="grid gap-2 text-sm font-medium text-slate-700">
           Chức danh
           <input
-            className="h-12 rounded-xl border border-slate-200 bg-white px-4 text-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-50"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             value={auth.profileForm.title}
             onChange={(event) => auth.setProfileForm({ ...auth.profileForm, title: event.target.value })}
           />
         </label>
-        <button
-          className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-slate-950 px-5 text-sm font-black text-white transition hover:bg-slate-800"
-          type="submit"
-        >
-          Lưu và tiếp tục
-        </button>
-      </form>
+        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+          {([canSubmit, isSubmitting]) => (
+            <button
+              className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={!canSubmit || isSubmitting}
+              type="submit"
+            >
+              Lưu và tiếp tục
+            </button>
+          )}
+        </form.Subscribe>
+      </TsForm>
     </div>
   );
 }
 
 export function NoPermissionNotice({ accountEmail, portal }: { accountEmail: string; portal: PortalKey }) {
   return (
-    <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
+    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
       Tài khoản {accountEmail} chưa có quyền truy cập {portal}. Vui lòng đăng nhập bằng tài khoản được cấp quyền.
     </div>
   );

@@ -59,7 +59,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden rounded-2xl border border-border bg-popover p-6 text-popover-foreground shadow-lg",
+          "fixed left-1/2 top-1/2 z-50 grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-hidden rounded-lg border border-[#cbd7e6] bg-white p-5 font-[var(--font-app)] text-[var(--foreground)] shadow-[0_20px_48px_rgba(15,23,42,0.18),0_2px_8px_rgba(15,23,42,0.08)]",
           className
         )}
         {...props}
@@ -109,7 +109,7 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold tracking-[-0.02em] text-foreground", className)}
+      className={cn("text-base font-semibold text-[var(--foreground)]", className)}
       {...props}
     />
   )
@@ -122,7 +122,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm leading-6 text-muted-foreground", className)}
+      className={cn("text-sm leading-5 text-[var(--muted-foreground)]", className)}
       {...props}
     />
   )

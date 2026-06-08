@@ -2,7 +2,8 @@ import { type ReactNode } from "react";
 import { CheckCircle2, Search } from "lucide-react";
 
 import { Card, CardContent, Input, inputClassName } from "@/components/ui/dashboard-kit";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function StatusSelectField({
   value,
@@ -15,11 +16,11 @@ export function StatusSelectField({
 }) {
   return (
     <Field label="Trạng thái">
-      <select value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
+      <AppSelect value={value} onChange={(event) => onChange(event.target.value)} className={inputClassName}>
         <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
         <option value="draft">Bản nháp</option>
         <option value="hidden">Đã ẩn</option>
-      </select>
+      </AppSelect>
     </Field>
   );
 }
@@ -94,7 +95,7 @@ export function SearchInput({ value, onChange, placeholder }: { value: string; o
 
 export function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white px-4 py-3">
+    <div className="flex items-center justify-between rounded-lg border border-[#e0e4ea] bg-white px-4 py-3">
       <span className="text-sm text-slate-500">{label}</span>
       <span className="font-semibold text-slate-950">{value}</span>
     </div>
@@ -104,7 +105,7 @@ export function InfoRow({ label, value }: { label: string; value: string }) {
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="space-y-2">
-      <span className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{label}</span>
+      <span className="text-xs font-semibold text-slate-500">{label}</span>
       {children}
     </label>
   );
@@ -112,7 +113,7 @@ export function Field({ label, children }: { label: string; children: ReactNode 
 
 export function ChecklistItem({ label }: { label: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+    <div className="flex items-center gap-3 rounded-lg border border-[#e0e4ea] bg-white px-4 py-3">
       <CheckCircle2 className="h-5 w-5 text-emerald-600" />
       <span className="text-sm font-medium text-slate-700">{label}</span>
     </div>
@@ -123,8 +124,8 @@ export function PublishCard({ title, value, description }: { title: string; valu
   return (
     <Card>
       <CardContent className="py-5">
-        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">{title}</div>
-        <div className="mt-2 text-3xl font-bold text-slate-950">{value}</div>
+        <div className="text-xs font-semibold text-slate-500">{title}</div>
+        <div className="mt-2 text-xl font-semibold text-slate-950">{value}</div>
         <p className="mt-1 text-sm text-slate-500">{description}</p>
       </CardContent>
     </Card>
@@ -133,8 +134,8 @@ export function PublishCard({ title, value, description }: { title: string; valu
 
 export function PublishStep({ icon, title, description }: { icon: ReactNode; title: string; description: string }) {
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-4">
-      <span className="grid h-10 w-10 place-items-center rounded-2xl bg-blue-50 text-[var(--erg-blue)]">{icon}</span>
+    <div className="rounded-lg border border-[#e0e4ea] bg-white p-4">
+      <span className="grid h-10 w-10 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]">{icon}</span>
       <div className="mt-4 font-semibold text-slate-950">{title}</div>
       <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p>
     </div>

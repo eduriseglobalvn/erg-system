@@ -1,4 +1,4 @@
-﻿import { CrmPortalShell } from "@/features/crm";
+import { CrmPortalShell } from "@/features/crm";
 
 export function CrmPage() {
   return <CrmPortalShell />;

@@ -1,4 +1,4 @@
-﻿import { ERG_ASSETS } from "@/config/seo";
+import { ERG_ASSETS } from "@/config/seo";
 
 type PortalBrandMarkProps = {
   title: string;

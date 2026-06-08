@@ -89,7 +89,7 @@ export function MobilePlayerShell({
           </div>
           <div className="px-4 py-5">
             <div className="rounded-lg border border-slate-200 bg-white px-4 py-5 shadow-sm">
-              <div className="inline-flex rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.12em]" style={modeBadgeStyle}>
+              <div className="inline-flex rounded-md px-3 py-1 text-[11px] font-semibold" style={modeBadgeStyle}>
                 {quiz.settings.mode === "training" ? "Practice mode" : "Test mode"}
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-600">
@@ -101,7 +101,7 @@ export function MobilePlayerShell({
               </div>
               <button
                 type="button"
-                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[#3da2eb] px-4 text-sm font-bold uppercase tracking-[0.04em] text-white shadow-sm"
+                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
                 onClick={onStart}
               >
                 Start quiz
@@ -131,7 +131,7 @@ export function MobilePlayerShell({
                 className="grid h-7 w-7 place-items-center"
                 onClick={onToggleBookmark}
               >
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-sky-500" : ""}`} />
+                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-[var(--erg-blue)]" : ""}`} />
               </button>
               <QuestionSheet
                 bookmarkCount={bookmarkCount}
@@ -154,7 +154,7 @@ export function MobilePlayerShell({
                 {question.instructions ? (
                   <p className="text-sm leading-6 text-slate-500">{question.instructions}</p>
                 ) : null}
-                <div className="flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-400">
                   <span>{answeredCount}/{questions.length} answered</span>
                   {timerVisible ? <span>{formatTimer(remainingSeconds)}</span> : null}
                 </div>
@@ -169,7 +169,7 @@ export function MobilePlayerShell({
             {attemptCompleted && !reviewingSubmittedAttempt ? (
               <button
                 type="button"
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[#3da2eb] px-4 text-sm font-bold uppercase tracking-[0.04em] text-white shadow-sm"
+                className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
                 onClick={onReview}
               >
                 {resultDisplay.reviewButtonLabel}
@@ -178,7 +178,7 @@ export function MobilePlayerShell({
               <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>
                 <button
                   type="button"
-                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#8ecbf2] bg-[#3da2eb] px-3 text-[13px] font-bold uppercase text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-3 text-[13px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isFirstQuestion || submitting}
                   onClick={onPrev}
                 >
@@ -187,7 +187,7 @@ export function MobilePlayerShell({
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#8ecbf2] bg-[#3da2eb] px-3 text-[13px] font-bold uppercase text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-3 text-[13px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isLastQuestion || submitting}
                   onClick={onNext}
                 >
@@ -197,7 +197,7 @@ export function MobilePlayerShell({
                 {showSubmitAction ? (
                   <button
                     type="button"
-                    className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#8ecbf2] bg-[#3da2eb] px-2 text-[11px] font-bold uppercase text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                    className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-2 text-[11px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
                     disabled={submitting}
                     onClick={onRequestSubmit}
                   >
@@ -232,7 +232,7 @@ function QuestionSheet({
         <button
           type="button"
           aria-label="Open question list"
-          className="grid h-7 w-7 place-items-center text-sky-500 transition"
+          className="grid h-7 w-7 place-items-center text-[var(--erg-blue)] transition"
         >
           <List className="h-4 w-4" />
         </button>
@@ -247,18 +247,18 @@ function QuestionSheet({
             <button
               type="button"
               aria-label="Close question list"
-              className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-sky-500"
+              className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
           </SheetClose>
-          <SheetTitle className="text-center text-base font-black text-slate-900">Questions</SheetTitle>
+          <SheetTitle className="text-center text-base font-semibold text-slate-900">Questions</SheetTitle>
           <div className="text-center text-xs font-semibold text-slate-500">{bookmarkCount} bookmarked</div>
           <SheetClose asChild>
             <button
               type="button"
               aria-label="Close question list"
-              className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-sky-500"
+              className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
             >
               <X className="h-5 w-5" />
             </button>
@@ -269,7 +269,7 @@ function QuestionSheet({
             <SheetClose key={item.id} asChild>
               <button
                 type="button"
-                className={`flex items-start gap-3 border-b px-4 py-4 text-left ${index === currentIndex ? "bg-sky-50" : "bg-white"}`}
+                className={`flex items-start gap-3 border-b px-4 py-4 text-left ${index === currentIndex ? "bg-[var(--erg-blue-light)]" : "bg-white"}`}
                 onClick={() => onJumpToQuestion(index)}
               >
                 <span className="w-5 flex-none pt-0.5 text-sm font-semibold text-slate-500">
@@ -291,8 +291,8 @@ function QuestionSheet({
 function IntroStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-md border border-slate-200 bg-white px-3 py-3 text-center shadow-sm">
-      <div className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-bold text-[var(--erg-blue)]">{value}</div>
+      <div className="text-[11px] font-semibold text-slate-400">{label}</div>
+      <div className="mt-1 text-sm font-medium text-[var(--erg-blue)]">{value}</div>
     </div>
   );
 }

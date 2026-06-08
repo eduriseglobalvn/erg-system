@@ -50,7 +50,7 @@ export function MultipleResponseQuestion({
                     <span
                       className="h-2.5 w-2.5 rounded-[2px]"
                       style={{
-                        backgroundColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : "#3da2eb",
+                        backgroundColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : "var(--erg-blue)",
                       }}
                     />
                   ) : null}
@@ -84,7 +84,7 @@ export function MultipleResponseQuestion({
               key={choice.id}
               type="button"
               disabled={submitted}
-              className="grid w-full grid-cols-[40px_36px_minmax(0,1fr)] items-start gap-3 rounded-xl border border-transparent px-2 py-3 text-left transition hover:bg-slate-200/20"
+              className="grid w-full grid-cols-[40px_36px_minmax(0,1fr)] items-start gap-3 rounded-lg border border-transparent px-2 py-3 text-left transition hover:bg-slate-200/20"
               style={containerStyle}
               onClick={() => {
                 if (submitted) return;
@@ -96,7 +96,7 @@ export function MultipleResponseQuestion({
             >
               <ReviewStatusIcon correct={showCorrect} visible={showStatus} />
               <span
-                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-md border-2 bg-white"
+                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-md border bg-white"
                 style={{
                   borderColor: showCorrect ? "#78b816" : showWrong ? "#ff8b3d" : selected ? "var(--quiz-accent-start)" : "#cfd8df",
                 }}
@@ -130,7 +130,7 @@ function ReviewStatusIcon({ correct, visible }: { correct: boolean; visible: boo
 
   return (
     <span
-      className="mt-0.5 grid h-8 w-8 place-items-center rounded-full text-lg font-black text-white"
+      className="mt-0.5 grid h-8 w-8 place-items-center rounded-full text-lg font-semibold text-white"
       style={{ backgroundColor: correct ? "#78b816" : "#e65a4d" }}
     >
       {correct ? "✓" : "×"}

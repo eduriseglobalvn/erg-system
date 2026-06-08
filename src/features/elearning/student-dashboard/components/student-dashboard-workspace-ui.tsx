@@ -39,13 +39,13 @@ const assignmentStatusMeta: Record<
 export function BrandWordmark() {
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <div className="flex items-end text-3xl font-black leading-none">
+      <div className="flex items-end text-xl font-semibold leading-none">
         <span className="text-[var(--erg-blue)]">ER</span>
         <span className="text-[var(--erg-red)]">G</span>
       </div>
       <div className="hidden min-w-0 sm:block">
-        <div className="truncate text-xl font-semibold leading-none text-[var(--erg-blue)]">EDURISE GLOBAL</div>
-        <div className="mt-1 text-[11px] font-semibold uppercase text-slate-400">Learn today, lead tomorrow</div>
+        <div className="truncate text-base font-semibold leading-none text-[var(--erg-blue)]">EDURISE GLOBAL</div>
+        <div className="mt-1 text-[11px] font-medium text-slate-400">Learn today, lead tomorrow</div>
       </div>
     </div>
   );
@@ -61,13 +61,13 @@ export function PageTitle({
   title: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
+    <div className="rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex items-start gap-3">
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-slate-100 text-[var(--erg-blue)]">
           {icon}
         </span>
         <div>
-          <h1 className="text-2xl font-semibold text-[var(--erg-blue)]">{title}</h1>
+          <h1 className="text-xl font-semibold text-slate-950">{title}</h1>
           <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">{description}</p>
         </div>
       </div>
@@ -112,15 +112,15 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
         </div>
 
         <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 md:w-[148px] md:text-right">
-          <div className="text-xs font-semibold uppercase text-slate-500">{copy.bestScoreLabel}</div>
-          <div className="mt-1 text-2xl font-semibold text-[var(--erg-blue)]">
+          <div className="text-xs font-semibold text-slate-500">{copy.bestScoreLabel}</div>
+          <div className="mt-1 text-xl font-semibold text-[var(--erg-blue)]">
             {bestAttempt ? copy.scoreBadge(bestAttempt.score, bestAttempt.maxScore) : copy.pendingScore}
           </div>
         </div>
       </div>
 
       <div className="mt-3">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase text-slate-400">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
           <span>{copy.recentResultsTitle}</span>
           <span>{recentAttempts.length}/{Math.min(assignment.attempts.length, 3)}</span>
         </div>
@@ -163,7 +163,7 @@ export function AssignmentCard({
   const actionable = assignment.status !== "submitted";
 
   return (
-    <Card className={cn("rounded-xl border bg-white shadow-none", statusMeta.cardClassName)}>
+    <Card className={cn("rounded-lg border bg-white shadow-none", statusMeta.cardClassName)}>
       <div className={compact ? "p-3" : "p-4"}>
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0">
@@ -199,7 +199,7 @@ export function AssignmentCard({
                 actionable
                   ? assignment.status === "overdue"
                     ? "bg-[var(--erg-red)] text-white hover:bg-[#b0001d]"
-                    : "bg-[var(--erg-blue)] text-white hover:bg-[#060b7a]"
+                    : "bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]"
                   : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
               )}
               onClick={actionable ? onOpen : undefined}
@@ -213,7 +213,7 @@ export function AssignmentCard({
         <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_112px_112px]">
           <div>
             <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold uppercase text-slate-400">{copy.progressLabel}</span>
+              <span className="text-xs font-semibold text-slate-400">{copy.progressLabel}</span>
               <span className="text-sm font-semibold text-slate-900">{assignment.progressRate}%</span>
             </div>
             <ProgressBar value={assignment.progressRate} className="mt-2 h-2.5 bg-slate-100" indicatorClassName={statusMeta.progressClassName} />
@@ -234,7 +234,7 @@ export function AssignmentCard({
 
 export function CompactBadge({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold uppercase text-slate-600">
+    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
       {children}
     </span>
   );
@@ -243,7 +243,7 @@ export function CompactBadge({ children }: { children: string }) {
 function CompactStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-50 px-3 py-3">
-      <div className="text-xs font-semibold uppercase text-slate-400">{label}</div>
+      <div className="text-xs font-semibold text-slate-400">{label}</div>
       <div className="mt-1 text-lg font-semibold text-[var(--erg-blue)]">{value}</div>
     </div>
   );
@@ -252,7 +252,7 @@ function CompactStat({ label, value }: { label: string; value: string }) {
 export function ProfileStat({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "danger" }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="text-xs font-semibold uppercase text-slate-400">{label}</div>
+      <div className="text-xs font-semibold text-slate-400">{label}</div>
       <div className={cn("mt-1 text-xl font-semibold", tone === "danger" ? "text-[var(--erg-red)]" : "text-[var(--erg-blue)]")}>
         {value}
       </div>
@@ -262,7 +262,7 @@ export function ProfileStat({ label, value, tone = "default" }: { label: string;
 
 export function StatusPill({ status, label }: { status: StudentAssignmentStatus; label: string }) {
   return (
-    <span className={cn("inline-flex items-center whitespace-nowrap rounded-full border px-3 py-1 text-[11px] font-semibold uppercase", assignmentStatusMeta[status].chipClassName)}>
+    <span className={cn("inline-flex items-center whitespace-nowrap rounded-md border px-2.5 py-1 text-[11px] font-semibold ", assignmentStatusMeta[status].chipClassName)}>
       {label}
     </span>
   );

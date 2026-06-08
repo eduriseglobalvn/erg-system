@@ -1,4 +1,4 @@
-﻿import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
 import { listLearningResourceSubjects, type LearningResourceTaxonomyOption } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import { listManageableUnits, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type {

@@ -15,15 +15,15 @@ export function LikertQuestion({
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
         <table className="w-full min-w-[720px] border-collapse text-left">
           <thead className="bg-slate-50">
             <tr>
-              <th className="w-[36%] p-4 text-sm font-black uppercase tracking-[0.12em] text-slate-500">
+              <th className="w-[36%] p-4 text-sm font-semibold text-slate-500">
                 Tiêu chí
               </th>
               {scale.map((point) => (
-                <th key={point.id} className="p-4 text-center text-sm font-black text-slate-500">
+                <th key={point.id} className="p-4 text-center text-sm font-semibold text-slate-500">
                   <span className="block text-lg text-[var(--quiz-option-text)]">{point.value}</span>
                   <span>{point.label}</span>
                 </th>
@@ -33,7 +33,7 @@ export function LikertQuestion({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-t border-slate-100">
-                <td className="p-4 text-lg font-bold text-slate-800">{row.label}</td>
+                <td className="p-4 text-lg font-medium text-slate-800">{row.label}</td>
                 {scale.map((point) => {
                   const active = responses[row.id] === point.id;
 
@@ -43,7 +43,7 @@ export function LikertQuestion({
                         type="button"
                         disabled={submitted}
                         className={cn(
-                          "mx-auto grid h-9 w-9 place-items-center rounded-full border-2 transition focus:outline-none focus:ring-4 disabled:cursor-default",
+                          "mx-auto grid h-9 w-9 place-items-center rounded-full border transition focus:outline-none focus:ring-2 disabled:cursor-default",
                           active
                             ? "border-[var(--quiz-accent-start)] bg-[var(--quiz-accent-start)]"
                             : "border-slate-300 bg-white hover:border-[var(--quiz-accent-start)]",

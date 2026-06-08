@@ -1,4 +1,4 @@
-﻿import type { EventInput } from "@fullcalendar/core";
+import type { EventInput } from "@fullcalendar/core";
 
 export type TeachingScheduleStatus = "confirmed" | "draft" | "needs-material";
 
@@ -12,6 +12,8 @@ export type TeachingScheduleMeta = {
   status: TeachingScheduleStatus;
   statusLabel: string;
   note: string;
+  schoolColor?: string;
+  subjectLabel?: string;
 };
 
 export type TeachingScheduleEvent = EventInput & {

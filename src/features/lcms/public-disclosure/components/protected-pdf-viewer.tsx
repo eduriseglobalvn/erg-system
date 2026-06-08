@@ -56,7 +56,7 @@ export function ProtectedPdfViewer({
     <section
       ref={viewerRef}
       className={cn(
-        "min-w-0 select-none overflow-hidden rounded-[8px] border border-slate-200 bg-slate-950 shadow-[0_28px_70px_-34px_rgba(15,23,42,0.65)]",
+        "min-w-0 select-none overflow-hidden rounded-[8px] border border-slate-200 bg-slate-950 shadow-sm",
         className,
       )}
       aria-label={`Viewer bảo vệ cho ${document.title}`}
@@ -126,7 +126,7 @@ function PdfPageMock({
         aria-hidden="true"
       >
         <span
-          className="whitespace-nowrap text-center text-3xl font-bold uppercase tracking-[0.2em] text-slate-900"
+          className="whitespace-nowrap text-center text-xl font-semibold text-slate-900"
           style={{
             opacity: watermark.opacity,
             transform: `translate(${watermark.offsetX}px, ${watermark.offsetY}px) rotate(${watermark.rotation}deg) scale(${watermark.scale})`,
@@ -137,17 +137,17 @@ function PdfPageMock({
       </div>
       <div className="relative z-0 flex h-full flex-col">
         <header className="border-b border-slate-200 pb-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[var(--erg-blue)]">
+          <p className="text-xs font-semibold text-[var(--erg-blue)]">
             ERG Education
           </p>
-          <h3 className="mt-3 text-2xl font-semibold leading-tight">
+          <h3 className="mt-3 text-xl font-semibold leading-tight text-[#242424]">
             {document.title}
           </h3>
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-[#616161]">
             {document.section} · {document.issuedBy}
           </p>
         </header>
-        <div className="grid flex-1 content-start gap-4 py-6 text-sm leading-7 text-slate-700">
+        <div className="grid flex-1 content-start gap-4 py-6 text-sm leading-6 text-[#424242]">
           <p>
             Tài liệu công khai được hiển thị ở chế độ xem bảo vệ để phục vụ phụ huynh,
             học viên và cơ quan quản lý tra cứu thông tin minh bạch.

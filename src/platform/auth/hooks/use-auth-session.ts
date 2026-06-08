@@ -13,6 +13,7 @@ import { clearTeacherSessionSnapshot, readStoredAuthSession, resolveCurrentPorta
 import { requestGoogleIdToken } from "@/platform/auth/api/google-identity";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useI18n } from "@/platform/i18n";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT, hasApiBase } from "@/lib/api-client";
 import type {
   AccountTab,
@@ -65,6 +66,7 @@ function createProfileForm(account: TeacherAccount | null): ProfileFormState {
 
 export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
   const { t } = useI18n();
+  const paceStateUpdate = usePacedStateBatch();
   const [mode, setMode] = useState<AuthMode>("login");
   const [accountTab, setAccountTab] = useState<AccountTab>("profile");
   const [account, setAccount] = useState<TeacherAccount | null>(() => getCurrentAccount(portal));
@@ -126,7 +128,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
 
     let isCancelled = false;
     hydratingProfileRef.current = true;
-    const hydrationFrameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       if (!isCancelled) setIsHydratingProfile(true);
     });
 
@@ -151,10 +153,9 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
 
     return () => {
       isCancelled = true;
-      window.cancelAnimationFrame(hydrationFrameId);
       hydratingProfileRef.current = false;
     };
-  }, [account, isHydratingProfile, portal]);
+  }, [account, isHydratingProfile, paceStateUpdate, portal]);
 
   useEffect(() => {
     function handleSessionReplaced() {

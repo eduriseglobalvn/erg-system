@@ -45,7 +45,7 @@ export function DashboardContent({
 
   if (activeLeaf.variant.startsWith("admin-")) {
     if (activeLeaf.variant === "admin-public-disclosure") {
-      return <PublicDisclosureAdminWorkspace />;
+      return <PublicDisclosureAdminWorkspace embedded />;
     }
 
     return (
@@ -147,12 +147,12 @@ export function DashboardContent({
 function AccessDeniedWorkspace({ deniedSchoolName }: { deniedSchoolName: string }) {
   return (
     <main className="flex h-full items-center justify-center overflow-y-auto bg-slate-50 px-5 py-8">
-      <section className="w-full max-w-[720px] rounded-[32px] border border-rose-200 bg-white p-8 text-center shadow-[0_28px_80px_-42px_rgba(15,23,42,0.38)]">
-        <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-rose-50 text-2xl font-semibold text-rose-700">
+      <section className="w-full max-w-[720px] rounded-lg border border-rose-200 bg-white p-8 text-center shadow-sm">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-rose-50 text-xl font-semibold text-rose-700">
           403
         </div>
-        <h1 className="mt-5 text-3xl font-semibold tracking-[-0.04em] text-slate-950">Access denied</h1>
-        <p className="mt-3 text-sm leading-7 text-slate-600">
+        <h1 className="mt-5 text-xl font-semibold text-slate-950">Access denied</h1>
+        <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
           Tài khoản giáo viên hiện tại chưa có quyền truy cập dữ liệu của <strong>{deniedSchoolName}</strong>.
           Vui lòng chọn trường được cấp quyền ở menu bên trái hoặc liên hệ quản trị viên để mở quyền.
         </p>

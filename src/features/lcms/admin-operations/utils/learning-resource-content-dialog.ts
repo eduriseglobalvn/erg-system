@@ -1,4 +1,4 @@
-﻿export type ContentDialogNodeKind = "group" | "lesson" | "folder";
+export type ContentDialogNodeKind = "group" | "lesson" | "folder";
 export type ContentDialogCreateMode = "subject" | "root" | "child";
 export type ContentDialogStructureKind = "category" | "section";
 export type ContentDialogOptionId = ContentDialogStructureKind | "lecture" | "exercise" | "resource";

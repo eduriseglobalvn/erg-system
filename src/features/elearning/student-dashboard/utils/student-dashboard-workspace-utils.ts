@@ -3,6 +3,7 @@ import type { StudentDiscussionFeedPost } from "@/features/elearning/student-das
 import type { StudentAssignmentAttempt, StudentDiscussionThread } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { StudentDiscussionNotification } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { createReactionSummary, getCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 
 export const ANNOUNCEMENT_POPUP_SNOOZE_MS = 2 * 60 * 60 * 1000;
 const ANNOUNCEMENT_POPUP_SNOOZE_KEY = "student-dashboard-announcement-popup-snooze";
@@ -101,29 +102,14 @@ export function escapeRegExp(value: string) {
 }
 
 export function readAnnouncementPopupSnoozes() {
-  if (typeof window === "undefined") return {};
-
-  try {
-    const rawValue = window.localStorage.getItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY);
-    if (!rawValue) return {};
-    const parsedValue = JSON.parse(rawValue);
-
-    if (!parsedValue || typeof parsedValue !== "object") {
-      return {};
-    }
-
-    return parsedValue as Record<string, number>;
-  } catch {
-    return {};
-  }
+  const snoozes = getPersistedJsonValue<Record<string, number>>(ANNOUNCEMENT_POPUP_SNOOZE_KEY, {});
+  return snoozes && typeof snoozes === "object" && !Array.isArray(snoozes) ? snoozes : {};
 }
 
 export function writeAnnouncementPopupSnooze(announcementId: string, snoozeUntil: number) {
-  if (typeof window === "undefined") return;
-
   const currentSnoozes = readAnnouncementPopupSnoozes();
   currentSnoozes[announcementId] = snoozeUntil;
-  window.localStorage.setItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY, JSON.stringify(currentSnoozes));
+  setPersistedJsonValue(ANNOUNCEMENT_POPUP_SNOOZE_KEY, currentSnoozes);
 }
 
 export function isAnnouncementPopupSnoozed(announcementId: string) {
@@ -136,9 +122,7 @@ export function isAnnouncementPopupSnoozed(announcementId: string) {
 
   if (snoozeUntil <= Date.now()) {
     delete currentSnoozes[announcementId];
-    if (typeof window !== "undefined") {
-      window.localStorage.setItem(ANNOUNCEMENT_POPUP_SNOOZE_KEY, JSON.stringify(currentSnoozes));
-    }
+    setPersistedJsonValue(ANNOUNCEMENT_POPUP_SNOOZE_KEY, currentSnoozes);
     return false;
   }
 

@@ -1,5 +1,10 @@
 import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import type { AnswerPayload } from "@/lib/types";
+import {
+  getPersistedJsonValue,
+  removePersistedJsonValue,
+  setPersistedJsonValue,
+} from "@/stores/persisted-store";
 
 const SESSION_VERSION = 1;
 const SESSION_PREFIX = "erg:local-quiz-attempt:v1:";
@@ -166,7 +171,7 @@ export const localQuizAttemptStore = {
       return;
     }
 
-    window.localStorage.removeItem(getSessionKey(assignmentId, quizId));
+    removePersistedJsonValue(getSessionKey(assignmentId, quizId));
   },
 
   async saveWithStatus(
@@ -213,17 +218,7 @@ function readJson<T>(key: string): T | null {
     return null;
   }
 
-  const raw = window.localStorage.getItem(key);
-  if (!raw) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(raw) as T;
-  } catch {
-    window.localStorage.removeItem(key);
-    return null;
-  }
+  return getPersistedJsonValue<T | null>(key, null);
 }
 
 function writeJson(key: string, value: unknown) {
@@ -231,7 +226,7 @@ function writeJson(key: string, value: unknown) {
     return;
   }
 
-  window.localStorage.setItem(key, JSON.stringify(value));
+  setPersistedJsonValue(key, value);
 }
 
 function canUseLocalStorage() {

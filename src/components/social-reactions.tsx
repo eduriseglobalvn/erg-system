@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   socialReactionKeys,
   type SocialReactionKey,
   type SocialReactionSummary as SocialReactionSummaryType,
 } from "@/types/social-reactions";
+import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { cn } from "@/lib/utils";
 
 type ReactionVisual = {
@@ -75,33 +76,20 @@ export function SocialReactionAction({
   onReaction,
 }: SocialReactionActionProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const closeTimerRef = useRef<number | null>(null);
+  const closePicker = useDebouncedCallback(() => setPickerOpen(false), 180);
   const activeMeta = activeReaction ? reactionVisuals[activeReaction] : null;
 
-  useEffect(() => clearCloseTimer, []);
-
-  function clearCloseTimer() {
-    if (closeTimerRef.current !== null) {
-      window.clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = null;
-    }
-  }
-
   function openPicker() {
-    clearCloseTimer();
+    closePicker.cancel();
     setPickerOpen(true);
   }
 
   function scheduleClose() {
-    clearCloseTimer();
-    closeTimerRef.current = window.setTimeout(() => {
-      setPickerOpen(false);
-      closeTimerRef.current = null;
-    }, 180);
+    closePicker.run();
   }
 
   function chooseReaction(reaction: SocialReactionKey) {
-    clearCloseTimer();
+    closePicker.cancel();
     onReaction(reaction);
     setPickerOpen(false);
   }
@@ -132,7 +120,7 @@ export function SocialReactionAction({
 
       <div
         className={cn(
-          "absolute bottom-full left-1/2 z-50 mb-1.5 flex h-[50px] -translate-x-1/2 items-center gap-0 rounded-full border border-black/10 bg-white px-1.5 shadow-[0_2px_8px_rgba(0,0,0,0.22)] transition-[opacity,transform] duration-150 ease-out",
+          "absolute bottom-full left-1/2 z-50 mb-1.5 flex h-[50px] -translate-x-1/2 items-center gap-0 rounded-full border border-black/10 bg-white px-1.5 shadow-sm transition-[opacity,transform] duration-150 ease-out",
           pickerOpen ? "pointer-events-auto translate-y-0 scale-100 opacity-100" : "pointer-events-none translate-y-1.5 scale-95 opacity-0",
         )}
         onMouseEnter={openPicker}
@@ -143,7 +131,7 @@ export function SocialReactionAction({
           <button
             key={reaction}
             aria-label={reactionVisuals[reaction].label}
-            className="relative grid h-11 w-11 place-items-center rounded-full transition duration-150 ease-out hover:-translate-y-2 hover:scale-125"
+            className="relative grid h-11 w-11 place-items-center rounded-full transition duration-150 ease-out hover:bg-slate-50"
             title={reactionVisuals[reaction].label}
             type="button"
             onClick={(event) => {
@@ -220,7 +208,7 @@ function SocialReactionGlyph({
         size === "picker" && cn("h-10 w-10 text-[32px]", isCircleReaction && "text-[24px] ring-2"),
         size === "summary" && cn("h-6 w-6 text-[18px]", isCircleReaction && "text-[13px] ring-2"),
         size === "tiny" && cn("h-4 w-4 text-[12px]", isCircleReaction && "text-[9px] ring-1"),
-        selected && "shadow-md ring-[3px]",
+        selected && "shadow-sm ring-[3px]",
       )}
     >
       <span className={cn("leading-none", visual.glyphClassName)}>{visual.glyph}</span>

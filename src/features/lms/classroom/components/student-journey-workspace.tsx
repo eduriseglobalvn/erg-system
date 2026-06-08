@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import FlagOutlinedIcon from "@mui/icons-material/FlagOutlined";
-import RouteOutlinedIcon from "@mui/icons-material/RouteOutlined";
-import TimelineOutlinedIcon from "@mui/icons-material/TimelineOutlined";
+import { Flag, Route, Timeline } from "lucide-react";
 
 import {
   DashboardMetricCard,
@@ -20,7 +18,8 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function StudentJourneyWorkspace({
   activeLeaf,
@@ -95,14 +94,14 @@ export function StudentJourneyWorkspace({
           value={student?.name ?? "-"}
           detail={`${student?.className ?? "-"} • ${student?.schoolName ?? "-"}`}
           delta={copy.currentMeaning(student?.status ?? "steady")}
-          icon={<RouteOutlinedIcon fontSize="inherit" />}
+          icon={<Route className="h-4 w-4" />}
         />
         <DashboardMetricCard
           label={copy.metrics.progress}
           value={`${student?.progressRate ?? 0}%`}
           detail={copy.metrics.progressDetail}
           delta={copy.progressMeaning(student?.progressRate ?? 0)}
-          icon={<TimelineOutlinedIcon fontSize="inherit" />}
+          icon={<Timeline className="h-4 w-4" />}
           tone="emerald"
         />
         <DashboardMetricCard
@@ -110,7 +109,7 @@ export function StudentJourneyWorkspace({
           value={`${student?.averageScore ?? 0}`}
           detail={copy.metrics.scoreDetail}
           delta={copy.scoreMeaning(student?.averageScore ?? 0)}
-          icon={<FlagOutlinedIcon fontSize="inherit" />}
+          icon={<Flag className="h-4 w-4" />}
           tone="amber"
         />
         <DashboardMetricCard
@@ -118,7 +117,7 @@ export function StudentJourneyWorkspace({
           value={student?.currentAssignment ?? "-"}
           detail={student?.currentStage ?? "-"}
           delta={copy.metrics.currentWorkDelta}
-          icon={<RouteOutlinedIcon fontSize="inherit" />}
+          icon={<Route className="h-4 w-4" />}
           tone="blue"
         />
       </div>
@@ -135,12 +134,12 @@ export function StudentJourneyWorkspace({
         <DashboardSectionCard title={copy.strengthTitle} description={copy.strengthDescription}>
           <div className="space-y-4">
             {journey?.strengths.map((strength) => (
-              <div key={strength.label} className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+              <div key={strength.label} className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
                 <div className="flex items-center justify-between gap-3">
                   <div className="text-sm font-semibold text-slate-950">{strength.label}</div>
                   <div className="text-sm font-semibold text-slate-900">{strength.value}%</div>
                 </div>
-                <ProgressBar value={strength.value} className="mt-3 h-2 bg-white" indicatorClassName="bg-blue-600" />
+                <ProgressBar value={strength.value} className="mt-3 h-2 bg-white" indicatorClassName="bg-[var(--erg-blue)]" />
               </div>
             ))}
           </div>
@@ -149,7 +148,7 @@ export function StudentJourneyWorkspace({
         <DashboardSectionCard title={copy.timelineTitle} description={copy.timelineDescription}>
           <div className="space-y-3">
             {journey?.milestones.map((milestone) => (
-              <div key={milestone.id} className="flex gap-4 rounded-[22px] border border-slate-200 bg-white p-4">
+              <div key={milestone.id} className="flex gap-4 rounded-lg border border-[#cbd7e6] bg-white p-4">
                 <div className="relative flex w-9 shrink-0 justify-center">
                   <span
                     className={cn(
@@ -157,7 +156,7 @@ export function StudentJourneyWorkspace({
                       milestone.state === "done"
                         ? "bg-emerald-500"
                         : milestone.state === "current"
-                          ? "bg-blue-600"
+                          ? "bg-[var(--erg-blue)]"
                           : "bg-slate-300",
                     )}
                   />
@@ -203,9 +202,9 @@ function SelectControl({
   value: string;
 }) {
   return (
-    <select
+    <AppSelect
       aria-label={ariaLabel}
-      className="h-11 min-w-[150px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+      className="h-10 min-w-[150px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       onChange={(event) => onChange(event.target.value)}
       value={value}
     >
@@ -214,13 +213,13 @@ function SelectControl({
           {option.label}
         </option>
       ))}
-    </select>
+    </AppSelect>
   );
 }
 
 function MeaningCard({ body, title }: { body: string; title: string }) {
   return (
-    <article className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+    <article className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
       <div className="text-sm font-semibold text-slate-950">{title}</div>
       <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
     </article>

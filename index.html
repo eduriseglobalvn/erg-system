@@ -2,24 +2,80 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="https://media.erg.edu.vn/logo/erg.png" />
-    <link rel="shortcut icon" type="image/png" href="https://media.erg.edu.vn/logo/erg.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="https://media.erg.edu.vn/logo/erg.png" />
+    <!-- DNS-prefetch for external asset CDN -->
+    <link rel="dns-prefetch" href="https://media.erg.edu.vn" />
+    <link rel="preconnect" href="https://media.erg.edu.vn" crossorigin />
+    <!-- Google Fonts preconnect -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Critical fonts preload -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Public+Sans:wght@400;500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500..700&family=Public+Sans:wght@400;500;600;700;800&display=swap" />
+    </noscript>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="shortcut icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh. Hệ thống bài tập đa dạng, bám sát đề thi thực tế." />
-    <meta name="keywords" content="ôn thi IC3 GS6 online, luyện thi IC3 Spark, kiểm tra tin học trực tuyến, ôn tập MOS online, hệ thống e-learning erg, học tin học trực tuyến" />
+    <meta name="theme-color" content="#0f6cbd" />
+    <meta name="color-scheme" content="light" />
+    <meta name="application-name" content="ERG LMS" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="ERG LMS" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh." />
+    <meta name="keywords" content="ôn thi IC3 GS6 online, luyện thi IC3 Spark, kiểm tra tin học trực tuyến, ôn tập MOS online" />
     <meta name="robots" content="index, follow" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="vi_VN" />
     <meta property="og:site_name" content="Edurise Global" />
     <meta property="og:title" content="Hệ thống ôn luyện trực tuyến MOS & IC3 | Trung Tâm Ngoại Ngữ - Tin Học ERG" />
-    <meta property="og:description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh. Hệ thống bài tập đa dạng, bám sát đề thi thực tế." />
+    <meta property="og:description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh." />
     <meta property="og:image" content="https://media.erg.edu.vn/logo/og-image.jpg" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Hệ thống ôn luyện trực tuyến MOS & IC3 | Trung Tâm Ngoại Ngữ - Tin Học ERG" />
-    <meta name="twitter:description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark dành cho học sinh. Hệ thống bài tập đa dạng, bám sát đề thi thực tế." />
+    <meta name="twitter:title" content="Hệ thống ôn luyện trực tuyến MOS & IC3" />
+    <meta name="twitter:description" content="Nền tảng học và thi thử trực tuyến chuẩn quốc tế MOS, IC3 GS6 và IC3 Spark." />
     <meta name="twitter:image" content="https://media.erg.edu.vn/logo/og-image.jpg" />
-    <title>Hệ thống ôn luyện trực tuyến MOS & IC3 | Trung Tâm Ngoại Ngữ - Tin Học ERG</title>
+    <title>Hệ thống ôn luyện trực tuyến MOS & IC3 | ERG</title>
+    <!-- Critical CSS: injected inline so browser can render immediately without waiting for JS -->
+    <style id="erg-critical-css">
+      :root {
+        --background: oklch(0.985 0.002 105);
+        --foreground: oklch(0.23 0.01 105);
+        --primary: oklch(0.55 0.12 185);
+        --primary-foreground: oklch(0.99 0 0);
+        --border: oklch(0.91 0.008 105);
+        --ring: oklch(0.55 0.12 185 / 0.3);
+        --accent-soft: oklch(0.96 0.02 185);
+        --font-sans: "Public Sans","IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+        --font-heading: "Fraunces","Public Sans",serif;
+        --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      }
+      html,body,#root{min-height:100%}
+      body{margin:0;background:var(--background);color:var(--foreground);font-family:var(--font-sans);font-size:14px;font-weight:400;line-height:1.55;-webkit-font-smoothing:antialiased}
+      *{box-sizing:border-box}
+      a{text-decoration:none;color:inherit}
+      button,input,select,textarea{font:inherit}
+      button{border:0;background:transparent;padding:0;cursor:pointer}
+      ::-webkit-scrollbar{width:6px;height:6px}
+      ::-webkit-scrollbar-track{background:transparent}
+      ::-webkit-scrollbar-thumb{background:oklch(0.55 0 0 / 0.18);border-radius:9999px}
+      ::-webkit-scrollbar-thumb:hover{background:oklch(0.5 0 0 / 0.3)}
+      ::selection{background:oklch(0.55 0.12 185 / 0.18)}
+      html{background:var(--background)}
+      #root:empty{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--background)}
+      #root:empty::after{content:"";width:64px;aspect-ratio:1;border-radius:50%;border:3px solid var(--border);border-top-color:var(--primary);animation:erg-spin 0.6s linear infinite}
+      @keyframes erg-spin{to{transform:rotate(360deg)}}
+    </style>
+    <!-- Non-critical CSS loaded asynchronously -->
+    <link rel="preload" href="/src/styles/globals.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
+    <noscript>
+      <link rel="stylesheet" href="/src/styles/globals.css" />
+      <link rel="stylesheet" href="/src/index.css" />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

@@ -5,7 +5,10 @@ import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboar
 import { Badge, Button, Input, inputClassName } from "@/components/ui/dashboard-kit";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { useDebouncedCallback } from "@/hooks/use-paced-callback";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
+import { AppSelect } from "@/components/ui/app-select";
 
 type GvizCell = {
   v?: string | number | boolean | null;
@@ -83,9 +86,10 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
   const [submitResult, setSubmitResult] = useState<BulkStudentAccountResponse | null>(null);
   const [targetCenterId, setTargetCenterId] = useState(() => (managementScope.level === "global" ? centers[0]?.id ?? "" : managementScope.centerId));
   const [targetClassId, setTargetClassId] = useState(() => (managementScope.level === "class" ? managementScope.classId : ""));
+  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
     if (managementScope.level === "global") {
       setTargetCenterId((current) => current || centers[0]?.id || "");
       return;
@@ -94,8 +98,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
     setTargetCenterId(managementScope.centerId);
     setTargetClassId(managementScope.level === "class" ? managementScope.classId : "");
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [centers, managementScope]);
+  }, [centers, managementScope, paceStateUpdate]);
 
   const targetClasses = useMemo(() => {
     return classes.filter((classroom) => !targetCenterId || classroom.schoolId === targetCenterId);
@@ -168,18 +171,17 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
     },
     [rangeEnd, rangeStart, selectedSheetName],
   );
+  const autoLoadSheet = useDebouncedCallback((url: string, sheetName: string) => {
+    void loadSheet(url, sheetName);
+  }, 700);
 
   useEffect(() => {
     const trimmedUrl = sheetUrl.trim();
     const loadKey = `${trimmedUrl}|${selectedSheetName}|${rangeStart}:${rangeEnd}`;
     if (!trimmedUrl.includes("docs.google.com/spreadsheets") || loadKey === lastLoadedUrl) return;
 
-    const timeoutId = window.setTimeout(() => {
-      void loadSheet(trimmedUrl, selectedSheetName);
-    }, 700);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [lastLoadedUrl, loadSheet, rangeEnd, rangeStart, selectedSheetName, sheetUrl]);
+    autoLoadSheet.run(trimmedUrl, selectedSheetName);
+  }, [autoLoadSheet, lastLoadedUrl, rangeEnd, rangeStart, selectedSheetName, sheetUrl]);
 
   const updateStudent = useCallback(
     (studentId: string, field: keyof Pick<ParsedStudentRow, "fullName" | "className" | "birthday" | "phone" | "generatedUsername" | "generatedPassword">, value: string) => {
@@ -257,7 +259,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
       >
         <div className="space-y-4">
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Link Google Sheet</span>
+            <span className="text-xs font-semibold text-slate-500">Link Google Sheet</span>
             <div className="mt-2 grid gap-2 md:grid-cols-[minmax(0,1fr)_150px]">
               <Input
                 value={sheetUrl}
@@ -276,7 +278,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
             </div>
           </label>
 
-          <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+          <div className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h3 className="font-semibold text-slate-950">Nơi tạo tài khoản</h3>
@@ -288,8 +290,8 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-2">
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Trung tâm / trường</span>
-                <select
+                <span className="text-xs font-semibold text-slate-500">Trung tâm / trường</span>
+                <AppSelect
                   className={`${inputClassName} mt-2`}
                   value={targetCenterId}
                   onChange={(event) => {
@@ -304,11 +306,11 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
                       {center.name}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </label>
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Lớp đích</span>
-                <select
+                <span className="text-xs font-semibold text-slate-500">Lớp đích</span>
+                <AppSelect
                   className={`${inputClassName} mt-2`}
                   value={targetClassId}
                   onChange={(event) => setTargetClassId(event.target.value)}
@@ -320,11 +322,11 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
                       {classroom.className}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </label>
             </div>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <h3 className="font-semibold text-slate-950">Vùng lấy dữ liệu</h3>
@@ -337,8 +339,8 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
 
             <div className="mt-4 grid gap-3 md:grid-cols-[minmax(240px,1.4fr)_repeat(2,minmax(0,1fr))]">
               <label className="block md:col-span-1">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Tab lớp trong Sheet</span>
-                <select
+                <span className="text-xs font-semibold text-slate-500">Tab lớp trong Sheet</span>
+                <AppSelect
                   className={`${inputClassName} mt-2`}
                   value={selectedSheetName}
                   onChange={(event) => {
@@ -353,14 +355,14 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
                       {tab.name}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </label>
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Ô bắt đầu</span>
+                <span className="text-xs font-semibold text-slate-500">Ô bắt đầu</span>
                 <Input className="mt-2 uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
               </label>
               <label className="block">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Ô kết thúc</span>
+                <span className="text-xs font-semibold text-slate-500">Ô kết thúc</span>
                 <Input className="mt-2 uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z46" />
               </label>
             </div>
@@ -394,7 +396,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
           </div>
 
           {errorMessage ? (
-            <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
               {errorMessage}
             </div>
           ) : null}
@@ -411,11 +413,11 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-3">
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cột username</span>
+              <span className="text-xs font-semibold text-slate-500">Cột username</span>
               <Input className="mt-2 uppercase" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">Cột mật khẩu</span>
+              <span className="text-xs font-semibold text-slate-500">Cột mật khẩu</span>
               <Input className="mt-2 uppercase" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
             </label>
           </div>
@@ -429,12 +431,12 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
           </div>
 
           {submitResult ? (
-            <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+            <div className="space-y-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
               <p className="font-semibold">
                 BE đã tạo {submitResult.created} tài khoản, bỏ qua {submitResult.skipped}, trùng {submitResult.duplicates}.
               </p>
               {submitResult.credentials.length ? (
-                <div className="rounded-xl bg-white/70 p-3 text-emerald-900">
+                <div className="rounded-lg bg-white/70 p-3 text-emerald-900">
                   <p className="font-semibold">Credential vừa tạo</p>
                   <div className="mt-2 grid gap-1">
                     {submitResult.credentials.slice(0, 5).map((item) => (
@@ -446,7 +448,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
                 </div>
               ) : null}
               {submitResult.failedItems.length ? (
-                <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-800">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800">
                   <p className="font-semibold">Dòng chưa tạo được</p>
                   <div className="mt-2 grid gap-1">
                     {submitResult.failedItems.slice(0, 5).map((item) => (
@@ -478,9 +480,9 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
           ) : null
         }
       >
-        <div className="mb-4 grid gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+        <div className="mb-4 grid gap-3 rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
           <div className="flex min-w-0 items-start gap-3">
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-slate-950 shadow-sm">
+            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-950 shadow-sm">
               <Table2 className="h-5 w-5" />
             </span>
             <div className="min-w-0">
@@ -490,14 +492,14 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
-            <Users className="h-4 w-4 text-blue-600" />
+          <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
+            <Users className="h-4 w-4 text-[var(--erg-blue)]" />
             {validCount}/{visibleStudents.length} dòng hợp lệ
           </div>
         </div>
 
-        <div className="max-h-[720px] overflow-auto rounded-[24px] border border-slate-200 bg-white shadow-sm">
-          <div className="sticky top-0 z-10 hidden min-w-[1380px] grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] gap-3 border-b border-slate-200 bg-slate-50/95 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 backdrop-blur lg:grid">
+        <div className="max-h-[720px] overflow-auto rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
+          <div className="sticky top-0 z-10 hidden min-w-[1380px] grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] gap-3 border-b border-[#e0e4ea] bg-[#f7f8fa] px-4 py-3 text-[11px] font-semibold text-slate-600 backdrop-blur lg:grid">
             <span>Dòng</span>
             <span>Học sinh</span>
             <span>Lớp</span>
@@ -513,15 +515,15 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
             {visibleStudents.map((student) => (
               <article
                 key={student.id}
-                className="grid gap-3 px-4 py-3 transition hover:bg-blue-50/40 lg:grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] lg:items-center"
+                className="grid gap-3 px-4 py-3 transition hover:bg-[var(--erg-blue-light)] lg:grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] lg:items-center"
               >
                 <div className="flex items-center gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-medium text-slate-700">
                     {student.rowNumber || student.sourceIndex}
                   </span>
                 </div>
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--erg-blue-light)] text-sm font-medium text-[var(--erg-blue)]">
                     {getInitials(student.fullName)}
                   </span>
                   <EditableField
@@ -885,7 +887,7 @@ function EditableField({
 
 function RuleLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-xl bg-slate-50 px-3 py-2">
+    <div className="flex items-start justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2">
       <span className="font-semibold text-slate-950">{label}</span>
       <span className="text-right text-slate-500">{value}</span>
     </div>

@@ -180,7 +180,7 @@ export function MatchingQuestion({
                   </button>
                 </div>
                 {reviewMode ? (
-                  <div className={`px-3 pb-3 text-xs font-bold ${isCorrect ? "text-lime-600" : "text-rose-600"}`}>
+                  <div className={`px-3 pb-3 text-xs font-medium ${isCorrect ? "text-lime-600" : "text-rose-600"}`}>
                     {isCorrect ? "Matched correctly" : `Correct answer: ${pair.rightText}`}
                   </div>
                 ) : null}
@@ -226,7 +226,7 @@ export function MatchingQuestion({
                   className={`grid items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${rowConnected ? "md:gap-0" : "md:gap-8"}`}
                 >
                   <div
-                    className="relative flex min-h-[56px] min-w-0 items-center rounded-lg border-2 bg-white px-4 py-2 pr-8 text-lg leading-[1.35] shadow-sm sm:text-[22px]"
+                    className="relative flex min-h-[56px] min-w-0 items-center rounded-lg border bg-white px-4 py-2 pr-8 text-lg leading-[1.35] shadow-sm sm:text-[22px]"
                     style={{
                       borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)",
                       color: showReviewCorrect ? "#111827" : showReviewWrong ? "#111827" : "var(--quiz-option-text)",
@@ -234,7 +234,7 @@ export function MatchingQuestion({
                   >
                     {reviewMode ? (
                       <span
-                        className="mr-2 text-2xl font-black"
+                        className="mr-2 text-xl font-semibold"
                         style={{ color: showReviewCorrect ? "#78b816" : "#e65a4d" }}
                       >
                         {index + 1}.
@@ -242,7 +242,7 @@ export function MatchingQuestion({
                     ) : null}
                     <span>{pair.leftText}</span>
                     <span
-                      className="pointer-events-none absolute right-[-2px] top-1/2 z-[3] h-7 w-[18px] -translate-y-1/2 rounded-l-full border-2 border-r-0 bg-white"
+                      className="pointer-events-none absolute right-[-2px] top-1/2 z-[3] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 bg-white"
                       style={{ borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)" }}
                     />
                   </div>
@@ -297,12 +297,12 @@ function MobileMatchingAnswerPicker({
 
   return (
     <div className="fixed inset-0 z-[280] bg-slate-950/55 px-4 py-12">
-      <div className="mx-auto mt-10 flex max-h-[78vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-[0_24px_60px_rgba(15,23,42,0.35)]">
+      <div className="mx-auto mt-10 flex max-h-[78vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-sm">
         <div className="relative border-b px-4 py-3 text-center" style={{ borderColor: "rgba(148,163,184,0.22)" }}>
-          <div className="text-sm font-bold text-slate-700">Select an Answer</div>
+          <div className="text-sm font-medium text-slate-700">Select an Answer</div>
           <button
             type="button"
-            className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-full text-sky-500"
+            className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-[var(--erg-blue)]"
             onClick={onClose}
           >
             <X className="h-4 w-4" />
@@ -465,9 +465,9 @@ function MatchingChip({
   return (
     <button
       type="button"
-      className={`relative inline-flex min-h-[56px] w-full min-w-0 items-center justify-between gap-3 rounded-r-lg border-2 px-4 pl-7 text-left text-lg leading-[1.35] shadow-sm transition sm:text-[22px] ${
+      className={`relative inline-flex min-h-[56px] w-full min-w-0 items-center justify-between gap-3 rounded-r-lg border px-4 pl-7 text-left text-lg leading-[1.35] shadow-sm transition sm:text-[22px] ${
         overlay || active
-          ? "border-[#c6b66a] bg-[#fff0a8] shadow-[0_10px_26px_rgba(98,89,34,0.22)]"
+          ? "border-[#c6b66a] bg-[#fff0a8] shadow-sm"
           : correct
             ? "border-[#8fb37f] bg-[#f4fff0]"
             : incorrect
@@ -478,7 +478,7 @@ function MatchingChip({
       {...dragProps}
     >
       <span
-        className={`pointer-events-none absolute left-[-18px] top-1/2 z-[4] h-7 w-[18px] -translate-y-1/2 rounded-l-full border-2 border-r-0 ${
+        className={`pointer-events-none absolute left-[-18px] top-1/2 z-[4] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 ${
           overlay || active
             ? "border-[#c6b66a] bg-[#fff0a8]"
             : correct
@@ -491,14 +491,14 @@ function MatchingChip({
       />
       {reviewIndex ? (
         <span
-          className="font-black"
+          className="font-semibold"
           style={{ color: correct ? "#78b816" : incorrect ? "#e65a4d" : "currentColor" }}
         >
           {reviewIndex}.
         </span>
       ) : null}
       <span className="min-w-0 flex-1 whitespace-normal break-words">{label}</span>
-      {!overlay ? <span aria-hidden="true" className="text-xl tracking-[-0.16em] text-slate-500">⋮⋮</span> : null}
+      {!overlay ? <span aria-hidden="true" className="text-xl text-slate-500">⋮⋮</span> : null}
     </button>
   );
 }

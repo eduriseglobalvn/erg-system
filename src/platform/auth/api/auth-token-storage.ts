@@ -1,4 +1,6 @@
-﻿export type StoredAuthSession = {
+import { getPersistedJsonValue } from "@/stores/persisted-store";
+
+export type StoredAuthSession = {
   accessToken?: string;
   loggedInAt?: string;
   refreshToken?: string;
@@ -75,18 +77,18 @@ export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): Sto
 
   const teacherSessions = [
     teacherSessionSnapshot,
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")), null),
+    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")), null),
+    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")), null),
+    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
+    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
   ].filter(hasStoredAuthCredential);
 
   const studentSessions = [
-    parseJson<StoredAuthSession | null>(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY), null),
+    getPersistedJsonValue<StoredAuthSession | null>(STUDENT_LOCAL_SESSION_KEY, null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null),
   ].filter(hasStoredAuthCredential);
 

@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
+import { Search } from "lucide-react";
 import {
   DashboardMetricCard,
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
 import { Badge, Button, Input, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TsForm } from "@/components/ui/tanstack-form";
 import {
   classroomSchools,
   classroomSnapshots,
@@ -20,9 +24,13 @@ import {
   type LmsEducationUnitDTO,
 } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";
+import { queryKeys } from "@/lib/query-keys";
+import { AppSelect } from "@/components/ui/app-select";
 
 type AdminOperationsWorkspaceProps = {
   activeLeaf: DashboardLeaf;
@@ -75,7 +83,7 @@ export function AdminOperationsWorkspace({
       headerContent={
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Phạm vi đang xem</p>
+            <p className="text-xs font-semibold text-slate-500">Phạm vi đang xem</p>
             <p className="mt-1 text-sm font-semibold text-slate-950">{scopeDescription}</p>
           </div>
           <Badge tone="secondary">Chỉ hiển thị với quyền ERG</Badge>
@@ -175,44 +183,42 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
   const [isSaving, setIsSaving] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
+  const debouncedKeyword = useDebouncedValue(keyword, 220);
 
   useEffect(() => {
     let cancelled = false;
-    const timeoutId = window.setTimeout(() => {
-      setIsLoading(true);
-      setErrorMessage("");
-      void queryClient
-        .fetchQuery({
-          queryKey: ["admin-operations", "education-units", keyword, typeFilter],
-          queryFn: () =>
-            listEducationUnits({
-              keyword: keyword.trim() || undefined,
-              type: typeFilter || undefined,
-              limit: 100,
-            }),
-          staleTime: 60_000,
-        })
-        .then((response) => {
-          if (cancelled) return;
-          const items = response.items ?? [];
-          setUnits(items);
-          setSelectedUnitId((current) => (items.some((unit) => unit.id === current) ? current : items[0]?.id ?? ""));
-        })
-        .catch((error) => {
-          if (cancelled) return;
-          setUnits([]);
-          setErrorMessage(error instanceof Error ? error.message : "Không tải được danh sách cơ sở giáo dục từ BE.");
-        })
-        .finally(() => {
-          if (!cancelled) setIsLoading(false);
-        });
-    }, 220);
+    setIsLoading(true);
+    setErrorMessage("");
+    void queryClient
+      .fetchQuery({
+        queryKey: queryKeys.adminOperations.educationUnits(debouncedKeyword, typeFilter),
+        queryFn: () =>
+          listEducationUnits({
+            keyword: debouncedKeyword.trim() || undefined,
+            type: typeFilter || undefined,
+            limit: 100,
+          }),
+        staleTime: 60_000,
+      })
+      .then((response) => {
+        if (cancelled) return;
+        const items = response.items ?? [];
+        setUnits(items);
+        setSelectedUnitId((current) => (items.some((unit) => unit.id === current) ? current : items[0]?.id ?? ""));
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        setUnits([]);
+        setErrorMessage(error instanceof Error ? error.message : "Không tải được danh sách cơ sở giáo dục từ BE.");
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
 
     return () => {
       cancelled = true;
-      window.clearTimeout(timeoutId);
     };
-  }, [keyword, queryClient, typeFilter]);
+  }, [debouncedKeyword, queryClient, typeFilter]);
 
   const selectedUnit = units.find((unit) => unit.id === selectedUnitId) ?? units[0];
   const sortedUnits = useMemo(() => sortEducationUnits(units), [units]);
@@ -239,7 +245,7 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
         website: input.website ?? "",
       });
       setUnits((current) => current.map((unit) => (unit.id === updated.id ? updated : unit)));
-      void queryClient.invalidateQueries({ queryKey: ["admin-operations", "education-units"] });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.educationUnits() });
       setSuccessMessage("Đã lưu thông tin cơ sở giáo dục.");
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Không lưu được thông tin cơ sở giáo dục.");
@@ -254,7 +260,7 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
         <DashboardMetricCard label="Hệ thống" value={String(systemCount)} detail="ERG, Hoclieu Studio..." tone="blue" />
         <DashboardMetricCard label="Trung tâm" value={String(centerCount)} detail="đơn vị quản lý trường" tone="emerald" />
         <DashboardMetricCard label="Trường học" value={String(schoolCount)} detail="đơn vị quản lý lớp" tone="violet" />
-        <DashboardMetricCard label="Nguồn dữ liệu" value={isLoading ? "Đang tải" : "BE"} detail="lms_centers thật" tone="amber" />
+        <DashboardMetricCard label="Nguồn dữ liệu" value={isLoading ? <Skeleton className="h-9 w-16" /> : "BE"} detail="lms_centers thật" tone="amber" />
       </div>
 
       <DashboardSectionCard
@@ -263,23 +269,26 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
         action={<Button onClick={onCreateUnit}>Tạo cơ sở</Button>}
       >
         <div className="grid gap-5 xl:grid-cols-[420px_minmax(0,1fr)]">
-          <section className="rounded-3xl border border-slate-200 bg-slate-50 p-4">
+          <section className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
             <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_160px]">
-              <Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Tìm theo tên, mã, địa chỉ..." />
-              <select
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                <Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Tìm theo tên, mã, địa chỉ..." />
+              </div>
+              <AppSelect
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
-                className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
+                className="h-9 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
               >
                 <option value="">Tất cả loại</option>
                 <option value="system">Hệ thống</option>
                 <option value="center">Trung tâm</option>
                 <option value="school">Trường học</option>
-              </select>
+              </AppSelect>
             </div>
 
             {errorMessage ? (
-              <div className="mt-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{errorMessage}</div>
+              <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{errorMessage}</div>
             ) : null}
 
             <div className="mt-4 max-h-[620px] space-y-3 overflow-y-auto pr-1">
@@ -293,8 +302,8 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
                     setErrorMessage("");
                   }}
                   className={cn(
-                    "flex w-full items-start gap-3 rounded-2xl border bg-white p-4 text-left transition hover:border-blue-200 hover:bg-blue-50/40",
-                    selectedUnit?.id === unit.id ? unitActiveClassName(unit.type) : "border-slate-200",
+                    "flex w-full items-start gap-3 rounded-lg border bg-white p-4 text-left transition hover:border-[#b8d6fa] hover:bg-[#f7f8fa]",
+                    selectedUnit?.id === unit.id ? unitActiveClassName(unit.type) : "border-[#e0e4ea]",
                   )}
                 >
                   <UnitAvatar unit={unit} />
@@ -304,20 +313,20 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
                       <UnitTypeBadge type={unit.type} />
                     </span>
                     <span className="mt-1 block truncate text-sm text-slate-500">{unit.address || unit.description || "Chưa có địa chỉ/mô tả"}</span>
-                    <span className="mt-2 block text-xs font-semibold uppercase tracking-[0.12em] text-slate-400">{unit.code || "NO-CODE"}</span>
+                    <span className="mt-2 block text-xs font-semibold text-slate-500">{unit.code || "NO-CODE"}</span>
                   </span>
                 </button>
               ))}
 
               {!units.length && !isLoading ? (
-                <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
+                <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-8 text-center text-sm text-slate-500">
                   Chưa có cơ sở giáo dục phù hợp bộ lọc.
                 </div>
               ) : null}
             </div>
           </section>
 
-          <section className="rounded-3xl border border-slate-200 bg-white">
+          <section className="rounded-lg border border-[#e0e4ea] bg-white">
             {selectedUnit ? (
               <EducationUnitEditor
                 key={selectedUnit.id}
@@ -355,8 +364,8 @@ function LegacyCenterManagement({
       description="Admin thêm trung tâm, kiểm tra trạng thái và đi tiếp vào danh sách lớp/học sinh."
       action={<Button onClick={onCreateUnit}>Tạo cơ sở</Button>}
     >
-      <div className="overflow-hidden rounded-2xl border border-slate-200">
-        <div className="hidden grid-cols-[minmax(0,1fr)_130px_130px_170px_140px] gap-3 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 lg:grid">
+      <div className="overflow-hidden rounded-lg border border-[#e0e4ea]">
+        <div className="hidden grid-cols-[minmax(0,1fr)_130px_130px_170px_140px] gap-3 bg-[#f7f8fa] px-4 py-3 text-[11px] font-semibold text-slate-600 lg:grid">
           <span>Trung tâm</span>
           <span>Lớp</span>
           <span>Học sinh</span>
@@ -409,21 +418,26 @@ function EducationUnitEditor({
 }) {
   const [draft, setDraft] = useState<LmsEducationUnitDTO>(unit);
   const centerOptions = units.filter((item) => item.type === "center" && item.id !== unit.id);
+  const paceStateUpdate = usePacedStateBatch();
+  const form = useForm({
+    defaultValues: draft,
+    onSubmit: () => onSave(draft),
+  });
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => setDraft(unit));
-    return () => window.cancelAnimationFrame(frameId);
-  }, [unit]);
+    paceStateUpdate(() => setDraft(unit));
+  }, [paceStateUpdate, unit]);
 
   function updateDraft<K extends keyof LmsEducationUnitDTO>(key: K, value: LmsEducationUnitDTO[K]) {
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
   return (
-    <form
+    <TsForm
       onSubmit={(event) => {
         event.preventDefault();
-        onSave(draft);
+        event.stopPropagation();
+        void form.handleSubmit();
       }}
       className="space-y-5 p-5"
     >
@@ -432,19 +446,19 @@ function EducationUnitEditor({
           <UnitAvatar unit={draft} size="lg" />
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-xl font-bold text-slate-950">{draft.name || "Cơ sở giáo dục"}</h3>
+              <h3 className="text-xl font-medium text-slate-950">{draft.name || "Cơ sở giáo dục"}</h3>
               <UnitTypeBadge type={draft.type} />
             </div>
             <p className="mt-1 text-sm text-slate-500">{draft.code || "Chưa có mã cơ sở"}</p>
           </div>
         </div>
-        <Button type="submit" disabled={isSaving || !draft.name?.trim()} className="bg-[var(--erg-blue)] hover:bg-blue-800">
+        <Button type="submit" disabled={isSaving || !draft.name?.trim()} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
           {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
         </Button>
       </div>
 
       {successMessage ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{successMessage}</div>
+        <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{successMessage}</div>
       ) : null}
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -454,15 +468,15 @@ function EducationUnitEditor({
         </label>
         <label className="grid gap-1.5">
           <span className="text-sm font-semibold text-slate-700">Loại đơn vị</span>
-          <select
+          <AppSelect
             value={draft.type ?? "school"}
             onChange={(event) => updateDraft("type", event.target.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           >
             <option value="system">Hệ thống</option>
             <option value="center">Trung tâm</option>
             <option value="school">Trường học</option>
-          </select>
+          </AppSelect>
         </label>
         <label className="grid gap-1.5 lg:col-span-2">
           <span className="text-sm font-semibold text-slate-700">Avatar / Logo URL</span>
@@ -473,7 +487,7 @@ function EducationUnitEditor({
           <textarea
             value={draft.description ?? ""}
             onChange={(event) => updateDraft("description", event.target.value)}
-            className="min-h-28 rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-slate-400 focus:ring-4 focus:ring-slate-200/80"
+            className="min-h-28 rounded-md border border-[#d7e0ec] bg-white px-3 py-3 text-sm text-[#242424] shadow-sm outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             placeholder="Ví dụ: Trung tâm phụ trách các trường khu vực Bình Phú..."
           />
         </label>
@@ -495,23 +509,23 @@ function EducationUnitEditor({
         </label>
         <label className="grid gap-1.5">
           <span className="text-sm font-semibold text-slate-700">Trạng thái</span>
-          <select
+          <AppSelect
             value={draft.status ?? "active"}
             onChange={(event) => updateDraft("status", event.target.value)}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           >
             <option value="active">Đang hoạt động</option>
             <option value="archived">Lưu trữ</option>
             <option value="inactive">Tạm dừng</option>
-          </select>
+          </AppSelect>
         </label>
         <label className="grid gap-1.5 lg:col-span-2">
           <span className="text-sm font-semibold text-slate-700">Thuộc trung tâm</span>
-          <select
+          <AppSelect
             value={draft.parentId ?? ""}
             onChange={(event) => updateDraft("parentId", event.target.value)}
             disabled={draft.type !== "school"}
-            className="h-11 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none focus:border-slate-400 focus:ring-4 focus:ring-slate-200 disabled:bg-slate-50 disabled:text-slate-400"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:bg-[#f6f8fb] disabled:text-[#707070]"
           >
             <option value="">Không thuộc trung tâm nào</option>
             {centerOptions.map((center) => (
@@ -519,10 +533,10 @@ function EducationUnitEditor({
                 {center.name}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </label>
       </div>
-    </form>
+    </TsForm>
   );
 }
 
@@ -537,11 +551,11 @@ function UnitAvatar({ size = "md", unit }: { size?: "md" | "lg"; unit: LmsEducat
   const sizeClass = size === "lg" ? "h-20 w-20 text-lg" : "h-12 w-12 text-sm";
 
   if (unit.avatarUrl) {
-    return <img src={unit.avatarUrl} alt={unit.name} className={cn(sizeClass, "shrink-0 rounded-2xl border border-slate-200 object-cover")} />;
+    return <img src={unit.avatarUrl} alt={unit.name} className={cn(sizeClass, "shrink-0 rounded-lg border border-[#e0e4ea] object-cover")} />;
   }
 
   return (
-    <span className={cn(sizeClass, "grid shrink-0 place-items-center rounded-2xl border font-bold", unitAvatarClassName(unit.type))}>
+    <span className={cn(sizeClass, "grid shrink-0 place-items-center rounded-lg border font-semibold", unitAvatarClassName(unit.type))}>
       {initials || "ERG"}
     </span>
   );
@@ -549,7 +563,7 @@ function UnitAvatar({ size = "md", unit }: { size?: "md" | "lg"; unit: LmsEducat
 
 function UnitTypeBadge({ type }: { type?: string }) {
   const label = type === "system" ? "Hệ thống" : type === "center" ? "Trung tâm" : "Trường học";
-  return <span className={cn("rounded-full border px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.12em]", unitBadgeClassName(type))}>{label}</span>;
+  return <span className={cn("rounded-md border px-2.5 py-1 text-[11px] font-semibold", unitBadgeClassName(type))}>{label}</span>;
 }
 
 function unitRank(type?: string) {
@@ -565,19 +579,19 @@ function sortEducationUnits(units: LmsEducationUnitDTO[]) {
 function unitAvatarClassName(type?: string) {
   if (type === "system") return "border-red-100 bg-red-50 text-[var(--erg-red)]";
   if (type === "center") return "border-emerald-100 bg-emerald-50 text-emerald-700";
-  return "border-blue-100 bg-gradient-to-br from-red-50 via-white to-emerald-50 text-[var(--erg-blue)]";
+  return "border-[#b8d6fa] bg-[#ebf3fc] text-[var(--erg-blue)]";
 }
 
 function unitBadgeClassName(type?: string) {
   if (type === "system") return "border-red-200 bg-red-50 text-[var(--erg-red)]";
   if (type === "center") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  return "border-blue-200 bg-gradient-to-r from-red-50 to-emerald-50 text-slate-700";
+  return "border-[#b8d6fa] bg-[#ebf3fc] text-[#0f5ea8]";
 }
 
 function unitActiveClassName(type?: string) {
   if (type === "system") return "border-red-300 bg-red-50";
   if (type === "center") return "border-emerald-300 bg-emerald-50";
-  return "border-blue-300 bg-gradient-to-r from-red-50/80 to-emerald-50/80";
+  return "border-[#b8d6fa] bg-[#ebf3fc]";
 }
 
 function SheetImportWorkspace({
@@ -602,7 +616,7 @@ function InternalDocsWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf }) {
 
 function CenterRow({ center }: { center: ClassroomSchool }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4">
+    <article className="rounded-lg border border-[#e0e4ea] bg-white p-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h3 className="font-semibold text-slate-950">{center.name}</h3>
@@ -625,7 +639,7 @@ function CenterRow({ center }: { center: ClassroomSchool }) {
 
 function ActionItem({ detail, title }: { detail: string; title: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+    <div className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
       <h3 className="font-semibold text-slate-950">{title}</h3>
       <p className="mt-1 text-sm leading-6 text-slate-500">{detail}</p>
     </div>

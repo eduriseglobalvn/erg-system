@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { useI18n } from "@/platform/i18n";
+import { useI18n } from "@/platform/i18n";
+import { AppSelect } from "@/components/ui/app-select";
 import type {
   QuizEditorSlide,
   QuizEditorSlideOptions,
@@ -110,7 +111,7 @@ export function QuestionOptionsSection({
 
       <div className="classic-editor__option-form">
         <OptionRow label={t("common.questionType")}>
-          <select
+          <AppSelect
             className="classic-editor__select"
             value={questionTypeValue}
             onChange={(event) => onUpdateOptions({ questionType: event.target.value })}
@@ -120,10 +121,10 @@ export function QuestionOptionsSection({
                 {t(option.labelKey)}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </OptionRow>
         <OptionRow label={t("common.feedback")}>
-          <select
+          <AppSelect
             className="classic-editor__select"
             value={feedbackValue}
             onChange={(event) => onUpdateOptions({ feedback: event.target.value })}
@@ -133,11 +134,11 @@ export function QuestionOptionsSection({
                 {t(option.labelKey)}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </OptionRow>
         {slide.kind === "multiple-choice" ? (
           <OptionRow label={t("common.branching")}>
-            <select
+            <AppSelect
               className="classic-editor__select"
               value={branchingValue}
               onChange={(event) => onUpdateOptions({ branching: event.target.value })}
@@ -147,11 +148,11 @@ export function QuestionOptionsSection({
                   {t(option.labelKey)}
                 </option>
               ))}
-            </select>
+            </AppSelect>
           </OptionRow>
         ) : null}
         <OptionRow label={t("common.score")}>
-          <select
+          <AppSelect
             className="classic-editor__select"
             value={scoreValue}
             onChange={(event) => onUpdateOptions({ score: event.target.value })}
@@ -161,10 +162,10 @@ export function QuestionOptionsSection({
                 {t(option.labelKey)}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </OptionRow>
         <OptionRow label={t("common.attempts")}>
-          <select
+          <AppSelect
             className="classic-editor__select"
             value={String(options?.attempts ?? 1)}
             onChange={(event) => onUpdateOptions({ attempts: Number(event.target.value) })}
@@ -174,7 +175,7 @@ export function QuestionOptionsSection({
                 {value}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </OptionRow>
       </div>
 
@@ -216,7 +217,7 @@ export function QuestionOptionsSection({
               onChange={(event) => onUpdateOptions({ limitResponses: event.target.checked })}
             />{" "}
             {t("quiz.limitResponses")}{" "}
-            <select
+            <AppSelect
               className="classic-editor__select"
               value={String(options?.limitResponsesValue ?? 1)}
               onChange={(event) => onUpdateOptions({ limitResponsesValue: Number(event.target.value) })}
@@ -226,7 +227,7 @@ export function QuestionOptionsSection({
                   {value}
                 </option>
               ))}
-            </select>
+            </AppSelect>
           </label>
         ) : null}
       </div>
@@ -236,7 +237,7 @@ export function QuestionOptionsSection({
           <div className="classic-editor__options-subtitle">{t("quiz.dragDropOptions")}</div>
           <div className="classic-editor__option-form">
             <OptionRow label={t("quiz.snapDragItemTo")}>
-              <select
+              <AppSelect
                 className="classic-editor__select classic-editor__select--wide"
                 value={dragSnapValue}
                 onChange={(event) =>
@@ -257,10 +258,10 @@ export function QuestionOptionsSection({
                     {t(option.labelKey)}
                   </option>
                 ))}
-              </select>
+              </AppSelect>
             </OptionRow>
             <OptionRow label={t("quiz.snappingType")}>
-              <select
+              <AppSelect
                 className="classic-editor__select classic-editor__select--wide"
                 value={dragSnappingValue}
                 onChange={(event) =>
@@ -281,7 +282,7 @@ export function QuestionOptionsSection({
                     {t(option.labelKey)}
                   </option>
                 ))}
-              </select>
+              </AppSelect>
             </OptionRow>
           </div>
 
@@ -327,7 +328,7 @@ export function QuestionOptionsSection({
           </div>
 
           <OptionRow label={t("quiz.beforeNewAttempt")} stacked>
-            <select
+            <AppSelect
               className="classic-editor__select classic-editor__select--wide"
               value={beforeAttemptValue}
               onChange={(event) =>
@@ -348,7 +349,7 @@ export function QuestionOptionsSection({
                   {t(option.labelKey)}
                 </option>
               ))}
-            </select>
+            </AppSelect>
           </OptionRow>
         </>
       ) : null}

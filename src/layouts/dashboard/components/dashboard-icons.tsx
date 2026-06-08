@@ -1,4 +1,4 @@
-﻿export function DashboardIcon() {
+export function DashboardIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <rect x="4" y="5" width="16" height="15" rx="2.5" />

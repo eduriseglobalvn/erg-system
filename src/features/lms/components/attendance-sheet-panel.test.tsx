@@ -41,7 +41,7 @@ test("shows up to five future attendance columns and keeps them empty", () => {
   expect(disabledFutureButtons).toHaveLength(students.length * 5);
   disabledFutureButtons.forEach((button) => {
     expect(button).toBeDisabled();
-    expect(button).toBeEmptyDOMElement();
+    expect(button).toHaveTextContent("—");
   });
 });
 

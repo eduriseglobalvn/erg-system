@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import { CheckCircle2, ClipboardCheck } from "lucide-react";
 
 import {
   DashboardPageShell,
@@ -8,6 +7,7 @@ import {
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
 import { Badge, Button, Input, ProgressBar } from "@/components/ui/dashboard-kit";
+import { LmsCheckbox } from "@/components/ui/lms-kit";
 import {
   assignmentRuns,
   classroomSchools,
@@ -18,7 +18,8 @@ import {
 import type { AssignmentRun, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 type DeliveryMode = "all" | "selected";
 
@@ -143,8 +144,8 @@ export function AssessmentControlWorkspace({
             <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_220px]">
               <label className="block">
                 <span className="text-sm font-semibold text-slate-700">{copy.assignmentLabel}</span>
-                <select
-                  className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 shadow-sm outline-none focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+                <AppSelect
+                  className="mt-2 h-10 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                   onChange={(event) => setAssignmentId(event.target.value)}
                   value={selectedAssignment?.id ?? ""}
                 >
@@ -153,7 +154,7 @@ export function AssessmentControlWorkspace({
                       {assignment.title}
                     </option>
                   ))}
-                </select>
+                </AppSelect>
               </label>
 
               <label className="block">
@@ -169,7 +170,7 @@ export function AssessmentControlWorkspace({
 
             {selectedAssignment ? <AssignmentPreview assignment={selectedAssignment} copy={copy} /> : null}
 
-            <div className="rounded-[24px] border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <div className="text-sm font-semibold text-slate-950">{copy.recipientsTitle}</div>
@@ -177,7 +178,7 @@ export function AssessmentControlWorkspace({
                     {copy.recipientCount(selectedRecipients.length, students.length)}
                   </div>
                 </div>
-                <div className="inline-flex rounded-2xl border border-slate-200 bg-white p-1">
+                <div className="inline-flex rounded-lg border border-[#cbd7e6] bg-white p-1">
                   {[
                     { id: "all" as const, label: copy.allStudents },
                     { id: "selected" as const, label: copy.selectedStudents },
@@ -185,8 +186,8 @@ export function AssessmentControlWorkspace({
                     <button
                       key={mode.id}
                       className={cn(
-                        "rounded-xl px-3 py-2 text-sm font-semibold transition",
-                        deliveryMode === mode.id ? "bg-slate-950 text-white" : "text-slate-600 hover:bg-slate-50",
+                        "rounded-md px-3 py-1.5 text-sm font-semibold transition",
+                        deliveryMode === mode.id ? "bg-[var(--erg-blue)] text-white" : "text-slate-600 hover:bg-[#f3f4f6]",
                       )}
                       onClick={() => setDeliveryMode(mode.id)}
                       type="button"
@@ -226,17 +227,17 @@ export function AssessmentControlWorkspace({
           <DashboardSectionCard title={copy.recentTitle} description={copy.recentDescription}>
             <div className="space-y-3">
               {(batches.length ? batches : getInitialBatches(copy)).map((batch) => (
-                <div key={batch.id} className="rounded-[22px] border border-slate-200 bg-white p-4">
+                <div key={batch.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
                   <div className="flex items-start gap-3">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
-                      <CheckCircleOutlineOutlinedIcon fontSize="small" />
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
+                      <CheckCircle2 className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
                       <div className="line-clamp-2 text-sm font-semibold text-slate-950">{batch.assignmentTitle}</div>
                       <div className="mt-1 text-sm text-slate-500">
                         {batch.className} • {batch.recipients} {copy.studentsUnit(batch.recipients)}
                       </div>
-                      <div className="mt-2 text-xs font-medium text-slate-500">
+                      <div className="mt-2 text-[13px] font-semibold text-slate-600">
                         {copy.dueDateLabel}: {formatDueDate(batch.dueDate)}
                       </div>
                     </div>
@@ -249,7 +250,7 @@ export function AssessmentControlWorkspace({
           <DashboardSectionCard title={copy.collectTitle} description={copy.collectDescription}>
             <div className="space-y-3">
               {filteredAssignments.slice(0, 3).map((assignment) => (
-                <div key={assignment.id} className="rounded-[22px] border border-slate-200 bg-white p-4">
+                <div key={assignment.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="line-clamp-2 text-sm font-semibold text-slate-950">{assignment.title}</div>
@@ -259,7 +260,7 @@ export function AssessmentControlWorkspace({
                       {assignment.needsReviewCount} {copy.reviewLabel}
                     </Badge>
                   </div>
-                  <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-blue-600" />
+                  <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-[var(--erg-blue)]" />
                 </div>
               ))}
             </div>
@@ -282,9 +283,9 @@ function SelectControl({
   value: string;
 }) {
   return (
-    <select
+    <AppSelect
       aria-label={ariaLabel}
-      className="h-11 min-w-[150px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+      className="h-10 min-w-[150px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       onChange={(event) => onChange(event.target.value)}
       value={value}
     >
@@ -293,16 +294,16 @@ function SelectControl({
           {option.label}
         </option>
       ))}
-    </select>
+    </AppSelect>
   );
 }
 
 function AssignmentPreview({ assignment, copy }: { assignment: AssignmentRun; copy: AssignmentCopy }) {
   return (
-    <div className="rounded-[24px] border border-blue-100 bg-blue-50/60 p-4">
+    <div className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] p-4">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white text-blue-700">
-          <AssignmentTurnedInOutlinedIcon fontSize="small" />
+        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white text-[var(--erg-blue)]">
+          <ClipboardCheck className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-slate-950">{assignment.title}</div>
@@ -322,8 +323,8 @@ function AssignmentPreview({ assignment, copy }: { assignment: AssignmentRun; co
 
 function PreviewMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-white px-3 py-2">
-      <div className="text-xs font-medium text-slate-500">{label}</div>
+    <div className="rounded-lg bg-white px-3 py-2">
+      <div className="text-[13px] font-bold text-slate-600">{label}</div>
       <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
     </div>
   );
@@ -339,14 +340,14 @@ function StudentCheck({
   student: ClassroomStudent;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 transition hover:bg-slate-50">
-      <input checked={checked} onChange={onChange} type="checkbox" className="h-4 w-4 accent-slate-950" />
-      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-slate-950 text-xs font-semibold text-white">
+    <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#cbd7e6] bg-white px-3 py-3 transition hover:bg-[#f8fbff]">
+      <LmsCheckbox checked={checked} onCheckedChange={onChange} />
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-[13px] font-bold text-white">
         {student.avatarSeed}
       </span>
       <span className="min-w-0">
         <span className="block truncate text-sm font-semibold text-slate-950">{student.name}</span>
-        <span className="block truncate text-xs text-slate-500">{student.currentStage}</span>
+        <span className="block truncate text-[13px] font-semibold text-slate-600">{student.currentStage}</span>
       </span>
     </label>
   );

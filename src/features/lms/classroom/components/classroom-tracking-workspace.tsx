@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import { ClipboardCheck, School, Users } from "lucide-react";
 
 import {
   DashboardPageShell,
@@ -17,7 +15,8 @@ import {
 import type { AssignmentRun, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function ClassroomTrackingWorkspace({
   activeLeaf,
@@ -79,14 +78,14 @@ export function ClassroomTrackingWorkspace({
     >
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(320px,0.8fr)]">
         <div className="space-y-4">
-          <div className="rounded-[28px] border border-slate-200/80 bg-white/95 p-5 shadow-[0_20px_48px_-30px_rgba(15,23,42,0.35)]">
+          <div className="rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-sm">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  <SchoolOutlinedIcon fontSize="small" />
+                <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600">
+                  <School className="h-4 w-4" />
                   <span>{copy.campusTitle}</span>
                 </div>
-                <h2 className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-slate-950">{school.name}</h2>
+                <h2 className="mt-2 text-xl font-semibold text-slate-950">{school.name}</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {copy.schoolLead}: {school.principal}
                 </p>
@@ -167,12 +166,12 @@ function CampusStat({
   return (
     <div
       className={cn(
-        "rounded-2xl border px-4 py-3",
-        tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-slate-200 bg-slate-50 text-slate-950",
+        "rounded-lg border px-4 py-3",
+        tone === "warning" ? "border-amber-200 bg-amber-50 text-amber-900" : "border-[#cbd7e6] bg-[#f8fbff] text-slate-950",
       )}
     >
-      <div className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</div>
-      <div className="mt-1 text-2xl font-semibold tracking-[-0.04em]">{value}</div>
+      <div className="text-[13px] font-bold text-slate-600">{label}</div>
+      <div className="mt-1 text-xl font-semibold">{value}</div>
     </div>
   );
 }
@@ -189,9 +188,9 @@ function SelectControl({
   value: string;
 }) {
   return (
-    <select
+    <AppSelect
       aria-label={ariaLabel}
-      className="h-11 min-w-[150px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 shadow-sm outline-none transition focus:border-blue-300 focus:ring-4 focus:ring-blue-100"
+      className="h-10 min-w-[150px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       onChange={(event) => onChange(event.target.value)}
       value={value}
     >
@@ -200,7 +199,7 @@ function SelectControl({
           {option.label}
         </option>
       ))}
-    </select>
+    </AppSelect>
   );
 }
 
@@ -226,8 +225,8 @@ function ClassroomCard({
   return (
     <article
       className={cn(
-        "overflow-hidden rounded-[24px] border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_-30px_rgba(15,23,42,0.55)]",
-        isSelected ? "border-blue-300 ring-4 ring-blue-100" : "border-slate-200",
+        "overflow-hidden rounded-lg border bg-white shadow-sm transition hover:border-[#b8d6fa]",
+        isSelected ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cbd7e6]",
       )}
     >
       <button type="button" className="block w-full text-left" onClick={onSelect}>
@@ -235,7 +234,7 @@ function ClassroomCard({
         <div className="p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h3 className="truncate text-xl font-semibold tracking-[-0.04em] text-slate-950">{snapshot.className}</h3>
+              <h3 className="truncate text-lg font-semibold text-slate-950">{snapshot.className}</h3>
               <p className="mt-1 text-sm text-slate-500">
                 {snapshot.gradeLabel} • {snapshot.homeroomTeacher}
               </p>
@@ -282,8 +281,8 @@ function ClassroomCard({
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-slate-50 px-3 py-2">
-      <div className="text-xs font-medium text-slate-500">{label}</div>
+    <div className="rounded-lg bg-[#f8fbff] px-3 py-2">
+      <div className="text-[13px] font-bold text-slate-600">{label}</div>
       <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
     </div>
   );
@@ -304,10 +303,10 @@ function SelectedClassPanel({
 
   return (
     <DashboardSectionCard title={copy.focusTitle} description={copy.focusDescription}>
-      <div className="rounded-[22px] border border-slate-200 bg-slate-50 p-4">
+      <div className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-xl font-semibold tracking-[-0.04em] text-slate-950">{snapshot.className}</div>
+            <div className="text-lg font-semibold text-slate-950">{snapshot.className}</div>
             <div className="mt-1 text-sm text-slate-500">
               {snapshot.gradeLabel} • {copy.teacherLabel}: {snapshot.homeroomTeacher}
             </div>
@@ -316,9 +315,9 @@ function SelectedClassPanel({
         </div>
 
         <div className="mt-5 grid gap-3">
-          <FocusRow icon={<GroupOutlinedIcon fontSize="inherit" />} label={copy.supportLabel} value={`${snapshot.riskStudents}`} />
+          <FocusRow icon={<Users className="h-4 w-4" />} label={copy.supportLabel} value={`${snapshot.riskStudents}`} />
           <FocusRow
-            icon={<AssignmentTurnedInOutlinedIcon fontSize="inherit" />}
+            icon={<ClipboardCheck className="h-4 w-4" />}
             label={copy.assignmentsLabel}
             value={`${snapshot.activeAssignments}`}
           />
@@ -345,9 +344,9 @@ function SelectedClassPanel({
 
 function FocusRow({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl bg-white px-3 py-3">
+    <div className="flex items-center justify-between gap-3 rounded-lg bg-white px-3 py-3">
       <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
-        <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-50 text-blue-700">{icon}</span>
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]">{icon}</span>
         {label}
       </div>
       <span className="text-lg font-semibold text-slate-950">{value}</span>
@@ -357,7 +356,7 @@ function FocusRow({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function AssignmentCard({ assignment, copy }: { assignment: AssignmentRun; copy: ClassroomCopy }) {
   return (
-    <article className="rounded-[22px] border border-slate-200 bg-white p-4">
+    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-slate-950">{assignment.title}</h3>
@@ -367,8 +366,8 @@ function AssignmentCard({ assignment, copy }: { assignment: AssignmentRun; copy:
         </div>
         <Badge tone="outline">{assignment.completionRate}%</Badge>
       </div>
-      <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-blue-600" />
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500">
+      <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-[var(--erg-blue)]" />
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold text-slate-600">
         <span>
           <strong className="text-slate-950">{assignment.submittedCount}</strong> {copy.submittedLabel}
         </span>
@@ -376,7 +375,7 @@ function AssignmentCard({ assignment, copy }: { assignment: AssignmentRun; copy:
           <strong className="text-slate-950">{assignment.needsReviewCount}</strong> {copy.reviewLabel}
         </span>
       </div>
-      <div className="mt-3 text-xs font-medium text-slate-500">{assignment.dueLabel}</div>
+      <div className="mt-3 text-[13px] font-semibold text-slate-600">{assignment.dueLabel}</div>
     </article>
   );
 }
@@ -400,13 +399,13 @@ function getClassAttention(snapshot: ClassroomSnapshot, copy: ClassroomCopy) {
 
   return {
     label: copy.statusSteady,
-    progressClassName: "bg-blue-600",
+    progressClassName: "bg-[var(--erg-blue)]",
     tone: "secondary" as const,
   };
 }
 
 function getClassAccent(index: number) {
-  const accents = ["bg-blue-600", "bg-emerald-500", "bg-amber-500", "bg-violet-500"];
+  const accents = ["bg-[var(--erg-blue)]", "bg-emerald-500", "bg-amber-500", "bg-slate-500"];
   return accents[index % accents.length];
 }
 

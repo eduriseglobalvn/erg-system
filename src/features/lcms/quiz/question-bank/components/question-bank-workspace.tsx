@@ -1,7 +1,8 @@
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-keys";
 
 import {
   DashboardPageShell,
@@ -9,6 +10,8 @@ import {
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
 import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 import {
@@ -27,7 +30,8 @@ import type {
   QuizBankKind,
 } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { cn } from "@/lib/utils";
-import type { ContentScope } from "@/types/scope-types";
+import type { ContentScope } from "@/types/scope-types";
+import { AppSelect } from "@/components/ui/app-select";
 
 type QuizKindFilter = "all" | QuizBankKind;
 
@@ -61,10 +65,11 @@ export function QuestionBankWorkspace({
     getDefaultAutoTopicIds(questionBankSubjects, "ic3-gs6", initialLevelId),
   );
   const [autoCount, setAutoCount] = useState(10);
-  const deferredSearchValue = useDeferredValue(searchValue);
+  const debouncedSearchValue = useDebouncedValue(searchValue);
+  const paceStateUpdate = usePacedStateBatch();
 
   const questionBankQuery = useQuery({
-    queryKey: ["question-bank", "workspace"],
+    queryKey: queryKeys.questionBank.workspace(),
     queryFn: loadQuestionBankData,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -75,7 +80,7 @@ export function QuestionBankWorkspace({
     const data = questionBankQuery.data;
     if (!data) return;
 
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       const nextSubjects = data.subjects.length ? data.subjects : questionBankSubjects;
       const nextSubject = nextSubjects.find((subject) => subject.id === subjectId) ?? nextSubjects[0];
       const nextLevel = nextSubject.levels.find((level) => level.id === levelId) ?? nextSubject.levels[0];
@@ -88,8 +93,7 @@ export function QuestionBankWorkspace({
       setTopicId("all");
       setAutoTopicIds(getDefaultAutoTopicIds(nextSubjects, nextSubject.id, nextLevel?.id ?? ""));
     });
-    return () => window.cancelAnimationFrame(frameId);
-  }, [levelId, questionBankQuery.data, subjectId]);
+  }, [levelId, paceStateUpdate, questionBankQuery.data, subjectId]);
 
   const activeSubject = useMemo(() => findQuestionBankSubject(subjects, subjectId), [subjectId, subjects]);
   const activeLevel = useMemo(() => findQuestionBankLevel(activeSubject, levelId), [activeSubject, levelId]);
@@ -103,7 +107,7 @@ export function QuestionBankWorkspace({
   );
 
   const visibleQuestions = useMemo(() => {
-    const keyword = deferredSearchValue.trim().toLowerCase();
+    const keyword = debouncedSearchValue.trim().toLowerCase();
 
     return questions.filter((question) => {
       const matchesSubject = question.subjectId === subjectId;
@@ -124,7 +128,7 @@ export function QuestionBankWorkspace({
 
       return matchesSubject && matchesLevel && matchesTopic && matchesScope && matchesSearch;
     });
-  }, [activeLevel.id, contentScope, deferredSearchValue, questions, subjectId, topicId]);
+  }, [activeLevel.id, contentScope, debouncedSearchValue, questions, subjectId, topicId]);
 
   const selectedQuestions = useMemo(
     () => questions.filter((question) => selectedIds.includes(question.id) && canUseInScope(question.scope, contentScope)),
@@ -380,7 +384,7 @@ function QuestionStructurePanel({
           />
         </div>
 
-        <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm">
+        <div className="flex min-h-11 flex-wrap items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3.5 py-2 text-sm">
           <span className="font-medium text-slate-500">{copy.currentPathLabel}</span>
           <span className="font-semibold text-slate-950">{activeSubject.label}</span>
           <span className="text-slate-300">/</span>
@@ -448,8 +452,8 @@ function QuestionLibrary({
         </div>
       }
     >
-      <div className="overflow-hidden rounded-2xl border border-slate-200">
-        <div className="hidden grid-cols-[56px_minmax(0,1fr)_170px_190px] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 lg:grid">
+      <div className="overflow-hidden rounded-lg border border-slate-200">
+        <div className="hidden grid-cols-[56px_minmax(0,1fr)_170px_190px] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold  text-slate-400 lg:grid">
           <span className="text-center">{copy.table.select}</span>
           <span>{copy.table.question}</span>
           <span>{copy.table.scope}</span>
@@ -464,7 +468,7 @@ function QuestionLibrary({
                 key={question.id}
                 className={cn(
                   "grid gap-3 px-4 py-4 transition lg:grid-cols-[56px_minmax(0,1fr)_170px_190px] lg:items-center",
-                  selected ? "bg-blue-50/70" : "hover:bg-slate-50",
+                  selected ? "bg-[var(--erg-blue-light)]" : "hover:bg-slate-50",
                 )}
               >
                 <label className="flex items-center gap-2 lg:justify-center">
@@ -530,10 +534,10 @@ function QuizBuilderPanel({
 }) {
   return (
     <DashboardSectionCard title={copy.builderTitle} description={copy.builderDescription}>
-      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <div className="text-3xl font-semibold tracking-[-0.04em] text-slate-950">{selectedQuestions.length}</div>
+            <div className="text-xl font-semibold text-slate-950">{selectedQuestions.length}</div>
             <div className="mt-1 text-sm text-slate-500">{copy.selectedQuestionCount}</div>
           </div>
           <Button variant="outline" size="sm" onClick={onClearSelection} disabled={selectedQuestions.length === 0}>
@@ -547,7 +551,7 @@ function QuizBuilderPanel({
 
       <SelectedQuestionList copy={copy} questions={selectedQuestions} />
 
-      <div className="rounded-2xl border border-slate-200 bg-white p-4">
+      <div className="rounded-lg border border-slate-200 bg-white p-4">
         <div className="text-sm font-semibold text-slate-950">{copy.autoBuilderTitle}</div>
         <div className="mt-3 grid gap-3">
           <SelectControl
@@ -562,7 +566,7 @@ function QuizBuilderPanel({
             ]}
           />
           <div>
-            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{copy.autoTopicLabel}</div>
+            <div className="text-xs font-semibold  text-slate-400">{copy.autoTopicLabel}</div>
             <div className="mt-2 flex max-h-28 flex-wrap gap-2 overflow-y-auto pr-1">
               {levelTopics.map((topic) => (
                 <TopicChip key={topic.id} active={autoTopicIds.includes(topic.id)} onClick={() => onTopicToggle(topic.id)}>
@@ -583,11 +587,11 @@ function QuizBuilderPanel({
 
 function SelectedQuestionList({ copy, questions }: { copy: QuestionBankCopy; questions: QuestionBankQuestion[] }) {
   if (questions.length === 0) {
-    return <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm leading-6 text-slate-500">{copy.emptySelection}</div>;
+    return <div className="rounded-lg border border-dashed border-slate-200 bg-white px-4 py-6 text-center text-sm leading-6 text-slate-500">{copy.emptySelection}</div>;
   }
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white">
+    <div className="rounded-lg border border-slate-200 bg-white">
       {questions.slice(0, 3).map((question) => (
         <div key={question.id} className="border-b border-slate-100 px-4 py-3 last:border-b-0">
           <div className="line-clamp-2 text-sm font-semibold leading-6 text-slate-950">{question.stem}</div>
@@ -632,8 +636,8 @@ function QuizBankPanel({
         />
       }
     >
-      <div className="overflow-hidden rounded-2xl border border-slate-200">
-        <div className="hidden grid-cols-[minmax(0,1.2fr)_110px_130px_100px_120px_120px] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-slate-400 lg:grid">
+      <div className="overflow-hidden rounded-lg border border-slate-200">
+        <div className="hidden grid-cols-[minmax(0,1.2fr)_110px_130px_100px_120px_120px] gap-3 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-semibold  text-slate-400 lg:grid">
           <span>{copy.quizTable.title}</span>
           <span>{copy.quizTable.scope}</span>
           <span>{copy.quizTable.kind}</span>
@@ -698,18 +702,18 @@ function SelectControl({
 
   return (
     <label className="block">
-      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">{label}</span>
-      <select
+      <span className="text-xs font-semibold  text-slate-400">{label}</span>
+      <AppSelect
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-900 shadow-sm outline-none transition focus:border-slate-400 focus:ring-4 focus:ring-slate-200"
+        className="mt-2 h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </select>
+      </AppSelect>
       {!hideDescription && selectedOption?.description ? (
         <span className="mt-1 block truncate text-xs font-medium text-slate-500">{selectedOption.description}</span>
       ) : null}

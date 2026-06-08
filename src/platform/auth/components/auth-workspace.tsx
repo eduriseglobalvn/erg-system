@@ -1,4 +1,4 @@
-﻿import { type FormEvent } from "react";
+import { type FormEvent } from "react";
 
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { AccountPanel } from "@/platform/auth/components/account-panel";
@@ -44,7 +44,7 @@ export function AuthWorkspace() {
   }
 
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,rgba(47,70,210,0.14),transparent_26%),linear-gradient(180deg,#f8f9fc,#eef2ff)] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[var(--erg-bg)] px-4 py-6 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1440px]">
         <div className="mb-4 flex justify-end">
           <LocaleSwitcher className="w-full max-w-[280px]" />
@@ -53,19 +53,19 @@ export function AuthWorkspace() {
         {auth.notice ? (
           <div
             className={cn(
-              "mb-4 rounded-2xl border px-4 py-3 text-sm font-medium shadow-sm",
+              "mb-4 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
               auth.notice.tone === "success"
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                 : auth.notice.tone === "error"
                   ? "border-rose-200 bg-rose-50 text-rose-700"
-                  : "border-blue-200 bg-blue-50 text-blue-700",
+                  : "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
             )}
           >
             {auth.notice.message}
           </div>
         ) : null}
 
-        <section className="overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-[0_30px_80px_-50px_rgba(15,23,42,0.35)]">
+        <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
           <div className="grid min-h-[780px] lg:grid-cols-[1.08fr_1fr]">
             <AuthHeroPanel />
             <div className="bg-white p-5 sm:p-7 lg:p-8">

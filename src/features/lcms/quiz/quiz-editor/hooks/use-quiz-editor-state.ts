@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from "react";
 
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tr } from "@/platform/i18n";
 import { createQuizSlideFromBankQuestion } from "@/features/lcms/quiz/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
@@ -64,6 +65,7 @@ export function useQuizEditorState() {
   const [selectedThemeId, setSelectedThemeId] = useState(defaultQuizTheme.id);
   const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(initialSelected);
   const [searchValue, setSearchValue] = useState("");
+  const debouncedSearchValue = useDebouncedValue(searchValue);
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<string[]>([]);
   const [clipboard, setClipboard] = useState<
     | { type: "group"; payload: QuizEditorGroup }
@@ -785,7 +787,7 @@ export function useQuizEditorState() {
   );
 
   const filteredGroups = useMemo(() => {
-    const keyword = searchValue.trim().toLowerCase();
+    const keyword = debouncedSearchValue.trim().toLowerCase();
     if (!keyword) return groups;
 
     return groups
@@ -802,7 +804,7 @@ export function useQuizEditorState() {
         return { ...group, slides: matchedSlides };
       })
       .filter((group) => group.title.toLowerCase().includes(keyword) || group.slides.length > 0);
-  }, [groups, searchValue]);
+  }, [debouncedSearchValue, groups]);
 
   return {
     groups,

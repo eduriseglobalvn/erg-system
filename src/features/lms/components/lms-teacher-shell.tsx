@@ -1,8 +1,7 @@
-﻿import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+import { lazy, memo, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "@/routes/router-compat";
 import {
-  Bell,
   BookOpen,
   BookOpenCheck,
   CalendarCheck,
@@ -13,11 +12,11 @@ import {
   FileText,
   GraduationCap,
   MoreVertical,
+  RotateCcw,
   Search,
   UsersRound,
 } from "lucide-react";
 
-import { Avatar } from "@/components/ui/avatar";
 import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
 import { ERG_ASSETS } from "@/config/seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
@@ -30,12 +29,14 @@ import {
   defaultClassId,
   defaultSchoolId,
 } from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
+import { LmsSelect } from "@/components/ui/lms-kit";
+import { LmsMobileShell, useLmsMobileBreakpoint } from "@/features/lms/mobile";
 
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
 
@@ -64,12 +65,62 @@ const AttendanceSheetPanel = lazy(() =>
     default: module.AttendanceSheetPanel,
   })),
 );
+const AssignHomeworkPage = lazy(() =>
+  import("@/features/lms/components/assign-homework-page").then((module) => ({
+    default: module.AssignHomeworkPage,
+  })),
+);
+const ExerciseBankPage = lazy(() =>
+  import("@/features/lms/components/exercise-bank-page").then((module) => ({
+    default: module.ExerciseBankPage,
+  })),
+);
+const StudentGroupsPage = lazy(() =>
+  import("@/features/lms/components/student-groups-page").then((module) => ({
+    default: module.StudentGroupsPage,
+  })),
+);
+const ClassManagementPage = lazy(() =>
+  import("@/features/lms/classroom/components/class-management-page").then((module) => ({
+    default: module.ClassManagementPage,
+  })),
+);
+const HomeworkFloatingMenu = lazy(() =>
+  import("@/features/lms/components/homework-floating-menu").then((module) => ({
+    default: module.HomeworkFloatingMenu,
+  })),
+);
+const LmsAccountPage = lazy(() =>
+  import("@/features/lms/components/lms-account-page").then((module) => ({
+    default: module.LmsAccountPage,
+  })),
+);
+const LmsLoginLogsPage = lazy(() =>
+  import("@/features/lms/components/lms-login-logs-page").then((module) => ({
+    default: module.LmsLoginLogsPage,
+  })),
+);
+const LmsNotificationCenter = lazy(() =>
+  import("@/features/lms/components/lms-notification-center").then((module) => ({
+    default: module.LmsNotificationCenter,
+  })),
+);
+const LmsNotificationDetailPage = lazy(() =>
+  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
+    default: module.LmsNotificationDetailPage,
+  })),
+);
+const LmsNotificationListPage = lazy(() =>
+  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
+    default: module.LmsNotificationListPage,
+  })),
+);
 
 const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: typeof ClipboardList }> = [
-  { id: "homework", label: "Giao bài", path: "/homework", icon: ClipboardList },
+  { id: "homework", label: "Bài tập", path: "/homework", icon: ClipboardList },
   { id: "score", label: "Bảng điểm", path: "/score", icon: GraduationCap },
   { id: "attendance", label: "Điểm danh", path: "/attendance", icon: CalendarCheck },
-  { id: "schedule", label: "Lịch giảng dạy", path: "/calendar", icon: CalendarDays },
+  { id: "schedule", label: "Lịch làm việc", path: "/calendar", icon: CalendarDays },
   { id: "classLog", label: "Sổ đầu bài", path: "/class-log", icon: BookOpenCheck },
   { id: "resources", label: "Tài nguyên", path: "/resources", icon: BookOpen },
   { id: "reports", label: "Báo cáo", path: "/reports", icon: FileText },
@@ -83,12 +134,15 @@ function resolveSection(pathname: string): LmsSection {
 export function LmsTeacherShell() {
   const { actions, account } = useAuthSession("lms");
   const navigate = useNavigate();
-  const location = useLocation();
   const apiBacked = hasApiBase();
-  const activeSection = resolveSection(location.pathname);
+  const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
+  const activeSection = resolveSection(pathname);
+  const showHomeworkFloatingMenu = pathname.startsWith("/homework");
   const [requestedSchoolId, setSelectedSchoolId] = useState("");
   const [requestedClassId, setSelectedClassId] = useState("");
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+  const [runs, setRuns] = useState<AssignmentRun[]>(assignmentRuns);
+  const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const bootstrapQuery = useQuery({
     queryKey: ["lms-teacher-shell", "bootstrap"],
     queryFn: loadLmsDashboardBootstrap,
@@ -142,6 +196,8 @@ export function LmsTeacherShell() {
     }),
     [selectedSchoolId],
   );
+  const isMobile = useLmsMobileBreakpoint();
+  const mobileDockItems = useMemo(() => lmsNavItems.slice(0, 4), []);
 
   useEffect(() => {
     if (!bootstrapQuery.error) return;
@@ -160,130 +216,95 @@ export function LmsTeacherShell() {
     navigate("/login", { replace: true });
   }
 
-  return (
-    <div className="flex h-screen max-h-screen overflow-hidden bg-[#f5f7fb] text-slate-950">
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200/80 bg-white/95 backdrop-blur">
-          <div className="flex h-[72px] items-center gap-5 px-5 xl:px-8">
-            <button type="button" onClick={() => navigate("/homework")} className="flex shrink-0 items-center gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-xl border border-slate-200 bg-white shadow-sm">
-                <img src={ERG_ASSETS.logo} alt="ERG" className="h-8 w-auto object-contain" />
-              </span>
-              <span className="hidden text-sm font-black uppercase tracking-tight text-[#0b1f80] lg:block">LMS ERG</span>
-            </button>
-
-            <nav className="hidden min-w-0 flex-1 items-center justify-center gap-1 overflow-x-auto xl:flex">
-              {lmsNavItems.map((item) => {
-                const Icon = item.icon;
-                const active = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => navigate(item.path)}
-                    className={cn(
-                      "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 hover:text-[#0b6fcf]",
-                      active && "bg-blue-50 text-[#0b6fcf]",
-                    )}
-                  >
-                    <Icon className="h-5 w-5" />
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="ml-auto flex shrink-0 items-center gap-3">
-              <select
-                value={selectedSchoolId}
-                onChange={(event) => selectSchool(event.target.value)}
-                className="hidden h-11 max-w-[230px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-300 lg:block"
-                aria-label="Chọn trường"
-              >
-                {schools.map((school) => (
-                  <option key={school.id} value={school.id}>
-                    {school.name}
-                  </option>
-                ))}
-              </select>
-              <select
-                value={selectedClass?.id ?? ""}
-                onChange={(event) => setSelectedClassId(event.target.value)}
-                className="h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm font-bold text-slate-800 shadow-sm outline-none focus:border-blue-300"
-                aria-label="Chọn lớp"
-                disabled={!selectedClassOptions.length}
-              >
-                {selectedClassOptions.length ? (
-                  selectedClassOptions.map((classroom) => (
-                    <option key={classroom.id} value={classroom.id}>
-                      {classroom.className}
-                    </option>
-                  ))
-                ) : (
-                  <option value="">Chưa có lớp</option>
-                )}
-              </select>
-              <button type="button" aria-label="Thông báo" className="grid h-10 w-10 place-items-center rounded-full text-slate-500 hover:bg-slate-100">
-                <Bell className="h-5 w-5" />
-              </button>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setAccountMenuOpen((open) => !open)}
-                  className="grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-[#0b1f80] text-xs font-black text-white ring-2 ring-white transition hover:ring-blue-200"
-                  aria-label="Tài khoản giáo viên"
-                  aria-expanded={accountMenuOpen}
-                >
-                  {teacherAvatar ? <img src={teacherAvatar} alt={teacherName} className="h-full w-full object-cover" /> : getInitials(teacherName)}
-                </button>
-                {accountMenuOpen ? (
-                  <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-                    <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
-                      <Avatar className="grid h-10 w-10 place-items-center overflow-hidden rounded-full bg-[#0b1f80] text-xs font-black text-white">
-                        {teacherAvatar ? <img src={teacherAvatar} alt={teacherName} className="h-full w-full object-cover" /> : getInitials(teacherName)}
-                      </Avatar>
-                      <div className="min-w-0">
-                        <div className="truncate text-sm font-black text-slate-950">{teacherName}</div>
-                        <div className="truncate text-xs font-semibold text-slate-500">{teacherEmail}</div>
-                      </div>
-                    </div>
-                    <div className="p-2">
-                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account"); }} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50">
-                        Quản lý tài khoản
-                      </button>
-                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account/login-logs"); }} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-slate-700 hover:bg-slate-50">
-                        Lịch sử đăng nhập
-                      </button>
-                      <button type="button" onClick={signOut} className="w-full rounded-lg px-3 py-2 text-left text-sm font-bold text-rose-600 hover:bg-rose-50">
-                        Đăng xuất
-                      </button>
-                    </div>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex gap-2 overflow-x-auto border-t border-slate-100 px-4 py-2 xl:hidden">
-            {lmsNavItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "whitespace-nowrap rounded-full px-3 py-2 text-sm font-bold",
-                  activeSection === item.id ? "bg-blue-50 text-[#0b6fcf]" : "text-slate-600",
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </header>
-
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          {activeSection === "resources" ? (
+  const teacherContent = (
+    <>
+          {pathname === "/account" ? (
+            <LmsAccountPage
+              onLoginLogs={() => navigate("/account/login-logs")}
+              onSignedOut={() => navigate("/login", { replace: true })}
+            />
+          ) : pathname === "/account/login-logs" ? (
+            <LmsLoginLogsPage onManageAccount={() => navigate("/account")} />
+          ) : pathname === "/notifications" ? (
+            <LmsNotificationListPage onOpenDetail={(notificationId) => navigate(`/notifications/${notificationId}`)} />
+          ) : pathname.startsWith("/notifications/") ? (
+            <LmsNotificationDetailPage
+              notificationId={pathname.replace("/notifications/", "").split("/")[0] ?? ""}
+              onBack={() => navigate("/notifications")}
+            />
+          ) : pathname === "/homework/assign" ? (
+            <Suspense fallback={null}>
+              <AssignHomeworkPage
+                classes={classes}
+                selectedClass={selectedClass}
+                onBack={() => navigate("/homework")}
+                onCreateAssignment={(title, subject) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: title,
+                    subjectLabel: subject,
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
+          ) : pathname === "/homework/student-groups" ? (
+            <Suspense fallback={null}>
+              <StudentGroupsPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                onBack={() => navigate("/homework")}
+              />
+            </Suspense>
+          ) : pathname === "/homework/class" ? (
+            <Suspense fallback={null}>
+              <ClassManagementPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+              />
+            </Suspense>
+          ) : pathname === "/homework/exercise-bank" ? (
+            <Suspense fallback={null}>
+              <ExerciseBankPage
+                onBack={() => navigate("/homework")}
+                onAssign={(exerciseTitle) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: exerciseTitle,
+                    subjectLabel: "Kho bài tập",
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
+          ) : pathname === "/homework/progress" ? (
+            <ClassManagementPage
+              classes={classes}
+              selectedClass={selectedClass}
+              selectedSchoolName={selectedSchoolName}
+              students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+            />
+          ) : activeSection === "resources" ? (
             <LearningResourceDashboardScopeProvider value={learningResourceScope}>
               <Suspense fallback={null}>
                 <LearningResourceLibraryPage />
@@ -311,18 +332,209 @@ export function LmsTeacherShell() {
             <Suspense fallback={null}>
               <AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
             </Suspense>
+          ) : activeSection === "homework" ? (
+            <div className="flex min-h-full flex-col gap-3 px-4 py-4 xl:px-6">
+              <HomeworkPanel
+                selectedClass={selectedClass}
+                runs={runs}
+                onAssign={() => navigate("/homework/assign")}
+                onViewProgress={() => navigate("/homework/class")}
+              />
+            </div>
           ) : (
             <TeacherWorkspaceFrame
               activeLabel={activeNav.label}
               selectedClass={selectedClass}
               selectedSchoolName={selectedSchoolName}
             >
-              {activeSection === "homework" ? <HomeworkPanel selectedClass={selectedClass} /> : null}
               {activeSection === "reports" ? <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} /> : null}
             </TeacherWorkspaceFrame>
           )}
+
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="lms-teacher-shell flex min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+        <LmsMobileShell
+          activeLabel={activeNav.label}
+          activeSection={activeSection}
+          classes={classes}
+          dockItems={mobileDockItems}
+          navItems={lmsNavItems}
+          notificationCenter={<LmsNotificationCenter />}
+          schoolName={selectedSchoolName}
+          schools={schools}
+          selectedClassId={selectedClass?.id ?? ""}
+          selectedClassName={selectedClass?.className ?? "Lop hoc"}
+          selectedSchoolId={selectedSchoolId}
+          teacherEmail={teacherEmail}
+          teacherName={teacherName}
+          onClassChange={setSelectedClassId}
+          onNavigate={(path) => navigate(path)}
+          onSchoolChange={selectSchool}
+          onSignOut={signOut}
+        >
+          {teacherContent}
+        </LmsMobileShell>
+      </div>
+    );
+  }
+  return (
+    <div className="lms-teacher-shell flex h-screen max-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-40 shrink-0 border-b border-[var(--border)] bg-[var(--card)]/95 shadow-[var(--shadow-xs)] backdrop-blur-xl">
+          <div className="flex h-16 items-center gap-4 px-4 xl:px-5">
+            <button type="button" onClick={() => navigate("/homework")} className="group flex h-12 shrink-0 items-center rounded-[10px] px-1.5 transition hover:bg-[var(--surface-hover)]">
+              <span className="flex h-11 w-[112px] items-center overflow-hidden">
+                <img src={ERG_ASSETS.logo} alt="ERG EduRise Global" className="h-10 w-auto max-w-full object-contain" />
+              </span>
+            </button>
+
+            <nav className="hidden min-w-0 flex-1 items-center justify-start gap-3 overflow-x-auto pl-0 pr-4 xl:flex">
+              {lmsNavItems.map((item) => {
+                const Icon = item.icon;
+                const active = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => navigate(item.path)}
+                    className={cn(
+                      "relative inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-3.5 text-[15px] font-extrabold tracking-0 text-[#243044] transition-all duration-150 hover:bg-[#f2f7ff] hover:text-slate-950",
+                      active && "bg-[#eef6ff] text-[var(--primary)]",
+                    )}
+                  >
+                    <Icon className={cn("h-[18px] w-[18px] transition-colors", active ? "text-[var(--primary)]" : "text-slate-600")} strokeWidth={2.45} />
+                    <span className="relative inline-flex h-full items-center leading-none">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="ml-auto flex shrink-0 items-center gap-2.5">
+              <LmsSelect
+                aria-label="Chọn trường"
+                value={selectedSchoolId}
+                onChange={(event) => selectSchool(event.target.value)}
+                className="hidden w-[230px] lg:block"
+              >
+                {schools.map((school) => (
+                  <option key={school.id} value={school.id}>
+                    {school.name}
+                  </option>
+                ))}
+              </LmsSelect>
+              <LmsSelect
+                aria-label="Chọn lớp"
+                value={selectedClass?.id ?? ""}
+                onChange={(event) => setSelectedClassId(event.target.value)}
+                disabled={!selectedClassOptions.length}
+                className="min-w-[132px]"
+              >
+                {selectedClassOptions.length ? (
+                  selectedClassOptions.map((classroom) => (
+                    <option key={classroom.id} value={classroom.id}>
+                      {classroom.className}
+                    </option>
+                  ))
+                ) : (
+                  <option value="empty" disabled>
+                    Chưa có lớp
+                  </option>
+                )}
+              </LmsSelect>
+              <LmsNotificationCenter />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAccountMenuOpen((open) => !open)}
+                  className="rounded-[10px] outline-none transition hover:brightness-[0.98] focus-visible:ring-2 focus-visible:ring-[var(--primary)]/20"
+                  aria-label="Tài khoản giáo viên"
+                  aria-expanded={accountMenuOpen}
+                >
+                  <OnlineTeacherAvatar avatarUrl={teacherAvatar} name={teacherName} />
+                </button>
+                {accountMenuOpen ? (
+                  <div className="absolute right-0 top-14 z-50 w-72 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
+                    <div className="flex items-center gap-3 border-b border-[var(--border)] px-4 py-3">
+                      <OnlineTeacherAvatar avatarUrl={teacherAvatar} name={teacherName} />
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-[var(--foreground)]">{teacherName}</div>
+                        <div className="truncate text-xs font-semibold text-[var(--muted-foreground)]">{teacherEmail}</div>
+                      </div>
+                    </div>
+                    <div className="p-2">
+                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account"); }} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-hover)]">
+                        Quản lý tài khoản
+                      </button>
+                      <button type="button" onClick={() => { setAccountMenuOpen(false); navigate("/account/login-logs"); }} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-hover)]">
+                        Lịch sử đăng nhập
+                      </button>
+                      <button type="button" onClick={signOut} className="w-full rounded-[10px] px-3 py-2 text-left text-sm font-semibold text-rose-600 hover:bg-rose-50">
+                        Đăng xuất
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-2 overflow-x-auto border-t border-[var(--border)] bg-[var(--card)] px-4 py-2 xl:hidden">
+            {lmsNavItems.map((item) => {
+              const active = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigate(item.path)}
+                  className={cn(
+                    "relative h-9 whitespace-nowrap rounded-lg px-3 text-[14px] font-extrabold tracking-0 transition hover:bg-[#f2f7ff] hover:text-slate-950",
+                    active ? "bg-[#eef6ff] text-[var(--primary)]" : "text-slate-700",
+                  )}
+                >
+                  <span className="relative inline-flex h-full items-center">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </header>
+
+        <main
+          className={cn(
+            "min-h-0 flex-1",
+            pathname === "/homework/assign" || pathname === "/homework/exercise-bank" || pathname === "/homework/progress" || pathname === "/homework/class" ? "overflow-hidden" : "overflow-y-auto",
+          )}
+        >
+          {teacherContent}
         </main>
       </div>
+      {showHomeworkFloatingMenu ? (
+        <HomeworkFloatingMenu
+          open={floatingMenuOpen}
+          setOpen={setFloatingMenuOpen}
+          onAction={(action) => {
+            if (action === "assign") {
+              navigate("/homework/assign");
+            } else if (action === "classes") {
+              navigate("/homework/class");
+            } else if (action === "groups") {
+              navigate("/homework/student-groups");
+            } else if (action === "exerciseBank") {
+              navigate("/homework/exercise-bank");
+            } else {
+              navigate("/homework");
+            }
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -339,20 +551,19 @@ function TeacherWorkspaceFrame({
   selectedSchoolName: string;
 }) {
   return (
-    <div className="flex min-h-full flex-col gap-5 px-5 py-6 xl:px-8">
-      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="flex min-h-full flex-col gap-3 px-4 py-4 xl:px-6">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--shadow-sm)]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-sm font-medium text-slate-400">Trang chủ / <span className="text-slate-600">{activeLabel}</span></div>
-            <h1 className="mt-4 text-[34px] font-black uppercase tracking-tight text-slate-950">{selectedClass?.className ?? "Lớp học"}</h1>
-            <p className="mt-1 text-sm font-semibold text-slate-500">{selectedSchoolName} · {selectedClass?.studentCount ?? 0} học sinh</p>
+            <div className="text-sm font-medium text-[var(--muted-foreground)]">Trang chủ / <span className="text-[var(--foreground)]">{activeLabel}</span></div>
+            <h1 className="mt-2 font-[var(--font-heading)] text-xl font-semibold tracking-normal text-[var(--foreground)]">{selectedClass?.className ?? "Lớp học"}</h1>
+            <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">{selectedSchoolName} - {selectedClass?.studentCount ?? 0} học sinh</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline">Xuất dữ liệu</Button>
-            <Button>Thao tác nhanh</Button>
+            <Button variant="outline" size="sm">Xuất dữ liệu</Button>
           </div>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           <ClassStat icon={ClipboardList} label="Bài đang mở" value={String(selectedClass?.activeAssignments ?? 0)} />
           <ClassStat icon={CheckCircle2} label="Hoàn thành" value={`${selectedClass?.completionRate ?? 0}%`} />
           <ClassStat icon={UsersRound} label="Cần hỗ trợ" value={String(selectedClass?.riskStudents ?? 0)} />
@@ -364,42 +575,56 @@ function TeacherWorkspaceFrame({
   );
 }
 
-function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; label: string; value: string }) {
+const ClassStat = memo(function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-white text-[#0b6fcf] shadow-sm">
-        <Icon className="h-5 w-5" />
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)] px-3 py-2">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--card)] text-[var(--primary)] shadow-[var(--shadow-xs)]">
+        <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-xs font-bold uppercase tracking-[0.12em] text-slate-400">{label}</span>
-        <span className="mt-1 block truncate text-lg font-black text-slate-950">{value}</span>
+        <span className="block truncate text-xs font-medium text-[var(--muted-foreground)]">{label}</span>
+        <span className="mt-1 block truncate text-base font-semibold text-[var(--foreground)]">{value}</span>
       </span>
     </div>
   );
-}
+});
 
-function HomeworkPanel({ selectedClass }: { selectedClass?: ClassroomSnapshot }) {
+function HomeworkPanel({
+  selectedClass,
+  runs,
+  onAssign,
+  onViewProgress,
+}: {
+  selectedClass?: ClassroomSnapshot;
+  runs: AssignmentRun[];
+  onAssign: () => void;
+  onViewProgress: (runId: string) => void;
+}) {
   return (
     <>
-      <FilterBar primaryPlaceholder="Tìm kiếm theo tên bài" filters={["Môn học", "Học kỳ", "Trạng thái", "Loại bài", "Tính điểm", "Đối tượng giao"]} />
-      <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
+      <FilterBar
+        primaryPlaceholder="Tìm kiếm theo tên bài"
+        filters={["Môn học", "Học kỳ", "Trạng thái", "Loại bài", "Tính điểm", "Đối tượng giao"]}
+        onAssign={onAssign}
+      />
+      <section className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
         <div className="overflow-x-auto">
           <div className="min-w-[1180px]">
             <TableHeader columns="grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px]" labels={["STT", "Tên bài", "Môn học", "Loại bài", "Đối tượng", "Thời gian làm bài", "Trạng thái", ""]} />
-            <div className="divide-y divide-slate-100">
-              {assignmentRuns.map((assignment, index) => (
-                <article key={assignment.id} className="grid grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px] items-center gap-3 px-4 py-4 text-sm transition hover:bg-slate-50/80">
-                  <span className="font-semibold text-slate-400">{String(index + 1).padStart(2, "0")}</span>
+            <div className="divide-y divide-[var(--border)]">
+              {runs.map((assignment, index) => (
+                <article key={assignment.id} className="grid grid-cols-[72px_minmax(280px,1.4fr)_150px_170px_170px_220px_160px_64px] items-center gap-3 px-4 py-4 text-sm transition hover:bg-[var(--surface-hover)]">
+                  <span className="font-semibold text-[var(--muted-foreground)]">{String(index + 1).padStart(2, "0")}</span>
                   <div className="min-w-0">
-                    <button type="button" className="truncate text-left font-black text-[#1677d2] hover:text-[#0b5fb3]">{assignment.title}</button>
-                    <p className="mt-1 text-xs font-semibold text-slate-400">Công bố điểm tự động</p>
+                    <button type="button" onClick={() => onViewProgress(assignment.id)} className="truncate text-left font-semibold text-[var(--primary)] hover:text-[var(--primary)]/80">{assignment.title}</button>
+                    <p className="mt-1 text-xs font-semibold text-[var(--muted-foreground)]">Công bố điểm tự động</p>
                   </div>
-                  <span className="font-semibold text-slate-700">{assignment.subjectLabel}</span>
-                  <span className="text-slate-600">{index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}</span>
-                  <span className="font-semibold text-slate-700">{selectedClass?.className ?? "Cả lớp"}</span>
-                  <span className="leading-6 text-slate-600">21/05/2026 10:{50 + index}<br />28/05/2026 10:{50 + index}</span>
+                  <span className="font-semibold text-[var(--foreground)]">{assignment.subjectLabel}</span>
+                  <span className="text-[var(--muted-foreground)]">{index % 2 === 0 ? "Kiểm tra đầu vào" : "Luyện tập"}</span>
+                  <span className="font-semibold text-[var(--foreground)]">{selectedClass?.className ?? "Cả lớp"}</span>
+                  <span className="leading-6 text-[var(--muted-foreground)]">21/05/2026 10:{50 + index}<br />28/05/2026 10:{50 + index}</span>
                   <Badge tone={index > 3 ? "danger" : "success"} className="justify-self-start">{index > 3 ? "Đã kết thúc" : "Đang diễn ra"}</Badge>
-                  <button type="button" aria-label="Mở thao tác" className="grid h-9 w-9 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm">
+                  <button type="button" onClick={() => onViewProgress(assignment.id)} aria-label="Mở thao tác" className="grid h-9 w-9 place-items-center rounded-[10px] text-[var(--muted-foreground)] hover:bg-[var(--card)] hover:text-[var(--foreground)] hover:shadow-[var(--shadow-xs)]">
                     <MoreVertical className="h-5 w-5" />
                   </button>
                 </article>
@@ -418,23 +643,23 @@ function LegacyAttendancePanel({ selectedClass }: { selectedClass?: ClassroomSna
   return (
     <section className="space-y-5">
       <div className="flex justify-end gap-2">
-        <Button variant="outline">â€¹</Button>
+        <Button variant="outline">‹</Button>
         <Button variant="outline">Tuần 12 (18/05 - 24/05)</Button>
-        <Button variant="outline">›</Button>
+        <Button variant="outline">⬺</Button>
         <Button>Tuần này</Button>
       </div>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-        <div className="grid grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] bg-[#50a8e8] text-sm font-black text-white">
+      <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+        <div className="grid grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] bg-[var(--primary)] text-sm font-semibold text-[var(--primary-foreground)]">
           <div className="px-4 py-4">STT</div>
           <div className="px-4 py-4">Học sinh</div>
           {days.map((day) => <div key={day} className="whitespace-pre-line px-4 py-4 text-center">{day}</div>)}
         </div>
         {students.slice(0, 10).map((student, index) => (
-          <div key={student.id} className="grid min-h-20 grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] border-t border-slate-100 text-sm">
-            <div className="px-4 py-5 text-slate-500">{index + 1}</div>
-            <div className="px-4 py-5 font-bold text-[#3d9df0]">{student.name}</div>
+          <div key={student.id} className="grid min-h-20 grid-cols-[70px_260px_repeat(7,minmax(120px,1fr))] border-t border-[var(--border)] text-sm">
+            <div className="px-4 py-5 text-[var(--muted-foreground)]">{index + 1}</div>
+            <div className="px-4 py-5 font-medium text-[var(--primary)]">{student.name}</div>
             {days.map((day, dayIndex) => (
-              <div key={day} className={cn("px-4 py-5 text-center font-bold", dayIndex === 6 && "bg-sky-100")}>
+              <div key={day} className={cn("px-4 py-5 text-center font-medium", dayIndex === 6 && "bg-[var(--accent-soft)]")}>
                 {dayIndex > 0 && dayIndex < 5 ? <span className={dayIndex === 2 && index === 1 ? "text-rose-600" : "text-emerald-600"}>●</span> : null}{" "}
                 {dayIndex > 0 && dayIndex < 5 ? "1/1" : ""}
               </div>
@@ -461,19 +686,19 @@ function AttendancePanel({
 }) {
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
-  const [sessionFilter, setSessionFilter] = useState("Tat ca buoi");
+  const [sessionFilter, setSessionFilter] = useState("Tất cả buổi");
   const attendanceColumns = [
-    { id: "mon-am", day: "Thu Hai", date: "18/05", session: "Sang" },
-    { id: "mon-pm", day: "Thu Hai", date: "18/05", session: "Chieu" },
-    { id: "tue-am", day: "Thu Ba", date: "19/05", session: "Sang" },
-    { id: "wed-am", day: "Thu Tu", date: "20/05", session: "Sang" },
-    { id: "thu-am", day: "Thu Nam", date: "21/05", session: "Sang" },
-    { id: "fri-am", day: "Thu Sau", date: "22/05", session: "Sang" },
-    { id: "fri-pm", day: "Thu Sau", date: "22/05", session: "Chieu" },
-    { id: "sat-am", day: "Thu Bay", date: "23/05", session: "Sang" },
+    { id: "mon-am", day: "Thứ Hai", date: "18/05", session: "Sáng" },
+    { id: "mon-pm", day: "Thứ Hai", date: "18/05", session: "Chiều" },
+    { id: "tue-am", day: "Thứ Ba", date: "19/05", session: "Sáng" },
+    { id: "wed-am", day: "Thứ Tư", date: "20/05", session: "Sáng" },
+    { id: "thu-am", day: "Thứ Năm", date: "21/05", session: "Sáng" },
+    { id: "fri-am", day: "Thứ Sáu", date: "22/05", session: "Sáng" },
+    { id: "fri-pm", day: "Thứ Sáu", date: "22/05", session: "Chiều" },
+    { id: "sat-am", day: "Thứ Bảy", date: "23/05", session: "Sáng" },
   ];
   const filteredStudents = students.filter((student) => student.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
-  const visibleColumns = attendanceColumns.filter((column) => sessionFilter === "Tat ca buoi" || column.session === sessionFilter);
+  const visibleColumns = attendanceColumns.filter((column) => sessionFilter === "Tất cả buổi" || column.session === sessionFilter);
 
   function updateAttendance(studentId: string, columnId: string) {
     const key = `${studentId}:${columnId}`;
@@ -485,63 +710,63 @@ function AttendancePanel({
 
   return (
     <div className="flex min-h-full flex-col gap-2 px-2 py-2 xl:px-3">
-      <section className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-2.5 py-2 shadow-[var(--shadow-sm)]">
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="mr-auto min-w-[190px]">
-            <div className="text-sm font-black uppercase leading-5 text-slate-950">{selectedClass?.className ?? "Lop hoc"}</div>
-            <div className="text-[11px] font-semibold text-slate-500">
+            <div className="text-sm font-semibold leading-5 text-[var(--foreground)]">{selectedClass?.className ?? "Lớp hoc"}</div>
+            <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">
               {selectedSchoolName} · {students.length} hoc sinh · {visibleColumns.length} cot diem danh
             </div>
           </div>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--primary)]" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Tim hoc sinh"
-              className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
+              placeholder="Tìm học sinh"
+              className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-[var(--card)]"
             />
           </div>
-          <select className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700 outline-none">
-            <option>Tuan 12 (18/05 - 24/05)</option>
-            <option>Tuan 13 (25/05 - 31/05)</option>
-          </select>
-          <select
+          <LmsSelect className="h-9 min-w-[150px] text-[13px]">
+            <option>Tuần 12 (18/05 - 24/05)</option>
+            <option>Tuần 13 (25/05 - 31/05)</option>
+          </LmsSelect>
+          <LmsSelect
             value={sessionFilter}
             onChange={(event) => setSessionFilter(event.target.value)}
-            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-700 outline-none"
+            className="h-9 min-w-[132px] text-[13px]"
           >
-            <option>Tat ca buoi</option>
-            <option>Sang</option>
-            <option>Chieu</option>
-          </select>
-          <Button variant="outline" className="h-8 rounded-md px-2.5 text-xs">Xuat Excel</Button>
-          <Button className="h-8 rounded-md bg-slate-950 px-2.5 text-xs font-black text-white">Luu diem danh</Button>
+            <option>Tất cả buổi</option>
+            <option>Sáng</option>
+            <option>Chiều</option>
+          </LmsSelect>
+            <Button variant="outline">Xuất dữ liệu</Button>
+          <Button className="h-10 rounded-[10px] px-3 text-[14px] font-bold">Lưu điểm danh</Button>
         </div>
       </section>
 
-      <section className="min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
-          <h2 className="text-sm font-black text-slate-950">Bang diem danh theo tuan</h2>
-          <div className="flex items-center gap-1.5 text-[10px] font-bold">
-            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Co mat</span>
-            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Di muon</span>
-            <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vang</span>
-            <span className="rounded bg-sky-50 px-1.5 py-0.5 text-sky-700">Co phep</span>
+      <section className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-2.5 py-1.5">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Bảng điểm danh theo tuần</h2>
+          <div className="flex items-center gap-1.5 text-[13px] font-bold">
+            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
+            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
+            <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
+            <span className="rounded bg-[var(--accent-soft)] px-1.5 py-0.5 text-[var(--primary)]">Có phép</span>
           </div>
         </div>
         <div className="max-h-[620px] overflow-auto">
-          <table className="min-w-[1500px] border-separate border-spacing-0 text-[11px]">
+          <table className="erg-data-table min-w-[1500px] border-separate border-spacing-0 text-[13px]">
             <thead>
-              <tr className="bg-[#f8fbff] text-[10px] font-black uppercase text-[#1d4ed8]">
+              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                 <AttendanceHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Hoc sinh</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[234px] top-0 z-40 w-[66px]">Lop</AttendanceHeaderCell>
-                <AttendanceHeaderCell className="sticky left-[300px] top-0 z-40 w-[76px]">Tong</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Học sinh</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[234px] top-0 z-40 w-[66px]">Lớp</AttendanceHeaderCell>
+                <AttendanceHeaderCell className="sticky left-[300px] top-0 z-40 w-[76px]">Tổng</AttendanceHeaderCell>
                 {visibleColumns.map((column) => (
                   <AttendanceHeaderCell key={column.id} className="sticky top-0 z-30 w-[136px]">
                     <span className="block">{column.day}</span>
-                    <span className="mt-0.5 block text-[10px] font-bold normal-case text-slate-500">{column.date} · {column.session}</span>
+                    <span className="mt-1 block text-[12px] font-semibold normal-case text-slate-600">{column.date} · {column.session}</span>
                   </AttendanceHeaderCell>
                 ))}
               </tr>
@@ -551,28 +776,28 @@ function AttendancePanel({
                 const summary = attendanceSummary(student.id, visibleColumns.map((column) => column.id), attendanceOverrides, index);
                 return (
                   <tr key={student.id} className="group">
-                    <AttendanceStickyCell className="left-0 z-20 w-[44px] text-center text-slate-500">{index + 1}</AttendanceStickyCell>
+                    <AttendanceStickyCell className="left-0 z-20 w-[44px] text-center text-[var(--muted-foreground)]">{index + 1}</AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[44px] z-20 w-[190px]">
-                      <button type="button" className="max-w-[166px] truncate text-left font-bold text-[#2563eb] hover:underline">
+                      <button type="button" className="max-w-[166px] truncate text-left font-medium text-[var(--primary)] hover:underline">
                         {student.name}
                       </button>
                     </AttendanceStickyCell>
-                    <AttendanceStickyCell className="left-[234px] z-20 w-[66px] text-center font-semibold text-slate-600">
-                      {student.className.replace("Lớp ", "").replace("Lop ", "")}
+                    <AttendanceStickyCell className="left-[234px] z-20 w-[66px] text-center font-semibold text-[var(--muted-foreground)]">
+                      {student.className.replace("Lớp ", "").replace("Lớp ", "")}
                     </AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[300px] z-20 w-[76px] text-center">
-                      <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-black", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
+                      <span className={cn("rounded-lg border px-2 py-1 text-[13px] font-bold", summary.absent ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>
                         {summary.present}/{summary.total}
                       </span>
                     </AttendanceStickyCell>
                     {visibleColumns.map((column, columnIndex) => {
                       const status = attendanceOverrides[`${student.id}:${column.id}`] ?? getMockAttendanceStatus(index, columnIndex);
                       return (
-                        <td key={column.id} className={cn("h-7 border-b border-r border-blue-100 px-1 text-center group-hover:!bg-blue-50", attendanceCellClass(status))}>
+                        <td key={column.id} className={cn("h-9 border-b border-r border-[#cbd7e6] px-1.5 text-center group-hover:!bg-[var(--accent-soft)]", attendanceCellClass(status))}>
                           <button
                             type="button"
                             onClick={() => updateAttendance(student.id, column.id)}
-                            className="h-6 w-full rounded text-[11px] font-black outline-none focus:ring-2 focus:ring-blue-200"
+                            className="h-8 w-full rounded-lg text-[13px] font-bold outline-none focus:ring-2 focus:ring-[var(--ring)]"
                             aria-label={`${student.name} ${column.day} ${column.session}`}
                           >
                             {attendanceLabel(status)}
@@ -591,21 +816,21 @@ function AttendancePanel({
   );
 }
 
-function AttendanceHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
+const AttendanceHeaderCell = memo(function AttendanceHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <th className={cn("h-8 border-b border-r border-blue-200 bg-[#f8fbff] px-1.5 text-center align-middle", className)}>
+    <th className={cn("h-8 border-b border-r border-[var(--border)] bg-[var(--muted)]/70 px-1.5 text-center align-middle", className)}>
       {children}
     </th>
   );
-}
+});
 
-function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
+const AttendanceStickyCell = memo(function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("sticky h-7 border-b border-r border-blue-100 bg-white px-1.5 align-middle group-hover:bg-blue-50", className)}>
+    <td className={cn("sticky h-7 border-b border-r border-[var(--border)] bg-[var(--card)] px-1.5 align-middle group-hover:bg-[var(--accent-soft)]", className)}>
       {children}
     </td>
   );
-}
+});
 
 function getMockAttendanceStatus(studentIndex: number, columnIndex: number): AttendanceStatus {
   if ((studentIndex + columnIndex) % 17 === 0) return "late";
@@ -631,7 +856,7 @@ function attendanceLabel(status: AttendanceStatus) {
 function attendanceCellClass(status: AttendanceStatus) {
   if (status === "absent") return "bg-rose-50 text-rose-700";
   if (status === "late") return "bg-amber-50 text-amber-700";
-  if (status === "excused") return "bg-sky-50 text-sky-700";
+  if (status === "excused") return "bg-[var(--accent-soft)] text-[var(--primary)]";
   return "bg-emerald-50 text-emerald-700";
 }
 
@@ -655,47 +880,82 @@ function ReportsPanel({ selectedClass, selectedSchoolName }: { selectedClass?: C
   );
 }
 
-function FilterBar({ filters, primaryPlaceholder }: { filters: string[]; primaryPlaceholder: string }) {
+function FilterBar({
+  filters,
+  primaryPlaceholder,
+  onAssign,
+}: {
+  filters: string[];
+  primaryPlaceholder: string;
+  onAssign: () => void;
+}) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/40">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[280px] flex-1 xl:max-w-[520px]">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <Input placeholder={primaryPlaceholder} className="border-slate-200 bg-slate-50 pl-10 shadow-none focus:bg-white" />
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-2.5 shadow-[var(--shadow-sm)]">
+      <div className="grid items-center gap-2 xl:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px] flex-1 xl:max-w-[520px]">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+            <Input placeholder={primaryPlaceholder} className="pl-10 shadow-none" />
+          </div>
+          {filters.map((filter) => (
+            <LmsSelect key={filter} className="h-10 min-w-[128px]">
+              <option>{filter}</option>
+            </LmsSelect>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 min-w-[104px] rounded-lg border border-[#d7e0ec] px-4 text-[14px] font-bold text-slate-900 shadow-none hover:border-[#b8c8db] hover:bg-[#f8fbff]"
+            style={{ backgroundColor: "#ffffff", border: "1px solid #d7e0ec", borderRadius: 8, paddingInline: 16 }}
+          >
+            <RotateCcw className="h-4 w-4" />
+            Đặt lại
+          </Button>
         </div>
-        {filters.map((filter) => (
-          <select key={filter} className="h-11 min-w-[150px] rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-2 focus:ring-blue-100">
-            <option>{filter}</option>
-          </select>
-        ))}
-        <Button variant="outline">Đặt lại</Button>
-        <Button className="ml-auto bg-[#06112f] hover:bg-[#111d42]">Giao bài</Button>
+        <div className="flex shrink-0 justify-end gap-2">
+          <Button
+            className="min-w-[88px] px-4"
+            size="sm"
+            style={{ backgroundColor: "#0078d4", borderColor: "#0078d4", color: "#ffffff" }}
+            onClick={onAssign}
+          >
+            Giao bài
+          </Button>
+        </div>
       </div>
     </div>
   );
 }
-
 function TableHeader({ columns, labels }: { columns: string; labels: string[] }) {
   return (
-    <div className={cn("grid gap-3 border-b border-slate-200 bg-[#eef6ff] px-4 py-4 text-xs font-black uppercase tracking-[0.08em] text-[#1d5f99]", columns)}>
+    <div className={cn("grid gap-3 border-b border-[var(--border)] bg-[var(--muted)]/70 px-4 py-4 text-xs font-semibold text-[var(--muted-foreground)]", columns)}>
       {labels.map((label) => <span key={label}>{label}</span>)}
     </div>
   );
 }
 
-function Metric({ detail, label, value }: { detail: string; label: string; value: string }) {
+const Metric = memo(function Metric({ detail, label, value }: { detail: string; label: string; value: string }) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-200/40">
-      <div className="text-xs font-black uppercase tracking-[0.16em] text-slate-400">{label}</div>
-      <div className="mt-3 text-2xl font-black text-slate-950">{value}</div>
-      <div className="mt-2 text-sm text-slate-500">{detail}</div>
+    <article className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
+      <div className="text-xs font-semibold text-[var(--muted-foreground)]">{label}</div>
+      <div className="mt-3 text-xl font-semibold text-[var(--foreground)]">{value}</div>
+      <div className="mt-2 text-sm text-[var(--muted-foreground)]">{detail}</div>
     </article>
   );
-}
+});
 
 function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);
 }
+
+const OnlineTeacherAvatar = memo(function OnlineTeacherAvatar({ avatarUrl, name }: { avatarUrl: string; name: string }) {
+  return (
+    <span className="relative grid size-11 place-items-center overflow-visible rounded-full bg-[var(--primary)] text-xs font-semibold text-[var(--primary-foreground)] shadow-[var(--shadow-xs)] ring-2 ring-[var(--card)]">
+      {avatarUrl ? <img src={avatarUrl} alt={name} className="size-full rounded-full object-cover" /> : getInitials(name)}
+      <span className="absolute bottom-0 right-0 size-3.5 rounded-full border border-[var(--card)] bg-emerald-500 ring-2 ring-[var(--card)]" aria-label="Đang online" />
+    </span>
+  );
+});
 
 function getInitials(value: string) {
   return value
@@ -706,3 +966,7 @@ function getInitials(value: string) {
     .join("")
     .toUpperCase();
 }
+
+// -----------------------------------------------------------------------------
+// NEW REDESIGNED SCREEN COMPONENTS FOR HOMEWORK & QUICK ACTIONS
+// -----------------------------------------------------------------------------

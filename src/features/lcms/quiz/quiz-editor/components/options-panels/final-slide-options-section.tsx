@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { useI18n } from "@/platform/i18n";
+import { useI18n } from "@/platform/i18n";
+import { AppSelect } from "@/components/ui/app-select";
 import type {
   QuizEditorFinalSlideOptions,
   QuizEditorSlide,
@@ -23,7 +24,7 @@ export function FinalSlideOptionsSection({
 
       <div className="classic-editor__option-form">
         <OptionRow label={t("quiz.whenQuizIsFinished")} stacked>
-          <select
+          <AppSelect
             className="classic-editor__select classic-editor__select--wide"
             value={finalOptions?.whenQuizFinished ?? t("quiz.showSlideWithResults")}
             onChange={(event) => onUpdateOptions({ whenQuizFinished: event.target.value })}
@@ -33,7 +34,7 @@ export function FinalSlideOptionsSection({
                 {value}
               </option>
             ))}
-          </select>
+          </AppSelect>
         </OptionRow>
       </div>
 
@@ -56,7 +57,7 @@ export function FinalSlideOptionsSection({
           <input type="checkbox" checked={finalOptions?.allowRetry ?? false} onChange={(event) => onUpdateOptions({ allowRetry: event.target.checked })} />{" "}
           {t("quiz.allowUserRetryQuiz")}
         </label>
-        <select
+        <AppSelect
           className="classic-editor__select"
           value={finalOptions?.retryLabel ?? t("quiz.retryOnce")}
           onChange={(event) => onUpdateOptions({ retryLabel: event.target.value })}
@@ -66,7 +67,7 @@ export function FinalSlideOptionsSection({
               {value}
             </option>
           ))}
-        </select>
+        </AppSelect>
       </div>
     </>
   );

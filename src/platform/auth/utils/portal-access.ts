@@ -1,4 +1,4 @@
-﻿import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import type { StudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 

@@ -1,17 +1,15 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useNavigate } from "@/routes/router-compat";
 import { useQuery } from "@tanstack/react-query";
 import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
 import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
 import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
 import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
 import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { queryKeys } from "@/lib/query-keys";
 
 import { PlayerShell } from "@/components/quiz/player-shell";
 import { Button } from "@/components/ui/dashboard-kit";
@@ -28,10 +26,11 @@ import { StudentDashboardMobileAnnouncements } from "@/features/elearning/studen
 import { StudentDashboardMobileAssignments } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-assignments";
 import { StudentDashboardMobileOverview } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-overview";
 import { StudentDashboardMobileScores } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-scores";
+import { StudentBrandHeader } from "@/features/elearning/student-dashboard/components/student-dashboard-header";
+import { enCopy, viCopy } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace.copy";
 import {
   AssignmentCard,
   AssignmentScoreCard,
-  BrandWordmark,
   CompactBadge,
   PageTitle,
   ProfileStat,
@@ -53,7 +52,6 @@ import type {
   StudentDiscussionReactionKey,
 } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import type {
-  StudentAssignmentStatus,
   StudentDashboardAssignment,
   StudentDashboardProfile,
   StudentDiscussionImageAttachment,
@@ -83,6 +81,8 @@ import {
   maskProfanity,
   writeAnnouncementPopupSnooze,
 } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
+import { useDebouncedCallback } from "@/hooks/use-paced-callback";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { cn } from "@/lib/utils";
 
 
@@ -96,7 +96,7 @@ export function StudentDashboardWorkspace() {
   const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
   const [account, setAccount] = useState<ElearningViewerSession | null>(() => getCurrentElearningViewerSession());
   const studentDashboardQuery = useQuery({
-    queryKey: ["student-dashboard", account?.id ?? "anonymous"],
+    queryKey: queryKeys.studentDashboard.workspace(account?.id),
     queryFn: loadStudentDashboardData,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -116,7 +116,20 @@ export function StudentDashboardWorkspace() {
   const [announcementPopupOpen, setAnnouncementPopupOpen] = useState(false);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
   const [readAnnouncementIds, setReadAnnouncementIds] = useState<string[]>([]);
-  const announcementPopupTimerRef = useRef<number | null>(null);
+  const paceStateUpdate = usePacedStateBatch();
+  const autoCloseAnnouncementPopup = useDebouncedCallback(() => setAnnouncementPopupOpen(false), 30000);
+  const scrollToAnnouncement = useDebouncedCallback((announcementId: string) => {
+    document.getElementById(`student-announcement-${announcementId}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 120);
+  const scrollToDiscussionPost = useDebouncedCallback((threadId: string) => {
+    document.getElementById(`student-discussion-post-${threadId}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, 120);
 
   const currentAssignment =
     viewState.type === "quiz"
@@ -155,43 +168,26 @@ export function StudentDashboardWorkspace() {
         copy.accountTitle;
 
   useEffect(() => {
-    let frameId: number | null = null;
     if (viewState.type === "quiz") {
-      frameId = window.requestAnimationFrame(() => setAnnouncementPopupOpen(false));
-      return () => {
-        if (frameId !== null) window.cancelAnimationFrame(frameId);
-      };
+      paceStateUpdate(() => setAnnouncementPopupOpen(false));
+      return;
     }
 
     if (!latestAnnouncement) return;
     if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
-    frameId = window.requestAnimationFrame(() => setAnnouncementPopupOpen(true));
-    return () => {
-      if (frameId !== null) window.cancelAnimationFrame(frameId);
-    };
-  }, [latestAnnouncement, viewState.type]);
+    paceStateUpdate(() => setAnnouncementPopupOpen(true));
+  }, [latestAnnouncement, paceStateUpdate, viewState.type]);
 
   useEffect(() => {
     if (!announcementPopupOpen) {
-      if (announcementPopupTimerRef.current) {
-        window.clearTimeout(announcementPopupTimerRef.current);
-        announcementPopupTimerRef.current = null;
-      }
+      autoCloseAnnouncementPopup.cancel();
       return;
     }
 
-    announcementPopupTimerRef.current = window.setTimeout(() => {
-      setAnnouncementPopupOpen(false);
-      announcementPopupTimerRef.current = null;
-    }, 30000);
+    autoCloseAnnouncementPopup.run();
 
-    return () => {
-      if (announcementPopupTimerRef.current) {
-        window.clearTimeout(announcementPopupTimerRef.current);
-        announcementPopupTimerRef.current = null;
-      }
-    };
-  }, [announcementPopupOpen]);
+    return () => autoCloseAnnouncementPopup.cancel();
+  }, [announcementPopupOpen, autoCloseAnnouncementPopup]);
 
   useEffect(() => {
     function reopenAnnouncementPopup() {
@@ -222,28 +218,20 @@ export function StudentDashboardWorkspace() {
     if (activePage !== "announcements") return;
     if (teacherAnnouncements.length === 0) return;
 
-    const frameId = window.requestAnimationFrame(() => setReadAnnouncementIds((currentIds) => {
+    paceStateUpdate(() => setReadAnnouncementIds((currentIds) => {
       const nextIds = new Set(currentIds);
       teacherAnnouncements.forEach((announcement) => nextIds.add(announcement.id));
       return Array.from(nextIds);
     }));
-    return () => window.cancelAnimationFrame(frameId);
-  }, [activePage, teacherAnnouncements]);
+  }, [activePage, paceStateUpdate, teacherAnnouncements]);
 
   useEffect(() => {
     if (activePage !== "announcements" || !selectedAnnouncementId) return;
 
-    const timeoutId = window.setTimeout(() => {
-      document.getElementById(`student-announcement-${selectedAnnouncementId}`)?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, 120);
+    scrollToAnnouncement.run(selectedAnnouncementId);
 
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [activePage, selectedAnnouncementId]);
+    return () => scrollToAnnouncement.cancel();
+  }, [activePage, scrollToAnnouncement, selectedAnnouncementId]);
 
   function openAssignment(assignmentId: string) {
     setViewState({ type: "quiz", assignmentId });
@@ -353,11 +341,7 @@ export function StudentDashboardWorkspace() {
           : notification,
       ),
     );
-    window.setTimeout(() => {
-      document
-        .getElementById(`student-discussion-post-${target.threadId}`)
-        ?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }, 120);
+    scrollToDiscussionPost.run(target.threadId);
   }
 
   function markAnnouncementRead(announcementId: string) {
@@ -598,11 +582,11 @@ function OverviewView({
 
   return (
     <section className="mx-auto max-w-[1480px] px-4 py-6">
-      <div className="rounded-xl border border-slate-200 bg-white p-5">
+      <div className="rounded-lg border border-slate-200 bg-white p-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <div className="text-sm font-semibold text-slate-500">{copy.heroEyebrow}</div>
-            <h1 className="mt-2 text-2xl font-semibold leading-tight text-[var(--erg-blue)] sm:text-3xl">
+            <h1 className="mt-2 text-xl font-semibold leading-tight text-[#242424]">
               {copy.heroTitle(profile.name)}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
@@ -612,7 +596,7 @@ function OverviewView({
 
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button
-              className="bg-[var(--erg-blue)] px-4 text-white hover:bg-[#060b7a]"
+              className="bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]"
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {copy.primaryAction}
@@ -658,7 +642,7 @@ function OverviewView({
         </div>
       </div>
 
-      <section className="mt-4 rounded-xl border border-slate-200 bg-white">
+      <section className="mt-4 rounded-lg border border-slate-200 bg-white">
         <SectionHeader
           actionLabel={copy.secondaryAction}
           onAction={() => onPageChange("assignments")}
@@ -677,14 +661,14 @@ function OverviewView({
         </div>
       </section>
 
-      <section className="mt-4 rounded-xl border border-slate-200 bg-white">
+      <section className="mt-4 rounded-lg border border-slate-200 bg-white">
         <SectionHeader actionLabel={copy.discussionTitle} onAction={() => onPageChange("discussion")} title="Câu hỏi học sinh" />
         <div className="grid gap-3 p-3">
           {discussionPreview.map((post) => (
             <button
               key={post.id}
               type="button"
-              className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-[var(--erg-blue)]/20 hover:bg-white"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-[var(--erg-blue)]/20 hover:bg-white"
               onClick={() => onPageChange("discussion")}
             >
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
@@ -765,7 +749,7 @@ function ScoresView({
         title={copy.scoresTitle}
       />
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white">
         {attemptedAssignments.map((assignment) => (
           <AssignmentScoreCard key={assignment.id} assignment={assignment} copy={copy} />
         ))}
@@ -797,9 +781,9 @@ function AnnouncementsView({
             key={announcement.id}
             id={`student-announcement-${announcement.id}`}
             className={cn(
-              "rounded-xl border bg-white p-4 transition",
+              "rounded-lg border bg-white p-4 transition",
               selectedAnnouncementId === announcement.id
-                ? "border-[var(--erg-blue)] shadow-[0_20px_48px_-32px_rgba(11,16,138,0.55)] ring-2 ring-[var(--erg-blue)]/10"
+                ? "border-[var(--erg-blue)] shadow-sm ring-2 ring-[var(--erg-blue)]/10"
                 : "border-slate-200",
             )}
           >
@@ -853,11 +837,11 @@ function AccountView({
         <section className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="grid h-16 w-16 place-items-center rounded-lg bg-[var(--erg-blue)] text-xl font-semibold text-white">
+              <div className="grid h-14 w-14 place-items-center rounded-lg bg-[var(--erg-blue)] text-lg font-semibold text-white">
                 {profile.name.slice(0, 1)}
               </div>
               <div>
-                <h2 className="text-2xl font-semibold text-[var(--erg-blue)]">{profile.name}</h2>
+                <h2 className="text-xl font-semibold text-[#242424]">{profile.name}</h2>
                 <p className="mt-1 text-sm text-slate-500">
                   {profile.className} • {profile.schoolName}
                 </p>
@@ -883,7 +867,7 @@ function AccountView({
 
           <h3 className="mt-6 text-lg font-semibold text-[var(--erg-blue)]">{copy.accountActionsTitle}</h3>
           <div className="mt-4 grid gap-3">
-            <Button className="bg-[var(--erg-blue)] text-white hover:bg-[#060b7a]" onClick={onSignIn}>
+            <Button className="bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={onSignIn}>
               <LoginOutlinedIcon fontSize="inherit" />
               {copy.signIn}
             </Button>
@@ -897,491 +881,3 @@ function AccountView({
     </section>
   );
 }
-
-function StudentBrandHeader({
-  account,
-  activePage,
-  announcementUnreadCount,
-  copy,
-  notifications,
-  studentName,
-  studentClass,
-  onNotificationClick,
-  onPageChange,
-  onSignIn,
-  onSignOut,
-}: {
-  account: ElearningViewerSession | null;
-  activePage: StudentPageKey;
-  announcementUnreadCount: number;
-  copy: DashboardCopy;
-  notifications: StudentDiscussionNotification[];
-  studentName: string;
-  studentClass: string;
-  onNotificationClick: (target: DiscussionScrollTarget) => void;
-  onPageChange: (page: StudentPageKey) => void;
-  onSignIn: () => void;
-  onSignOut: () => void;
-}) {
-  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
-
-  return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-[1480px] flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-center justify-between gap-4">
-          <BrandWordmark />
-          <div className="lg:hidden">
-            <div className="flex items-center gap-2">
-              <NotificationMenu
-                copy={copy}
-                menuOpen={notificationMenuOpen}
-                notifications={notifications}
-                onMenuOpenChange={setNotificationMenuOpen}
-                onNotificationClick={(target) => {
-                  setNotificationMenuOpen(false);
-                  onNotificationClick(target);
-                }}
-              />
-              <ProfileMenu
-                account={account}
-                copy={copy}
-                menuOpen={accountMenuOpen}
-                studentClass={studentClass}
-                studentName={studentName}
-                onMenuOpenChange={setAccountMenuOpen}
-                onPageChange={onPageChange}
-                onSignIn={onSignIn}
-                onSignOut={onSignOut}
-              />
-            </div>
-          </div>
-        </div>
-
-        <nav className="flex gap-1 overflow-x-auto pb-1 lg:pb-0">
-          {copy.navItems.map((item) => (
-            <button
-              key={item.key}
-              type="button"
-              className={cn(
-                "inline-flex h-9 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-semibold transition",
-                activePage === item.key
-                  ? "bg-slate-100 text-[var(--erg-blue)]"
-                  : "text-slate-600 hover:bg-slate-50 hover:text-[var(--erg-blue)]",
-              )}
-              onClick={() => onPageChange(item.key)}
-            >
-              {item.icon}
-              {item.label}
-              {item.key === "announcements" && announcementUnreadCount > 0 ? (
-                <span className="grid min-w-5 place-items-center rounded-full bg-[var(--erg-red)] px-1.5 py-0.5 text-[10px] font-bold text-white shadow-[0_8px_18px_-8px_rgba(233,45,74,0.95)]">
-                  {announcementUnreadCount}
-                </span>
-              ) : null}
-            </button>
-          ))}
-        </nav>
-
-        <div className="hidden lg:flex lg:items-center lg:gap-2">
-          <NotificationMenu
-            copy={copy}
-            menuOpen={notificationMenuOpen}
-            notifications={notifications}
-            onMenuOpenChange={setNotificationMenuOpen}
-            onNotificationClick={(target) => {
-              setNotificationMenuOpen(false);
-              onNotificationClick(target);
-            }}
-          />
-          <ProfileMenu
-            account={account}
-            copy={copy}
-            menuOpen={accountMenuOpen}
-            studentClass={studentClass}
-            studentName={studentName}
-            onMenuOpenChange={setAccountMenuOpen}
-            onPageChange={onPageChange}
-            onSignIn={onSignIn}
-            onSignOut={onSignOut}
-          />
-        </div>
-      </div>
-    </header>
-  );
-}
-
-function ProfileMenu({
-  account,
-  copy,
-  menuOpen,
-  studentClass,
-  studentName,
-  onMenuOpenChange,
-  onPageChange,
-  onSignIn,
-  onSignOut,
-}: {
-  account: ElearningViewerSession | null;
-  copy: DashboardCopy;
-  menuOpen: boolean;
-  studentClass: string;
-  studentName: string;
-  onMenuOpenChange: (open: boolean) => void;
-  onPageChange: (page: StudentPageKey) => void;
-  onSignIn: () => void;
-  onSignOut: () => void;
-}) {
-  const initial = studentName.trim().slice(0, 1).toUpperCase();
-  const signedInLabel = account ? copy.signedInAs : copy.guestLabel;
-
-  function handleAccountClick() {
-    onPageChange("account");
-    onMenuOpenChange(false);
-  }
-
-  function handleAuthClick() {
-    onMenuOpenChange(false);
-    if (account) {
-      onSignOut();
-      return;
-    }
-    onSignIn();
-  }
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        aria-expanded={menuOpen}
-        className={cn(
-          "flex min-w-[148px] items-center gap-2 rounded-lg border bg-white px-2 py-1.5 text-left transition hover:border-[var(--erg-blue)]/25 hover:bg-slate-50",
-          menuOpen ? "border-[var(--erg-blue)]/30 ring-4 ring-[var(--erg-blue)]/6" : "border-slate-200",
-        )}
-        onClick={() => onMenuOpenChange(!menuOpen)}
-      >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[var(--erg-blue)] text-xs font-semibold text-white">
-          {initial}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block max-w-[98px] truncate text-sm font-semibold leading-4 text-[var(--erg-blue)]">{studentName}</span>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] leading-4 text-slate-500">
-            <span>{studentClass}</span>
-            <span className="h-0.5 w-0.5 rounded-full bg-slate-300" />
-            <span className="max-w-[76px] truncate">{signedInLabel}</span>
-          </span>
-        </span>
-        <ExpandMoreOutlinedIcon
-          className={cn("shrink-0 text-slate-400 transition", menuOpen ? "rotate-180" : "rotate-0")}
-          fontSize="small"
-        />
-      </button>
-
-      {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_24px_64px_-32px_rgba(15,23,42,0.35)]">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <div className="text-sm font-semibold text-slate-950">{studentName}</div>
-            <div className="mt-1 text-xs text-slate-500">{studentClass}</div>
-          </div>
-
-          <div className="grid gap-1 p-2">
-            <button
-              type="button"
-              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 hover:text-[var(--erg-blue)]"
-              onClick={handleAccountClick}
-            >
-              <SettingsOutlinedIcon fontSize="small" />
-              {copy.accountTitle}
-            </button>
-            <button
-              type="button"
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition hover:bg-slate-50",
-                account ? "text-[var(--erg-red)]" : "text-[var(--erg-blue)]",
-              )}
-              onClick={handleAuthClick}
-            >
-              {account ? <LogoutOutlinedIcon fontSize="small" /> : <LoginOutlinedIcon fontSize="small" />}
-              {account ? copy.signOut : copy.signIn}
-            </button>
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-function NotificationMenu({
-  copy,
-  menuOpen,
-  notifications,
-  onMenuOpenChange,
-  onNotificationClick,
-}: {
-  copy: DashboardCopy;
-  menuOpen: boolean;
-  notifications: StudentDiscussionNotification[];
-  onMenuOpenChange: (open: boolean) => void;
-  onNotificationClick: (target: DiscussionScrollTarget) => void;
-}) {
-  const unreadCount = notifications.filter((notification) => notification.unread).length;
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        aria-expanded={menuOpen}
-        aria-label={copy.notificationTitle}
-        className={cn(
-          "relative grid h-10 w-10 place-items-center rounded-lg border bg-white text-[var(--erg-blue)] transition hover:border-[var(--erg-blue)]/25 hover:bg-slate-50",
-          menuOpen ? "border-[var(--erg-blue)]/30 ring-4 ring-[var(--erg-blue)]/6" : "border-slate-200",
-        )}
-        onClick={() => onMenuOpenChange(!menuOpen)}
-      >
-        <NotificationsNoneOutlinedIcon fontSize="small" />
-        {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--erg-red)] px-1 text-[10px] font-semibold text-white">
-            {unreadCount}
-          </span>
-        ) : null}
-      </button>
-
-      {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_24px_64px_-32px_rgba(15,23,42,0.35)]">
-          <div className="border-b border-slate-100 px-4 py-3">
-            <div className="text-sm font-semibold text-[var(--erg-blue)]">{copy.notificationTitle}</div>
-          </div>
-          <div className="max-h-[360px] overflow-y-auto p-2">
-            {notifications.length > 0 ? (
-              notifications.map((notification) => (
-                <button
-                  key={notification.id}
-                  type="button"
-                  className={cn(
-                    "w-full rounded-lg px-3 py-2.5 text-left transition hover:bg-slate-50",
-                    notification.unread ? "bg-[var(--erg-blue)]/5" : "bg-white",
-                  )}
-                  onClick={() =>
-                    onNotificationClick({
-                      replyId: notification.replyId,
-                      threadId: notification.threadId,
-                    })
-                  }
-                >
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={cn(
-                        "mt-1 h-2 w-2 shrink-0 rounded-full",
-                        notification.unread ? "bg-[var(--erg-red)]" : "bg-slate-300",
-                      )}
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold leading-5 text-slate-900">
-                        {notification.primaryText}
-                      </span>
-                      <span className="mt-0.5 block truncate text-xs leading-5 text-slate-500">
-                        {notification.secondaryText}
-                      </span>
-                      <span className="mt-1 block text-xs text-slate-500">{notification.timeLabel}</span>
-                    </span>
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="px-3 py-6 text-center text-sm text-slate-500">{copy.notificationEmpty}</div>
-            )}
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-const viCopy: DashboardCopy = {
-  navItems: [
-    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Điểm bài tập", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
-  ],
-  heroEyebrow: "Bảng học tập",
-  heroTitle: (name: string) => `Chào ${name}, chọn bài cần làm hôm nay.`,
-  heroDescription: (taskTitle: string) =>
-    `Ưu tiên của bạn là "${taskTitle}". Màn hình này gom bài tập, tiến độ và điểm số vào từng trang rõ ràng để bạn không phải tìm lâu.`,
-  primaryAction: "Làm bài ưu tiên",
-  secondaryAction: "Xem bài tập",
-  stats: {
-    open: "Bài đang mở",
-    overdue: "Bài quá hạn",
-    average: "Điểm trung bình",
-    completed: "Bài đã hoàn thành",
-  },
-  priority: {
-    title: "Việc nên làm ngay",
-    action: "Vào làm bài",
-    detail: (dueLabel: string) => `Hạn: ${dueLabel}. Hoàn thành bài này trước để giữ nhịp học.`,
-  },
-  todayTitle: "Bài cần xử lý hôm nay",
-  assignmentsTitle: "Bài tập",
-  assignmentsDescription: "Tất cả bài được giao, trạng thái quá hạn, tiến độ hoàn thành và điểm số.",
-  scoresTitle: "Điểm bài tập",
-  scoresDescription: "Theo dõi điểm cao nhất và 3 kết quả gần đây của từng bài tập đã được giao.",
-  bestScoreLabel: "Điểm cao nhất",
-  recentResultsTitle: "Kết quả gần đây",
-  noRecentResults: "Chưa có lần làm nào cho bài tập này.",
-  attemptDurationLabel: "Thời gian làm bài",
-  discussionTitle: "Thảo luận lớp",
-  discussionDescription: "Hỏi bài và trao đổi với các bạn trong cùng lớp, giống diễn đàn lớp học.",
-  discussionComposerTitle: "Đặt câu hỏi mới",
-  discussionTitlePlaceholder: "Bạn đang vướng phần nào?",
-  discussionBodyPlaceholder: "Viết rõ câu hỏi, cách bạn đã thử làm hoặc phần chưa hiểu...",
-  discussionAttachmentAction: "Chèn ảnh",
-  discussionAttachmentHint: "Có thể thêm nhiều ảnh minh họa.",
-  discussionRemoveAttachment: "Bỏ ảnh",
-  discussionModerationWarning: "Nội dung này có từ không phù hợp nên đã được hệ thống thay bằng ***.",
-  discussionPostAction: "Đăng câu hỏi",
-  discussionReplyPlaceholder: "Viết phản hồi cho chủ đề này...",
-  discussionReplyAction: "Trả lời",
-  discussionRepliesLabel: (count: number) => `${count} phản hồi`,
-  discussionResolvedLabel: "Đã giải đáp",
-  discussionRelatedLabel: "Bài liên quan",
-  discussionEmptyTitle: "Chưa có thảo luận nào",
-  discussionEmptyDescription: "Bạn có thể mở chủ đề đầu tiên để hỏi bài cùng lớp.",
-  discussionPageLabel: (page: number, totalPages: number) => `Trang ${page}/${totalPages}`,
-  discussionPreviousPage: "Trước",
-  discussionNextPage: "Tiếp",
-  announcementTitle: "Thông báo giáo viên",
-  announcementDescription: "Tất cả thông báo từ giáo viên gửi riêng cho bạn hoặc gửi chung cho lớp.",
-  announcementHeroTitle: "Chưa có thông báo mới",
-  announcementHeroEmpty: "Khi giáo viên gửi thông báo, nội dung quan trọng sẽ hiển thị tại đây.",
-  announcementPinnedLabel: "Quan trọng",
-  announcementPopupAutoDismiss: "Tự tắt sau 30 giây",
-  announcementPopupAction: "Xem chi tiết",
-  announcementPopupDismiss: "Tắt thông báo",
-  announcementPopupSnooze: "Không nhận thông báo này trong 2 giờ",
-  notificationTitle: "Thông báo",
-  notificationEmpty: "Chưa có thông báo mới.",
-  notificationNewTopicLabel: "Chủ đề mới",
-  notificationImageOnly: "Đã gửi ảnh",
-  notificationNewThread: (authorName: string) => `${authorName} đã tạo chủ đề mới`,
-  notificationNewReply: (authorName: string) => `${authorName} đã trả lời bạn`,
-  notificationTopicContext: (title: string) => `trong "${title}"`,
-  accountTitle: "Quản lý tài khoản",
-  accountDescription: "Thông tin hồ sơ học sinh, trạng thái đăng nhập và các thao tác tài khoản.",
-  learningProfileTitle: "Hồ sơ học tập",
-  loginStateTitle: "Trạng thái đăng nhập",
-  accountActionsTitle: "Thao tác tài khoản",
-  progressLabel: "Tiến độ",
-  questionCountLabel: "Câu đã làm",
-  scoreLabel: "Điểm",
-  scoreBadge: (score: number, maxScore: number) => `${score}/${maxScore}`,
-  pendingScore: "Chờ chấm",
-  assignmentAction: (status: StudentAssignmentStatus) =>
-    status === "in_progress" ? "Làm tiếp" : status === "overdue" ? "Làm ngay" : status === "submitted" ? "Đã nộp" : "Bắt đầu",
-  signedInAs: "Đã đăng nhập",
-  guestLabel: "Chưa đăng nhập",
-  signIn: "Đăng nhập",
-  signOut: "Đăng xuất",
-  footerTitle: "ERG Edurise Global",
-  footerSubtitle: "Learn today, lead tomorrow",
-  sessionBadge: "Quiz session",
-  sessionEyebrow: "Phiên làm bài",
-  sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
-    `${subject} • ${teacher} • ${dueLabel}. Hoàn thành trọn phiên để hệ thống cập nhật tiến độ và điểm số.`,
-  backToDashboard: "Quay lại",
-};
-
-const enCopy: DashboardCopy = {
-  navItems: [
-    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Assignment scores", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
-  ],
-  heroEyebrow: "Learning board",
-  heroTitle: (name: string) => `Hi ${name}, choose what to finish today.`,
-  heroDescription: (taskTitle: string) =>
-    `Your priority is "${taskTitle}". Assignments, progress, and scores are separated into clear pages so students can find the next action quickly.`,
-  primaryAction: "Open priority task",
-  secondaryAction: "View assignments",
-  stats: {
-    open: "Open tasks",
-    overdue: "Overdue",
-    average: "Average score",
-    completed: "Completed tasks",
-  },
-  priority: {
-    title: "Best next action",
-    action: "Start task",
-    detail: (dueLabel: string) => `Due: ${dueLabel}. Finish this first to keep your learning pace.`,
-  },
-  todayTitle: "Tasks to handle today",
-  assignmentsTitle: "Assignments",
-  assignmentsDescription: "All assigned tasks, overdue status, completion progress, and score.",
-  scoresTitle: "Assignment scores",
-  scoresDescription: "Review the best score and 3 most recent results for each assigned task.",
-  bestScoreLabel: "Best score",
-  recentResultsTitle: "Recent results",
-  noRecentResults: "No attempts have been recorded for this assignment yet.",
-  attemptDurationLabel: "Attempt time",
-  discussionTitle: "Class discussion",
-  discussionDescription: "Ask questions and exchange ideas with classmates, like a simple classroom forum.",
-  discussionComposerTitle: "Start a new question",
-  discussionTitlePlaceholder: "What part are you stuck on?",
-  discussionBodyPlaceholder: "Write the question, what you tried, or the exact step you do not understand...",
-  discussionAttachmentAction: "Add image",
-  discussionAttachmentHint: "You can attach multiple reference images.",
-  discussionRemoveAttachment: "Remove",
-  discussionModerationWarning: "This message had inappropriate words and they were replaced with ***.",
-  discussionPostAction: "Post question",
-  discussionReplyPlaceholder: "Write a reply for this topic...",
-  discussionReplyAction: "Reply",
-  discussionRepliesLabel: (count: number) => `${count} replies`,
-  discussionResolvedLabel: "Resolved",
-  discussionRelatedLabel: "Related task",
-  discussionEmptyTitle: "No discussions yet",
-  discussionEmptyDescription: "Start the first topic to ask classmates for help.",
-  discussionPageLabel: (page: number, totalPages: number) => `Page ${page}/${totalPages}`,
-  discussionPreviousPage: "Previous",
-  discussionNextPage: "Next",
-  announcementTitle: "Teacher notices",
-  announcementDescription: "All teacher notices sent directly to you or to your class.",
-  announcementHeroTitle: "No new notices",
-  announcementHeroEmpty: "Important teacher notices will appear here when they are posted.",
-  announcementPinnedLabel: "Important",
-  announcementPopupAutoDismiss: "Auto closes in 30 seconds",
-  announcementPopupAction: "Open detail",
-  announcementPopupDismiss: "Dismiss notice",
-  announcementPopupSnooze: "Hide this notice for 2 hours",
-  notificationTitle: "Notifications",
-  notificationEmpty: "No new notifications.",
-  notificationNewTopicLabel: "New topic",
-  notificationImageOnly: "Sent an image",
-  notificationNewThread: (authorName: string) => `${authorName} created a new topic`,
-  notificationNewReply: (authorName: string) => `${authorName} replied to you`,
-  notificationTopicContext: (title: string) => `in "${title}"`,
-  accountTitle: "Manage account",
-  accountDescription: "Student profile, login state, and account actions.",
-  learningProfileTitle: "Learning profile",
-  loginStateTitle: "Login state",
-  accountActionsTitle: "Account actions",
-  progressLabel: "Progress",
-  questionCountLabel: "Questions",
-  scoreLabel: "Score",
-  scoreBadge: (score: number, maxScore: number) => `${score}/${maxScore}`,
-  pendingScore: "Pending",
-  assignmentAction: (status: StudentAssignmentStatus) =>
-    status === "in_progress" ? "Continue" : status === "overdue" ? "Do now" : status === "submitted" ? "Submitted" : "Start",
-  signedInAs: "Signed in",
-  guestLabel: "Not signed in",
-  signIn: "Sign in",
-  signOut: "Sign out",
-  footerTitle: "ERG Edurise Global",
-  footerSubtitle: "Learn today, lead tomorrow",
-  sessionBadge: "Quiz session",
-  sessionEyebrow: "Quiz mode",
-  sessionDescription: (subject: string, teacher: string, dueLabel: string) =>
-    `${subject} • ${teacher} • ${dueLabel}. Finish the full session to refresh progress and score.`,
-  backToDashboard: "Back",
-};

@@ -17,12 +17,12 @@ const hotspotMockImage = `data:image/svg+xml,${encodeURIComponent(`
     </defs>
     <rect width="1200" height="675" fill="url(#bg)"/>
     <rect x="135" y="105" width="930" height="465" rx="34" fill="#ffffff" stroke="#9cc7ff" stroke-width="8"/>
-    <rect x="180" y="160" width="840" height="64" rx="18" fill="#00008b" opacity="0.9"/>
+    <rect x="180" y="160" width="840" height="64" rx="18" fill="#0f6cbd" opacity="0.9"/>
     <rect x="190" y="270" width="360" height="210" rx="24" fill="#f1f5f9"/>
     <rect x="625" y="284" width="300" height="150" rx="24" fill="#fff7ed" stroke="#f97316" stroke-width="6"/>
-    <text x="215" y="200" font-family="Arial, sans-serif" font-size="30" font-weight="700" fill="#ffffff">System Settings</text>
-    <text x="660" y="345" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#0f172a">Version 23H2</text>
-    <text x="660" y="392" font-family="Arial, sans-serif" font-size="24" fill="#475569">Build 22631</text>
+    <text x="215" y="200" font-family="Inter" font-size="30" font-weight="700" fill="#ffffff">System Settings</text>
+    <text x="660" y="345" font-family="Inter" font-size="32" font-weight="700" fill="#0f172a">Version 23H2</text>
+    <text x="660" y="392" font-family="Inter" font-size="24" fill="#475569">Build 22631</text>
   </svg>
 `)}`;
 
@@ -35,7 +35,7 @@ function createCableMockImage(label: string, color: string) {
       <rect x="103" y="112" width="46" height="70" rx="18" fill="#111827"/>
       <rect x="109" y="182" width="34" height="18" rx="8" fill="#1f2937"/>
       <path d="M120 198v18c0 10 8 18 18 18h8" stroke="#111827" stroke-width="8" stroke-linecap="round" fill="none"/>
-      <text x="120" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#334155">${label}</text>
+      <text x="120" y="222" text-anchor="middle" font-family="Inter" font-size="20" font-weight="700" fill="#334155">${label}</text>
     </svg>
   `)}`;
 }

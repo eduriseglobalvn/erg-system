@@ -1,1 +1,1 @@
-﻿export { QuizEditorWorkspace } from "@/features/lcms/quiz/quiz-editor";
+export { QuizEditorWorkspace } from "@/features/lcms/quiz/quiz-editor";

@@ -55,7 +55,7 @@ export function StudentAnnouncementPopup({
     >
       <div className="pointer-events-none flex min-h-full items-center justify-center p-4 sm:p-6">
         <div
-          className="pointer-events-auto w-full max-w-[760px] cursor-pointer overflow-hidden rounded-[28px] border border-[var(--erg-blue)]/10 bg-white shadow-[0_40px_120px_-40px_rgba(15,23,42,0.6)] transition hover:-translate-y-0.5"
+          className="pointer-events-auto w-full max-w-[760px] cursor-pointer overflow-hidden rounded-lg border border-[var(--erg-blue)]/10 bg-white shadow-sm transition "
           onClick={handleCardClick}
           role="button"
           tabIndex={0}
@@ -71,11 +71,11 @@ export function StudentAnnouncementPopup({
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 {announcement.isPinned ? (
-                  <span className="rounded-full bg-[var(--erg-red)]/10 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-[var(--erg-red)]">
+                  <span className="rounded-full bg-[var(--erg-red)]/10 px-3 py-1.5 text-xs font-medium text-[var(--erg-red)]">
                     {pinnedLabel}
                   </span>
                 ) : null}
-                <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                <span className="rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-500">
                   {announcement.targetLabel}
                 </span>
               </div>
@@ -90,7 +90,7 @@ export function StudentAnnouncementPopup({
             </div>
 
             <div>
-              <h2 className="text-2xl font-semibold leading-tight text-[var(--erg-blue)] sm:text-3xl">{announcement.title}</h2>
+              <h2 className="text-xl font-semibold leading-tight text-[var(--erg-blue)] ">{announcement.title}</h2>
               <p className="mt-3 text-base leading-8 text-slate-600 sm:text-lg">{announcement.content}</p>
             </div>
 
@@ -102,15 +102,15 @@ export function StudentAnnouncementPopup({
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
-                  className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                  className="rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
                   onClick={handleSnoozeClick}
                 >
                   {snoozeLabel}
                 </button>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <div className="text-sm text-slate-500">{autoDismissLabel}</div>
-                  <div className="shrink-0 rounded-2xl bg-[var(--erg-blue)] px-5 py-3 text-white shadow-[0_16px_36px_-22px_rgba(11,16,138,0.9)]">
-                    <div className="text-sm font-semibold uppercase tracking-[0.14em]">{ctaLabel}</div>
+                  <div className="shrink-0 rounded-lg bg-[var(--erg-blue)] px-5 py-3 text-white shadow-sm">
+                    <div className="text-sm font-semibold ">{ctaLabel}</div>
                   </div>
                 </div>
               </div>

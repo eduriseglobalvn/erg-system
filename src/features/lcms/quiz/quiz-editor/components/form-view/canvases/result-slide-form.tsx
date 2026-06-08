@@ -5,7 +5,8 @@ import {
   FieldLabel,
   FormViewSection,
 } from "@/features/lcms/quiz/quiz-editor/components/form-view/authoring-frame";
-import { ResultTabs } from "@/features/lcms/quiz/quiz-editor/components/form-view/result-tabs";
+import { ResultTabs } from "@/features/lcms/quiz/quiz-editor/components/form-view/result-tabs";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function ResultSlideForm({
   slide,
@@ -30,9 +31,9 @@ export function ResultSlideForm({
       </div>
 
       <FieldLabel label={t("quiz.finishAction")} />
-      <select className="classic-editor__select classic-editor__select--result">
+      <AppSelect className="classic-editor__select classic-editor__select--result">
         <option>{slide.finishAction ?? t("quiz.closeBrowserWindow")}</option>
-      </select>
+      </AppSelect>
     </FormViewSection>
   );
 }

@@ -1,4 +1,4 @@
-﻿import type { ReactNode } from "react";
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { ERG_ASSETS } from "@/config/seo";
@@ -25,8 +25,9 @@ export function PortalMobileLoginShell({
   return (
     <main
       style={{
-        background: "linear-gradient(180deg, #f7faff 0%, #eef4ff 55%, #f8fbff 100%)",
+        background: "var(--erg-bg)",
         color: "#0f172a",
+        fontFamily: "var(--font-app)",
         minHeight: "100svh",
         padding: "calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px)",
       }}
@@ -40,9 +41,9 @@ export function PortalMobileLoginShell({
       >
         <section
           style={{
-            background: "linear-gradient(155deg, #0b1494 0%, #2435a7 56%, #9d154d 126%)",
-            borderRadius: 30,
-            boxShadow: "0 28px 60px -34px rgba(11,20,148,0.55)",
+            background: "var(--erg-blue)",
+            borderRadius: 8,
+            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
             color: "#ffffff",
             overflow: "hidden",
             padding: "20px",
@@ -60,8 +61,8 @@ export function PortalMobileLoginShell({
               src={ERG_ASSETS.logo}
               style={{
                 backgroundColor: "#ffffff",
-                borderRadius: 18,
-                boxShadow: "0 10px 28px -18px rgba(15,23,42,0.55)",
+                borderRadius: 8,
+                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
                 display: "block",
                 height: 48,
                 objectFit: "contain",
@@ -74,10 +75,10 @@ export function PortalMobileLoginShell({
                 style={{
                   color: "rgba(255,255,255,0.72)",
                   fontSize: 10,
-                  fontWeight: 900,
-                  letterSpacing: "0.22em",
+                  fontWeight: 600,
+                  letterSpacing: 0,
                   margin: 0,
-                  textTransform: "uppercase",
+                  textTransform: "none",
                 }}
               >
                 {copy.badge}
@@ -86,7 +87,7 @@ export function PortalMobileLoginShell({
                 style={{
                   color: "#ffffff",
                   fontSize: 14,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   lineHeight: 1.35,
                   margin: "4px 0 0",
                 }}
@@ -99,10 +100,10 @@ export function PortalMobileLoginShell({
           <h1
             style={{
               color: "#ffffff",
-              fontSize: 28,
-              fontWeight: 900,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.08,
+              fontSize: 22,
+              fontWeight: 600,
+              letterSpacing: 0,
+              lineHeight: 1.2,
               margin: "20px 0 0",
             }}
           >
@@ -121,11 +122,10 @@ export function PortalMobileLoginShell({
 
           <div
             style={{
-              display: "flex",
+              display: "grid",
               gap: 8,
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               marginTop: 20,
-              overflowX: "auto",
-              paddingBottom: 4,
             }}
           >
             {copy.trustItems.slice(0, 3).map((item) => {
@@ -138,8 +138,8 @@ export function PortalMobileLoginShell({
                     backdropFilter: "blur(12px)",
                     backgroundColor: "rgba(255,255,255,0.10)",
                     border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 20,
-                    minWidth: 128,
+                    borderRadius: 8,
+                    minWidth: 0,
                     padding: "12px",
                   }}
                 >
@@ -148,11 +148,12 @@ export function PortalMobileLoginShell({
                     style={{
                       color: "rgba(255,255,255,0.92)",
                       fontSize: 11,
-                      fontWeight: 900,
-                      letterSpacing: "0.14em",
+                      fontWeight: 600,
+                      letterSpacing: 0,
                       lineHeight: 1.4,
                       margin: "12px 0 0",
-                      textTransform: "uppercase",
+                      textTransform: "none",
+                      wordBreak: "break-word",
                     }}
                   >
                     {item.label}
@@ -163,6 +164,7 @@ export function PortalMobileLoginShell({
                       fontSize: 12,
                       lineHeight: 1.55,
                       margin: "4px 0 0",
+                      wordBreak: "break-word",
                     }}
                   >
                     {item.caption}

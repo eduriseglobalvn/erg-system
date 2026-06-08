@@ -1,4 +1,4 @@
-﻿import { getApiBase } from "@/lib/platform";
+import { getApiBase } from "@/lib/platform";
 import { getStoredAccessToken, resolveCurrentPortal, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";

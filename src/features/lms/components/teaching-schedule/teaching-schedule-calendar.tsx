@@ -1,4 +1,4 @@
-﻿import type { DateSelectArg, DatesSetArg, EventChangeArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
+import type { DateSelectArg, DatesSetArg, EventChangeArg, EventClickArg, EventContentArg } from "@fullcalendar/core";
 import viLocale from "@fullcalendar/core/locales/vi";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import type { DateClickArg } from "@fullcalendar/interaction";
@@ -15,6 +15,7 @@ export type TeachingScheduleView = "timeGridDay" | "timeGridWeek" | "dayGridMont
 type TeachingScheduleCalendarProps = {
   calendarRef: RefObject<FullCalendar | null>;
   events: TeachingScheduleEvent[];
+  initialView?: TeachingScheduleView;
   onDateClick: (arg: DateClickArg) => void;
   onDatesSet: (arg: DatesSetArg) => void;
   onEventChange: (arg: EventChangeArg) => void;
@@ -28,11 +29,13 @@ function getTeachingScheduleEventClassNames() {
 
 function renderTeachingScheduleEvent(info: EventContentArg) {
   const meta = info.event.extendedProps as TeachingScheduleMeta;
+  const schoolColor = meta.schoolColor ?? info.event.borderColor;
   const compactView = info.view.type === "dayGridMonth" || info.view.type === "multiMonthYear";
 
   if (compactView) {
     return (
-      <div className="teaching-schedule-month-event min-w-0">
+      <div className="teaching-schedule-month-event flex min-w-0 items-center gap-1">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: schoolColor }} />
         <span className="font-semibold">{info.timeText}</span>
         <span className="truncate">{info.event.title}</span>
       </div>
@@ -40,11 +43,15 @@ function renderTeachingScheduleEvent(info: EventContentArg) {
   }
 
   return (
-    <div className="min-w-0 px-1 py-0.5">
-      <div className="truncate text-[10px] font-semibold leading-3">{info.timeText}</div>
-      <div className="truncate text-[11px] font-semibold leading-4">{info.event.title}</div>
-      <div className="truncate text-[10px] leading-3 opacity-85">{meta.school}</div>
-      <div className="truncate text-[10px] leading-3 opacity-75">
+    <div className="min-w-0 px-1.5 py-1">
+      <div className="truncate text-[12px] font-bold leading-4">{info.timeText}</div>
+      <div className="truncate text-[13px] font-bold leading-4">{info.event.title}</div>
+      <div className="mt-0.5 flex min-w-0 items-center gap-1.5 text-[12px] font-semibold leading-4">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: schoolColor }} />
+        <span className="truncate opacity-85">{meta.school}</span>
+      </div>
+      <div className="truncate text-[12px] font-semibold leading-4 opacity-80">{meta.subjectLabel ?? "Môn học"}</div>
+      <div className="truncate text-[12px] font-semibold leading-4 opacity-80">
         {meta.room} · {meta.lesson}
       </div>
     </div>
@@ -70,6 +77,7 @@ function renderDayHeader(info: { date: Date; view: { type: string } }) {
 export function TeachingScheduleCalendar({
   calendarRef,
   events,
+  initialView = "timeGridWeek",
   onDateClick,
   onDatesSet,
   onEventChange,
@@ -82,7 +90,7 @@ export function TeachingScheduleCalendar({
         ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, multiMonthPlugin, interactionPlugin]}
         locale={viLocale}
-        initialView="timeGridWeek"
+        initialView={initialView}
         initialDate="2026-06-01"
         firstDay={1}
         allDaySlot={false}
@@ -96,13 +104,13 @@ export function TeachingScheduleCalendar({
         showNonCurrentDates
         stickyHeaderDates
         height="100%"
-        slotMinTime="00:00:00"
+        slotMinTime="07:00:00"
         slotMaxTime="24:00:00"
         scrollTime="07:00:00"
         slotDuration="00:30:00"
         snapDuration="00:15:00"
-        eventMinHeight={22}
-        eventShortHeight={22}
+        eventMinHeight={30}
+        eventShortHeight={30}
         dayMaxEvents={3}
         dayMaxEventRows={3}
         moreLinkText={(count) => `+${count} lịch`}

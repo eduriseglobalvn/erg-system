@@ -1,8 +1,10 @@
+import { useForm } from "@tanstack/react-form";
 import { useState, type FormEvent } from "react";
 import { Building2, CheckCircle2, MapPin, School } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import {
   Dialog,
   DialogClose,
@@ -39,14 +41,14 @@ const unitTypes: Array<{
     title: "Hệ thống",
     description: "Dành cho phạm vi toàn hệ thống như ERG hoặc Hoclieu Studio.",
     icon: Building2,
-    accentClassName: "bg-indigo-50 text-indigo-700 ring-indigo-100",
+    accentClassName: "bg-[var(--erg-blue-light)] text-[var(--erg-blue)] ring-[var(--erg-blue-ring)]",
   },
   {
     id: "school",
     title: "Trường",
     description: "Dành cho cơ sở có nhiều lớp, giáo viên và học sinh theo năm học.",
     icon: School,
-    accentClassName: "bg-blue-50 text-blue-700 ring-blue-100",
+    accentClassName: "bg-[var(--erg-blue-light)] text-[var(--erg-blue)] ring-[var(--erg-blue-ring)]",
   },
   {
     id: "center",
@@ -75,9 +77,14 @@ export function CreateEducationUnitDialog({
   const createUnitMutation = useMutation({
     mutationFn: createEducationUnit,
   });
+  const form = useForm({
+    defaultValues: {
+      unitName,
+    },
+    onSubmit: () => handleCreateUnit(),
+  });
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function handleCreateUnit() {
     setErrorMessage(null);
 
     try {
@@ -107,13 +114,19 @@ export function CreateEducationUnitDialog({
     }
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+    void form.handleSubmit();
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[760px] gap-0 p-0">
-        <form onSubmit={handleSubmit}>
+        <TsForm onSubmit={handleSubmit}>
           <DialogHeader className="border-b border-slate-200 bg-slate-50 px-6 py-5">
             <div className="flex items-start gap-3 pr-8">
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary ring-1 ring-primary/10">
+              <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10">
                 <School className="size-5" />
               </span>
               <div className="min-w-0">
@@ -127,7 +140,7 @@ export function CreateEducationUnitDialog({
 
           <div className="grid gap-5 px-6 py-5">
             <section className="grid gap-3">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+              <p className="text-xs font-semibold text-slate-400">
                 Loại cơ sở
               </p>
               <div className="grid gap-3 lg:grid-cols-3">
@@ -142,7 +155,7 @@ export function CreateEducationUnitDialog({
               </div>
             </section>
 
-            <section className="grid gap-4 rounded-2xl border border-slate-200 bg-white p-4">
+            <section className="grid gap-4 rounded-lg border border-slate-200 bg-white p-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-950">
@@ -152,22 +165,36 @@ export function CreateEducationUnitDialog({
                     Giữ form ngắn để admin tạo nhanh, các cấu hình nâng cao xử lý sau.
                   </p>
                 </div>
-                <span className="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                <span className="rounded-full border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-2.5 py-1 text-xs font-semibold text-[var(--erg-blue)]">
                   {selectedType === "school" ? "Trường" : "Trung tâm"}
                 </span>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
+                <form.Field
+                  name="unitName"
+                  validators={{
+                    onChange: ({ value }) => value.trim() ? undefined : "Tên cơ sở là bắt buộc.",
+                  }}
+                >
+                  {(field) => (
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Tên cơ sở</span>
                   <Input
-                    required
                     className="h-10 bg-white"
                     placeholder={selectedType === "school" ? "VD: ERG Alpha School" : "VD: ERG East Learning Point"}
-                    value={unitName}
-                    onChange={(event) => setUnitName(event.target.value)}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => {
+                      field.handleChange(event.target.value);
+                      setUnitName(event.target.value);
+                    }}
+                    aria-invalid={field.state.meta.errors.length ? "true" : undefined}
                   />
+                  <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
                 </label>
+                  )}
+                </form.Field>
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Mã cơ sở</span>
                   <Input
@@ -188,12 +215,12 @@ export function CreateEducationUnitDialog({
               </div>
 
               {errorMessage ? (
-                <div className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
+                <div className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700">
                   {errorMessage}
                 </div>
               ) : null}
 
-              <div className="flex items-start gap-3 rounded-xl bg-slate-50 px-3 py-3 text-sm text-slate-600">
+              <div className="flex items-start gap-3 rounded-lg bg-slate-50 px-3 py-3 text-sm text-slate-600">
                 <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
                 <p className="leading-6">
                   Địa chỉ, phân quyền chi tiết, lớp học và giáo viên sẽ được bổ sung trong bước cấu hình sau khi tạo.
@@ -208,11 +235,15 @@ export function CreateEducationUnitDialog({
                 Hủy
               </Button>
             </DialogClose>
-            <Button type="submit" size="lg" disabled={!unitName.trim() || createUnitMutation.isPending}>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+            <Button type="submit" size="lg" disabled={!canSubmit || !unitName.trim() || createUnitMutation.isPending || isSubmitting}>
               Tạo cơ sở
             </Button>
+              )}
+            </form.Subscribe>
           </DialogFooter>
-        </form>
+        </TsForm>
       </DialogContent>
     </Dialog>
   );
@@ -246,14 +277,14 @@ function EducationUnitTypeCard({
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex min-h-[118px] items-start gap-4 rounded-2xl border bg-white p-4 text-left transition",
-        "hover:border-blue-200 hover:shadow-[0_18px_36px_-28px_rgba(37,99,235,0.7)]",
-        active ? "border-blue-300 ring-4 ring-blue-50" : "border-slate-200",
+        "flex min-h-[118px] items-start gap-4 rounded-lg border bg-white p-4 text-left transition",
+        "hover:border-[#b8d6fa] hover:shadow-sm",
+        active ? "border-[#b8d6fa] shadow-sm ring-2 ring-[var(--erg-blue-ring)]" : "border-slate-200",
       )}
     >
       <span
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-xl ring-1",
+          "grid size-11 shrink-0 place-items-center rounded-lg ring-1",
           unitType.accentClassName,
         )}
       >
@@ -262,7 +293,7 @@ function EducationUnitTypeCard({
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
           <span className="text-base font-semibold text-slate-950">{unitType.title}</span>
-          {active ? <CheckCircle2 className="size-4 text-blue-600" /> : null}
+          {active ? <CheckCircle2 className="size-4 text-[var(--erg-blue)]" /> : null}
         </span>
         <span className="mt-1.5 block text-sm leading-6 text-slate-500">
           {unitType.description}

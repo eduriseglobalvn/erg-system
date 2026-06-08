@@ -1,6 +1,8 @@
-﻿import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
+import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 
+import { useForm } from "@tanstack/react-form";
+import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
 import type {
   AuthMode,
@@ -59,6 +61,14 @@ export function PortalMobileLoginForm({
   const { t } = useI18n();
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const effectiveMode = allowRegister ? mode : "login";
+  const loginTanstackForm = useForm({
+    defaultValues: loginForm,
+    onSubmit: () => onLoginSubmit(createHandledSubmitEvent()),
+  });
+  const registerTanstackForm = useForm({
+    defaultValues: registerForm,
+    onSubmit: () => onRegisterSubmit(createHandledSubmitEvent()),
+  });
 
   function focusPasswordFromEmail(event: KeyboardEvent<HTMLInputElement>) {
     if ((event.key !== "Tab" || event.shiftKey) && event.key !== "Enter") return;
@@ -115,52 +125,89 @@ export function PortalMobileLoginForm({
             </div>
           ) : null}
 
-          <form style={styles.form} onSubmit={onLoginSubmit}>
-            <label style={styles.field}>
-              <span style={styles.label}>{credentialLabel ?? t("auth.email")}</span>
-              <span style={styles.inputWrap}>
-                <Mail color="#64748b" size={18} />
-                <input
-                  autoComplete="username"
-                  inputMode="email"
-                  onChange={(event) => onLoginFormChange({ ...loginForm, email: event.target.value })}
-                  onKeyDown={focusPasswordFromEmail}
-                  placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
-                  style={styles.input}
-                  type="text"
-                  value={loginForm.email}
-                />
-              </span>
-            </label>
+          <TsForm
+            style={styles.form}
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void loginTanstackForm.handleSubmit();
+            }}
+          >
+            <loginTanstackForm.Field
+              name="email"
+              validators={{
+                onChange: ({ value }) => validateCredential(value, credentialLabel ?? t("auth.email")),
+              }}
+            >
+              {(field) => (
+                <label style={styles.field}>
+                  <span style={styles.label}>{credentialLabel ?? t("auth.email")}</span>
+                  <span style={styles.inputWrap}>
+                    <Mail color="#64748b" size={18} />
+                    <input
+                      autoComplete="username"
+                      inputMode="email"
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        onLoginFormChange({ ...loginForm, email: event.target.value });
+                      }}
+                      onKeyDown={focusPasswordFromEmail}
+                      placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
+                      style={styles.input}
+                      type="text"
+                      value={field.state.value}
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    />
+                  </span>
+                  <TsFormMessage style={styles.errorText}>{field.state.meta.errors[0]}</TsFormMessage>
+                </label>
+              )}
+            </loginTanstackForm.Field>
 
-            <label style={styles.field}>
-              <span style={styles.passwordLabelRow}>
-                <span style={styles.label}>{t("auth.password")}</span>
-                <button style={styles.inlineButton} type="button" onClick={onForgotPassword}>
-                  {t("auth.forgotPassword")}
-                </button>
-              </span>
-              <span style={styles.inputWrap}>
-                <LockKeyhole color="#64748b" size={18} />
-                <input
-                  ref={passwordInputRef}
-                  autoComplete="current-password"
-                  onChange={(event) => onLoginFormChange({ ...loginForm, password: event.target.value })}
-                  placeholder={t("auth.enterPassword")}
-                  style={styles.input}
-                  type={showPassword ? "text" : "password"}
-                  value={loginForm.password}
-                />
-                <button
-                  aria-label={t("auth.showHidePassword")}
-                  style={styles.iconButton}
-                  type="button"
-                  onClick={onShowPasswordToggle}
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </span>
-            </label>
+            <loginTanstackForm.Field
+              name="password"
+              validators={{
+                onChange: ({ value }) => validatePassword(value),
+              }}
+            >
+              {(field) => (
+                <label style={styles.field}>
+                  <span style={styles.passwordLabelRow}>
+                    <span style={styles.label}>{t("auth.password")}</span>
+                    <button style={styles.inlineButton} type="button" onClick={onForgotPassword}>
+                      {t("auth.forgotPassword")}
+                    </button>
+                  </span>
+                  <span style={styles.inputWrap}>
+                    <LockKeyhole color="#64748b" size={18} />
+                    <input
+                      ref={passwordInputRef}
+                      autoComplete="current-password"
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.handleChange(event.target.value);
+                        onLoginFormChange({ ...loginForm, password: event.target.value });
+                      }}
+                      placeholder={t("auth.enterPassword")}
+                      style={styles.input}
+                      type={showPassword ? "text" : "password"}
+                      value={field.state.value}
+                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    />
+                    <button
+                      aria-label={t("auth.showHidePassword")}
+                      style={styles.iconButton}
+                      type="button"
+                      onClick={onShowPasswordToggle}
+                    >
+                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                    </button>
+                  </span>
+                  <TsFormMessage style={styles.errorText}>{field.state.meta.errors[0]}</TsFormMessage>
+                </label>
+              )}
+            </loginTanstackForm.Field>
 
             <label style={styles.rememberRow}>
               <input
@@ -172,15 +219,26 @@ export function PortalMobileLoginForm({
               <span>{t("auth.rememberMe")}</span>
             </label>
 
-            <button style={styles.submitButton} type="submit">
-              {t("auth.login")}
-            </button>
-          </form>
+            <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <button disabled={!canSubmit || isSubmitting} style={styles.submitButton} type="submit">
+                  {t("auth.login")}
+                </button>
+              )}
+            </loginTanstackForm.Subscribe>
+          </TsForm>
 
           {loginFootnote ? <p style={styles.footnote}>{loginFootnote}</p> : null}
         </>
       ) : (
-        <form style={styles.form} onSubmit={onRegisterSubmit}>
+        <TsForm
+          style={styles.form}
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void registerTanstackForm.handleSubmit();
+          }}
+        >
           <div style={styles.headingBlock}>
             <div style={styles.iconBadge}>
               <ShieldCheck size={18} />
@@ -189,57 +247,124 @@ export function PortalMobileLoginForm({
             <p style={styles.subtitle}>{t("auth.registerSubtitle")}</p>
           </div>
 
-          <MobileTextField
-            label={t("auth.fullName")}
-            value={registerForm.fullName}
-            onChange={(value) => onRegisterFormChange({ ...registerForm, fullName: value })}
-            placeholder={t("auth.placeholderName")}
-          />
-          <MobileTextField
-            label={t("auth.internalEmail")}
-            value={registerForm.email}
-            onChange={(value) => onRegisterFormChange({ ...registerForm, email: value })}
-            placeholder={t("auth.placeholderWorkEmail")}
-            type="email"
-          />
+          <registerTanstackForm.Field
+            name="fullName"
+            validators={{
+              onChange: ({ value }) => validateRequired(value, t("auth.fullName")),
+            }}
+          >
+            {(field) => (
+              <MobileTextField
+                error={field.state.meta.errors[0]}
+                label={t("auth.fullName")}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onRegisterFormChange({ ...registerForm, fullName: value });
+                }}
+                placeholder={t("auth.placeholderName")}
+              />
+            )}
+          </registerTanstackForm.Field>
+          <registerTanstackForm.Field
+            name="email"
+            validators={{
+              onChange: ({ value }) => validateEmail(value),
+            }}
+          >
+            {(field) => (
+              <MobileTextField
+                error={field.state.meta.errors[0]}
+                label={t("auth.internalEmail")}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onRegisterFormChange({ ...registerForm, email: value });
+                }}
+                placeholder={t("auth.placeholderWorkEmail")}
+                type="email"
+              />
+            )}
+          </registerTanstackForm.Field>
           <MobileTextField
             label={t("auth.department")}
             value={registerForm.department}
             onChange={(value) => onRegisterFormChange({ ...registerForm, department: value })}
             placeholder={t("auth.placeholderDepartment")}
           />
-          <MobileTextField
-            label={t("auth.password")}
-            value={registerForm.password}
-            onChange={(value) => onRegisterFormChange({ ...registerForm, password: value })}
-            placeholder={t("auth.placeholderPasswordMin")}
-            type="password"
-          />
-          <MobileTextField
-            label={t("auth.confirmPassword")}
-            value={registerForm.confirmPassword}
-            onChange={(value) => onRegisterFormChange({ ...registerForm, confirmPassword: value })}
-            placeholder={t("auth.placeholderConfirmPassword")}
-            type="password"
-          />
+          <registerTanstackForm.Field
+            name="password"
+            validators={{
+              onChange: ({ value }) => validatePassword(value),
+            }}
+          >
+            {(field) => (
+              <MobileTextField
+                error={field.state.meta.errors[0]}
+                label={t("auth.password")}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onRegisterFormChange({ ...registerForm, password: value });
+                }}
+                placeholder={t("auth.placeholderPasswordMin")}
+                type="password"
+              />
+            )}
+          </registerTanstackForm.Field>
+          <registerTanstackForm.Field
+            name="confirmPassword"
+            validators={{
+              onChange: ({ value, fieldApi }) => {
+                const password = fieldApi.form.getFieldValue("password");
+                return value === password ? undefined : "Mật khẩu xác nhận chưa khớp.";
+              },
+            }}
+          >
+            {(field) => (
+              <MobileTextField
+                error={field.state.meta.errors[0]}
+                label={t("auth.confirmPassword")}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(value) => {
+                  field.handleChange(value);
+                  onRegisterFormChange({ ...registerForm, confirmPassword: value });
+                }}
+                placeholder={t("auth.placeholderConfirmPassword")}
+                type="password"
+              />
+            )}
+          </registerTanstackForm.Field>
 
-          <button style={styles.submitButton} type="submit">
-            {t("auth.createAccount")}
-          </button>
-        </form>
+          <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+            {([canSubmit, isSubmitting]) => (
+              <button disabled={!canSubmit || isSubmitting} style={styles.submitButton} type="submit">
+                {t("auth.createAccount")}
+              </button>
+            )}
+          </registerTanstackForm.Subscribe>
+        </TsForm>
       )}
     </section>
   );
 }
 
 function MobileTextField({
+  error,
   label,
+  onBlur,
   onChange,
   placeholder,
   type = "text",
   value,
 }: {
+  error?: string;
   label: string;
+  onBlur?: () => void;
   onChange: (value: string) => void;
   placeholder: string;
   type?: string;
@@ -250,6 +375,8 @@ function MobileTextField({
       <span style={styles.label}>{label}</span>
       <span style={styles.inputWrap}>
         <input
+          aria-invalid={error ? "true" : undefined}
+          onBlur={onBlur}
           onChange={(event) => onChange(event.target.value)}
           placeholder={placeholder}
           style={{ ...styles.input, paddingLeft: 0 }}
@@ -257,16 +384,45 @@ function MobileTextField({
           value={value}
         />
       </span>
+      <TsFormMessage style={styles.errorText}>{error}</TsFormMessage>
     </label>
   );
+}
+
+function createHandledSubmitEvent() {
+  return {
+    preventDefault() {},
+    stopPropagation() {},
+  } as FormEvent<HTMLFormElement>;
+}
+
+function validateRequired(value: string, label: string) {
+  return value.trim() ? undefined : `${label} là bắt buộc.`;
+}
+
+function validateCredential(value: string, label: string) {
+  const requiredMessage = validateRequired(value, label);
+  if (requiredMessage) return requiredMessage;
+  if (label.toLowerCase().includes("email")) return validateEmail(value);
+  return undefined;
+}
+
+function validateEmail(value: string) {
+  if (!value.trim()) return "Email là bắt buộc.";
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()) ? undefined : "Email không hợp lệ.";
+}
+
+function validatePassword(value: string) {
+  if (!value) return "Mật khẩu là bắt buộc.";
+  return value.length >= 6 ? undefined : "Mật khẩu tối thiểu 6 ký tự.";
 }
 
 const styles = {
   card: {
     background: "#ffffff",
-    border: "1px solid rgba(148,163,184,0.26)",
-    borderRadius: 28,
-    boxShadow: "0 26px 70px -46px rgba(15,23,42,0.4)",
+    border: "1px solid #d7e0ec",
+    borderRadius: 8,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
     padding: "22px 18px",
     width: "100%",
   },
@@ -290,16 +446,22 @@ const styles = {
   dividerText: {
     color: "#94a3b8",
     fontSize: 12,
-    fontWeight: 700,
+    fontWeight: 600,
   },
   field: {
     display: "grid",
     gap: 8,
   },
+  errorText: {
+    color: "#cc0022",
+    fontSize: 12,
+    fontWeight: 600,
+    margin: 0,
+  },
   footnote: {
     background: "#f8fafc",
     border: "1px solid #e2e8f0",
-    borderRadius: 18,
+    borderRadius: 8,
     color: "#475569",
     fontSize: 13,
     lineHeight: 1.65,
@@ -318,8 +480,8 @@ const styles = {
   iconBadge: {
     alignItems: "center",
     background: "#eef4ff",
-    borderRadius: 14,
-    color: "var(--erg-blue, #00008b)",
+    borderRadius: 8,
+    color: "var(--erg-blue, #0f6cbd)",
     display: "inline-flex",
     height: 38,
     justifyContent: "center",
@@ -332,27 +494,28 @@ const styles = {
     color: "#64748b",
     display: "inline-flex",
     flex: "0 0 auto",
-    height: 40,
+    height: 44,
     justifyContent: "center",
     marginRight: -8,
-    width: 40,
+    width: 44,
   },
   inlineButton: {
     background: "transparent",
     border: 0,
-    color: "var(--erg-blue, #00008b)",
+    color: "var(--erg-blue, #0f6cbd)",
     flex: "0 0 auto",
     fontSize: 12,
-    fontWeight: 800,
-    padding: 0,
+    fontWeight: 600,
+    minHeight: 36,
+    padding: "8px 0 8px 8px",
   },
   input: {
     background: "transparent",
     border: 0,
     color: "#0f172a",
     flex: "1 1 auto",
-    fontSize: 16,
-    height: 28,
+    fontSize: 14,
+    height: 44,
     minWidth: 0,
     outline: "none",
     width: "100%",
@@ -361,18 +524,18 @@ const styles = {
     alignItems: "center",
     background: "#ffffff",
     border: "1px solid #dbe3ef",
-    borderRadius: 18,
-    boxShadow: "0 10px 26px -24px rgba(15,23,42,0.55)",
+    borderRadius: 8,
+    boxShadow: "none",
     display: "flex",
-    gap: 10,
-    minHeight: 56,
-    padding: "0 14px",
+    gap: 8,
+    minHeight: 46,
+    padding: "0 12px",
     width: "100%",
   },
   label: {
     color: "#1e293b",
     fontSize: 13,
-    fontWeight: 800,
+    fontWeight: 600,
     lineHeight: 1.35,
   },
   passwordLabelRow: {
@@ -386,34 +549,34 @@ const styles = {
     color: "#334155",
     display: "flex",
     fontSize: 14,
-    fontWeight: 700,
+    fontWeight: 600,
     gap: 10,
     lineHeight: 1.4,
   },
   segmentedActive: {
-    background: "var(--erg-blue, #00008b)",
+    background: "var(--erg-blue, #0f6cbd)",
     border: 0,
-    borderRadius: 14,
+    borderRadius: 6,
     color: "#ffffff",
     flex: 1,
     fontSize: 14,
-    fontWeight: 800,
-    height: 42,
+    fontWeight: 600,
+    height: 44,
   },
   segmentedButton: {
     background: "transparent",
     border: 0,
-    borderRadius: 14,
+    borderRadius: 6,
     color: "#64748b",
     flex: 1,
     fontSize: 14,
-    fontWeight: 800,
-    height: 42,
+    fontWeight: 600,
+    height: 44,
   },
   segmentedControl: {
     background: "#f1f5f9",
     border: "1px solid #e2e8f0",
-    borderRadius: 18,
+    borderRadius: 8,
     display: "flex",
     gap: 4,
     marginBottom: 20,
@@ -424,15 +587,15 @@ const styles = {
   },
   submitButton: {
     alignItems: "center",
-    background: "var(--erg-blue, #00008b)",
+    background: "var(--erg-blue, #0f6cbd)",
     border: 0,
-    borderRadius: 18,
-    boxShadow: "0 18px 38px -24px rgba(0,0,139,0.65)",
+    borderRadius: 8,
+    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
     color: "#ffffff",
     display: "inline-flex",
-    fontSize: 16,
-    fontWeight: 900,
-    height: 54,
+    fontSize: 14,
+    fontWeight: 600,
+    height: 44,
     justifyContent: "center",
     marginTop: 2,
     width: "100%",
@@ -445,8 +608,8 @@ const styles = {
   },
   title: {
     color: "#0f172a",
-    fontSize: 27,
-    fontWeight: 900,
+    fontSize: 22,
+    fontWeight: 600,
     letterSpacing: 0,
     lineHeight: 1.12,
     margin: 0,

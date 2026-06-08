@@ -1,15 +1,15 @@
-﻿import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
 
 import type { TeachingScheduleEvent } from "./teaching-schedule-types";
 
 export type TeachingScheduleCalendarColor = Pick<TeachingScheduleEvent, "backgroundColor" | "borderColor" | "textColor">;
 
 export const personalTeachingCalendar = {
-  color: "#1a73e8",
+  color: "#0f6cbd",
   label: "Lịch dạy của tôi",
 };
 
-const schoolColorPalette = ["#1a73e8", "#34a853", "#fbbc04", "#a142f4", "#fa7b17", "#24c1e0"];
+const schoolColorPalette = ["#0f6cbd", "#34a853", "#fbbc04", "#a142f4", "#fa7b17", "#24c1e0"];
 
 export const schoolTeachingCalendars = classroomSchools.map((school, index) => ({
   id: school.id,
@@ -31,8 +31,8 @@ const fallbackSchoolColors: TeachingScheduleCalendarColor = {
 
 const schoolColorTokens: Record<string, TeachingScheduleCalendarColor> = {
   "ERG Alpha Campus": {
-    backgroundColor: "#e8f0fe",
-    borderColor: "#1a73e8",
+    backgroundColor: "#ebf3fc",
+    borderColor: "#0f6cbd",
     textColor: "#174ea6",
   },
   "ERG East Learning Point": {

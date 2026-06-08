@@ -20,6 +20,11 @@ import {
 import { clearCrossDomainSession } from "@/platform/auth/api/cross-domain-session";
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
+import {
+  getPersistedJsonValue,
+  removePersistedJsonValue,
+  setPersistedJsonValue,
+} from "@/stores/persisted-store";
 
 type AccountSession = StoredAuthIdentity & {
   loggedInAt: string;
@@ -58,13 +63,13 @@ function parseJson<T>(value: string | null, fallback: T) {
 
 function writeAccounts(accounts: TeacherAccount[]) {
   if (!canUseStorage()) return;
-  window.localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
+  setPersistedJsonValue(ACCOUNTS_KEY, accounts);
 }
 
 export function listAccounts() {
   if (!canUseStorage()) return defaultAccounts;
 
-  const stored = parseJson<TeacherAccount[]>(window.localStorage.getItem(ACCOUNTS_KEY), []);
+  const stored = getPersistedJsonValue<TeacherAccount[]>(ACCOUNTS_KEY, []);
   if (!stored.length) {
     writeAccounts(defaultAccounts);
     return defaultAccounts;
@@ -80,13 +85,13 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
   // Try SSO hydration first — if another portal set a cookie or passed an sso_token,
   // this writes the session into localStorage before we read it.
   const candidates = [
-    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")), null),
+    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")), null),
+    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")), null),
+    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    parseJson<AccountSession | null>(window.localStorage.getItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")), null),
+    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
     readTeacherSessionSnapshot() as AccountSession | null,
   ];
@@ -107,11 +112,11 @@ function writeSession(session: AccountSession) {
   const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
   const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
   if (session.rememberMe) {
-    window.localStorage.setItem(localKey, JSON.stringify(session));
+    setPersistedJsonValue(localKey, session);
     window.sessionStorage.removeItem(tempKey);
   } else {
     window.sessionStorage.setItem(tempKey, JSON.stringify(session));
-    window.localStorage.removeItem(localKey);
+    removePersistedJsonValue(localKey);
   }
 }
 
@@ -124,10 +129,10 @@ function clearSession() {
   clearTeacherSessionSnapshot();
   clearCrossDomainSession();
   if (!canUseStorage()) return;
-  window.localStorage.removeItem(TEACHER_LOCAL_SESSION_KEY);
+  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
   window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
   for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
-    window.localStorage.removeItem(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
+    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
     window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
   }
 }

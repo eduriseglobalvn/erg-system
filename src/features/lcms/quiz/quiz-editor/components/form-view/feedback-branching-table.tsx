@@ -3,7 +3,8 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
 
-import { useI18n } from "@/platform/i18n";
+import { useI18n } from "@/platform/i18n";
+import { AppSelect } from "@/components/ui/app-select";
 import type {
   QuizEditorFeedbackBranching,
   QuizEditorFeedbackRow,
@@ -84,7 +85,7 @@ function FeedbackRow({
           <span>{t("common.branching")}</span>
           <div className="classic-editor__feedback-select-wrap">
             <ArrowForwardIcon className="h-3.5 w-3.5" fontSize="inherit" />
-            <select
+            <AppSelect
               value={branching}
               onChange={(event) =>
                 onChange(row.id, { branching: event.target.value as QuizEditorFeedbackBranching })
@@ -95,7 +96,7 @@ function FeedbackRow({
                   {formatBranchingLabel(option, t)}
                 </option>
               ))}
-            </select>
+            </AppSelect>
           </div>
         </label>
 

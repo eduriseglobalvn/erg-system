@@ -1,4 +1,4 @@
-﻿import { expect, test } from "vitest";
+import { expect, test } from "vitest";
 
 import type { LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { buildManagedSchoolsFromUnits } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";

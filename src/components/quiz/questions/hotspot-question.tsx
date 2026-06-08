@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type TouchEvent as ReactTouchEvent } from 
 
 import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 
 const MIN_ZOOM = 1;
@@ -18,6 +19,7 @@ export function HotspotQuestion({
 }: QuestionComponentProps) {
   const { t } = useI18n();
   const isMobile = useIsMobile();
+  const paceStateUpdate = usePacedStateBatch();
   const imageRef = useRef<HTMLDivElement | null>(null);
   const editorImageRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<{ x: number; y: number } | null>(null);
@@ -31,13 +33,12 @@ export function HotspotQuestion({
       return;
     }
 
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       setZoom(DEFAULT_MOBILE_ZOOM);
       setOffset({ x: 0, y: 0 });
     });
 
-    return () => window.cancelAnimationFrame(frameId);
-  }, [editorOpen]);
+  }, [editorOpen, paceStateUpdate]);
 
   if (!question.hotspotImage) {
     return null;
@@ -131,7 +132,7 @@ export function HotspotQuestion({
             ) : null}
             {!submitted ? (
               <div className="absolute inset-0 grid place-items-center bg-slate-950/35">
-                <div className="grid place-items-center gap-2 rounded-md bg-slate-900/75 px-5 py-4 text-center text-white shadow-lg">
+                <div className="grid place-items-center gap-2 rounded-md bg-slate-900/75 px-5 py-4 text-center text-white shadow-sm">
                   <Pointer className="h-9 w-9" />
                   <span className="text-sm font-semibold leading-5">Tap to answer this question</span>
                 </div>
@@ -143,7 +144,7 @@ export function HotspotQuestion({
 
         {editorOpen ? (
           <div className="fixed inset-0 z-[320] bg-[#2f2f2f]">
-            <div className="flex items-center justify-between px-4 py-3 text-sm font-semibold uppercase text-sky-400">
+            <div className="flex items-center justify-between px-4 py-3 text-sm font-semibold text-[var(--erg-blue-light)]">
               <button
                 type="button"
                 onClick={() => resetEditorState(true)}
@@ -184,7 +185,7 @@ export function HotspotQuestion({
                       ? question.hotspotAreas?.map((area) => (
                           <div
                             key={area.id}
-                            className="absolute border-2 border-dashed border-white/90 bg-sky-400/20"
+                            className="absolute border border-dashed border-white/90 bg-[var(--erg-blue)]/20"
                             style={{
                               left: `${area.x * 100}%`,
                               top: `${area.y * 100}%`,
@@ -229,7 +230,7 @@ export function HotspotQuestion({
     <div className="grid gap-3">
       <div
         ref={imageRef}
-        className="relative overflow-hidden rounded-xl border bg-white"
+        className="relative overflow-hidden rounded-lg border bg-white"
         style={{ borderColor: "var(--quiz-canvas-border)" }}
         onClick={(event) => {
           handlePickPoint(event.clientX, event.clientY, imageRef.current);
@@ -244,7 +245,7 @@ export function HotspotQuestion({
           ? question.hotspotAreas?.map((area) => (
               <div
                 key={area.id}
-                className="absolute border-2 border-dashed border-white/90 bg-sky-400/20"
+                className="absolute border border-dashed border-white/90 bg-[var(--erg-blue)]/20"
                 style={{
                   left: `${area.x * 100}%`,
                   top: `${area.y * 100}%`,
@@ -266,7 +267,7 @@ export function HotspotQuestion({
 function HotspotMarker({ x, y }: { x: number; y: number }) {
   return (
     <div
-      className="absolute h-[20px] w-[20px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white shadow-[0_10px_20px_rgba(23,41,58,0.22)]"
+      className="absolute h-[20px] w-[20px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px] border-white shadow-sm"
       style={{
         backgroundColor: "var(--quiz-accent-end)",
         left: `${x * 100}%`,

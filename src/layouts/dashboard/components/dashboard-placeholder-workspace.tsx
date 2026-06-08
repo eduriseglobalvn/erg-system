@@ -28,8 +28,8 @@ export function DashboardPlaceholderWorkspace({
       }
     >
       <DashboardSectionCard title={copy.title} description={copy.description}>
-        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-[28px] border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-[22px] bg-slate-900 text-white">
+        <div className="flex min-h-[280px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/80 px-6 py-10 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-slate-900 text-white">
             <InsightsOutlinedIcon fontSize="inherit" />
           </div>
           <div className="mt-5 max-w-xl text-lg font-semibold text-slate-950">{copy.title}</div>

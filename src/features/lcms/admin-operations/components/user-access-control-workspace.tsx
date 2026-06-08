@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search } from "lucide-react";
+import { queryKeys } from "@/lib/query-keys";
 
 import {
   AccessSection,
@@ -47,7 +48,10 @@ import {
   sortUsers,
   superAdminEffectiveAccess,
 } from "@/features/lcms/admin-operations/utils/user-access-control-utils";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { cn } from "@/lib/utils";
+import { AppSelect } from "@/components/ui/app-select";
 
 export function UserAccessControlWorkspace({
   defaultSection = "profile",
@@ -85,6 +89,9 @@ export function UserAccessControlWorkspace({
   const [savingAccess, setSavingAccess] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const debouncedQuery = useDebouncedValue(query);
+  const debouncedScopeSearch = useDebouncedValue(scopeSearch);
+  const paceStateUpdate = usePacedStateBatch();
 
   const profileMutation = useMutation({
     mutationFn: ({ userId, draft }: { userId: string; draft: ProfileDraft }) => updateAdminUserProfile(userId, draft),
@@ -101,13 +108,12 @@ export function UserAccessControlWorkspace({
 
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => setActiveSection(defaultSection));
-    return () => window.cancelAnimationFrame(frameId);
-  }, [defaultSection]);
+    paceStateUpdate(() => setActiveSection(defaultSection));
+  }, [defaultSection, paceStateUpdate]);
 
   useEffect(() => {
     let cancelled = false;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       if (cancelled) return;
       setLoadingUsers(true);
       setError("");
@@ -115,12 +121,12 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: ["admin-operations", "user-access", "users", query, status],
-        queryFn: () => listAccessManagedUsers({ search: query, status, page: 1, limit: 100 }),
+        queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status),
+        queryFn: () => listAccessManagedUsers({ search: debouncedQuery, status, page: 1, limit: 100 }),
         staleTime: 60_000,
       }),
       queryClient.fetchQuery({
-        queryKey: ["admin-operations", "user-access", "options"],
+        queryKey: queryKeys.adminOperations.userAccess.options(),
         queryFn: getAccessManagementOptions,
         staleTime: 60_000,
       }),
@@ -143,24 +149,23 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(frameId);
     };
-  }, [query, queryClient, status]);
+  }, [debouncedQuery, paceStateUpdate, queryClient, status]);
 
   useEffect(() => {
     if (!selectedUserId) {
-      const frameId = window.requestAnimationFrame(() => {
+      paceStateUpdate(() => {
         setSelectedUserDetail(null);
         setPolicies([]);
         setEffective(null);
         setProfileDraft({ fullName: "", phone: "", jobTitle: "", avatarUrl: "", bio: "", gender: "", dateOfBirth: "", address: "", city: "", district: "", region: "" });
         setRoleDraft([]);
       });
-      return () => window.cancelAnimationFrame(frameId);
+      return;
     }
 
     let cancelled = false;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       if (cancelled) return;
       setLoadingDetail(true);
       setError("");
@@ -169,12 +174,12 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: ["admin-operations", "user-access", "detail", selectedUserId, "access"],
+        queryKey: queryKeys.adminOperations.userAccess.detailAccess(selectedUserId),
         queryFn: () => getUserAccess(selectedUserId),
         staleTime: 60_000,
       }),
       queryClient.fetchQuery({
-        queryKey: ["admin-operations", "user-access", "detail", selectedUserId, "user"],
+        queryKey: queryKeys.adminOperations.userAccess.detailUser(selectedUserId),
         queryFn: () => getAdminUser(selectedUserId),
         staleTime: 60_000,
       }),
@@ -196,23 +201,22 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(frameId);
     };
-  }, [queryClient, selectedUserId]);
+  }, [paceStateUpdate, queryClient, selectedUserId]);
 
   useEffect(() => {
     if (!policies.length) {
       const roleSource = selectedUserDetail ?? users.find((user) => user.id === selectedUserId);
-      const frameId = window.requestAnimationFrame(() => {
+      paceStateUpdate(() => {
         setEffective(isSuperAdmin(roleSource) ? superAdminEffectiveAccess(options?.modules) : { highestScope: "none", modules: [], permissions: [] });
       });
-      return () => window.cancelAnimationFrame(frameId);
+      return;
     }
 
     let cancelled = false;
     queryClient
       .fetchQuery({
-        queryKey: ["admin-operations", "user-access", "preview", policies],
+        queryKey: queryKeys.adminOperations.userAccess.preview(policies),
         queryFn: () => previewUserAccess({ policies }),
         staleTime: 30_000,
       })
@@ -224,25 +228,25 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [options?.modules, policies, queryClient, selectedUserDetail, selectedUserId, users]);
+  }, [options?.modules, paceStateUpdate, policies, queryClient, selectedUserDetail, selectedUserId, users]);
 
   useEffect(() => {
     if (!draft.scopeType) {
-      const frameId = window.requestAnimationFrame(() => {
+      paceStateUpdate(() => {
         setScopeResults([]);
         setScopeTotal(0);
       });
-      return () => window.cancelAnimationFrame(frameId);
+      return;
     }
 
     let cancelled = false;
-    const frameId = window.requestAnimationFrame(() => {
+    paceStateUpdate(() => {
       if (!cancelled) setLoadingScopes(true);
     });
     queryClient
       .fetchQuery({
-        queryKey: ["admin-operations", "user-access", "scopes", draft.scopeType, scopeSearch],
-        queryFn: () => listAccessScopes({ scopeType: draft.scopeType, search: scopeSearch, page: 1, limit: 20 }),
+        queryKey: queryKeys.adminOperations.userAccess.scopes(draft.scopeType, debouncedScopeSearch),
+        queryFn: () => listAccessScopes({ scopeType: draft.scopeType, search: debouncedScopeSearch, page: 1, limit: 20 }),
         staleTime: 60_000,
       })
       .then((result) => {
@@ -259,9 +263,8 @@ export function UserAccessControlWorkspace({
 
     return () => {
       cancelled = true;
-      window.cancelAnimationFrame(frameId);
     };
-  }, [draft.scopeType, queryClient, scopeSearch]);
+  }, [debouncedScopeSearch, draft.scopeType, paceStateUpdate, queryClient]);
 
   const selectedListUser = users.find((user) => user.id === selectedUserId);
   const selectedUser = selectedUserId ? mergeUser(selectedListUser, selectedUserDetail) : null;
@@ -392,18 +395,18 @@ export function UserAccessControlWorkspace({
   }
 
   return (
-    <div className="min-h-full overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-sm">
-      <header className="border-b border-slate-200 px-5 py-5 lg:px-6">
+    <div className="min-h-full overflow-hidden rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
+      <header className="border-b border-[#e0e4ea] px-5 py-5 lg:px-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--erg-red)]">ERG IAM</p>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Quản lý thành viên và quyền truy cập</h2>
+            <p className="text-xs font-semibold text-[var(--erg-blue)]">ERG IAM</p>
+            <h2 className="mt-2 text-xl font-semibold text-slate-950">Quản lý thành viên và quyền truy cập</h2>
             <p className="mt-2 text-sm leading-6 text-slate-500">
               Một nơi để xem hồ sơ, trạng thái tài khoản, vai trò đăng nhập và phạm vi LMS của từng thành viên.
             </p>
             {scopeDescription ? <p className="mt-2 text-xs font-semibold text-[var(--erg-blue)]">Phạm vi: {scopeDescription}</p> : null}
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 text-center">
+          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-[#e0e4ea] bg-[#fafbfc] text-center">
             <HeaderMetric label="Thành viên" value={String(users.length)} />
             <HeaderMetric label="Đang hoạt động" value={String(users.filter((user) => user.status === "ACTIVE").length)} />
             <HeaderMetric label="Chưa onboarding" value={String(users.filter((user) => !user.isProfileCompleted).length)} />
@@ -419,14 +422,14 @@ export function UserAccessControlWorkspace({
             <label className="relative block">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[rgb(0_0_139_/_0.08)]"
+                className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
                 placeholder="Tìm theo tên, email, số điện thoại"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
-            <select
-              className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[rgb(0_0_139_/_0.08)]"
+            <AppSelect
+              className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
               value={status}
               onChange={(event) => setStatus(event.target.value)}
             >
@@ -436,7 +439,7 @@ export function UserAccessControlWorkspace({
               <option value="BLOCKED">Đã khóa</option>
               <option value="BANNED">Banned</option>
               <option value="PENDING">Chờ kích hoạt</option>
-            </select>
+            </AppSelect>
           </div>
 
           <div className="max-h-[655px] overflow-auto p-3">
