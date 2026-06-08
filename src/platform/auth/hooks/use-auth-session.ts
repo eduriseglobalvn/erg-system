@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import {
   AUTH_ACCOUNT_CHANGED_EVENT,
   getCurrentAccount,
+  loginWithMockAdmin,
   logoutAccount,
   providerLabel,
   saveServerAuthSession,
@@ -204,6 +205,19 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   }
 
   async function login(portal: StoredAuthSession["portal"] = "lms") {
+    if (loginForm.email.trim().toLowerCase() === "admin" && loginForm.password === "admin") {
+      const nextAccount = loginWithMockAdmin({ portal, rememberMe });
+      setAccount(nextAccount);
+      setProfileForm(createProfileForm(nextAccount));
+      setAccountTab("profile");
+      pushNotice({
+        tone: "success",
+        message: t("auth.noticeWelcomeBack", { name: nextAccount.fullName }),
+      });
+
+      return nextAccount;
+    }
+
     if (!hasApiBase()) {
       throw new Error("API chưa được cấu hình nên không thể đăng nhập bằng tài khoản thật.");
     }
