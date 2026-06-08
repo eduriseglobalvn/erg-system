@@ -1,27 +1,31 @@
-import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+﻿import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 import {
   getCoreRowModel,
   getFilteredRowModel,
   useReactTable,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Download, Search } from "lucide-react";
+import { CalendarDays, Download, Search } from "lucide-react";
 import { toast } from "sonner";
+import * as XLSX from "xlsx";
 
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import { Input } from "@/components/ui/dashboard-kit";
 import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
 import type { ClassroomSnapshot, ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
+import { MobileAttendanceSheetPanel } from "@/features/lms/components/attendance/mobile-attendance-sheet-panel";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { StudentAttendanceContextMenu } from "@/features/lms/components/student-attendance-context-menu";
+import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useVirtualList } from "@/hooks/use-virtual-list";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
-type AttendanceStatus = "present" | "absent" | "late" | "excused" | "";
+export type AttendanceStatus = "present" | "absent" | "late" | "excused" | "";
 type SessionPart = "Tiết 1" | "Tiết 2";
 
-type AttendanceColumn = {
+export type AttendanceColumn = {
   id: string;
   day: string;
   date: string;
@@ -57,7 +61,7 @@ type AttendanceSheetPanelProps = {
 
 const COURSE_START_DATE = "2026-05-29";
 
-type CurriculumItem = {
+export type CurriculumItem = {
   topic: string;
   period: number;
   title: string;
@@ -127,10 +131,12 @@ const curriculumProgram: CurriculumItem[] = [
 ];
 
 export function AttendanceSheetPanel({ selectedClass, students }: AttendanceSheetPanelProps) {
+  const isMobile = useIsMobile();
   const [attendanceOverrides, setAttendanceOverrides] = useState<Record<string, AttendanceStatus>>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
   const [selectedDate, setSelectedDate] = useState(getTodayInputDate());
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   const [attendancePaneWidth, setAttendancePaneWidth] = useState(68);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; student: ClassroomStudent } | null>(null);
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
@@ -205,7 +211,14 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
     }));
   }
 
-  function exportCsv() {
+  function setAttendanceStatus(studentId: string, columnId: string, status: AttendanceStatus) {
+    setAttendanceOverrides((current) => ({
+      ...current,
+      [attendanceKey(studentId, columnId)]: status,
+    }));
+  }
+
+  function exportXlsx() {
     const header = ["STT", "Học sinh", "Tổng vắng", ...visibleColumns.map((column) => `${column.day} ${column.date} ${column.session}`)];
     const rows = filteredStudentRows.map((row, studentIndex) => {
       const student = row.original;
@@ -213,14 +226,17 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       const summary = attendanceSummary(statuses);
       return [String(studentIndex + 1), student.name, String(summary.absent), ...statuses.map((status) => attendanceText(status))];
     });
-    const csv = [header, ...rows].map((row) => row.map(escapeCsvCell).join(",")).join("\n");
-    const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `diem-danh-${selectedClass?.className ?? "lop"}-${selectedDate}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    const worksheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    worksheet["!cols"] = [
+      { wch: 6 },
+      { wch: 28 },
+      { wch: 10 },
+      ...visibleColumns.map(() => ({ wch: 18 })),
+    ];
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Điểm danh");
+    XLSX.writeFile(workbook, `diem-danh-${sanitizeExportName(selectedClass?.className ?? "lop")}-${selectedDate}.xlsx`);
   }
 
   function openStudentDetail(student: ClassroomStudent) {
@@ -271,50 +287,111 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
     window.addEventListener("pointerup", handlePointerUp, { once: true });
   }
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileAttendanceSheetPanel
+          attendanceSummary={attendanceSummary}
+          curriculumProgram={curriculumProgram}
+          exportXlsx={exportXlsx}
+          filteredStudents={filteredStudents}
+          getStatus={(studentId, studentIndex, column, columnIndex) => statusFor(studentId, studentIndex, column, columnIndex)}
+          onOpenStudentDetail={openStudentDetail}
+          onSearchQueryChange={setSearchQuery}
+          onSelectedDateChange={(value) => setSelectedDate(clampInputDateToToday(value))}
+          onSetAttendanceStatus={setAttendanceStatus}
+          searchQuery={searchQuery}
+          selectedClass={selectedClass}
+          selectedDate={selectedDate}
+          todayInputDate={todayInputDate}
+          taughtLessonCount={taughtLessonCount}
+          visibleColumns={visibleColumns}
+        />
+
+        {selectedStudent ? (
+          <StudentProfileDetailDrawer
+            draft={studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent)}
+            onClose={() => setSelectedStudentId(null)}
+            onUpdate={(patch) => updateStudentDraft(selectedStudent.id, patch)}
+            onStatusChange={(status) => updateStudentDraft(selectedStudent.id, { status })}
+            statusOptions={[
+              { label: "Vượt tiến độ", value: "ahead" },
+              { label: "Ổn định", value: "steady" },
+              { label: "Cần há»— trợ", value: "support" },
+            ]}
+            statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent)).status}
+            student={selectedStudent}
+          />
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-2 p-2">
-      <section className="shrink-0 rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
+      <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-[var(--shadow-xs)]">
         <div className="flex flex-wrap items-center gap-1.5">
-          <div className="mr-auto min-w-[220px] border-b border-slate-900 pb-1 pr-6 text-[12px] italic leading-5 text-[var(--erg-blue)]">
+          <div className="mr-auto min-w-[260px] border-b border-slate-900 pb-1 pr-6 text-[13px] italic leading-5 text-[var(--erg-blue)]">
             <div>Gv phụ trách: <span className="font-semibold">{selectedClass?.homeroomTeacher ?? ""}</span></div>
             <div className="flex items-center gap-10">
-              <span>Số tiết đã dạy:</span>
+              <span>Số tiết Ä‘ã dạy:</span>
               <span className="font-semibold not-italic text-red-600">{taughtLessonCount}</span>
             </div>
           </div>
-          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[11px] font-medium text-[var(--erg-blue)]">{notice}</span> : null}
+          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[13px] font-bold text-[var(--erg-blue)]">{notice}</span> : null}
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Tìm học sinh"
-              className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
+              className="h-10 border border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             />
           </div>
-          <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700">
-            <span className="text-slate-500">Ngày</span>
-            <span className="min-w-[74px] text-slate-800">{formatFullDate(parseDateInput(selectedDate))}</span>
-            <input
-              type="date"
+          <div className="relative flex h-10 shrink-0 items-center gap-2 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[13px] font-semibold text-slate-700 shadow-none transition focus-within:border-[#aebfd5] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+            <CalendarDays className="h-4 w-4 text-[var(--erg-blue)]" />
+            <span className="text-slate-500">Ngay</span>
+            <button
+              type="button"
               aria-label="Chọn ngày trọng tâm"
-              value={selectedDate}
-              max={todayInputDate}
-              onChange={(event) => setSelectedDate(clampInputDateToToday(event.target.value))}
-              className="h-7 w-8 cursor-pointer rounded bg-transparent text-transparent outline-none"
+              onClick={() => setDatePickerOpen((open) => !open)}
+              className="h-8 min-w-[118px] rounded-md bg-transparent px-0 text-left text-[14px] font-bold text-slate-900 outline-none"
+            >
+              {formatPickerDateLabel(selectedDate)}
+            </button>
+            <button
+              type="button"
+              aria-label="Mở lịch chọn ngày"
+              onClick={() => setDatePickerOpen((open) => !open)}
+              className="grid h-7 w-7 place-items-center rounded-md text-slate-500 transition hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]"
+            >
+              <CalendarDays className="h-3.5 w-3.5" />
+            </button>
+            <DateTimePickerPopover
+              mode="date"
+              open={datePickerOpen}
+              value={formatPickerDateLabel(selectedDate)}
+              onChange={(value) => setSelectedDate(clampInputDateToToday(parsePickerDateLabel(value)))}
+              onClose={() => setDatePickerOpen(false)}
             />
-          </label>
-          <Button type="button" variant="outline" onClick={exportCsv} className="h-8 rounded-md px-2.5 text-xs">
+          </div>
+          <button
+            type="button"
+            onClick={exportXlsx}
+            className="inline-flex h-10 min-w-[132px] shrink-0 items-center justify-center gap-2 rounded-lg border px-3.5 text-[14px] font-bold shadow-[0_8px_18px_rgba(0,104,217,0.18)] transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            style={{ backgroundColor: "var(--erg-blue)", borderColor: "#0b65c6", color: "#fff" }}
+          >
             <Download className="h-3.5 w-3.5" />
-            Xuất CSV
-          </Button>
-          <label className="flex h-8 items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700">
+            Xuất Excel
+          </button>
+          <label className="flex h-9 items-center gap-1.5 rounded-md border border-[#b8c8db] bg-white px-2.5 text-[13px] font-semibold text-slate-700 shadow-[var(--shadow-xs)] transition focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
             <span className="text-slate-500">Môn</span>
             <AppSelect
               aria-label="Chọn môn học"
+              data-inline-select="true"
               value={selectedSubject}
               onChange={(event) => setSelectedSubject(event.target.value)}
-              className="h-7 bg-transparent font-medium text-slate-800 outline-none"
+              className="h-8 min-w-[112px] border-0 bg-transparent px-0 pr-6 font-bold text-slate-800 shadow-none outline-none"
             >
               {lmsSubjectOptions.map((subject) => (
                 <option key={subject} value={subject}>
@@ -327,10 +404,10 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
       </section>
 
       <div ref={splitPaneRef} className="grid min-h-0 flex-1 gap-2 xl:flex xl:gap-0">
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white xl:flex-none" style={{ flexBasis: `${attendancePaneWidth}%` }}>
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
+        <section className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] xl:flex-none" style={{ flexBasis: `${attendancePaneWidth}%` }}>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#cbd7e6] px-2.5 py-1.5">
             <h2 className="text-sm font-semibold text-slate-950">Điểm danh {dateRangeLabel}</h2>
-            <div className="flex items-center gap-1.5 text-[10px] font-medium">
+            <div className="flex items-center gap-1.5 text-[13px] font-bold">
               <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
               <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
               <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
@@ -338,20 +415,20 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
             </div>
           </div>
           <div ref={tableScrollRef} className="min-h-0 flex-1 overflow-auto">
-            <table className="w-full min-w-[790px] border-separate border-spacing-0 text-[11px]">
+            <table className="erg-data-table w-full min-w-[920px] border-separate border-spacing-0 text-[14px]">
               <thead>
-                <tr className="bg-slate-50 text-[10px] font-semibold text-slate-500">
+                <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                   <AttendanceHeaderCell rowSpan={2} className="sticky left-0 top-0 z-40 w-9">STT</AttendanceHeaderCell>
-                  <AttendanceHeaderCell rowSpan={2} className="sticky left-9 top-0 z-40 w-40 text-left">Học sinh</AttendanceHeaderCell>
-                  <AttendanceHeaderCell rowSpan={2} className="sticky left-[196px] top-0 z-40 w-[62px]">Tổng vắng</AttendanceHeaderCell>
+                  <AttendanceHeaderCell rowSpan={2} className="sticky left-9 top-0 z-40 w-[220px] text-left">Học sinh</AttendanceHeaderCell>
+                  <AttendanceHeaderCell rowSpan={2} className="sticky left-[256px] top-0 z-40 w-[72px]">Tổng vắng</AttendanceHeaderCell>
                   {visibleDayGroups.map((group) => (
                     <AttendanceHeaderCell key={group.id} colSpan={group.columns.length} className={cn("sticky top-0 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-t-2 border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)] shadow-sm")}>
                       <span className="block">{group.day}</span>
-                      <span className="mt-0.5 block text-[10px] font-medium normal-case text-slate-500">{group.date}</span>
+                      <span className="mt-0.5 block text-[13px] font-semibold normal-case text-slate-600">{group.date}</span>
                     </AttendanceHeaderCell>
                   ))}
                 </tr>
-                <tr className="bg-slate-50 text-[10px] font-semibold text-slate-500">
+                <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                   {visibleDayGroups.map((group) => (
                     <AttendanceHeaderCell key={`${group.id}-lessons`} colSpan={group.columns.length} className={cn("sticky top-8 z-30 w-[76px]", group.isFocusDate && "border-x-2 border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}>
                       {group.columns.length}
@@ -376,10 +453,10 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                   return (
                     <tr key={student.id} className="group">
                       <AttendanceStickyCell className="left-0 z-20 w-9 text-center text-slate-500">{studentIndex + 1}</AttendanceStickyCell>
-                      <AttendanceStickyCell className="left-9 z-20 w-40">
+                      <AttendanceStickyCell className="left-9 z-20 w-[220px]">
                         <button
                           type="button"
-                          className="max-w-[136px] truncate text-left font-medium text-[var(--erg-blue)] hover:underline"
+                          className="block max-w-full whitespace-normal text-left font-bold leading-5 text-[var(--erg-blue)] hover:underline"
                           onClick={() => openStudentDetail(student)}
                           onContextMenu={(event) => {
                             event.preventDefault();
@@ -389,20 +466,20 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
                           {studentDrafts[student.id]?.name ?? student.name}
                         </button>
                       </AttendanceStickyCell>
-                      <AttendanceStickyCell className="left-[196px] z-20 w-[62px] text-center">
-                        <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
+                      <AttendanceStickyCell className="left-[256px] z-20 w-[72px] text-center">
+                        <span className={cn("rounded px-1.5 py-0.5 text-[12px] font-semibold", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
                           {summary.absent}
                         </span>
                       </AttendanceStickyCell>
                       {visibleColumns.map((column, columnIndex) => {
                         const status = statuses[columnIndex];
                         return (
-                          <td key={column.id} className={cn("h-7 border-b border-r border-slate-100 px-1 text-center group-hover:!bg-[var(--erg-blue-light)]", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status), column.isFutureDate && "bg-slate-100 text-slate-400")}>
+                          <td key={column.id} className={cn("h-8 border-b border-r border-[#dbe4f0] px-1.5 text-center group-hover:!bg-[var(--erg-blue-light)]", attendanceSubColumnWidthClass(column, visibleDayGroups), attendanceCellClass(status), column.isFocusDate && focusAttendanceCellClass(status), column.isFutureDate && "bg-slate-100 text-slate-400")}>
                             <button
                               type="button"
                               onClick={() => updateAttendance(student.id, sourceStudentIndex, column, columnIndex)}
                               disabled={column.isFutureDate}
-                              className="h-6 w-full rounded text-[11px] font-semibold outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:cursor-not-allowed"
+                              className="h-7 w-full rounded text-[13px] font-bold outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:cursor-not-allowed"
                               aria-label={`${student.name} ${column.day} ${column.session}`}
                               title={column.isFutureDate ? "Ngày chưa tới, chưa thể điểm danh" : "Bấm để đổi trạng thái"}
                             >
@@ -462,7 +539,7 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
           statusOptions={[
             { label: "Vượt tiến độ", value: "ahead" },
             { label: "Ổn định", value: "steady" },
-            { label: "Cần hỗ trợ", value: "support" },
+            { label: "Cần há»— trợ", value: "support" },
           ]}
           statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent)).status}
           student={selectedStudent}
@@ -475,16 +552,14 @@ export function AttendanceSheetPanel({ selectedClass, students }: AttendanceShee
 function CurriculumDistributionPanel({ taughtLessonCount }: { taughtLessonCount: number }) {
   const topicSpans = getCurriculumTopicSpans(curriculumProgram);
   return (
-    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
-      <div className="border-b border-slate-200 px-3 py-2">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <h2 className="text-sm font-semibold text-[var(--erg-blue)]">Khung chương trình tin học quốc tế</h2>
-          </div>
+    <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+      <div className="border-b border-[#cbd7e6] px-3 py-2">
+        <div className="flex items-center justify-center">
+          <h2 className="w-full text-center text-sm font-semibold text-[var(--erg-blue)]">Khung chương trình tin học quốc tế</h2>
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-auto bg-white p-2">
-        <table className="w-full table-fixed border-collapse text-[12px] text-[var(--erg-blue)]">
+        <table className="erg-data-table w-full table-fixed border-collapse text-[13px] text-[var(--erg-blue)]">
           <colgroup>
             <col className="w-32" />
             <col className="w-12" />
@@ -494,7 +569,7 @@ function CurriculumDistributionPanel({ taughtLessonCount }: { taughtLessonCount:
             <tr>
               <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Chủ đề</th>
               <th className="w-12 border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Tiết</th>
-              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Tên bài học</th>
+              <th className="border border-slate-900 bg-slate-100 px-2 py-1 text-center font-medium">Ten bai hoc</th>
             </tr>
           </thead>
           <tbody>
@@ -534,14 +609,14 @@ function AttendanceHeaderCell({
   rowSpan?: number;
 }) {
   return (
-    <th colSpan={colSpan} rowSpan={rowSpan} className={cn("h-8 border-b border-r border-slate-200 bg-slate-50 px-1.5 text-center align-middle", className)}>
+    <th colSpan={colSpan} rowSpan={rowSpan} className={cn("h-8 border-b border-r border-[#b8c8db] bg-[#eef4fb] px-1.5 text-center align-middle text-[13px] font-bold text-slate-700", className)}>
       {children}
     </th>
   );
 }
 
 function AttendanceStickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("sticky h-7 border-b border-r border-slate-100 bg-white px-1.5 align-middle group-hover:bg-slate-50", className)}>{children}</td>;
+  return <td className={cn("sticky h-8 border-b border-r border-[#cbd7e6] bg-white px-1.5 align-middle group-hover:bg-[#f8fbff]", className)}>{children}</td>;
 }
 
 function attendanceKey(studentId: string, columnId: string) {
@@ -725,6 +800,19 @@ function clampInputDateToToday(value: string) {
   return formatInputDate(minDate(parseDateInput(value), todayStart()));
 }
 
+function parsePickerDateLabel(value: string) {
+  const matched = value.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+  if (!matched) return getTodayInputDate();
+
+  const [, day, month, year] = matched;
+  return `${year}-${month}-${day}`;
+}
+
+function formatPickerDateLabel(value: string) {
+  const date = parseDateInput(value);
+  return formatFullDate(date);
+}
+
 function minDate(firstDate: Date, secondDate: Date) {
   return firstDate <= secondDate ? firstDate : secondDate;
 }
@@ -766,8 +854,12 @@ function weekdayLabel(date: Date) {
   return labels[date.getDay()];
 }
 
-function escapeCsvCell(value: string) {
-  return `"${value.replace(/"/g, '""')}"`;
+function sanitizeExportName(value: string) {
+  return value
+    .trim()
+    .replace(/[\\/:*?"<>|]+/g, "-")
+    .replace(/\s+/g, "-")
+    .toLowerCase();
 }
 
 function removeVietnameseMarks(value: string) {

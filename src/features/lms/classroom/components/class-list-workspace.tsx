@@ -167,7 +167,7 @@ export function ClassListWorkspace({
       >
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
             <Input
               aria-label="Tìm lớp học"
               placeholder="Tìm theo tên lớp hoặc giáo viên"
@@ -177,7 +177,7 @@ export function ClassListWorkspace({
           </div>
           <AppSelect
             aria-label="Lọc khối"
-            className="h-9 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             value={gradeFilter}
             onChange={(event) => setGradeFilter(event.target.value)}
           >
@@ -190,7 +190,7 @@ export function ClassListWorkspace({
           </AppSelect>
           <AppSelect
             aria-label="Năm học"
-            className="h-9 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             defaultValue="2025-2026"
           >
             <option value="2025-2026">Năm học 2025 - 2026</option>

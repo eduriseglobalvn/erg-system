@@ -164,7 +164,7 @@ function WatermarkEditor({
           <input
             value={watermark.text}
             onChange={(event) => onChange({ ...watermark, text: event.target.value })}
-            className="h-9 rounded-md border border-[#d1d1d1] px-3 text-sm outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-9 rounded-md border border-[#d7e0ec] px-3 text-sm outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           />
         </label>
         <label className="grid gap-1.5 text-sm font-medium text-slate-700">
@@ -172,7 +172,7 @@ function WatermarkEditor({
           <AppSelect
             value={watermark.position}
             onChange={(event) => onChange({ ...watermark, position: event.target.value as WatermarkPosition })}
-            className="h-9 rounded-md border border-[#d1d1d1] px-3 text-sm outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-9 rounded-md border border-[#d7e0ec] px-3 text-sm outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           >
             {Object.entries(positionLabels).map(([value, label]) => (
               <option key={value} value={value}>{label}</option>

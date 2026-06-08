@@ -46,9 +46,9 @@ export function LocaleSwitcher({
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="min-w-0 rounded-lg border border-[#cfd7e3] bg-white shadow-sm hover:bg-[#f6f8fb] data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#b8d6fa]"
+                className="min-w-0 rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-[#f8fbff] data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#b8c8db]"
               >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#d1d9e6] bg-[#f6f8fb] text-slate-600">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-slate-600">
                   <TranslateIcon className="h-4 w-4" fontSize="inherit" />
                 </div>
                 <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
@@ -83,7 +83,7 @@ export function LocaleSwitcher({
                     onClick={() => setLocale(item.value)}
                     className={cn(
                       "font-semibold",
-                      active && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)] shadow-[inset_3px_0_0_var(--erg-blue)]",
+                      active && "bg-[var(--accent-soft)] text-[var(--primary)] shadow-[inset_3px_0_0_var(--primary)]",
                     )}
                   >
                     {t(item.labelKey)}
@@ -100,7 +100,7 @@ export function LocaleSwitcher({
   return (
     <div
       className={cn(
-        "rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] shadow-sm",
+        "rounded-lg border border-[#cbd7e6] bg-[#f8fbff] shadow-[var(--shadow-xs)]",
         className,
       )}
     >
@@ -124,8 +124,8 @@ export function LocaleSwitcher({
               className={cn(
                 "inline-flex min-h-10 flex-1 items-center justify-center rounded-lg border px-3 text-sm font-semibold transition",
                 active
-                  ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm ring-1 ring-[#b8d6fa]"
-                  : "border-[#d1d9e6] bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50",
+                  ? "border-[#b8c8db] bg-white text-[var(--primary)] shadow-[var(--shadow-xs)] ring-1 ring-[#b8c8db]"
+                  : "border-[#cbd7e6] bg-white text-slate-700 hover:border-[#b8c8db] hover:bg-[#f8fbff]",
                 compact && "min-h-9 px-2.5 text-[13px]",
               )}
             >

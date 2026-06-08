@@ -1,10 +1,10 @@
 import { getPreferredLocale, tr } from "@/platform/i18n";
 
 export const inputClassName =
-  "h-10 w-full rounded-md border border-[#cfd7e3] bg-white px-3 text-sm text-[#242424] outline-none transition placeholder:text-[#707070] hover:border-[#b8c2d0] focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+  "h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm text-[#242424] shadow-none outline-none transition placeholder:text-[#707070] hover:border-[#b8c8db] focus:border-[#aebfd5] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
 export const submitButtonClassName =
-  "inline-flex h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+  "inline-flex h-10 w-full items-center justify-center rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-none transition hover:bg-[var(--erg-blue-hover)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
 export function formatDate(value: string | null) {
   if (!value) return tr("auth.noDateYet");

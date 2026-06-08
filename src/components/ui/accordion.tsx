@@ -42,7 +42,7 @@ function AccordionTrigger({
       <AccordionPrimitive.Trigger
         data-slot="accordion-trigger"
         className={cn(
-          "group/accordion-trigger relative flex flex-1 items-start justify-between rounded-md border border-transparent px-2 py-2 text-left text-sm font-semibold text-[#242424] transition-all outline-none hover:border-[#d9e0ea] hover:bg-white focus-visible:border-[var(--erg-blue)] focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)] focus-visible:after:border-[var(--erg-blue)] disabled:pointer-events-none disabled:opacity-50 aria-expanded:border-[#b8d6fa] aria-expanded:bg-white aria-expanded:text-[var(--erg-blue)] aria-expanded:shadow-sm **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-[#616161]",
+          "group/accordion-trigger relative flex flex-1 items-start justify-between rounded-lg border border-transparent px-2 py-2 text-left text-sm font-semibold text-[var(--foreground)] transition-all outline-none hover:border-[#cbd7e6] hover:bg-white focus-visible:border-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:after:border-[var(--primary)] disabled:pointer-events-none disabled:opacity-50 aria-expanded:border-[#b8c8db] aria-expanded:bg-white aria-expanded:text-[var(--primary)] aria-expanded:shadow-[var(--shadow-xs)] **:data-[slot=accordion-trigger-icon]:ml-auto **:data-[slot=accordion-trigger-icon]:size-4 **:data-[slot=accordion-trigger-icon]:text-[var(--muted-foreground)]",
           className
         )}
         {...props}
@@ -63,12 +63,12 @@ function AccordionContent({
   return (
     <AccordionPrimitive.Content
       data-slot="accordion-content"
-      className="overflow-hidden text-sm text-[#616161] data-open:animate-accordion-down data-closed:animate-accordion-up"
+      className="overflow-hidden text-sm text-[var(--muted-foreground)] data-open:animate-accordion-down data-closed:animate-accordion-up"
       {...props}
     >
       <div
         className={cn(
-          "h-(--radix-accordion-content-height) px-2 pt-0 pb-2.5 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-[#242424] [&_p:not(:last-child)]:mb-4",
+          "h-(--radix-accordion-content-height) px-2 pt-0 pb-2.5 [&_a]:underline [&_a]:underline-offset-3 [&_a]:hover:text-[var(--foreground)] [&_p:not(:last-child)]:mb-4",
           className
         )}
       >

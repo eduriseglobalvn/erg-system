@@ -49,7 +49,7 @@ function getFormatBadgeClass(fileType: LearningResourceFileType) {
 
 function FormatBadge({ resource }: { resource: LearningResourceResource }) {
   return (
-    <span className={`rounded-md px-2 py-1 text-[11px] font-semibold leading-none ${getFormatBadgeClass(resource.fileType)}`}>
+    <span className={`rounded-lg px-2.5 py-1 text-[13px] font-bold leading-none shadow-[var(--shadow-xs)] ${getFormatBadgeClass(resource.fileType)}`}>
       {displayText(resource.formatBadge)}
     </span>
   );
@@ -68,7 +68,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceRes
   if (canEmbed) {
     return (
       <div className="fixed inset-0 z-[240] bg-white">
-        <div className="flex h-12 items-center gap-3 border-b border-[#d1d1d1] bg-[#f7f8fa] px-4 text-slate-900 shadow-sm">
+        <div className="flex h-14 items-center gap-3 border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
           <button
             type="button"
             onClick={onClose}
@@ -77,9 +77,9 @@ function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceRes
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-sm font-semibold">{presentationTitle}</h1>
+          <h1 className="truncate text-[15px] font-bold">{presentationTitle}</h1>
         </div>
-        <div className="h-[calc(100vh-48px)] bg-[#f7f8fa] px-3 py-4">
+        <div className="h-[calc(100vh-56px)] bg-[#f8fbff] px-3 py-4">
           <iframe
             title={presentationTitle}
             src={resource.viewer.embedUrl ?? ""}
@@ -95,7 +95,7 @@ function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceRes
 
   return (
     <div className="fixed inset-0 z-[240] bg-white">
-      <div className="flex h-12 items-center gap-3 border-b border-[#d1d1d1] bg-[#f7f8fa] px-4 text-slate-900 shadow-sm">
+      <div className="flex h-14 items-center gap-3 border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
         <button
           type="button"
           onClick={onClose}
@@ -104,10 +104,10 @@ function SlideDeckPreview({ resource, onClose }: { resource: LearningResourceRes
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="truncate text-sm font-semibold">{presentationTitle}</h1>
+        <h1 className="truncate text-[15px] font-bold">{presentationTitle}</h1>
       </div>
-      <div className="flex h-[calc(100vh-48px)] items-center justify-center bg-[#f7f8fa] p-8">
-        <div className="max-w-xl rounded-lg border border-dashed border-[#d1d1d1] bg-white p-6 text-center shadow-sm">
+      <div className="flex h-[calc(100vh-56px)] items-center justify-center bg-[#f8fbff] p-8">
+        <div className="max-w-xl rounded-lg border border-dashed border-[#cbd7e6] bg-white p-6 text-center shadow-[var(--shadow-xs)]">
           <Presentation className="mx-auto h-10 w-10 text-[var(--erg-blue)]" />
           <h4 className="mt-4 text-lg font-semibold text-slate-950">{displayText(resource.viewer.title)}</h4>
           <p className="mt-3 text-sm leading-6 text-slate-500">
@@ -134,7 +134,7 @@ function MediaPreview({ resource }: { resource: LearningResourceResource }) {
   const isAudio = resource.launchMode === "audio_player";
 
   return (
-    <div className="rounded-lg border border-[#d1d1d1] bg-white p-5">
+    <div className="rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-[var(--shadow-xs)]">
       <div className={`flex min-h-[320px] items-center justify-center rounded-lg border ${thumbnailThemes[resource.thumbnailTheme]}`}>
         <div className="flex h-14 w-14 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm">
           {isAudio ? <FileAudio className="h-8 w-8" /> : <Play className="h-9 w-9 translate-x-0.5 fill-current" />}
@@ -146,7 +146,7 @@ function MediaPreview({ resource }: { resource: LearningResourceResource }) {
           <p className="mt-1 text-sm text-slate-500">{displayText(resource.viewer.description)}</p>
         </div>
         {resource.viewer.duration ? (
-          <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">{displayText(resource.viewer.duration)}</span>
+          <span className="rounded-lg border border-[#dbe4f0] bg-slate-50 px-3 py-1.5 text-[13px] font-bold text-slate-600">{displayText(resource.viewer.duration)}</span>
         ) : null}
       </div>
     </div>
@@ -162,14 +162,14 @@ function FallbackPreview({ resource }: { resource: LearningResourceResource }) {
         : Lock;
 
   return (
-    <div className="rounded-lg border border-[#d1d1d1] bg-white p-6 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-[#f7f8fa] text-slate-500">
+    <div className="rounded-lg border border-[#cbd7e6] bg-white p-6 text-center shadow-[var(--shadow-xs)]">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-[#f8fbff] text-slate-500">
         <Icon className="h-7 w-7" />
       </div>
       <h4 className="mt-4 text-lg font-semibold text-slate-950">{displayText(resource.viewer.title)}</h4>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-500">{displayText(resource.viewer.description)}</p>
       <button
-        className="mt-5 inline-flex h-9 items-center gap-2 rounded-md bg-[var(--erg-blue)] px-3 text-sm font-medium text-white hover:bg-[var(--erg-blue-hover)]"
+        className="mt-5 inline-flex h-10 items-center gap-2 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] font-bold text-white hover:bg-[var(--erg-blue-hover)]"
         type="button"
       >
         {resource.launchMode === "download_only" ? "Tải gói tài liệu" : "Mở khi tích hợp BE"}
@@ -203,13 +203,13 @@ export function ResourceViewerModal({ resource, onClose }: { resource: LearningR
   }
 
   return (
-    <div className="fixed inset-0 z-[220] overflow-y-auto bg-slate-950/45 p-4">
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-lg border border-[#d1d1d1] bg-[#f7f8fa] shadow-sm">
-        <div className="flex items-center justify-between border-b border-[#e5e5e5] bg-white px-4 py-3">
+    <div className="fixed inset-0 z-[220] overflow-y-auto bg-slate-950/45 p-0 md:p-4">
+      <div className="min-h-[100dvh] overflow-hidden border-[#cbd7e6] bg-[#f8fbff] shadow-md shadow-slate-900/10 md:mx-auto md:min-h-0 md:max-w-6xl md:rounded-lg md:border">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[#dbe4f0] bg-white px-3 py-3 md:px-4">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-8 items-center gap-2 rounded-md px-2 text-sm font-medium text-slate-600 hover:bg-[#f7f8fa]"
+            className="inline-flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-[14px] font-bold text-slate-700 hover:bg-[#f8fbff] hover:text-[var(--erg-blue)] md:h-9"
           >
             <ArrowLeft className="h-4 w-4" />
             Quay lại kho học liệu
@@ -219,13 +219,13 @@ export function ResourceViewerModal({ resource, onClose }: { resource: LearningR
             {resource.isDownloadable ? (
               <button
                 type="button"
-                className="inline-flex h-8 items-center gap-2 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-600 hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
+                className="hidden h-9 items-center gap-2 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-bold text-slate-700 hover:border-[var(--erg-blue)] hover:bg-[#eef6ff] hover:text-[var(--erg-blue)] sm:inline-flex"
               >
                 <Download className="h-4 w-4" />
                 Tải xuống
               </button>
             ) : null}
-            <button type="button" onClick={onClose} className="rounded-md p-2 text-slate-400 hover:bg-[#f7f8fa] hover:text-slate-700">
+            <button type="button" onClick={onClose} className="rounded-lg p-2 text-slate-500 hover:bg-[#f8fbff] hover:text-slate-800">
               <X className="h-5 w-5" />
             </button>
           </div>

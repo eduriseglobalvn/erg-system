@@ -12,6 +12,7 @@ import {
   FileText,
   GraduationCap,
   MoreVertical,
+  RotateCcw,
   Search,
   UsersRound,
 } from "lucide-react";
@@ -35,6 +36,7 @@ import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { LmsSelect } from "@/components/ui/lms-kit";
+import { LmsMobileShell, useLmsMobileBreakpoint } from "@/features/lms/mobile";
 
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
 
@@ -108,6 +110,11 @@ const LmsNotificationDetailPage = lazy(() =>
     default: module.LmsNotificationDetailPage,
   })),
 );
+const LmsNotificationListPage = lazy(() =>
+  import("@/features/lms/components/lms-notification-detail-page").then((module) => ({
+    default: module.LmsNotificationListPage,
+  })),
+);
 
 const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: typeof ClipboardList }> = [
   { id: "homework", label: "Bài tập", path: "/homework", icon: ClipboardList },
@@ -130,11 +137,12 @@ export function LmsTeacherShell() {
   const apiBacked = hasApiBase();
   const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
   const activeSection = resolveSection(pathname);
+  const showHomeworkFloatingMenu = pathname.startsWith("/homework");
   const [requestedSchoolId, setSelectedSchoolId] = useState("");
   const [requestedClassId, setSelectedClassId] = useState("");
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
   const [runs, setRuns] = useState<AssignmentRun[]>(assignmentRuns);
-  const [floatingMenuOpen, setFloatingMenuOpen] = useState(true);
+  const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const bootstrapQuery = useQuery({
     queryKey: ["lms-teacher-shell", "bootstrap"],
     queryFn: loadLmsDashboardBootstrap,
@@ -188,6 +196,8 @@ export function LmsTeacherShell() {
     }),
     [selectedSchoolId],
   );
+  const isMobile = useLmsMobileBreakpoint();
+  const mobileDockItems = useMemo(() => lmsNavItems.slice(0, 4), []);
 
   useEffect(() => {
     if (!bootstrapQuery.error) return;
@@ -206,19 +216,184 @@ export function LmsTeacherShell() {
     navigate("/login", { replace: true });
   }
 
+
+  const teacherContent = (
+    <>
+          {pathname === "/account" ? (
+            <LmsAccountPage
+              onLoginLogs={() => navigate("/account/login-logs")}
+              onSignedOut={() => navigate("/login", { replace: true })}
+            />
+          ) : pathname === "/account/login-logs" ? (
+            <LmsLoginLogsPage onManageAccount={() => navigate("/account")} />
+          ) : pathname === "/notifications" ? (
+            <LmsNotificationListPage onOpenDetail={(notificationId) => navigate(`/notifications/${notificationId}`)} />
+          ) : pathname.startsWith("/notifications/") ? (
+            <LmsNotificationDetailPage
+              notificationId={pathname.replace("/notifications/", "").split("/")[0] ?? ""}
+              onBack={() => navigate("/notifications")}
+            />
+          ) : pathname === "/homework/assign" ? (
+            <Suspense fallback={null}>
+              <AssignHomeworkPage
+                classes={classes}
+                selectedClass={selectedClass}
+                onBack={() => navigate("/homework")}
+                onCreateAssignment={(title, subject) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: title,
+                    subjectLabel: subject,
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
+          ) : pathname === "/homework/student-groups" ? (
+            <Suspense fallback={null}>
+              <StudentGroupsPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                onBack={() => navigate("/homework")}
+              />
+            </Suspense>
+          ) : pathname === "/homework/class" ? (
+            <Suspense fallback={null}>
+              <ClassManagementPage
+                classes={classes}
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+              />
+            </Suspense>
+          ) : pathname === "/homework/exercise-bank" ? (
+            <Suspense fallback={null}>
+              <ExerciseBankPage
+                onBack={() => navigate("/homework")}
+                onAssign={(exerciseTitle) => {
+                  const newRun: AssignmentRun = {
+                    id: `assignment-${Date.now()}`,
+                    title: exerciseTitle,
+                    subjectLabel: "Kho bài tập",
+                    targetLevel: selectedClass?.className ?? "Cả lớp",
+                    activeClasses: 1,
+                    completionRate: 0,
+                    submittedCount: 0,
+                    inProgressCount: 0,
+                    needsReviewCount: 0,
+                    dueLabel: "Hạn nộp sau 7 ngày",
+                  };
+                  setRuns([newRun, ...runs]);
+                  navigate("/homework");
+                }}
+              />
+            </Suspense>
+          ) : pathname === "/homework/progress" ? (
+            <ClassManagementPage
+              classes={classes}
+              selectedClass={selectedClass}
+              selectedSchoolName={selectedSchoolName}
+              students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+            />
+          ) : activeSection === "resources" ? (
+            <LearningResourceDashboardScopeProvider value={learningResourceScope}>
+              <Suspense fallback={null}>
+                <LearningResourceLibraryPage />
+              </Suspense>
+            </LearningResourceDashboardScopeProvider>
+          ) : activeSection === "schedule" ? (
+            <div className="flex h-full min-h-[720px]">
+              <Suspense fallback={null}>
+                <TeachingSchedulePanel selectedClass={selectedClass} teacherName={teacherName} />
+              </Suspense>
+            </div>
+          ) : activeSection === "classLog" ? (
+            <Suspense fallback={null}>
+              <WeeklyClassLogPage
+                selectedClass={selectedClass}
+                selectedSchoolName={selectedSchoolName}
+                teacherName={teacherName}
+              />
+            </Suspense>
+          ) : activeSection === "score" ? (
+            <Suspense fallback={null}>
+              <ScoreSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            </Suspense>
+          ) : activeSection === "attendance" ? (
+            <Suspense fallback={null}>
+              <AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
+            </Suspense>
+          ) : activeSection === "homework" ? (
+            <div className="flex min-h-full flex-col gap-3 px-4 py-4 xl:px-6">
+              <HomeworkPanel
+                selectedClass={selectedClass}
+                runs={runs}
+                onAssign={() => navigate("/homework/assign")}
+                onViewProgress={() => navigate("/homework/class")}
+              />
+            </div>
+          ) : (
+            <TeacherWorkspaceFrame
+              activeLabel={activeNav.label}
+              selectedClass={selectedClass}
+              selectedSchoolName={selectedSchoolName}
+            >
+              {activeSection === "reports" ? <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} /> : null}
+            </TeacherWorkspaceFrame>
+          )}
+
+    </>
+  );
+
+  if (isMobile) {
+    return (
+      <div className="lms-teacher-shell flex min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
+        <LmsMobileShell
+          activeLabel={activeNav.label}
+          activeSection={activeSection}
+          classes={classes}
+          dockItems={mobileDockItems}
+          navItems={lmsNavItems}
+          notificationCenter={<LmsNotificationCenter />}
+          schoolName={selectedSchoolName}
+          schools={schools}
+          selectedClassId={selectedClass?.id ?? ""}
+          selectedClassName={selectedClass?.className ?? "Lop hoc"}
+          selectedSchoolId={selectedSchoolId}
+          teacherEmail={teacherEmail}
+          teacherName={teacherName}
+          onClassChange={setSelectedClassId}
+          onNavigate={(path) => navigate(path)}
+          onSchoolChange={selectSchool}
+          onSignOut={signOut}
+        >
+          {teacherContent}
+        </LmsMobileShell>
+      </div>
+    );
+  }
   return (
     <div className="lms-teacher-shell flex h-screen max-h-screen overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-40 shrink-0 border-b border-[var(--border)] bg-[var(--card)]/95 shadow-[var(--shadow-xs)] backdrop-blur-xl">
-          <div className="flex h-16 items-center gap-3 px-4 xl:px-5">
+          <div className="flex h-16 items-center gap-4 px-4 xl:px-5">
             <button type="button" onClick={() => navigate("/homework")} className="group flex h-12 shrink-0 items-center rounded-[10px] px-1.5 transition hover:bg-[var(--surface-hover)]">
               <span className="flex h-11 w-[112px] items-center overflow-hidden">
                 <img src={ERG_ASSETS.logo} alt="ERG EduRise Global" className="h-10 w-auto max-w-full object-contain" />
               </span>
             </button>
 
-            <nav className="hidden min-w-0 flex-1 items-center justify-start gap-1.5 overflow-x-auto pl-1 pr-2 xl:flex">
+            <nav className="hidden min-w-0 flex-1 items-center justify-start gap-3 overflow-x-auto pl-0 pr-4 xl:flex">
               {lmsNavItems.map((item) => {
                 const Icon = item.icon;
                 const active = activeSection === item.id;
@@ -228,13 +403,14 @@ export function LmsTeacherShell() {
                     type="button"
                     onClick={() => navigate(item.path)}
                     className={cn(
-                      "relative inline-flex h-10 shrink-0 items-center gap-2 rounded-[10px] px-3 text-sm font-semibold text-[var(--muted-foreground)] transition-colors duration-150 hover:bg-[var(--surface-hover)] hover:text-[var(--foreground)]",
-                      "after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--primary)] after:transition-transform",
-                      active && "text-[var(--primary)] after:scale-x-100",
+                      "relative inline-flex h-10 shrink-0 items-center gap-2 rounded-lg px-3.5 text-[15px] font-extrabold tracking-0 text-[#243044] transition-all duration-150 hover:bg-[#f2f7ff] hover:text-slate-950",
+                      active && "bg-[#eef6ff] text-[var(--primary)]",
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 transition-colors", active ? "text-[var(--primary)]" : "text-[var(--muted-foreground)]")} />
-                    {item.label}
+                    <Icon className={cn("h-[18px] w-[18px] transition-colors", active ? "text-[var(--primary)]" : "text-slate-600")} strokeWidth={2.45} />
+                    <span className="relative inline-flex h-full items-center leading-none">
+                      {item.label}
+                    </span>
                   </button>
                 );
               })}
@@ -309,178 +485,56 @@ export function LmsTeacherShell() {
             </div>
           </div>
 
-          <div className="flex gap-1.5 overflow-x-auto border-t border-[var(--border)] bg-[var(--card)] px-3 py-2 xl:hidden">
-            {lmsNavItems.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "relative whitespace-nowrap rounded-[10px] px-3 py-2 text-sm font-semibold transition hover:bg-[var(--surface-hover)] after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-center after:scale-x-0 after:rounded-full after:bg-[var(--primary)] after:transition-transform",
-                  activeSection === item.id ? "text-[var(--primary)] after:scale-x-100" : "text-[var(--muted-foreground)]",
-                )}
-              >
-                {item.label}
-              </button>
-            ))}
+          <div className="flex gap-2 overflow-x-auto border-t border-[var(--border)] bg-[var(--card)] px-4 py-2 xl:hidden">
+            {lmsNavItems.map((item) => {
+              const active = activeSection === item.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigate(item.path)}
+                  className={cn(
+                    "relative h-9 whitespace-nowrap rounded-lg px-3 text-[14px] font-extrabold tracking-0 transition hover:bg-[#f2f7ff] hover:text-slate-950",
+                    active ? "bg-[#eef6ff] text-[var(--primary)]" : "text-slate-700",
+                  )}
+                >
+                  <span className="relative inline-flex h-full items-center">
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </header>
 
         <main
           className={cn(
-            "min-h-0 flex-1 transition-[padding-right] duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)]",
-            pathname === "/homework/assign" || pathname === "/homework/exercise-bank" || pathname === "/homework/progress" || pathname === "/classes" ? "overflow-hidden" : "overflow-y-auto",
-            floatingMenuOpen ? "xl:pr-[132px]" : "xl:pr-[48px]",
+            "min-h-0 flex-1",
+            pathname === "/homework/assign" || pathname === "/homework/exercise-bank" || pathname === "/homework/progress" || pathname === "/homework/class" ? "overflow-hidden" : "overflow-y-auto",
           )}
         >
-          {pathname === "/account" ? (
-            <LmsAccountPage
-              onLoginLogs={() => navigate("/account/login-logs")}
-              onSignedOut={() => navigate("/login", { replace: true })}
-            />
-          ) : pathname === "/account/login-logs" ? (
-            <LmsLoginLogsPage onManageAccount={() => navigate("/account")} />
-          ) : pathname.startsWith("/notifications/") ? (
-            <LmsNotificationDetailPage
-              notificationId={pathname.replace("/notifications/", "").split("/")[0] ?? ""}
-              onBack={() => navigate("/homework")}
-            />
-          ) : pathname === "/homework/assign" ? (
-            <Suspense fallback={null}>
-              <AssignHomeworkPage
-                classes={classes}
-                selectedClass={selectedClass}
-                onBack={() => navigate("/homework")}
-                onCreateAssignment={(title, subject) => {
-                  const newRun: AssignmentRun = {
-                    id: `assignment-${Date.now()}`,
-                    title: title,
-                    subjectLabel: subject,
-                    targetLevel: selectedClass?.className ?? "Cả lớp",
-                    activeClasses: 1,
-                    completionRate: 0,
-                    submittedCount: 0,
-                    inProgressCount: 0,
-                    needsReviewCount: 0,
-                    dueLabel: "Hạn nộp sau 7 ngày",
-                  };
-                  setRuns([newRun, ...runs]);
-                  navigate("/homework");
-                }}
-              />
-            </Suspense>
-          ) : pathname === "/homework/student-groups" ? (
-            <Suspense fallback={null}>
-              <StudentGroupsPage
-                classes={classes}
-                selectedClass={selectedClass}
-                selectedSchoolName={selectedSchoolName}
-                onBack={() => navigate("/homework")}
-              />
-            </Suspense>
-          ) : pathname === "/classes" ? (
-            <Suspense fallback={null}>
-              <ClassManagementPage
-                classes={classes}
-                selectedClass={selectedClass}
-                selectedSchoolName={selectedSchoolName}
-                students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
-              />
-            </Suspense>
-          ) : pathname === "/homework/exercise-bank" ? (
-            <Suspense fallback={null}>
-              <ExerciseBankPage
-                onBack={() => navigate("/homework")}
-                onAssign={(exerciseTitle) => {
-                  const newRun: AssignmentRun = {
-                    id: `assignment-${Date.now()}`,
-                    title: exerciseTitle,
-                    subjectLabel: "Kho bài tập",
-                    targetLevel: selectedClass?.className ?? "Cả lớp",
-                    activeClasses: 1,
-                    completionRate: 0,
-                    submittedCount: 0,
-                    inProgressCount: 0,
-                    needsReviewCount: 0,
-                    dueLabel: "Hạn nộp sau 7 ngày",
-                  };
-                  setRuns([newRun, ...runs]);
-                  navigate("/homework");
-                }}
-              />
-            </Suspense>
-          ) : pathname === "/homework/progress" ? (
-            <ClassManagementPage
-              classes={classes}
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-              students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
-            />
-          ) : activeSection === "resources" ? (
-            <LearningResourceDashboardScopeProvider value={learningResourceScope}>
-              <Suspense fallback={null}>
-                <LearningResourceLibraryPage />
-              </Suspense>
-            </LearningResourceDashboardScopeProvider>
-          ) : activeSection === "schedule" ? (
-            <div className="flex h-full min-h-[720px]">
-              <Suspense fallback={null}>
-                <TeachingSchedulePanel selectedClass={selectedClass} teacherName={teacherName} />
-              </Suspense>
-            </div>
-          ) : activeSection === "classLog" ? (
-            <Suspense fallback={null}>
-              <WeeklyClassLogPage
-                selectedClass={selectedClass}
-                selectedSchoolName={selectedSchoolName}
-                teacherName={teacherName}
-              />
-            </Suspense>
-          ) : activeSection === "score" ? (
-            <Suspense fallback={null}>
-              <ScoreSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
-            </Suspense>
-          ) : activeSection === "attendance" ? (
-            <Suspense fallback={null}>
-              <AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
-            </Suspense>
-          ) : (
-            <TeacherWorkspaceFrame
-              activeLabel={activeNav.label}
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-            >
-              {activeSection === "homework" ? (
-                <HomeworkPanel
-                  selectedClass={selectedClass}
-                  runs={runs}
-                  onAssign={() => navigate("/homework/assign")}
-                  onViewProgress={() => navigate("/classes")}
-                />
-              ) : null}
-              {activeSection === "reports" ? <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} /> : null}
-            </TeacherWorkspaceFrame>
-          )}
+          {teacherContent}
         </main>
       </div>
-
-      <HomeworkFloatingMenu
-        open={floatingMenuOpen}
-        setOpen={setFloatingMenuOpen}
-        onAction={(action) => {
-          if (action === "assign") {
-            navigate("/homework/assign");
-          } else if (action === "classes") {
-            navigate("/classes");
-          } else if (action === "groups") {
-            navigate("/homework/student-groups");
-          } else if (action === "exerciseBank") {
-            navigate("/homework/exercise-bank");
-          } else {
-            navigate("/classes");
-          }
-        }}
-      />
+      {showHomeworkFloatingMenu ? (
+        <HomeworkFloatingMenu
+          open={floatingMenuOpen}
+          setOpen={setFloatingMenuOpen}
+          onAction={(action) => {
+            if (action === "assign") {
+              navigate("/homework/assign");
+            } else if (action === "classes") {
+              navigate("/homework/class");
+            } else if (action === "groups") {
+              navigate("/homework/student-groups");
+            } else if (action === "exerciseBank") {
+              navigate("/homework/exercise-bank");
+            } else {
+              navigate("/homework");
+            }
+          }}
+        />
+      ) : null}
     </div>
   );
 }
@@ -497,20 +551,19 @@ function TeacherWorkspaceFrame({
   selectedSchoolName: string;
 }) {
   return (
-    <div className="flex min-h-full flex-col gap-5 px-5 py-6 xl:px-8">
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-[var(--shadow-sm)]">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+    <div className="flex min-h-full flex-col gap-3 px-4 py-4 xl:px-6">
+      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-4 py-3 shadow-[var(--shadow-sm)]">
+        <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="text-sm font-medium text-[var(--muted-foreground)]">Trang chủ / <span className="text-[var(--foreground)]">{activeLabel}</span></div>
-            <h1 className="mt-3 font-[var(--font-heading)] text-xl font-semibold tracking-[-0.01em] text-[var(--foreground)]">{selectedClass?.className ?? "Lớp học"}</h1>
+            <h1 className="mt-2 font-[var(--font-heading)] text-xl font-semibold tracking-normal text-[var(--foreground)]">{selectedClass?.className ?? "Lớp học"}</h1>
             <p className="mt-1 text-sm font-semibold text-[var(--muted-foreground)]">{selectedSchoolName} - {selectedClass?.studentCount ?? 0} học sinh</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline">Xuất dữ liệu</Button>
-            <Button>Thao tác nhanh</Button>
+            <Button variant="outline" size="sm">Xuất dữ liệu</Button>
           </div>
         </div>
-        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">
           <ClassStat icon={ClipboardList} label="Bài đang mở" value={String(selectedClass?.activeAssignments ?? 0)} />
           <ClassStat icon={CheckCircle2} label="Hoàn thành" value={`${selectedClass?.completionRate ?? 0}%`} />
           <ClassStat icon={UsersRound} label="Cần hỗ trợ" value={String(selectedClass?.riskStudents ?? 0)} />
@@ -524,9 +577,9 @@ function TeacherWorkspaceFrame({
 
 const ClassStat = memo(function ClassStat({ icon: Icon, label, value }: { icon: typeof ClipboardList; label: string; value: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)] px-4 py-3">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[10px] bg-[var(--card)] text-[var(--primary)] shadow-[var(--shadow-xs)]">
-        <Icon className="h-5 w-5" />
+    <div className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-[var(--muted)] px-3 py-2">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded-[10px] bg-[var(--card)] text-[var(--primary)] shadow-[var(--shadow-xs)]">
+        <Icon className="h-4 w-4" />
       </span>
       <span className="min-w-0">
         <span className="block truncate text-xs font-medium text-[var(--muted-foreground)]">{label}</span>
@@ -661,17 +714,17 @@ function AttendancePanel({
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="mr-auto min-w-[190px]">
             <div className="text-sm font-semibold leading-5 text-[var(--foreground)]">{selectedClass?.className ?? "Lớp hoc"}</div>
-            <div className="text-[11px] font-semibold text-[var(--muted-foreground)]">
+            <div className="text-[13px] font-semibold text-[var(--muted-foreground)]">
               {selectedSchoolName} · {students.length} hoc sinh · {visibleColumns.length} cot diem danh
             </div>
           </div>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--muted-foreground)]" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--primary)]" />
             <Input
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Tìm học sinh"
-              className="h-8 border-[var(--border)] bg-[var(--muted)] pl-8 text-xs shadow-none focus:bg-[var(--card)]"
+              className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-[var(--card)]"
             />
           </div>
           <LmsSelect className="h-9 min-w-[150px] text-[13px]">
@@ -688,14 +741,14 @@ function AttendancePanel({
             <option>Chiều</option>
           </LmsSelect>
             <Button variant="outline">Xuất dữ liệu</Button>
-          <Button className="h-8 rounded-[10px] px-2.5 text-xs font-semibold">Lưu điểm danh</Button>
+          <Button className="h-10 rounded-[10px] px-3 text-[14px] font-bold">Lưu điểm danh</Button>
         </div>
       </section>
 
       <section className="min-h-0 flex-1 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border)] px-2.5 py-1.5">
           <h2 className="text-sm font-semibold text-[var(--foreground)]">Bảng điểm danh theo tuần</h2>
-          <div className="flex items-center gap-1.5 text-[10px] font-medium">
+          <div className="flex items-center gap-1.5 text-[13px] font-bold">
             <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Có mặt</span>
             <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Đi muộn</span>
             <span className="rounded bg-rose-50 px-1.5 py-0.5 text-rose-700">Vắng</span>
@@ -703,9 +756,9 @@ function AttendancePanel({
           </div>
         </div>
         <div className="max-h-[620px] overflow-auto">
-          <table className="min-w-[1500px] border-separate border-spacing-0 text-[11px]">
+          <table className="erg-data-table min-w-[1500px] border-separate border-spacing-0 text-[13px]">
             <thead>
-              <tr className="bg-[var(--muted)]/70 text-[11px] font-semibold text-[var(--muted-foreground)]">
+              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                 <AttendanceHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</AttendanceHeaderCell>
                 <AttendanceHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Học sinh</AttendanceHeaderCell>
                 <AttendanceHeaderCell className="sticky left-[234px] top-0 z-40 w-[66px]">Lớp</AttendanceHeaderCell>
@@ -713,7 +766,7 @@ function AttendancePanel({
                 {visibleColumns.map((column) => (
                   <AttendanceHeaderCell key={column.id} className="sticky top-0 z-30 w-[136px]">
                     <span className="block">{column.day}</span>
-                    <span className="mt-0.5 block text-[10px] font-medium normal-case text-[var(--muted-foreground)]">{column.date} · {column.session}</span>
+                    <span className="mt-1 block text-[12px] font-semibold normal-case text-slate-600">{column.date} · {column.session}</span>
                   </AttendanceHeaderCell>
                 ))}
               </tr>
@@ -733,18 +786,18 @@ function AttendancePanel({
                       {student.className.replace("Lớp ", "").replace("Lớp ", "")}
                     </AttendanceStickyCell>
                     <AttendanceStickyCell className="left-[300px] z-20 w-[76px] text-center">
-                      <span className={cn("rounded px-1.5 py-0.5 text-[10px] font-semibold", summary.absent ? "bg-rose-50 text-rose-700" : "bg-emerald-50 text-emerald-700")}>
+                      <span className={cn("rounded-lg border px-2 py-1 text-[13px] font-bold", summary.absent ? "border-rose-200 bg-rose-50 text-rose-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>
                         {summary.present}/{summary.total}
                       </span>
                     </AttendanceStickyCell>
                     {visibleColumns.map((column, columnIndex) => {
                       const status = attendanceOverrides[`${student.id}:${column.id}`] ?? getMockAttendanceStatus(index, columnIndex);
                       return (
-                        <td key={column.id} className={cn("h-7 border-b border-r border-[var(--border)] px-1 text-center group-hover:!bg-[var(--accent-soft)]", attendanceCellClass(status))}>
+                        <td key={column.id} className={cn("h-9 border-b border-r border-[#cbd7e6] px-1.5 text-center group-hover:!bg-[var(--accent-soft)]", attendanceCellClass(status))}>
                           <button
                             type="button"
                             onClick={() => updateAttendance(student.id, column.id)}
-                            className="h-6 w-full rounded text-[11px] font-semibold outline-none focus:ring-2 focus:ring-[var(--ring)]"
+                            className="h-8 w-full rounded-lg text-[13px] font-bold outline-none focus:ring-2 focus:ring-[var(--ring)]"
                             aria-label={`${student.name} ${column.day} ${column.session}`}
                           >
                             {attendanceLabel(status)}
@@ -837,19 +890,38 @@ function FilterBar({
   onAssign: () => void;
 }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 shadow-[var(--shadow-sm)]">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[280px] flex-1 xl:max-w-[520px]">
-          <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
-          <Input placeholder={primaryPlaceholder} className="pl-10 shadow-none" />
+    <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-2.5 shadow-[var(--shadow-sm)]">
+      <div className="grid items-center gap-2 xl:grid-cols-[minmax(0,1fr)_auto]">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
+          <div className="relative min-w-[240px] flex-1 xl:max-w-[520px]">
+            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]" />
+            <Input placeholder={primaryPlaceholder} className="pl-10 shadow-none" />
+          </div>
+          {filters.map((filter) => (
+            <LmsSelect key={filter} className="h-10 min-w-[128px]">
+              <option>{filter}</option>
+            </LmsSelect>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-10 min-w-[104px] rounded-lg border border-[#d7e0ec] px-4 text-[14px] font-bold text-slate-900 shadow-none hover:border-[#b8c8db] hover:bg-[#f8fbff]"
+            style={{ backgroundColor: "#ffffff", border: "1px solid #d7e0ec", borderRadius: 8, paddingInline: 16 }}
+          >
+            <RotateCcw className="h-4 w-4" />
+            Đặt lại
+          </Button>
         </div>
-        {filters.map((filter) => (
-          <LmsSelect key={filter} className="h-11 min-w-[150px]">
-            <option>{filter}</option>
-          </LmsSelect>
-        ))}
-        <Button variant="outline">Đặt lại</Button>
-        <Button className="ml-auto" onClick={onAssign}>Giao bài</Button>
+        <div className="flex shrink-0 justify-end gap-2">
+          <Button
+            className="min-w-[88px] px-4"
+            size="sm"
+            style={{ backgroundColor: "#0078d4", borderColor: "#0078d4", color: "#ffffff" }}
+            onClick={onAssign}
+          >
+            Giao bài
+          </Button>
+        </div>
       </div>
     </div>
   );

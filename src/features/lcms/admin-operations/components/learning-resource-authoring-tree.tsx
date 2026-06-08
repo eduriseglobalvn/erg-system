@@ -43,7 +43,7 @@ export const ExplorerTreeRow = memo(function ExplorerTreeRow({
     <div
       className={cn(
         "group relative flex items-center justify-between gap-1.5 rounded-sm py-1.5 px-2 text-[13px] transition",
-        selected ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
+        selected ? "bg-[#dceeff] font-semibold text-[#0b3f7a] [&_svg]:text-[#0b6fcf]" : "text-[#111827] hover:bg-[#eef6ff]",
       )}
       style={{ paddingLeft: `${8 + Math.min(depth, 8) * 14}px` }}
       onContextMenu={(event) => onOpenContextMenu(event, node)}
@@ -69,7 +69,7 @@ export const ExplorerTreeRow = memo(function ExplorerTreeRow({
           <span className="shrink-0">
             {getNodeIcon(node, selected || expanded)}
           </span>
-          <span className="truncate font-medium text-[#111827]" title={node.label}>
+          <span className={cn("truncate", selected ? "font-semibold text-[#0b3f7a]" : "font-medium text-[#111827]")} title={node.label}>
             {node.label}
           </span>
         </button>

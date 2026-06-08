@@ -172,7 +172,7 @@ function ProfileMenu({
         aria-expanded={menuOpen}
         className={cn(
           "flex min-w-[148px] items-center gap-2 rounded-lg border bg-white px-2 py-1.5 text-left shadow-sm transition hover:border-[#b8d6fa] hover:bg-white",
-          menuOpen ? "border-[#b8d6fa] text-[var(--erg-blue)] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cfd7e3]",
+          menuOpen ? "border-[#b8d6fa] text-[var(--erg-blue)] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#d7e0ec]",
         )}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
@@ -194,7 +194,7 @@ function ProfileMenu({
       </button>
 
       {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] overflow-hidden rounded-lg border border-[#cfd7e3] bg-white shadow-sm">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] overflow-hidden rounded-lg border border-[#d7e0ec] bg-white shadow-sm">
           <div className="border-b border-[#edf1f5] px-4 py-3">
             <div className="text-sm font-semibold text-slate-950">{studentName}</div>
             <div className="mt-1 text-xs text-slate-500">{studentClass}</div>
@@ -250,7 +250,7 @@ function NotificationMenu({
         aria-label={copy.notificationTitle}
         className={cn(
           "relative grid h-10 w-10 place-items-center rounded-lg border bg-white text-[var(--erg-blue)] shadow-sm transition hover:border-[#b8d6fa] hover:bg-white",
-          menuOpen ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cfd7e3]",
+          menuOpen ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#d7e0ec]",
         )}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
@@ -263,7 +263,7 @@ function NotificationMenu({
       </button>
 
       {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-lg border border-[#cfd7e3] bg-white shadow-sm">
+        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-lg border border-[#d7e0ec] bg-white shadow-sm">
           <div className="border-b border-[#edf1f5] px-4 py-3">
             <div className="text-sm font-semibold text-[var(--erg-blue)]">{copy.notificationTitle}</div>
           </div>

@@ -49,7 +49,7 @@ function AlertDialogContent({
         data-size={size}
         data-slot="alert-dialog-content"
         className={cn(
-          "group/alert-dialog-content fixed left-1/2 top-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-[#cfd7e3] bg-white p-4 font-[var(--font-app)] text-[#242424] shadow-sm duration-100 outline-none data-[size=default]:max-w-xs data-[size=default]:sm:max-w-sm data-[size=sm]:max-w-xs data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
+          "group/alert-dialog-content fixed left-1/2 top-1/2 z-50 grid w-full -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border border-[#cbd7e6] bg-white p-4 font-[var(--font-app)] text-[var(--foreground)] shadow-[0_20px_48px_rgba(15,23,42,0.18),0_2px_8px_rgba(15,23,42,0.08)] duration-100 outline-none data-[size=default]:max-w-xs data-[size=default]:sm:max-w-sm data-[size=sm]:max-w-xs data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95",
           className,
         )}
         {...props}
@@ -76,7 +76,7 @@ function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">)
     <div
       data-slot="alert-dialog-footer"
       className={cn(
-        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-lg border-t border-[#e0e4ea] bg-[#f7f8fa] p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        "-mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-lg border-t border-[#cbd7e6] bg-[#f8fbff] p-4 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
         className,
       )}
       {...props}
@@ -121,7 +121,7 @@ function AlertDialogDescription({
     <AlertDialogPrimitive.Description
       data-slot="alert-dialog-description"
       className={cn(
-        "text-sm text-balance text-[#616161] md:text-pretty *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-[#242424]",
+        "text-sm text-balance text-[var(--muted-foreground)] md:text-pretty *:[a]:underline *:[a]:underline-offset-3 *:[a]:hover:text-[var(--foreground)]",
         className,
       )}
       {...props}

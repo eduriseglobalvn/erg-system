@@ -48,7 +48,7 @@ export function AppSidebar({
     <Sidebar
       variant="inset"
       collapsible="icon"
-      className="relative overflow-visible border-r border-[#d0d7e2] bg-[#f6f8fb] shadow-[1px_0_0_rgba(15,23,42,0.04)] group-data-[collapsible=icon]:px-0"
+      className="relative overflow-visible border-r border-[#cbd7e6] bg-[#f8fbff] shadow-[1px_0_0_rgba(15,23,42,0.05)] group-data-[collapsible=icon]:px-0"
       {...props}
     >
       <SidebarEdgeToggle />
@@ -69,7 +69,7 @@ function SidebarEdgeToggle() {
       type="button"
       onClick={toggleSidebar}
       aria-label={isExpanded ? t("sidebar.collapseMenu") : t("sidebar.expandMenu")}
-      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#c8d1dc] bg-white text-slate-600 shadow-sm ring-2 ring-[#f7f8fa] transition hover:bg-white hover:text-[var(--erg-blue)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)]"
+      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#cbd7e6] bg-white text-slate-600 shadow-[var(--shadow-xs)] ring-2 ring-[#f8fbff] transition hover:border-[#b8c8db] hover:bg-white hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
     >
       {isExpanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
     </button>

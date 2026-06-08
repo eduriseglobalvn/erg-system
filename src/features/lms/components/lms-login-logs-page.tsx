@@ -127,33 +127,33 @@ export function LmsLoginLogsPage({ onManageAccount }: { onManageAccount: () => v
   }, [logs, searchQuery]);
 
   return (
-    <section className="flex min-h-full flex-col gap-2 bg-[#f7f8fa] px-2 py-2 text-slate-950 xl:px-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#e0e4ea] bg-white px-2.5 py-2 shadow-sm">
+    <section className="flex min-h-full flex-col gap-2 bg-[#f8fbff] px-2 py-2 text-slate-950 xl:px-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-sm">
         <div className="mr-auto min-w-[260px]">
           <h1 className="text-base font-semibold leading-5 text-slate-950">Lịch sử đăng nhập</h1>
-          <p className="mt-0.5 text-[11px] font-semibold text-slate-500">
+          <p className="mt-1 text-[13px] font-semibold text-slate-600">
             Theo dõi phiên đăng nhập LMS, thiết bị, vị trí và mức độ tin cậy.
           </p>
         </div>
         <div className="relative min-w-[260px] flex-1 xl:max-w-[460px]">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
+          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
           <Input
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Tìm theo IP, thiết bị, vị trí, phương thức"
-            className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
+            className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-white"
           />
         </div>
-        <Button variant="outline" className="h-8 rounded-md px-2.5 text-xs" onClick={onManageAccount}>
+        <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={onManageAccount}>
           <ArrowLeft data-icon="inline-start" />
           Quản lý tài khoản
         </Button>
       </div>
 
-      <section className="overflow-hidden rounded-lg border border-[#e0e4ea] bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#e0e4ea] px-2.5 py-1.5">
+      <section className="overflow-hidden rounded-lg border border-[#cbd7e6] bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#cbd7e6] px-2.5 py-1.5">
           <h2 className="text-sm font-semibold text-slate-950">Bảng log đăng nhập</h2>
-          <div className="flex items-center gap-1.5 text-[10px] font-medium">
+          <div className="flex items-center gap-1.5 text-[13px] font-bold">
             <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Đang hoạt động</span>
             <span className="rounded bg-[var(--erg-blue-light)] px-1.5 py-0.5 text-[var(--erg-blue)]">Phiên hiện tại</span>
             <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Đã đăng xuất</span>
@@ -161,9 +161,9 @@ export function LmsLoginLogsPage({ onManageAccount }: { onManageAccount: () => v
         </div>
 
         <div className="overflow-auto">
-          <table className="min-w-[1650px] border-separate border-spacing-0 text-[11px]">
+          <table className="erg-data-table min-w-[1650px] border-separate border-spacing-0 text-[13px]">
             <thead>
-              <tr className="bg-[#f7f8fa] text-[10px] font-semibold text-slate-600">
+              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                 <LoginLogHeaderCell className="sticky left-0 top-0 z-40 w-[54px]">STT</LoginLogHeaderCell>
                 <LoginLogHeaderCell className="sticky left-[54px] top-0 z-40 w-[170px] text-left">Thời gian</LoginLogHeaderCell>
                 <LoginLogHeaderCell className="sticky left-[224px] top-0 z-40 w-[92px]">Portal</LoginLogHeaderCell>
@@ -211,7 +211,7 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
         {formatDate(log.createdAt)}
       </LoginLogStickyCell>
       <LoginLogStickyCell className="left-[224px] z-20 w-[92px] text-center">
-        <span className="rounded-md bg-[#ebf3fc] px-2 py-0.5 text-[10px] font-semibold text-[#0f5ea8]">{log.portal ?? "lms"}</span>
+        <span className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] px-2.5 py-1 text-[13px] font-bold text-[#0f5ea8]">{log.portal ?? "lms"}</span>
       </LoginLogStickyCell>
       <LoginLogCell className="w-[150px] text-center font-semibold text-slate-700">{log.ipAddress || "-"}</LoginLogCell>
       <LoginLogCell className="w-[300px]">
@@ -223,7 +223,7 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
             <span className="block truncate font-semibold text-[var(--erg-blue)]" title={log.userAgent}>
               {log.deviceName || log.deviceType || "Thiết bị không xác định"}
             </span>
-            <span className="mt-0.5 block truncate text-[10px] font-semibold text-slate-400" title={log.userAgent}>
+            <span className="mt-1 block truncate text-[13px] font-semibold text-slate-600" title={log.userAgent}>
               {log.userAgent || "-"}
             </span>
           </span>
@@ -231,7 +231,7 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
       </LoginLogCell>
       <LoginLogCell className="w-[190px]">
         <span className="flex items-center gap-1.5 font-semibold text-slate-700">
-          <MapPin className="size-3.5 text-slate-400" />
+          <MapPin className="size-4 text-slate-500" />
           {log.location || "Không xác định"}
         </span>
       </LoginLogCell>
@@ -240,7 +240,7 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
         <SessionStatusPill status={status} />
       </LoginLogCell>
       <LoginLogCell className="w-[120px] text-center">
-        <span className={cn("rounded-md px-2 py-0.5 text-[10px] font-semibold", log.revoked ? "bg-slate-100 text-slate-600" : "bg-emerald-50 text-emerald-700")}>
+        <span className={cn("rounded-lg border px-2.5 py-1 text-[13px] font-bold", log.revoked ? "border-slate-200 bg-slate-100 text-slate-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>
           {log.riskLabel || "Bình thường"}
         </span>
       </LoginLogCell>
@@ -248,12 +248,12 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
       <LoginLogCell className="w-[170px] text-center font-semibold text-slate-600">{formatDate(log.expiresAt)}</LoginLogCell>
       <LoginLogCell className="w-[140px] text-center">
         {log.revoked ? (
-          <span className="text-[10px] font-semibold text-slate-500">Đã đóng</span>
+          <span className="text-[13px] font-bold text-slate-600">Đã đóng</span>
         ) : (
           <button
             type="button"
             onClick={onRevoke}
-            className="inline-flex h-7 items-center justify-center gap-1 rounded-md border border-rose-200 bg-rose-50 px-2 text-[10px] font-semibold text-rose-700 transition hover:bg-rose-100"
+            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 text-[13px] font-bold text-rose-700 transition hover:bg-rose-100"
           >
             <LogOut className="size-3" />
             Đăng xuất
@@ -266,7 +266,7 @@ function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessio
 
 function LoginLogHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <th className={cn("sticky h-8 border-b border-r border-[#e0e4ea] bg-[#f7f8fa] px-1.5 text-center align-middle", className)}>
+    <th className={cn("sticky h-10 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-2 text-center align-middle", className)}>
       {children}
     </th>
   );
@@ -274,7 +274,7 @@ function LoginLogHeaderCell({ children, className }: { children: ReactNode; clas
 
 function LoginLogCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("h-9 border-b border-r border-[#eef0f4] bg-white px-1.5 align-middle group-hover:bg-[#f7f8fa]", className)}>
+    <td className={cn("h-11 border-b border-r border-[#dbe4f0] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>
       {children}
     </td>
   );
@@ -282,7 +282,7 @@ function LoginLogCell({ children, className }: { children: ReactNode; className?
 
 function LoginLogStickyCell({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <td className={cn("sticky h-9 border-b border-r border-[#eef0f4] bg-white px-1.5 align-middle group-hover:bg-[#f7f8fa]", className)}>
+    <td className={cn("sticky h-11 border-b border-r border-[#dbe4f0] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>
       {children}
     </td>
   );
@@ -302,7 +302,7 @@ function SessionStatusPill({ status }: { status: { label: string; tone: "success
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center justify-center gap-1.5 rounded-md border px-2.5 text-[10px] font-semibold leading-none",
+        "inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-[13px] font-bold leading-none",
         status.tone === "success" && "border-emerald-200 bg-emerald-50 text-emerald-700",
         status.tone === "secondary" && "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
         status.tone === "outline" && "border-slate-200 bg-white text-slate-500",

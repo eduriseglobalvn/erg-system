@@ -324,7 +324,7 @@ function SidebarMenu({ className, ...props }: React.ComponentProps<"ul">) {
     <ul
       data-slot="sidebar-menu"
       data-sidebar="menu"
-      className={cn("flex w-full min-w-0 flex-col gap-0", className)}
+      className={cn("flex w-full min-w-0 flex-col gap-1", className)}
       {...props}
     />
   )
@@ -342,17 +342,17 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
 }
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button group/menu-button relative flex w-full items-center gap-2 overflow-hidden rounded-md border border-transparent p-2 text-left text-sm font-semibold text-slate-700 ring-[var(--erg-blue-ring)] outline-hidden transition-[width,height,padding,background-color,border-color,color,box-shadow] before:absolute before:left-0 before:top-1.5 before:h-[calc(100%-12px)] before:w-1 before:rounded-r-full before:bg-transparent before:transition-colors group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:border-[#d9e0ea] hover:bg-white hover:text-[#242424] hover:shadow-sm focus-visible:ring-2 active:border-[#b8d6fa] active:bg-white active:text-[var(--erg-blue)] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:border-[#b8d6fa] data-open:bg-white data-open:text-[var(--erg-blue)] data-open:shadow-sm data-active:border-[#b8d6fa] data-active:bg-white data-active:text-[var(--erg-blue)] data-active:shadow-sm data-active:before:bg-[var(--erg-blue)] [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate group-data-[collapsible=icon]:before:hidden group-data-[collapsible=icon]:[&>span:last-child]:overflow-visible group-data-[collapsible=icon]:[&>span:last-child]:whitespace-normal group-data-[collapsible=icon]:[&>span:last-child]:text-clip",
+  "peer/menu-button group/menu-button relative flex w-full items-center gap-2 overflow-hidden rounded-lg border border-transparent p-2 text-left text-sm font-bold text-slate-800 ring-[var(--ring)] outline-hidden transition-[width,height,padding,background-color,border-color,color,box-shadow] before:absolute before:left-0 before:top-1.5 before:h-[calc(100%-12px)] before:w-1 before:rounded-r-full before:bg-transparent before:transition-colors group-has-data-[sidebar=menu-action]/menu-item:pr-8 group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:p-2! hover:border-[#cbd7e6] hover:bg-white hover:text-[var(--foreground)] hover:shadow-[var(--shadow-xs)] focus-visible:ring-2 active:border-transparent active:bg-white active:text-[var(--primary)] disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-open:border-transparent data-open:bg-white data-open:text-[var(--primary)] data-open:shadow-[var(--shadow-xs)] data-active:border-transparent data-active:bg-white data-active:text-[var(--primary)] data-active:font-extrabold data-active:shadow-[var(--shadow-xs)] data-active:before:bg-[var(--primary)] [&_svg]:size-4 [&_svg]:shrink-0 [&>span:last-child]:truncate group-data-[collapsible=icon]:before:hidden group-data-[collapsible=icon]:[&>span:last-child]:overflow-visible group-data-[collapsible=icon]:[&>span:last-child]:whitespace-normal group-data-[collapsible=icon]:[&>span:last-child]:text-clip",
   {
     variants: {
       variant: {
-        default: "hover:border-[#d9e0ea] hover:bg-white hover:text-[#242424]",
+        default: "hover:border-[#cbd7e6] hover:bg-white hover:text-[var(--foreground)]",
         outline:
-          "border-[#d9e0ea] bg-white shadow-sm hover:border-[#b8d6fa] hover:bg-white hover:text-[var(--erg-blue)] hover:shadow-sm",
+          "border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-white hover:text-[var(--primary)] hover:shadow-[var(--shadow-xs)]",
       },
       size: {
-        default: "h-8 text-sm",
-        sm: "h-7 text-xs",
+        default: "min-h-9 text-sm",
+        sm: "min-h-8 text-xs",
         lg: "h-12 text-sm group-data-[collapsible=icon]:p-0!",
       },
     },

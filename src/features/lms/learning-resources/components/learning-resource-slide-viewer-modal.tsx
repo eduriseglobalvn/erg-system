@@ -150,8 +150,8 @@ export function LearningResourceSlideViewerModal({
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="min-w-0">
-            <h2 className="truncate text-sm font-medium">{resource.title}</h2>
-            <p className="truncate text-xs text-white/65">{slideCounter}</p>
+            <h2 className="truncate text-[15px] font-bold">{resource.title}</h2>
+            <p className="truncate text-[13px] font-semibold text-white/70">{slideCounter}</p>
           </div>
         </div>
 
@@ -161,7 +161,7 @@ export function LearningResourceSlideViewerModal({
               <button
                 type="button"
                 onClick={() => setDrawingMode((current) => (current === "pen" ? "cursor" : "pen"))}
-                className={`inline-flex h-9 items-center gap-2 rounded-md px-3 text-xs font-medium ${
+                className={`inline-flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-bold ${
                   drawingMode === "pen" ? "bg-white text-slate-950" : "text-white/85 hover:bg-white/10"
                 }`}
               >
@@ -171,7 +171,7 @@ export function LearningResourceSlideViewerModal({
               <button
                 type="button"
                 onClick={clearCurrentSlideAnnotations}
-                className="inline-flex h-9 items-center gap-2 rounded-md px-3 text-xs font-medium text-white/85 hover:bg-white/10"
+                className="inline-flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-bold text-white/85 hover:bg-white/10"
               >
                 <Eraser className="h-4 w-4" />
                 Xóa nét
@@ -196,10 +196,10 @@ export function LearningResourceSlideViewerModal({
                     key={slide.id}
                     type="button"
                     onClick={() => setActiveSlideIndex(index)}
-                    className={`block w-full overflow-hidden rounded-lg border text-left ${isActive ? "border-white bg-white" : "border-white/10 bg-white/10"}`}
+                    className={`block w-full overflow-hidden rounded-lg border text-left ${isActive ? "border-white bg-white" : "border-white/20 bg-white/10 hover:border-white/35"}`}
                   >
                     <img src={slide.thumbnailUrl || slide.imageUrl} alt={slide.title || `Slide ${index + 1}`} className="aspect-video w-full object-cover" />
-                    <span className={`block px-2 py-1 text-center text-[11px] font-semibold ${isActive ? "text-[#091f80]" : "text-white/70"}`}>{index + 1}</span>
+                    <span className={`block px-2 py-1 text-center text-[12px] font-bold ${isActive ? "text-[#091f80]" : "text-white/75"}`}>{index + 1}</span>
                   </button>
                 );
               })}
@@ -207,7 +207,7 @@ export function LearningResourceSlideViewerModal({
           </aside>
 
           <section className="relative min-h-0 p-4">
-            <div className="absolute left-4 top-4 z-10 rounded-md bg-black/55 px-3 py-1 text-xs font-medium text-white/80">{activeSlideTitle}</div>
+            <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-32px)] truncate rounded-lg bg-black/60 px-3 py-1.5 text-[13px] font-bold text-white/85">{activeSlideTitle}</div>
             <div className="flex h-full items-center justify-center">
               <div className="relative aspect-video max-h-full w-full max-w-[1500px] overflow-hidden rounded-lg bg-black shadow-sm">
                 <img src={activeSlide?.imageUrl} alt={activeSlideTitle} className="h-full w-full object-contain" draggable={false} />
@@ -232,7 +232,7 @@ export function LearningResourceSlideViewerModal({
                 type="button"
                 disabled={!canGoPrevious}
                 onClick={() => setActiveSlideIndex((current) => Math.max(0, current - 1))}
-                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-70"
               >
                 <ChevronLeft className="h-5 w-5" />
               </button>
@@ -243,7 +243,7 @@ export function LearningResourceSlideViewerModal({
                 type="button"
                 disabled={!canGoNext}
                 onClick={() => setActiveSlideIndex((current) => Math.min(slides.length - 1, current + 1))}
-                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-35"
+                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-70"
               >
                 <ChevronRight className="h-5 w-5" />
               </button>

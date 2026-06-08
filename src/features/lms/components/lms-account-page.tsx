@@ -45,13 +45,13 @@ export function LmsAccountPage({
   }
 
   return (
-    <section className="min-h-full bg-[#f7f8fa] px-3 py-3 text-slate-950 xl:px-4">
+    <section className="min-h-full bg-[#f8fbff] px-3 py-3 text-slate-950 xl:px-4">
       <div className="mx-auto flex max-w-6xl flex-col gap-3">
-        <section className="rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
+        <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
           <div className="flex flex-wrap items-center gap-4 px-5 py-5">
-            <Avatar size="lg" className="size-12 overflow-visible rounded-lg bg-[var(--erg-blue)] ring-2 ring-[var(--erg-blue-ring)]">
+            <Avatar size="lg" className="size-12 overflow-visible rounded-lg bg-[var(--primary)] ring-2 ring-[var(--ring)]">
               <AvatarImage src={account?.avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-base font-semibold text-white">
+              <AvatarFallback className="rounded-lg bg-[var(--primary)] text-base font-semibold text-white">
                 {initials(displayName)}
               </AvatarFallback>
               <AvatarBadge className="size-4 border border-white bg-emerald-500 ring-2 ring-white" />
@@ -59,7 +59,7 @@ export function LmsAccountPage({
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-semibold leading-tight text-[#242424]">{displayName}</h1>
+                <h1 className="text-lg font-semibold leading-tight text-[var(--foreground)]">{displayName}</h1>
                 <Badge tone="success" className="tracking-normal">
                   {status}
                 </Badge>
@@ -81,7 +81,7 @@ export function LmsAccountPage({
         </section>
 
         <div className="grid gap-3 xl:grid-cols-[1fr_380px]">
-          <section className="rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
+          <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
             <SectionHeader
               title="Thông tin tài khoản"
               description="Thông tin định danh và liên hệ dùng khi giáo viên thao tác trên LMS."
@@ -102,7 +102,7 @@ export function LmsAccountPage({
             </div>
           </section>
 
-          <section className="rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
+          <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
             <SectionHeader title="Bảo mật" description="Các thiết lập quan trọng cho đăng nhập và xác minh." compact />
             <div className="divide-y divide-slate-100">
               <SecurityRow
@@ -141,15 +141,15 @@ export function LmsAccountPage({
           </section>
         </div>
 
-        <section className="rounded-lg border border-[#e0e4ea] bg-white px-5 py-4 shadow-sm">
+        <section className="rounded-lg border border-[#cbd7e6] bg-white px-5 py-4 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold text-slate-950">Quyền truy cập LMS</h2>
-              <p className="mt-0.5 text-xs font-semibold text-slate-500">Các phạm vi đang được cấp cho tài khoản này.</p>
+              <p className="mt-1 text-[13px] font-semibold text-slate-600">Các phạm vi đang được cấp cho tài khoản này.</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {permissionLabels.map((label) => (
-                <span key={label} className="rounded-md border border-[#b8d6fa] bg-[#ebf3fc] px-3 py-1 text-xs font-semibold text-[#0f5ea8]">
+                <span key={label} className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] px-3 py-1.5 text-[13px] font-bold text-[#0f5ea8]">
                   {label}
                 </span>
               ))}
@@ -175,7 +175,7 @@ function SectionHeader({ compact, description, title }: { compact?: boolean; des
   return (
     <div className={cn("border-b border-slate-100 px-5", compact ? "py-4" : "py-4")}>
       <h2 className="text-base font-semibold text-slate-950">{title}</h2>
-      <p className="mt-0.5 text-xs font-semibold text-slate-500">{description}</p>
+      <p className="mt-1 text-[13px] font-semibold text-slate-600">{description}</p>
     </div>
   );
 }
@@ -195,13 +195,13 @@ function InfoRow({
 }) {
   return (
     <div className="min-h-20 bg-white px-5 py-4">
-      <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500">
+      <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600">
         {Icon ? <Icon className="size-3.5" /> : null}
         {label}
       </div>
       <div className="mt-2 text-sm font-semibold text-slate-900">{value || "-"}</div>
       {actionLabel && onAction ? (
-        <button type="button" onClick={onAction} className="mt-2 text-xs font-semibold text-[var(--erg-blue)] hover:underline">
+        <button type="button" onClick={onAction} className="mt-2 text-[13px] font-bold text-[var(--erg-blue)] hover:underline">
           {actionLabel}
         </button>
       ) : null}
@@ -239,9 +239,9 @@ function SecurityRow({
       </span>
       <span className="min-w-0 flex-1">
         <span className="block text-sm font-semibold text-slate-950">{title}</span>
-        <span className="mt-0.5 block text-xs font-semibold leading-5 text-slate-500">{detail}</span>
+        <span className="mt-1 block text-[13px] font-semibold leading-5 text-slate-600">{detail}</span>
       </span>
-      <Button variant="outline" className="h-8 rounded-md px-3 text-xs" onClick={onAction}>
+      <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={onAction}>
         {actionLabel}
       </Button>
     </div>

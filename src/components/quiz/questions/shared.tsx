@@ -80,7 +80,7 @@ export function InlineChoiceSelect({
         className={`outline-none transition ${
           isMobile
             ? "min-h-10 min-w-[92px] rounded-md border px-3 pr-9 text-sm font-medium"
-            : "min-h-13 min-w-[180px] rounded-lg border-2 px-4 pr-10 text-lg font-medium"
+            : "min-h-13 min-w-[180px] rounded-lg border px-4 pr-10 text-lg font-medium"
         }`}
         disabled={submitted}
         style={{
@@ -113,7 +113,7 @@ export function InlineChoiceSelect({
         <button
           type="button"
           aria-label="Xem đáp án đúng"
-          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border-2 border-[#ef6b5f] font-semibold text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30 ${
+          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border border-[#ef6b5f] font-semibold text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30 ${
             isMobile ? "right-1.5 h-6 w-6 text-sm" : "right-2 h-7 w-7 text-base"
           }`}
           onClick={onRevealCorrectAnswer}

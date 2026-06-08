@@ -43,7 +43,7 @@ export function LikertQuestion({
                         type="button"
                         disabled={submitted}
                         className={cn(
-                          "mx-auto grid h-9 w-9 place-items-center rounded-full border-2 transition focus:outline-none focus:ring-4 disabled:cursor-default",
+                          "mx-auto grid h-9 w-9 place-items-center rounded-full border transition focus:outline-none focus:ring-2 disabled:cursor-default",
                           active
                             ? "border-[var(--quiz-accent-start)] bg-[var(--quiz-accent-start)]"
                             : "border-slate-300 bg-white hover:border-[var(--quiz-accent-start)]",

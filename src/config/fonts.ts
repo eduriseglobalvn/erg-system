@@ -1,16 +1,16 @@
 // ---------------------------------------------------------------------------
 // Font configuration for ERG system.
-// Font stack uses Public Sans (warm readable sans-serif) with Fraunces for
-// headings, following the "Soft Editorial" design philosophy.
+// The app uses Public Sans for body/UI and Fraunces for editorial headings.
 // font-display: swap ensures text is visible immediately during font load.
 // ---------------------------------------------------------------------------
 
-export const appFontStack = '"Public Sans", "IBM Plex Sans", -apple-system, sans-serif';
+export const appFontStack = '"Public Sans", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
 export const headingFontStack = '"Fraunces", "Public Sans", serif';
 export const monoFontStack = '"JetBrains Mono", "SF Mono", ui-monospace, monospace';
 
 export const quizFontStacks = {
   "Public Sans": appFontStack,
+  "Fraunces": headingFontStack,
   "Default": appFontStack,
 } as const;
 
@@ -40,11 +40,6 @@ export function injectFontDisplaySwap() {
     @font-face {
       font-family: "Fraunces";
       src: local("Fraunces");
-      font-display: swap;
-    }
-    @font-face {
-      font-family: "JetBrains Mono";
-      src: local("JetBrains Mono");
       font-display: swap;
     }
   `;

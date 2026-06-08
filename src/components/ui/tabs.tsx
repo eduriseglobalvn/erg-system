@@ -23,11 +23,11 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg border border-[#d1d9e6] p-[3px] text-[#616161] shadow-sm group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none data-[variant=line]:border-transparent data-[variant=line]:shadow-none",
+  "group/tabs-list inline-flex w-fit items-center justify-center rounded-lg border border-[#cbd7e6] p-[3px] text-[var(--muted-foreground)] shadow-[var(--shadow-xs)] group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col data-[variant=line]:rounded-none data-[variant=line]:border-transparent data-[variant=line]:shadow-none",
   {
     variants: {
       variant: {
-        default: "bg-[#f6f8fb]",
+        default: "bg-[#f8fbff]",
         line: "gap-1 bg-transparent",
       },
     },
@@ -61,10 +61,10 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap text-[#616161] transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:bg-white hover:text-[#242424] focus-visible:border-[var(--erg-blue)] focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 dark:text-[#616161] dark:hover:text-[#242424] group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2.5 py-0.5 text-sm font-semibold whitespace-nowrap text-[var(--muted-foreground)] transition-all group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start hover:bg-white hover:text-[var(--foreground)] focus-visible:border-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 has-data-[icon=inline-end]:pr-1 has-data-[icon=inline-start]:pl-1 dark:text-[var(--muted-foreground)] dark:hover:text-[var(--foreground)] group-data-[variant=default]/tabs-list:data-active:shadow-sm group-data-[variant=line]/tabs-list:data-active:shadow-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         "group-data-[variant=line]/tabs-list:bg-transparent group-data-[variant=line]/tabs-list:data-active:bg-transparent dark:group-data-[variant=line]/tabs-list:data-active:border-transparent dark:group-data-[variant=line]/tabs-list:data-active:bg-transparent",
-        "data-active:border-[#b8d6fa] data-active:bg-white data-active:text-[var(--erg-blue)] dark:data-active:border-[#b8d6fa] dark:data-active:bg-white dark:data-active:text-[var(--erg-blue)]",
-        "after:absolute after:bg-[var(--erg-blue)] after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-3 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-horizontal/tabs:after:rounded-full group-data-vertical/tabs:after:inset-y-1.5 group-data-vertical/tabs:after:left-0 group-data-vertical/tabs:after:w-1 group-data-vertical/tabs:after:rounded-r-full group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
+        "data-active:border-[#b8c8db] data-active:bg-white data-active:text-[var(--primary)] dark:data-active:border-[#b8c8db] dark:data-active:bg-white dark:data-active:text-[var(--primary)]",
+        "after:absolute after:bg-[var(--primary)] after:opacity-0 after:transition-opacity group-data-horizontal/tabs:after:inset-x-3 group-data-horizontal/tabs:after:bottom-[-5px] group-data-horizontal/tabs:after:h-0.5 group-data-horizontal/tabs:after:rounded-full group-data-vertical/tabs:after:inset-y-1.5 group-data-vertical/tabs:after:left-0 group-data-vertical/tabs:after:w-1 group-data-vertical/tabs:after:rounded-r-full group-data-[variant=line]/tabs-list:data-active:after:opacity-100",
         className
       )}
       {...props}

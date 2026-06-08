@@ -33,7 +33,7 @@ export function DragDropQuestion({
             const assignedItems = items.filter((item) => placements[item.id] === target.id);
 
             return (
-              <div key={target.id} className="min-h-40 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 p-4">
+              <div key={target.id} className="min-h-40 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4">
                 <div className="text-sm font-semibold text-slate-500">
                   {target.label}
                 </div>
@@ -64,7 +64,7 @@ export function DragDropQuestion({
               <div
                 key={item.id}
                 className={cn(
-                  "rounded-lg border-2 bg-white p-4 transition",
+                  "rounded-lg border bg-white p-4 transition",
                   reviewMode
                     ? isCorrect
                       ? "border-emerald-300"

@@ -60,7 +60,7 @@ export function NumericQuestion({
           value={value.numericValue ?? ""}
           disabled={submitted}
           onChange={(event) => onChange({ numericValue: event.target.value })}
-          className="min-h-16 rounded-lg border-2 bg-white px-5 text-xl font-semibold outline-none transition focus:ring-4 disabled:cursor-default"
+          className="min-h-16 rounded-lg border bg-white px-5 text-xl font-semibold outline-none transition focus:ring-2 disabled:cursor-default"
           style={{
             borderColor: isCorrect ? "#78b816" : reviewMode ? "#ef6b5f" : "var(--quiz-canvas-border)",
             color: "var(--quiz-option-text)",
@@ -68,7 +68,7 @@ export function NumericQuestion({
           }}
           placeholder="Nhập số"
         />
-        <div className="grid min-h-16 place-items-center rounded-lg border-2 border-slate-200 bg-slate-50 px-5 text-lg font-semibold text-slate-600">
+        <div className="grid min-h-16 place-items-center rounded-lg border border-slate-200 bg-slate-50 px-5 text-lg font-semibold text-slate-600">
           {question.numericAnswer?.unit ?? "đơn vị"}
         </div>
         {reviewMode && result?.correctNumericValue ? (
@@ -95,7 +95,7 @@ export function EssayQuestion({
           value={value.essayText ?? ""}
           disabled={submitted}
           onChange={(event) => onChange({ essayText: event.target.value })}
-          className="min-h-52 w-full resize-y rounded-lg border-2 bg-white p-5 text-xl font-medium leading-8 outline-none transition focus:ring-4 disabled:cursor-default"
+          className="min-h-52 w-full resize-y rounded-lg border bg-white p-5 text-xl font-medium leading-8 outline-none transition focus:ring-2 disabled:cursor-default"
           style={{
             borderColor: reviewMode ? "#78b816" : "var(--quiz-canvas-border)",
             color: "var(--quiz-option-text)",
@@ -172,7 +172,7 @@ function TextBlankQuestion({
                   className={
                     isMobile
                       ? "min-h-8 max-w-full border-0 border-b-2 bg-transparent px-1 pb-1 text-[18px] font-semibold outline-none disabled:cursor-default"
-                      : "min-h-14 min-w-[220px] flex-1 rounded-lg border-2 bg-white px-4 text-lg font-semibold outline-none transition focus:ring-4 disabled:cursor-default"
+                      : "min-h-14 min-w-[220px] flex-1 rounded-lg border bg-white px-4 text-lg font-semibold outline-none transition focus:ring-2 disabled:cursor-default"
                   }
                   style={
                     isMobile

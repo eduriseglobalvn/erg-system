@@ -37,8 +37,8 @@ type DashboardSegmentOption = {
 
 const toneClassMap = {
   blue: {
-    bubble: "bg-[var(--erg-blue-light)] text-[var(--erg-blue)] ring-1 ring-[#b8d6fa]",
-    delta: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
+    bubble: "bg-[var(--accent-soft)] text-[var(--primary)] ring-1 ring-[#b8c8db]",
+    delta: "border-[#b8c8db] bg-[var(--accent-soft)] text-[var(--primary)]",
   },
   amber: {
     bubble: "bg-amber-50 text-amber-700 ring-1 ring-amber-100",
@@ -53,8 +53,8 @@ const toneClassMap = {
     delta: "border-rose-200 bg-rose-50 text-rose-700",
   },
   violet: {
-    bubble: "bg-[var(--erg-blue-light)] text-[var(--erg-blue)] ring-1 ring-[#b8d6fa]",
-    delta: "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
+    bubble: "bg-[var(--accent-soft)] text-[var(--primary)] ring-1 ring-[#b8c8db]",
+    delta: "border-[#b8c8db] bg-[var(--accent-soft)] text-[var(--primary)]",
   },
 } as const;
 
@@ -68,9 +68,9 @@ export function DashboardPageShell({
   children,
 }: DashboardPageShellProps) {
   return (
-    <div className="h-full overflow-y-auto bg-[#f6f8fb]">
+    <div className="h-full overflow-y-auto bg-[#f8fbff]">
       <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-5 py-5 sm:px-6">
-        <section className="rounded-lg border border-[#d9e0ea] bg-white p-4 shadow-sm sm:p-5">
+        <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 text-xs font-medium tracking-normal text-slate-500">
@@ -83,11 +83,11 @@ export function DashboardPageShell({
               </div>
               <div className="mt-3 flex flex-wrap items-center gap-3">
                 {badge ? <Badge tone="secondary">{badge}</Badge> : null}
-                <h1 className="text-lg font-semibold tracking-normal text-[#242424] sm:text-xl">
+                <h1 className="text-lg font-semibold tracking-normal text-[var(--foreground)] sm:text-xl">
                   {title}
                 </h1>
               </div>
-              <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[#616161]">
+              <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--muted-foreground)]">
                 {description}
               </p>
             </div>
@@ -112,12 +112,12 @@ export function DashboardMetricCard({
   const toneClass = toneClassMap[tone];
 
   return (
-    <Card className="overflow-hidden border-[#d9e0ea] bg-white">
+    <Card className="overflow-hidden border-[#cbd7e6] bg-white">
       <div className="flex items-start justify-between gap-4 p-4">
         <div className="min-w-0">
-          <div className="text-xs font-medium tracking-normal text-[#616161]">{label}</div>
-          <div className="mt-2 text-xl font-semibold tracking-normal text-[#242424]">{value}</div>
-          <div className="mt-1.5 text-[13px] leading-5 text-[#616161]">{detail}</div>
+          <div className="text-xs font-medium tracking-normal text-[var(--muted-foreground)]">{label}</div>
+          <div className="mt-2 text-xl font-semibold tracking-normal text-[var(--foreground)]">{value}</div>
+          <div className="mt-1.5 text-[13px] leading-5 text-[var(--muted-foreground)]">{detail}</div>
         </div>
         {icon ? (
           <div
@@ -131,7 +131,7 @@ export function DashboardMetricCard({
         ) : null}
       </div>
       {delta ? (
-        <div className="border-t border-[#edf1f5] px-4 py-3">
+        <div className="border-t border-[#cbd7e6] bg-[#f8fbff] px-4 py-3">
           <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-medium", toneClass.delta)}>
             {delta}
           </span>
@@ -149,12 +149,12 @@ export function DashboardSectionCard({
   children,
 }: DashboardSectionCardProps) {
   return (
-    <Card className={cn("border-[#d9e0ea] bg-white", className)}>
+    <Card className={cn("border-[#cbd7e6] bg-white", className)}>
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-sm font-semibold tracking-normal text-[#242424]">{title}</h2>
-            {description ? <p className="mt-1 text-[13px] leading-5 text-[#616161]">{description}</p> : null}
+            <h2 className="text-sm font-semibold tracking-normal text-[var(--foreground)]">{title}</h2>
+            {description ? <p className="mt-1 text-[13px] leading-5 text-[var(--muted-foreground)]">{description}</p> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </div>
@@ -174,7 +174,7 @@ export function DashboardSegmentedControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] p-1 shadow-sm">
+    <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-1 shadow-[var(--shadow-xs)]">
       {options.map((option) => {
         const active = option.value === value;
 
@@ -186,8 +186,8 @@ export function DashboardSegmentedControl({
             className={cn(
               "rounded-md px-3 py-1.5 text-[13px] font-semibold transition",
               active
-                ? "bg-white text-[var(--erg-blue)] shadow-sm ring-1 ring-[#b8d6fa]"
-                : "text-[#616161] hover:bg-white hover:text-[#242424]",
+                ? "bg-white text-[var(--primary)] shadow-[var(--shadow-xs)] ring-1 ring-[#b8c8db]"
+                : "text-[var(--muted-foreground)] hover:bg-white hover:text-[var(--foreground)]",
             )}
           >
             {option.label}

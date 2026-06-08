@@ -152,7 +152,7 @@ function AccessDeniedWorkspace({ deniedSchoolName }: { deniedSchoolName: string 
           403
         </div>
         <h1 className="mt-5 text-xl font-semibold text-slate-950">Access denied</h1>
-        <p className="mt-3 text-sm leading-6 text-[#616161]">
+        <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
           Tài khoản giáo viên hiện tại chưa có quyền truy cập dữ liệu của <strong>{deniedSchoolName}</strong>.
           Vui lòng chọn trường được cấp quyền ở menu bên trái hoặc liên hệ quản trị viên để mở quyền.
         </p>

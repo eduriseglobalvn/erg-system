@@ -428,7 +428,7 @@ export function AccessSection({
               type="button"
               onClick={onAddPolicy}
               disabled={!canAdd || saving}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-[#d1d1d1] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-[#d7e0ec] bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Thêm quyền
             </button>
@@ -553,7 +553,7 @@ function SearchableScopePicker({
         <label className="relative block md:w-[360px]">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
           <input
-            className="h-10 w-full rounded-md border border-[#cfd7e3] bg-[#f6f8fb] pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 w-full rounded-md border border-[#d7e0ec] bg-[#f6f8fb] pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             placeholder="Tìm trung tâm hoặc trường"
             value={search}
             onChange={(event) => onSearch(event.target.value)}
@@ -619,7 +619,7 @@ function CompactRolePicker({ roles, value, onSelect }: { roles: AccessRoleGroup[
       </div>
       <div className="min-w-0">
         <AppSelect
-          className="h-10 w-full rounded-md border border-[#cfd7e3] bg-[#f6f8fb] px-3 text-sm font-semibold text-[#242424] outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+          className="h-10 w-full rounded-md border border-[#d7e0ec] bg-[#f6f8fb] px-3 text-sm font-semibold text-[#242424] outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           value={value}
           onChange={(event) => onSelect(event.target.value)}
         >

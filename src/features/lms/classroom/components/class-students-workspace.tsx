@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import SearchIcon from "@mui/icons-material/Search";
+import { CheckCircle2, Search } from "lucide-react";
 
 import {
   DashboardPageShell,
@@ -245,9 +244,9 @@ export function ClassStudentsWorkspace({
         >
           <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_150px_150px_150px]">
             <div className="relative">
-              <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
               <Input
-                className="pl-10"
+                className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-10 text-[14px] font-semibold"
                 onChange={(event) => setSearchValue(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 value={searchValue}
@@ -315,17 +314,17 @@ export function ClassStudentsWorkspace({
           <DashboardSectionCard title={copy.recentTitle} description={copy.recentDescription}>
             <div className="space-y-3">
               {(recentBatches.length ? recentBatches : getInitialBatches(copy)).map((batch) => (
-                <div key={batch.id} className="rounded-lg border border-[#e0e4ea] bg-white p-4">
+                <div key={batch.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
                   <div className="flex items-start gap-3">
                     <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
-                      <CheckCircleOutlineOutlinedIcon fontSize="small" />
+                      <CheckCircle2 className="h-4 w-4" />
                     </span>
                     <div className="min-w-0">
                       <div className="line-clamp-2 text-sm font-semibold text-slate-950">{batch.assignmentTitle}</div>
                       <div className="mt-1 text-sm text-slate-500">
                         {batch.className} • {batch.recipients} {copy.studentUnit(batch.recipients)}
                       </div>
-                      <div className="mt-2 text-xs font-medium text-slate-500">
+                      <div className="mt-2 text-[13px] font-semibold text-slate-600">
                         {copy.dueDateLabel}: {formatDueDate(batch.dueDate)}
                       </div>
                     </div>

@@ -157,7 +157,8 @@ function AppRoutesContent() {
   } else if (isLmsPortal) {
     if (path === "access-denied") element = <AccessDeniedPage />;
     else if (path === "login") element = <PortalLoginPage portal="lms" />;
-    else if (isRoot || pathStarts(path, "homework") || pathStarts(path, "notifications") || path === "account" || path === "account/login-logs" || ["classes", "score", "attendance", "calendar", "class-log", "resources", "reports"].includes(path)) element = withPortalAuth("lms", <DashboardPage />);
+    else if (path === "classes" || path === "homework/classes") element = <Navigate to="/homework/class" replace />;
+    else if (isRoot || pathStarts(path, "homework") || pathStarts(path, "notifications") || path === "account" || path === "account/login-logs" || ["score", "attendance", "calendar", "class-log", "resources", "reports"].includes(path)) element = withPortalAuth("lms", <DashboardPage />);
     else if (path === "teaching-schedule") element = <Navigate to="/calendar" replace />;
     else if (path === "profile") element = <AuthenticatedAccountGate><ProfilePage /></AuthenticatedAccountGate>;
     else if (path === "student") element = <PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />;

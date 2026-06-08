@@ -54,17 +54,17 @@ export function NavUser({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="border-[#d9e0ea] bg-white/70 shadow-sm hover:border-[#b8d6fa] hover:bg-white data-[state=open]:border-[#b8d6fa] data-[state=open]:bg-white data-[state=open]:text-[var(--erg-blue)] data-[state=open]:shadow-sm"
+              className="border-[#cbd7e6] bg-white/80 shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-white data-[state=open]:border-[#b8c8db] data-[state=open]:bg-white data-[state=open]:text-[var(--primary)] data-[state=open]:shadow-[var(--shadow-xs)]"
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-white">
+                <AvatarFallback className="rounded-lg bg-[var(--primary)] text-white">
                   {fallback}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-[#242424]">{user.name}</span>
-                <span className="truncate text-xs font-medium text-[#616161]">{user.email}</span>
+                <span className="truncate font-semibold text-[var(--foreground)]">{user.name}</span>
+                <span className="truncate text-xs font-medium text-[var(--muted-foreground)]">{user.email}</span>
               </div>
               <span className="ml-auto inline-flex flex-col">
                 <ArrowUpwardIcon className="size-3" fontSize="inherit" />
@@ -82,13 +82,13 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-white">
+                  <AvatarFallback className="rounded-lg bg-[var(--primary)] text-white">
                     {fallback}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-[#242424]">{user.name}</span>
-                  <span className="truncate text-xs font-medium text-[#616161]">{user.email}</span>
+                  <span className="truncate font-semibold text-[var(--foreground)]">{user.name}</span>
+                  <span className="truncate text-xs font-medium text-[var(--muted-foreground)]">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -108,7 +108,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuLabel className="text-xs font-semibold text-[#616161]">
+            <DropdownMenuLabel className="text-xs font-semibold text-[var(--muted-foreground)]">
               {t("locale.language")}
             </DropdownMenuLabel>
             <div className="px-2 pb-2">

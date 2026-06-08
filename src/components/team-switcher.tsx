@@ -61,14 +61,14 @@ export function TeamSwitcher({
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
               size="lg"
-              className="border-[#d9e0ea] bg-white/70 shadow-sm hover:border-[#b8d6fa] hover:bg-white data-[state=open]:border-[#b8d6fa] data-[state=open]:bg-white data-[state=open]:text-[var(--erg-blue)] data-[state=open]:shadow-sm"
+              className="border-[#cbd7e6] bg-white/80 shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-white data-[state=open]:border-[#b8c8db] data-[state=open]:bg-white data-[state=open]:text-[var(--primary)] data-[state=open]:shadow-[var(--shadow-xs)]"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--erg-blue)] text-white shadow-sm">
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--primary)] text-white shadow-[var(--shadow-xs)]">
                 {activeTeam.logo}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-[#242424]">{activeTeam.name}</span>
-                <span className="truncate text-xs font-medium text-[#616161]">{activeTeam.plan}</span>
+                <span className="truncate font-semibold text-[var(--foreground)]">{activeTeam.name}</span>
+                <span className="truncate text-xs font-medium text-[var(--muted-foreground)]">{activeTeam.plan}</span>
               </div>
               <span className="ml-auto inline-flex flex-col">
                 <ArrowUpwardIcon className="size-3" fontSize="inherit" />
@@ -82,7 +82,7 @@ export function TeamSwitcher({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs font-semibold text-[#616161]">
+            <DropdownMenuLabel className="text-xs font-semibold text-[var(--muted-foreground)]">
               {menuLabel ?? t("common.teams")}
             </DropdownMenuLabel>
             {teams.map((team, index) => (
@@ -94,7 +94,7 @@ export function TeamSwitcher({
                 }}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-md border border-[#d9e0ea] bg-[#f6f8fb] text-[var(--erg-blue)]">
+                <div className="flex size-6 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-[var(--primary)]">
                   {team.logo}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -110,10 +110,10 @@ export function TeamSwitcher({
               <>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="gap-2 p-2">
-                  <div className="flex size-6 items-center justify-center rounded-md border border-[#d9e0ea] bg-[#f6f8fb] text-[var(--erg-blue)]">
+                  <div className="flex size-6 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-[var(--primary)]">
                     <AddIcon className="size-4" fontSize="inherit" />
                   </div>
-                  <div className="font-semibold text-[#616161]">{addLabel ?? t("common.addTeam")}</div>
+                  <div className="font-semibold text-[var(--muted-foreground)]">{addLabel ?? t("common.addTeam")}</div>
                 </DropdownMenuItem>
               </>
             ) : null}

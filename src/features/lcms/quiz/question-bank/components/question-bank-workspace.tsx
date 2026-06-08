@@ -706,7 +706,7 @@ function SelectControl({
       <AppSelect
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="mt-2 h-10 w-full rounded-md border border-[#cfd7e3] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+        className="mt-2 h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

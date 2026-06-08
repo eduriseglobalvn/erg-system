@@ -613,7 +613,7 @@ function validatePassword(value: string) {
 }
 
 const authInputClassName =
-  "h-9 w-full rounded-md border border-[#cfd7e3] bg-white px-3 text-sm text-[#242424] outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+  "h-9 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm text-[#242424] outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
 const authSubmitClassName =
   "inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-70";

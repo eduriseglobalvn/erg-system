@@ -8,19 +8,22 @@ import {
   type ColumnFiltersState,
   type SortingState,
 } from "@tanstack/react-table";
-import { ArrowDownAZ, ArrowUpAZ, Check, ChevronDown, Filter, History, LockKeyhole, Plus, Search, X } from "lucide-react";
+import { ArrowDownAZ, ArrowUpAZ, ChevronDown, Filter, History, LockKeyhole, Plus, Search, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import { Input } from "@/components/ui/dashboard-kit";
 import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
+import { MobileScoreSheetPanel } from "@/features/lms/components/score/mobile-score-sheet-panel";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useVirtualList } from "@/hooks/use-virtual-list";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
+import { LmsCheckbox } from "@/components/ui/lms-kit";
 
-type ScoreColumn = {
+export type ScoreColumn = {
   id: string;
   label: string;
   maxScore: number;
@@ -34,9 +37,9 @@ type ScoreAttempt = {
   takenAt: string;
 };
 
-type Classification = "A" | "B" | "C" | "D" | "E";
+export type Classification = "A" | "B" | "C" | "D" | "E";
 type ClassificationSort = "asc" | "desc" | null;
-type StudentState = "active" | "disabled";
+export type StudentState = "active" | "disabled";
 
 type ClassificationLog = {
   id: string;
@@ -75,6 +78,7 @@ const baseScoreColumns: ScoreColumn[] = [
 const classificationOptions: Classification[] = ["A", "B", "C", "D", "E"];
 
 export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }: ScoreSheetPanelProps) {
+  const isMobile = useIsMobile();
   const [offlineColumns, setOfflineColumns] = useState<ScoreColumn[]>([]);
   const [offlineColumnName, setOfflineColumnName] = useState("");
   const [manualScores, setManualScores] = useState<Record<string, string>>({});
@@ -97,8 +101,8 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
   const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
   const scoreColumns = [...baseScoreColumns, ...offlineColumns];
-  const scoreColumnWidth = `clamp(108px, calc((100vw - 470px) / ${scoreColumns.length}), 160px)`;
-  const scoreTableWidth = `max(100%, ${428 + scoreColumns.length * 108}px)`;
+  const scoreColumnWidth = `clamp(116px, calc((100vw - 580px) / ${scoreColumns.length}), 172px)`;
+  const scoreTableWidth = `max(100%, ${530 + scoreColumns.length * 116}px)`;
   const selectedStudent = students.find((student) => student.id === selectedStudentId) ?? null;
   const scoreTableColumns = useMemo<ColumnDef<ClassroomStudent>[]>(
     () => [
@@ -167,7 +171,7 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
   const sortedStudents = sortedStudentRows.map((row) => row.original);
   const rowVirtualizer = useVirtualList({
     count: sortedStudents.length,
-    estimateSize: 28,
+    estimateSize: 36,
     overscan: 10,
     scrollRef: tableScrollRef,
   });
@@ -267,68 +271,147 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
     toast.success("Da khoa tai khoan elearning");
   }
 
+  if (isMobile) {
+    return (
+      <>
+        <MobileScoreSheetPanel
+          addOfflineColumn={addOfflineColumn}
+          bonusScores={bonusScores}
+          commitScoreInputOnEnter={commitScoreInputOnEnter}
+          getClassification={(student) => getStudentClassification(student, manualClassifications)}
+          getStudentState={(student) => studentStates[student.id] ?? "active"}
+          manualScores={manualScores}
+          offlineColumnName={offlineColumnName}
+          onOfflineColumnNameChange={setOfflineColumnName}
+          onOpenStudentDetail={openStudentDetail}
+          onRequestClassificationChange={requestClassificationChange}
+          onSearchQueryChange={setSearchQuery}
+          onSelectedSubjectChange={setSelectedSubject}
+          onUpdateBonusScore={updateBonusScore}
+          onUpdateManualScore={updateManualScore}
+          scoreColumns={scoreColumns}
+          searchQuery={searchQuery}
+          selectedClass={selectedClass}
+          selectedSchoolName={selectedSchoolName}
+          selectedSubject={selectedSubject}
+          sortedStudents={sortedStudents}
+          studentNameFor={(student) => studentDrafts[student.id]?.name ?? student.name}
+          subjectOptions={lmsSubjectOptions}
+        />
+
+        {selectedStudent ? (
+          <StudentProfileDetailDrawer
+            draft={studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")}
+            onClose={() => setSelectedStudentId(null)}
+            onUpdate={(patch) => updateStudentDraft(selectedStudent.id, patch)}
+            onStatusChange={(state) => updateStudentDraft(selectedStudent.id, { state })}
+            statusLabel="Tr?ng th?i t?i kho?n"
+            statusOptions={[
+              { label: "?ang h?c", value: "active" },
+              { label: "Ngh? h?c / kh?a t?i kho?n", value: "disabled" },
+            ]}
+            statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")).state}
+            student={selectedStudent}
+          />
+        ) : null}
+
+        {pendingClassification ? (
+          <ClassificationChangeDialog
+            comment={classificationComment}
+            pending={pendingClassification}
+            onCancel={() => {
+              setPendingClassification(null);
+              setClassificationComment("");
+            }}
+            onCommentChange={setClassificationComment}
+            onSave={saveClassificationChange}
+          />
+        ) : null}
+      </>
+    );
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col gap-2 px-2 py-2 xl:px-3">
-      <section className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <div className="mr-auto min-w-[220px]">
+      <section className="rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="min-w-[220px] flex-1">
             <div className="text-sm font-semibold leading-5 text-slate-950">{selectedClass?.className ?? "Lớp học"}</div>
-            <div className="text-[11px] font-semibold text-slate-500">
+            <div className="text-[13px] font-semibold text-slate-600">
               {selectedSchoolName} · {students.length} học sinh · {scoreColumns.length} cột điểm
             </div>
           </div>
-          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[11px] font-medium text-[var(--erg-blue)]">{notice}</span> : null}
-          <AppSelect
-            aria-label="Chọn môn học"
-            value={selectedSubject}
-            onChange={(event) => setSelectedSubject(event.target.value)}
-            className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium text-slate-700 outline-none focus:border-[#b8d6fa]"
-          >
-            {lmsSubjectOptions.map((subject) => (
-              <option key={subject} value={subject}>
-                {subject}
-              </option>
-            ))}
-          </AppSelect>
-          <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-            <Input
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Tìm học sinh"
-              className="h-8 border-slate-200 bg-slate-50 pl-8 text-xs shadow-none focus:bg-white"
+          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[13px] font-semibold text-[var(--erg-blue)]">{notice}</span> : null}
+          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 lg:flex-nowrap">
+            <label className="flex h-9 min-w-[178px] items-center gap-2 rounded-lg border border-[#b8c8db] bg-white px-3 shadow-[var(--shadow-xs)] transition focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+              <span className="shrink-0 text-[13px] font-semibold text-slate-500">Môn</span>
+              <AppSelect
+                aria-label="Chọn môn học"
+                data-inline-select="true"
+                value={selectedSubject}
+                onChange={(event) => setSelectedSubject(event.target.value)}
+                className="h-7 min-w-0 flex-1 border-0 bg-transparent px-0 pr-5 text-[14px] font-bold text-slate-900 shadow-none outline-none"
+              >
+                {lmsSubjectOptions.map((subject) => (
+                  <option key={subject} value={subject}>
+                    {subject}
+                  </option>
+                ))}
+              </AppSelect>
+            </label>
+            <div className="relative min-w-[220px] flex-1 lg:max-w-[340px]">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
+              <Input
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="Tìm học sinh"
+                className="h-9 border-[#cbd7e6] bg-white pl-8 text-[14px] shadow-none focus:bg-white"
+              />
+            </div>
+            <input
+              value={offlineColumnName}
+              onChange={(event) => setOfflineColumnName(event.target.value)}
+              placeholder="Tên cột offline"
+              className="h-9 w-40 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-medium outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             />
+            <button
+              type="button"
+              onClick={addOfflineColumn}
+              aria-label="Tạo cột offline"
+              title="Tạo cột offline"
+              className="inline-flex h-9 min-w-[148px] shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-[0px] font-bold shadow-[var(--shadow-xs)] transition hover:opacity-90"
+              style={{
+                backgroundColor: "var(--erg-blue)",
+                border: "1px solid var(--erg-blue)",
+                color: "#ffffff",
+                fontSize: "0px",
+              }}
+            >
+              <Plus className="h-3.5 w-3.5" style={{ color: "#ffffff" }} />
+              <span style={{ color: "#ffffff", fontSize: "14px" }}>Tạo cột offline</span>
+              Tạo cột offline
+            </button>
           </div>
-          <input
-            value={offlineColumnName}
-            onChange={(event) => setOfflineColumnName(event.target.value)}
-            placeholder="Tên cột offline"
-            className="h-8 w-36 rounded-md border border-slate-200 bg-white px-2 text-xs font-medium outline-none focus:border-[#b8d6fa]"
-          />
-          <Button type="button" onClick={addOfflineColumn} className="h-8 rounded-md bg-slate-950 px-2.5 text-xs font-semibold text-white">
-            <Plus className="h-3.5 w-3.5" />
-            Cột offline
-          </Button>
         </div>
       </section>
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 px-2.5 py-1.5">
-          <h2 className="text-sm font-semibold text-slate-950">Bảng điểm theo chủ đề</h2>
-          <div className="flex items-center gap-1.5 text-[10px] font-medium">
+      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#d9e2ef] bg-white">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d9e2ef] px-2.5 py-1.5">
+          <h2 className="text-base font-bold text-slate-950">Bảng điểm theo chủ đề</h2>
+          <div className="flex items-center gap-1.5 text-[13px] font-semibold">
             <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Điểm mới nhất</span>
             <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Hover xem lịch sử</span>
             <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">- là chưa làm</span>
           </div>
         </div>
         <div ref={tableScrollRef} className="min-h-0 flex-1 overflow-auto">
-          <table style={{ width: scoreTableWidth }} className="table-fixed border-separate border-spacing-0 text-[11px]">
+          <table style={{ width: scoreTableWidth }} className="erg-data-table table-fixed border-separate border-spacing-0 text-[13px]">
             <thead>
-              <tr className="bg-slate-50 text-[10px] font-semibold text-slate-500">
+              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                 <ScoreHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[44px] top-0 z-40 w-[190px] text-left">Học sinh</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[234px] top-0 z-40 w-[82px]">Điểm +/-</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[316px] top-0 z-40 w-[112px]">
+                <ScoreHeaderCell className="sticky left-[44px] top-0 z-40 w-[260px] text-left">Học sinh</ScoreHeaderCell>
+                <ScoreHeaderCell className="sticky left-[304px] top-0 z-40 w-[88px]">Điểm +/-</ScoreHeaderCell>
+                <ScoreHeaderCell className="sticky left-[392px] top-0 z-40 w-[118px]">
                   <ClassificationFilterMenu
                     selected={classificationFilter}
                     sort={classificationSort}
@@ -364,10 +447,10 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
                 return (
                   <tr key={student.id} className={cn("group", studentState === "disabled" && "text-slate-400")}>
                     <ScoreStickyCell className={cn("left-0 z-20 w-[44px] text-center text-slate-500", studentState === "disabled" && "bg-slate-100")}>{index + 1}</ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[44px] z-20 w-[190px]", studentState === "disabled" && "bg-slate-100")}>
+                    <ScoreStickyCell className={cn("left-[44px] z-20 w-[260px]", studentState === "disabled" && "bg-slate-100")}>
                       <button
                         type="button"
-                        className={cn("max-w-[166px] truncate text-left font-medium text-[var(--erg-blue)] hover:underline", studentState === "disabled" && "text-slate-400")}
+                        className={cn("block max-w-full whitespace-normal text-left font-bold leading-5 text-[var(--erg-blue)] hover:underline", studentState === "disabled" && "text-slate-400")}
                         onClick={() => openStudentDetail(student)}
                         onContextMenu={(event) => {
                           event.preventDefault();
@@ -377,23 +460,24 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
                         {studentDrafts[student.id]?.name ?? student.name}
                       </button>
                     </ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[234px] z-20 w-[82px] text-center", studentState === "disabled" && "bg-slate-100")}>
+                    <ScoreStickyCell className={cn("left-[304px] z-20 w-[88px] text-center", studentState === "disabled" && "bg-slate-100")}>
                       <input
                         value={bonusScores[student.id] ?? ""}
                         onChange={(event) => updateBonusScore(student.id, event.target.value)}
                         onKeyDown={commitScoreInputOnEnter}
-                        className="h-6 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-700 outline-none focus:border-[#b8d6fa] focus:bg-white"
+                        className="h-7 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-700 outline-none focus:border-[var(--primary)] focus:bg-white"
                         placeholder="0"
                       />
                     </ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[316px] z-20 w-[112px]", studentState === "disabled" && "bg-slate-100")}>
+                    <ScoreStickyCell className={cn("left-[392px] z-20 w-[118px]", studentState === "disabled" && "bg-slate-100")}>
                       <div className="group/log relative">
                         <AppSelect
+                          variant="native"
                           data-classification-select="true"
                           data-classification={classification}
                           value={classification}
                           onChange={(event) => requestClassificationChange(student, event.target.value as Classification)}
-                          className={cn("h-8 w-full rounded-lg border text-center text-xs font-semibold outline-none transition", classificationClass(classification))}
+                          className={cn("h-8 w-full rounded-full border text-center text-[13px] font-bold outline-none transition", classificationClass(classification))}
                           style={{ textAlignLast: "center" }}
                         >
                           {classificationOptions.map((option) => <option key={option}>{option}</option>)}
@@ -414,12 +498,12 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
                     {scoreColumns.map((column, columnIndex) => {
                       if (column.kind === "offline") {
                         return (
-                          <td key={column.id} style={{ width: scoreColumnWidth }} className="h-7 border-b border-r border-slate-100 bg-amber-50/40 px-1 text-center group-hover:!bg-[var(--erg-blue-light)]">
+                          <td key={column.id} style={{ width: scoreColumnWidth }} className="h-10 border-b border-r border-[#cbd7e6] bg-amber-50/40 px-1.5 text-center group-hover:!bg-[var(--erg-blue-light)]">
                             <input
                               value={manualScores[`${column.id}:${student.id}`] ?? ""}
                               onChange={(event) => updateManualScore(column.id, student.id, event.target.value)}
                               onKeyDown={commitScoreInputOnEnter}
-                              className="h-6 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-800 outline-none focus:border-amber-300 focus:bg-white"
+                              className="h-7 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-800 outline-none focus:border-amber-300 focus:bg-white"
                               inputMode="decimal"
                               placeholder="-"
                               aria-label={`${student.name} ${column.label}`}
@@ -431,7 +515,7 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
                       const attempts = getMockAttempts(student, column, sourceStudentIndex, columnIndex);
                       const latest = attempts[0];
                       return (
-                        <td key={column.id} style={{ width: scoreColumnWidth }} className={cn("group/score relative h-7 border-b border-r border-slate-100 px-1.5 text-center font-semibold group-hover:!bg-[var(--erg-blue-light)]", scoreCellClass(latest?.score, column.maxScore))}>
+                        <td key={column.id} style={{ width: scoreColumnWidth }} className={cn("group/score relative h-10 border-b border-r border-[#cbd7e6] px-1.5 text-center font-semibold group-hover:!bg-[var(--erg-blue-light)]", scoreCellClass(latest?.score, column.maxScore))}>
                           {latest ? formatScore(latest.score) : "-"}
                           {latest ? <ScoreAttemptPopup attempts={attempts} maxScore={column.maxScore} /> : null}
                         </td>
@@ -521,11 +605,15 @@ function ClassificationFilterMenu({
   }
 
   function toggleOption(option: Classification) {
-    setDraftSelected((current) => (current.includes(option) ? current.filter((item) => item !== option) : [...current, option]));
+    const next = draftSelected.includes(option) ? draftSelected.filter((item) => item !== option) : [...draftSelected, option];
+    setDraftSelected(next);
+    onApply(next, draftSort);
   }
 
   function toggleAll() {
-    setDraftSelected(allChecked ? [] : classificationOptions);
+    const next = allChecked ? [] : classificationOptions;
+    setDraftSelected(next);
+    onApply(next, draftSort);
   }
 
   return (
@@ -534,8 +622,8 @@ function ClassificationFilterMenu({
         type="button"
         onClick={openMenu}
         className={cn(
-          "mx-auto grid h-7 w-full grid-cols-[18px_1fr_18px] items-center gap-1 rounded border bg-white px-1.5 text-[10px] font-semibold text-slate-700 shadow-sm hover:border-[#b8d6fa]",
-          isFiltered ? "border-[#b8d6fa] text-[var(--erg-blue)]" : "border-slate-200",
+          "mx-auto grid h-9 w-full grid-cols-[18px_1fr_18px] items-center gap-1 rounded-lg border bg-white px-1.5 text-[13px] font-bold text-slate-800 shadow-none hover:border-[#b8c8db]",
+          isFiltered ? "border-[#b8d6fa] text-[var(--erg-blue)]" : "border-[#cbd7e6]",
         )}
         aria-expanded={open}
       >
@@ -549,63 +637,63 @@ function ClassificationFilterMenu({
       {open ? (
         <>
           <button type="button" aria-label="Đóng bộ lọc xếp loại" className="fixed inset-0 z-[55] cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-8 z-[60] w-64 rounded-md border border-slate-200 bg-white p-2 text-left normal-case text-slate-800 shadow-sm shadow-slate-900/20">
+          <div className="absolute left-0 top-10 z-[60] w-72 rounded-lg border border-[#b8c8db] bg-white p-2.5 text-left normal-case text-slate-800 shadow-md shadow-slate-900/10">
             <button
               type="button"
-              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs font-semibold hover:bg-slate-50", draftSort === "asc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
-              onClick={() => setDraftSort("asc")}
+              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold hover:bg-slate-50", draftSort === "asc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
+              onClick={() => { setDraftSort("asc"); onApply(draftSelected, "asc"); }}
             >
               <ArrowDownAZ className="h-4 w-4" />
-              Sort A to Z
+              Sắp xếp A đến Z
             </button>
             <button
               type="button"
-              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs font-semibold hover:bg-slate-50", draftSort === "desc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
-              onClick={() => setDraftSort("desc")}
+              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold hover:bg-slate-50", draftSort === "desc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
+              onClick={() => { setDraftSort("desc"); onApply(draftSelected, "desc"); }}
             >
               <ArrowUpAZ className="h-4 w-4" />
-              Sort Z to A
+              Sắp xếp Z đến A
             </button>
             <button
               type="button"
-              className="mt-1 flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 hover:text-rose-600"
+              className="mt-1 flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-rose-600"
               onClick={() => {
                 onApply(classificationOptions, null);
                 setOpen(false);
               }}
             >
               <X className="h-4 w-4" />
-              Clear filter
+              Xóa bộ lọc
             </button>
-            <div className="my-2 border-t border-slate-100" />
+            <div className="my-2 border-t border-[#dbe4f0]" />
             <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search"
-                className="h-8 w-full rounded border border-slate-200 pl-7 pr-2 text-xs font-semibold outline-none focus:border-[#b8d6fa]"
+                placeholder="Tìm xếp loại"
+                className="h-9 w-full rounded-lg border border-[#b8c8db] pl-8 pr-2 text-[13px] font-semibold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               />
             </div>
-            <div className="mt-2 max-h-44 overflow-auto rounded border border-slate-100 p-1">
-              <CheckRow checked={allChecked} label="(Select All)" onToggle={toggleAll} />
+            <div className="mt-2 max-h-48 overflow-auto rounded-lg border border-[#dbe4f0] bg-[#fbfdff] p-1">
+              <CheckRow checked={allChecked} label="Chọn tất cả" onToggle={toggleAll} />
               {visibleOptions.map((option) => (
                 <CheckRow key={option} checked={draftSelected.includes(option)} label={option} onToggle={() => toggleOption(option)} />
               ))}
             </div>
             <div className="mt-2 flex justify-end gap-2">
-              <button type="button" className="h-7 rounded border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50" onClick={() => setOpen(false)}>
-                Cancel
+              <button type="button" className="h-8 rounded-lg border border-[#cbd7e6] px-3 text-[13px] font-semibold text-slate-700 hover:bg-slate-50" onClick={() => setOpen(false)}>
+                Hủy
               </button>
               <button
                 type="button"
-                className="h-7 rounded bg-[var(--erg-blue)] px-3 text-xs font-semibold text-white hover:bg-[var(--erg-blue-hover)]"
+                className="h-8 rounded-lg bg-[var(--erg-blue)] px-3 text-[13px] font-bold text-white hover:bg-[var(--erg-blue-hover)]"
                 onClick={() => {
                   onApply(draftSelected, draftSort);
                   setOpen(false);
                 }}
               >
-                OK
+                Áp dụng
               </button>
             </div>
           </div>
@@ -617,9 +705,15 @@ function ClassificationFilterMenu({
 
 function CheckRow({ checked, label, onToggle }: { checked: boolean; label: string; onToggle: () => void }) {
   return (
-    <button type="button" className="flex w-full items-center gap-2 rounded px-1.5 py-1 text-left text-xs font-semibold hover:bg-slate-50" onClick={onToggle}>
-      <span className={cn("grid h-4 w-4 place-items-center rounded-sm border", checked ? "border-[var(--erg-blue)] bg-[var(--erg-blue-light)]0 text-white" : "border-slate-300 bg-white")}>
-        {checked ? <Check className="h-3 w-3" /> : null}
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold text-slate-800 hover:bg-[#eef6ff]"
+      onClick={onToggle}
+    >
+      <span className="inline-flex shrink-0" onClick={(event) => event.stopPropagation()}>
+        <LmsCheckbox checked={checked} onCheckedChange={onToggle} aria-label={label} />
       </span>
       <span>{label}</span>
     </button>
@@ -629,19 +723,19 @@ function CheckRow({ checked, label, onToggle }: { checked: boolean; label: strin
 function ScoreAttemptPopup({ attempts, maxScore }: { attempts: ScoreAttempt[]; maxScore: number }) {
   const best = attempts.reduce((currentBest, attempt) => (attempt.score > currentBest.score ? attempt : currentBest), attempts[0]);
   return (
-    <div className="pointer-events-none absolute left-1/2 top-7 z-50 hidden w-72 -translate-x-1/2 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm shadow-slate-900/15 group-hover/score:block">
+    <div className="pointer-events-none absolute left-1/2 top-7 z-50 hidden w-72 -translate-x-1/2 rounded-lg border border-[#cbd7e6] bg-white p-3 text-left shadow-sm shadow-slate-900/15 group-hover/score:block">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <div className="text-[10px] font-semibold text-slate-400">Điểm cao nhất</div>
+          <div className="text-[13px] font-bold text-slate-500">Điểm cao nhất</div>
           <div className="mt-1 text-xl font-semibold text-emerald-700">{formatScore(best.score)}/{maxScore}</div>
-          <div className="mt-1 text-[11px] font-semibold text-slate-500">{best.duration} · {best.takenAt}</div>
+          <div className="mt-1 text-[13px] font-semibold text-slate-600">{best.duration} · {best.takenAt}</div>
         </div>
-        <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[11px] font-semibold text-[var(--erg-blue)]">{attempts.length} lần</span>
+        <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[13px] font-bold text-[var(--erg-blue)]">{attempts.length} lần</span>
       </div>
-      <div className="mt-3 border-t border-slate-100 pt-2">
-        <div className="mb-1 text-[10px] font-semibold text-slate-400">3 lần gần đây</div>
+      <div className="mt-3 border-t border-[#dbe4f0] pt-2">
+        <div className="mb-1 text-[13px] font-bold text-slate-500">3 lần gần đây</div>
         {attempts.slice(0, 3).map((attempt) => (
-          <div key={attempt.id} className="ml-3 flex items-center justify-between gap-2 py-1 text-[11px] font-semibold">
+          <div key={attempt.id} className="ml-3 flex items-center justify-between gap-2 py-1 text-[13px] font-semibold">
             <span className="text-slate-700">{formatScore(attempt.score)}/{maxScore}</span>
             <span className="text-slate-400">{attempt.duration} · {attempt.takenAt}</span>
           </div>
@@ -655,11 +749,11 @@ function ClassificationLogPopup({ logs, onClose }: { logs: ClassificationLog[]; 
   return (
     <>
       <button type="button" aria-label="Đóng log xếp loại" className="fixed inset-0 z-[55] cursor-default" onClick={onClose} />
-      <div className="absolute left-full top-0 z-[60] ml-2 w-96 rounded-lg border border-slate-200 bg-white p-3 text-left shadow-sm shadow-slate-900/20">
-        <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2">
+      <div className="absolute left-full top-0 z-[60] ml-2 w-96 rounded-lg border border-[#cbd7e6] bg-white p-3 text-left shadow-sm shadow-slate-900/20">
+        <div className="flex items-center justify-between gap-2 border-b border-[#dbe4f0] pb-2">
           <div>
-            <div className="text-[10px] font-semibold text-slate-400">Log xếp loại</div>
-            <div className="mt-0.5 text-xs font-medium text-slate-800">{logs.length} lần chỉnh tay có ghi chú</div>
+            <div className="text-[13px] font-bold text-slate-500">Log xếp loại</div>
+            <div className="mt-0.5 text-[13px] font-semibold text-slate-800">{logs.length} lần chỉnh tay có ghi chú</div>
           </div>
           <button type="button" className="grid h-7 w-7 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700" onClick={onClose}>
             <X className="h-3.5 w-3.5" />
@@ -667,7 +761,7 @@ function ClassificationLogPopup({ logs, onClose }: { logs: ClassificationLog[]; 
         </div>
         <div className="mt-3 grid max-h-72 gap-2 overflow-auto">
           {logs.map((log) => (
-            <div key={log.id} className="rounded-md border border-slate-100 bg-slate-50 p-2.5 text-[11px]">
+            <div key={log.id} className="rounded-md border border-[#dbe4f0] bg-slate-50 p-2.5 text-[13px]">
               <div className="flex items-center justify-between gap-2">
                 <div className="font-semibold text-slate-900">{log.from} → {log.to}</div>
                 <div className="text-slate-400">{log.at}</div>
@@ -699,8 +793,8 @@ function ClassificationChangeDialog({
   return (
     <>
       <button type="button" aria-label="Đóng đổi xếp loại" className="fixed inset-0 z-[110] bg-slate-950/30" onClick={onCancel} />
-      <div className="fixed left-1/2 top-1/2 z-[120] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="border-b border-slate-100 p-4">
+      <div className="fixed left-1/2 top-1/2 z-[120] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[#cbd7e6] bg-white shadow-sm">
+        <div className="border-b border-[#dbe4f0] p-4">
           <div className="text-sm font-semibold text-slate-950">Đổi xếp loại học sinh</div>
           <div className="mt-1 text-xs font-semibold text-slate-500">{pending.student.name}</div>
         </div>
@@ -711,24 +805,24 @@ function ClassificationChangeDialog({
             <span className={cn("rounded border px-2 py-1", classificationClass(pending.to))}>{pending.to}</span>
           </div>
           <label className="mt-4 block">
-            <span className="mb-1 block text-[11px] font-semibold text-slate-500">Comment bắt buộc</span>
+            <span className="mb-1 block text-[13px] font-semibold text-slate-600">Comment bắt buộc</span>
             <textarea
               value={comment}
               onChange={(event) => onCommentChange(event.target.value)}
-              className="min-h-28 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+              className="min-h-28 w-full rounded-lg border border-[#cbd7e6] px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               placeholder="Nhập lý do đổi xếp loại để giáo viên sau theo dõi được lịch sử."
               autoFocus
             />
           </label>
-          <div className="mt-2 text-[11px] font-semibold text-slate-500">Chỉ khi bấm Lưu thì hệ thống mới ghi log và comment.</div>
+          <div className="mt-2 text-[13px] font-semibold text-slate-600">Chỉ khi bấm Lưu thì hệ thống mới ghi log và comment.</div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-slate-100 p-3">
-          <button type="button" className="h-9 rounded-md border border-slate-200 px-3 text-xs font-medium text-slate-600 hover:bg-slate-50" onClick={onCancel}>
+        <div className="flex justify-end gap-2 border-t border-[#dbe4f0] p-3">
+          <button type="button" className="h-9 rounded-md border border-[#cbd7e6] px-3 text-[13px] font-semibold text-slate-600 hover:bg-slate-50" onClick={onCancel}>
             Hủy
           </button>
           <button
             type="button"
-            className={cn("h-9 rounded-md px-3 text-xs font-semibold text-white", canSave ? "bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]" : "cursor-not-allowed bg-slate-300")}
+            className={cn("h-9 rounded-md px-3 text-[13px] font-semibold text-white", canSave ? "bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]" : "cursor-not-allowed bg-slate-300")}
             disabled={!canSave}
             onClick={onSave}
           >
@@ -755,16 +849,16 @@ function ScoreStudentContextMenu({
   return (
     <>
       <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
-      <div className="fixed z-[80] w-60 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-sm shadow-slate-900/15" style={{ left: menu.x, top: menu.y }}>
-        <div className="border-b border-slate-100 px-3 py-2">
-          <div className="truncate text-xs font-semibold text-slate-950">{menu.student.name}</div>
-          <div className="mt-0.5 text-[11px] font-semibold text-slate-500">{menu.student.className}</div>
+      <div className="fixed z-[80] w-60 overflow-hidden rounded-lg border border-[#cbd7e6] bg-white py-1 text-sm shadow-sm shadow-slate-900/15" style={{ left: menu.x, top: menu.y }}>
+        <div className="border-b border-[#dbe4f0] px-3 py-2">
+          <div className="truncate text-[13px] font-bold text-slate-950">{menu.student.name}</div>
+          <div className="mt-0.5 text-[13px] font-semibold text-slate-600">{menu.student.className}</div>
         </div>
-        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[var(--erg-blue)]" onClick={onAddTransferStudent}>
+        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[var(--erg-blue)]" onClick={onAddTransferStudent}>
           <Plus className="h-3.5 w-3.5" />
           Thêm HS chuyển lớp vào
         </button>
-        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-rose-700 hover:bg-rose-50" onClick={() => onDisableStudent(menu.student)}>
+        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-rose-700 hover:bg-rose-50" onClick={() => onDisableStudent(menu.student)}>
           <LockKeyhole className="h-3.5 w-3.5" />
           Nghỉ học / khóa tài khoản
         </button>
@@ -774,11 +868,11 @@ function ScoreStudentContextMenu({
 }
 
 function ScoreHeaderCell({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
-  return <th style={style} className={cn("h-8 border-b border-r border-slate-200 bg-slate-50 px-1.5 text-center align-middle", className)}>{children}</th>;
+  return <th style={style} className={cn("h-10 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-2 text-center align-middle", className)}>{children}</th>;
 }
 
 function ScoreStickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("sticky h-7 border-b border-r border-slate-100 bg-white px-1.5 align-middle group-hover:bg-slate-50", className)}>{children}</td>;
+  return <td className={cn("sticky h-10 border-b border-r border-[#cbd7e6] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>{children}</td>;
 }
 
 
@@ -813,9 +907,9 @@ function getStudentClassification(student: ClassroomStudent, manual: Record<stri
 
 function classificationClass(classification: Classification) {
   if (classification === "A") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (classification === "B") return "border-sky-200 bg-sky-50 text-[var(--erg-blue)]";
-  if (classification === "C") return "border-slate-200 bg-slate-50 text-slate-600";
-  if (classification === "D") return "border-amber-200 bg-amber-50 text-amber-700";
+  if (classification === "B") return "border-blue-200 bg-blue-50 text-[var(--erg-blue)]";
+  if (classification === "C") return "border-yellow-200 bg-yellow-50 text-yellow-800";
+  if (classification === "D") return "border-orange-200 bg-orange-50 text-orange-700";
   if (classification === "E") return "border-rose-200 bg-rose-50 text-rose-700";
   return "border-rose-200 bg-rose-50 text-rose-700";
 }

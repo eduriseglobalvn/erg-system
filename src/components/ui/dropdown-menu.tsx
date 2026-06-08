@@ -43,7 +43,7 @@ function DropdownMenuContent({
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}
-        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg border border-[#cfd7e3] bg-white p-1.5 font-[var(--font-app)] text-[#242424] shadow-sm data-[state=closed]:overflow-hidden", className )}
+        className={cn("z-50 max-h-(--radix-dropdown-menu-content-available-height) w-(--radix-dropdown-menu-trigger-width) min-w-32 origin-(--radix-dropdown-menu-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-lg border border-[#d7e0ec] bg-white p-1.5 font-[var(--font-app)] text-[var(--foreground)] shadow-[0_10px_24px_rgba(15,23,42,0.10),0_1px_4px_rgba(15,23,42,0.05)] data-[state=closed]:overflow-hidden", className )}
         {...props}
       />
     </DropdownMenuPrimitive.Portal>
@@ -183,7 +183,7 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1.5 my-1.5 h-px bg-[#e5e7eb]", className)}
+      className={cn("-mx-1.5 my-1.5 h-px bg-[#cbd7e6]", className)}
       {...props}
     />
   )
@@ -242,7 +242,7 @@ function DropdownMenuSubContent({
   return (
     <DropdownMenuPrimitive.SubContent
       data-slot="dropdown-menu-sub-content"
-      className={cn("z-50 min-w-[96px] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-lg border border-[#cfd7e3] bg-white p-1.5 font-[var(--font-app)] text-[#242424] shadow-sm", className )}
+      className={cn("z-50 min-w-[96px] origin-(--radix-dropdown-menu-content-transform-origin) overflow-hidden rounded-lg border border-[#d7e0ec] bg-white p-1.5 font-[var(--font-app)] text-[var(--foreground)] shadow-[0_10px_24px_rgba(15,23,42,0.10),0_1px_4px_rgba(15,23,42,0.05)]", className )}
       {...props}
     />
   )

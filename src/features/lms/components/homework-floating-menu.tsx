@@ -11,6 +11,7 @@ interface HomeworkFloatingMenuProps {
 
 export function HomeworkFloatingMenu({ open, setOpen, onAction }: HomeworkFloatingMenuProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [menuHovered, setMenuHovered] = useState(false);
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "/";
 
   const items = [
@@ -29,7 +30,8 @@ export function HomeworkFloatingMenu({ open, setOpen, onAction }: HomeworkFloati
   const PEAK_X = 2;
   const centerY = TOTAL_H / 2;
   const BUMP_H = 132;
-  const CLOSED_OFFSET = PANEL_W - 28;
+  const CLOSED_OFFSET = SVG_W - 26;
+  const HOVER_PEEK = 24;
 
   /* Single center bump SVG path */
   const shapePath = useMemo(() => {
@@ -75,14 +77,16 @@ export function HomeworkFloatingMenu({ open, setOpen, onAction }: HomeworkFloati
   return (
     <aside
       aria-label="Menu nhanh bài tập"
-      className="fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 xl:block"
+      className="fixed right-0 top-1/2 z-50 hidden -translate-y-1/2 xl:block"
     >
       <div
         className="relative transition-transform duration-[700ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform"
+        onMouseEnter={() => setMenuHovered(true)}
+        onMouseLeave={() => setMenuHovered(false)}
         style={{
           width: SVG_W,
           height: TOTAL_H,
-          transform: open ? "translateX(0)" : `translateX(${CLOSED_OFFSET}px)`,
+          transform: open ? "translateX(0)" : `translateX(${CLOSED_OFFSET - (menuHovered ? HOVER_PEEK : 0)}px)`,
         }}
       >
         {/* Background shape */}

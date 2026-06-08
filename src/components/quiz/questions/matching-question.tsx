@@ -226,7 +226,7 @@ export function MatchingQuestion({
                   className={`grid items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${rowConnected ? "md:gap-0" : "md:gap-8"}`}
                 >
                   <div
-                    className="relative flex min-h-[56px] min-w-0 items-center rounded-lg border-2 bg-white px-4 py-2 pr-8 text-lg leading-[1.35] shadow-sm sm:text-[22px]"
+                    className="relative flex min-h-[56px] min-w-0 items-center rounded-lg border bg-white px-4 py-2 pr-8 text-lg leading-[1.35] shadow-sm sm:text-[22px]"
                     style={{
                       borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)",
                       color: showReviewCorrect ? "#111827" : showReviewWrong ? "#111827" : "var(--quiz-option-text)",
@@ -242,7 +242,7 @@ export function MatchingQuestion({
                     ) : null}
                     <span>{pair.leftText}</span>
                     <span
-                      className="pointer-events-none absolute right-[-2px] top-1/2 z-[3] h-7 w-[18px] -translate-y-1/2 rounded-l-full border-2 border-r-0 bg-white"
+                      className="pointer-events-none absolute right-[-2px] top-1/2 z-[3] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 bg-white"
                       style={{ borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)" }}
                     />
                   </div>
@@ -465,7 +465,7 @@ function MatchingChip({
   return (
     <button
       type="button"
-      className={`relative inline-flex min-h-[56px] w-full min-w-0 items-center justify-between gap-3 rounded-r-lg border-2 px-4 pl-7 text-left text-lg leading-[1.35] shadow-sm transition sm:text-[22px] ${
+      className={`relative inline-flex min-h-[56px] w-full min-w-0 items-center justify-between gap-3 rounded-r-lg border px-4 pl-7 text-left text-lg leading-[1.35] shadow-sm transition sm:text-[22px] ${
         overlay || active
           ? "border-[#c6b66a] bg-[#fff0a8] shadow-sm"
           : correct
@@ -478,7 +478,7 @@ function MatchingChip({
       {...dragProps}
     >
       <span
-        className={`pointer-events-none absolute left-[-18px] top-1/2 z-[4] h-7 w-[18px] -translate-y-1/2 rounded-l-full border-2 border-r-0 ${
+        className={`pointer-events-none absolute left-[-18px] top-1/2 z-[4] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 ${
           overlay || active
             ? "border-[#c6b66a] bg-[#fff0a8]"
             : correct

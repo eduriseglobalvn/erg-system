@@ -132,7 +132,7 @@ export function AuthFormPanel({
   const inputStyle = mobileVariant
     ? ({
         backgroundColor: "#ffffff",
-        border: "1px solid #cfd7e3",
+        border: "1px solid #d7e0ec",
         borderRadius: 6,
         color: "#242424",
         fontSize: 14,
@@ -144,7 +144,7 @@ export function AuthFormPanel({
   const passwordInputStyle = mobileVariant
     ? ({
         backgroundColor: "#ffffff",
-        border: "1px solid #cfd7e3",
+        border: "1px solid #d7e0ec",
         borderRadius: 6,
         color: "#242424",
         fontSize: 14,
@@ -182,7 +182,7 @@ export function AuthFormPanel({
   return (
     <div className="w-full" style={{ width: "100%" }}>
       {allowRegister ? (
-      <div className="rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] p-1 shadow-sm" style={{ backgroundColor: "#f6f8fb", border: "1px solid #cfd7e3", borderRadius: 8, padding: 4 }}>
+      <div className="rounded-lg border border-[#d7e0ec] bg-[#f6f8fb] p-1 shadow-sm" style={{ backgroundColor: "#f6f8fb", border: "1px solid #d7e0ec", borderRadius: 8, padding: 4 }}>
         <div className="grid grid-cols-2 gap-1" style={{ display: "grid", gap: 4, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           {[
             { id: "login" as const, label: t("auth.login") },

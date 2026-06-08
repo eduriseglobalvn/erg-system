@@ -227,15 +227,15 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-4 py-4 xl:px-6">
-      <section className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm shadow-slate-200/40">
+      <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 shadow-[var(--shadow-xs)]">
         <div className="grid items-center gap-3 xl:grid-cols-[minmax(280px,1fr)_auto_auto]">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+            <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-500">
               <FileQuestion className="h-3.5 w-3.5 text-[var(--erg-blue)]" />
               Bài tập / <span className="text-slate-600">Kho bài tập</span>
             </div>
             <h1 className="mt-1 text-xl font-semibold tracking-normal text-slate-950">Kho bài tập</h1>
-            <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+            <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-600">
               Thư viện bài tập mẫu, đề luyện tập và bài kiểm tra để giáo viên chọn nhanh rồi giao cho lớp hoặc nhóm.
             </p>
           </div>
@@ -246,12 +246,12 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
             <ExerciseBankStat icon={Filter} label="Đang hiện" value={String(totals.visible)} />
           </div>
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-xs" onClick={onBack}>Về trang bài tập</Button>
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-xs">
+            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={onBack}>Về trang bài tập</Button>
+            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]">
               <Copy className="h-3.5 w-3.5" />
               Nhân bản
             </Button>
-            <Button className="h-9 rounded-lg bg-[#06112f] px-4 text-xs hover:bg-[#111d42]">
+            <Button className="h-9 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] hover:bg-[var(--erg-blue-hover)]">
               <Plus className="h-3.5 w-3.5" />
               Tạo bài mới
             </Button>
@@ -259,14 +259,14 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
         </div>
       </section>
 
-      <section className="shrink-0 rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/40">
+      <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
         <div className="grid gap-2 xl:grid-cols-[minmax(260px,1.4fr)_repeat(4,minmax(130px,0.65fr))_auto]">
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="h-10 rounded-lg bg-slate-50 pl-9 text-xs shadow-none focus:bg-white"
+              className="h-10 rounded-lg border border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold text-slate-900 shadow-none focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               placeholder="Tìm tên bài, môn, cấp độ hoặc tag"
             />
           </div>
@@ -286,7 +286,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
             values={["quiz", "practice", "project", "exam"]}
             labels={typeLabels}
           />
-          <Button variant="outline" className="h-10 rounded-lg px-3 text-xs" onClick={clearFilters}>
+          <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={clearFilters}>
             Xóa lọc
           </Button>
         </div>
@@ -302,10 +302,10 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
               type="button"
               onClick={() => setStatusFilter(tab.id as ExerciseStatus | typeof allValue)}
               className={cn(
-                "h-8 rounded-lg border px-3 text-xs font-semibold transition",
+                "h-9 rounded-lg border px-3 text-[13px] font-bold transition",
                 statusFilter === tab.id
                   ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]"
-                  : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
+                  : "border-[#dbe4f0] bg-white text-slate-700 hover:border-[#b8c8db] hover:bg-[#f8fbff]",
               )}
             >
               {tab.label}
@@ -315,14 +315,14 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
       </section>
 
       <section className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
-          <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+          <div className="flex shrink-0 items-center justify-between border-b border-[#dbe4f0] px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Danh sách bài tập</h2>
             <Badge tone="secondary" className="tracking-normal normal-case">{filteredExercises.length} kết quả</Badge>
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
-            <table className="min-w-[980px] w-full border-collapse text-left text-xs">
-              <thead className="sticky top-0 z-10 bg-slate-50 text-[11px] font-semibold text-slate-500">
+            <table className="erg-data-table min-w-[1040px] w-full border-collapse text-left text-[14px]">
+              <thead className="sticky top-0 z-10 bg-[#eef4fb] text-[13px] font-bold text-slate-700 shadow-sm">
                 <tr>
                   <th className="px-4 py-3">Bài tập</th>
                   <th className="px-4 py-3">Môn</th>
@@ -333,14 +333,14 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                   <th className="px-4 py-3 text-right">Thao tác</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filteredExercises.map((exercise) => {
                   const isSelected = exercise.id === selectedExercise.id;
 
                   return (
                     <tr
                       key={exercise.id}
-                      className={cn("cursor-pointer transition hover:bg-slate-50", isSelected && "bg-[var(--erg-blue-light)]")}
+                      className={cn("cursor-pointer transition hover:bg-[#f8fbff]", isSelected && "bg-[var(--erg-blue-light)]")}
                       onClick={() => setSelectedExerciseId(exercise.id)}
                     >
                       <td className="px-4 py-3">
@@ -348,7 +348,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                           <div className="truncate font-semibold text-slate-900">{exercise.title}</div>
                           <div className="mt-1 flex flex-wrap gap-1">
                             {exercise.tags.slice(0, 3).map((tag) => (
-                              <span key={tag} className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                              <span key={tag} className="rounded border border-[#dbe4f0] bg-[#f8fbff] px-1.5 py-0.5 text-[13px] font-semibold text-slate-700">
                                 {tag}
                               </span>
                             ))}
@@ -357,7 +357,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                       </td>
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-700">{exercise.subject}</div>
-                        <div className="text-[11px] font-semibold text-slate-400">{exercise.level}</div>
+                        <div className="text-[13px] font-semibold text-slate-500">{exercise.level}</div>
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-600">{typeLabels[exercise.type]}</td>
                       <td className="px-4 py-3">
@@ -365,17 +365,17 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <Clock3 className="h-3.5 w-3.5 text-slate-400" />
+                          <Clock3 className="h-3.5 w-3.5 text-slate-500" />
                           {exercise.durationMinutes} phút
                         </div>
-                        <div className="text-[11px] font-semibold text-slate-400">{exercise.questionCount} câu/nhiệm vụ</div>
+                        <div className="text-[13px] font-semibold text-slate-500">{exercise.questionCount} câu/nhiệm vụ</div>
                       </td>
                       <td className="px-4 py-3">
                         <Badge tone={statusTones[exercise.status]} className="tracking-normal normal-case">{statusLabels[exercise.status]}</Badge>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1.5">
-                          <button type="button" className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-slate-700 hover:shadow-sm" title="Xem nhanh">
+                          <button type="button" className="grid h-8 w-8 place-items-center rounded-lg border border-transparent text-slate-600 hover:border-[#b8c8db] hover:bg-white hover:text-slate-800 hover:shadow-sm" title="Xem nhanh">
                             <Eye className="h-4 w-4" />
                           </button>
                           <button
@@ -384,7 +384,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                               event.stopPropagation();
                               onAssign(exercise.title);
                             }}
-                            className="grid h-8 w-8 place-items-center rounded-lg text-slate-400 hover:bg-white hover:text-[var(--erg-blue)] hover:shadow-sm"
+                            className="grid h-8 w-8 place-items-center rounded-lg border border-transparent text-slate-600 hover:border-[#b8d6fa] hover:bg-white hover:text-[var(--erg-blue)] hover:shadow-sm"
                             title="Giao bài"
                           >
                             <Send className="h-4 w-4" />
@@ -398,47 +398,47 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
             </table>
 
             {filteredExercises.length === 0 ? (
-              <div className="m-4 rounded-lg border border-dashed border-slate-200 p-8 text-center text-sm font-semibold text-slate-400">
+              <div className="m-4 rounded-lg border border-dashed border-[#cbd7e6] p-8 text-center text-sm font-semibold text-slate-600">
                 Không tìm thấy bài tập phù hợp. Thử đổi từ khóa hoặc xóa bộ lọc.
               </div>
             ) : null}
           </div>
         </div>
 
-        <aside className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
-          <div className="shrink-0 border-b border-slate-100 px-4 py-3">
+        <aside className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+          <div className="shrink-0 border-b border-[#dbe4f0] px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Xem nhanh bài tập</h2>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4">
-            <div className="rounded-lg border border-slate-100 bg-slate-50 p-3">
+            <div className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h3 className="font-semibold leading-5 text-slate-900">{selectedExercise.title}</h3>
-                  <p className="mt-1 text-xs font-semibold text-slate-400">
+                  <p className="mt-1 text-[13px] font-semibold text-slate-500">
                     Cập nhật {new Date(selectedExercise.updatedAt).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
                 <Badge tone={statusTones[selectedExercise.status]} className="shrink-0 tracking-normal normal-case">{statusLabels[selectedExercise.status]}</Badge>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="grid grid-cols-2 gap-2 text-[13px]">
               <QuickInfo label="Môn học" value={selectedExercise.subject} />
               <QuickInfo label="Cấp độ" value={selectedExercise.level} />
               <QuickInfo label="Loại bài" value={typeLabels[selectedExercise.type]} />
               <QuickInfo label="Đã giao" value={`${selectedExercise.assignedCount} lần`} />
             </div>
             <div>
-              <h3 className="mb-2 text-xs font-semibold text-slate-400">Lớp/nhóm phù hợp</h3>
+              <h3 className="mb-2 text-[13px] font-bold text-slate-600">Lớp/nhóm phù hợp</h3>
               <div className="space-y-2">
                 {selectedExercise.classTargets.map((target) => (
-                  <div key={target} className="rounded-lg border border-slate-100 px-3 py-2 text-xs font-medium text-slate-600">
+                  <div key={target} className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-[13px] font-semibold text-slate-700">
                     {target}
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <h3 className="mb-2 text-xs font-semibold text-slate-400">Tag nội dung</h3>
+              <h3 className="mb-2 text-[13px] font-bold text-slate-600">Tag nội dung</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedExercise.tags.map((tag) => (
                   <Badge key={tag} tone="outline" className="tracking-normal normal-case">
@@ -448,8 +448,8 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
               </div>
             </div>
           </div>
-          <div className="shrink-0 space-y-2 border-t border-slate-100 p-4">
-            <Button className="w-full bg-[#06112f] hover:bg-[#111d42]" onClick={() => onAssign(selectedExercise.title)}>
+          <div className="shrink-0 space-y-2 border-t border-[#dbe4f0] p-4">
+            <Button className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]" onClick={() => onAssign(selectedExercise.title)}>
               <Send className="h-4 w-4" />
               Giao bài tập này
             </Button>
@@ -481,7 +481,7 @@ function FilterSelect({
     <AppSelect
       value={value}
       onChange={(event) => onChange(event.target.value)}
-      className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 outline-none transition hover:border-slate-300 focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+      className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none transition hover:border-[var(--erg-blue)] focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
     >
       <option value={allValue}>{label}</option>
       {values.map((item) => (
@@ -495,12 +495,12 @@ function FilterSelect({
 
 function ExerciseBankStat({ icon: Icon, label, value }: { icon: typeof BookOpenCheck; label: string; value: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-1.5">
       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-[var(--erg-blue)] shadow-sm">
         <Icon className="h-3.5 w-3.5" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[11px] font-medium tracking-normal text-slate-400">{label}</span>
+        <span className="block truncate text-[13px] font-semibold tracking-normal text-slate-600">{label}</span>
         <span className="block truncate text-sm font-semibold text-slate-950">{value}</span>
       </span>
     </div>
@@ -509,9 +509,9 @@ function ExerciseBankStat({ icon: Icon, label, value }: { icon: typeof BookOpenC
 
 function QuickInfo({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-slate-50 px-3 py-2">
-      <div className="text-[10px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 truncate font-semibold text-slate-800">{value}</div>
+    <div className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2">
+      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
+      <div className="mt-1 truncate text-[14px] font-bold text-slate-900">{value}</div>
     </div>
   );
 }

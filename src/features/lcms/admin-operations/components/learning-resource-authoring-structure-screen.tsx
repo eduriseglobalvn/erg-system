@@ -548,7 +548,7 @@ export function StructureScreen({
                   onContextMenu={(event) => openContextMenu(event, undefined, undefined, undefined, subject)}
                   className={cn(
                     "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-[13px]",
-                    selectedSubject?.id === subject.id && !selectedNode?.id ? "bg-[#dceeff] text-[#111827]" : "text-[#111827] hover:bg-[#eef6ff]",
+                    selectedSubject?.id === subject.id && !selectedNode?.id ? "bg-[#dceeff] font-semibold text-[#0b3f7a] [&_svg]:text-[#0b6fcf]" : "text-[#111827] hover:bg-[#eef6ff]",
                   )}
                 >
                   <ChevronRight className={cn("h-3.5 w-3.5 text-[#6b7280] shrink-0 transition-transform duration-150", expandedSubjectIds.has(subject.id) ? "rotate-90" : undefined)} />

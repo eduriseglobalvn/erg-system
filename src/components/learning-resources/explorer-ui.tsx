@@ -57,13 +57,13 @@ type ExplorerViewToggleProps = {
 
 export function ExplorerViewToggle({ viewMode, onViewModeChange }: ExplorerViewToggleProps) {
   return (
-    <div className="ml-auto flex h-8 items-center overflow-hidden rounded-md border border-[#d1d1d1] bg-white shadow-sm">
+    <div className="ml-auto flex h-8 items-center overflow-hidden rounded-md border border-[#d7e0ec] bg-white shadow-sm">
       <button
         type="button"
         title="Dạng lưới"
         aria-pressed={viewMode === "grid"}
         onClick={() => onViewModeChange("grid")}
-        className={`grid h-8 w-9 place-items-center border-r border-[#d1d1d1] transition ${
+        className={`grid h-8 w-9 place-items-center border-r border-[#d7e0ec] transition ${
           viewMode === "grid" ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-600 hover:bg-[#f7f8fa]"
         }`}
       >
@@ -113,7 +113,7 @@ export function LearningResourceFolderTile({
       className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-lg border px-4 text-center transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] ${
         selected
           ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] shadow-sm ring-1 ring-inset ring-[#b8d6fa]"
-          : "border-[#d1d1d1] bg-white hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
+          : "border-[#d7e0ec] bg-white hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
       }`}
     >
       <span className="absolute inset-x-0 top-[45%] flex -translate-y-1/2 items-center justify-center">
@@ -155,7 +155,7 @@ export function LearningResourceSquareCard({
     <button
       type="button"
       onClick={onOpen}
-      className="group flex aspect-[4/5] w-full overflow-hidden rounded-lg border border-[#d1d1d1] bg-white text-left shadow-sm transition hover:border-[#b8d6fa] hover:bg-[#f7fbff] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+      className="group flex aspect-[4/5] w-full overflow-hidden rounded-lg border border-[#d7e0ec] bg-white text-left shadow-sm transition hover:border-[#b8d6fa] hover:bg-[#f7fbff] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
     >
       <span className="flex h-full w-full flex-col">
         <span className="relative h-[50%] shrink-0 overflow-hidden border-b border-[#e0e4ea] bg-[#f7f8fa]">

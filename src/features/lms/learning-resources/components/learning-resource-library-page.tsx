@@ -42,7 +42,9 @@ import {
 } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { displayText } from "@/features/lms/learning-resources/components/learning-resource-library-utils";
 import { ResourceViewerModal } from "@/features/lms/learning-resources/components/learning-resource-viewer-modal";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
+import { cn } from "@/lib/utils";
 
 const fileIcons: Record<LearningResourceFileType, LucideIcon> = {
   PDF: FileText,
@@ -191,7 +193,7 @@ function CategoryTree({
   }
 
   return (
-    <aside className="min-h-0 overflow-y-auto border-r border-[#e5e5e5] bg-[#fafafa] px-1.5 py-2 [scrollbar-gutter:stable]">
+    <aside className="lms-resource-tree min-h-0 overflow-y-auto border-r border-[#e5e5e5] bg-[#fafafa] px-1.5 py-2 [scrollbar-gutter:stable]">
       <nav className="space-y-0.5 pt-1">
         {topLevelCategories.map((category) => {
           const children = getCategoryChildrenFrom(categories, category.id);
@@ -211,18 +213,22 @@ function CategoryTree({
                     return next;
                   });
                 }}
-                className={`relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition ${
-                  isSelected ? "bg-[var(--erg-blue-light)] font-medium text-slate-950 before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)]" : "text-slate-800 hover:bg-white"
-                }`}
+                data-resource-active={isSelected ? "true" : undefined}
+                className={cn(
+                  "relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition",
+                  isSelected
+                    ? "bg-[#cfe6ff] font-semibold !text-[#0b3f7a] before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)] [&_svg]:!text-[#0b6fcf]"
+                    : "text-slate-800 hover:bg-white",
+                )}
               >
                 <span
                   onClick={(e) => toggleExpand(category.id, e)}
                   className="grid h-5 w-5 place-items-center rounded hover:bg-black/5"
                 >
-                  <ChevronRight className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
+                  <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform", isSelected ? "!text-[#0b6fcf]" : "text-slate-500", isExpanded && "rotate-90")} />
                 </span>
                 <WindowsFolderIcon open={isExpanded} />
-                <span className="min-w-0 flex-1 truncate">{displayText(category.label)}</span>
+                <span className={cn("min-w-0 flex-1 truncate", isSelected ? "!text-[#0b3f7a]" : "text-slate-800")}>{displayText(category.label)}</span>
               </button>
               {children.length > 0 && isExpanded ? (
                 <div className="ml-5 space-y-0.5">
@@ -234,13 +240,17 @@ function CategoryTree({
                         key={child.id}
                         type="button"
                         onClick={() => onSelectCategory(child.id)}
-                        className={`relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition ${
-                          isChildActive ? "bg-[var(--erg-blue-light)] font-medium text-slate-950 before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)]" : "text-slate-800 hover:bg-white"
-                        }`}
+                        data-resource-active={isChildActive ? "true" : undefined}
+                        className={cn(
+                          "relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition",
+                          isChildActive
+                            ? "bg-[#cfe6ff] font-semibold !text-[#0b3f7a] before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)] [&_svg]:!text-[#0b6fcf]"
+                            : "text-slate-800 hover:bg-white",
+                        )}
                       >
                         <span className="w-3.5" />
                         <WindowsFolderIcon open={isChildActive} />
-                        <span className="min-w-0 flex-1 truncate">{displayText(child.label)}</span>
+                        <span className={cn("min-w-0 flex-1 truncate", isChildActive ? "!text-[#0b3f7a]" : "text-slate-800")}>{displayText(child.label)}</span>
                       </button>
                     );
                   })}
@@ -383,26 +393,48 @@ function LearningResourceExplorer({
 
   const itemCount = childCategories.length + resources.length;
   const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
+  const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
 
   function openContextMenu(event: { preventDefault: () => void; stopPropagation: () => void }) {
     event.preventDefault();
     event.stopPropagation();
   }
 
+  if (isMobile) {
+    return (
+      <MobileLearningResourceExplorer
+        activeCategory={activeCategory}
+        activeGrade={activeGrade}
+        activeSubject={activeSubject}
+        breadcrumbItems={breadcrumbItems}
+        childCategories={childCategories}
+        keyword={keyword}
+        libraryError={libraryError}
+        onKeywordChange={onKeywordChange}
+        onOpenResource={onOpenResource}
+        onRefresh={onRefresh}
+        onSelectCategory={onSelectCategory}
+        resources={resources}
+        totalVisibleResources={totalVisibleResources}
+        viewerLoadingResourceId={viewerLoadingResourceId}
+      />
+    );
+  }
+
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[#d1d1d1] bg-white text-[13px] text-slate-900 shadow-sm">
-      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-[#e5e5e5] bg-[#f7f8fa] px-3">
-        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-white disabled:opacity-45" disabled>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white text-[14px] text-slate-900 shadow-sm">
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#dbe4f0] bg-[#f8fbff] px-3">
+        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-white disabled:opacity-70" disabled>
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-white disabled:opacity-45" disabled>
+        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-white disabled:opacity-70" disabled>
           <ChevronRight className="h-4 w-4" />
         </button>
         <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-white" onClick={onRefresh}>
           <RefreshCw className="h-4 w-4" />
         </button>
-        <div className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md border border-[#d1d1d1] bg-white px-2 shadow-sm">
-          <Monitor className="mx-2 h-4 w-4 shrink-0 text-slate-500" />
+        <div className="flex h-10 min-w-0 flex-1 items-center overflow-hidden rounded-lg border border-[#d7e0ec] bg-white px-2 shadow-sm">
+          <Monitor className="mx-2 h-4 w-4 shrink-0 text-[var(--erg-blue)]" />
           {breadcrumbItems.map((item, index) => (
             <span key={`${item.label}-${index}`} className="flex min-w-0 items-center">
               {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
@@ -418,21 +450,21 @@ function LearningResourceExplorer({
             </span>
           ))}
         </div>
-        <div className="flex h-8 w-[280px] max-w-[30vw] items-center rounded-md border border-[#d1d1d1] bg-white px-3 shadow-sm focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
-          <Search className="mr-2 h-4 w-4 text-slate-500" />
+        <div className="lms-resource-search-control flex h-10 w-[300px] max-w-[32vw] items-center rounded-lg border border-[#d7e0ec] bg-white px-3 shadow-sm focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+          <Search className="mr-2 h-4 w-4 text-[var(--erg-blue)]" />
           <input
             value={keyword}
             onChange={(event) => onKeywordChange(event.target.value)}
             placeholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
-            className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#64748b]"
-            type="search"
+            className="lms-resource-search-input min-w-0 flex-1 bg-transparent text-[14px] font-semibold outline-none placeholder:text-[#64748b]"
+            type="text"
           />
         </div>
       </div>
 
-      <div className="flex h-11 shrink-0 items-center gap-2 border-b border-[#e5e5e5] bg-white px-3">
+      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#dbe4f0] bg-white px-3">
         <span className="text-[13px] font-semibold text-slate-800">{displayText(activeCategory?.label) || "Kho học liệu"}</span>
-        <span className="rounded-md border border-[#d1d1d1] bg-[#f7f8fa] px-2 py-1 text-[12px] font-medium text-slate-600">{itemCount} mục</span>
+        <span className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-1 text-[13px] font-bold text-slate-700">{itemCount} mục</span>
         <ExplorerViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
       </div>
 
@@ -442,7 +474,7 @@ function LearningResourceExplorer({
         <section className="min-h-0 min-w-0 overflow-hidden bg-white" onContextMenu={(event) => openContextMenu(event)}>
           {viewMode === "list" ? (
             <>
-              <div className="grid grid-cols-[minmax(260px,1fr)_155px_120px_95px] border-b border-[#e5e5e5] bg-[#fafafa] text-[12px] font-semibold text-slate-600">
+              <div className="grid grid-cols-[minmax(260px,1fr)_155px_120px_95px] border-b border-[#cbd7e6] bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                 <span className="border-r border-[#e5e5e5] px-4 py-2">Tên</span>
                 <span className="border-r border-[#e5e5e5] px-3 py-2">Cập nhật</span>
                 <span className="border-r border-[#e5e5e5] px-3 py-2">Loại</span>
@@ -455,7 +487,7 @@ function LearningResourceExplorer({
                     type="button"
                     onClick={() => onSelectCategory(category.id)}
                     onContextMenu={openContextMenu}
-                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f7f8fa]"
+                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f8fbff]"
                   >
                     <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
                       <WindowsFolderIcon />
@@ -473,7 +505,7 @@ function LearningResourceExplorer({
                     type="button"
                     onClick={() => onOpenResource(resource)}
                     onContextMenu={openContextMenu}
-                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f7f8fa]"
+                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f8fbff]"
                   >
                     <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
                       <ResourceExplorerIcon resource={resource} />
@@ -487,8 +519,8 @@ function LearningResourceExplorer({
               </div>
             </>
           ) : (
-            <div className="h-full overflow-y-auto p-4 [scrollbar-gutter:stable]">
-              <div className="grid grid-cols-[repeat(auto-fill,minmax(180px,1fr))] gap-3">
+              <div className="h-full overflow-y-auto p-4 [scrollbar-gutter:stable]">
+                <div className="lms-resource-card-grid grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-4">
                 {childCategories.map((category) => (
                   <div
                     key={category.id}
@@ -504,6 +536,7 @@ function LearningResourceExplorer({
                 {resources.map((resource) => (
                   <div
                     key={resource.id}
+                    className="lms-resource-activity-card"
                     onContextMenu={openContextMenu}
                   >
                     <LearningActivityCard resource={resource} onOpen={onOpenResource} />
@@ -527,7 +560,7 @@ function LearningResourceExplorer({
         </section>
       </div>
 
-      <div className="flex h-7 shrink-0 items-center justify-between border-t border-[#e5e5e5] bg-[#fafafa] px-3 text-[12px] text-slate-600">
+      <div className="flex h-9 shrink-0 items-center justify-between border-t border-[#dbe4f0] bg-[#fafafa] px-3 text-[13px] font-semibold text-slate-700">
         <span>{itemCount} mục</span>
         <span>{displayText(activeGrade?.label) || "-"} / {displayText(activeCategory?.label) || "Kho học liệu"} / {totalVisibleResources} học liệu</span>
       </div>
@@ -535,14 +568,142 @@ function LearningResourceExplorer({
   );
 }
 
+function MobileLearningResourceExplorer({
+  activeCategory,
+  activeGrade,
+  activeSubject,
+  breadcrumbItems,
+  childCategories,
+  keyword,
+  libraryError,
+  onKeywordChange,
+  onOpenResource,
+  onRefresh,
+  onSelectCategory,
+  resources,
+  totalVisibleResources,
+  viewerLoadingResourceId,
+}: {
+  activeCategory?: LearningResourceCategory;
+  activeGrade?: { label: string };
+  activeSubject?: LearningResourceSubject;
+  breadcrumbItems: { label: string; categoryId: string }[];
+  childCategories: LearningResourceCategory[];
+  keyword: string;
+  libraryError: string | null;
+  onKeywordChange: (value: string) => void;
+  onOpenResource: (resource: LearningResourceResource) => void;
+  onRefresh: () => void;
+  onSelectCategory: (categoryId: string) => void;
+  resources: LearningResourceResource[];
+  totalVisibleResources: number;
+  viewerLoadingResourceId: string | null;
+}) {
+  const itemCount = childCategories.length + resources.length;
+
+  return (
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[20px] border border-white bg-[#f3f6fb] text-slate-900 shadow-[0_12px_34px_rgba(96,165,250,0.10)] md:hidden">
+      <header className="shrink-0 border-b border-[#dbe4f0] bg-white/95 px-3 py-3 shadow-[0_10px_28px_rgba(96,165,250,0.06)] backdrop-blur-md">
+        <div className="flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-[12px] font-bold uppercase text-[var(--erg-blue)]">{displayText(activeSubject?.label) || "Kho học liệu"}</p>
+            <h2 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || "Tài nguyên"}</h2>
+          </div>
+          <button type="button" onClick={onRefresh} className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#dce6f1] bg-[#f8fbff] text-slate-700 shadow-[var(--shadow-xs)]" aria-label="Làm mới học liệu">
+            <RefreshCw className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="mt-3 flex h-11 items-center rounded-[14px] border border-[#d7e0ec] bg-[#f8fbff] px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+          <Search className="mr-2 h-4 w-4 text-[var(--erg-blue)]" />
+          <input
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
+            placeholder="Tìm học liệu"
+            className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-[#64748b]"
+            type="search"
+          />
+        </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+          {breadcrumbItems.map((item, index) => (
+            <button
+              key={`${item.label}-${index}`}
+              type="button"
+              onClick={() => onSelectCategory(item.categoryId)}
+              className="min-h-9 max-w-[220px] shrink-0 truncate rounded-full border border-[#dce6f1] bg-[#f8fbff] px-3 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]"
+            >
+              {displayText(item.label)}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      <main className="min-h-0 flex-1 overflow-y-auto p-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+        <div className="mb-3 flex items-center justify-between gap-2 text-[13px] font-bold text-slate-600">
+          <span>{itemCount} mục</span>
+          <span className="truncate">{displayText(activeGrade?.label) || "-"} · {totalVisibleResources} học liệu</span>
+        </div>
+
+        {childCategories.length ? (
+          <section className="mb-4 space-y-3">
+            {childCategories.map((category) => (
+              <button
+                key={category.id}
+                type="button"
+                onClick={() => onSelectCategory(category.id)}
+                className="flex min-h-14 w-full items-center gap-3 rounded-[16px] border border-white bg-white px-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)]"
+              >
+                <WindowsFolderIcon />
+                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-slate-950">{displayText(category.label)}</span>
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </button>
+            ))}
+          </section>
+        ) : null}
+
+        <section className="space-y-3">
+          {resources.map((resource) => (
+            <button
+              key={resource.id}
+              type="button"
+              onClick={() => onOpenResource(resource)}
+              className="w-full rounded-[16px] border border-white bg-white p-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)] transition active:scale-[0.99]"
+            >
+              <div className="flex items-start gap-3">
+                <ResourceExplorerIcon resource={resource} />
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-[14px] font-bold text-slate-950">{displayText(resource.title)}</p>
+                  <p className="mt-1 text-[13px] font-semibold text-slate-600">{getExplorerType(resource)} · {getExplorerSize(resource)}</p>
+                </div>
+                <span className="rounded-full border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-2.5 py-1 text-[12px] font-bold text-[var(--erg-blue)]">{displayText(resource.formatBadge)}</span>
+              </div>
+            </button>
+          ))}
+        </section>
+
+        {libraryError ? (
+          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+            {displayText(libraryError)}
+          </p>
+        ) : null}
+        {viewerLoadingResourceId ? (
+          <p className="mt-3 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-3 py-2 text-sm font-medium text-[var(--erg-blue)]">
+            Đang mở học liệu...
+          </p>
+        ) : null}
+        {!itemCount ? <EmptyState /> : null}
+      </main>
+    </div>
+  );
+}
+
 function EmptyState() {
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-md bg-slate-100 text-slate-400">
+    <div className="rounded-lg border border-dashed border-[#cbd7e6] bg-white p-10 text-center">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
         <Search className="h-5 w-5" />
       </div>
       <h3 className="mt-4 text-lg font-semibold text-slate-950">Không tìm thấy tài liệu phù hợp</h3>
-      <p className="mt-2 text-sm text-slate-500">Hãy đổi bộ lọc lớp, môn, nhóm học liệu hoặc từ khóa tìm kiếm.</p>
+      <p className="mt-2 text-[14px] font-semibold text-slate-600">Hãy đổi bộ lọc lớp, môn, nhóm học liệu hoặc từ khóa tìm kiếm.</p>
     </div>
   );
 }
@@ -662,8 +823,8 @@ export function LearningResourceLibraryPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-64px)] min-h-0 flex-col overflow-hidden bg-[#f7f8fa]">
-      <div className="min-h-0 flex-1 p-3">
+    <div className="flex h-[calc(100dvh-64px)] min-h-0 flex-col overflow-hidden bg-[#f8fbff] md:h-[calc(100vh-64px)]">
+      <div className="min-h-0 flex-1 p-2 md:p-3">
         <LearningResourceExplorer
           activeCategoryId={activeCategoryId}
           activeGradeId={activeGradeId}

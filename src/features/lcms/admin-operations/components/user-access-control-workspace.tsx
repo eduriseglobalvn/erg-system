@@ -422,14 +422,14 @@ export function UserAccessControlWorkspace({
             <label className="relative block">
               <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
               <input
-                className="h-9 w-full rounded-md border border-[#d1d1d1] bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
                 placeholder="Tìm theo tên, email, số điện thoại"
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
             <AppSelect
-              className="h-9 w-full rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+              className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
               value={status}
               onChange={(event) => setStatus(event.target.value)}
             >

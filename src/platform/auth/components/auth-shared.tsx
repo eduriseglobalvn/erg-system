@@ -34,8 +34,8 @@ export function SocialButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-[#cfd7e3] bg-white text-sm font-semibold text-[#242424] transition hover:border-[#b8d6fa] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-      style={{ alignItems: "center", backgroundColor: "#fff", border: "1px solid #cfd7e3", borderRadius: 6, color: "#242424", display: "flex", fontSize: 14, fontWeight: 600, gap: 10, height: 40, justifyContent: "center", width: "100%" }}
+      className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-[#d7e0ec] bg-white text-sm font-semibold text-[#242424] transition hover:border-[#b8d6fa] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+      style={{ alignItems: "center", backgroundColor: "#fff", border: "1px solid #d7e0ec", borderRadius: 6, color: "#242424", display: "flex", fontSize: 14, fontWeight: 600, gap: 10, height: 40, justifyContent: "center", width: "100%" }}
     >
       {icon}
       {label}

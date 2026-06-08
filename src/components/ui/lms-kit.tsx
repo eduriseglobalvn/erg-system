@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from "react";
+import { Check, Minus } from "lucide-react";
+import { useEffect, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes } from "react";
 
 // ---------------------------------------------------------------------------
 // LMS Lightweight Kit — native HTML elements styled with ERG design tokens.
@@ -21,19 +22,19 @@ type LmsButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> & {
 
 const buttonVariantClasses: Record<LmsButtonVariant, string> = {
   default:
-    "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)]",
+    "border border-[var(--primary)] bg-[var(--primary)] text-white hover:bg-[var(--erg-blue-hover)] active:bg-[var(--erg-blue-hover)] shadow-[var(--shadow-xs)] [&_*]:text-inherit",
   outline:
-    "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] shadow-[var(--shadow-xs)]",
+    "border border-[#cbd7e6] bg-white text-slate-800 hover:border-[var(--primary)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] shadow-[var(--shadow-xs)] [&_*]:text-inherit",
   ghost:
-    "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)]",
+    "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] [&_*]:text-inherit",
   danger:
-    "bg-[var(--destructive)] text-white hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)]",
+    "border border-[var(--destructive)] bg-[var(--destructive)] text-white hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] [&_*]:text-inherit",
 };
 
 const buttonSizeClasses: Record<LmsButtonSize, string> = {
-  sm: "h-9 rounded-[10px] px-3 text-sm",
-  md: "h-10 rounded-[10px] px-4 text-sm",
-  lg: "h-11 rounded-[10px] px-5 text-sm",
+  sm: "min-h-9 rounded-[10px] px-3 py-1.5 text-[14px]",
+  md: "min-h-10 rounded-[10px] px-4 py-2 text-[14px]",
+  lg: "min-h-11 rounded-[10px] px-5 py-2.5 text-[14px]",
   icon: "size-9 rounded-[10px]",
 };
 
@@ -47,8 +48,11 @@ export function LmsButton({
   return (
     <button
       type={type}
+      data-slot="button"
+      data-variant={variant === "danger" ? "destructive" : variant}
+      data-size={size}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-40",
+        "inline-flex min-w-fit items-center justify-center gap-2 whitespace-nowrap font-bold leading-5 transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-70 [&_svg]:shrink-0",
         buttonVariantClasses[variant],
         buttonSizeClasses[size],
         className,
@@ -65,7 +69,7 @@ type LmsSearchInputProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type">;
 
 export function LmsSearchInput({ className, ...props }: LmsSearchInputProps) {
   return (
-    <div className="relative flex h-10 items-center rounded-[10px] border border-[var(--border)] bg-[var(--card)] pl-9 pr-3.5 shadow-[var(--shadow-xs)] transition-all duration-150 focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--ring)]">
+    <div className="erg-search-control relative flex h-10 items-center rounded-lg border bg-[var(--card)] pl-9 pr-3.5 shadow-[var(--shadow-xs)] transition-all duration-150 focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--ring)]">
       <svg
         className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--muted-foreground)]"
         xmlns="http://www.w3.org/2000/svg"
@@ -84,7 +88,7 @@ export function LmsSearchInput({ className, ...props }: LmsSearchInputProps) {
       <input
         type="text"
         className={cn(
-          "h-full w-full flex-1 border-0 bg-transparent p-0 text-[14px] font-medium leading-5 text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]",
+          "h-full w-full flex-1 border-0 bg-transparent p-0 text-[15px] font-medium leading-5 text-[var(--foreground)] outline-none placeholder:text-[var(--muted-foreground)]",
           className,
         )}
         {...props}
@@ -102,9 +106,8 @@ export function LmsSelect({ className, children, ...props }: LmsSelectProps) {
   return (
     <select
       className={cn(
-        "h-10 min-w-[150px] appearance-none rounded-[10px] border border-[var(--border)] bg-[var(--card)] py-0 pl-3.5 pr-9 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-150",
-        "bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.75 10 12.25l4.5-4.5' stroke='%23787878' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")] bg-[length:16px_16px] bg-[right_12px_center] bg-no-repeat",
-        "hover:border-[var(--muted-foreground)]/30",
+        "erg-select-control h-10 min-w-[150px] rounded-lg bg-[var(--card)] py-0 pl-3.5 pr-10 text-[14px] font-bold text-[var(--foreground)] transition-all duration-150",
+        "hover:border-[var(--primary)]",
         "focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)] focus:outline-none",
         "disabled:cursor-not-allowed disabled:opacity-50",
         className,
@@ -153,7 +156,7 @@ export function LmsBadge({
   return (
     <span
       className={cn(
-        "inline-flex min-h-[26px] items-center justify-center rounded-lg border px-2.5 py-1 text-xs font-semibold tracking-normal",
+        "inline-flex min-h-7 items-center justify-center rounded-lg border px-2.5 py-1 text-[13px] font-bold tracking-normal",
         badgeToneClasses[tone],
         className,
       )}
@@ -186,7 +189,7 @@ export function LmsGradePill({ grade, className }: LmsGradePillProps) {
   return (
     <span
       className={cn(
-        "inline-flex h-8 min-w-[56px] items-center justify-center rounded-[10px] border px-3 text-xs font-bold shadow-[inset_0_0_0_1px_rgba(255,255,255,0.5),var(--shadow-xs)]",
+        "inline-flex h-8 min-w-[56px] items-center justify-center rounded-[10px] border px-3 text-[13px] font-bold shadow-none",
         colorClass,
         className,
       )}
@@ -206,38 +209,55 @@ type LmsCheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "ch
 
 export function LmsCheckbox({
   checked,
+  defaultChecked,
   onCheckedChange,
   className,
   onChange,
   onClick,
   ...props
 }: LmsCheckboxProps) {
-  const isIndeterminate = checked === "indeterminate";
+  const isControlled = checked !== undefined;
+  const [uncontrolledChecked, setUncontrolledChecked] = useState(Boolean(defaultChecked));
+  const visualChecked = isControlled ? checked : uncontrolledChecked;
+  const isIndeterminate = visualChecked === "indeterminate";
+  const isChecked = visualChecked === true;
+
+  useEffect(() => {
+    if (!isControlled) setUncontrolledChecked(Boolean(defaultChecked));
+  }, [defaultChecked, isControlled]);
 
   return (
-    <input
-      type="checkbox"
-      checked={isIndeterminate ? false : (checked as boolean)}
-      ref={(el) => {
-        if (el) el.indeterminate = isIndeterminate;
-      }}
-      onClick={(event) => {
-        onClick?.(event);
-        if (event.defaultPrevented || !onCheckedChange) return;
-        onCheckedChange(isIndeterminate ? true : !Boolean(checked));
-      }}
-      onChange={(event) => {
-        onChange?.(event);
-        if (onCheckedChange) {
-          onCheckedChange(event.target.checked ? true : false);
-        }
-      }}
-      className={cn(
-        "size-4 cursor-pointer rounded-[4px] border border-[var(--border)] bg-[var(--card)] text-[var(--primary)] shadow-[var(--shadow-xs)] transition-all duration-100",
-        "focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-        className,
-      )}
-      {...props}
-    />
+    <span className="relative inline-grid size-[18px] shrink-0 place-items-center align-middle">
+      <input
+        type="checkbox"
+        checked={isIndeterminate ? false : isChecked}
+        aria-checked={isIndeterminate ? "mixed" : isChecked}
+        data-checked={isChecked ? "true" : undefined}
+        data-indeterminate={isIndeterminate ? "true" : undefined}
+        ref={(el) => {
+          if (el) el.indeterminate = isIndeterminate;
+        }}
+        onClick={(event) => {
+          onClick?.(event);
+        }}
+        onChange={(event) => {
+          onChange?.(event);
+          if (!isControlled) setUncontrolledChecked(event.target.checked);
+          if (onCheckedChange) {
+            onCheckedChange(event.target.checked ? true : false);
+          }
+        }}
+        className={cn(
+          "peer size-[18px] cursor-pointer appearance-none rounded-[5px] border border-[#b8c8db] bg-white shadow-none transition-all duration-100",
+          "checked:border-[var(--primary)] checked:bg-[var(--primary)] data-[checked=true]:border-[var(--primary)] data-[checked=true]:bg-[var(--primary)] data-[indeterminate=true]:border-[var(--primary)] data-[indeterminate=true]:bg-[var(--primary)]",
+          "hover:border-[var(--primary)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+          "disabled:cursor-not-allowed disabled:opacity-60",
+          className,
+        )}
+        {...props}
+      />
+      {isChecked ? <Check className="pointer-events-none absolute size-3.5 text-white" strokeWidth={3} /> : null}
+      {isIndeterminate ? <Minus className="pointer-events-none absolute size-3.5 text-white" strokeWidth={3} /> : null}
+    </span>
   );
 }

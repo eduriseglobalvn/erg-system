@@ -50,7 +50,7 @@ export function CardTitle({ className, children, ...props }: HTMLAttributes<HTML
   return (
     <h3
       data-slot="card-title"
-      className={cn("font-[var(--font-heading)] text-lg font-semibold tracking-[-0.01em] text-[var(--foreground)]", className)}
+      className={cn("font-[var(--font-heading)] text-lg font-semibold tracking-normal text-[var(--foreground)]", className)}
       {...props}
     >
       {children}
@@ -100,7 +100,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex min-h-[26px] items-center justify-center rounded-lg border px-2.5 py-1 text-xs font-semibold tracking-normal",
+        "inline-flex min-h-7 items-center justify-center rounded-lg border px-2.5 py-1 text-[13px] font-bold tracking-normal",
         badgeToneClasses[tone],
         className,
       )}
@@ -123,21 +123,21 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> & {
 
 const btnVariantClasses: Record<ButtonVariant, string> = {
   default:
-    "bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] font-semibold",
+    "border border-[var(--primary)] bg-[var(--primary)] text-white hover:bg-[var(--erg-blue-hover)] active:bg-[var(--erg-blue-hover)] shadow-[var(--shadow-xs)] font-bold [&_*]:text-inherit",
   secondary:
-    "bg-[var(--accent-soft)] text-[var(--primary)] hover:bg-[var(--accent-soft-hover)] active:opacity-90 font-semibold",
+    "border border-[#d7e0ec] bg-[var(--accent-soft)] text-[var(--primary)] hover:border-[#b8c8db] hover:bg-[var(--accent-soft-hover)] active:opacity-90 font-semibold [&_*]:text-inherit",
   outline:
-    "border border-[var(--border)] bg-[var(--card)] text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] shadow-[var(--shadow-xs)] font-semibold",
+    "border border-[#d7e0ec] bg-white text-slate-800 hover:border-[#b8c8db] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] shadow-none font-bold [&_*]:text-inherit",
   ghost:
-    "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] font-semibold",
+    "bg-transparent text-[var(--foreground)] hover:bg-[var(--surface-hover)] active:bg-[var(--muted)] font-semibold [&_*]:text-inherit",
   danger:
-    "bg-[var(--destructive)] text-white hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] font-semibold",
+    "border border-[var(--destructive)] bg-[var(--destructive)] text-white hover:opacity-90 active:opacity-80 shadow-[var(--shadow-xs)] font-semibold [&_*]:text-inherit",
 };
 
 const btnSizeClasses: Record<ButtonSize, string> = {
-  sm: "h-9 rounded-[10px] px-3 text-sm",
-  md: "h-10 rounded-[10px] px-4 text-sm",
-  lg: "h-11 rounded-[10px] px-5 text-sm",
+  sm: "min-h-9 rounded-[10px] px-3 py-1.5 text-[14px]",
+  md: "min-h-10 rounded-[10px] px-4 py-2 text-[14px]",
+  lg: "min-h-11 rounded-[10px] px-5 py-2.5 text-[14px]",
   icon: "size-9 rounded-[10px]",
 };
 
@@ -151,8 +151,11 @@ export function Button({
   return (
     <button
       type={type}
+      data-slot="button"
+      data-variant={variant === "danger" ? "destructive" : variant}
+      data-size={size}
       className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-40",
+        "inline-flex min-w-fit items-center justify-center gap-2 whitespace-nowrap font-bold leading-5 text-current transition-all duration-150 select-none disabled:cursor-not-allowed disabled:opacity-70 [&_svg]:shrink-0",
         btnVariantClasses[variant],
         btnSizeClasses[size],
         className,
@@ -169,7 +172,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
   return (
     <input
       className={cn(
-        "block h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150",
+        "block h-10 w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-medium text-[var(--foreground)] shadow-none outline-none transition-all duration-150",
         "placeholder:text-[var(--muted-foreground)]",
         "hover:border-[var(--muted-foreground)]/20",
         "focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]",
@@ -188,7 +191,7 @@ export function Textarea({ className, ...props }: InputHTMLAttributes<HTMLTextAr
   return (
     <textarea
       className={cn(
-        "block min-h-[132px] w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 py-3 text-sm font-medium text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150",
+        "block min-h-[132px] w-full rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 py-3 text-sm font-medium text-[var(--foreground)] shadow-none outline-none transition-all duration-150",
         "placeholder:text-[var(--muted-foreground)]",
         "hover:border-[var(--muted-foreground)]/20",
         "focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]",

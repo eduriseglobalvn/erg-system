@@ -611,7 +611,7 @@ function OnboardingPanel({ auth }: { auth: AuthSession }) {
             <label className="grid gap-2 text-sm font-medium text-slate-700">
               Họ và tên
               <input
-                className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(event) => {
@@ -634,7 +634,7 @@ function OnboardingPanel({ auth }: { auth: AuthSession }) {
             <label className="grid gap-2 text-sm font-medium text-slate-700">
               Số điện thoại
               <input
-                className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                 inputMode="tel"
                 value={field.state.value}
                 onBlur={field.handleBlur}
@@ -651,7 +651,7 @@ function OnboardingPanel({ auth }: { auth: AuthSession }) {
         <label className="grid gap-2 text-sm font-medium text-slate-700">
           Chức danh
           <input
-            className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             value={auth.profileForm.title}
             onChange={(event) => auth.setProfileForm({ ...auth.profileForm, title: event.target.value })}
           />

@@ -278,7 +278,7 @@ function CenterManagement({ onCreateUnit }: { onCreateUnit: () => void }) {
               <AppSelect
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
-                className="h-9 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                className="h-9 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
               >
                 <option value="">Tất cả loại</option>
                 <option value="system">Hệ thống</option>
@@ -471,7 +471,7 @@ function EducationUnitEditor({
           <AppSelect
             value={draft.type ?? "school"}
             onChange={(event) => updateDraft("type", event.target.value)}
-            className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           >
             <option value="system">Hệ thống</option>
             <option value="center">Trung tâm</option>
@@ -487,7 +487,7 @@ function EducationUnitEditor({
           <textarea
             value={draft.description ?? ""}
             onChange={(event) => updateDraft("description", event.target.value)}
-            className="min-h-28 rounded-md border border-[#cfd7e3] bg-white px-3 py-3 text-sm text-[#242424] shadow-sm outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="min-h-28 rounded-md border border-[#d7e0ec] bg-white px-3 py-3 text-sm text-[#242424] shadow-sm outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
             placeholder="Ví dụ: Trung tâm phụ trách các trường khu vực Bình Phú..."
           />
         </label>
@@ -512,7 +512,7 @@ function EducationUnitEditor({
           <AppSelect
             value={draft.status ?? "active"}
             onChange={(event) => updateDraft("status", event.target.value)}
-            className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
           >
             <option value="active">Đang hoạt động</option>
             <option value="archived">Lưu trữ</option>
@@ -525,7 +525,7 @@ function EducationUnitEditor({
             value={draft.parentId ?? ""}
             onChange={(event) => updateDraft("parentId", event.target.value)}
             disabled={draft.type !== "school"}
-            className="h-10 rounded-md border border-[#cfd7e3] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:bg-[#f6f8fb] disabled:text-[#707070]"
+            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:bg-[#f6f8fb] disabled:text-[#707070]"
           >
             <option value="">Không thuộc trung tâm nào</option>
             {centerOptions.map((center) => (

@@ -37,13 +37,13 @@ export function StudentAttendanceContextMenu({
     <>
       <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
       <div
-        className="fixed z-[80] w-56 overflow-hidden rounded-lg border border-slate-200 bg-white py-1 text-sm shadow-sm shadow-slate-900/15"
+        className="fixed z-[80] w-64 overflow-hidden rounded-lg border border-[#cbd7e6] bg-white py-1 text-[14px] shadow-md shadow-slate-900/10"
         style={{ left: menu.x, top: menu.y }}
         role="menu"
       >
-        <div className="border-b border-slate-100 px-3 py-2">
-          <div className="truncate text-xs font-semibold text-slate-950">{menu.student.name}</div>
-          <div className="mt-0.5 text-[11px] font-semibold text-slate-500">{menu.student.className}</div>
+        <div className="border-b border-[#dbe4f0] px-3 py-2.5">
+          <div className="truncate text-[14px] font-bold text-slate-950">{menu.student.name}</div>
+          <div className="mt-1 text-[13px] font-semibold text-slate-600">{menu.student.className}</div>
         </div>
         {actions.map((action) => {
           const Icon = action.icon;
@@ -51,14 +51,14 @@ export function StudentAttendanceContextMenu({
             <button
               key={action.label}
               type="button"
-              className={cn("flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium text-slate-700 hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]")}
+              className={cn("flex w-full items-center gap-2 px-3 py-2.5 text-left text-[14px] font-semibold text-slate-700 hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]")}
               onClick={() => {
                 action.onClick();
                 onClose();
               }}
               role="menuitem"
             >
-              <Icon className="h-3.5 w-3.5" />
+              <Icon className="h-4 w-4" />
               {action.label}
             </button>
           );

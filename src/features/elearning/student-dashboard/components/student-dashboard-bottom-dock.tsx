@@ -14,7 +14,7 @@ export function StudentDashboardBottomDock({
 }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)]">
-      <div className="mx-auto max-w-md rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] px-1.5 py-1.5 shadow-[0_-2px_10px_rgba(15,23,42,0.08)]">
+      <div className="mx-auto max-w-md rounded-lg border border-[#d7e0ec] bg-[#f6f8fb] px-1.5 py-1.5 shadow-[0_-2px_10px_rgba(15,23,42,0.08)]">
         <div className="grid grid-cols-5 gap-0.5">
           {items.map((item) => {
             const active = activePage === item.key;

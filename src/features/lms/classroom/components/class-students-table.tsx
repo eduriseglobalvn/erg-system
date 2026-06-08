@@ -2,6 +2,7 @@ import { useRef } from "react";
 
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import { Badge, Button, ProgressBar } from "@/components/ui/dashboard-kit";
+import { LmsCheckbox } from "@/components/ui/lms-kit";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { useVirtualList } from "@/hooks/use-virtual-list";
 import { cn } from "@/lib/utils";
@@ -24,7 +25,7 @@ export function SelectControl({
   return (
     <AppSelect
       aria-label={ariaLabel}
-      className="h-9 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+      className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       onChange={(event) => onChange(event.target.value)}
       value={value}
     >
@@ -55,7 +56,7 @@ export function SelectionBar({
   visibleCount: number;
 }) {
   return (
-    <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="text-sm text-slate-600">
         <span className="font-semibold text-slate-950">{copy.selectionSummary(selectedCount)}</span>
         <span className="ml-1">{copy.visibleSummary(visibleCount)}</span>
@@ -103,7 +104,7 @@ export function StudentDataTable({
 
   if (students.length === 0) {
     return (
-      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-[#fafbfc] p-8 text-center">
+      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-8 text-center">
         <div className="text-sm font-semibold text-slate-950">{copy.emptyTitle}</div>
         <div className="mt-2 text-sm text-slate-500">{copy.emptyDescription}</div>
       </div>
@@ -114,11 +115,11 @@ export function StudentDataTable({
     <>
       <div
         ref={tableScrollRef}
-        className="mt-4 hidden overflow-auto rounded-lg border border-[#e0e4ea] md:block"
+        className="mt-4 hidden overflow-auto rounded-lg border border-[#cbd7e6] md:block"
         style={{ maxHeight: TABLE_HEADER_HEIGHT + TABLE_ROW_HEIGHT * TABLE_VISIBLE_ROWS }}
       >
-        <table className="min-w-[980px] w-full border-collapse bg-white text-left text-sm">
-          <thead className="sticky top-0 z-10 bg-[#f7f8fa] text-[11px] font-semibold text-slate-600 shadow-sm">
+        <table className="erg-data-table min-w-[980px] w-full border-collapse bg-white text-left text-[14px]">
+          <thead className="sticky top-0 z-10 bg-[#eef4fb] text-[13px] font-bold text-slate-700 shadow-sm">
             <tr>
               <th className="w-12 px-4 py-3">{copy.pickColumn}</th>
               <th className="px-4 py-3">{copy.studentColumn}</th>
@@ -129,7 +130,7 @@ export function StudentDataTable({
               <th className="px-4 py-3">{copy.actionColumn}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody>
             {topPadding > 0 ? (
               <tr aria-hidden="true">
                 <td colSpan={7} style={{ height: topPadding, padding: 0 }} />
@@ -193,26 +194,24 @@ function StudentTableRow({
   student: ClassroomStudent;
 }) {
   return (
-    <tr className={cn("transition", active ? "bg-[#ebf3fc]" : "hover:bg-[#f7f8fa]")}>
+    <tr className={cn("transition", active ? "bg-[#ebf3fc]" : "hover:bg-[#f8fbff]")}> 
       <td className="px-4 py-3 align-middle">
-        <input
+        <LmsCheckbox
           aria-label={copy.selectStudent(student.name)}
           checked={checked}
-          className="h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
-          onChange={onToggle}
-          type="checkbox"
+          onCheckedChange={onToggle}
         />
       </td>
       <td className="px-4 py-3">
         <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-xs font-semibold text-white">
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-[13px] font-bold text-white">
             {student.avatarSeed}
           </span>
           <div className="min-w-0">
-            <button type="button" className="block max-w-full truncate text-left font-semibold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
+            <button type="button" className="block max-w-full truncate text-left font-bold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
               {student.name}
             </button>
-            <div className="mt-0.5 truncate text-xs text-slate-500">
+            <div className="mt-1 truncate text-[13px] font-medium text-slate-600">
               {student.className} • {student.lastActivity}
             </div>
           </div>
@@ -220,10 +219,10 @@ function StudentTableRow({
       </td>
       <td className="max-w-[260px] px-4 py-3">
         <div className="truncate font-medium text-slate-900">{student.currentAssignment}</div>
-        <div className="mt-0.5 truncate text-xs text-slate-500">{student.currentStage}</div>
+        <div className="mt-1 truncate text-[13px] font-medium text-slate-600">{student.currentStage}</div>
       </td>
       <td className="px-4 py-3">
-        <div className="mb-2 flex min-w-[120px] justify-between text-xs font-semibold text-slate-600">
+        <div className="mb-2 flex min-w-[120px] justify-between text-[13px] font-semibold text-slate-700">
           <span>{copy.progressLabel}</span>
           <span>{student.progressRate}%</span>
         </div>
@@ -234,7 +233,7 @@ function StudentTableRow({
         />
       </td>
       <td className="px-4 py-3 font-semibold text-slate-950">
-        {student.averageScore} <span className="text-xs font-medium text-slate-400">{copy.scoreUnit}</span>
+        {student.averageScore} <span className="text-[13px] font-semibold text-slate-500">{copy.scoreUnit}</span>
       </td>
       <td className="px-4 py-3">
         <Badge tone={getStatusTone(student.status)}>{copy.status[student.status]}</Badge>
@@ -264,20 +263,19 @@ function StudentMobileCard({
   student: ClassroomStudent;
 }) {
   return (
-    <article className={cn("rounded-lg border bg-white p-4", active ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#e0e4ea]")}>
+    <article className={cn("rounded-lg border bg-white p-4", active ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cbd7e6]")}>
       <div className="flex items-start gap-3">
-        <input
+        <LmsCheckbox
           aria-label={copy.selectStudent(student.name)}
           checked={checked}
-          className="mt-3 h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
-          onChange={onToggle}
-          type="checkbox"
+          className="mt-3"
+          onCheckedChange={onToggle}
         />
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
           {student.avatarSeed}
         </span>
         <div className="min-w-0 flex-1">
-          <button type="button" className="text-left font-semibold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
+          <button type="button" className="text-left font-bold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
             {student.name}
           </button>
           <div className="mt-0.5 text-sm text-slate-500">
@@ -286,7 +284,7 @@ function StudentMobileCard({
         </div>
         <Badge tone={getStatusTone(student.status)}>{copy.status[student.status]}</Badge>
       </div>
-      <div className="mt-4 rounded-lg bg-[#fafbfc] p-3">
+      <div className="mt-4 rounded-lg bg-[#f8fbff] p-3">
         <div className="text-sm font-semibold text-slate-950">{student.currentAssignment}</div>
         <div className="mt-1 text-sm text-slate-500">{student.currentStage}</div>
         <div className="mt-3 flex items-center justify-between text-sm font-semibold text-slate-700">
@@ -339,8 +337,8 @@ export function StudentDetailCard({ copy, student }: { copy: StudentCopy; studen
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-[#fafbfc] px-3 py-3">
-      <div className="text-xs font-semibold text-slate-500">{label}</div>
+    <div className="rounded-lg bg-[#f8fbff] px-3 py-3">
+      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
       <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
     </div>
   );
@@ -348,7 +346,7 @@ function Metric({ label, value }: { label: string; value: string }) {
 
 function InfoBlock({ body, title }: { body: string; title: string }) {
   return (
-    <div className="rounded-lg border border-[#e0e4ea] bg-white p-4">
+    <div className="rounded-lg border border-[#cbd7e6] bg-white p-4">
       <div className="text-sm font-semibold text-slate-950">{title}</div>
       <div className="mt-2 text-sm leading-6 text-slate-500">{body}</div>
     </div>

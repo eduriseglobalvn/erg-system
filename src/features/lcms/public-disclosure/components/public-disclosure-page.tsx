@@ -108,7 +108,7 @@ export function PublicDisclosurePage() {
 
           <div className="w-full max-w-[calc(100vw-32px)] min-w-0 rounded-[8px] border border-[#e0e4ea] bg-white p-3 shadow-sm">
             <h2 className="text-sm font-semibold text-slate-950">Tra cứu nhanh</h2>
-            <label className="mt-3 flex h-9 items-center gap-2 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm text-slate-500 focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+            <label className="mt-3 flex h-9 items-center gap-2 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm text-slate-500 focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
               <Search className="h-4 w-4" aria-hidden="true" />
               <input
                 value={search}

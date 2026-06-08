@@ -579,7 +579,7 @@ export function PlayerShell({
                   className="flex items-start gap-3 rounded-lg bg-slate-100 p-2 text-left"
                   onClick={() => setStarted(false)}
                 >
-                  <span className="h-11 w-[86px] flex-none rounded-sm border border-[#d1d1d1] bg-white" />
+                  <span className="h-11 w-[86px] flex-none rounded-sm border border-[#d7e0ec] bg-white" />
                   <span className="flex min-w-0 flex-1 flex-col gap-1">
                     <strong className="line-clamp-2 text-xs font-medium text-slate-600">1. Trang giới thiệu</strong>
                     <small className="text-[11px] text-slate-400">{readyQuiz.subtitle}</small>

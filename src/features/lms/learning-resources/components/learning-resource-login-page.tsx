@@ -49,7 +49,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
   }
 
   return (
-    <div className="min-h-[calc(100vh-96px)] bg-[#f7f8fa]">
+    <div className="min-h-[calc(100vh-96px)] bg-[#f8fbff]">
       <div className="border-b border-[#e5e5e5] bg-white">
         <div className="mx-auto flex max-w-[86rem] flex-wrap items-center justify-center gap-1.5 px-4 py-3 sm:px-6 lg:px-8">
           {["Mầm non", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].map((grade) => (
@@ -66,8 +66,8 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
       </div>
 
       <div className="mx-auto grid max-w-[86rem] gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:px-8">
-        <section className="overflow-hidden rounded-lg border border-[#d1d1d1] bg-white shadow-sm">
-          <div className="border-b border-[#e5e5e5] bg-white px-5 py-5 text-slate-900">
+        <section className="overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+          <div className="border-b border-[#cbd7e6] bg-white px-5 py-5 text-slate-900">
             <div className="flex items-start justify-between gap-5">
               <div>
                 <p className="text-[13px] font-semibold text-[var(--erg-blue)]">Kho học liệu ERG</p>
@@ -78,7 +78,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
                   Trang chủ có thể xem công khai. Các tài liệu, bài giảng điện tử, file PDF, video, IC3, MOS và Tin học chỉ mở sau khi xác thực tài khoản giáo viên.
                 </p>
               </div>
-              <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#d1d1d1] bg-[#f7f8fa] text-[var(--erg-blue)] md:flex">
+              <div className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-[#cbd7e6] bg-[#f3f6fb] text-[var(--erg-blue)] md:flex">
                 <Lock className="h-5 w-5" />
               </div>
             </div>
@@ -90,15 +90,15 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
               { label: "Bài giảng điện tử", value: "PPTX" },
               { label: "IC3 / MOS / Tin học", value: "API thật" },
             ].map((item) => (
-              <div key={item.label} className="border-t border-[#e5e5e5] p-5 md:border-r md:last:border-r-0">
-                <p className="text-[12px] font-semibold text-slate-500">{item.label}</p>
+              <div key={item.label} className="border-t border-[#cbd7e6] p-5 md:border-r md:last:border-r-0">
+                <p className="text-[13px] font-bold text-slate-600">{item.label}</p>
                 <p className="mt-2 text-lg font-semibold text-slate-950">{item.value}</p>
               </div>
             ))}
           </div>
         </section>
 
-        <section className="rounded-lg border border-[#d1d1d1] bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-[var(--shadow-xs)]">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
               <Lock className="h-5 w-5" />
@@ -130,9 +130,9 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
             >
               {(field) => (
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700">Email</span>
+                  <span className="text-[14px] font-bold text-slate-700">Email</span>
                   <input
-                    className="mt-2 h-10 w-full rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                    className="mt-2 h-10 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                     type="email"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -154,9 +154,9 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
             >
               {(field) => (
                 <label className="block">
-                  <span className="text-sm font-medium text-slate-700">Mat khau</span>
+                  <span className="text-[14px] font-bold text-slate-700">Mat khau</span>
                   <input
-                    className="mt-2 h-10 w-full rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                    className="mt-2 h-10 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none transition placeholder:text-slate-500 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                     type="password"
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -174,7 +174,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, formSubmitting]) => (
                 <button
-                  className="inline-flex h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] font-bold text-white transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-60"
                   disabled={!canSubmit || isSubmitting || formSubmitting}
                   type="submit"
                 >
@@ -186,7 +186,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
 
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             <button
-              className="h-9 rounded-md border border-[#d1d1d1] bg-white text-sm font-medium text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
+              className="h-10 rounded-lg border border-[#d7e0ec] bg-white text-[14px] font-bold text-slate-700 transition hover:border-[var(--erg-blue)] hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]"
               disabled={isSubmitting}
               type="button"
               onClick={() => void handleProviderLogin("google")}

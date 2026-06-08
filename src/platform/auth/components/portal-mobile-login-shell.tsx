@@ -122,11 +122,10 @@ export function PortalMobileLoginShell({
 
           <div
             style={{
-              display: "flex",
+              display: "grid",
               gap: 8,
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
               marginTop: 20,
-              overflowX: "auto",
-              paddingBottom: 4,
             }}
           >
             {copy.trustItems.slice(0, 3).map((item) => {
@@ -140,7 +139,7 @@ export function PortalMobileLoginShell({
                     backgroundColor: "rgba(255,255,255,0.10)",
                     border: "1px solid rgba(255,255,255,0.12)",
                     borderRadius: 8,
-                    minWidth: 128,
+                    minWidth: 0,
                     padding: "12px",
                   }}
                 >
@@ -154,6 +153,7 @@ export function PortalMobileLoginShell({
                       lineHeight: 1.4,
                       margin: "12px 0 0",
                       textTransform: "none",
+                      wordBreak: "break-word",
                     }}
                   >
                     {item.label}
@@ -164,6 +164,7 @@ export function PortalMobileLoginShell({
                       fontSize: 12,
                       lineHeight: 1.55,
                       margin: "4px 0 0",
+                      wordBreak: "break-word",
                     }}
                   >
                     {item.caption}

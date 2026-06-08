@@ -145,8 +145,8 @@ function getLectureDeckLabel(resource: LearningResourceResource) {
 function getLectureDeckTheme(resource: LearningResourceResource) {
   if (resource.subjectId === "tieng-anh") {
     return {
-      background: "bg-[#f7f8fa]",
-      panel: "border-[#d1d1d1] bg-white text-slate-900",
+      background: "bg-[#f8fbff]",
+      panel: "border-[#cbd7e6] bg-white text-slate-900",
       card: "border-orange-100 bg-orange-50/80",
       icon: "bg-orange-500 text-white",
     };
@@ -154,16 +154,16 @@ function getLectureDeckTheme(resource: LearningResourceResource) {
 
   if (resource.subjectId === "tin-hoc") {
     return {
-      background: "bg-[#f7f8fa]",
-      panel: "border-[#d1d1d1] bg-white text-slate-900",
+      background: "bg-[#f8fbff]",
+      panel: "border-[#cbd7e6] bg-white text-slate-900",
       card: "border-[#b8d6fa] bg-[var(--erg-blue-light)]",
       icon: "bg-[var(--erg-blue)] text-white",
     };
   }
 
   return {
-    background: "bg-[#f7f8fa]",
-    panel: "border-[#d1d1d1] bg-white text-slate-900",
+    background: "bg-[#f8fbff]",
+    panel: "border-[#cbd7e6] bg-white text-slate-900",
     card: "border-[#b8d6fa] bg-[var(--erg-blue-light)]",
     icon: "bg-[var(--erg-blue)] text-white",
   };
@@ -196,10 +196,10 @@ function LectureUnitCard({
                   key={child.id}
                   type="button"
                   onClick={() => onOpenLesson(displayText(child.title))}
-                  className="rounded-md border border-[#d1d1d1] bg-white px-3 py-2.5 text-left transition hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
+                  className="rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 text-left transition hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
                 >
-                  <p className="text-[11px] font-semibold text-[var(--erg-blue)]">{lesson.eyebrow}</p>
-                  <p className="mt-1 text-sm font-medium text-slate-800">{lesson.title}</p>
+                  <p className="text-[13px] font-bold text-[var(--erg-blue)]">{lesson.eyebrow}</p>
+                  <p className="mt-1 text-[14px] font-semibold text-slate-800">{lesson.title}</p>
                 </button>
               );
             })}
@@ -228,14 +228,14 @@ function PdfLessonBankView({
       <button
         type="button"
         onClick={onClose}
-        className="fixed left-0 top-5 z-10 flex h-10 w-16 items-center justify-center rounded-r-md border border-l-0 border-[#d1d1d1] bg-white text-[var(--erg-blue)] shadow-sm transition hover:w-20"
+        className="fixed left-0 top-5 z-10 flex h-10 w-16 items-center justify-center rounded-r-lg border border-l-0 border-[#cbd7e6] bg-white text-[var(--erg-blue)] shadow-sm transition hover:w-20"
         aria-label="Quay lại kho học liệu"
       >
-        <span className="text-center text-xs font-semibold leading-4">
+        <span className="text-center text-[13px] font-bold leading-4">
           ERG
         </span>
       </button>
-      <main className="relative mx-auto my-5 flex h-[calc(100vh-40px)] w-[min(1350px,calc(100vw-96px))] flex-col overflow-hidden rounded-lg border border-[#d1d1d1] bg-white shadow-sm">
+      <main className="relative mx-auto my-5 flex h-[calc(100vh-40px)] w-[min(1350px,calc(100vw-96px))] flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-sm">
         <header className={`relative shrink-0 overflow-hidden border-b ${theme.panel} px-5 py-4`}>
           <div className="relative max-w-3xl">
             <p className="text-[13px] font-semibold text-[var(--erg-blue)]">{deckLabel}</p>
@@ -383,8 +383,8 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
   }
 
   return (
-    <div ref={viewerRootRef} className="fixed inset-0 z-[240] overflow-hidden bg-[#f7f8fa]">
-      <div className="flex h-12 items-center justify-between border-b border-[#d1d1d1] bg-[#f7f8fa] px-4 text-slate-900 shadow-sm">
+    <div ref={viewerRootRef} className="fixed inset-0 z-[240] overflow-hidden bg-[#f8fbff]">
+      <div className="flex h-14 items-center justify-between border-b border-[#cbd7e6] bg-[#f8fbff] px-4 text-slate-900 shadow-sm">
         <div className="flex min-w-0 items-center gap-3">
           <button
             type="button"
@@ -394,7 +394,7 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <h1 className="truncate text-sm font-semibold">{activeLessonTitle}</h1>
+          <h1 className="truncate text-[15px] font-bold">{activeLessonTitle}</h1>
         </div>
         <div className="flex items-center gap-1 text-slate-600">
           <button
@@ -424,9 +424,9 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
         </div>
       </div>
       {canEmbed ? (
-        <div className="h-[calc(100vh-48px)] overflow-y-auto bg-[#f7f8fa] px-4 py-6">
+        <div className="h-[calc(100vh-48px)] overflow-y-auto bg-[#f8fbff] px-4 py-6">
           {renderState === "loading" ? (
-            <div className="mx-auto mb-6 grid max-w-[980px] gap-4 rounded-lg border border-slate-200 bg-white p-5 shadow-sm" aria-hidden="true">
+            <div className="mx-auto mb-6 grid max-w-[980px] gap-4 rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-sm" aria-hidden="true">
               <Skeleton className="h-5 w-48" />
               <Skeleton className="h-[520px] w-full rounded-lg" />
               <div className="grid gap-3 sm:grid-cols-3">

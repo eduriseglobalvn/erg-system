@@ -29,9 +29,9 @@ import { getCurrentAccount, saveCurrentAccount } from "@/platform/auth/api/auth-
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 
 const inputClassName =
-  "h-10 w-full rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+  "h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 const textareaClassName =
-  "min-h-28 w-full rounded-md border border-[#d1d1d1] bg-white px-3 py-3 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+  "min-h-28 w-full rounded-md border border-[#d7e0ec] bg-white px-3 py-3 text-sm font-medium leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 const mutedInputClassName = `${inputClassName} bg-slate-50 text-slate-500`;
 
 type ProfileFormState = {

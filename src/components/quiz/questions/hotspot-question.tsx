@@ -185,7 +185,7 @@ export function HotspotQuestion({
                       ? question.hotspotAreas?.map((area) => (
                           <div
                             key={area.id}
-                            className="absolute border-2 border-dashed border-white/90 bg-[var(--erg-blue)]/20"
+                            className="absolute border border-dashed border-white/90 bg-[var(--erg-blue)]/20"
                             style={{
                               left: `${area.x * 100}%`,
                               top: `${area.y * 100}%`,
@@ -245,7 +245,7 @@ export function HotspotQuestion({
           ? question.hotspotAreas?.map((area) => (
               <div
                 key={area.id}
-                className="absolute border-2 border-dashed border-white/90 bg-[var(--erg-blue)]/20"
+                className="absolute border border-dashed border-white/90 bg-[var(--erg-blue)]/20"
                 style={{
                   left: `${area.x * 100}%`,
                   top: `${area.y * 100}%`,

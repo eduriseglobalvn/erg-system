@@ -170,14 +170,14 @@ export function StudentGroupsPage({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-4 py-4 xl:px-6">
-      <div className="shrink-0 rounded-lg border border-slate-200 bg-white px-3 py-2.5 shadow-sm shadow-slate-200/40">
+      <div className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 shadow-[var(--shadow-xs)]">
         <div className="grid items-center gap-3 xl:grid-cols-[minmax(280px,1fr)_auto_auto]">
           <div className="min-w-0">
-            <div className="text-xs font-medium text-slate-400">
+            <div className="text-[13px] font-semibold text-slate-500">
               Bài tập / <span className="text-slate-600">Quản lý nhóm học sinh</span>
             </div>
             <h1 className="mt-1 text-xl font-semibold tracking-normal text-slate-950">Quản lý nhóm học sinh</h1>
-            <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">
+            <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-600">
               Tạo nhóm và bóc học sinh từ nhiều lớp khác nhau trong {selectedSchoolName}.
             </p>
           </div>
@@ -187,15 +187,15 @@ export function StudentGroupsPage({
             <StudentGroupStat icon={Layers} label="Nguồn lớp" value={`${selectedClassCount} lớp`} />
           </div>
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-xs" onClick={onBack}>Về danh sách bài tập</Button>
-            <Button className="h-9 rounded-lg bg-[#06112f] px-4 text-xs hover:bg-[#111d42]" onClick={createGroup}>Tạo nhóm</Button>
+            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={onBack}>Về danh sách bài tập</Button>
+            <Button className="h-9 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] hover:bg-[var(--erg-blue-hover)]" onClick={createGroup}>Tạo nhóm</Button>
           </div>
         </div>
       </div>
 
       <div className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[280px_minmax(0,1fr)]">
-        <section className="flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm shadow-slate-200/40">
-          <h2 className="mb-2 text-[11px] font-semibold text-slate-400">Danh sách nhóm</h2>
+        <section className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
+          <h2 className="mb-2 text-[13px] font-bold text-slate-600">Danh sách nhóm</h2>
           <div className="flex min-h-0 flex-1 flex-col">
             <div className="mb-3 flex-1 space-y-2 overflow-y-auto pr-1">
               {groups.map((group) => (
@@ -208,17 +208,17 @@ export function StudentGroupsPage({
                     borderLeftColor: group.color,
                   }}
                   className={cn(
-                    "w-full rounded-lg border border-l-4 px-3 py-2.5 text-left text-xs font-medium transition",
+                    "w-full rounded-lg border border-l-4 px-3 py-2.5 text-left text-[13px] font-bold transition",
                     selectedGroupId === group.id
                       ? "border-transparent text-white shadow-sm"
-                      : "border-slate-100 bg-white text-slate-600 hover:bg-slate-50/75",
+                      : "border-[#dbe4f0] bg-white text-slate-700 hover:bg-slate-50/75",
                   )}
                 >
                   <span className="flex items-center justify-between gap-3">
                     <span className="truncate">{group.name}</span>
                     <span
                       className={cn(
-                        "shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold",
+                        "shrink-0 rounded px-1.5 py-0.5 text-[13px] font-bold",
                         selectedGroupId === group.id ? "bg-white/20 text-white" : "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
                       )}
                     >
@@ -227,8 +227,8 @@ export function StudentGroupsPage({
                   </span>
                   <span
                     className={cn(
-                      "mt-1 block truncate text-[11px] font-semibold",
-                      selectedGroupId === group.id ? "text-white/80" : "text-slate-400",
+                      "mt-1 block truncate text-[13px] font-semibold",
+                      selectedGroupId === group.id ? "text-white/85" : "text-slate-500",
                     )}
                   >
                     {group.note || "Chưa có ghi chú"}
@@ -237,7 +237,7 @@ export function StudentGroupsPage({
               ))}
             </div>
 
-            <div className="shrink-0 space-y-2 border-t border-slate-100 pt-2.5">
+            <div className="shrink-0 space-y-2 border-t border-[#dbe4f0] pt-2.5">
               <input
                 type="text"
                 placeholder="Tên nhóm mới..."
@@ -246,12 +246,12 @@ export function StudentGroupsPage({
                 onKeyDown={(event) => {
                   if (event.key === "Enter") createGroup();
                 }}
-                className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold focus:border-[#b8d6fa] focus:outline-none"
+                className="w-full rounded-lg border border-[#d7e0ec] bg-white px-3 py-2 text-[14px] font-semibold text-slate-900 focus:border-[var(--erg-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               />
               <button
                 type="button"
                 onClick={createGroup}
-                className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--erg-blue)] py-2 text-xs font-semibold text-white transition-colors hover:bg-[#028cc9]"
+                className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--erg-blue)] py-2 text-[13px] font-bold text-white transition-colors hover:bg-[var(--erg-blue-hover)]"
               >
                 <Plus className="h-3.5 w-3.5" /> Tạo nhóm
               </button>
@@ -261,18 +261,18 @@ export function StudentGroupsPage({
 
         {currentGroup ? (
           <section className="grid min-h-0 gap-3 overflow-hidden 2xl:grid-cols-[minmax(0,0.9fr)_minmax(460px,1.1fr)]">
-            <div className="flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white p-4 shadow-sm shadow-slate-200/40">
+            <div className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <label className="mb-1 block text-[11px] font-medium text-slate-400">Tên nhóm</label>
+                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Tên nhóm</label>
                   <input
                     type="text"
                     value={currentGroup.name}
                     onChange={(event) => updateGroup((group) => ({ ...group, name: event.target.value }))}
-                    className="w-full max-w-sm border-b border-transparent pb-1 text-lg font-semibold text-slate-900 focus:border-slate-200 focus:outline-none"
+                    className="w-full max-w-sm border-b border-transparent pb-1 text-lg font-semibold text-slate-900 focus:border-[#cbd7e6] focus:outline-none"
                   />
                 </div>
-                <Button variant="outline" className="h-9 rounded-lg px-3 text-xs" onClick={deleteGroup} disabled={groups.length <= 1}>Xóa nhóm</Button>
+                <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={deleteGroup} disabled={groups.length <= 1}>Xóa nhóm</Button>
               </div>
 
               <GroupColorPicker
@@ -280,25 +280,25 @@ export function StudentGroupsPage({
                 onChange={(color) => updateGroup((group) => ({ ...group, color }))}
               />
 
-              <label className="mb-1.5 block text-[11px] font-medium text-slate-400">Ghi chú</label>
+              <label className="mb-1.5 block text-[13px] font-semibold text-slate-600">Ghi chú</label>
               <textarea
                 value={currentGroup.note}
                 onChange={(event) => updateGroup((group) => ({ ...group, note: event.target.value }))}
                 placeholder="Mục tiêu nhóm, lịch ôn tập, ghi chú khi giao bài..."
-                className="mb-3 min-h-16 resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#b8d6fa] focus:bg-white"
+                className="mb-3 min-h-16 resize-none rounded-lg border border-[#d7e0ec] bg-white px-3 py-2 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               />
 
               <div className="mb-2 flex items-center justify-between gap-3">
                 <div>
                   <h3 className="text-sm font-semibold text-slate-900">Học sinh trong nhóm</h3>
-                  <p className="text-xs font-semibold text-slate-400">Bỏ chọn checkbox để đưa học sinh ra khỏi nhóm.</p>
+                  <p className="text-[13px] font-semibold text-slate-500">Bỏ chọn checkbox để đưa học sinh ra khỏi nhóm.</p>
                 </div>
-                <span className="rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-semibold text-[var(--erg-blue)]">{groupStudents.length} học sinh</span>
+                <span className="rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-[13px] font-bold text-[var(--erg-blue)]">{groupStudents.length} học sinh</span>
               </div>
 
               <div className="mb-3 flex max-h-16 flex-wrap gap-2 overflow-y-auto pr-1">
                 {groupSummaryByClass.map(({ classroom, count }) => (
-                  <span key={classroom.id} className="rounded-md border border-slate-100 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500">
+                  <span key={classroom.id} className="rounded-md border border-[#dbe4f0] bg-[#f8fbff] px-3 py-1 text-[13px] font-bold text-slate-700">
                     {classroom.className}: {count}
                   </span>
                 ))}
@@ -322,14 +322,14 @@ export function StudentGroupsPage({
               />
             </div>
 
-            <div className="flex min-h-0 flex-col rounded-lg border border-slate-200 bg-white shadow-sm shadow-slate-200/40">
-              <div className="shrink-0 border-b border-slate-100 p-3">
+            <div className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+              <div className="shrink-0 border-b border-[#dbe4f0] p-3">
                 <div className="mb-3 flex items-center justify-between gap-3">
                   <div>
                     <h3 className="text-sm font-semibold text-slate-900">Danh sách học sinh</h3>
-                    <p className="text-xs font-semibold text-slate-400">Chọn checkbox để thêm học sinh vào nhóm hiện tại.</p>
+                    <p className="text-[13px] font-semibold text-slate-500">Chọn checkbox để thêm học sinh vào nhóm hiện tại.</p>
                   </div>
-                  <span className="rounded-md bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">
+                  <span className="rounded-md border border-[#dbe4f0] bg-[#f8fbff] px-3 py-1 text-[13px] font-bold text-slate-700">
                     {visibleStudents.length} học sinh
                   </span>
                 </div>
@@ -337,7 +337,7 @@ export function StudentGroupsPage({
                   <AppSelect
                     value={classFilter}
                     onChange={(event) => setClassFilter(event.target.value)}
-                    className="h-10 min-w-[220px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-700 outline-none focus:border-[#b8d6fa]"
+                    className="h-10 min-w-[220px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)]"
                   >
                     <option value={allClassesFilterValue}>Tất cả lớp</option>
                     {classes.map((classroom) => (
@@ -345,13 +345,13 @@ export function StudentGroupsPage({
                     ))}
                   </AppSelect>
                   <div className="relative min-w-[240px] flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-300" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
                     <input
                       type="text"
                       value={studentSearch}
                       onChange={(event) => setStudentSearch(event.target.value)}
                       placeholder="Tìm học sinh hoặc lớp..."
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs font-semibold text-slate-700 outline-none transition focus:border-[#b8d6fa] focus:bg-white"
+                      className="h-10 w-full rounded-lg border border-[#d7e0ec] bg-white pl-9 pr-3 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                     />
                   </div>
                 </div>
@@ -374,7 +374,7 @@ export function StudentGroupsPage({
             </div>
           </section>
         ) : (
-          <section className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-8 text-sm font-semibold text-slate-400">
+          <section className="flex items-center justify-center rounded-lg border border-[#cbd7e6] bg-white p-8 text-sm font-semibold text-slate-600 shadow-[var(--shadow-xs)]">
             Vui lòng tạo hoặc chọn một nhóm.
           </section>
         )}
@@ -385,10 +385,10 @@ export function StudentGroupsPage({
 
 function GroupColorPicker({ value, onChange }: { value: string; onChange: (color: string) => void }) {
   return (
-    <div className="mb-3 rounded-lg border border-slate-100 bg-slate-50/60 px-3 py-2.5">
+    <div className="mb-3 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-3 py-2.5">
       <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-[11px] font-medium text-slate-400">Màu nhóm</span>
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+        <span className="text-[13px] font-semibold text-slate-600">Màu nhóm</span>
+        <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-600">
           <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: value }} />
           Hiển thị ở danh sách nhóm
         </span>
@@ -405,7 +405,7 @@ function GroupColorPicker({ value, onChange }: { value: string; onChange: (color
               onClick={() => onChange(option.value)}
               className={cn(
                 "grid h-8 w-8 place-items-center rounded-full border bg-white transition",
-                selected ? "border-slate-900 shadow-sm" : "border-slate-200 hover:border-slate-400",
+                selected ? "border-slate-900 shadow-sm" : "border-[#cbd7e6] hover:border-slate-500",
               )}
             >
               <span className="h-5 w-5 rounded-full" style={{ backgroundColor: option.value }} />
@@ -419,12 +419,12 @@ function GroupColorPicker({ value, onChange }: { value: string; onChange: (color
 
 function StudentGroupStat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5">
+    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2.5 py-1.5">
       <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-[var(--erg-blue)] shadow-sm">
         <Icon className="h-3.5 w-3.5" />
       </span>
       <span className="min-w-0">
-        <span className="block truncate text-[11px] font-medium tracking-normal text-slate-400">{label}</span>
+        <span className="block truncate text-[13px] font-bold tracking-normal text-slate-600">{label}</span>
         <span className="block truncate text-sm font-semibold text-slate-950">{value}</span>
       </span>
     </div>
@@ -451,11 +451,11 @@ function StudentSelectionTable({
   mode: "members" | "available";
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-slate-100 bg-white">
+    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
       <div className="min-h-0 flex-1 overflow-auto">
         <Table>
-          <TableHeader className="sticky top-0 z-10 bg-slate-50">
-            <TableRow className="hover:bg-slate-50">
+          <TableHeader className="sticky top-0 z-10 bg-[#eef4fb]">
+            <TableRow className="hover:bg-[#eef4fb]">
               <TableHead className="w-11 px-3">
                 <Checkbox
                   aria-label={headerCheckbox.ariaLabel}
@@ -463,10 +463,10 @@ function StudentSelectionTable({
                   onCheckedChange={headerCheckbox.onCheckedChange}
                 />
               </TableHead>
-              <TableHead className="min-w-[220px] text-xs font-semibold text-slate-500">Học sinh</TableHead>
-              <TableHead className="min-w-[120px] text-xs font-semibold text-slate-500">Lớp</TableHead>
-              <TableHead className="min-w-[110px] text-xs font-semibold text-slate-500">Khối</TableHead>
-              <TableHead className="min-w-[150px] text-xs font-semibold text-slate-500">Trạng thái</TableHead>
+              <TableHead className="min-w-[220px] text-[13px] font-semibold text-slate-600">Học sinh</TableHead>
+              <TableHead className="min-w-[120px] text-[13px] font-semibold text-slate-600">Lớp</TableHead>
+              <TableHead className="min-w-[110px] text-[13px] font-semibold text-slate-600">Khối</TableHead>
+              <TableHead className="min-w-[150px] text-[13px] font-semibold text-slate-600">Trạng thái</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -485,11 +485,11 @@ function StudentSelectionTable({
                     <TableCell className="min-w-[220px]">
                       <div className="max-w-[260px]">
                         <div className="truncate text-sm font-semibold text-slate-800">{student.name}</div>
-                        <div className="mt-0.5 truncate text-xs font-semibold text-slate-400">{student.currentStage}</div>
+                        <div className="mt-0.5 truncate text-[13px] font-semibold text-slate-500">{student.currentStage}</div>
                       </div>
                     </TableCell>
-                    <TableCell className="min-w-[120px] text-xs font-medium text-slate-600">{student.className}</TableCell>
-                    <TableCell className="min-w-[110px] text-xs font-medium text-slate-600">{student.gradeLabel}</TableCell>
+                    <TableCell className="min-w-[120px] text-[13px] font-medium text-slate-700">{student.className}</TableCell>
+                    <TableCell className="min-w-[110px] text-[13px] font-medium text-slate-700">{student.gradeLabel}</TableCell>
                     <TableCell className="min-w-[150px]">
                       <StudentStatusBadge status={student.status} selected={mode === "available" && checked} />
                     </TableCell>
@@ -498,7 +498,7 @@ function StudentSelectionTable({
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-40 text-center text-sm font-semibold text-slate-400">
+                <TableCell colSpan={5} className="h-40 text-center text-sm font-semibold text-slate-600">
                   {emptyLabel}
                 </TableCell>
               </TableRow>
@@ -506,7 +506,7 @@ function StudentSelectionTable({
           </TableBody>
         </Table>
       </div>
-      <div className="border-t border-slate-100 px-3 py-2 text-xs font-medium text-slate-400">
+      <div className="border-t border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">
         {students.length} học sinh{mode === "available" ? " trong danh sách" : " trong nhóm"}
       </div>
     </div>
@@ -523,7 +523,7 @@ function StudentStatusBadge({ status, selected }: { status: ClassroomStudent["st
   return (
     <span
       className={cn(
-        "inline-flex rounded-md px-2.5 py-1 text-[11px] font-semibold",
+        "inline-flex rounded-md px-2.5 py-1 text-[13px] font-bold",
         selected
           ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]"
           : status === "support"

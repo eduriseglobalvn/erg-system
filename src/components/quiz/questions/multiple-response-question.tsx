@@ -96,7 +96,7 @@ export function MultipleResponseQuestion({
             >
               <ReviewStatusIcon correct={showCorrect} visible={showStatus} />
               <span
-                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-md border-2 bg-white"
+                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-md border bg-white"
                 style={{
                   borderColor: showCorrect ? "#78b816" : showWrong ? "#ff8b3d" : selected ? "var(--quiz-accent-start)" : "#cfd8df",
                 }}

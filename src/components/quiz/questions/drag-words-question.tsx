@@ -54,7 +54,7 @@ export function DragWordsQuestion({
                 <button
                   type="button"
                   disabled={submitted && !reviewMode}
-                  className="mx-2 inline-flex min-h-12 min-w-36 items-center justify-center rounded-lg border-2 bg-white px-4 text-center text-lg font-semibold transition"
+                  className="mx-2 inline-flex min-h-12 min-w-36 items-center justify-center rounded-lg border bg-white px-4 text-center text-lg font-semibold transition"
                   style={{
                     borderColor: isCorrect ? "#78b816" : reviewMode ? "#ef6b5f" : "var(--quiz-canvas-border)",
                     color: isCorrect ? "#66a80f" : reviewMode ? "#df4f43" : "var(--quiz-option-text)",
@@ -84,7 +84,7 @@ export function DragWordsQuestion({
                   key={word.id}
                   type="button"
                   disabled={submitted || used}
-                  className="min-h-12 rounded-lg border-2 bg-white px-4 text-base font-semibold shadow-sm transition  disabled:cursor-default disabled:opacity-40"
+                  className="min-h-12 rounded-lg border bg-white px-4 text-base font-semibold shadow-sm transition  disabled:cursor-default disabled:opacity-40"
                   style={{
                     borderColor: used ? "#d1d5db" : "var(--quiz-canvas-border)",
                     color: "var(--quiz-option-text)",

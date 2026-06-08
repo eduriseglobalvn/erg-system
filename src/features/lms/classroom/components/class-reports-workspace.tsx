@@ -1,7 +1,5 @@
 import { useMemo, useState } from "react";
-import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
-import TrendingUpOutlinedIcon from "@mui/icons-material/TrendingUpOutlined";
+import { BarChart3, TrendingUp, Trophy } from "lucide-react";
 
 import {
   DashboardMetricCard,
@@ -74,7 +72,7 @@ export function ClassReportsWorkspace({
           value={`${averageCompletion}%`}
           detail={copy.metrics.completionDetail}
           delta={strongestClass ? copy.metrics.strongest(strongestClass.className) : "-"}
-          icon={<TrendingUpOutlinedIcon fontSize="inherit" />}
+          icon={<TrendingUp className="h-4 w-4" />}
           tone="emerald"
         />
         <DashboardMetricCard
@@ -82,7 +80,7 @@ export function ClassReportsWorkspace({
           value={`${averageScore}`}
           detail={copy.metrics.scoreDetail}
           delta={leader ? copy.metrics.leader(leader.name) : copy.noData}
-          icon={<EmojiEventsOutlinedIcon fontSize="inherit" />}
+          icon={<Trophy className="h-4 w-4" />}
           tone="amber"
         />
         <DashboardMetricCard
@@ -90,7 +88,7 @@ export function ClassReportsWorkspace({
           value={`${supportTotal}`}
           detail={copy.metrics.supportDetail}
           delta={classNeedingCare ? copy.metrics.watch(classNeedingCare.className) : "-"}
-          icon={<InsightsOutlinedIcon fontSize="inherit" />}
+          icon={<BarChart3 className="h-4 w-4" />}
           tone="rose"
         />
         <DashboardMetricCard
@@ -98,7 +96,7 @@ export function ClassReportsWorkspace({
           value={`${leaderboard.length}`}
           detail={copy.metrics.scopeSizeDetail(scope)}
           delta={copy.metrics.scopeSizeDelta}
-          icon={<EmojiEventsOutlinedIcon fontSize="inherit" />}
+          icon={<Trophy className="h-4 w-4" />}
           tone="violet"
         />
       </div>
@@ -165,7 +163,7 @@ function LeaderboardRow({
   rank: number;
 }) {
   return (
-    <article className="rounded-lg border border-[#e0e4ea] bg-white p-4">
+    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
           #{rank}
@@ -190,7 +188,7 @@ function LeaderboardRow({
 
 function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: ClassroomSnapshot }) {
   return (
-    <article className="rounded-lg border border-[#e0e4ea] bg-white p-4">
+    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <div className="text-sm font-semibold text-slate-950">{snapshot.className}</div>
@@ -217,8 +215,8 @@ function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: Classr
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-[#fafbfc] px-3 py-2">
-      <div className="text-xs font-medium text-slate-500">{label}</div>
+    <div className="rounded-lg bg-[#f8fbff] px-3 py-2">
+      <div className="text-[13px] font-bold text-slate-600">{label}</div>
       <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
     </div>
   );
@@ -226,7 +224,7 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
 
 function InsightCard({ body, title }: { body: string; title: string }) {
   return (
-    <div className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
+    <div className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
       <div className="text-sm font-semibold text-slate-950">{title}</div>
       <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
     </div>

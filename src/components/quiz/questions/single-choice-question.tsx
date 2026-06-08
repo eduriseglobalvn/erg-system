@@ -90,7 +90,7 @@ export function SingleChoiceQuestion({
             >
               <ReviewStatusIcon correct={showCorrect} visible={showStatus} />
               <span
-                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-full border-2 bg-white"
+                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-full border bg-white"
                 style={{
                   borderColor: showCorrect ? "#78b816" : showWrong ? "#ff8b3d" : selected ? "var(--quiz-accent-start)" : "#cfd8df",
                 }}

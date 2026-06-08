@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
@@ -46,8 +47,6 @@ const periodFields: Array<keyof WeeklyClassLogPeriod> = [
   "disciplineScore",
   "teacherSignature",
 ];
-
-const svgChevronDown = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 20 20' fill='none'%3E%3Cpath d='M5.5 7.75 10 12.25l4.5-4.5' stroke='%23787878' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")`;
 
 export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName }: WeeklyClassLogPageProps) {
   const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(() => loadStoredWeeks());
@@ -109,14 +108,13 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
     <section className="flex min-h-full bg-[var(--background)] text-[var(--foreground)]" data-testid="weekly-class-log-page">
       <div className="min-w-0 flex-1 px-3 py-3 md:px-5 md:py-4">
         <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--card)]/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
-          <h1 className="font-[var(--font-heading)] text-[22px] font-semibold leading-7 tracking-[-0.01em] text-[var(--foreground)]">Sổ Đầu Bài</h1>
+          <h1 className="font-[var(--font-heading)] text-[22px] font-semibold leading-7 tracking-normal text-[var(--foreground)]">Sổ Đầu Bài</h1>
 
           <div className="ml-auto flex flex-wrap items-center gap-2">
             <select
               value={selectedSubject}
               onChange={(event) => setSelectedSubject(event.target.value)}
-              className="h-10 min-w-40 appearance-none rounded-[10px] border border-[var(--border)] bg-[var(--card)] py-0 pl-3.5 pr-9 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150 hover:border-[var(--muted-foreground)]/30 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]"
-              style={{ backgroundImage: svgChevronDown, backgroundSize: "16px 16px", backgroundPosition: "right 12px center", backgroundRepeat: "no-repeat" }}
+              className="erg-select-control h-10 min-w-40 rounded-lg py-0 pl-3.5 text-sm"
               aria-label="Chọn môn học"
             >
               {lmsSubjectOptions.map((subject) => (
@@ -128,8 +126,7 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
             <select
               value={selectedWeek.id}
               onChange={(event) => setSelectedWeekId(event.target.value)}
-              className="h-10 min-w-56 appearance-none rounded-[10px] border border-[var(--border)] bg-[var(--card)] py-0 pl-3.5 pr-9 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] outline-none transition-all duration-150 hover:border-[var(--muted-foreground)]/30 focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)]"
-              style={{ backgroundImage: svgChevronDown, backgroundSize: "16px 16px", backgroundPosition: "right 12px center", backgroundRepeat: "no-repeat" }}
+              className="erg-select-control h-10 min-w-56 rounded-lg py-0 pl-3.5 text-sm"
               aria-label="Chọn tuần"
             >
               {weeks.map((week) => (
@@ -138,27 +135,33 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
                 </option>
               ))}
             </select>
-            <button
-              type="button"
-              onClick={() => goToWeek(1)}
-              disabled={selectedWeekIndex >= weeks.length - 1}
-              className="h-10 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-150 hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Tuần trước
-            </button>
-            <button
-              type="button"
-              onClick={() => goToWeek(-1)}
-              disabled={selectedWeekIndex <= 0}
-              className="h-10 rounded-[10px] border border-[var(--border)] bg-[var(--card)] px-3.5 text-sm font-semibold text-[var(--foreground)] shadow-[var(--shadow-xs)] transition-all duration-150 hover:bg-[var(--surface-hover)] disabled:cursor-not-allowed disabled:opacity-40"
-            >
-              Tuần sau
-            </button>
+            <div className="ml-1 inline-flex h-10 overflow-hidden rounded-xl border border-[#cfdbea] bg-white shadow-[0_1px_2px_rgb(15_23_42/0.04)]" aria-label="Điều hướng tuần">
+              <button
+                type="button"
+                onClick={() => goToWeek(1)}
+                disabled={selectedWeekIndex >= weeks.length - 1}
+                className="inline-flex h-full min-w-[116px] items-center justify-center gap-1.5 border-r border-[#dbe4f0] px-3 text-sm font-bold text-slate-700 transition hover:bg-[#f3f8ff] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-slate-400"
+                aria-label="Tuần trước"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                <span>Tuần trước</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => goToWeek(-1)}
+                disabled={selectedWeekIndex <= 0}
+                className="inline-flex h-full min-w-[104px] items-center justify-center gap-1.5 px-3 text-sm font-bold text-slate-700 transition hover:bg-[#f3f8ff] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-slate-400"
+                aria-label="Tuần sau"
+              >
+                <span>Tuần sau</span>
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
-        <div className="overflow-auto rounded-xl border border-[var(--border)] bg-[var(--card)] shadow-[var(--shadow-sm)]">
-          <div className="grid min-w-[1380px] grid-cols-[minmax(0,1fr)_260px]">
-            <table className="w-full table-fixed border-collapse text-[13px] leading-5 text-[var(--foreground)]" style={{ contentVisibility: "auto" }}>
+        <div className="overflow-auto rounded-lg border border-[#d9e2ef] bg-[var(--card)] shadow-[var(--shadow-xs)]">
+          <div className="grid min-w-[1540px] grid-cols-[minmax(0,1fr)_280px]">
+            <table className="erg-data-table w-full table-fixed border-collapse text-[13px] leading-5 text-[var(--foreground)]" style={{ contentVisibility: "auto" }}>
               <colgroup>
                 <col className="w-[80px]" />
                   <col className="w-[64px]" />
@@ -166,8 +169,8 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
                 <col className="w-[70px]" />
                 <col className="w-[52px]" />
                 <col className="w-[110px]" />
-                <col className="w-[300px]" />
-                <col className="w-[250px]" />
+                <col className="w-[380px]" />
+                <col className="w-[320px]" />
                 <col className="w-[78px]" />
                 <col className="w-[76px]" />
               </colgroup>
@@ -227,7 +230,7 @@ const DayRows = memo(function DayRows({
   return (
     <>
       {day.periods.map((period, index) => (
-        <tr key={period.id} className={cn("h-9 align-top", periodRowClass(getPeriodCompletionState(period)))}>
+        <tr key={period.id} className={cn("min-h-10 align-top", periodRowClass(getPeriodCompletionState(period)))}>
           {index === 0 ? (
             <td rowSpan={day.periods.length} className={cn("border border-[var(--border)] px-2 text-center align-middle", periodRowClass(dayState))}>
               <div>{day.label}</div>
@@ -342,7 +345,7 @@ const HeaderCell = memo(function HeaderCell({
   rowSpan?: number;
 }) {
   return (
-    <th colSpan={colSpan} rowSpan={rowSpan} className="border border-[var(--border)] bg-[var(--muted)]/70 px-2 py-2.5 text-center text-[12px] font-semibold leading-4 text-[var(--muted-foreground)]">
+    <th colSpan={colSpan} rowSpan={rowSpan} className="border border-[#cbd7e6] bg-[#eef4fb] px-2 py-2.5 text-center text-[13px] font-bold leading-4 text-slate-700">
       {children}
     </th>
   );
@@ -391,7 +394,7 @@ const EditableCell = memo(function EditableCell({
           value={value}
           disabled={disabled}
           onChange={(event) => onChange(event.target.value)}
-          className="h-9 w-full bg-transparent px-1 text-center text-[13px] font-semibold text-[var(--foreground)] outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
+          className="erg-select-control erg-select-cell h-9 w-full rounded-none bg-transparent px-1 pl-2 pr-7 text-center text-[13px] font-semibold text-[var(--foreground)] shadow-none outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
         >
           <option value=""></option>
           <option value="Đạt">Đạt</option>
@@ -401,8 +404,6 @@ const EditableCell = memo(function EditableCell({
     );
   }
 
-  // use native <input> instead of <textarea> — CSS field-sizing: content handles auto-height
-  // No JS resize. No useEffect per cell.
   const handleInputChange = useCallback((nextValue: string, caretPosition: number | null) => {
     onChange(nextValue);
     if (!mentionOptions?.length || caretPosition === null) {
@@ -430,6 +431,13 @@ const EditableCell = memo(function EditableCell({
     setMentionQuery("");
   }, [value, mentionStart, mentionQuery, onChange]);
 
+  const controlClassName = cn(
+    "block min-h-9 w-full min-w-0 bg-transparent px-2 py-1.5 text-[13px] font-medium leading-5 outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50",
+    mentionOptions?.length && !isFocused ? "text-transparent caret-[var(--foreground)]" : "text-[var(--foreground)]",
+    center && "text-center",
+  );
+  const useMultilineControl = field === "absent" || field === "lesson" || field === "comment";
+
   return (
     <td className={cn("relative overflow-visible border border-[var(--border)] border-b border-dotted border-b-[var(--border)] p-0", periodRowClass(rowState))}>
       {/* Mention overlay: renders highlighted names behind the transparent input when blurred */}
@@ -444,25 +452,39 @@ const EditableCell = memo(function EditableCell({
           {renderMentionText(value, mentionOptions)}
         </div>
       ) : null}
-      <input
-        type="text"
-        value={value}
-        disabled={disabled}
-        onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => {
-          window.setTimeout(() => {
-            setMentionStart(null);
-            setMentionQuery("");
-            setIsFocused(false);
-          }, 120);
-        }}
-        className={cn(
-          "block h-9 w-full min-w-0 bg-transparent px-2 py-1.5 text-[13px] font-medium leading-5 outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50",
-          mentionOptions?.length && !isFocused ? "text-transparent caret-[var(--foreground)]" : "text-[var(--foreground)]",
-          center && "text-center",
-        )}
-      />
+      {useMultilineControl ? (
+        <textarea
+          value={value}
+          disabled={disabled}
+          rows={getEditableCellRows(field, value)}
+          onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => {
+            window.setTimeout(() => {
+              setMentionStart(null);
+              setMentionQuery("");
+              setIsFocused(false);
+            }, 120);
+          }}
+          className={cn(controlClassName, "resize-none overflow-hidden whitespace-pre-wrap break-words [field-sizing:content]")}
+        />
+      ) : (
+        <input
+          type="text"
+          value={value}
+          disabled={disabled}
+          onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => {
+            window.setTimeout(() => {
+              setMentionStart(null);
+              setMentionQuery("");
+              setIsFocused(false);
+            }, 120);
+          }}
+          className={controlClassName}
+        />
+      )}
       {/* Mention dropdown */}
       {filteredMentionOptions.length ? (
         <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] py-1 text-left shadow-[var(--shadow-sm)]">
@@ -602,6 +624,17 @@ function isCenteredField(field: keyof WeeklyClassLogPeriod) {
 
 function isStudentMentionField(field: keyof WeeklyClassLogPeriod) {
   return field === "absent" || field === "comment";
+}
+
+function getEditableCellRows(field: keyof WeeklyClassLogPeriod, value: string) {
+  const charsPerLine =
+    field === "absent" ? 16 :
+    field === "comment" ? 44 :
+    56;
+
+  return value
+    .split("\n")
+    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0);
 }
 
 function normalizeSearchText(value: string) {

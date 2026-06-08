@@ -5,12 +5,12 @@ import { Toggle as TogglePrimitive } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 const toggleVariants = cva(
-  "group/toggle inline-flex items-center justify-center gap-1 rounded-md border border-transparent text-sm font-semibold whitespace-nowrap text-slate-600 transition-all outline-none hover:border-[#dbe2ea] hover:bg-white hover:text-slate-950 hover:shadow-sm focus-visible:border-[var(--erg-blue)] focus-visible:ring-2 focus-visible:ring-[var(--erg-blue-ring)] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:border-[#b8d6fa] aria-pressed:bg-white aria-pressed:text-[var(--erg-blue)] aria-pressed:shadow-sm data-[state=on]:border-[#b8d6fa] data-[state=on]:bg-white data-[state=on]:text-[var(--erg-blue)] data-[state=on]:shadow-sm dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/toggle inline-flex items-center justify-center gap-1 rounded-md border border-transparent text-sm font-semibold whitespace-nowrap text-slate-600 transition-all outline-none hover:border-[#cbd7e6] hover:bg-white hover:text-slate-950 hover:shadow-[var(--shadow-xs)] focus-visible:border-[var(--primary)] focus-visible:ring-2 focus-visible:ring-[var(--ring)] disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 aria-pressed:border-[#b8c8db] aria-pressed:bg-white aria-pressed:text-[var(--primary)] aria-pressed:shadow-[var(--shadow-xs)] data-[state=on]:border-[#b8c8db] data-[state=on]:bg-white data-[state=on]:text-[var(--primary)] data-[state=on]:shadow-[var(--shadow-xs)] dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default: "bg-transparent",
-        outline: "border border-[#d1d9e6] bg-[#f6f8fb] hover:bg-white",
+        outline: "border border-[#cbd7e6] bg-[#f8fbff] hover:bg-white",
       },
       size: {
         default:

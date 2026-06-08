@@ -43,7 +43,7 @@ export function QuestionTypeDemoWorkspace() {
                 </a>
                 <a
                   href={getLmsPortalUrl()}
-                  className="inline-flex h-9 items-center rounded-md border border-[#cfd7e3] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)] transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]"
+                  className="inline-flex h-9 items-center rounded-md border border-[#d7e0ec] bg-white px-4 text-sm font-semibold text-[var(--erg-blue)] transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]"
                 >
                   Về dashboard
                 </a>
@@ -192,7 +192,7 @@ function QuestionTypeMiniature({ kind, active = false }: { kind: QuestionType; a
           </>
         ) : kind === "hotspot" ? (
           <span className="relative mt-0.5 h-6 rounded-sm bg-[var(--erg-blue-light)]">
-            <span className="absolute left-5 top-2 h-3 w-3 rounded-md border-2 border-[var(--erg-blue)]" />
+            <span className="absolute left-5 top-2 h-3 w-3 rounded-md border border-[var(--erg-blue)]" />
           </span>
         ) : kind === "drag-and-drop" || kind === "drag-the-words" ? (
           <span className="mt-1 grid grid-cols-3 gap-0.5">
@@ -314,7 +314,7 @@ function TrueFalseMock() {
           key={id}
           type="button"
           className={cn(
-            "min-h-24 rounded-lg border-2 px-5 text-xl font-semibold transition focus:outline-none focus:ring-4 focus:ring-[var(--erg-blue-ring)]",
+            "min-h-24 rounded-lg border px-5 text-xl font-semibold transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]",
             selected === id
               ? "border-[var(--erg-blue)] bg-[rgb(0_0_139_/_0.08)] text-[var(--erg-blue)]"
               : "border-slate-200 bg-white text-slate-600 hover:border-[#b8d6fa]",
@@ -337,7 +337,7 @@ function ShortAnswerMock() {
       <input
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        className="h-14 w-full rounded-lg border-2 border-slate-200 bg-white px-5 text-xl font-medium outline-none transition focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[var(--erg-blue-ring)]"
+        className="h-14 w-full rounded-lg border border-slate-200 bg-white px-5 text-xl font-medium outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
         placeholder="Nhập câu trả lời ngắn"
       />
       <p className="rounded-lg bg-[var(--erg-blue-light)] px-4 py-3 text-sm font-semibold text-[var(--erg-blue)]">
@@ -356,7 +356,7 @@ function NumericMock() {
         type="number"
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        className="h-14 rounded-lg border-2 border-slate-200 bg-white px-5 text-xl font-semibold outline-none transition focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[var(--erg-blue-ring)]"
+        className="h-14 rounded-lg border border-slate-200 bg-white px-5 text-xl font-semibold outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       />
       <div className="grid h-14 place-items-center rounded-lg bg-slate-100 text-sm font-semibold  text-slate-600">
         trang
@@ -434,7 +434,7 @@ function MatchingMock() {
             <div key={pair.id} className="grid items-stretch gap-0 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.35fr)]">
               <div
                 className={cn(
-                  "flex min-h-16 items-center gap-3 rounded-l-2xl border-2 bg-white px-4 text-lg font-medium",
+                  "flex min-h-16 items-center gap-3 rounded-l-2xl border bg-white px-4 text-lg font-medium",
                   isCorrect ? "border-emerald-400 text-emerald-700" : "border-red-300 text-red-600",
                 )}
               >
@@ -443,7 +443,7 @@ function MatchingMock() {
               </div>
               <div
                 className={cn(
-                  "flex min-h-16 items-center gap-3 rounded-r-2xl border-2 border-l-0 bg-white px-4 text-lg font-medium",
+                  "flex min-h-16 items-center gap-3 rounded-r-2xl border border-l-0 bg-white px-4 text-lg font-medium",
                   isCorrect ? "border-emerald-400 text-emerald-700" : "border-red-300 text-red-600",
                 )}
               >
@@ -489,7 +489,7 @@ function SelectFromListsMock() {
           <AppSelect
             value={answers[id as keyof typeof answers]}
             onChange={(event) => setAnswers((current) => ({ ...current, [id as string]: event.target.value }))}
-            className="h-11 rounded-md border-2 border-[#b8d6fa] bg-white px-4 font-semibold text-[var(--erg-blue)] outline-none"
+            className="h-11 rounded-md border border-[#b8d6fa] bg-white px-4 font-semibold text-[var(--erg-blue)] outline-none"
           >
             {(options as string[]).map((option) => (
               <option key={option}>{option}</option>
@@ -527,7 +527,7 @@ function DragWordsMock() {
           <button
             key={word}
             type="button"
-            className="cursor-grab rounded-md border-2 border-[#b8d6fa] bg-white px-4 py-2 text-sm font-semibold text-[var(--erg-blue)] shadow-sm transition "
+            className="cursor-grab rounded-md border border-[#b8d6fa] bg-white px-4 py-2 text-sm font-semibold text-[var(--erg-blue)] shadow-sm transition "
             onClick={() => placeWord(word)}
           >
             {word}
@@ -546,14 +546,14 @@ function HotspotMock() {
 
   return (
     <div className="space-y-4">
-      <div className="relative min-h-[320px] overflow-hidden rounded-lg border-2 border-[#0b7f9d] bg-[#f7f8fa]">
+      <div className="relative min-h-[320px] overflow-hidden rounded-lg border border-[#0b7f9d] bg-[#f7f8fa]">
         <div className="absolute left-[12%] top-[18%] h-32 w-44 rounded-lg border border-[#b8d6fa] bg-white p-4 shadow-sm">
           <div className="h-3 w-24 rounded-full bg-slate-200" />
           <div className="mt-4 h-20 rounded-md bg-slate-100" />
         </div>
         <button
           type="button"
-          className="absolute left-[58%] top-[34%] h-28 w-40 rounded-lg border-2 border-dashed border-[var(--erg-blue)] bg-white/80 p-4 text-left text-sm font-semibold text-[var(--erg-blue)]"
+          className="absolute left-[58%] top-[34%] h-28 w-40 rounded-lg border border-dashed border-[var(--erg-blue)] bg-white/80 p-4 text-left text-sm font-semibold text-[var(--erg-blue)]"
           onClick={() => setPoint({ x: 66, y: 48 })}
         >
           Vùng đúng: thông tin phiên bản
@@ -640,7 +640,7 @@ function LikertMock() {
                   <button
                     type="button"
                     className={cn(
-                      "h-8 w-8 rounded-md border-2 transition",
+                      "h-8 w-8 rounded-md border transition",
                       answers[row] === column ? "border-[var(--erg-blue)] bg-[var(--erg-blue)]" : "border-slate-300 bg-white",
                     )}
                     aria-label={`${row}: ${column}`}
@@ -666,7 +666,7 @@ function EssayMock() {
       <textarea
         value={value}
         onChange={(event) => setValue(event.target.value)}
-        className="min-h-44 w-full resize-y rounded-lg border-2 border-slate-200 bg-white p-5 text-lg font-medium leading-7 outline-none transition focus:border-[var(--erg-blue)] focus:ring-4 focus:ring-[var(--erg-blue-ring)]"
+        className="min-h-44 w-full resize-y rounded-lg border border-slate-200 bg-white p-5 text-lg font-medium leading-7 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
       />
       <div className="rounded-lg bg-slate-50 p-4">
         <div className="text-sm font-semibold  text-slate-500">Rubric mock</div>
@@ -695,14 +695,14 @@ function ChoiceButton({
     <button
       type="button"
       className={cn(
-        "flex min-h-14 items-center gap-3 rounded-lg border-2 px-4 text-left text-lg font-medium transition focus:outline-none focus:ring-4 focus:ring-[var(--erg-blue-ring)]",
+        "flex min-h-14 items-center gap-3 rounded-lg border px-4 text-left text-lg font-medium transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]",
         active ? "border-[var(--erg-blue)] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "border-slate-200 bg-white text-slate-700 hover:border-[#b8d6fa]",
       )}
       onClick={onClick}
     >
       <span
         className={cn(
-          "grid h-7 w-7 shrink-0 place-items-center border-2 bg-white",
+          "grid h-7 w-7 shrink-0 place-items-center border bg-white",
           shape === "radio" ? "rounded-full" : "rounded-lg",
           active ? "border-[var(--erg-blue)]" : "border-slate-300",
         )}
@@ -728,14 +728,14 @@ function BlankInput({
       value={value}
       placeholder={placeholder}
       onChange={(event) => onChange(event.target.value)}
-      className="mx-1 inline h-11 min-w-32 rounded-md border-2 border-[#b8d6fa] bg-white px-3 text-center font-semibold text-[var(--erg-blue)] outline-none focus:border-[var(--erg-blue)]"
+      className="mx-1 inline h-11 min-w-32 rounded-md border border-[#b8d6fa] bg-white px-3 text-center font-semibold text-[var(--erg-blue)] outline-none focus:border-[var(--erg-blue)]"
     />
   );
 }
 
 function WordSlot({ value }: { value: string }) {
   return (
-    <span className="inline-flex min-h-11 min-w-32 items-center justify-center rounded-md border-2 border-dashed border-[#b8d6fa] bg-white px-3 text-center font-semibold text-[var(--erg-blue)]">
+    <span className="inline-flex min-h-11 min-w-32 items-center justify-center rounded-md border border-dashed border-[#b8d6fa] bg-white px-3 text-center font-semibold text-[var(--erg-blue)]">
       {value || "......"}
     </span>
   );
@@ -743,7 +743,7 @@ function WordSlot({ value }: { value: string }) {
 
 function DropZone({ title, items, tone }: { title: string; items: string[]; tone: "green" | "red" }) {
   return (
-    <div className={cn("min-h-40 rounded-lg border-2 border-dashed p-4", tone === "green" ? "border-emerald-300 bg-emerald-50" : "border-red-300 bg-red-50")}>
+    <div className={cn("min-h-40 rounded-lg border border-dashed p-4", tone === "green" ? "border-emerald-300 bg-emerald-50" : "border-red-300 bg-red-50")}>
       <div className={cn("text-sm font-semibold ", tone === "green" ? "text-emerald-700" : "text-red-700")}>
         {title}
       </div>

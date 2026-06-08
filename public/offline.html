@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f6cbd" />
+    <title>ERG LMS offline</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter, "Public Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #f8fafc;
+        color: #172033;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        min-height: 100dvh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+      }
+
+      main {
+        width: min(420px, 100%);
+        border: 1px solid #d9e2ef;
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 18px 48px rgba(23, 32, 51, 0.12);
+        padding: 24px;
+      }
+
+      .mark {
+        width: 52px;
+        height: 52px;
+        display: grid;
+        place-items: center;
+        border-radius: 16px;
+        background: #0f6cbd;
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 18px 0 8px;
+        font-size: 24px;
+        line-height: 1.2;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0;
+        color: #526173;
+        font-size: 15px;
+        line-height: 1.6;
+      }
+
+      button {
+        width: 100%;
+        min-height: 44px;
+        margin-top: 20px;
+        border: 0;
+        border-radius: 10px;
+        background: #0f6cbd;
+        color: #fff;
+        font: inherit;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="mark" aria-hidden="true">ERG</div>
+      <h1>Chưa có kết nối mạng</h1>
+      <p>ERG LMS vẫn giữ app shell để mở lại nhanh. Kết nối lại mạng để tải dữ liệu lớp học, điểm danh, bảng điểm và tài nguyên mới nhất.</p>
+      <button type="button" onclick="window.location.reload()">Thử lại</button>
+    </main>
+  </body>
+</html>

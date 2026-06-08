@@ -104,7 +104,7 @@ export function CrmPortalShell() {
 
   return (
     <div className="flex h-screen max-h-screen overflow-hidden bg-[#f7f8fa] text-slate-950">
-      <aside className="hidden w-[292px] shrink-0 flex-col border-r border-[#cfd7e3] bg-[#f6f8fb] shadow-[1px_0_0_rgba(15,23,42,0.04)] lg:flex">
+      <aside className="hidden w-[292px] shrink-0 flex-col border-r border-[#d7e0ec] bg-[#f6f8fb] shadow-[1px_0_0_rgba(15,23,42,0.04)] lg:flex">
         <PortalBrandMark title="CRM ERG" />
 
         <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-4">
@@ -125,7 +125,7 @@ export function CrmPortalShell() {
                         active ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm before:absolute before:left-0 before:top-1.5 before:h-6 before:w-1 before:rounded-r-full before:bg-[var(--erg-blue)]" : "text-slate-600",
                       )}
                     >
-                      <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-slate-500 shadow-[inset_0_0_0_1px_rgba(148,163,184,0.24)]", active && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}>
+                      <span className={cn("grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-slate-500", active && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}>
                         <Icon className="h-4 w-4" />
                       </span>
                       {item.title}
@@ -156,7 +156,7 @@ export function CrmPortalShell() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#cfd7e3] bg-white px-5 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
+        <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#d7e0ec] bg-white px-5 shadow-[0_1px_0_rgba(15,23,42,0.04)]">
           <div className="min-w-0">
             <div className="text-xs font-medium text-slate-500">CRM ERG / {activeItem.section}</div>
             <h1 className="truncate text-lg font-semibold text-slate-950">{activeItem.title}</h1>
@@ -165,7 +165,7 @@ export function CrmPortalShell() {
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <Input className="h-9 border-0 bg-transparent shadow-none focus:ring-0" placeholder="Tìm kiếm toàn hệ thống" />
           </div>
-          <AppSelect className="hidden h-9 rounded-md border border-[#d1d1d1] bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)] xl:block" defaultValue="global">
+          <AppSelect className="hidden h-9 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)] xl:block" defaultValue="global">
             <option value="global">Toàn ERG</option>
             <option value="center">Theo trung tâm</option>
             <option value="school">Theo trường</option>

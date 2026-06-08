@@ -1,6 +1,7 @@
 "use client"
 
-import type { InputHTMLAttributes } from "react"
+import { Check, Minus } from "lucide-react"
+import { useEffect, useState, type InputHTMLAttributes } from "react"
 
 import { cn } from "@/lib/utils"
 
@@ -12,37 +13,53 @@ type CheckboxProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "check
 function Checkbox({
   className,
   checked,
+  defaultChecked,
   onCheckedChange,
+  onChange,
   ...props
 }: CheckboxProps) {
-  const isIndeterminate = checked === "indeterminate"
+  const isControlled = checked !== undefined
+  const [uncontrolledChecked, setUncontrolledChecked] = useState(Boolean(defaultChecked))
+  const visualChecked = isControlled ? checked : uncontrolledChecked
+  const isIndeterminate = visualChecked === "indeterminate"
+  const isChecked = visualChecked === true
+
+  useEffect(() => {
+    if (!isControlled) setUncontrolledChecked(Boolean(defaultChecked))
+  }, [defaultChecked, isControlled])
 
   return (
-    <input
-      type="checkbox"
-      data-slot="checkbox"
-      checked={isIndeterminate ? false : (checked as boolean)}
-      ref={(el) => {
-        if (el) el.indeterminate = isIndeterminate
-      }}
-      onChange={(event) => {
-        if (onCheckedChange) {
-          onCheckedChange(event.target.checked ? true : false)
-        }
-      }}
-      className={cn(
-        "size-[18px] cursor-pointer appearance-none rounded-[5px] border-2 border-[var(--border)] bg-[var(--card)] transition-all duration-100",
-        "checked:border-[var(--primary)] checked:bg-[var(--primary)]",
-        "hover:border-[var(--muted-foreground)]/40",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
-        "indeterminate:border-[var(--primary)] indeterminate:bg-[var(--primary)]",
-        "bg-[length:14px_14px] bg-center bg-no-repeat",
-        "checked:bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6L9 17l-5-5'/%3E%3C/svg%3E\")]",
-        "indeterminate:bg-[url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='4' stroke-linecap='round'%3E%3Cpath d='M6 12h12'/%3E%3C/svg%3E\")]",
-        className,
-      )}
-      {...props}
-    />
+    <span className="relative inline-grid size-[18px] shrink-0 place-items-center align-middle">
+      <input
+        type="checkbox"
+        data-slot="checkbox"
+        checked={isIndeterminate ? false : isChecked}
+        aria-checked={isIndeterminate ? "mixed" : isChecked}
+        data-checked={isChecked ? "true" : undefined}
+        data-indeterminate={isIndeterminate ? "true" : undefined}
+        ref={(el) => {
+          if (el) el.indeterminate = isIndeterminate
+        }}
+        onChange={(event) => {
+          onChange?.(event)
+          if (!isControlled) setUncontrolledChecked(event.target.checked)
+          if (onCheckedChange) {
+            onCheckedChange(event.target.checked ? true : false)
+          }
+        }}
+        className={cn(
+          "peer size-[18px] cursor-pointer appearance-none rounded-[5px] border border-[#b8c8db] bg-white shadow-none transition-all duration-100",
+          "checked:border-[var(--primary)] checked:bg-[var(--primary)] data-[checked=true]:border-[var(--primary)] data-[checked=true]:bg-[var(--primary)] data-[indeterminate=true]:border-[var(--primary)] data-[indeterminate=true]:bg-[var(--primary)]",
+          "hover:border-[var(--primary)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+          "disabled:cursor-not-allowed disabled:opacity-60",
+          className,
+        )}
+        {...props}
+      />
+      {isChecked ? <Check className="pointer-events-none absolute size-3.5 text-white" strokeWidth={3} /> : null}
+      {isIndeterminate ? <Minus className="pointer-events-none absolute size-3.5 text-white" strokeWidth={3} /> : null}
+    </span>
   )
 }
 

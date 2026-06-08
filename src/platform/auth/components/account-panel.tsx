@@ -73,7 +73,7 @@ export function AccountPanel({
         </div>
       </div>
 
-      <div className="mt-6 inline-flex w-fit rounded-lg border border-[#cfd7e3] bg-[#f6f8fb] p-1 shadow-sm">
+      <div className="mt-6 inline-flex w-fit rounded-lg border border-[#d7e0ec] bg-[#f6f8fb] p-1 shadow-sm">
         {[
           { id: "profile" as const, label: t("auth.profile") },
           { id: "security" as const, label: t("auth.security") },

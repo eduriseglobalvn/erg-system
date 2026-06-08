@@ -16,7 +16,7 @@ function Command({ className, ...props }: React.ComponentProps<typeof CommandPri
   return (
     <CommandPrimitive
       data-slot="command"
-      className={cn("flex size-full flex-col overflow-hidden rounded-lg border border-[#cfd7e3] bg-white p-1 font-[var(--font-app)] text-[#242424] shadow-sm", className)}
+      className={cn("flex size-full flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white p-1 font-[var(--font-app)] text-[var(--foreground)] shadow-[var(--shadow-xs)]", className)}
       {...props}
     />
   );
@@ -42,7 +42,7 @@ function CommandDialog({
         <DialogDescription>{description}</DialogDescription>
       </DialogHeader>
       <DialogContent
-        className={cn("top-1/3 translate-y-0 overflow-hidden rounded-lg border-[#cfd7e3] p-0 shadow-sm", className)}
+        className={cn("top-1/3 translate-y-0 overflow-hidden rounded-lg border-[#cbd7e6] p-0", className)}
         showCloseButton={showCloseButton}
       >
         {children}
@@ -57,7 +57,7 @@ function CommandInput({
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div data-slot="command-input-wrapper" className="p-1 pb-0">
-      <InputGroup className="h-9 rounded-md border-[#d1d9e6] bg-[#f6f8fb] shadow-none *:data-[slot=input-group-addon]:pl-2 focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
+      <InputGroup className="h-9 rounded-md border-[#b8c8db] bg-[#fbfdff] shadow-none *:data-[slot=input-group-addon]:pl-2 focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--ring)]">
         <CommandPrimitive.Input
           data-slot="command-input"
           className={cn("w-full text-sm font-medium outline-hidden disabled:cursor-not-allowed disabled:opacity-50", className)}
@@ -99,7 +99,7 @@ function CommandGroup({
     <CommandPrimitive.Group
       data-slot="command-group"
       className={cn(
-        "overflow-hidden p-1 text-[#242424] **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-slate-500",
+        "overflow-hidden p-1 text-[var(--foreground)] **:[[cmdk-group-heading]]:px-2 **:[[cmdk-group-heading]]:py-1.5 **:[[cmdk-group-heading]]:text-xs **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:text-slate-500",
         className,
       )}
       {...props}

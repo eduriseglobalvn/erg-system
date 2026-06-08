@@ -31,7 +31,7 @@ export function StudentDashboardMobileShell({
 
   return (
     <div className="min-h-screen bg-[#f7f8fa] pb-24 font-[var(--font-app)] text-slate-900">
-      <header className="sticky top-0 z-30 border-b border-[#cfd7e3] bg-white/98 px-4 pb-3 pt-[calc(env(safe-area-inset-top,0px)+0.8rem)] shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-[#d7e0ec] bg-white/98 px-4 pb-3 pt-[calc(env(safe-area-inset-top,0px)+0.8rem)] shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur">
         <div className="mx-auto max-w-md">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">

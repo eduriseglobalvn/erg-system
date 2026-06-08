@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Bell, Building2, CheckCheck, Megaphone, ServerCog, Star, X } from "lucide-react";
+import { Bell, Building2, CheckCheck, Megaphone, MoreVertical, ServerCog, Settings, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -20,12 +20,6 @@ export type LmsNotification = {
   unread: boolean;
   starred?: boolean;
 };
-
-const notificationTypes: Array<{ type: LmsNotificationType; label: string }> = [
-  { type: "company", label: "Công ty" },
-  { type: "general", label: "Lớp học" },
-  { type: "system", label: "Hệ thống" },
-];
 
 export const lmsNotifications: LmsNotification[] = [
   {
@@ -78,13 +72,9 @@ export const lmsNotifications: LmsNotification[] = [
 
 export function LmsNotificationCenter() {
   const navigate = useNavigate();
-  const [activeType, setActiveType] = useState<LmsNotificationType>("system");
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set(lmsNotifications.filter((item) => !item.unread).map((item) => item.id)));
   const unreadCount = lmsNotifications.filter((item) => !readIds.has(item.id)).length;
-  const visibleNotifications = useMemo(
-    () => lmsNotifications.filter((item) => item.type === activeType),
-    [activeType],
-  );
+  const latestNotifications = useMemo(() => lmsNotifications.slice(0, 3), []);
 
   useEffect(() => {
     const newestSystemNotification = lmsNotifications.find((item) => item.type === "system" && item.unread);
@@ -128,82 +118,110 @@ export function LmsNotificationCenter() {
         >
           <Bell className="size-5" />
           {unreadCount ? (
-            <span className="absolute right-1 top-1 flex size-4 items-center justify-center rounded-full bg-[#d13438] text-[10px] font-semibold leading-none text-white ring-2 ring-white">
+            <span className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-full bg-[#d13438] text-[11px] font-bold leading-none text-white ring-2 ring-white">
               {unreadCount}
             </span>
           ) : null}
         </span>
       </PopoverTrigger>
-      <PopoverContent align="end" sideOffset={12} className="w-[min(430px,calc(100vw-24px))] gap-0 overflow-hidden rounded-lg border border-[#e0e4ea] bg-white p-0 shadow-sm">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-slate-950">Thông báo</h2>
-            <p className="mt-0.5 text-xs font-semibold text-slate-500">Cập nhật mới nhất cho giáo viên LMS</p>
-          </div>
-          <Button variant="ghost" size="sm" className="rounded-md text-[var(--erg-blue)]" onClick={markAllAsRead}>
-            <CheckCheck data-icon="inline-start" />
-            Đọc tất cả
-          </Button>
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto border-b border-slate-100 px-4 py-3">
-          {notificationTypes.map((item) => {
-            const count = lmsNotifications.filter((notification) => notification.type === item.type && !readIds.has(notification.id)).length;
-            const active = activeType === item.type;
-
-            return (
-              <button
-                key={item.type}
-                type="button"
-                onClick={() => setActiveType(item.type)}
-                className={cn(
-                  "inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-semibold transition",
-                  active ? "bg-[var(--erg-blue)] text-white" : "text-slate-500 hover:bg-[#f3f4f6] hover:text-slate-800",
-                )}
-              >
-                {item.label}
-                {count ? (
-                  <span className={cn("grid size-5 place-items-center rounded-md text-xs", active ? "bg-white text-[var(--erg-blue)]" : "bg-slate-200 text-slate-700")}>
-                    {count}
-                  </span>
-                ) : null}
+      <PopoverContent
+        align="end"
+        sideOffset={10}
+        collisionPadding={12}
+        className="w-[min(470px,calc(100vw-20px))] gap-0 overflow-hidden rounded-xl border border-[#d7e2ef] bg-white p-0 shadow-[0_18px_44px_rgba(15,23,42,0.14)]"
+      >
+        <div className="border-b border-[#eef2f7] bg-white px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-base font-bold leading-6 text-slate-950">Thông báo</h2>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" className="h-8 shrink-0 rounded-md px-2 text-xs font-bold text-[var(--erg-blue)]" onClick={markAllAsRead}>
+                <CheckCheck data-icon="inline-start" />
+                Đọc tất cả
+              </Button>
+              <button type="button" aria-label="Cài đặt thông báo" className="grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-900">
+                <Settings className="size-4" />
               </button>
-            );
-          })}
+            </div>
+          </div>
+          <div className="mt-3 flex items-center gap-2">
+            <span className="rounded-full bg-[var(--erg-blue-light)] px-4 py-2 text-sm font-black text-[var(--erg-blue)]">Tất cả</span>
+            <span className="rounded-full px-4 py-2 text-sm font-black text-slate-700">Chưa đọc</span>
+          </div>
         </div>
 
-        <div className="max-h-[440px] overflow-y-auto bg-slate-50/70 px-4 py-3">
-          {visibleNotifications.map((notification) => (
-            <button
-              key={notification.id}
-              type="button"
-              onClick={() => openNotification(notification)}
-              className={cn(
-                "mb-3 flex w-full items-start gap-3 rounded-lg border border-transparent bg-white p-4 text-left shadow-sm transition hover:border-[#b8d6fa]",
-                !readIds.has(notification.id) && "bg-[#ebf3fc]",
-              )}
-            >
-              <NotificationIcon type={notification.type} />
-              <span className="min-w-0 flex-1">
-                <span className="flex items-start justify-between gap-3">
-                  <span className="text-sm font-semibold leading-5 text-slate-900">{notification.title}</span>
-                  <Star className={cn("mt-0.5 size-4 shrink-0", notification.starred ? "fill-amber-400 text-amber-400" : "text-slate-300")} />
-                </span>
-                <span className="mt-1 block text-sm leading-6 text-slate-600">{notification.description}</span>
-                <span className="mt-1 flex items-center justify-between gap-3 text-xs font-semibold text-slate-400">
-                  {notification.timeLabel}
-                  {!readIds.has(notification.id) ? <span className="size-2 rounded-full bg-[var(--erg-blue)]" /> : null}
-                </span>
-              </span>
-            </button>
-          ))}
+        <div className="max-h-[min(470px,calc(100vh-210px))] overflow-y-auto bg-white">
+          <div className="px-4 pb-2 pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-sm font-bold text-slate-950">Quan trọng</h3>
+              <button type="button" onClick={() => navigate("/notifications")} className="text-sm font-semibold text-[var(--erg-blue)]">
+                Xem tất cả
+              </button>
+            </div>
+            <div className="grid gap-2">
+              {latestNotifications.slice(0, 1).map((notification) => (
+                <NotificationFeedItem
+                  key={notification.id}
+                  notification={notification}
+                  unread={!readIds.has(notification.id)}
+                  onOpen={() => openNotification(notification)}
+                  thumbnail
+                />
+              ))}
+            </div>
+          </div>
+          <div className="border-t border-[#eef2f7] px-4 pb-3 pt-4">
+            <h3 className="mb-2 text-sm font-bold text-slate-950">Các thông báo khác</h3>
+            <div className="grid gap-2">
+              {latestNotifications.slice(1).map((notification) => (
+                <NotificationFeedItem
+                  key={notification.id}
+                  notification={notification}
+                  unread={!readIds.has(notification.id)}
+                  onOpen={() => openNotification(notification)}
+                  thumbnail={notification.type === "general"}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div className="border-t border-slate-100 bg-white px-4 py-3">
-          <Button className="w-full rounded-md bg-[var(--erg-blue)] font-semibold hover:bg-[var(--erg-blue-hover)]">Xem tất cả thông báo</Button>
+        <div className="border-t border-[#eef2f7] bg-white px-5 py-3">
+          <Button variant="ghost" size="sm" className="h-9 w-full rounded-lg text-sm font-black text-[var(--erg-blue)]" onClick={() => navigate("/notifications")}>
+            Xem tất cả thông báo
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
+  );
+}
+
+function NotificationFeedItem({
+  notification,
+  onOpen,
+  thumbnail,
+  unread,
+}: {
+  notification: LmsNotification;
+  onOpen: () => void;
+  thumbnail?: boolean;
+  unread: boolean;
+}) {
+  return (
+    <button type="button" onClick={onOpen} className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 rounded-xl border border-[#e5ebf3] bg-white px-3 py-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.035)] transition hover:border-[#b8d6fa] hover:bg-[#f8fbff]">
+      <NotificationIcon type={notification.type} />
+      <span className="min-w-0">
+        <span className="block text-[15px] font-medium leading-6 text-slate-900">
+          <span className="font-bold">{notificationLabel(notification.type)}</span> · {notification.title}
+        </span>
+        <span className="mt-0.5 block text-sm leading-5 text-slate-600">{notification.description}</span>
+        <span className="mt-1 block text-xs font-bold text-slate-500">{notification.timeLabel}</span>
+      </span>
+      <span className="flex min-w-0 items-center gap-3">
+        {thumbnail ? <span className={cn("hidden h-12 w-20 rounded-md md:block", notificationThumbnailClass(notification.type))} /> : null}
+        {unread ? <span className="size-3 rounded-full bg-[var(--erg-blue)]" /> : null}
+        <MoreVertical className="size-4 text-slate-500 opacity-0 transition group-hover:opacity-100" />
+      </span>
+    </button>
   );
 }
 
@@ -211,16 +229,34 @@ function NotificationIcon({ type }: { type: LmsNotificationType }) {
   const Icon = type === "company" ? Building2 : type === "system" ? ServerCog : Megaphone;
 
   return (
-    <span className={cn("grid size-10 shrink-0 place-items-center rounded-lg text-white", type === "company" ? "bg-[var(--erg-blue)]" : type === "system" ? "bg-[var(--erg-blue)]" : "bg-amber-500")}>
+    <span className={cn("grid size-12 shrink-0 place-items-center rounded-full text-white", notificationIconClass(type))}>
       <Icon className="size-5" />
     </span>
   );
 }
 
+function notificationIconClass(type: LmsNotificationType) {
+  if (type === "company") return "bg-slate-700";
+  if (type === "system") return "bg-[var(--erg-blue)]";
+  return "bg-amber-500";
+}
+
+function notificationThumbnailClass(type: LmsNotificationType) {
+  if (type === "company") return "bg-[linear-gradient(135deg,#0f172a,#64748b)]";
+  if (type === "system") return "bg-[linear-gradient(135deg,#0068d9,#9cc9ff)]";
+  return "bg-[linear-gradient(135deg,#f59e0b,#fde68a)]";
+}
+
+function notificationLabel(type: LmsNotificationType) {
+  if (type === "company") return "Công ty";
+  if (type === "system") return "Hệ thống";
+  return "Lớp học";
+}
+
 function showSystemToast(notification: LmsNotification, onOpenDetail: (notification: LmsNotification) => void) {
   toast.custom(
     (toastId) => (
-      <div className="relative flex w-[360px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-lg border border-[#b8d6fa] bg-white p-4 pr-11 text-left shadow-sm transition duration-300 ease-out">
+      <div className="relative flex w-[380px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-xl border border-[#b8d6fa] bg-white p-4 pr-11 text-left shadow-[0_16px_42px_rgba(15,23,42,0.16)] transition duration-300 ease-out">
         <button
           type="button"
           onClick={() => {
@@ -235,7 +271,7 @@ function showSystemToast(notification: LmsNotification, onOpenDetail: (notificat
               <Badge variant="secondary" className="rounded-md bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
                 Hệ thống
               </Badge>
-              <span className="text-xs font-semibold text-slate-400">{notification.timeLabel}</span>
+              <span className="text-[13px] font-semibold text-slate-600">{notification.timeLabel}</span>
             </span>
             <span className="mt-2 block text-sm font-semibold leading-5 text-slate-950">{notification.title}</span>
             <span className="mt-1 block text-sm leading-5 text-slate-600">{notification.description}</span>
@@ -248,7 +284,7 @@ function showSystemToast(notification: LmsNotification, onOpenDetail: (notificat
             event.stopPropagation();
             toast.dismiss(toastId);
           }}
-          className="absolute right-3 top-3 grid size-7 place-items-center rounded-md text-slate-400 transition hover:bg-[#f3f4f6] hover:text-slate-700"
+          className="absolute right-3 top-3 grid size-8 place-items-center rounded-lg text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-800"
         >
           <X className="size-4" />
         </button>

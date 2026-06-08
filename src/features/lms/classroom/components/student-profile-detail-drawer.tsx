@@ -44,8 +44,8 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
   return (
     <>
       <button type="button" aria-label="Đóng chi tiết học sinh" className="fixed inset-0 z-[90] bg-slate-950/25" onClick={onClose} />
-      <aside className="fixed right-0 top-0 z-[100] flex h-screen w-[560px] max-w-[calc(100vw-20px)] flex-col border-l border-[#e0e4ea] bg-white shadow-sm">
-        <div className="border-b border-slate-200 p-4">
+      <aside className="fixed right-0 top-0 z-[100] flex h-screen w-[560px] max-w-[calc(100vw-20px)] flex-col border-l border-[#cbd7e6] bg-white shadow-sm">
+        <div className="border-b border-[#cbd7e6] bg-[#f8fbff] p-4">
           <div className="flex items-start justify-between gap-3">
             <div className="flex min-w-0 items-start gap-3">
               <div className="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
@@ -53,7 +53,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
               </div>
               <div className="min-w-0">
                 <h2 className="truncate text-lg font-semibold text-slate-950">Chi tiết hồ sơ học sinh</h2>
-                <p className="mt-0.5 text-xs font-semibold text-slate-500">
+                <p className="mt-0.5 text-[13px] font-semibold text-slate-600">
                   {student.className} - {student.schoolName}
                 </p>
                 <div className="mt-2 flex flex-wrap gap-2">
@@ -63,7 +63,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
                 </div>
               </div>
             </div>
-            <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-slate-100" onClick={onClose}>
+            <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-white hover:text-[var(--erg-blue)]" onClick={onClose}>
               <X className="h-4 w-4" />
             </button>
           </div>
@@ -71,7 +71,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
 
         <div className="min-h-0 flex-1 overflow-auto p-4">
           <div className="grid gap-4">
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <SectionTitle title="Thông tin định danh" />
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <Field label="Họ tên">
@@ -85,7 +85,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <SectionTitle title="Liên hệ gia đình" />
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <ReadOnlyField label="Phụ huynh chính" value={profile.guardianName} />
@@ -95,7 +95,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <SectionTitle title="Tài khoản elearning" />
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <Field label="Username">
@@ -103,7 +103,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
                 </Field>
                 <Field label="Mật khẩu">
                   <div className="relative">
-                    <LockKeyhole className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+                    <LockKeyhole className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
                     <input value={draft.password} onChange={(event) => onUpdate({ password: event.target.value })} className={cn(detailInputClass, "pl-8")} />
                   </div>
                 </Field>
@@ -112,7 +112,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <SectionTitle title="Theo dõi học tập" />
               <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                 <MiniMetric label="Tiến độ" value={`${student.progressRate}%`} />
@@ -128,7 +128,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
               </div>
             </section>
 
-            <section className="rounded-lg border border-slate-200 bg-white p-4">
+            <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
               <SectionTitle title="Chăm sóc và ghi chú" />
               <div className="mt-3 grid gap-3">
                 {statusOptions?.length && statusValue && onStatusChange ? (
@@ -151,9 +151,9 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2 border-t border-slate-200 p-3">
-          <span className="text-xs font-medium text-slate-500">{student.name} - {student.className}</span>
-          <Button type="button" onClick={onClose} className="h-9 rounded-md px-3 text-xs">
+        <div className="flex items-center justify-between gap-2 border-t border-[#cbd7e6] bg-[#f8fbff] p-3">
+          <span className="text-[13px] font-semibold text-slate-600">{student.name} - {student.className}</span>
+          <Button type="button" onClick={onClose} className="h-9 rounded-md px-3 text-[14px]">
             Lưu thông tin
           </Button>
         </div>
@@ -187,17 +187,17 @@ function buildStudentProfile(student: ClassroomStudent) {
 }
 
 function SectionTitle({ title }: { title: string }) {
-  return <h3 className="text-xs font-semibold text-slate-600">{title}</h3>;
+  return <h3 className="text-[14px] font-bold text-slate-700">{title}</h3>;
 }
 
 function BadgeText({ children }: { children: string }) {
-  return <span className="rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-600">{children}</span>;
+  return <span className="rounded-md border border-[#dbe4f0] bg-white px-2.5 py-1 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]">{children}</span>;
 }
 
 function Field({ children, label }: { children: ReactNode; label: string }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-[11px] font-semibold text-slate-500">{label}</span>
+      <span className="mb-1 block text-[13px] font-semibold text-slate-600">{label}</span>
       {children}
     </label>
   );
@@ -206,22 +206,22 @@ function Field({ children, label }: { children: ReactNode; label: string }) {
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="mb-1 text-[11px] font-semibold text-slate-500">{label}</div>
-      <div className="min-h-9 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-sm font-semibold leading-5 text-slate-800">{value}</div>
+      <div className="mb-1 text-[13px] font-semibold text-slate-600">{label}</div>
+      <div className="min-h-10 rounded-md border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-2 text-sm font-semibold leading-5 text-slate-800">{value}</div>
     </div>
   );
 }
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md border border-slate-200 bg-slate-50 px-2 py-1.5">
-      <div className="text-[10px] font-semibold text-slate-500">{label}</div>
-      <div className="mt-0.5 truncate text-xs font-semibold text-slate-900">{value}</div>
+    <div className="rounded-md border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-2">
+      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
+      <div className="mt-0.5 truncate text-[13px] font-bold text-slate-900">{value}</div>
     </div>
   );
 }
 
-const detailInputClass = "h-9 w-full rounded-md border border-[#d1d1d1] bg-white px-2.5 text-sm font-semibold text-slate-800 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
+const detailInputClass = "h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-2.5 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
 function removeVietnameseMarks(value: string) {
   return value

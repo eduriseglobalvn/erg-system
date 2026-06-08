@@ -23,12 +23,12 @@ export function StudentLevelBadge({ level }: { level: string }) {
   return (
     <span
       className={cn(
-        "inline-flex rounded-md px-2.5 py-1 text-[11px] font-semibold",
+        "inline-flex rounded-lg border px-2.5 py-1 text-[13px] font-bold",
         level === "Khá"
-          ? "bg-emerald-50 text-emerald-600"
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
           : level === "Cần hỗ trợ"
-            ? "bg-amber-50 text-amber-600"
-            : "bg-slate-100 text-slate-500",
+            ? "border-amber-200 bg-amber-50 text-amber-700"
+            : "border-slate-200 bg-slate-50 text-slate-700",
       )}
     >
       {level}
