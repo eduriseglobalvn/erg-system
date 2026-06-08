@@ -205,7 +205,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   }
 
   async function login(portal: StoredAuthSession["portal"] = "lms") {
-    if (loginForm.email.trim().toLowerCase() === "admin" && loginForm.password === "admin") {
+    if (loginForm.email.trim().toLowerCase() === "admin@erg.edu.vn" && loginForm.password === "Password123") {
       const nextAccount = loginWithMockAdmin({ portal, rememberMe });
       setAccount(nextAccount);
       setProfileForm(createProfileForm(nextAccount));
