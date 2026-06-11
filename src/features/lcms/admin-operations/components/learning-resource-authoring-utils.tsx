@@ -219,7 +219,7 @@ export function slugifyPathSegment(value: string) {
 }
 
 export function buildExplorerPathUrl(subject?: StudioSubject, path: StudioNode[] = [], target?: StudioNode | LocalContentItem | AttachedResourceItem) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://lcms.erg.edu.vn";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://lcms.erg.edu.local";
   const segments = ["resources"];
   if (subject?.label) segments.push(slugifyPathSegment(subject.label));
   path.forEach((item) => segments.push(slugifyPathSegment(item.label)));

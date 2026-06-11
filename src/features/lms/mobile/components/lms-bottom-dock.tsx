@@ -1,4 +1,4 @@
-import { MoreHorizontal, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -7,73 +7,37 @@ export type LmsMobileDockItem<TSection extends string> = {
   label: string;
   path: string;
   icon: LucideIcon;
+  badgeCount?: number;
 };
-
-const dockWavePositions = ["left-[10%]", "left-[30%]", "left-[50%]", "left-[70%]", "left-[90%]"] as const;
 
 export function LmsBottomDock<TSection extends string>({
   activeSection,
   items,
-  moreActive,
-  onMoreOpen,
   onNavigate,
 }: {
   activeSection: TSection;
   items: Array<LmsMobileDockItem<TSection>>;
-  moreActive: boolean;
-  onMoreOpen: () => void;
   onNavigate: (path: string) => void;
 }) {
-  const activeIndex = moreActive ? items.length : Math.max(0, items.findIndex((item) => item.id === activeSection));
-  const wavePosition = dockWavePositions[Math.min(activeIndex, dockWavePositions.length - 1)];
+  const dockItemCount = Math.max(items.length, 1);
 
   return (
     <nav
-      aria-label="Dieu huong LMS tren mobile"
-      className="fixed inset-x-0 bottom-0 z-40 px-2.5 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] xl:hidden"
+      aria-label="Điều hướng LMS mobile"
+      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] xl:hidden"
     >
-      <div className="relative mx-auto max-w-[390px]">
-        <div
-          className={cn(
-            "pointer-events-none absolute -top-px z-20 h-[34px] w-[66px] -translate-x-1/2 text-[var(--erg-blue)]",
-            "transition-[left,transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-            wavePosition,
-          )}
-          aria-hidden="true"
-        >
-          <svg viewBox="0 0 66 34" className="h-full w-full" preserveAspectRatio="none">
-            <path
-              fill="currentColor"
-              d="M0 0H66C57.1 0 52.6 5.8 47.8 13.4C43.8 19.7 39.5 23.7 33 23.7C26.5 23.7 22.2 19.7 18.2 13.4C13.4 5.8 8.9 0 0 0Z"
-            />
-            <circle cx="33" cy="12.5" r="5.8" fill="white" />
-          </svg>
-        </div>
-
-        <div className="relative z-10 rounded-[22px] border border-white/90 bg-white px-2.5 pb-2 pt-3.5 shadow-[0_10px_24px_rgba(15,23,42,0.16),0_1px_0_rgba(255,255,255,0.95)_inset] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]">
-          <div className="relative z-10 grid h-[48px] grid-cols-5 items-end gap-1">
-            {items.map((item) => {
-              const active = activeSection === item.id;
-
-              return (
-                <DockButton
-                  key={item.id}
-                  active={active}
-                  icon={item.icon}
-                  label={item.label}
-                  onClick={() => onNavigate(item.path)}
-                />
-              );
-            })}
-
+      <div className="mx-auto max-w-[430px] rounded-[26px] border border-[#eef3f8] bg-white px-2.5 py-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.16),0_1px_0_rgba(255,255,255,0.96)_inset]">
+        <div className="grid h-[68px] items-stretch" style={{ gridTemplateColumns: `repeat(${dockItemCount}, minmax(0, 1fr))` }}>
+          {items.map((item) => (
             <DockButton
-              active={moreActive}
-              ariaLabel="Mo them chuc nang LMS"
-              icon={MoreHorizontal}
-              label={"Th\u00eam"}
-              onClick={onMoreOpen}
+              key={item.id}
+              active={activeSection === item.id}
+              badgeCount={item.badgeCount}
+              icon={item.icon}
+              label={item.label}
+              onClick={() => onNavigate(item.path)}
             />
-          </div>
+          ))}
         </div>
       </div>
     </nav>
@@ -83,12 +47,14 @@ export function LmsBottomDock<TSection extends string>({
 function DockButton({
   active,
   ariaLabel,
+  badgeCount,
   icon: Icon,
   label,
   onClick,
 }: {
   active: boolean;
   ariaLabel?: string;
+  badgeCount?: number;
   icon: LucideIcon;
   label: string;
   onClick: () => void;
@@ -97,34 +63,32 @@ function DockButton({
     <button
       type="button"
       aria-current={active ? "page" : undefined}
-      aria-label={ariaLabel}
+      aria-label={ariaLabel ?? label}
       className={cn(
-        "group relative flex h-[46px] min-w-0 flex-col items-center justify-end gap-1 text-center",
-        "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--erg-blue)]/25",
-        active ? "text-[var(--erg-blue)]" : "text-[#747b86]",
+        "group relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] text-center",
+        "transition-all duration-200 ease-out active:scale-[0.97]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f6cbd]/25",
+        active ? "bg-[#f0f7ff] text-[#0f6cbd]" : "text-[#6b7280] hover:bg-[#f6f9fc] hover:text-slate-900",
       )}
       onClick={onClick}
     >
       <span
         className={cn(
-          "grid h-8 w-8 place-items-center will-change-transform",
-          "transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          active
-            ? "-translate-y-0.5 scale-100 text-[var(--erg-blue)]"
-            : "scale-100 text-[#202327] group-hover:-translate-y-0.5 group-hover:text-[var(--erg-blue)] group-active:translate-y-0 group-active:scale-90",
+          "relative grid h-8 w-8 place-items-center rounded-full transition-colors duration-200",
+          active ? "bg-[#0f6cbd] text-white shadow-[0_8px_18px_rgba(15,108,189,0.24)]" : "bg-transparent text-[#202327] group-hover:text-[#0f6cbd]",
         )}
       >
-        <Icon
-          className="h-[21px] w-[21px] transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
-          strokeWidth={active ? 2.1 : 2}
-        />
+        <Icon className="h-5 w-5" strokeWidth={active ? 2.35 : 2.1} />
+        {badgeCount ? (
+          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d13438] px-1 text-[10px] font-black leading-none text-white ring-2 ring-white">
+            {badgeCount > 9 ? "9+" : badgeCount}
+          </span>
+        ) : null}
       </span>
       <span
         className={cn(
-          "block max-w-full truncate px-0.5 text-[9px] font-bold leading-none tracking-normal",
-          "transition-colors duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]",
-          active ? "text-[var(--erg-blue)]" : "text-[#7b7f86]",
+          "block max-w-full truncate px-0.5 text-[11px] font-extrabold leading-none tracking-normal",
+          active ? "text-[#0f6cbd]" : "text-[#737984]",
         )}
       >
         {label}

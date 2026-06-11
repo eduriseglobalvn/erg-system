@@ -223,7 +223,7 @@ function localExercise(
     parentOptionId: sectionId,
     title,
     topicLabel,
-    resourceUrl: `https://lcms.erg.edu.vn/mock/${id}`,
+    resourceUrl: `https://lcms.erg.edu.local/mock/${id}`,
     questionCount,
     durationMinutes,
     status: "published",

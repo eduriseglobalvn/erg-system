@@ -58,6 +58,8 @@ type BackendProfileResponseDTO = {
   bio?: string;
   isProfileCompleted?: boolean;
   is_profile_completed?: boolean;
+  jobTitle?: string;
+  job_title?: string;
   provider?: string;
   accountType?: string;
   account_type?: string;
@@ -121,24 +123,23 @@ export const authApi = {
   },
 
   async profile() {
-    const result = await apiRequest<BackendProfileResponseDTO | AuthAccountResponseDTO>("/api/lms/auth/profile");
+    const result = await apiRequest<BackendProfileResponseDTO | AuthAccountResponseDTO>("/api/v1/users/me");
     return "role" in result ? result : mapProfileToAccount(result);
   },
 
   sessions() {
-    return apiRequest<{ items: AuthSessionResponseDTO[] }>("/api/lms/auth/sessions");
+    return apiRequest<{ items: AuthSessionResponseDTO[] }>("/api/v1/users/me/sessions");
   },
 
   async updateProfile(accountId: string, input: UpdateProfileRequestDTO) {
-    const result = await apiRequest<BackendProfileResponseDTO>(`/api/lms/auth/accounts/${accountId}/profile`, {
-      method: "PUT",
+    void accountId;
+    const result = await apiRequest<BackendProfileResponseDTO>("/api/v1/users/me", {
+      method: "PATCH",
       body: JSON.stringify({
-        fullName: input.fullName,
+        full_name: input.fullName,
         phone: input.phone,
-        department: input.department,
-        title: input.title,
-        jobTitle: input.title,
-        avatarUrl: input.avatarUrl,
+        job_title: input.title,
+        avatar_url: input.avatarUrl,
         bio: input.bio,
       }),
     });
@@ -155,18 +156,32 @@ export const authApi = {
     return mapProfileToAccount(result);
   },
 
-  updatePassword(accountId: string, input: UpdatePasswordRequestDTO) {
-    return apiRequest<AuthAccountResponseDTO>(`/api/lms/auth/accounts/${accountId}/password`, {
+  async updatePassword(accountId: string, input: UpdatePasswordRequestDTO) {
+    void accountId;
+    await apiRequest<{ message: string }>("/api/v1/users/me/password", {
       method: "PUT",
-      body: JSON.stringify({ currentPassword: input.currentPassword, newPassword: input.nextPassword }),
+      body: JSON.stringify({ old_password: input.currentPassword, new_password: input.nextPassword }),
     });
+    return authApi.profile();
   },
 
   async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string, portal: "admin" | "crm" | "lcms" | "lms" = "lms") {
-    const result = await apiRequest<BackendAuthSessionResponseDTO>(`/api/lms/auth/providers/${provider}`, {
+    void provider;
+    const claims = decodeJwtPayload(idToken);
+    const result = await apiRequest<BackendAuthSessionResponseDTO>(`${AUTH_V1_BASE}/google/login`, {
       portal,
       method: "POST",
-      body: JSON.stringify({ rememberMe, idToken, portal }),
+      body: JSON.stringify({
+        ...getLoginDeviceMetadata(),
+        avatarUrl: typeof claims?.picture === "string" ? claims.picture : undefined,
+        email: typeof claims?.email === "string" ? claims.email : "",
+        emailVerified: typeof claims?.email_verified === "boolean" ? claims.email_verified : undefined,
+        fullName: typeof claims?.name === "string" ? claims.name : undefined,
+        googleSub: typeof claims?.sub === "string" ? claims.sub : "",
+        idToken,
+        rememberMe,
+        portal,
+      }),
     });
     return normalizeAuthSession(result);
   },
@@ -243,7 +258,7 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
     role: mapRole(profile?.roles),
     provider: mapProvider(profile?.provider),
     department: profile?.accountType ?? profile?.account_type ?? "ERG",
-    title: mapRole(profile?.roles) === "admin" ? "Quản trị viên" : "Giáo viên",
+    title: profile?.jobTitle ?? profile?.job_title ?? (mapRole(profile?.roles) === "admin" ? "Quản trị viên" : "Giáo viên"),
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
     isProfileCompleted: profile?.isProfileCompleted ?? profile?.is_profile_completed ?? true,
     status: profile?.status ?? "ACTIVE",
@@ -282,6 +297,29 @@ function mapProvider(provider?: string): AuthProvider {
 function expiresInToDate(expiresIn?: number) {
   if (!expiresIn) return undefined;
   return new Date(Date.now() + expiresIn * 1000).toISOString();
+}
+
+function decodeJwtPayload(token: string) {
+  const payload = token.split(".")[1];
+  if (!payload) return null;
+
+  try {
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const decoded =
+      typeof window !== "undefined" && typeof window.atob === "function"
+        ? window.atob(padded)
+        : globalThis.atob(padded);
+    return JSON.parse(decoded) as {
+      email?: unknown;
+      email_verified?: unknown;
+      name?: unknown;
+      picture?: unknown;
+      sub?: unknown;
+    };
+  } catch {
+    return null;
+  }
 }
 
 const DEVICE_ID_STORAGE_KEY = "erg-device-id";

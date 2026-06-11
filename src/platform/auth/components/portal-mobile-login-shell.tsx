@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 import { ERG_ASSETS } from "@/config/seo";
@@ -23,160 +23,103 @@ export function PortalMobileLoginShell({
   copy: PortalMobileLoginShellCopy;
 }) {
   return (
-    <main
-      style={{
-        background: "var(--erg-bg)",
-        color: "#0f172a",
-        fontFamily: "var(--font-app)",
-        minHeight: "100svh",
-        padding: "calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 24px)",
-      }}
-    >
-      <div
-        style={{
-          margin: "0 auto",
-          maxWidth: 400,
-          width: "100%",
-        }}
-      >
-        <section
-          style={{
-            background: "var(--erg-blue)",
-            borderRadius: 8,
-            boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-            color: "#ffffff",
-            overflow: "hidden",
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              alignItems: "center",
-              display: "flex",
-              gap: 12,
-            }}
-          >
-            <img
-              alt="ERG"
-              src={ERG_ASSETS.logo}
-              style={{
-                backgroundColor: "#ffffff",
-                borderRadius: 8,
-                boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-                display: "block",
-                height: 48,
-                objectFit: "contain",
-                padding: "8px 10px",
-                width: "auto",
-              }}
-            />
-            <div style={{ minWidth: 0 }}>
-              <p
-                style={{
-                  color: "rgba(255,255,255,0.72)",
-                  fontSize: 10,
-                  fontWeight: 600,
-                  letterSpacing: 0,
-                  margin: 0,
-                  textTransform: "none",
-                }}
-              >
-                {copy.badge}
-              </p>
-              <p
-                style={{
-                  color: "#ffffff",
-                  fontSize: 14,
-                  fontWeight: 600,
-                  lineHeight: 1.35,
-                  margin: "4px 0 0",
-                }}
-              >
-                {copy.mobileLabel}
-              </p>
-            </div>
+    <main style={styles.screen}>
+      <div style={styles.glowTop} />
+      <div style={styles.glowBottom} />
+      <div style={styles.content}>
+        <header style={styles.header}>
+          <div style={styles.logoShell}>
+            <img alt="ERG" src={ERG_ASSETS.mobileLogo} style={styles.logo} />
           </div>
+          <p style={styles.appName}>ERG LMS</p>
+          <p style={styles.portalName}>{copy.mobileLabel}</p>
+        </header>
 
-          <h1
-            style={{
-              color: "#ffffff",
-              fontSize: 22,
-              fontWeight: 600,
-              letterSpacing: 0,
-              lineHeight: 1.2,
-              margin: "20px 0 0",
-            }}
-          >
-            {copy.title}
-          </h1>
-          <p
-            style={{
-              color: "rgba(255,255,255,0.82)",
-              fontSize: 14,
-              lineHeight: 1.7,
-              margin: "12px 0 0",
-            }}
-          >
-            {copy.description}
-          </p>
-
-          <div
-            style={{
-              display: "grid",
-              gap: 8,
-              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-              marginTop: 20,
-            }}
-          >
-            {copy.trustItems.slice(0, 3).map((item) => {
-              const Icon = item.icon;
-
-              return (
-                <div
-                  key={item.label}
-                  style={{
-                    backdropFilter: "blur(12px)",
-                    backgroundColor: "rgba(255,255,255,0.10)",
-                    border: "1px solid rgba(255,255,255,0.12)",
-                    borderRadius: 8,
-                    minWidth: 0,
-                    padding: "12px",
-                  }}
-                >
-                  <Icon color="#ffffff" size={16} />
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.92)",
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: 0,
-                      lineHeight: 1.4,
-                      margin: "12px 0 0",
-                      textTransform: "none",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {item.label}
-                  </p>
-                  <p
-                    style={{
-                      color: "rgba(255,255,255,0.7)",
-                      fontSize: 12,
-                      lineHeight: 1.55,
-                      margin: "4px 0 0",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {item.caption}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-
-        <section style={{ marginTop: 16 }}>{children}</section>
+        <section style={styles.formSlot}>{children}</section>
       </div>
     </main>
   );
 }
+
+const styles = {
+  screen: {
+    background:
+      "radial-gradient(circle at 50% -8%, rgba(49, 134, 246, 0.20), transparent 36%), linear-gradient(180deg, #f3f7fc 0%, #edf3fa 54%, #e8eff7 100%)",
+    color: "#0f172a",
+    fontFamily: "var(--font-app)",
+    minHeight: "100svh",
+    overflow: "hidden",
+    padding:
+      "calc(env(safe-area-inset-top, 0px) + 26px) 22px calc(env(safe-area-inset-bottom, 0px) + 28px)",
+    position: "relative",
+  },
+  glowTop: {
+    background: "rgba(255, 255, 255, 0.86)",
+    borderRadius: 999,
+    filter: "blur(22px)",
+    height: 140,
+    left: "50%",
+    position: "absolute",
+    top: 84,
+    transform: "translateX(-50%)",
+    width: 250,
+  },
+  glowBottom: {
+    background: "rgba(49, 134, 246, 0.10)",
+    borderRadius: 999,
+    bottom: 86,
+    filter: "blur(28px)",
+    height: 180,
+    position: "absolute",
+    right: -70,
+    width: 180,
+  },
+  content: {
+    margin: "0 auto",
+    maxWidth: 390,
+    position: "relative",
+    width: "100%",
+    zIndex: 1,
+  },
+  header: {
+    alignItems: "center",
+    display: "grid",
+    justifyItems: "center",
+    textAlign: "center",
+  },
+  logoShell: {
+    alignItems: "center",
+    background: "rgba(255,255,255,0.82)",
+    border: "1px solid rgba(49, 134, 246, 0.14)",
+    borderRadius: 20,
+    boxShadow: "0 18px 36px rgba(49, 134, 246, 0.16)",
+    display: "inline-flex",
+    height: 58,
+    justifyContent: "center",
+    marginBottom: 12,
+    width: 58,
+  },
+  logo: {
+    display: "block",
+    height: 40,
+    objectFit: "contain",
+    width: 40,
+  },
+  appName: {
+    color: "#1677e8",
+    fontSize: 25,
+    fontWeight: 850,
+    letterSpacing: 0,
+    margin: 0,
+  },
+  portalName: {
+    color: "#8b95a5",
+    fontSize: 11,
+    fontWeight: 700,
+    letterSpacing: 0,
+    margin: "5px 0 0",
+  },
+  formSlot: {
+    marginTop: 34,
+  },
+} satisfies Record<string, CSSProperties>;

@@ -68,12 +68,12 @@ export function DashboardPageShell({
   children,
 }: DashboardPageShellProps) {
   return (
-    <div className="h-full overflow-y-auto bg-[#f8fbff]">
-      <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-5 py-5 sm:px-6">
-        <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
+    <div className="h-full overflow-y-auto bg-[var(--background)]">
+      <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6">
+        <section className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-medium tracking-normal text-slate-500">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-slate-500">
                 {breadcrumbs.map((item, index) => (
                   <div key={`${item}-${index}`} className="flex items-center gap-2">
                     {index > 0 ? <span className="text-slate-300">/</span> : null}
@@ -112,10 +112,10 @@ export function DashboardMetricCard({
   const toneClass = toneClassMap[tone];
 
   return (
-    <Card className="overflow-hidden border-[#cbd7e6] bg-white">
-      <div className="flex items-start justify-between gap-4 p-4">
+    <Card className="overflow-hidden border-[#d9e2ef] bg-white p-0 shadow-[var(--shadow-xs)]">
+        <div className="flex items-start justify-between gap-4 p-4">
         <div className="min-w-0">
-          <div className="text-xs font-medium tracking-normal text-[var(--muted-foreground)]">{label}</div>
+          <div className="text-xs font-semibold tracking-normal text-[var(--muted-foreground)]">{label}</div>
           <div className="mt-2 text-xl font-semibold tracking-normal text-[var(--foreground)]">{value}</div>
           <div className="mt-1.5 text-[13px] leading-5 text-[var(--muted-foreground)]">{detail}</div>
         </div>
@@ -131,7 +131,7 @@ export function DashboardMetricCard({
         ) : null}
       </div>
       {delta ? (
-        <div className="border-t border-[#cbd7e6] bg-[#f8fbff] px-4 py-3">
+        <div className="border-t border-[#d9e2ef] bg-[#f8fbff] px-4 py-3">
           <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-medium", toneClass.delta)}>
             {delta}
           </span>
@@ -149,7 +149,7 @@ export function DashboardSectionCard({
   children,
 }: DashboardSectionCardProps) {
   return (
-    <Card className={cn("border-[#cbd7e6] bg-white", className)}>
+    <Card className={cn("border-[#d9e2ef] bg-white p-0 shadow-[var(--shadow-xs)]", className)}>
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>

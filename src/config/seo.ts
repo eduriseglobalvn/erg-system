@@ -3,7 +3,9 @@ export const ERG_BRAND_SUFFIX = "Trung Tam Ngoai Ngu - Tin Hoc ERG";
 
 export const ERG_ASSETS = {
   logo: "https://media.erg.edu.vn/logo/erg.png",
+  mobileLogo: "https://media.erg.edu.vn/logo/mobile-logo.png",
   favicon: "https://media.erg.edu.vn/logo/erg.png",
+  appleTouchIcon: "/apple-touch-icon.png",
   ogImage: "https://media.erg.edu.vn/logo/og-image.jpg",
 };
 

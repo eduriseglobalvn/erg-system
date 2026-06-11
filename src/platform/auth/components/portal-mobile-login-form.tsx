@@ -1,5 +1,5 @@
-import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent } from "react";
-import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
+import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
+import { Apple, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 
 import { useForm } from "@tanstack/react-form";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
@@ -40,10 +40,7 @@ export function PortalMobileLoginForm({
   allowRegister = true,
   credentialLabel,
   credentialPlaceholder,
-  loginFootnote,
   loginForm,
-  loginSubtitle,
-  loginTitle,
   mode,
   onForgotPassword,
   onLoginFormChange,
@@ -79,6 +76,7 @@ export function PortalMobileLoginForm({
 
   return (
     <section style={styles.card}>
+      <div style={styles.cardAccent} />
       {allowRegister ? (
         <div style={styles.segmentedControl}>
           <button
@@ -101,29 +99,11 @@ export function PortalMobileLoginForm({
       {effectiveMode === "login" ? (
         <>
           <div style={styles.headingBlock}>
-            <div style={styles.iconBadge}>
-              <ShieldCheck size={18} />
-            </div>
-            <h2 style={styles.title}>{loginTitle ?? t("auth.loginTeacherHub")}</h2>
-            <p style={styles.subtitle}>{loginSubtitle ?? t("auth.loginSubtitle")}</p>
+            <h2 style={styles.title}>
+              Chào mừng trở lại
+            </h2>
+            <p style={styles.subtitle}>Đăng nhập để quản lý lớp học, lịch dạy và học sinh ERG.</p>
           </div>
-
-          {allowGoogle ? (
-            <div style={styles.socialArea}>
-              <GoogleSignInButton
-                label={t("auth.loginWithGoogle")}
-                onCredential={(idToken) => onProviderLogin("google", idToken)}
-                onError={(message) => {
-                  console.warn(message);
-                }}
-              />
-              <div style={styles.divider}>
-                <span style={styles.dividerLine} />
-                <span style={styles.dividerText}>{t("auth.orContinueWith")}</span>
-                <span style={styles.dividerLine} />
-              </div>
-            </div>
-          ) : null}
 
           <TsForm
             style={styles.form}
@@ -143,7 +123,7 @@ export function PortalMobileLoginForm({
                 <label style={styles.field}>
                   <span style={styles.label}>{credentialLabel ?? t("auth.email")}</span>
                   <span style={styles.inputWrap}>
-                    <Mail color="#64748b" size={18} />
+                    <Mail color="#6b8aaa" size={17} />
                     <input
                       autoComplete="username"
                       inputMode="email"
@@ -173,14 +153,9 @@ export function PortalMobileLoginForm({
             >
               {(field) => (
                 <label style={styles.field}>
-                  <span style={styles.passwordLabelRow}>
-                    <span style={styles.label}>{t("auth.password")}</span>
-                    <button style={styles.inlineButton} type="button" onClick={onForgotPassword}>
-                      {t("auth.forgotPassword")}
-                    </button>
-                  </span>
+                  <span style={styles.label}>{t("auth.password")}</span>
                   <span style={styles.inputWrap}>
-                    <LockKeyhole color="#64748b" size={18} />
+                    <LockKeyhole color="#6b8aaa" size={17} />
                     <input
                       ref={passwordInputRef}
                       autoComplete="current-password"
@@ -209,15 +184,20 @@ export function PortalMobileLoginForm({
               )}
             </loginTanstackForm.Field>
 
-            <label style={styles.rememberRow}>
-              <input
-                checked={rememberMe}
-                onChange={(event) => onRememberMeChange(event.target.checked)}
-                style={styles.checkbox}
-                type="checkbox"
-              />
-              <span>{t("auth.rememberMe")}</span>
-            </label>
+            <div style={styles.metaRow}>
+              <label style={styles.rememberRow}>
+                <input
+                  checked={rememberMe}
+                  onChange={(event) => onRememberMeChange(event.target.checked)}
+                  style={styles.checkbox}
+                  type="checkbox"
+                />
+                <span>{t("auth.rememberMe")}</span>
+              </label>
+              <button style={styles.inlineButton} type="button" onClick={onForgotPassword}>
+                {t("auth.forgotPassword")}
+              </button>
+            </div>
 
             <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
@@ -228,7 +208,28 @@ export function PortalMobileLoginForm({
             </loginTanstackForm.Subscribe>
           </TsForm>
 
-          {loginFootnote ? <p style={styles.footnote}>{loginFootnote}</p> : null}
+          {allowGoogle ? (
+            <div style={styles.socialArea}>
+              <p style={styles.socialLabel}>Hoặc đăng nhập với</p>
+              <div style={styles.socialButtons}>
+                <DisabledSocialButton label="Facebook">
+                  <span style={styles.facebookGlyph}>f</span>
+                </DisabledSocialButton>
+                <GoogleSignInButton
+                  label={t("auth.loginWithGoogle")}
+                  onCredential={(idToken) => onProviderLogin("google", idToken)}
+                  onError={(message) => {
+                    console.warn(message);
+                  }}
+                  variant="icon"
+                />
+                <DisabledSocialButton label="Apple">
+                  <Apple fill="#111827" size={23} strokeWidth={0} />
+                </DisabledSocialButton>
+              </div>
+            </div>
+          ) : null}
+
         </>
       ) : (
         <TsForm
@@ -240,9 +241,6 @@ export function PortalMobileLoginForm({
           }}
         >
           <div style={styles.headingBlock}>
-            <div style={styles.iconBadge}>
-              <ShieldCheck size={18} />
-            </div>
             <h2 style={styles.title}>{t("auth.createTeacherAccount")}</h2>
             <p style={styles.subtitle}>{t("auth.registerSubtitle")}</p>
           </div>
@@ -389,6 +387,14 @@ function MobileTextField({
   );
 }
 
+function DisabledSocialButton({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <button aria-label={label} disabled style={styles.socialButton} type="button">
+      {children}
+    </button>
+  );
+}
+
 function createHandledSubmitEvent() {
   return {
     preventDefault() {},
@@ -419,34 +425,28 @@ function validatePassword(value: string) {
 
 const styles = {
   card: {
-    background: "#ffffff",
-    border: "1px solid #d7e0ec",
-    borderRadius: 8,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-    padding: "22px 18px",
+    background: "linear-gradient(180deg, rgba(255,255,255,0.98) 0%, #ffffff 100%)",
+    border: "1px solid rgba(255,255,255,0.72)",
+    borderRadius: 34,
+    boxShadow: "0 30px 70px rgba(24, 58, 99, 0.13)",
+    overflow: "hidden",
+    padding: "28px 24px 28px",
+    position: "relative",
     width: "100%",
   },
+  cardAccent: {
+    background: "linear-gradient(90deg, transparent, rgba(49, 134, 246, 0.50), transparent)",
+    height: 2,
+    left: 44,
+    position: "absolute",
+    right: 44,
+    top: 0,
+  },
   checkbox: {
-    accentColor: "var(--erg-blue)",
+    accentColor: "#3186f6",
     flex: "0 0 auto",
-    height: 18,
-    width: 18,
-  },
-  divider: {
-    alignItems: "center",
-    display: "flex",
-    gap: 12,
-    marginTop: 16,
-  },
-  dividerLine: {
-    backgroundColor: "#e2e8f0",
-    flex: 1,
-    height: 1,
-  },
-  dividerText: {
-    color: "#94a3b8",
-    fontSize: 12,
-    fontWeight: 600,
+    height: 13,
+    width: 13,
   },
   field: {
     display: "grid",
@@ -454,109 +454,102 @@ const styles = {
   },
   errorText: {
     color: "#cc0022",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 600,
     margin: 0,
   },
   footnote: {
-    background: "#f8fafc",
-    border: "1px solid #e2e8f0",
-    borderRadius: 8,
+    background: "#f8fbff",
+    border: "1px solid #dbeafe",
+    borderRadius: 14,
     color: "#475569",
-    fontSize: 13,
-    lineHeight: 1.65,
-    margin: "18px 0 0",
-    padding: "14px 16px",
+    fontSize: 12,
+    lineHeight: 1.6,
+    margin: "16px 0 0",
+    padding: "12px 14px",
   },
   form: {
     display: "grid",
-    gap: 15,
-    marginTop: 22,
+    gap: 14,
+    marginTop: 23,
   },
   headingBlock: {
     display: "grid",
-    gap: 8,
-  },
-  iconBadge: {
-    alignItems: "center",
-    background: "#eef4ff",
-    borderRadius: 8,
-    color: "var(--erg-blue, #0f6cbd)",
-    display: "inline-flex",
-    height: 38,
-    justifyContent: "center",
-    width: 38,
+    gap: 7,
+    textAlign: "center",
   },
   iconButton: {
     alignItems: "center",
     background: "transparent",
     border: 0,
-    color: "#64748b",
+    color: "#9aa5b5",
     display: "inline-flex",
     flex: "0 0 auto",
-    height: 44,
+    height: 42,
     justifyContent: "center",
     marginRight: -8,
-    width: 44,
+    width: 42,
   },
   inlineButton: {
     background: "transparent",
     border: 0,
-    color: "var(--erg-blue, #0f6cbd)",
+    color: "#2f86f6",
     flex: "0 0 auto",
-    fontSize: 12,
-    fontWeight: 600,
-    minHeight: 36,
-    padding: "8px 0 8px 8px",
+    fontSize: 11,
+    fontWeight: 500,
+    minHeight: 28,
+    padding: "4px 0 4px 8px",
   },
   input: {
     background: "transparent",
     border: 0,
-    color: "#0f172a",
+    color: "#192232",
     flex: "1 1 auto",
     fontSize: 14,
-    height: 44,
+    height: 46,
     minWidth: 0,
     outline: "none",
     width: "100%",
   },
   inputWrap: {
     alignItems: "center",
-    background: "#ffffff",
-    border: "1px solid #dbe3ef",
-    borderRadius: 8,
-    boxShadow: "none",
+    background: "#f5f8fc",
+    border: "1px solid #edf2f8",
+    borderRadius: 20,
+    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.78)",
     display: "flex",
     gap: 8,
-    minHeight: 46,
-    padding: "0 12px",
+    minHeight: 48,
+    padding: "0 14px",
     width: "100%",
   },
   label: {
-    color: "#1e293b",
-    fontSize: 13,
-    fontWeight: 600,
+    color: "#243246",
+    fontSize: 11,
+    fontWeight: 700,
     lineHeight: 1.35,
   },
-  passwordLabelRow: {
+  metaRow: {
     alignItems: "center",
     display: "flex",
     justifyContent: "space-between",
     minWidth: 0,
+    paddingTop: 1,
   },
   rememberRow: {
     alignItems: "center",
-    color: "#334155",
+    color: "#a5adba",
     display: "flex",
-    fontSize: 14,
-    fontWeight: 600,
-    gap: 10,
+    fontSize: 11,
+    fontWeight: 500,
+    gap: 6,
     lineHeight: 1.4,
   },
   segmentedActive: {
     background: "var(--erg-blue, #0f6cbd)",
     border: 0,
-    borderRadius: 6,
+    borderRadius: 10,
+    boxShadow: "0 8px 18px rgba(15, 108, 189, 0.22)",
     color: "#ffffff",
     flex: 1,
     fontSize: 14,
@@ -566,7 +559,7 @@ const styles = {
   segmentedButton: {
     background: "transparent",
     border: 0,
-    borderRadius: 6,
+    borderRadius: 10,
     color: "#64748b",
     flex: 1,
     fontSize: 14,
@@ -574,44 +567,86 @@ const styles = {
     height: 44,
   },
   segmentedControl: {
-    background: "#f1f5f9",
-    border: "1px solid #e2e8f0",
-    borderRadius: 8,
+    background: "#f8fbff",
+    border: "1px solid #dbeafe",
+    borderRadius: 14,
     display: "flex",
     gap: 4,
-    marginBottom: 20,
+    marginBottom: 18,
     padding: 4,
   },
   socialArea: {
-    marginTop: 18,
+    marginTop: 22,
+  },
+  socialButton: {
+    alignItems: "center",
+    background: "#ffffff",
+    border: 0,
+    borderRadius: 18,
+    boxShadow: "0 14px 28px rgba(24, 58, 99, 0.09)",
+    color: "#111827",
+    display: "inline-flex",
+    height: 48,
+    justifyContent: "center",
+    opacity: 1,
+    width: 48,
+  },
+  socialButtons: {
+    alignItems: "center",
+    display: "flex",
+    gap: 18,
+    justifyContent: "center",
+    marginTop: 12,
+  },
+  socialLabel: {
+    color: "#a0a8b5",
+    fontSize: 11,
+    fontWeight: 500,
+    margin: 0,
+    textAlign: "center",
+  },
+  facebookGlyph: {
+    alignItems: "center",
+    background: "#4267b2",
+    borderRadius: 999,
+    color: "#ffffff",
+    display: "inline-flex",
+    fontFamily: "Arial, sans-serif",
+    fontSize: 21,
+    fontWeight: 700,
+    height: 22,
+    justifyContent: "center",
+    lineHeight: 1,
+    paddingTop: 4,
+    width: 22,
   },
   submitButton: {
     alignItems: "center",
-    background: "var(--erg-blue, #0f6cbd)",
+    background: "linear-gradient(180deg, #3d92ff 0%, #247cf1 100%)",
     border: 0,
-    borderRadius: 8,
-    boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+    borderRadius: 20,
+    boxShadow: "0 16px 30px rgba(49, 134, 246, 0.30)",
     color: "#ffffff",
     display: "inline-flex",
-    fontSize: 14,
-    fontWeight: 600,
-    height: 44,
+    fontSize: 13,
+    fontWeight: 800,
+    height: 48,
     justifyContent: "center",
-    marginTop: 2,
+    marginTop: 8,
     width: "100%",
   },
   subtitle: {
-    color: "#64748b",
-    fontSize: 14,
-    lineHeight: 1.7,
+    color: "#7f8da0",
+    fontSize: 12,
+    lineHeight: 1.55,
     margin: 0,
   },
   title: {
-    color: "#0f172a",
-    fontSize: 22,
-    fontWeight: 600,
+    color: "#101828",
+    fontSize: 21,
+    fontWeight: 850,
     letterSpacing: 0,
-    lineHeight: 1.12,
+    lineHeight: 1.18,
     margin: 0,
   },
 } satisfies Record<string, CSSProperties>;

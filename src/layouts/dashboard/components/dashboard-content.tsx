@@ -8,7 +8,6 @@ import { AdminOperationsWorkspace } from "@/features/lcms/admin-operations";
 import { DashboardPlaceholderWorkspace } from "@/layouts/dashboard/components/dashboard-placeholder-workspace";
 import { QuizEditorWorkspace } from "@/layouts/dashboard/components/quiz-editor-workspace";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
-import { PublicDisclosureAdminWorkspace } from "@/features/lcms/public-disclosure";
 import { QuestionBankWorkspace } from "@/features/lcms/quiz/question-bank";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { SeoCrmWorkspace } from "@/features/crm/seo";
@@ -44,10 +43,6 @@ export function DashboardContent({
   }
 
   if (activeLeaf.variant.startsWith("admin-")) {
-    if (activeLeaf.variant === "admin-public-disclosure") {
-      return <PublicDisclosureAdminWorkspace embedded />;
-    }
-
     return (
       <AdminOperationsWorkspace
         activeLeaf={activeLeaf}

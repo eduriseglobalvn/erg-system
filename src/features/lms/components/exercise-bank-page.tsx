@@ -4,6 +4,7 @@ import { BookOpenCheck, Clock3, Copy, Eye, FileQuestion, Filter, ListChecks, Plu
 import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 
 type ExerciseStatus = "published" | "draft" | "archived";
 type ExerciseDifficulty = "easy" | "medium" | "hard";
@@ -171,7 +172,8 @@ function uniqueValues(key: "subject" | "level") {
 }
 
 export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onAssign: (exerciseTitle: string) => void }) {
-  const [selectedExerciseId, setSelectedExerciseId] = useState(exercises[0]?.id || "");
+  const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
+  const [selectedExerciseId, setSelectedExerciseId] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [subjectFilter, setSubjectFilter] = useState(allValue);
   const [levelFilter, setLevelFilter] = useState(allValue);
@@ -223,6 +225,125 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
     setDifficultyFilter(allValue);
     setTypeFilter(allValue);
     setStatusFilter(allValue);
+  }
+
+  if (isMobile) {
+    const statusTabs: Array<{ id: ExerciseStatus | typeof allValue; label: string }> = [
+      { id: "published", label: "Xuat ban" },
+      { id: allValue, label: "Tat ca" },
+      { id: "draft", label: "Nhap" },
+      { id: "archived", label: "Luu tru" },
+    ];
+
+    return (
+      <div className="min-h-full bg-[#f3f6fb] px-3 pb-4 pt-3 text-slate-950">
+        <section className="rounded-[24px] border border-[#d9e2ef] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+          <div className="text-[13px] font-extrabold text-[var(--erg-blue)]">Kho bai tap</div>
+          <h1 className="mt-1 text-xl font-extrabold leading-7">Chon bai va giao nhanh</h1>
+          <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">{filteredExercises.length} ket qua phu hop bo loc hien tai</p>
+
+          <div className="relative mt-4">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
+            <input
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="h-12 w-full rounded-[18px] border border-[#d7e0ec] bg-[#f8fbff] pl-10 pr-3 text-[15px] font-bold text-slate-950 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+              placeholder="Tim bai, mon, tag"
+            />
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+            {statusTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setStatusFilter(tab.id)}
+                className={cn(
+                  "h-10 shrink-0 rounded-full border px-4 text-sm font-extrabold",
+                  statusFilter === tab.id ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "border-[#d9e2ef] bg-white text-slate-600",
+                )}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <div className="mt-3 grid gap-3">
+          {filteredExercises.map((exercise) => (
+            <article key={exercise.id} className="rounded-[22px] border border-white bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
+              <button type="button" className="w-full text-left" onClick={() => setSelectedExerciseId(exercise.id)}>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="line-clamp-2 text-base font-extrabold leading-6 text-slate-950">{exercise.title}</h2>
+                    <p className="mt-1 text-sm font-bold text-slate-500">{exercise.subject} · {exercise.level}</p>
+                  </div>
+                  <Badge tone={statusTones[exercise.status]} className="shrink-0 tracking-normal normal-case">{statusLabels[exercise.status]}</Badge>
+                </div>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{typeLabels[exercise.type]}</span>
+                  <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-extrabold text-amber-700">{difficultyLabels[exercise.difficulty]}</span>
+                  <span className="rounded-full bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-extrabold text-[var(--erg-blue)]">{exercise.durationMinutes} phut</span>
+                  <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{exercise.questionCount} cau</span>
+                </div>
+              </button>
+              <div className="mt-4 flex gap-2">
+                <button
+                  type="button"
+                  className="flex h-11 flex-1 items-center justify-center rounded-[16px] border border-[#d9e2ef] bg-white text-sm font-extrabold text-slate-700"
+                  onClick={() => setSelectedExerciseId(exercise.id)}
+                >
+                  <Eye className="mr-2 h-4 w-4" />
+                  Xem
+                </button>
+                <button
+                  type="button"
+                  className="flex h-11 flex-1 items-center justify-center rounded-[16px] bg-[var(--erg-blue)] text-sm font-extrabold text-white shadow-[0_10px_20px_rgba(15,108,189,0.2)]"
+                  onClick={() => onAssign(exercise.title)}
+                >
+                  <Send className="mr-2 h-4 w-4" />
+                  Giao nhanh
+                </button>
+              </div>
+            </article>
+          ))}
+
+          {filteredExercises.length === 0 ? (
+            <div className="rounded-[22px] border border-dashed border-[#cbd7e6] bg-white p-6 text-center">
+              <div className="text-base font-extrabold text-slate-950">Khong co bai phu hop</div>
+              <p className="mt-2 text-sm font-semibold text-slate-500">Thu doi tu khoa hoac xoa bo loc de xem lai kho bai.</p>
+              <button type="button" className="mt-4 h-11 rounded-[16px] bg-[var(--erg-blue)] px-5 text-sm font-extrabold text-white" onClick={clearFilters}>
+                Xoa loc
+              </button>
+            </div>
+          ) : null}
+        </div>
+
+        {selectedExerciseId && selectedExercise ? (
+          <div className="fixed inset-x-0 bottom-[calc(92px+env(safe-area-inset-bottom,0px)+8px)] z-50 px-3">
+            <div className="rounded-[22px] border border-[#d9e2ef] bg-white p-4 shadow-[0_18px_44px_rgba(15,23,42,0.18)]">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="line-clamp-2 text-sm font-extrabold text-slate-950">{selectedExercise.title}</div>
+                  <div className="mt-1 text-xs font-bold text-slate-500">{selectedExercise.subject} · {selectedExercise.durationMinutes} phut · {selectedExercise.questionCount} cau</div>
+                </div>
+                <button type="button" className="h-9 rounded-full bg-[#f1f5f9] px-3 text-xs font-extrabold text-slate-600" onClick={() => setSelectedExerciseId("")}>
+                  Dong
+                </button>
+              </div>
+              <button
+                type="button"
+                className="mt-3 flex h-11 w-full items-center justify-center rounded-[16px] bg-[var(--erg-blue)] text-sm font-extrabold text-white"
+                onClick={() => onAssign(selectedExercise.title)}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Giao bai tap nay
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
   }
 
   return (

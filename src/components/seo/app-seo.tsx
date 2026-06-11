@@ -58,7 +58,7 @@ export function AppSeo() {
 
     upsertLink("icon", ERG_ASSETS.favicon, { type: "image/png", sizes: "32x32" });
     upsertLink("shortcut icon", ERG_ASSETS.favicon, { type: "image/png" });
-    upsertLink("apple-touch-icon", ERG_ASSETS.favicon, { sizes: "180x180" });
+    upsertLink("apple-touch-icon", ERG_ASSETS.appleTouchIcon, { sizes: "180x180" });
   }, [location.pathname, location.search]);
 
   return null;

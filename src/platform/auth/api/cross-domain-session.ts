@@ -11,7 +11,7 @@
  *    to the URL. The receiving portal login page hydrates the session.
  *
  * Flow:
- *   Login on lms.erg.edu.vn -> cookie saved + localStorage saved.
+ *   Login on lms.erg.edu.local -> cookie saved + localStorage saved.
  *   Navigate to another portal -> check cookie -> if found, hydrate.
  *   If cookie not found -> redirect to login -> check URL for sso_token -> hydrate.
  */

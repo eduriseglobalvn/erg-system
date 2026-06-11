@@ -5,7 +5,7 @@ import type {
 } from "@/platform/auth/types/auth-types";
 import type { AuthSessionResponseDTO } from "@/platform/auth/api/auth-api";
 import {
-  clearTeacherSessionSnapshot,
+  clearStoredAuthSessions,
   hasStoredAuthCredential,
   readTeacherSessionSnapshot,
   readStoredAuthSession,
@@ -126,15 +126,8 @@ function notifyAuthAccountChanged() {
 }
 
 function clearSession() {
-  clearTeacherSessionSnapshot();
   clearCrossDomainSession();
-  if (!canUseStorage()) return;
-  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
-  window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
-  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
-    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
-    window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
-  }
+  clearStoredAuthSessions();
 }
 
 function saveAccount(nextAccount: TeacherAccount) {

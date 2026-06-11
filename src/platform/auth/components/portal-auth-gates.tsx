@@ -227,7 +227,7 @@ async function safely(auth: AuthSession, run: () => unknown | Promise<unknown>, 
 
     auth.setNotice({
       tone: "error",
-      message: error instanceof Error ? error.message : "Không thể đăng nhập tài khoản này.",
+      message: getFriendlyAuthErrorMessage(error, "Không thể đăng nhập tài khoản này."),
     });
   }
 }
@@ -283,7 +283,7 @@ function handleStudentLoginSubmit(
     } catch (error) {
       setNotice({
         tone: "error",
-        message: error instanceof Error ? error.message : "Không thể đăng nhập tài khoản học sinh này.",
+        message: getFriendlyAuthErrorMessage(error, "Không thể đăng nhập tài khoản học sinh này."),
       });
     }
   })();
@@ -313,6 +313,30 @@ function isAccessDeniedError(error: unknown) {
   }
 
   return false;
+}
+
+function getFriendlyAuthErrorMessage(error: unknown, fallback: string) {
+  if (error instanceof ApiClientError) {
+    if (error.status === 0 || error.code === "NETWORK_ERROR" || error.code === "API_BASE_MISSING") {
+      return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+    }
+
+    if (error.status === 401) {
+      return "Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại thông tin đăng nhập.";
+    }
+
+    return error.message || fallback;
+  }
+
+  if (error instanceof TypeError && error.message.toLowerCase().includes("fetch")) {
+    return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+  }
+
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+
+  return fallback;
 }
 
 function googleEmailFromIdToken(idToken?: string) {

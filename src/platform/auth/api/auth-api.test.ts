@@ -105,8 +105,8 @@ test("backend login sends LCMS portal when logging in from lcms host", async () 
 test("keeps the configured spring API base when the CRM portal runs on its own host", async () => {
   vi.stubEnv("VITE_API_BASE", "http://localhost:8080");
   Object.assign(window.location, {
-    hostname: "crm.erg.edu.vn",
-    origin: "https://crm.erg.edu.vn:3001",
+    hostname: "crm.erg.edu.local",
+    origin: "https://crm.erg.edu.local:3001",
     protocol: "https:",
   });
   const fetchMock = vi.fn(async () =>

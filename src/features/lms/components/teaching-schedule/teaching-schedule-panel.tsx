@@ -82,7 +82,7 @@ export function TeachingSchedulePanel({
   const [selectedCalendarIds, setSelectedCalendarIds] = useState(() => [personalCalendarFilterId, ...schoolTeachingCalendars.map((calendar) => calendar.id)]);
   const [selectedSubjects, setSelectedSubjects] = useState(() => [...lmsSubjectOptions]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const [mobileView, setMobileView] = useState<MobileCalendarView>("month");
+  const [mobileView, setMobileView] = useState<MobileCalendarView>("agenda");
   const [mobileSelectedDate, setMobileSelectedDate] = useState(() => new Date("2026-06-08T13:00:00"));
   const isMobile = useLmsMobileBreakpoint();
   const paceStateUpdate = usePacedStateBatch();

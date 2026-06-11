@@ -69,13 +69,7 @@
       #root:empty::after{content:"";width:64px;aspect-ratio:1;border-radius:50%;border:3px solid var(--border);border-top-color:var(--primary);animation:erg-spin 0.6s linear infinite}
       @keyframes erg-spin{to{transform:rotate(360deg)}}
     </style>
-    <!-- Non-critical CSS loaded asynchronously -->
-    <link rel="preload" href="/src/styles/globals.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <link rel="preload" href="/src/index.css" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript>
-      <link rel="stylesheet" href="/src/styles/globals.css" />
-      <link rel="stylesheet" href="/src/index.css" />
-    </noscript>
+    <!-- CSS files are imported directly in src/main.tsx to enable Vite HMR and bundling -->
   </head>
   <body>
     <div id="root"></div>

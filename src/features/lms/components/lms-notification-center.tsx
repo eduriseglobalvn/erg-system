@@ -1,103 +1,85 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, Building2, CheckCheck, Megaphone, MoreVertical, ServerCog, Settings, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { useNavigate } from "@/routes/router-compat";
+import {
+  fetchNotificationFeed,
+  fetchUnreadNotificationCount,
+  markAllNotificationsRead,
+  markNotificationRead,
+  notificationQueryKeys,
+  type LmsNotificationType,
+  type NotificationFeedItem,
+} from "@/features/notifications/api/notification-api";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "@/routes/router-compat";
 
-type LmsNotificationType = "company" | "general" | "system";
-
-export type LmsNotification = {
-  id: string;
-  title: string;
-  description: string;
-  timeLabel: string;
-  dateLabel: string;
-  type: LmsNotificationType;
-  unread: boolean;
-  starred?: boolean;
-};
-
-export const lmsNotifications: LmsNotification[] = [
-  {
-    id: "system-schedule-updated",
-    title: "Lớp học vừa được cập nhật thời khóa biểu",
-    description: "Vào lúc 09:02 19/05/2026, thời khóa biểu đã được cập nhật",
-    timeLabel: "09:02 19/05/2026",
-    dateLabel: "19/05/2026",
-    type: "system",
-    unread: true,
-  },
-  {
-    id: "company-training",
-    title: "Công ty mở lịch tập huấn LMS tháng 6",
-    description: "Giáo viên đăng ký ca phù hợp để cập nhật quy trình giao bài và báo cáo.",
-    timeLabel: "08:30 19/05/2026",
-    dateLabel: "19/05/2026",
-    type: "company",
-    unread: true,
-    starred: true,
-  },
-  {
-    id: "general-homework",
-    title: "Bài tập mới cần rà soát trước khi gửi",
-    description: "Kho bài tập có 4 câu hỏi mới được đồng bộ cho lớp đang chọn.",
-    timeLabel: "16:45 18/05/2026",
-    dateLabel: "18/05/2026",
-    type: "general",
-    unread: false,
-  },
-  {
-    id: "system-sync",
-    title: "Đồng bộ dữ liệu học sinh hoàn tất",
-    description: "Hệ thống đã cập nhật danh sách học sinh và trạng thái tài khoản.",
-    timeLabel: "14:20 18/05/2026",
-    dateLabel: "18/05/2026",
-    type: "system",
-    unread: true,
-  },
-  {
-    id: "company-policy",
-    title: "Nhắc lịch hoàn tất báo cáo tuần",
-    description: "Báo cáo lớp cần được gửi trước 17:00 thứ Sáu tuần này.",
-    timeLabel: "10:10 17/05/2026",
-    dateLabel: "17/05/2026",
-    type: "company",
-    unread: false,
-  },
-];
+const LMS_NOTIFICATION_PORTAL = "lms";
 
 export function LmsNotificationCenter() {
   const navigate = useNavigate();
-  const [readIds, setReadIds] = useState<Set<string>>(() => new Set(lmsNotifications.filter((item) => !item.unread).map((item) => item.id)));
-  const unreadCount = lmsNotifications.filter((item) => !readIds.has(item.id)).length;
-  const latestNotifications = useMemo(() => lmsNotifications.slice(0, 3), []);
+  const queryClient = useQueryClient();
+  const shownToastRef = useRef<string | null>(null);
+  const [tab, setTab] = useState<"all" | "unread">("all");
+
+  const notificationsQuery = useQuery({
+    queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 5),
+    queryFn: () => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 5 }),
+    staleTime: 30_000,
+  });
+  const unreadCountQuery = useQuery({
+    queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL),
+    queryFn: () => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL),
+    staleTime: 30_000,
+  });
+  const markReadMutation = useMutation({
+    mutationFn: (notificationId: string) => markNotificationRead(notificationId, LMS_NOTIFICATION_PORTAL),
+    onSuccess: invalidateNotificationQueries,
+  });
+  const markAllReadMutation = useMutation({
+    mutationFn: () => markAllNotificationsRead(LMS_NOTIFICATION_PORTAL),
+    onSuccess: invalidateNotificationQueries,
+  });
+
+  const notifications = notificationsQuery.data?.items ?? [];
+  const latestNotifications = useMemo(() => notifications.slice(0, 3), [notifications]);
+  const unreadCount = unreadCountQuery.data?.unread ?? notifications.filter((item) => item.unread).length;
+  const newestSystemNotification = useMemo(
+    () => notifications.find((item) => item.type === "system" && item.unread),
+    [notifications],
+  );
 
   useEffect(() => {
-    const newestSystemNotification = lmsNotifications.find((item) => item.type === "system" && item.unread);
-    if (!newestSystemNotification) return;
+    if (!newestSystemNotification || shownToastRef.current === newestSystemNotification.id) return;
 
+    shownToastRef.current = newestSystemNotification.id;
     const timeoutId = window.setTimeout(() => {
       showSystemToast(newestSystemNotification, openNotificationDetail);
     }, 900);
 
     return () => window.clearTimeout(timeoutId);
-  }, []);
+  }, [newestSystemNotification?.id]);
 
-  function markAllAsRead() {
-    setReadIds(new Set(lmsNotifications.map((item) => item.id)));
+  function invalidateNotificationQueries() {
+    void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL) });
   }
 
-  function openNotification(notification: LmsNotification) {
-    setReadIds((current) => new Set(current).add(notification.id));
+  function markAllAsRead() {
+    void markAllReadMutation.mutateAsync();
+  }
+
+  function openNotification(notification: NotificationFeedItem) {
+    if (notification.unread) {
+      markReadMutation.mutate(notification.id);
+    }
     openNotificationDetail(notification);
   }
 
-  function openNotificationDetail(notification: LmsNotification) {
-    setReadIds((current) => new Set(current).add(notification.id));
+  function openNotificationDetail(notification: NotificationFeedItem) {
     navigate(`/notifications/${notification.id}`);
   }
 
@@ -119,7 +101,7 @@ export function LmsNotificationCenter() {
           <Bell className="size-5" />
           {unreadCount ? (
             <span className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-full bg-[#d13438] text-[11px] font-bold leading-none text-white ring-2 ring-white">
-              {unreadCount}
+              {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           ) : null}
         </span>
@@ -134,55 +116,75 @@ export function LmsNotificationCenter() {
           <div className="flex items-center justify-between gap-3">
             <h2 className="text-base font-bold leading-6 text-slate-950">Thông báo</h2>
             <div className="flex items-center gap-1">
-              <Button variant="ghost" size="sm" className="h-8 shrink-0 rounded-md px-2 text-xs font-bold text-[var(--erg-blue)]" onClick={markAllAsRead}>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 shrink-0 rounded-md px-2 text-xs font-bold text-[var(--erg-blue)]"
+                disabled={!unreadCount || markAllReadMutation.isPending}
+                onClick={markAllAsRead}
+              >
                 <CheckCheck data-icon="inline-start" />
                 Đọc tất cả
               </Button>
-              <button type="button" aria-label="Cài đặt thông báo" className="grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-900">
+              <button
+                type="button"
+                aria-label="Cài đặt thông báo"
+                className="grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-900"
+              >
                 <Settings className="size-4" />
               </button>
             </div>
           </div>
           <div className="mt-3 flex items-center gap-2">
-            <span className="rounded-full bg-[var(--erg-blue-light)] px-4 py-2 text-sm font-black text-[var(--erg-blue)]">Tất cả</span>
-            <span className="rounded-full px-4 py-2 text-sm font-black text-slate-700">Chưa đọc</span>
+            <NotificationTab active={tab === "all"} label="Tất cả" onClick={() => setTab("all")} />
+            <NotificationTab active={tab === "unread"} label="Chưa đọc" onClick={() => setTab("unread")} />
           </div>
         </div>
 
         <div className="max-h-[min(470px,calc(100vh-210px))] overflow-y-auto bg-white">
-          <div className="px-4 pb-2 pt-4">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-sm font-bold text-slate-950">Quan trọng</h3>
-              <button type="button" onClick={() => navigate("/notifications")} className="text-sm font-semibold text-[var(--erg-blue)]">
-                Xem tất cả
-              </button>
-            </div>
-            <div className="grid gap-2">
-              {latestNotifications.slice(0, 1).map((notification) => (
-                <NotificationFeedItem
-                  key={notification.id}
-                  notification={notification}
-                  unread={!readIds.has(notification.id)}
-                  onOpen={() => openNotification(notification)}
-                  thumbnail
-                />
-              ))}
-            </div>
-          </div>
-          <div className="border-t border-[#eef2f7] px-4 pb-3 pt-4">
-            <h3 className="mb-2 text-sm font-bold text-slate-950">Các thông báo khác</h3>
-            <div className="grid gap-2">
-              {latestNotifications.slice(1).map((notification) => (
-                <NotificationFeedItem
-                  key={notification.id}
-                  notification={notification}
-                  unread={!readIds.has(notification.id)}
-                  onOpen={() => openNotification(notification)}
-                  thumbnail={notification.type === "general"}
-                />
-              ))}
-            </div>
-          </div>
+          {notificationsQuery.isLoading ? (
+            <NotificationPopoverState label="Đang tải thông báo..." />
+          ) : notificationsQuery.isError ? (
+            <NotificationPopoverState label="Không tải được thông báo." />
+          ) : latestNotifications.length ? (
+            <>
+              <div className="px-4 pb-2 pt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-950">Quan trọng</h3>
+                  <button type="button" onClick={() => navigate("/notifications")} className="text-sm font-semibold text-[var(--erg-blue)]">
+                    Xem tất cả
+                  </button>
+                </div>
+                <div className="grid gap-2">
+                  {latestNotifications.slice(0, 1).map((notification) => (
+                    <NotificationFeedCard
+                      key={notification.id}
+                      notification={notification}
+                      unread={notification.unread}
+                      onOpen={() => openNotification(notification)}
+                      thumbnail
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="border-t border-[#eef2f7] px-4 pb-3 pt-4">
+                <h3 className="mb-2 text-sm font-bold text-slate-950">Các thông báo khác</h3>
+                <div className="grid gap-2">
+                  {latestNotifications.slice(1).map((notification) => (
+                    <NotificationFeedCard
+                      key={notification.id}
+                      notification={notification}
+                      unread={notification.unread}
+                      onOpen={() => openNotification(notification)}
+                      thumbnail={notification.type === "general"}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : (
+            <NotificationPopoverState label={tab === "unread" ? "Không còn thông báo chưa đọc." : "Chưa có thông báo."} />
+          )}
         </div>
 
         <div className="border-t border-[#eef2f7] bg-white px-5 py-3">
@@ -195,19 +197,46 @@ export function LmsNotificationCenter() {
   );
 }
 
-function NotificationFeedItem({
+function NotificationTab({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "rounded-full px-4 py-2 text-sm font-black transition",
+        active ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-700 hover:bg-[#f3f4f6]",
+      )}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function NotificationPopoverState({ label }: { label: string }) {
+  return (
+    <div className="px-5 py-8 text-center text-sm font-semibold leading-6 text-slate-500">
+      {label}
+    </div>
+  );
+}
+
+function NotificationFeedCard({
   notification,
   onOpen,
   thumbnail,
   unread,
 }: {
-  notification: LmsNotification;
+  notification: NotificationFeedItem;
   onOpen: () => void;
   thumbnail?: boolean;
   unread: boolean;
 }) {
   return (
-    <button type="button" onClick={onOpen} className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 rounded-xl border border-[#e5ebf3] bg-white px-3 py-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.035)] transition hover:border-[#b8d6fa] hover:bg-[#f8fbff]">
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 rounded-xl border border-[#e5ebf3] bg-white px-3 py-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.035)] transition hover:border-[#b8d6fa] hover:bg-[#f8fbff]"
+    >
       <NotificationIcon type={notification.type} />
       <span className="min-w-0">
         <span className="block text-[15px] font-medium leading-6 text-slate-900">
@@ -253,7 +282,7 @@ function notificationLabel(type: LmsNotificationType) {
   return "Lớp học";
 }
 
-function showSystemToast(notification: LmsNotification, onOpenDetail: (notification: LmsNotification) => void) {
+function showSystemToast(notification: NotificationFeedItem, onOpenDetail: (notification: NotificationFeedItem) => void) {
   toast.custom(
     (toastId) => (
       <div className="relative flex w-[380px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-xl border border-[#b8d6fa] bg-white p-4 pr-11 text-left shadow-[0_16px_42px_rgba(15,23,42,0.16)] transition duration-300 ease-out">

@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshCw, Table2, Trash2, Users } from "lucide-react";
+import { RefreshCw, Trash2, FileSpreadsheet } from "lucide-react";
 
 import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, Input, inputClassName } from "@/components/ui/dashboard-kit";
+import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
 import { AppSelect } from "@/components/ui/app-select";
+import { cn } from "@/lib/utils";
 
 type GvizCell = {
   v?: string | number | boolean | null;
@@ -66,9 +67,20 @@ type StudentSheetImportWorkspaceProps = {
   managementScope: ManagementScope;
   centers: ClassroomSchool[];
   classes: ClassroomSnapshot[];
+  compact?: boolean;
+  lockedCenter?: {
+    id: string;
+    name: string;
+  };
 };
 
-export function StudentSheetImportWorkspace({ managementScope, centers, classes }: StudentSheetImportWorkspaceProps) {
+export function StudentSheetImportWorkspace({
+  centers,
+  classes,
+  compact = false,
+  lockedCenter,
+  managementScope,
+}: StudentSheetImportWorkspaceProps) {
   const [sheetUrl, setSheetUrl] = useState(demoSheetUrl);
   const [lastLoadedUrl, setLastLoadedUrl] = useState("");
   const [sheetTabs, setSheetTabs] = useState<SheetTab[]>([]);
@@ -84,21 +96,49 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitResult, setSubmitResult] = useState<BulkStudentAccountResponse | null>(null);
-  const [targetCenterId, setTargetCenterId] = useState(() => (managementScope.level === "global" ? centers[0]?.id ?? "" : managementScope.centerId));
+  const [targetCenterId, setTargetCenterId] = useState(() => lockedCenter?.id ?? (managementScope.level === "global" ? centers[0]?.id ?? "" : managementScope.centerId));
   const [targetClassId, setTargetClassId] = useState(() => (managementScope.level === "class" ? managementScope.classId : ""));
   const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     paceStateUpdate(() => {
-    if (managementScope.level === "global") {
-      setTargetCenterId((current) => current || centers[0]?.id || "");
-      return;
+      if (lockedCenter) {
+        setTargetCenterId(lockedCenter.id);
+        setTargetClassId("");
+        return;
+      }
+
+      if (managementScope.level === "global") {
+        setTargetCenterId((current) => current || centers[0]?.id || "");
+        return;
+      }
+
+      setTargetCenterId(managementScope.centerId);
+      setTargetClassId(managementScope.level === "class" ? managementScope.classId : "");
+    });
+  }, [centers, lockedCenter, managementScope, paceStateUpdate]);
+
+  const centerOptions = useMemo(() => {
+    if (!lockedCenter || centers.some((center) => center.id === lockedCenter.id)) {
+      return centers;
     }
 
-    setTargetCenterId(managementScope.centerId);
-    setTargetClassId(managementScope.level === "class" ? managementScope.classId : "");
-    });
-  }, [centers, managementScope, paceStateUpdate]);
+    return [
+      {
+        id: lockedCenter.id,
+        name: lockedCenter.name,
+        activeClasses: 0,
+        activeStudents: 0,
+        averageScore: 0,
+        clusterId: "central",
+        completionRate: 0,
+        flaggedStudents: 0,
+        overdueAssignments: 0,
+        principal: "",
+      } satisfies ClassroomSchool,
+      ...centers,
+    ];
+  }, [centers, lockedCenter]);
 
   const targetClasses = useMemo(() => {
     return classes.filter((classroom) => !targetCenterId || classroom.schoolId === targetCenterId);
@@ -217,7 +257,7 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
 
   const submitAccounts = useCallback(async () => {
     if (!centerId) {
-      setErrorMessage("Vui long chon truong/trung tam truoc khi tao tai khoan hoc sinh.");
+      setErrorMessage("Vui lòng chọn trường/trung tâm trước khi tạo tài khoản học sinh.");
       return;
     }
     if (!visibleStudents.length) return;
@@ -245,321 +285,395 @@ export function StudentSheetImportWorkspace({ managementScope, centers, classes 
       });
       setSubmitResult(response);
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : "Khong the tao tai khoan hoc sinh tu BE.");
+      setErrorMessage(error instanceof Error ? error.message : "Không thể tạo tài khoản học sinh từ BE.");
     } finally {
       setIsSubmitting(false);
     }
   }, [centerId, classId, visibleStudents]);
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <DashboardSectionCard
-        title="Nhập học sinh từ Google Sheet"
-        description="Dán link sheet, chọn lớp hoặc vùng dữ liệu cần lấy, chỉnh preview trước khi gửi BE tạo tài khoản."
-      >
-        <div className="space-y-4">
-          <label className="block">
-            <span className="text-xs font-semibold text-slate-500">Link Google Sheet</span>
-            <div className="mt-2 grid gap-2 md:grid-cols-[minmax(0,1fr)_150px]">
-              <Input
-                value={sheetUrl}
-                onChange={(event) => setSheetUrl(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    void loadSheet(sheetUrl);
-                  }
-                }}
-                placeholder="Dán link Google Sheet tại đây..."
-              />
-              <Button onClick={() => void loadSheet(sheetUrl)} disabled={isLoading}>
-                {isLoading ? "Đang đọc..." : "Lấy dữ liệu"}
-              </Button>
-            </div>
-          </label>
-
-          <div className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="font-semibold text-slate-950">Nơi tạo tài khoản</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-600">
-                  Chọn trung tâm/trường và lớp đích trước khi gửi BE. Nếu bỏ trống lớp, BE sẽ tạo theo lớp trong từng dòng import.
-                </p>
-              </div>
-              <Badge tone="secondary">Dữ liệu thật từ BE</Badge>
-            </div>
-            <div className="mt-4 grid gap-3 md:grid-cols-2">
+    <div className={cn("grid gap-4", compact ? "xl:grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_340px]")}>
+      <div className="space-y-4">
+        <DashboardSectionCard
+          title={lockedCenter ? "Import danh sách lớp" : "Nhập học sinh từ Google Sheet"}
+          description={
+            lockedCenter
+              ? `Dữ liệu sẽ được gắn vào ${lockedCenter.name}. Kiểm tra lớp và học sinh trước khi tạo tài khoản LMS.`
+              : "Dán link, chọn đơn vị đích, xem trước dữ liệu rồi tạo tài khoản LMS."
+          }
+        >
+          <div className="mt-2 space-y-4">
+            <div className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)]">
               <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Trung tâm / trường</span>
-                <AppSelect
-                  className={`${inputClassName} mt-2`}
-                  value={targetCenterId}
-                  onChange={(event) => {
-                    setTargetCenterId(event.target.value);
-                    setTargetClassId("");
-                  }}
-                  disabled={managementScope.level !== "global" && centers.length <= 1}
-                >
-                  <option value="">Chọn trung tâm hoặc trường</option>
-                  {centers.map((center) => (
-                    <option key={center.id} value={center.id}>
-                      {center.name}
-                    </option>
-                  ))}
-                </AppSelect>
-              </label>
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Lớp đích</span>
-                <AppSelect
-                  className={`${inputClassName} mt-2`}
-                  value={targetClassId}
-                  onChange={(event) => setTargetClassId(event.target.value)}
-                  disabled={managementScope.level === "class"}
-                >
-                  <option value="">Tự nhận theo cột lớp</option>
-                  {targetClasses.map((classroom) => (
-                    <option key={classroom.id} value={classroom.id}>
-                      {classroom.className}
-                    </option>
-                  ))}
-                </AppSelect>
-              </label>
-            </div>
-          </div>
-          <div className="rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <h3 className="font-semibold text-slate-950">Vùng lấy dữ liệu</h3>
-                <p className="mt-1 text-sm leading-6 text-slate-500">
-                  Chọn tab lớp ở dưới cùng của Google Sheet, sau đó giới hạn cột/dòng nếu sheet có dữ liệu thừa.
-                </p>
-              </div>
-              <Badge tone="secondary">{selectedSheetLabel}</Badge>
-            </div>
-
-            <div className="mt-4 grid gap-3 md:grid-cols-[minmax(240px,1.4fr)_repeat(2,minmax(0,1fr))]">
-              <label className="block md:col-span-1">
-                <span className="text-xs font-semibold text-slate-500">Tab lớp trong Sheet</span>
-                <AppSelect
-                  className={`${inputClassName} mt-2`}
-                  value={selectedSheetName}
-                  onChange={(event) => {
-                    const nextSheetName = event.target.value;
-                    setSelectedSheetName(nextSheetName);
-                    void loadSheet(sheetUrl, nextSheetName);
-                  }}
-                >
-                  <option value="">Theo gid trong link</option>
-                  {sheetTabs.map((tab) => (
-                    <option key={tab.name} value={tab.name}>
-                      {tab.name}
-                    </option>
-                  ))}
-                </AppSelect>
-              </label>
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Ô bắt đầu</span>
-                <Input className="mt-2 uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
-              </label>
-              <label className="block">
-                <span className="text-xs font-semibold text-slate-500">Ô kết thúc</span>
-                <Input className="mt-2 uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z46" />
-              </label>
-            </div>
-
-            {sheetTabs.length ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {sheetTabs.slice(0, 18).map((tab) => (
-                  <button
-                    key={tab.name}
-                    type="button"
-                    onClick={() => {
-                      setSelectedSheetName(tab.name);
-                      void loadSheet(sheetUrl, tab.name);
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Đường dẫn Google Sheet
+                </span>
+                <p className="mt-1 text-xs text-slate-400">Sheet cần bật quyền xem bằng liên kết.</p>
+                <div className="mt-3 flex flex-col gap-2.5 sm:flex-row">
+                  <Input
+                    value={sheetUrl}
+                    onChange={(event) => setSheetUrl(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") {
+                        event.preventDefault();
+                        void loadSheet(sheetUrl);
+                      }
                     }}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
-                      selectedSheetName === tab.name
-                        ? "border-slate-950 bg-slate-950 text-white"
-                        : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-100"
-                    }`}
-                  >
-                    {tab.name}
-                  </button>
-                ))}
-                {sheetTabs.length > 18 ? (
-                  <span className="rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-slate-500">
-                    +{sheetTabs.length - 18} tab khác trong dropdown
-                  </span>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
-
-          {errorMessage ? (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-700">
-              {errorMessage}
-            </div>
-          ) : null}
-
-          <div className="grid gap-3 md:grid-cols-3">
-            <DashboardMetricCard label="Học sinh sẽ nhập" value={String(visibleStudents.length)} detail={summaryText} tone="blue" />
-            <DashboardMetricCard label="Hợp lệ" value={String(validCount)} detail="Có đủ họ tên và lớp để tạo tài khoản" tone="emerald" />
-            <DashboardMetricCard label="Cần kiểm tra" value={String(warningCount)} detail="Thiếu họ tên, lớp hoặc dữ liệu quan trọng" tone="amber" />
-          </div>
-        </div>
-      </DashboardSectionCard>
-
-      <DashboardSectionCard title="Ghi ngược về Sheet" description="FE chỉ gửi yêu cầu. BE giữ quyền Google và cập nhật username/password sau khi tạo tài khoản.">
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-3">
-            <label className="block">
-              <span className="text-xs font-semibold text-slate-500">Cột username</span>
-              <Input className="mt-2 uppercase" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
-            </label>
-            <label className="block">
-              <span className="text-xs font-semibold text-slate-500">Cột mật khẩu</span>
-              <Input className="mt-2 uppercase" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
-            </label>
-          </div>
-
-          <div className="space-y-3 text-sm leading-6 text-slate-600">
-            <RuleLine label="Đọc tab" value="Theo gid trong link hoặc BE liệt kê tab" />
-            <RuleLine label="Tạo tài khoản" value="BE tạo auth user thật, chống trùng username" />
-            <RuleLine label="Mật khẩu mặc định" value="123456" />
-            <RuleLine label="Ghi Sheet" value={`${usernameColumn || "AA"} / ${passwordColumn || "AB"}`} />
-            <RuleLine label="Quyền ghi" value="OAuth hoặc service account" />
-          </div>
-
-          {submitResult ? (
-            <div className="space-y-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
-              <p className="font-semibold">
-                BE đã tạo {submitResult.created} tài khoản, bỏ qua {submitResult.skipped}, trùng {submitResult.duplicates}.
-              </p>
-              {submitResult.credentials.length ? (
-                <div className="rounded-lg bg-white/70 p-3 text-emerald-900">
-                  <p className="font-semibold">Credential vừa tạo</p>
-                  <div className="mt-2 grid gap-1">
-                    {submitResult.credentials.slice(0, 5).map((item) => (
-                      <span key={item.rowId} className="font-mono text-xs">
-                        Dòng {item.rowNumber}: {item.username} / {item.password}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-              {submitResult.failedItems.length ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800">
-                  <p className="font-semibold">Dòng chưa tạo được</p>
-                  <div className="mt-2 grid gap-1">
-                    {submitResult.failedItems.slice(0, 5).map((item) => (
-                      <span key={item.id} className="text-xs">
-                        {item.id}: {item.message}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-          <Button className="w-full" onClick={() => void submitAccounts()} disabled={!visibleStudents.length || !centerId || isSubmitting}>
-            {isSubmitting ? "Đang gửi BE..." : `Gửi BE tạo ${visibleStudents.length} tài khoản`}
-          </Button>
-        </div>
-      </DashboardSectionCard>
-
-      <DashboardSectionCard
-        className="xl:col-span-2"
-        title="Preview trước khi tạo"
-        description="Admin có thể sửa nhanh họ tên, lớp, ngày sinh, số điện thoại, username hoặc bỏ dòng dư thừa trước khi gửi BE."
-        action={
-          excludedCount > 0 ? (
-            <Button variant="outline" size="sm" onClick={restoreAllStudents}>
-              <RefreshCw className="h-4 w-4" />
-              Khôi phục {excludedCount} dòng
-            </Button>
-          ) : null
-        }
-      >
-        <div className="mb-4 grid gap-3 rounded-lg border border-[#e0e4ea] bg-[#fafbfc] p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div className="flex min-w-0 items-start gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-slate-950 shadow-sm">
-              <Table2 className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <h3 className="font-semibold text-slate-950">Danh sách sẽ tạo tài khoản</h3>
-              <p className="mt-1 text-sm leading-6 text-slate-500">
-                Tab {selectedSheetLabel} · {visibleStudents.length} dòng đang hiển thị · {excludedCount} dòng đã bỏ.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm">
-            <Users className="h-4 w-4 text-[var(--erg-blue)]" />
-            {validCount}/{visibleStudents.length} dòng hợp lệ
-          </div>
-        </div>
-
-        <div className="max-h-[720px] overflow-auto rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
-          <div className="sticky top-0 z-10 hidden min-w-[1380px] grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] gap-3 border-b border-[#e0e4ea] bg-[#f7f8fa] px-4 py-3 text-[11px] font-semibold text-slate-600 backdrop-blur lg:grid">
-            <span>Dòng</span>
-            <span>Học sinh</span>
-            <span>Lớp</span>
-            <span>Ngày sinh</span>
-            <span>Số SĐT</span>
-            <span>Username</span>
-            <span>Mật khẩu</span>
-            <span>Trạng thái</span>
-            <span></span>
-          </div>
-
-          <div className="min-w-[1380px] divide-y divide-slate-100 bg-white">
-            {visibleStudents.map((student) => (
-              <article
-                key={student.id}
-                className="grid gap-3 px-4 py-3 transition hover:bg-[var(--erg-blue-light)] lg:grid-cols-[72px_minmax(300px,1.4fr)_120px_140px_140px_minmax(190px,0.8fr)_minmax(160px,0.7fr)_128px_88px] lg:items-center"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 text-sm font-medium text-slate-700">
-                    {student.rowNumber || student.sourceIndex}
-                  </span>
-                </div>
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--erg-blue-light)] text-sm font-medium text-[var(--erg-blue)]">
-                    {getInitials(student.fullName)}
-                  </span>
-                  <EditableField
-                    label="Học sinh"
-                    value={student.fullName}
-                    onChange={(value) => updateStudent(student.id, "fullName", value)}
-                    helper={student.schoolName || "Chưa xác định trường"}
+                    placeholder="https://docs.google.com/spreadsheets/d/..."
+                    className="h-10 flex-1 rounded-[10px] border-slate-200 text-xs focus:border-[var(--erg-blue)]"
                   />
+                  <Button 
+                    onClick={() => void loadSheet(sheetUrl)} 
+                    disabled={isLoading}
+                    className="h-10 shrink-0 rounded-[10px] px-5 text-xs font-bold"
+                  >
+                    {isLoading ? "Đang xử lý..." : "Đồng bộ dữ liệu"}
+                  </Button>
                 </div>
-                <EditableField label="Lớp" value={student.className} onChange={(value) => updateStudent(student.id, "className", value)} />
-                <EditableField label="Ngày sinh" value={student.birthday} onChange={(value) => updateStudent(student.id, "birthday", value)} />
-                <EditableField label="Số SĐT" value={student.phone} onChange={(value) => updateStudent(student.id, "phone", value)} />
-                <EditableField label="Username" value={student.generatedUsername} onChange={(value) => updateStudent(student.id, "generatedUsername", value)} />
-                <EditableField label="Mật khẩu" value={student.generatedPassword} onChange={(value) => updateStudent(student.id, "generatedPassword", value)} />
-                <Badge tone={student.status === "valid" ? "success" : "warning"}>{student.note}</Badge>
-                <Button variant="ghost" size="sm" onClick={() => excludeStudent(student.id)} aria-label={`Bỏ ${student.fullName}`}>
-                  <Trash2 className="h-4 w-4" />
-                  Bỏ
-                </Button>
-              </article>
-            ))}
+              </label>
+            </div>
 
-            {result && visibleStudents.length === 0 ? (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">
-                Không còn học sinh nào trong lớp hoặc vùng dữ liệu đang chọn.
+            <div className="rounded-xl border border-[#d9e2ef] bg-[#f8fbff] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9e2ef] pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800">{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</h3>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    {lockedCenter ? "Import được thực hiện trong phạm vi trường này." : "Tài khoản được gắn vào trường/lớp đã chọn."}
+                  </p>
+                </div>
+                <Badge tone="secondary">{lockedCenter ? "Đúng phạm vi trường" : "BE realtime"}</Badge>
+              </div>
+              <div className={cn("mt-4 grid gap-3", lockedCenter ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "sm:grid-cols-2")}>
+                {lockedCenter ? (
+                  <div className="rounded-[10px] border border-slate-200/80 bg-white px-3 py-2.5">
+                    <span className="block text-xs font-bold text-slate-500">Trường</span>
+                    <span className="mt-1 block truncate text-sm font-bold text-slate-800">{lockedCenter.name}</span>
+                  </div>
+                ) : (
+                  <label className="block">
+                    <span className="text-xs font-bold text-slate-500">Trường / Trung tâm</span>
+                    <AppSelect
+                      className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                      value={targetCenterId}
+                      onChange={(event) => {
+                        setTargetCenterId(event.target.value);
+                        setTargetClassId("");
+                      }}
+                      disabled={managementScope.level !== "global" && centers.length <= 1}
+                    >
+                      <option value="">Chọn cơ sở thụ hưởng</option>
+                      {centerOptions.map((center) => (
+                        <option key={center.id} value={center.id}>
+                          {center.name}
+                        </option>
+                      ))}
+                    </AppSelect>
+                  </label>
+                )}
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500">Lớp học đích</span>
+                  <AppSelect
+                    className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                    value={targetClassId}
+                    onChange={(event) => setTargetClassId(event.target.value)}
+                    disabled={managementScope.level === "class"}
+                  >
+                    <option value="">Tự động nhận theo cột Lớp trong Sheet</option>
+                    {targetClasses.map((classroom) => (
+                      <option key={classroom.id} value={classroom.id}>
+                        {classroom.className}
+                      </option>
+                    ))}
+                  </AppSelect>
+                </label>
+              </div>
+            </div>
+
+            <div className="space-y-4 rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)]">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-800">Khoảng dữ liệu</h3>
+                  <p className="mt-0.5 text-xs text-slate-400">Chọn tab và vùng ô cần đọc.</p>
+                </div>
+                <Badge tone="outline">{selectedSheetLabel}</Badge>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-[minmax(200px,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500">Tab Sheet cần đọc</span>
+                  <AppSelect
+                    className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                    value={selectedSheetName}
+                    onChange={(event) => {
+                      const nextSheetName = event.target.value;
+                      setSelectedSheetName(nextSheetName);
+                      void loadSheet(sheetUrl, nextSheetName);
+                    }}
+                  >
+                    <option value="">Chọn theo mặc định (Tab đầu)</option>
+                    {sheetTabs.map((tab) => (
+                      <option key={tab.name} value={tab.name}>
+                        {tab.name}
+                      </option>
+                    ))}
+                  </AppSelect>
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500">Tọa độ bắt đầu</span>
+                  <Input className="mt-2 h-10 rounded-[10px] uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
+                </label>
+                <label className="block">
+                  <span className="text-xs font-bold text-slate-500">Tọa độ kết thúc</span>
+                  <Input className="mt-2 h-10 rounded-[10px] uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z100" />
+                </label>
+              </div>
+
+              {sheetTabs.length > 0 && (
+                <div className="pt-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Chuyển đổi nhanh các tab lớp</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {sheetTabs.slice(0, 10).map((tab) => (
+                      <button
+                        key={tab.name}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSheetName(tab.name);
+                          void loadSheet(sheetUrl, tab.name);
+                        }}
+                        className={cn(
+                          "rounded-lg border px-3 py-1.5 text-xs font-semibold tracking-tight transition duration-150",
+                          selectedSheetName === tab.name
+                            ? "border-slate-800 bg-slate-800 text-white shadow-sm"
+                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                        )}
+                      >
+                        {tab.name}
+                      </button>
+                    ))}
+                    {sheetTabs.length > 10 && (
+                      <span className="text-xs font-semibold text-slate-400 bg-white border border-slate-200/60 rounded-lg px-2.5 py-1.5">
+                        +{sheetTabs.length - 10} tab khác
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {errorMessage ? (
+              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 leading-relaxed">
+                {errorMessage}
               </div>
             ) : null}
 
-            {!result && !isLoading ? (
-              <div className="px-4 py-8 text-center text-sm text-slate-500">
-                Dán link Google Sheet để hệ thống tự tải dữ liệu xuống preview.
-              </div>
-            ) : null}
+            {/* Metrics cards */}
+            <div className="grid gap-3 sm:grid-cols-3">
+              <DashboardMetricCard label="Tổng học sinh nhận diện" value={String(visibleStudents.length)} detail={summaryText} tone="blue" />
+              <DashboardMetricCard label="Dòng hợp lệ" value={String(validCount)} detail="Đầy đủ thông tin định danh" tone="emerald" />
+              <DashboardMetricCard label="Cần rà soát lại" value={String(warningCount)} detail="Thiếu thông tin hoặc định dạng lỗi" tone="amber" />
+            </div>
           </div>
-        </div>
-      </DashboardSectionCard>
+        </DashboardSectionCard>
+
+        {/* Preview Table Card */}
+        <DashboardSectionCard
+          title="Bảng xem trước dữ liệu học sinh"
+          description="Cho phép chỉnh sửa trực tiếp thông tin lỗi của học sinh trước khi gửi dữ liệu lên máy chủ."
+          action={
+            excludedCount > 0 ? (
+              <Button variant="outline" size="sm" onClick={restoreAllStudents} className="text-xs h-8">
+                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                Khôi phục {excludedCount} dòng đã bỏ
+              </Button>
+            ) : null
+          }
+        >
+          <div className="mt-4 border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
+            <div className="overflow-x-auto max-h-[580px] scrollbar-thin">
+              <table className="w-full text-left border-collapse min-w-[1200px]">
+                <thead>
+                  <tr className="bg-slate-50/80 sticky top-0 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    <th className="py-3 px-4 w-16 text-center">STT</th>
+                    <th className="py-3 px-4 w-72">Họ & Tên học sinh</th>
+                    <th className="py-3 px-3 w-32">Lớp</th>
+                    <th className="py-3 px-3 w-40">Ngày sinh</th>
+                    <th className="py-3 px-3 w-40">Số điện thoại</th>
+                    <th className="py-3 px-3 w-48">Tên tài khoản (Gen)</th>
+                    <th className="py-3 px-3 w-32">Mật khẩu</th>
+                    <th className="py-3 px-4 w-36 text-center">Trạng thái</th>
+                    <th className="py-3 px-4 w-24 text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+                  {visibleStudents.map((student) => {
+                    const isValid = student.status === "valid";
+                    return (
+                      <tr 
+                        key={student.id} 
+                        className={cn(
+                          "hover:bg-slate-50/40 transition duration-150",
+                          !isValid && "bg-amber-50/15"
+                        )}
+                      >
+                        <td className="py-2.5 px-4 text-center">
+                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">
+                            {student.rowNumber || student.sourceIndex}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-4">
+                          <div className="flex items-center gap-3">
+                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-bold text-blue-600">
+                              {getInitials(student.fullName)}
+                            </span>
+                            <div className="flex-1 min-w-0">
+                              <input 
+                                value={student.fullName} 
+                                onChange={(e) => updateStudent(student.id, "fullName", e.target.value)}
+                                className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-bold text-slate-800"
+                              />
+                              <div className="text-[10px] text-slate-400 mt-0.5 truncate">{student.schoolName || "Cơ sở chưa phân loại"}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <input 
+                            value={student.className} 
+                            onChange={(e) => updateStudent(student.id, "className", e.target.value)}
+                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-bold"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <input 
+                            value={student.birthday} 
+                            onChange={(e) => updateStudent(student.id, "birthday", e.target.value)}
+                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs text-slate-600"
+                            placeholder="DD/MM/YYYY"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <input 
+                            value={student.phone} 
+                            onChange={(e) => updateStudent(student.id, "phone", e.target.value)}
+                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs text-slate-600"
+                            placeholder="Chưa cập nhật SĐT"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <input 
+                            value={student.generatedUsername} 
+                            onChange={(e) => updateStudent(student.id, "generatedUsername", e.target.value)}
+                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-mono text-slate-500"
+                          />
+                        </td>
+                        <td className="py-2.5 px-3">
+                          <input 
+                            value={student.generatedPassword} 
+                            onChange={(e) => updateStudent(student.id, "generatedPassword", e.target.value)}
+                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-mono text-slate-500"
+                          />
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          <span className={cn(
+                            "rounded-full border px-2.5 py-0.5 text-[10px] font-bold inline-block",
+                            isValid 
+                              ? "bg-emerald-50 text-emerald-600 border-emerald-200/60" 
+                              : "bg-amber-50 text-amber-600 border-amber-200/60"
+                          )}>
+                            {student.note}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => excludeStudent(student.id)} 
+                            className="h-8 text-xs text-slate-400 hover:text-rose-600 transition"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+
+                  {result && visibleStudents.length === 0 && (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-slate-400 font-semibold">
+                        Không còn học sinh nào phù hợp trong khoảng lựa chọn.
+                      </td>
+                    </tr>
+                  )}
+
+                  {!result && !isLoading && (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-slate-400 font-bold">
+                        Vui lòng nhập đường dẫn Google Sheet phía trên để tải và cấu hình dữ liệu.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </DashboardSectionCard>
+      </div>
+
+      {/* Right Sidebar Control */}
+      <div className={cn("space-y-4", compact && "xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-4 xl:space-y-0")}>
+        <DashboardSectionCard 
+          title="Đồng bộ về Sheet" 
+          description="Cấu hình trả kết quả tài khoản đã khởi tạo về tệp Google Sheet gốc."
+        >
+          <div className="space-y-5 mt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs font-bold text-slate-500">Cột Tên đăng nhập</span>
+                <Input className="mt-2 uppercase h-9 rounded-lg" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
+              </label>
+              <label className="block">
+                <span className="text-xs font-bold text-slate-500">Cột Mật khẩu</span>
+                <Input className="mt-2 uppercase h-9 rounded-lg" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
+              </label>
+            </div>
+
+            <div className="space-y-2.5 text-xs border-t border-slate-100 pt-3">
+              <RuleLine label="Đầu vào Tab" value={selectedSheetLabel} />
+              <RuleLine label="Định danh Auth" value="Khởi tạo thật, chống trùng lặp" />
+              <RuleLine label="Mật khẩu mặc định" value="123456" />
+              <RuleLine label="Cột ghi nhận kết quả" value={`${usernameColumn || "AA"} / ${passwordColumn || "AB"}`} />
+              <RuleLine label="Quyền hạn ghi tệp" value="OAuth 2.0 / Service Account" />
+            </div>
+
+            {submitResult && (
+              <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-xs text-emerald-800 leading-relaxed shadow-sm">
+                <p className="font-bold">
+                  Hoàn tất: BE đã khởi tạo {submitResult.created} tài khoản, bỏ qua {submitResult.skipped}, trùng lặp {submitResult.duplicates}.
+                </p>
+                {submitResult.credentials.length > 0 && (
+                  <div className="rounded-lg bg-white/70 p-2.5 mt-2 font-mono">
+                    <p className="font-bold text-slate-800 mb-1 text-[10px] uppercase tracking-wider">Tài khoản mẫu mới tạo</p>
+                    <div className="grid gap-1 text-[10px] text-slate-600">
+                      {submitResult.credentials.slice(0, 5).map((item) => (
+                        <span key={item.rowId}>
+                          Dòng {item.rowNumber}: {item.username} / {item.password}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <Button 
+              className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)] text-xs font-bold h-10 rounded-xl shadow-sm transition" 
+              onClick={() => void submitAccounts()} 
+              disabled={!visibleStudents.length || !centerId || isSubmitting}
+            >
+              {isSubmitting ? "Đang truyền dữ liệu..." : `Khởi tạo ${visibleStudents.length} tài khoản`}
+            </Button>
+          </div>
+        </DashboardSectionCard>
+      </div>
     </div>
   );
 }
@@ -615,7 +729,7 @@ function loadGoogleSheetViaJsonp({
 
     const timeoutId = window.setTimeout(() => {
       cleanup();
-      reject(new Error("Google Sheet phản hồi quá lâu. Kiểm tra lại quyền chia sẻ hoặc link sheet."));
+      reject(new Error("Google Sheet phản hồi quá lâu. Kiểm tra lại quyền chia sẻ hoặc tệp sheet."));
     }, 15000);
 
     callbackRegistry[callbackName] = (payload: GvizResponse) => {
@@ -629,7 +743,7 @@ function loadGoogleSheetViaJsonp({
 
     script.onerror = () => {
       cleanup();
-      reject(new Error("Không tải được Google Sheet. Sheet cần bật quyền xem bằng link."));
+      reject(new Error("Không tải được Google Sheet. Tệp sheet cần được cấp quyền xem công khai."));
     };
 
     const params = new URLSearchParams({
@@ -865,31 +979,13 @@ function parseBirthdayForApi(value: string) {
   return date.toISOString();
 }
 
-function EditableField({
-  label,
-  value,
-  helper,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  helper?: string;
-  onChange: (value: string) => void;
-}) {
-  return (
-    <label className="block min-w-0">
-      <span className="mb-1 block text-xs font-medium text-slate-500 lg:hidden">{label}</span>
-      <Input className="h-9 rounded-lg px-3 shadow-none" value={value} onChange={(event) => onChange(event.target.value)} />
-      {helper ? <span className="mt-1 block truncate text-xs text-slate-500">{helper}</span> : null}
-    </label>
-  );
-}
+
 
 function RuleLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2">
-      <span className="font-semibold text-slate-950">{label}</span>
-      <span className="text-right text-slate-500">{value}</span>
+    <div className="flex items-start justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2 text-xs">
+      <span className="font-semibold text-slate-700">{label}</span>
+      <span className="text-right text-slate-500 font-bold">{value}</span>
     </div>
   );
 }

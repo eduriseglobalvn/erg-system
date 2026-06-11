@@ -1,7 +1,7 @@
-export const LCMS_PORTAL_HOST = "lcms.erg.edu.vn";
-export const LMS_PORTAL_HOST = "lms.erg.edu.vn";
-export const CRM_PORTAL_HOST = "crm.erg.edu.vn";
-export const ELEARNING_PORTAL_HOST = "elearning.erg.edu.vn";
+export const LCMS_PORTAL_HOST = "lcms.erg.edu.local";
+export const LMS_PORTAL_HOST = "lms.erg.edu.local";
+export const CRM_PORTAL_HOST = "crm.erg.edu.local";
+export const ELEARNING_PORTAL_HOST = "elearning.erg.edu.local";
 export const ELEARNING_VUONG_PORTAL_HOST = "elearning.vuongtran.io.vn";
 export const LCMS_PORTAL_HOSTS = [LCMS_PORTAL_HOST, `${LCMS_PORTAL_HOST}:3001`];
 export const LMS_PORTAL_HOSTS = [LMS_PORTAL_HOST, `${LMS_PORTAL_HOST}:3001`];

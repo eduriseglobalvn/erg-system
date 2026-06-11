@@ -3,6 +3,7 @@ import type {
   HTMLAttributes,
   InputHTMLAttributes,
   ReactNode,
+  TextareaHTMLAttributes,
 } from "react";
 
 import { cn } from "@/lib/utils";
@@ -123,7 +124,7 @@ type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "size"> & {
 
 const btnVariantClasses: Record<ButtonVariant, string> = {
   default:
-    "border border-[var(--primary)] bg-[var(--primary)] text-white hover:bg-[var(--erg-blue-hover)] active:bg-[var(--erg-blue-hover)] shadow-[var(--shadow-xs)] font-bold [&_*]:text-inherit",
+    "border border-[#0f6cbd] bg-[#0f6cbd] text-white hover:border-[#0b5cab] hover:bg-[#0b5cab] active:bg-[#094a9f] shadow-[var(--shadow-xs)] font-bold [&_*]:text-inherit",
   secondary:
     "border border-[#d7e0ec] bg-[var(--accent-soft)] text-[var(--primary)] hover:border-[#b8c8db] hover:bg-[var(--accent-soft-hover)] active:opacity-90 font-semibold [&_*]:text-inherit",
   outline:
@@ -187,7 +188,7 @@ export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElem
 /* ---------------------------------------------------------------------------
    Textarea
    --------------------------------------------------------------------------- */
-export function Textarea({ className, ...props }: InputHTMLAttributes<HTMLTextAreaElement>) {
+export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea
       className={cn(

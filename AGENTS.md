@@ -27,46 +27,78 @@ skills:
     use: "@tanstack/router-core#router-core/ssr"
   - when: "Full type inference philosophy (never cast, never annotate inferred values), Register module declaration, from narrowing on hooks and Link, strict:false for shared components, getRouteApi for code-split typed access, addChildren with object syntax for TS perf, LinkProps and ValidateLinkOptions type utilities, as const satisfies pattern."
     use: "@tanstack/router-core#router-core/type-safety"
+  - when: "CenterUp-inspired UI design for ERG System. shadcn/ui + Radix + Tailwind v4. Data tables, sidebar, forms, badges, cards. NOT for landing pages or marketing sites. ERP SaaS UI only."
+    use: "@/agents/skills/centerup-ui-design"
 <!-- intent-skills:end -->
 
-# Repository Working Rules
+# Working Rules
 
 ## Frontend Architecture
 
-Follow this structure for all new frontend work and for refactors of existing code:
+Follow this structure for all frontend work:
 
-```text
+```
 src/
-├── assets/
-├── components/   # Shared, reusable UI used by multiple features
-├── config/       # App-level constants and configuration
-├── context/      # Global React context only when truly cross-app
-├── features/     # Feature-first modules; this is the primary place for business logic
+├── app/              # Route tree + page components (type-safe TanStack Router)
+│   ├── route-tree.ts
+│   ├── root-route.tsx
+│   └── pages/
+│       ├── lms/
+│       ├── lcms/
+│       ├── crm/
+│       └── elearning/
+├── components/
+│   ├── ui/           # shadcn/ui components (CenterUp-styled)
+│   ├── portal/       # Sidebar, Header, SidebarLayout
+│   └── shared/       # Shared business components
+├── features/         # Feature modules (business logic)
 │   └── <feature>/
 │       ├── api/
 │       ├── components/
 │       ├── hooks/
-│       ├── types/
-│       └── index.ts
-├── hooks/        # Shared hooks reused across features
-├── layouts/      # Route/layout shells
-├── lib/          # Thin wrappers around third-party libs or legacy adapters
-├── pages/        # Route-level page entry points only
-├── routes/       # Router composition and route declarations
-├── stores/       # Global state stores
-├── types/        # Shared cross-feature types
-└── utils/        # Pure helper utilities
+│       └── types/
+├── platform/         # Auth, i18n
+├── styles/           # globals.css, theme.css
+├── lib/              # Utility wrappers
+├── stores/           # TanStack stores
+├── hooks/            # Shared hooks
+└── types/            # Global types
 ```
 
 ## Non-Negotiable Rules
 
-1. Components must be split clearly and designed for reuse.
-2. Business logic must live inside `features/<feature>`, not inside pages.
-3. Pages should stay thin and mainly compose feature exports.
-4. Shared UI belongs in `src/components`, feature-only UI belongs in `src/features/<feature>/components`.
-5. If a legacy file cannot be moved immediately, create a thin adapter and keep new work on the target architecture.
+1. ✅ Dùng TanStack Router (type-safe), KHÔNG if/else chain routing
+2. ✅ Dùng shadcn/ui, KHÔNG dùng MUI, KHÔNG dashboard-kit
+3. ✅ Dùng lucide-react icons, KHÔNG @mui/icons-material
+4. ✅ Theme qua CSS variables, KHÔNG next-themes
+5. ✅ Shell components < 200 dòng, tách sub-components
+6. ✅ Pages mỏng - chỉ compose feature components
+7. ✅ Business logic trong features/, KHÔNG trong pages
+8. ✅ Skeleton screens (không spinner) cho loading
+9. ✅ TanStack Query persist cho offline
+10. ✅ Code-split mỗi route cho performance
 
-## Current User Preference
+## CenterUp Design Tokens (EXACT — extracted via Playwright)
 
-- Keep the dashboard architecture aligned with the reference image and a feature-first structure.
-- Keep the mock teacher account visible in the dashboard sidebar at the bottom-left.
+- Primary: #696CFF (PURPLE) — KHÔNG phải blue
+- Sidebar: #1C252E (dark), 280px
+- Font: Manrope Variable (body), JetBrains Mono (code)
+- Border: rgba(145, 158, 171, 0.2) dashed
+- Border radius: 8px (base)
+- Table cell: 6px 16px, font 14px
+- Header: 64px, border-bottom
+- Status badges: success=green(#22C55E), warning=gold(#FFAB00), danger=red(#FF5630), info=cyan(#00B8D9)
+
+## Performance Budget
+
+- FCP < 1.5s (3G)
+- Bundle (initial) < 100KB gzip
+- Lighthouse > 90
+- TTI < 3s
+
+## PWA Strategy
+
+- vite-plugin-pwa with IndexedDB + TanStack Query persist
+- Offline-first cho core features (attendance, scores, homework)
+- Connection quality detection (3G/4G/WiFi)
+- Adaptive loading (giảm ảnh trên 3G)

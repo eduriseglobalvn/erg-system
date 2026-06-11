@@ -1,4 +1,8 @@
-import { getPersistedJsonValue } from "@/stores/persisted-store";
+import {
+  getPersistedJsonValue,
+  removePersistedJsonValue,
+  setPersistedJsonValue,
+} from "@/stores/persisted-store";
 
 export type StoredAuthSession = {
   accessToken?: string;
@@ -103,6 +107,52 @@ export function getStoredAccessToken(portal?: StoredAuthSession["portal"]) {
   return readStoredAuthSession(portal)?.accessToken;
 }
 
+export function readStoredRefreshSession(portal?: StoredAuthSession["portal"]): StoredAuthIdentity | null {
+  if (!canUseStorage()) return null;
+
+  const targetPortal = portal ?? resolveCurrentPortal();
+  const session = readRawStoredAuthSession(targetPortal);
+  if (!session?.refreshToken) return null;
+
+  return session;
+}
+
+export function updateStoredAuthSessionTokens(
+  portal: StoredAuthSession["portal"],
+  tokens: {
+    accessToken: string;
+    expiresAt?: string;
+    refreshToken?: string;
+  },
+) {
+  if (!tokens.accessToken) return null;
+
+  const session = readStoredRefreshSession(portal) ?? readRawStoredAuthSession(portal);
+  if (!session) return null;
+
+  const nextSession: StoredAuthIdentity = {
+    ...session,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken ?? session.refreshToken,
+    expiresAt: tokens.expiresAt ?? session.expiresAt,
+  };
+
+  writeRawStoredAuthSession(nextSession);
+  return nextSession;
+}
+
+export function clearStoredAuthSessions() {
+  clearTeacherSessionSnapshot();
+  if (!canUseStorage()) return;
+
+  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
+  window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
+  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
+    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
+    window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
+  }
+}
+
 export function portalSessionKey(baseKey: string, portal: Exclude<NonNullable<StoredAuthSession["portal"]>, "elearning">) {
   return `${baseKey}.${portal}`;
 }
@@ -137,6 +187,47 @@ function hasMergedTeacherPortalAccess(session: StoredAuthSession) {
 
 function isMergedTeacherPortal(portal: StoredAuthSession["portal"] | "*"): portal is (typeof MERGED_TEACHER_PORTALS)[number] {
   return MERGED_TEACHER_PORTALS.includes(portal as (typeof MERGED_TEACHER_PORTALS)[number]);
+}
+
+function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredAuthIdentity | null {
+  if (!canUseStorage()) return null;
+
+  const targetPortal = portal ?? resolveCurrentPortal();
+  const candidates = [
+    teacherSessionSnapshot,
+    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
+    parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
+    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
+    parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
+    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
+    parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
+    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
+    parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
+  ].filter((session): session is StoredAuthIdentity => Boolean(session?.accountId));
+
+  if (targetPortal === "elearning") {
+    return null;
+  }
+
+  return candidates.find((session) => sessionMatchesPortal(session, targetPortal)) ?? null;
+}
+
+function writeRawStoredAuthSession(session: StoredAuthIdentity) {
+  setTeacherSessionSnapshot(session);
+  if (!canUseStorage()) return;
+
+  const portal = session.portal && session.portal !== "elearning" ? session.portal : "lms";
+  const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
+  const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
+
+  if (session.rememberMe) {
+    setPersistedJsonValue(localKey, session);
+    window.sessionStorage.removeItem(tempKey);
+    return;
+  }
+
+  window.sessionStorage.setItem(tempKey, JSON.stringify(session));
+  removePersistedJsonValue(localKey);
 }
 
 function readSessionExpiry(session: StoredAuthSession) {

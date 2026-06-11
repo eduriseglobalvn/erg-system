@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Search } from "lucide-react";
 
 import {
@@ -13,9 +14,16 @@ import {
   classroomStudents,
   getSchoolSnapshots,
 } from "@/features/lms/classroom/api/mock-classroom-data";
+import {
+  loadLmsClassWorkspace,
+  mapClassWorkspaceToStudents,
+  type LmsClassWorkspace,
+} from "@/features/lms/api/lms-graphql-api";
+import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
+import { hasApiBase } from "@/lib/api-client";
 import { useI18n } from "@/platform/i18n";
 import {
   AssignmentDialog,
@@ -68,18 +76,52 @@ export function ClassStudentsWorkspace({
   const [recentBatches, setRecentBatches] = useState<DeliveryBatch[]>([]);
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const paceStateUpdate = usePacedStateBatch();
+  const apiBacked = hasApiBase();
+  const classWorkspaceQuery = useQuery({
+    queryKey: ["lms", "class-students-workspace", "class-workspace", selectedSchoolId, selectedClassId],
+    queryFn: () =>
+      loadLmsClassWorkspace({
+        assignmentPage: 0,
+        assignmentSize: 50,
+        assignmentStatus: "active",
+        classId: selectedClassId,
+        page: 0,
+        schoolId: selectedSchoolId,
+        size: 50,
+        studentStatus: "active",
+      }),
+    enabled: apiBacked && Boolean(selectedClassId),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
-  const selectedClass =
+  const fallbackSelectedClass =
     classroomSnapshots.find((snapshot) => snapshot.id === selectedClassId && snapshot.schoolId === selectedSchoolId) ??
     getSchoolSnapshots(selectedSchoolId)[0];
+  const selectedClass = useMemo(
+    () =>
+      classWorkspaceQuery.data
+        ? mapClassWorkspaceToSnapshot(classWorkspaceQuery.data, fallbackSelectedClass, selectedSchoolId)
+        : fallbackSelectedClass,
+    [classWorkspaceQuery.data, fallbackSelectedClass, selectedSchoolId],
+  );
   const school = classroomSchools.find((item) => item.id === selectedSchoolId) ?? classroomSchools[0];
   const subjectOptions = useMemo(
     () => Array.from(new Set([...assignmentRuns, ...assignmentCatalog].map((assignment) => assignment.subjectLabel))),
     [],
   );
-  const schoolStudents = useMemo(
+  const fallbackSchoolStudents = useMemo(
     () => classroomStudents.filter((student) => student.schoolId === selectedSchoolId),
     [selectedSchoolId],
+  );
+  const workspaceStudents = useMemo(
+    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : []),
+    [classWorkspaceQuery.data, selectedClass],
+  );
+  const schoolStudents = useMemo(
+    () => (workspaceStudents.length ? workspaceStudents : fallbackSchoolStudents),
+    [fallbackSchoolStudents, workspaceStudents],
   );
 
   const visibleStudents = useMemo(() => {
@@ -351,7 +393,7 @@ export function ClassStudentsWorkspace({
         onNoteChange={setTeacherNote}
         onSubjectChange={pickSubject}
         open={assignDialogOpen}
-        schoolName={school.name}
+        schoolName={selectedClass?.schoolName ?? school.name}
         selectedCount={selectedStudents.length}
         selectedAssignmentIds={selectedAssignmentIds}
         selectedLevelId={selectedLevel?.id ?? ""}
@@ -377,6 +419,47 @@ export function ClassStudentsWorkspace({
       ) : null}
     </DashboardPageShell>
   );
+}
+
+function mapClassWorkspaceToSnapshot(
+  workspace: LmsClassWorkspace,
+  fallback: ClassroomSnapshot | undefined,
+  selectedSchoolId: string,
+): ClassroomSnapshot {
+  const classInfo = workspace.classInfo;
+  const schoolId = classInfo.schoolId || fallback?.schoolId || selectedSchoolId;
+  const grade = classInfo.grade?.replace(/^grade[-_]?/i, "");
+  const studentCount = Math.round(classInfo.studentCount ?? workspace.students.totalItems ?? workspace.students.items.length);
+  const activeAssignments = Math.round(classInfo.assignmentCount ?? workspace.assignments.totalItems ?? workspace.assignments.items.length);
+  const averageScore = Math.round(workspace.scoreSummary?.averagePercent ?? fallback?.averageScore ?? 0);
+
+  return {
+    id: classInfo.id || fallback?.id || selectedSchoolId,
+    schoolId,
+    schoolName: fallback?.schoolName || classInfo.schoolId || "ERG Learning",
+    clusterId: fallback?.clusterId ?? "central",
+    className: classInfo.name || fallback?.className || classInfo.id || "Lop hoc",
+    gradeLabel: grade ? `Khoi ${grade}` : fallback?.gradeLabel ?? "ERG",
+    homeroomTeacher: fallback?.homeroomTeacher || classInfo.homeroomTeacherId || "Giao vien chu nhiem",
+    studentCount,
+    activeAssignments,
+    completionRate: averageScore,
+    averageScore,
+    riskStudents: Math.round(
+      workspace.riskSummary?.missingOverdueStudentCount ??
+        workspace.riskSummary?.lowScoreStudentCount ??
+        fallback?.riskStudents ??
+        0,
+    ),
+    competitionPoints: fallback?.competitionPoints ?? 0,
+    lastSubmissionAt: classInfo.updatedAt ? formatClassWorkspaceDate(classInfo.updatedAt) : fallback?.lastSubmissionAt ?? "Chua co du lieu",
+  };
+}
+
+function formatClassWorkspaceDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Moi cap nhat";
+  return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
 }
 
 function createStudentProfileDraft(student: { avatarSeed: string; id: string; mentorNote: string; name: string }) {

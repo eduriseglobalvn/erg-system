@@ -1,8 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Clock3, FileCheck2, Search, UsersRound } from "lucide-react";
 
 import { Badge, Button } from "@/components/ui/dashboard-kit";
+import {
+  loadLmsAssignmentProgressWorkspace,
+  type LmsAssignmentProgressWorkspace,
+} from "@/features/lms/api/lms-graphql-api";
 import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 
 type ProgressStatus = "completed" | "inprogress" | "notstarted";
@@ -41,9 +47,25 @@ export function HomeworkProgressPage({
   const [selectedRunId, setSelectedRunId] = useState(initialRunId || runs[0]?.id || "");
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProgressStatus | typeof allStatusValue>(allStatusValue);
+  const apiBacked = hasApiBase();
+
+  useEffect(() => {
+    const nextRunId = initialRunId && runs.some((run) => run.id === initialRunId) ? initialRunId : runs[0]?.id || "";
+    if (!nextRunId) return;
+    setSelectedRunId((current) => (runs.some((run) => run.id === current) ? current : nextRunId));
+  }, [initialRunId, runs]);
+
+  const progressQuery = useQuery({
+    queryKey: ["lms", "assignment-progress-workspace", selectedRunId],
+    queryFn: () => loadLmsAssignmentProgressWorkspace({ assignmentId: selectedRunId, page: 0, size: 50 }),
+    enabled: apiBacked && Boolean(selectedRunId),
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
 
   const selectedRun = runs.find((run) => run.id === selectedRunId) ?? runs[0];
-  const progressRows = useMemo(
+  const fallbackRows = useMemo(
     () =>
       students.map((student, index): StudentProgressRow => {
         const statusType = (index * 3 + 2) % 3;
@@ -62,6 +84,11 @@ export function HomeworkProgressPage({
       }),
     [students],
   );
+  const graphQlRows = useMemo(
+    () => (progressQuery.data ? mapAssignmentProgressRows(progressQuery.data, selectedClass) : []),
+    [progressQuery.data, selectedClass],
+  );
+  const progressRows = graphQlRows.length ? graphQlRows : fallbackRows;
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
 
@@ -79,6 +106,7 @@ export function HomeworkProgressPage({
   const inProgress = progressRows.filter((row) => row.status === "inprogress").length;
   const notStarted = progressRows.filter((row) => row.status === "notstarted").length;
   const completedPct = total ? Math.round((completed / total) * 100) : 0;
+  const needsReviewCount = progressQuery.data?.summary.needsReviewCount ?? selectedRun?.needsReviewCount ?? 0;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-4 py-4 xl:px-6">
@@ -216,7 +244,7 @@ export function HomeworkProgressPage({
               <ProgressQuickInfo label="Hoàn thành" value={`${completed}/${total}`} tone="text-emerald-600" />
               <ProgressQuickInfo label="Đang làm" value={String(inProgress)} tone="text-amber-600" />
               <ProgressQuickInfo label="Chưa mở" value={String(notStarted)} tone="text-slate-500" />
-              <ProgressQuickInfo label="Cần chấm" value={String(selectedRun?.needsReviewCount ?? 0)} tone="text-rose-500" />
+              <ProgressQuickInfo label="Cần chấm" value={String(needsReviewCount)} tone="text-rose-500" />
             </div>
             <div className="mt-3 rounded-lg border border-[#dbe4f0] p-3">
               <div className="mb-2 flex items-center justify-between text-[13px] font-bold text-slate-600">
@@ -232,6 +260,99 @@ export function HomeworkProgressPage({
       </section>
     </div>
   );
+}
+
+type AssignmentProgressRecipient = LmsAssignmentProgressWorkspace["recipients"]["items"][number];
+type AssignmentProgressAttempt = LmsAssignmentProgressWorkspace["attempts"]["items"][number];
+
+function mapAssignmentProgressRows(
+  workspace: LmsAssignmentProgressWorkspace,
+  selectedClass?: ClassroomSnapshot,
+): StudentProgressRow[] {
+  const recipientRows = workspace.recipients.items.map((recipient, index) => {
+    const attempt = recipient.latestAttempt ?? recipient.bestAttempt;
+    const status = statusFromRecipient(recipient);
+    const score = scoreFromAttempt(attempt);
+    const studentId = recipientStudentId(recipient);
+
+    return {
+      id: studentId || attempt?.studentId || `recipient-${index + 1}`,
+      name: recipient.fullName || recipient.username || recipient.studentCode || studentId || "Hoc sinh",
+      className: selectedClass?.className || recipient.academicClassId || workspace.assignment.academicClassId || "Lop hoc",
+      progress: progressPercentFromAttempt(attempt, status),
+      score,
+      status,
+      timestamp: formatProgressTimestamp(attempt?.submittedAt || attempt?.updatedAt || recipient.updatedAt),
+    } satisfies StudentProgressRow;
+  });
+
+  if (recipientRows.length) return recipientRows;
+
+  return workspace.attempts.items.map((attempt, index) => {
+    const status = statusFromAttempt(attempt);
+    const score = scoreFromAttempt(attempt);
+
+    return {
+      id: attempt.studentId || attempt.id || `attempt-${index + 1}`,
+      name: attempt.studentId || `Hoc sinh ${index + 1}`,
+      className: selectedClass?.className || workspace.assignment.academicClassId || "Lop hoc",
+      progress: progressPercentFromAttempt(attempt, status),
+      score,
+      status,
+      timestamp: formatProgressTimestamp(attempt.submittedAt || attempt.updatedAt || attempt.startedAt),
+    } satisfies StudentProgressRow;
+  });
+}
+
+function recipientStudentId(recipient: AssignmentProgressRecipient) {
+  return (recipient as AssignmentProgressRecipient & { studentId?: string | null }).studentId || recipient.id;
+}
+
+function statusFromRecipient(recipient: AssignmentProgressRecipient): ProgressStatus {
+  const attempt = recipient.latestAttempt ?? recipient.bestAttempt;
+  if (!attempt || recipient.missing) return "notstarted";
+  return statusFromAttempt(attempt);
+}
+
+function statusFromAttempt(attempt: AssignmentProgressAttempt | null | undefined): ProgressStatus {
+  if (!attempt) return "notstarted";
+
+  const normalizedStatus = attempt.status?.toLowerCase();
+  if (
+    attempt.submittedAt ||
+    attempt.passed ||
+    attempt.percent === 100 ||
+    ["completed", "graded", "reviewed", "submitted"].includes(normalizedStatus ?? "")
+  ) {
+    return "completed";
+  }
+
+  if (["draft", "in_progress", "started", "running"].includes(normalizedStatus ?? "")) return "inprogress";
+  return attempt.startedAt || attempt.updatedAt ? "inprogress" : "notstarted";
+}
+
+function progressPercentFromAttempt(attempt: AssignmentProgressAttempt | null | undefined, status: ProgressStatus) {
+  const percent = scoreFromAttempt(attempt);
+  if (status === "completed") return percent ?? 100;
+  if (status === "inprogress") return Math.max(5, Math.min(percent ?? 50, 95));
+  return 0;
+}
+
+function scoreFromAttempt(attempt: AssignmentProgressAttempt | null | undefined) {
+  if (!attempt) return null;
+  if (typeof attempt.percent === "number") return Math.round(attempt.percent);
+  if (typeof attempt.score === "number" && typeof attempt.maxScore === "number" && attempt.maxScore > 0) {
+    return Math.round((attempt.score / attempt.maxScore) * 100);
+  }
+  if (typeof attempt.score === "number") return Math.round(attempt.score);
+  return null;
+}
+
+function formatProgressTimestamp(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
 }
 
 function ProgressStat({ icon: Icon, label, value }: { icon: typeof UsersRound; label: string; value: string }) {

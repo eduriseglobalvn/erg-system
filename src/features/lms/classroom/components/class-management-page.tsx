@@ -1,10 +1,13 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
 import { Input } from "@/components/ui/dashboard-kit";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 import { AppSelect } from "@/components/ui/app-select";
@@ -34,7 +37,7 @@ const scopeModeOptions: Array<{ label: string; value: ScopeMode }> = [
   { label: "Theo nhóm", value: "group" },
 ];
 
-export function ClassManagementPage({ classes, selectedClass, selectedSchoolName, students }: ClassManagementPageProps) {
+export function ClassManagementPage({ classes, selectedClass, selectedSchoolName, students: fallbackStudents }: ClassManagementPageProps) {
   const [scopeMode, setScopeMode] = useState<ScopeMode>("class");
   const [scopeId, setScopeId] = useState(selectedClass?.id ?? classes[0]?.id ?? "");
   const [searchValue, setSearchValue] = useState("");
@@ -44,6 +47,31 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentProfileDetailDraft>>({});
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
   const debouncedSearchValue = useDebouncedValue(searchValue);
+  const apiBacked = hasApiBase();
+  const selectedClassId = selectedClass?.id ?? classes[0]?.id ?? "";
+
+  const classWorkspaceQuery = useQuery({
+    queryKey: ["lms", "class-management", "class-workspace", selectedClass?.schoolId ?? "", selectedClassId],
+    queryFn: () =>
+      loadLmsClassWorkspace({
+        assignmentPage: 0,
+        assignmentSize: 50,
+        assignmentStatus: "active",
+        classId: selectedClassId,
+        page: 0,
+        schoolId: selectedClass?.schoolId,
+        size: 50,
+        studentStatus: "active",
+      }),
+    enabled: apiBacked && Boolean(selectedClassId),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const students = useMemo(
+    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : fallbackStudents),
+    [classWorkspaceQuery.data, fallbackStudents, selectedClass],
+  );
 
   const schoolClasses = useMemo(() => classes.filter((classroom) => !selectedClass || classroom.schoolId === selectedClass.schoolId), [classes, selectedClass]);
   const gradeLabels = useMemo(() => Array.from(new Set(schoolClasses.map((classroom) => classroom.gradeLabel))), [schoolClasses]);

@@ -54,16 +54,7 @@ const QuestionTypeDemoPage = lazy(() =>
     default: module.QuestionTypeDemoPage,
   })),
 );
-const PublicDisclosurePage = lazy(() =>
-  import("@/pages/public-disclosure-page").then((module) => ({
-    default: module.PublicDisclosurePage,
-  })),
-);
-const PublicDisclosureAdminPage = lazy(() =>
-  import("@/pages/public-disclosure-admin-page").then((module) => ({
-    default: module.PublicDisclosureAdminPage,
-  })),
-);
+
 const NotFoundPage = lazy(() =>
   import("@/pages/not-found-page").then((module) => ({
     default: module.NotFoundPage,
@@ -132,6 +123,21 @@ function pathStarts(path: string, prefix: string) {
   return path === prefix || path.startsWith(`${prefix}/`);
 }
 
+const lcmsWorkspacePaths = [
+  "schools",
+  "users",
+  "questions",
+  "quiz-bank",
+  "quiz-editor",
+  "resources",
+  "assignments",
+  "rubrics",
+  "session-templates",
+  "report-templates",
+  "legal",
+  "settings",
+];
+
 function AppRoutesContent() {
   const location = useLocation();
   const path = stripPath(location.pathname);
@@ -146,14 +152,15 @@ function AppRoutesContent() {
   if (isLcmsPortal) {
     if (path === "access-denied") element = <AccessDeniedPage />;
     else if (path === "login") element = <PortalLoginPage portal="lcms" />;
-    else if (isRoot || ["schools", "import", "users", "questions", "quiz-bank", "quiz-editor", "resources", "legal", "settings"].includes(path)) element = withPortalAuth("lcms", <LcmsPage />);
+    else if (path === "import") element = <Navigate to="/schools" replace />;
+    else if (isRoot || lcmsWorkspacePaths.includes(path)) element = withPortalAuth("lcms", <LcmsPage />);
     else if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "hoclieu")) element = <Navigate to="/resources" replace />;
     else element = <NotFoundPage />;
   } else if (isCrmPortal) {
     if (path === "access-denied") element = <AccessDeniedPage />;
     else if (path === "login") element = <PortalLoginPage portal="crm" />;
     else if (isRoot || ["seo", "seo/schools", "seo/opportunities", "seo/pnl", "seo/follow-ups", "seo/handover"].includes(path)) element = withPortalAuth("crm", <CrmPage />);
-    else if (["schools", "import", "users", "questions", "quiz-bank", "quiz-editor", "resources", "legal", "settings"].includes(path)) element = <PortalHostRedirect targetHost={LCMS_PORTAL_HOST} preservePathAndSearch />;
+    else if (lcmsWorkspacePaths.includes(path)) element = <PortalHostRedirect targetHost={LCMS_PORTAL_HOST} preservePathAndSearch />;
     else element = <NotFoundPage />;
   } else if (isLmsPortal) {
     if (path === "access-denied") element = <AccessDeniedPage />;
@@ -177,8 +184,7 @@ function AppRoutesContent() {
     else if (path === "student") element = <PortalHostRedirect targetHost={ELEARNING_PORTAL_HOST} />;
     else if (path === "admin" || path === "crm") element = <PortalHostRedirect targetHost={CRM_PORTAL_HOST} />;
     else if (path === "dashboard") element = <PortalHostRedirect targetHost={LMS_PORTAL_HOST} />;
-    else if (path === "cong-khai" || pathStarts(path, "cong-khai/viewer")) element = <PublicDisclosurePage />;
-    else if (path === "public-disclosure") element = <PublicDisclosureAdminPage />;
+
     else if (path === "question-types") element = <QuestionTypeDemoPage />;
     else if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "chuong-trinh") || pathStarts(path, "hoclieu")) element = <PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />;
     else if (["cong-dong", "portfolio", "quizzes"].includes(path)) element = <PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />;
@@ -190,10 +196,8 @@ function AppRoutesContent() {
 
 const rootRoute = createRootRoute({ component: RootLayout });
 const indexRoute = createRoute({ getParentRoute: () => rootRoute, path: "/", component: AppRoutesContent });
-const publicDisclosureViewerRoute = createRoute({ getParentRoute: () => rootRoute, path: "cong-khai/viewer/$documentId", component: AppRoutesContent });
 const catchAllRoute = createRoute({ getParentRoute: () => rootRoute, path: "$", component: AppRoutesContent });
-
-export const routeTree = rootRoute.addChildren([indexRoute, publicDisclosureViewerRoute, catchAllRoute]);
+export const routeTree = rootRoute.addChildren([indexRoute, catchAllRoute]);
 
 export function createAppRouter() {
   return createRouter({

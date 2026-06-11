@@ -1,7 +1,8 @@
 import { lazy, memo, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@/routes/router-compat";
 import {
+  Bell,
   BookOpen,
   BookOpenCheck,
   CalendarCheck,
@@ -30,6 +31,7 @@ import {
   defaultSchoolId,
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, ClassroomStudent, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+import { loadLmsTeacherHomeworkWorkspace, mapAssignmentsToRuns } from "@/features/lms/api/lms-graphql-api";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
@@ -37,8 +39,10 @@ import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { LmsSelect } from "@/components/ui/lms-kit";
 import { LmsMobileShell, useLmsMobileBreakpoint } from "@/features/lms/mobile";
+import { fetchUnreadNotificationCount, notificationQueryKeys } from "@/features/notifications/api/notification-api";
 
 type LmsSection = "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
+type LmsMobileSection = "assignHomework" | "exerciseBank" | "schedule" | "notifications";
 
 const LearningResourceLibraryPage = lazy(() =>
   import("@/features/lms/learning-resources/components/learning-resource-library-page").then((module) => ({
@@ -85,6 +89,11 @@ const ClassManagementPage = lazy(() =>
     default: module.ClassManagementPage,
   })),
 );
+const HomeworkProgressPage = lazy(() =>
+  import("@/features/lms/components/homework-progress-page").then((module) => ({
+    default: module.HomeworkProgressPage,
+  })),
+);
 const HomeworkFloatingMenu = lazy(() =>
   import("@/features/lms/components/homework-floating-menu").then((module) => ({
     default: module.HomeworkFloatingMenu,
@@ -126,22 +135,39 @@ const lmsNavItems: Array<{ id: LmsSection; label: string; path: string; icon: ty
   { id: "reports", label: "Báo cáo", path: "/reports", icon: FileText },
 ];
 
+const lmsMobileDockItems: Array<{ id: LmsMobileSection; label: string; path: string; icon: typeof ClipboardList }> = [
+  { id: "assignHomework", label: "Giao bài", path: "/homework/assign", icon: ClipboardList },
+  { id: "exerciseBank", label: "Kho bài", path: "/homework/exercise-bank", icon: BookOpen },
+  { id: "schedule", label: "Lịch", path: "/calendar", icon: CalendarDays },
+  { id: "notifications", label: "Thông báo", path: "/notifications", icon: Bell },
+];
+
 function resolveSection(pathname: string): LmsSection {
   const matched = lmsNavItems.find((item) => pathname === item.path || pathname.startsWith(`${item.path}/`));
   return matched?.id ?? "homework";
 }
 
+function resolveMobileSection(pathname: string): LmsMobileSection {
+  if (pathname === "/homework/exercise-bank" || pathname.startsWith("/homework/exercise-bank/")) return "exerciseBank";
+  if (pathname === "/calendar" || pathname.startsWith("/calendar/")) return "schedule";
+  if (pathname === "/notifications" || pathname.startsWith("/notifications/")) return "notifications";
+  return "assignHomework";
+}
+
 export function LmsTeacherShell() {
   const { actions, account } = useAuthSession("lms");
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const apiBacked = hasApiBase();
   const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
+  const progressAssignmentId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("assignmentId") : null;
   const activeSection = resolveSection(pathname);
+  const activeMobileSection = resolveMobileSection(pathname);
   const showHomeworkFloatingMenu = pathname.startsWith("/homework");
   const [requestedSchoolId, setSelectedSchoolId] = useState("");
   const [requestedClassId, setSelectedClassId] = useState("");
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);
-  const [runs, setRuns] = useState<AssignmentRun[]>(assignmentRuns);
+  const [createdRuns, setCreatedRuns] = useState<AssignmentRun[]>([]);
   const [floatingMenuOpen, setFloatingMenuOpen] = useState(false);
   const bootstrapQuery = useQuery({
     queryKey: ["lms-teacher-shell", "bootstrap"],
@@ -151,8 +177,33 @@ export function LmsTeacherShell() {
     gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,
   });
+  const notificationUnreadQuery = useQuery({
+    queryKey: notificationQueryKeys.unreadCount("lms"),
+    queryFn: () => fetchUnreadNotificationCount("lms"),
+    staleTime: 30_000,
+    refetchOnWindowFocus: true,
+  });
+  const homeworkWorkspaceQuery = useQuery({
+    queryKey: ["lms-teacher-shell", "teacher-homework-workspace"],
+    queryFn: () => loadLmsTeacherHomeworkWorkspace({ page: 0, size: 50, status: "active" }),
+    enabled: apiBacked,
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
   const schools = bootstrapQuery.data?.schools.length ? bootstrapQuery.data.schools : classroomSchools;
   const classes = bootstrapQuery.data?.classes.length ? bootstrapQuery.data.classes : classroomSnapshots;
+  const workspaceRuns = useMemo(
+    () =>
+      homeworkWorkspaceQuery.data
+        ? mapAssignmentsToRuns(homeworkWorkspaceQuery.data.assignments.items, homeworkWorkspaceQuery.data.classOptions)
+        : [],
+    [homeworkWorkspaceQuery.data],
+  );
+  const runs = useMemo(
+    () => [...createdRuns, ...(workspaceRuns.length ? workspaceRuns : assignmentRuns)],
+    [createdRuns, workspaceRuns],
+  );
   const bootstrapSelection = useMemo(() => {
     const scope = bootstrapQuery.data?.managementScope;
     const scopedSchoolId =
@@ -186,6 +237,7 @@ export function LmsTeacherShell() {
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? classroomSchools[0];
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
+  const activeMobileNav = lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? lmsMobileDockItems[0];
   const teacherName = account?.fullName || "Lê Thị Thùy";
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
   const teacherAvatar = account?.avatarUrl || "";
@@ -197,12 +249,35 @@ export function LmsTeacherShell() {
     [selectedSchoolId],
   );
   const isMobile = useLmsMobileBreakpoint();
-  const mobileDockItems = useMemo(() => lmsNavItems.slice(0, 4), []);
+  const unreadNotificationCount = notificationUnreadQuery.data?.unread ?? 0;
+  const mobileDockItems = useMemo(
+    () =>
+      lmsMobileDockItems.map((item) =>
+        item.id === "notifications" ? { ...item, badgeCount: unreadNotificationCount } : item,
+      ),
+    [unreadNotificationCount],
+  );
 
   useEffect(() => {
     if (!bootstrapQuery.error) return;
     console.error("Cannot load LMS teacher bootstrap", bootstrapQuery.error);
   }, [bootstrapQuery.error]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;
+
+    const handleNotificationMessage = (event: MessageEvent) => {
+      if (event.data?.type !== "erg:notification-push") return;
+
+      const portal = typeof event.data.payload?.portal === "string" ? event.data.payload.portal.toLowerCase() : "lms";
+      if (portal !== "lms") return;
+
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root("lms") });
+    };
+
+    navigator.serviceWorker.addEventListener("message", handleNotificationMessage);
+    return () => navigator.serviceWorker.removeEventListener("message", handleNotificationMessage);
+  }, [queryClient]);
 
   function selectSchool(schoolId: string) {
     const firstClass = classes.find((classroom) => classroom.schoolId === schoolId);
@@ -252,7 +327,7 @@ export function LmsTeacherShell() {
                     needsReviewCount: 0,
                     dueLabel: "Hạn nộp sau 7 ngày",
                   };
-                  setRuns([newRun, ...runs]);
+                  setCreatedRuns((current) => [newRun, ...current]);
                   navigate("/homework");
                 }}
               />
@@ -292,18 +367,21 @@ export function LmsTeacherShell() {
                     needsReviewCount: 0,
                     dueLabel: "Hạn nộp sau 7 ngày",
                   };
-                  setRuns([newRun, ...runs]);
+                  setCreatedRuns((current) => [newRun, ...current]);
                   navigate("/homework");
                 }}
               />
             </Suspense>
           ) : pathname === "/homework/progress" ? (
-            <ClassManagementPage
-              classes={classes}
-              selectedClass={selectedClass}
-              selectedSchoolName={selectedSchoolName}
-              students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
-            />
+            <Suspense fallback={null}>
+              <HomeworkProgressPage
+                initialRunId={progressAssignmentId}
+                onBack={() => navigate("/homework")}
+                runs={runs}
+                selectedClass={selectedClass}
+                students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+              />
+            </Suspense>
           ) : activeSection === "resources" ? (
             <LearningResourceDashboardScopeProvider value={learningResourceScope}>
               <Suspense fallback={null}>
@@ -338,7 +416,7 @@ export function LmsTeacherShell() {
                 selectedClass={selectedClass}
                 runs={runs}
                 onAssign={() => navigate("/homework/assign")}
-                onViewProgress={() => navigate("/homework/class")}
+                onViewProgress={(runId) => navigate(`/homework/progress?assignmentId=${encodeURIComponent(runId)}`)}
               />
             </div>
           ) : (
@@ -354,16 +432,129 @@ export function LmsTeacherShell() {
     </>
   );
 
+  const mobileContent = (() => {
+    if (pathname === "/" || pathname === "/homework" || pathname === "/dashboard") {
+      return (
+        <Suspense fallback={null}>
+          <AssignHomeworkPage
+            classes={classes}
+            selectedClass={selectedClass}
+            onBack={() => navigate("/homework/assign")}
+            onCreateAssignment={(title, subject) => {
+              const newRun: AssignmentRun = {
+                id: `assignment-${Date.now()}`,
+                title,
+                subjectLabel: subject,
+                targetLevel: selectedClass?.className ?? "Ca lop",
+                activeClasses: 1,
+                completionRate: 0,
+                submittedCount: 0,
+                inProgressCount: 0,
+                needsReviewCount: 0,
+                dueLabel: "Han nop sau 7 ngay",
+              };
+              setCreatedRuns((current) => [newRun, ...current]);
+              navigate("/homework/assign");
+            }}
+          />
+        </Suspense>
+      );
+    }
+
+    if (pathname === "/homework/assign") {
+      return (
+        <Suspense fallback={null}>
+          <AssignHomeworkPage
+            classes={classes}
+            selectedClass={selectedClass}
+            onBack={() => navigate("/homework/assign")}
+            onCreateAssignment={(title, subject) => {
+              const newRun: AssignmentRun = {
+                id: `assignment-${Date.now()}`,
+                title,
+                subjectLabel: subject,
+                targetLevel: selectedClass?.className ?? "Ca lop",
+                activeClasses: 1,
+                completionRate: 0,
+                submittedCount: 0,
+                inProgressCount: 0,
+                needsReviewCount: 0,
+                dueLabel: "Han nop sau 7 ngay",
+              };
+              setCreatedRuns((current) => [newRun, ...current]);
+              navigate("/homework/assign");
+            }}
+          />
+        </Suspense>
+      );
+    }
+
+    if (pathname === "/homework/exercise-bank") {
+      return (
+        <Suspense fallback={null}>
+          <ExerciseBankPage
+            onBack={() => navigate("/homework/assign")}
+            onAssign={(exerciseTitle) => {
+              const newRun: AssignmentRun = {
+                id: `assignment-${Date.now()}`,
+                title: exerciseTitle,
+                subjectLabel: "Kho bai tap",
+                targetLevel: selectedClass?.className ?? "Ca lop",
+                activeClasses: 1,
+                completionRate: 0,
+                submittedCount: 0,
+                inProgressCount: 0,
+                needsReviewCount: 0,
+                dueLabel: "Han nop sau 7 ngay",
+              };
+              setCreatedRuns((current) => [newRun, ...current]);
+              navigate("/homework/assign");
+            }}
+          />
+        </Suspense>
+      );
+    }
+
+    if (pathname === "/calendar" || pathname.startsWith("/calendar/")) {
+      return (
+        <Suspense fallback={null}>
+          <TeachingSchedulePanel selectedClass={selectedClass} teacherName={teacherName} />
+        </Suspense>
+      );
+    }
+
+    if (pathname === "/notifications") {
+      return <LmsNotificationListPage onOpenDetail={(notificationId) => navigate(`/notifications/${notificationId}`)} />;
+    }
+
+    if (pathname.startsWith("/notifications/")) {
+      return (
+        <LmsNotificationDetailPage
+          notificationId={pathname.replace("/notifications/", "").split("/")[0] ?? ""}
+          onBack={() => navigate("/notifications")}
+        />
+      );
+    }
+
+    if (pathname === "/account") {
+      return <LmsAccountPage onLoginLogs={() => navigate("/account/login-logs")} onSignedOut={() => navigate("/login", { replace: true })} />;
+    }
+
+    if (pathname === "/account/login-logs") {
+      return <LmsLoginLogsPage onManageAccount={() => navigate("/account")} />;
+    }
+
+    return <MobileUnsupportedScreen activeLabel={activeNav.label} onGoHome={() => navigate("/homework/assign")} />;
+  })();
+
   if (isMobile) {
     return (
       <div className="lms-teacher-shell flex min-h-[100dvh] overflow-hidden bg-[var(--background)] text-[var(--foreground)]">
         <LmsMobileShell
-          activeLabel={activeNav.label}
-          activeSection={activeSection}
+          activeLabel={activeMobileNav.label}
+          activeSection={activeMobileSection}
           classes={classes}
           dockItems={mobileDockItems}
-          navItems={lmsNavItems}
-          notificationCenter={<LmsNotificationCenter />}
           schoolName={selectedSchoolName}
           schools={schools}
           selectedClassId={selectedClass?.id ?? ""}
@@ -371,12 +562,14 @@ export function LmsTeacherShell() {
           selectedSchoolId={selectedSchoolId}
           teacherEmail={teacherEmail}
           teacherName={teacherName}
+          unreadNotificationCount={unreadNotificationCount}
           onClassChange={setSelectedClassId}
+          onOpenNotifications={() => navigate("/notifications")}
           onNavigate={(path) => navigate(path)}
           onSchoolChange={selectSchool}
           onSignOut={signOut}
         >
-          {teacherContent}
+          {mobileContent}
         </LmsMobileShell>
       </div>
     );
@@ -868,6 +1061,29 @@ function attendanceSummary(studentId: string, columnIds: string[], overrides: Re
 }
 
 void AttendancePanel;
+
+function MobileUnsupportedScreen({ activeLabel, onGoHome }: { activeLabel: string; onGoHome: () => void }) {
+  return (
+    <section className="flex min-h-full flex-col justify-center px-4 py-8">
+      <div className="rounded-[24px] border border-[#d9e2ef] bg-white p-5 text-center shadow-[0_16px_38px_rgba(15,23,42,0.08)]">
+        <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
+          <FileText className="h-7 w-7" />
+        </div>
+        <h1 className="mt-4 text-xl font-extrabold text-slate-950">{activeLabel} dùng trên web</h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+          Phiên bản mobile LMS hiện hỗ trợ Giao bài, Kho bài, Lịch và Thông báo. Mở máy tính để thao tác đầy đủ màn này.
+        </p>
+        <button
+          type="button"
+          className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-[16px] bg-[var(--erg-blue)] px-4 text-sm font-extrabold text-white shadow-[0_12px_24px_rgba(15,108,189,0.22)]"
+          onClick={onGoHome}
+        >
+          Về Giao bài
+        </button>
+      </div>
+    </section>
+  );
+}
 
 function ReportsPanel({ selectedClass, selectedSchoolName }: { selectedClass?: ClassroomSnapshot; selectedSchoolName: string }) {
   return (

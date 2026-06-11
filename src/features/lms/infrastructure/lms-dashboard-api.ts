@@ -41,6 +41,8 @@ export type LmsClassDTO = {
 
 type ListResponse<T> = {
   items: T[];
+  source?: "api" | "mock";
+  sourceError?: string;
   total: number;
 };
 
@@ -128,19 +130,39 @@ export async function listManageableUnits() {
 }
 
 export async function listEducationUnits(params: Record<string, string | number | undefined> = {}) {
-  if (!hasApiBase()) return { items: mockBootstrap().systemUnits, total: mockBootstrap().systemUnits.length };
+  if (!hasApiBase()) {
+    const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
+    return { items, source: "mock", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
+  }
 
-  const session = await loadCurrentSessionBootstrap();
-  if (!session) return { items: [], total: 0 };
+  try {
+    const session = await loadCurrentSessionBootstrap();
+    if (!session) {
+      const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
+      return { items, source: "mock", sourceError: "Session bootstrap is empty.", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
+    }
+
+    const items = filterEducationUnits(normalizeManageableUnits(session), params);
+    return { items, source: "api", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
+  } catch (error) {
+    const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
+    const sourceError = error instanceof Error ? error.message : "Cannot load education units from API.";
+
+    console.warn("[LMS] Falling back to mock education units.", error);
+
+    return { items, source: "mock", sourceError, total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
+  }
+}
+
+function filterEducationUnits(units: LmsEducationUnitDTO[], params: Record<string, string | number | undefined>) {
   const limit = Number(params.limit ?? 100);
   const keyword = String(params.keyword ?? params.search ?? "").trim().toLowerCase();
   const typeFilter = String(params.type ?? "").trim();
-  const items = normalizeManageableUnits(session)
+
+  return units
     .filter((unit) => !typeFilter || unit.type === typeFilter)
     .filter((unit) => !keyword || unit.name.toLowerCase().includes(keyword) || unit.code?.toLowerCase().includes(keyword))
     .slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
-
-  return { items, total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
 }
 
 export async function loadLmsDashboardBootstrap(): Promise<LmsDashboardBootstrap> {
