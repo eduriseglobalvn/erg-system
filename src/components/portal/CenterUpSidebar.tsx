@@ -24,8 +24,8 @@ import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRigh
 import { useLocation } from "../../routes/router-compat";
 import type { MenuGroup, MenuItem, PortalInfo } from "./CenterUpLayout";
 
-const EXPANDED_SIDEBAR_WIDTH = 256;
-const COLLAPSED_SIDEBAR_WIDTH = 80;
+const EXPANDED_SIDEBAR_WIDTH = 236;
+const COLLAPSED_SIDEBAR_WIDTH = 72;
 const NAV_BLUE = "#0F6CBD";
 const NAV_RED = "#F35C6B";
 const NAV_ITEM_COLOR = "#425264";
@@ -252,7 +252,7 @@ export default function CenterUpSidebar({
           display: "flex",
           height: 68,
           justifyContent: renderedCollapsed ? "center" : "flex-start",
-          pl: renderedCollapsed ? 0 : "20px",
+          pl: renderedCollapsed ? 0 : "16px",
           pt: "20px",
           position: "relative",
           transform: navMotionTransform,
@@ -279,7 +279,7 @@ export default function CenterUpSidebar({
             m: 0,
             p: 0,
             transition: `width ${SIDEBAR_MOTION_CURVE}, opacity ${SIDEBAR_FADE_EASING}`,
-            width: renderedCollapsed ? 40 : 98,
+            width: renderedCollapsed ? 38 : 92,
           }}
         >
           <Box
@@ -291,7 +291,7 @@ export default function CenterUpSidebar({
               objectFit: "contain",
               objectPosition: renderedCollapsed ? "center" : "left center",
               transition: `width ${SIDEBAR_MOTION_CURVE}, opacity ${SIDEBAR_FADE_EASING}`,
-              width: renderedCollapsed ? 34 : 92,
+              width: renderedCollapsed ? 32 : 86,
             }}
           />
         </Box>
@@ -327,7 +327,7 @@ export default function CenterUpSidebar({
             display: "flex",
             flexDirection: "column",
             pb: 2,
-            px: renderedCollapsed ? 0.5 : 1.5,
+            px: renderedCollapsed ? 0.45 : 1.15,
             transition: `padding ${SIDEBAR_MOTION_CURVE}`,
             width: "100%",
             "& > .centerup-nav-group + .centerup-nav-group": {
@@ -812,7 +812,7 @@ function SidebarItem({
                 flexShrink: 0,
                 height: 20,
                 justifyContent: "center",
-                m: "0 12px 0 0",
+              m: "0 10px 0 0",
                 minWidth: 20,
                 width: 20,
                 "& .MuiSvgIcon-root": {
@@ -863,7 +863,7 @@ function SidebarItem({
           }}
           sx={{
             overflow: "hidden",
-            pl: 2,
+            pl: 1.5,
             "& .MuiCollapse-wrapper": { overflow: "hidden" },
             "& .MuiCollapse-wrapperInner": { overflow: "hidden" },
           }}
@@ -878,7 +878,7 @@ function SidebarItem({
               m: 0,
               opacity: showExpandedChildren ? 1 : 0,
               overflow: "hidden",
-              p: "4px 0 0 12px",
+              p: "4px 0 0 10px",
               position: "relative",
               transform: showExpandedChildren
                 ? "translateY(0)"
@@ -1061,7 +1061,7 @@ function SidebarItem({
               flexShrink: 0,
               height: 20,
               justifyContent: "center",
-              m: "0 12px 0 0",
+                m: "0 10px 0 0",
               minWidth: 20,
               width: 20,
               "& .MuiSvgIcon-root": {

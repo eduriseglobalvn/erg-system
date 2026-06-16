@@ -45,7 +45,6 @@ export default function LcmsCenterupShell() {
   const isPreservedWorkspace = Boolean(
     activeLeaf?.variant && PRESERVED_WORKSPACE_VARIANTS.has(activeLeaf.variant),
   );
-  const isCalendarWorkspace = pathname.startsWith("/calendar");
 
   const portalInfo = useMemo(
     () => ({
@@ -105,7 +104,7 @@ export default function LcmsCenterupShell() {
   return (
     <CenterUpLayout
       contentMode={isPreservedWorkspace ? "flush" : "padded"}
-      hideHeaderIdentity={isCalendarWorkspace}
+      hideHeaderIdentity
       menuGroups={LCMS_MENU_GROUPS}
       portalInfo={portalInfo}
     >
