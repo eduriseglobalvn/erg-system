@@ -1,7 +1,7 @@
 import { LockKeyhole, UserRound, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 import type { ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";

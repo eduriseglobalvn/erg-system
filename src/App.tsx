@@ -9,7 +9,7 @@ import { createAppRouter } from "@/routes/app-routes";
 
 export default function App() {
   const router = useMemo(() => createAppRouter(), []);
-  const showQueryDevtools = import.meta.env.DEV && import.meta.env.VITE_SHOW_QUERY_DEVTOOLS === "true";
+  const showQueryDevtools = import.meta.env.DEV && import.meta.env.VITE_SHOW_QUERY_DEVTOOLS !== "false";
 
   return (
     <QueryClientProvider client={appQueryClient}>

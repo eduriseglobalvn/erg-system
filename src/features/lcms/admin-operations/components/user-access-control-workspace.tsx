@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, RefreshCw, Search } from "lucide-react";
+import { AlertTriangle, RefreshCw, Search } from "@/components/mui-icon-shim";
 import { queryKeys } from "@/lib/query-keys";
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 
 import {
   AccessSection,

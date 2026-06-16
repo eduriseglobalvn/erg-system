@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Layers, Plus, Search, Users, UsersRound } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";

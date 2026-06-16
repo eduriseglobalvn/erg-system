@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
-import PreviewIcon from "@mui/icons-material/Preview";
-import PublishIcon from "@mui/icons-material/Publish";
-import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import SlideshowOutlinedIcon from "@mui/icons-material/SlideshowOutlined";
-import TableRowsIcon from "@mui/icons-material/TableRows";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import { Palette as PaletteOutlinedIcon } from "@/components/mui-icon-shim";
+import { Eye as PreviewIcon } from "@/components/mui-icon-shim";
+import { Upload as PublishIcon } from "@/components/mui-icon-shim";
+import { HelpCircle as QuizOutlinedIcon } from "@/components/mui-icon-shim";
+import { Settings as SettingsOutlinedIcon } from "@/components/mui-icon-shim";
+import { Presentation as SlideshowOutlinedIcon } from "@/components/mui-icon-shim";
+import { Table as TableRowsIcon } from "@/components/mui-icon-shim";
+import { LineChart as InsightsOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { IntroductionMenu, QuestionMenu } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus";
 import { RibbonGroup, ToolbarButton } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-primitives";
@@ -114,7 +114,7 @@ export function FormViewRibbon({
               <div ref={questionTriggerRef}>
                 <ToolbarButton
                   label={t("common.question")}
-                  iconNode={<QuizOutlinedIcon className="h-6 w-6" fontSize="inherit" />}
+                  iconNode={<QuizOutlinedIcon className="h-6 w-6" size="1em" />}
                   caret
                   size="regular"
                   active={openMenu === "question"}
@@ -123,14 +123,14 @@ export function FormViewRibbon({
               </div>
               <ToolbarButton
                 label={t("common.questionGroup")}
-                iconNode={<TableRowsIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<TableRowsIcon className="h-6 w-6" size="1em" />}
                 size="regular"
                 onClick={onAddQuestionGroup}
               />
               <div ref={introductionTriggerRef}>
                 <ToolbarButton
                   label={t("common.introduction")}
-                  iconNode={<SlideshowOutlinedIcon className="h-6 w-6" fontSize="inherit" />}
+                  iconNode={<SlideshowOutlinedIcon className="h-6 w-6" size="1em" />}
                   caret
                   size="regular"
                   active={openMenu === "introduction"}
@@ -142,13 +142,13 @@ export function FormViewRibbon({
             <RibbonGroup label={t("common.settings")}>
               <ToolbarButton
                 label={t("quiz.quizProperties")}
-                iconNode={<SettingsOutlinedIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<SettingsOutlinedIcon className="h-6 w-6" size="1em" />}
                 size="wide"
                 onClick={onOpenQuizProperties}
               />
               <ToolbarButton
                 label={t("quiz.playerTemplate")}
-                iconNode={<PaletteOutlinedIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<PaletteOutlinedIcon className="h-6 w-6" size="1em" />}
                 size="wide"
                 onClick={onOpenPlayerTemplate}
               />
@@ -157,13 +157,13 @@ export function FormViewRibbon({
             <RibbonGroup label={t("common.publish")}>
               <ToolbarButton
                 label={t("common.preview")}
-                iconNode={<PreviewIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<PreviewIcon className="h-6 w-6" size="1em" />}
                 size="regular"
                 onClick={onOpenPreview}
               />
               <ToolbarButton
                 label={t("common.publish")}
-                iconNode={<PublishIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<PublishIcon className="h-6 w-6" size="1em" />}
                 size="regular"
                 onClick={onOpenPublish}
               />
@@ -172,7 +172,7 @@ export function FormViewRibbon({
             <RibbonGroup label={t("common.results")}>
               <ToolbarButton
                 label={t("quiz.manageResults")}
-                iconNode={<InsightsOutlinedIcon className="h-6 w-6" fontSize="inherit" />}
+                iconNode={<InsightsOutlinedIcon className="h-6 w-6" size="1em" />}
                 size="wide"
                 onClick={onOpenResults}
               />

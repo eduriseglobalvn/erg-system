@@ -1,7 +1,7 @@
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
-import HighlightOffIcon from "@mui/icons-material/HighlightOff";
-import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
+import { ArrowRight as ArrowForwardIcon } from "@/components/mui-icon-shim";
+import { CheckCircle2 as CheckCircleOutlineIcon } from "@/components/mui-icon-shim";
+import { XCircle as HighlightOffIcon } from "@/components/mui-icon-shim";
+import { SquarePen as RateReviewOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { useI18n } from "@/platform/i18n";
 import { AppSelect } from "@/components/ui/app-select";
@@ -57,11 +57,11 @@ function FeedbackRow({
       <div className="classic-editor__feedback-card-head">
         <span className="classic-editor__feedback-status-icon">
           {row.kind === "correct" ? (
-            <CheckCircleOutlineIcon className="h-4 w-4" fontSize="inherit" />
+            <CheckCircleOutlineIcon className="h-4 w-4" size="1em" />
           ) : row.kind === "incorrect" ? (
-            <HighlightOffIcon className="h-4 w-4" fontSize="inherit" />
+            <HighlightOffIcon className="h-4 w-4" size="1em" />
           ) : (
-            <RateReviewOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+            <RateReviewOutlinedIcon className="h-4 w-4" size="1em" />
           )}
         </span>
         <div>
@@ -84,7 +84,7 @@ function FeedbackRow({
         <label className="classic-editor__feedback-field is-branching">
           <span>{t("common.branching")}</span>
           <div className="classic-editor__feedback-select-wrap">
-            <ArrowForwardIcon className="h-3.5 w-3.5" fontSize="inherit" />
+            <ArrowForwardIcon className="h-3.5 w-3.5" size="1em" />
             <AppSelect
               value={branching}
               onChange={(event) =>

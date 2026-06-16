@@ -1,19 +1,19 @@
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import { ClipboardCheck as AssignmentTurnedInOutlinedIcon } from "lucide-react";
+import { MessageSquare as ForumOutlinedIcon } from "lucide-react";
+import { Home as HomeOutlinedIcon } from "lucide-react";
+import { Bell as NotificationsNoneOutlinedIcon } from "lucide-react";
+import { GraduationCap as SchoolOutlinedIcon } from "lucide-react";
 
 import type { StudentAssignmentStatus } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 
 export const viCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Điểm bài tập", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
+    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon size={16} /> },
+    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon size={16} /> },
+    { key: "scores", label: "Điểm bài tập", icon: <SchoolOutlinedIcon size={16} /> },
+    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon size={16} /> },
+    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon size={16} /> },
   ],
   heroEyebrow: "Bảng học tập",
   heroTitle: (name: string) => `Chào ${name}, chọn bài cần làm hôm nay.`,
@@ -104,11 +104,11 @@ export const viCopy: DashboardCopy = {
 
 export const enCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Assignment scores", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
+    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon size={16} /> },
+    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon size={16} /> },
+    { key: "scores", label: "Assignment scores", icon: <SchoolOutlinedIcon size={16} /> },
+    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon size={16} /> },
+    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon size={16} /> },
   ],
   heroEyebrow: "Learning board",
   heroTitle: (name: string) => `Hi ${name}, choose what to finish today.`,

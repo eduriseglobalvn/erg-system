@@ -1,20 +1,20 @@
-import { useRef, type FormEvent, type KeyboardEvent } from "react";
-
-import { EyeIcon } from "@/platform/auth/components/auth-icons";
-import { useForm } from "@tanstack/react-form";
 import {
-  DividerText,
-  Field,
-} from "@/platform/auth/components/auth-shared";
-import { inputClassName, submitButtonClassName } from "@/platform/auth/components/auth-shared-styles";
+  forwardRef,
+  useRef,
+  type FormEvent,
+  type KeyboardEvent,
+  type KeyboardEventHandler,
+  type ReactNode,
+} from "react";
+import { Building2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
+import { useForm } from "@tanstack/react-form";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
 import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
-import type {
-  AuthMode,
-  LoginFormState,
-  RegisterFormState,
-} from "@/platform/auth/types/auth-types";
+import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
+import type { AuthMode, LoginFormState, RegisterFormState } from "@/platform/auth/types/auth-types";
 import { useI18n } from "@/platform/i18n";
 import { cn } from "@/utils/cn";
 
@@ -67,7 +67,6 @@ export function AuthFormPanel({
 }) {
   const { t } = useI18n();
   const effectiveMode = allowRegister ? mode : "login";
-  const hasSocialLogin = allowGoogle;
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const loginTanstackForm = useForm({
     defaultValues: loginForm,
@@ -113,116 +112,28 @@ export function AuthFormPanel({
     passwordInputRef.current?.focus();
   }
 
-  const titleStyle = mobileVariant
-    ? ({ color: "#242424", fontSize: 20, fontWeight: 600, letterSpacing: 0, lineHeight: 1.25 } as const)
-    : undefined;
-  const subtitleStyle = mobileVariant
-    ? ({ color: "#64748b", fontSize: 14, lineHeight: 1.7, marginTop: 10, maxWidth: 320 } as const)
-    : undefined;
-  const formCardStyle = mobileVariant
-    ? ({
-        backgroundColor: "#ffffff",
-        border: "1px solid #d9e0ea",
-        borderRadius: 8,
-        boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
-        marginTop: allowRegister ? 14 : 0,
-        padding: "22px 18px",
-      } as const)
-    : undefined;
-  const inputStyle = mobileVariant
-    ? ({
-        backgroundColor: "#ffffff",
-        border: "1px solid #d7e0ec",
-        borderRadius: 6,
-        color: "#242424",
-        fontSize: 14,
-        height: 40,
-        padding: "0 12px",
-        width: "100%",
-      } as const)
-    : undefined;
-  const passwordInputStyle = mobileVariant
-    ? ({
-        backgroundColor: "#ffffff",
-        border: "1px solid #d7e0ec",
-        borderRadius: 6,
-        color: "#242424",
-        fontSize: 14,
-        height: 40,
-        padding: "0 42px 0 12px",
-        width: "100%",
-      } as const)
-    : undefined;
-  const submitStyle = mobileVariant
-    ? ({
-        backgroundColor: "var(--erg-blue)",
-        borderRadius: 6,
-        color: "#fff",
-        display: "inline-flex",
-        fontSize: 14,
-        fontWeight: 600,
-        height: 40,
-        justifyContent: "center",
-        width: "100%",
-      } as const)
-    : undefined;
-  const footnoteStyle = mobileVariant
-    ? ({
-        backgroundColor: "#f8fafc",
-        border: "1px solid #e2e8f0",
-        borderRadius: 8,
-        color: "#475569",
-        fontSize: 14,
-        lineHeight: 1.7,
-        marginTop: 18,
-        padding: "14px 16px",
-      } as const)
-    : undefined;
-
   return (
-    <div className="w-full" style={{ width: "100%" }}>
+    <section className="w-full">
       {allowRegister ? (
-      <div className="rounded-lg border border-[#d7e0ec] bg-[#f6f8fb] p-1 shadow-sm" style={{ backgroundColor: "#f6f8fb", border: "1px solid #d7e0ec", borderRadius: 8, padding: 4 }}>
-        <div className="grid grid-cols-2 gap-1" style={{ display: "grid", gap: 4, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
-          {[
-            { id: "login" as const, label: t("auth.login") },
-            { id: "register" as const, label: t("auth.register") },
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onModeChange(item.id)}
-              className={cn(
-                "relative h-10 rounded-md border border-transparent px-4 text-sm font-semibold transition",
-                mode === item.id
-                  ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm after:absolute after:inset-x-6 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[var(--erg-blue)]"
-                  : "text-slate-600 hover:bg-white hover:text-slate-950",
-              )}
-              style={{ borderRadius: 6, fontSize: 14, fontWeight: 600, height: 40, padding: "0 16px" }}
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-white/55 bg-white/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-xl">
+          <SegmentButton active={effectiveMode === "login"} onClick={() => onModeChange("login")}>
+            {t("auth.login")}
+          </SegmentButton>
+          <SegmentButton active={effectiveMode === "register"} onClick={() => onModeChange("register")}>
+            {t("auth.register")}
+          </SegmentButton>
         </div>
-      </div>
       ) : null}
 
-      <div className={cn("rounded-lg border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-7", allowRegister ? "mt-4" : "mt-0")} style={formCardStyle}>
-        {effectiveMode === "login" ? (
-          <>
-            <div className="text-left" style={{ textAlign: "left" }}>
-              <h2 className="text-lg font-semibold text-[#242424] sm:text-xl" style={titleStyle}>
-                {loginTitle ?? t("auth.loginTeacherHub")}
-              </h2>
-              <p className="mt-2 max-w-sm text-sm leading-6 text-slate-500" style={subtitleStyle}>
-                {loginSubtitle ?? t("auth.loginSubtitle")}
-              </p>
-            </div>
+      {effectiveMode === "login" ? (
+        <>
+          <AuthHeading
+            title={loginTitle ?? t("auth.loginTeacherHub")}
+            subtitle={loginSubtitle ?? t("auth.loginSubtitle")}
+          />
 
-            {hasSocialLogin ? (
-            <>
-            <div className="mt-6 space-y-3">
-              {allowGoogle ? (
+          {allowGoogle ? (
+            <div className="mt-6">
               <GoogleSignInButton
                 label={t("auth.loginWithGoogle")}
                 onCredential={(idToken) => onProviderLogin("google", idToken)}
@@ -230,319 +141,363 @@ export function AuthFormPanel({
                   console.warn(message);
                 }}
               />
-              ) : null}
+              <div className="mt-5 flex items-center gap-3 text-xs font-semibold text-slate-500/80">
+                <span className="h-px flex-1 bg-white/60" />
+                <span>Hoặc tiếp tục với</span>
+                <span className="h-px flex-1 bg-white/60" />
+              </div>
             </div>
+          ) : null}
 
-            <DividerText text={t("auth.orContinueWith")} />
-            </>
-            ) : null}
-
-            <TsForm
-              className="mt-5 space-y-4"
-              style={{ marginTop: 20 }}
-              onSubmit={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void loginTanstackForm.handleSubmit();
+          <TsForm
+            className="mt-5 space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void loginTanstackForm.handleSubmit();
+            }}
+          >
+            <loginTanstackForm.Field
+              name="email"
+              validators={{
+                onChange: ({ value }) => validateCredential(value, credentialLabel ?? t("auth.email")),
               }}
             >
-              <loginTanstackForm.Field
-                name="email"
-                validators={{
-                  onChange: ({ value }) => validateCredential(value, credentialLabel ?? t("auth.email")),
-                }}
-              >
-                {(field) => (
-                  <Field label={credentialLabel ?? t("auth.email")}>
-                    <input
-                      className={inputClassName}
-                      style={inputStyle}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => {
-                        field.handleChange(event.target.value);
-                        onLoginFormChange({
-                          ...loginForm,
-                          email: event.target.value,
-                        });
-                      }}
-                      placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
-                      type="text"
-                      autoComplete="username"
-                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                      onKeyDown={focusPasswordFromEmail}
-                    />
-                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                  </Field>
-                )}
-              </loginTanstackForm.Field>
+              {(field) => (
+                <GlassField
+                  autoComplete="username"
+                  error={field.state.meta.errors[0]}
+                  icon={<Mail size={18} />}
+                  label={credentialLabel ?? t("auth.email")}
+                  onBlur={field.handleBlur}
+                  onChange={(value) => {
+                    field.handleChange(value);
+                    onLoginFormChange({ ...loginForm, email: value });
+                  }}
+                  onKeyDown={focusPasswordFromEmail}
+                  placeholder={credentialPlaceholder ?? t("auth.placeholderWorkEmail")}
+                  value={field.state.value}
+                />
+              )}
+            </loginTanstackForm.Field>
 
-              <loginTanstackForm.Field
+            <loginTanstackForm.Field
+              name="password"
+              validators={{
+                onChange: ({ value }) => validatePassword(value),
+              }}
+            >
+              {(field) => (
+                <GlassField
+                  ref={passwordInputRef}
+                  autoComplete="current-password"
+                  error={field.state.meta.errors[0]}
+                  icon={<LockKeyhole size={18} />}
+                  label={t("auth.password")}
+                  onBlur={field.handleBlur}
+                  onChange={(value) => {
+                    field.handleChange(value);
+                    onLoginFormChange({ ...loginForm, password: value });
+                  }}
+                  placeholder={t("auth.enterPassword")}
+                  type={showPassword ? "text" : "password"}
+                  value={field.state.value}
+                  action={
+                    <button
+                      aria-label={t("auth.showHidePassword")}
+                      className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-white/55 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-[rgba(105,108,255,0.18)]"
+                      type="button"
+                      onClick={onShowPasswordToggle}
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  }
+                />
+              )}
+            </loginTanstackForm.Field>
+
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <label className="inline-flex min-h-8 items-center gap-2 font-medium text-slate-600">
+                <input
+                  checked={rememberMe}
+                  className="h-3.5 w-3.5 rounded border-white/60 accent-[#696CFF]"
+                  type="checkbox"
+                  onChange={(event) => onRememberMeChange(event.target.checked)}
+                />
+                <span>{t("auth.rememberMe")}</span>
+              </label>
+              <button
+                className="min-h-8 font-semibold text-[#5558e8] underline-offset-4 transition hover:text-[#3f42c8] hover:underline"
+                type="button"
+                onClick={onForgotPassword}
+              >
+                {t("auth.forgotPassword")}
+              </button>
+            </div>
+
+            <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
+                  disabled={!canSubmit || isSubmitting}
+                  style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
+                  type="submit"
+                >
+                  {isSubmitting ? "Đang đăng nhập..." : t("auth.login")}
+                </Button>
+              )}
+            </loginTanstackForm.Subscribe>
+          </TsForm>
+
+          {allowRegister ? (
+            <p className="mt-5 text-center text-sm text-slate-600">
+              {t("auth.noAccount")}
+              <button
+                className="ml-1 font-semibold text-slate-900 underline underline-offset-4 transition hover:text-[#696CFF]"
+                type="button"
+                onClick={() => onModeChange("register")}
+              >
+                {t("auth.registerNow")}
+              </button>
+            </p>
+          ) : null}
+        </>
+      ) : (
+        <>
+          <AuthHeading title={t("auth.createTeacherAccount")} subtitle={t("auth.registerSubtitle")} center />
+
+          <TsForm
+            className="mt-6 space-y-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              void registerTanstackForm.handleSubmit();
+            }}
+          >
+            <registerTanstackForm.Field
+              name="fullName"
+              validators={{
+                onChange: ({ value }) => validateRequired(value, t("auth.fullName")),
+              }}
+            >
+              {(field) => (
+                <GlassField
+                  error={field.state.meta.errors[0]}
+                  icon={<UserRound size={18} />}
+                  label={t("auth.fullName")}
+                  onBlur={field.handleBlur}
+                  onChange={(value) => {
+                    field.handleChange(value);
+                    onRegisterFormChange({ ...registerForm, fullName: value });
+                  }}
+                  placeholder={t("auth.placeholderName")}
+                  value={field.state.value}
+                />
+              )}
+            </registerTanstackForm.Field>
+
+            <registerTanstackForm.Field
+              name="email"
+              validators={{
+                onChange: ({ value }) => validateEmail(value),
+              }}
+            >
+              {(field) => (
+                <GlassField
+                  autoComplete="email"
+                  error={field.state.meta.errors[0]}
+                  icon={<Mail size={18} />}
+                  label={t("auth.internalEmail")}
+                  onBlur={field.handleBlur}
+                  onChange={(value) => {
+                    field.handleChange(value);
+                    onRegisterFormChange({ ...registerForm, email: value });
+                  }}
+                  placeholder={t("auth.placeholderWorkEmail")}
+                  type="email"
+                  value={field.state.value}
+                />
+              )}
+            </registerTanstackForm.Field>
+
+            <GlassField
+              icon={<Building2 size={18} />}
+              label={t("auth.department")}
+              onChange={(value) => onRegisterFormChange({ ...registerForm, department: value })}
+              placeholder={t("auth.placeholderDepartment")}
+              value={registerForm.department}
+            />
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <registerTanstackForm.Field
                 name="password"
                 validators={{
                   onChange: ({ value }) => validatePassword(value),
                 }}
               >
                 {(field) => (
-                  <Field
+                  <GlassField
+                    error={field.state.meta.errors[0]}
+                    icon={<LockKeyhole size={18} />}
                     label={t("auth.password")}
-                    action={
-                      <button
-                        type="button"
-                        className="font-semibold text-[var(--erg-blue)] hover:text-[var(--erg-blue-hover)]"
-                        onClick={onForgotPassword}
-                      >
-                        {t("auth.forgotPassword")}
-                      </button>
-                    }
-                  >
-                    <div className="relative">
-                      <input
-                        ref={passwordInputRef}
-                        className={cn(inputClassName, "pr-12")}
-                        style={passwordInputStyle}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => {
-                          field.handleChange(event.target.value);
-                          onLoginFormChange({
-                            ...loginForm,
-                            password: event.target.value,
-                          });
-                        }}
-                        placeholder={t("auth.enterPassword")}
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="current-password"
-                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                      />
-                      <button
-                        type="button"
-                        onClick={onShowPasswordToggle}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
-                        aria-label={t("auth.showHidePassword")}
-                      >
-                        <EyeIcon open={showPassword} />
-                      </button>
-                    </div>
-                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                  </Field>
+                    onBlur={field.handleBlur}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                      onRegisterFormChange({ ...registerForm, password: value });
+                    }}
+                    placeholder={t("auth.placeholderPasswordMin")}
+                    type="password"
+                    value={field.state.value}
+                  />
                 )}
-              </loginTanstackForm.Field>
+              </registerTanstackForm.Field>
 
-              <label className="inline-flex items-center gap-2.5 text-sm font-medium text-slate-700">
-                <input
-                  checked={rememberMe}
-                  onChange={(event) => onRememberMeChange(event.target.checked)}
-                  className="h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
-                  style={{ accentColor: "var(--erg-blue)", height: 16, width: 16 }}
-                  type="checkbox"
-                />
-                {t("auth.rememberMe")}
-              </label>
-
-              <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-                {([canSubmit, isSubmitting]) => (
-                  <button className={submitButtonClassName} disabled={!canSubmit || isSubmitting} style={submitStyle} type="submit">
-                    {t("auth.login")}
-                  </button>
-                )}
-              </loginTanstackForm.Subscribe>
-            </TsForm>
-
-            {loginFootnote ? (
-              <p className="mt-5 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600" style={footnoteStyle}>
-                {loginFootnote}
-              </p>
-            ) : null}
-
-            {allowRegister ? (
-            <div className="mt-5 text-center text-sm text-slate-600">
-              {t("auth.noAccount")}
-              <button
-                type="button"
-                className="ml-1 font-semibold text-slate-900 underline underline-offset-4"
-                onClick={() => onModeChange("register")}
+              <registerTanstackForm.Field
+                name="confirmPassword"
+                validators={{
+                  onChange: ({ value, fieldApi }) => {
+                    const password = fieldApi.form.getFieldValue("password");
+                    return value === password ? undefined : "Mật khẩu xác nhận chưa khớp.";
+                  },
+                }}
               >
-                {t("auth.registerNow")}
-              </button>
-            </div>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <div className="text-center">
-              <h2 className="text-lg font-semibold text-[#242424] sm:text-xl">
-                {t("auth.createTeacherAccount")}
-              </h2>
-              <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
-                {t("auth.registerSubtitle")}
-              </p>
+                {(field) => (
+                  <GlassField
+                    error={field.state.meta.errors[0]}
+                    icon={<LockKeyhole size={18} />}
+                    label={t("auth.confirmPassword")}
+                    onBlur={field.handleBlur}
+                    onChange={(value) => {
+                      field.handleChange(value);
+                      onRegisterFormChange({ ...registerForm, confirmPassword: value });
+                    }}
+                    placeholder={t("auth.placeholderConfirmPassword")}
+                    type="password"
+                    value={field.state.value}
+                  />
+                )}
+              </registerTanstackForm.Field>
             </div>
 
-            <TsForm
-              className="mt-6 space-y-4"
-              onSubmit={(event) => {
-                event.preventDefault();
-                event.stopPropagation();
-                void registerTanstackForm.handleSubmit();
-              }}
+            <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+              {([canSubmit, isSubmitting]) => (
+                <Button
+                  className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
+                  disabled={!canSubmit || isSubmitting}
+                  style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
+                  type="submit"
+                >
+                  {isSubmitting ? "Đang tạo tài khoản..." : t("auth.createAccount")}
+                </Button>
+              )}
+            </registerTanstackForm.Subscribe>
+          </TsForm>
+
+          <p className="mt-5 text-center text-sm text-slate-600">
+            {t("auth.hasAccount")}
+            <button
+              className="ml-1 font-semibold text-slate-900 underline underline-offset-4 transition hover:text-[#696CFF]"
+              type="button"
+              onClick={() => onModeChange("login")}
             >
-              <registerTanstackForm.Field
-                name="fullName"
-                validators={{
-                  onChange: ({ value }) => validateRequired(value, t("auth.fullName")),
-                }}
-              >
-                {(field) => (
-                  <Field label={t("auth.fullName")}>
-                    <input
-                      className={inputClassName}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => {
-                        field.handleChange(event.target.value);
-                        onRegisterFormChange({
-                          ...registerForm,
-                          fullName: event.target.value,
-                        });
-                      }}
-                      placeholder={t("auth.placeholderName")}
-                      type="text"
-                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                    />
-                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                  </Field>
-                )}
-              </registerTanstackForm.Field>
-
-              <registerTanstackForm.Field
-                name="email"
-                validators={{
-                  onChange: ({ value }) => validateEmail(value),
-                }}
-              >
-                {(field) => (
-                  <Field label={t("auth.internalEmail")}>
-                    <input
-                      className={inputClassName}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(event) => {
-                        field.handleChange(event.target.value);
-                        onRegisterFormChange({
-                          ...registerForm,
-                          email: event.target.value,
-                        });
-                      }}
-                      placeholder={t("auth.placeholderWorkEmail")}
-                      type="email"
-                      aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                    />
-                    <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                  </Field>
-                )}
-              </registerTanstackForm.Field>
-
-              <Field label={t("auth.department")}>
-                <input
-                  className={inputClassName}
-                  value={registerForm.department}
-                  onChange={(event) =>
-                    onRegisterFormChange({
-                      ...registerForm,
-                      department: event.target.value,
-                    })
-                  }
-                  placeholder={t("auth.placeholderDepartment")}
-                  type="text"
-                />
-              </Field>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <registerTanstackForm.Field
-                  name="password"
-                  validators={{
-                    onChange: ({ value }) => validatePassword(value),
-                  }}
-                >
-                  {(field) => (
-                    <Field label={t("auth.password")}>
-                      <input
-                        className={inputClassName}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => {
-                          field.handleChange(event.target.value);
-                          onRegisterFormChange({
-                            ...registerForm,
-                            password: event.target.value,
-                          });
-                        }}
-                        placeholder={t("auth.placeholderPasswordMin")}
-                        type="password"
-                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                      />
-                      <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                    </Field>
-                  )}
-                </registerTanstackForm.Field>
-                <registerTanstackForm.Field
-                  name="confirmPassword"
-                  validators={{
-                    onChange: ({ value, fieldApi }) => {
-                      const password = fieldApi.form.getFieldValue("password");
-                      return value === password ? undefined : "Mật khẩu xác nhận chưa khớp.";
-                    },
-                  }}
-                >
-                  {(field) => (
-                    <Field label={t("auth.confirmPassword")}>
-                      <input
-                        className={inputClassName}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(event) => {
-                          field.handleChange(event.target.value);
-                          onRegisterFormChange({
-                            ...registerForm,
-                            confirmPassword: event.target.value,
-                          });
-                        }}
-                        placeholder={t("auth.placeholderConfirmPassword")}
-                        type="password"
-                        aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-                      />
-                      <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-                    </Field>
-                  )}
-                </registerTanstackForm.Field>
-              </div>
-
-              <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-                {([canSubmit, isSubmitting]) => (
-                  <button className={submitButtonClassName} disabled={!canSubmit || isSubmitting} type="submit">
-                    {t("auth.createAccount")}
-                  </button>
-                )}
-              </registerTanstackForm.Subscribe>
-            </TsForm>
-
-            <div className="mt-5 text-center text-sm text-slate-600">
-              {t("auth.hasAccount")}
-              <button
-                type="button"
-                className="ml-1 font-semibold text-slate-900 underline underline-offset-4"
-                onClick={() => onModeChange("login")}
-              >
-                {t("auth.backToLogin")}
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
+              {t("auth.backToLogin")}
+            </button>
+          </p>
+        </>
+      )}
+    </section>
   );
 }
+
+function AuthHeading({ center, subtitle, title }: { center?: boolean; subtitle: string; title: string }) {
+  return (
+    <header className={cn(center ? "text-center" : "text-left")}>
+      <h1 className="text-[26px] font-bold leading-tight text-[#1C252E]">{title}</h1>
+      <p className={cn("mt-2 text-sm leading-6 text-slate-600", center && "mx-auto max-w-[360px]")}>{subtitle}</p>
+    </header>
+  );
+}
+
+function SegmentButton({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={cn(
+        "h-10 rounded-lg text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[rgba(105,108,255,0.20)]",
+        active
+          ? "bg-white text-[#1C252E] shadow-[0_10px_22px_rgba(105,108,255,0.12)]"
+          : "text-slate-600 hover:bg-white/40 hover:text-[#1C252E]",
+      )}
+      type="button"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  );
+}
+
+const GlassField = forwardRef<HTMLInputElement, {
+  action?: ReactNode;
+  autoComplete?: string;
+  error?: string;
+  icon?: ReactNode;
+  label: string;
+  onBlur?: () => void;
+  onChange: (value: string) => void;
+  onKeyDown?: KeyboardEventHandler<HTMLInputElement>;
+  placeholder: string;
+  type?: string;
+  value: string;
+}>(function GlassField({
+    action,
+    autoComplete,
+    error,
+    icon,
+    label,
+    onBlur,
+    onChange,
+    onKeyDown,
+    placeholder,
+    type = "text",
+    value,
+  },
+  ref,
+) {
+    return (
+      <label className="grid gap-2">
+        <span className="text-xs font-semibold text-slate-700">{label}</span>
+        <span
+          className={cn(
+            "flex min-h-11 items-center gap-2 rounded-xl border border-white/60 bg-white/55 px-3 text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-xl transition focus-within:border-[#696CFF]/55 focus-within:bg-white/75 focus-within:ring-4 focus-within:ring-[#696CFF]/10",
+            error && "border-rose-300/80 ring-4 ring-rose-500/10",
+          )}
+        >
+          {icon}
+          <Input
+            aria-invalid={error ? "true" : undefined}
+            autoComplete={autoComplete}
+            className="h-10 border-0 bg-transparent px-0 shadow-none focus:border-0 focus:ring-0"
+            placeholder={placeholder}
+            ref={ref}
+            type={type}
+            value={value}
+            onBlur={onBlur}
+            onChange={(event) => onChange(event.target.value)}
+            onKeyDown={onKeyDown}
+          />
+          {action}
+        </span>
+        <TsFormMessage className="text-xs font-semibold text-rose-600">{error}</TsFormMessage>
+      </label>
+    );
+});
 
 function createHandledSubmitEvent() {
   return {

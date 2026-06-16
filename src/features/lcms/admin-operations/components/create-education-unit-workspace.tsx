@@ -1,6 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { useState, type FormEvent } from "react";
-import { Building2, CheckCircle2, MapPin, School } from "lucide-react";
+import { Building2, CheckCircle2, MapPin, School } from "@/components/mui-icon-shim";
 import { useMutation } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";

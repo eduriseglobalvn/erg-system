@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ReactNode } from "react";
-import SearchIcon from "@mui/icons-material/Search";
+import { Search as SearchIcon } from "@/components/mui-icon-shim";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
 
@@ -9,7 +9,10 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, Card, CardContent, CardDescription, CardHeader, CardTitle, Input } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";

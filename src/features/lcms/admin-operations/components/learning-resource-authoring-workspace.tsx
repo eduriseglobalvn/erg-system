@@ -12,21 +12,14 @@ import {
   Plus,
   Settings2,
   Trash2,
-} from "lucide-react";
+} from "@/components/mui-icon-shim";
 import { queryKeys } from "@/lib/query-keys";
 
-import {
-  Badge,
-  Button,
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  EmptyState,
-  Input,
-  inputClassName,
-} from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Input, inputClassName } from "@/components/ui/input";
 import {
   ChecklistItem,
   Field,
@@ -494,7 +487,7 @@ function SubjectsScreen({
                   <Pencil className="h-4 w-4" />
                   Sửa môn
                 </Button>
-                <Button variant="danger" onClick={() => onDeleteSubject(selectedSubject)}>
+                <Button variant="destructive" onClick={() => onDeleteSubject(selectedSubject)}>
                   <Trash2 className="h-4 w-4" />
                   Xóa
                 </Button>

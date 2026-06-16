@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from "react";
-import { Bell, Download, LogOut, ShieldCheck, Smartphone, UserRound } from "lucide-react";
+import Notifications from "@mui/icons-material/Notifications";
+import { Download, LogOut, ShieldCheck, Smartphone, UserRound } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -166,7 +167,7 @@ export function LmsMobileShell<TSection extends string>({
                 onOpenNotifications();
               }}
             >
-              <Bell className="h-5 w-5 shrink-0" />
+              <Notifications className="h-5 w-5 shrink-0" />
               <span className="text-sm font-extrabold">Mo thong bao</span>
             </button>
           ) : null}

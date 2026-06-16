@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
 
 import { TsForm } from "@/components/ui/tanstack-form";
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -370,7 +371,7 @@ export function TaxonomyDeleteDialog({
         {error ? <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-700">{error}</div> : null}
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onClose} disabled={deleting}>Hủy</Button>
-          <Button type="button" variant="danger" onClick={handleDelete} disabled={deleting}>
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={deleting}>
             {deleting ? "Đang xóa..." : "Xóa"}
           </Button>
         </DialogFooter>

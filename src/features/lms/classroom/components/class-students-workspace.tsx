@@ -6,7 +6,8 @@ import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   assignmentRuns,
   classroomSnapshots,

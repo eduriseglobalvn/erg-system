@@ -1,5 +1,5 @@
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import { User as AccountCircleOutlinedIcon } from "lucide-react";
+import { Bell as NotificationsNoneOutlinedIcon } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
@@ -36,8 +36,8 @@ export function StudentDashboardMobileShell({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="flex items-end text-[30px] font-semibold leading-none">
-                <span className="text-[var(--erg-blue)]">ER</span>
-                <span className="text-[var(--erg-red)]">G</span>
+                <span className="text-[#696CFF]">ER</span>
+                <span className="text-[#FF5630]">G</span>
               </div>
               <div className="mt-1.5 text-[11px] font-semibold text-slate-500">Learning app</div>
               <div className="mt-1.5 text-[17px] font-semibold leading-none  text-slate-900">{currentPageLabel}</div>
@@ -50,9 +50,9 @@ export function StudentDashboardMobileShell({
                 className="relative grid h-10 w-10 place-items-center rounded-md border border-[#d1d9e6] bg-white text-slate-600 shadow-sm"
                 onClick={onAnnouncementsOpen}
               >
-                <NotificationsNoneOutlinedIcon fontSize="small" />
+                <NotificationsNoneOutlinedIcon size={16} />
                 {announcementUnreadCount > 0 ? (
-                  <span className="absolute right-[5px] top-[5px] grid h-4 min-w-4 place-items-center rounded-full bg-[var(--erg-red)] px-1 text-[10px] font-medium text-white">
+                  <span className="absolute right-[5px] top-[5px] grid h-4 min-w-4 place-items-center rounded-full bg-[#FF5630] px-1 text-[10px] font-medium text-white">
                     {announcementUnreadCount}
                   </span>
                 ) : null}
@@ -61,11 +61,11 @@ export function StudentDashboardMobileShell({
               <button
                 type="button"
                 aria-label={studentName ? `Open account for ${studentName}` : "Open account"}
-                className={cn("relative grid h-10 w-10 place-items-center rounded-md border border-[#d1d9e6] bg-white text-slate-600 shadow-sm", activePage === "account" ? "text-[var(--erg-blue)] ring-1 ring-[#b8d6fa]" : "")}
+                className={cn("relative grid h-10 w-10 place-items-center rounded-md border border-[#d1d9e6] bg-white text-slate-600 shadow-sm", activePage === "account" ? "text-[#696CFF] ring-1 ring-[rgba(105, 108, 255, 0.24)]" : "")}
                 onClick={onAccountOpen}
               >
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--erg-blue)] text-xs font-semibold text-white shadow-sm">
-                  {initial || <AccountCircleOutlinedIcon fontSize="small" />}
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-[#696CFF] text-xs font-semibold text-white shadow-sm">
+                  {initial || <AccountCircleOutlinedIcon size={16} />}
                 </span>
                 <span className="absolute bottom-[7px] right-[7px] h-2.5 w-2.5 rounded-full border-2 border-white bg-[#22c55e]" />
               </button>

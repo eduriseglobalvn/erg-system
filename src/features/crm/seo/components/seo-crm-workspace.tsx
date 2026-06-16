@@ -19,7 +19,10 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, Input, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ProgressBar } from "@/components/ui/progress";
 import {
   calculateSeoPnlSummary,
   costTotal,

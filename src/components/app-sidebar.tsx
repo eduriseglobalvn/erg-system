@@ -48,7 +48,7 @@ export function AppSidebar({
     <Sidebar
       variant="inset"
       collapsible="icon"
-      className="relative overflow-visible border-r border-[#cbd7e6] bg-[#f8fbff] shadow-[1px_0_0_rgba(15,23,42,0.05)] group-data-[collapsible=icon]:px-0"
+      className="relative overflow-visible border-r border-[rgba(145,158,171,0.12)] bg-[#1C252E] shadow-none group-data-[collapsible=icon]:px-0"
       {...props}
     >
       <SidebarEdgeToggle />
@@ -69,7 +69,7 @@ function SidebarEdgeToggle() {
       type="button"
       onClick={toggleSidebar}
       aria-label={isExpanded ? t("sidebar.collapseMenu") : t("sidebar.expandMenu")}
-      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#cbd7e6] bg-white text-slate-600 shadow-[var(--shadow-xs)] ring-2 ring-[#f8fbff] transition hover:border-[#b8c8db] hover:bg-white hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
+      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[rgba(145,158,171,0.12)] bg-[#1C252E] text-[#919EAB] shadow-md ring-2 ring-[#1C252E] transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#696CFF]"
     >
       {isExpanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
     </button>
@@ -77,14 +77,14 @@ function SidebarEdgeToggle() {
 }
 
 function getSectionTone(iconKey: DashboardGroup["iconKey"]) {
-  if (iconKey === "materials") return "text-[#7c3cff]";
-  if (iconKey === "classroom") return "text-[#0f9f76]";
-  if (iconKey === "docs") return "text-[#ef5b5b]";
-  if (iconKey === "settings") return "text-[#2d7cff]";
-  if (iconKey === "admin") return "text-[#ff6b35]";
-  if (iconKey === "members") return "text-[#2d7cff]";
+  if (iconKey === "materials") return "text-[#696CFF]";
+  if (iconKey === "classroom") return "text-[#696CFF]";
+  if (iconKey === "docs") return "text-[#696CFF]";
+  if (iconKey === "settings") return "text-[#696CFF]";
+  if (iconKey === "admin") return "text-[#696CFF]";
+  if (iconKey === "members") return "text-[#696CFF]";
 
-  return "text-[#2d7cff]";
+  return "text-[#696CFF]";
 }
 
 function getSectionIcon(iconKey: DashboardGroup["iconKey"]) {

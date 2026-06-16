@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
-import CampaignOutlinedIcon from "@mui/icons-material/CampaignOutlined";
-import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
+import { Megaphone as CampaignOutlinedIcon } from "lucide-react";
+import { Pin as PushPinOutlinedIcon } from "lucide-react";
 
-import { Card } from "@/components/ui/dashboard-kit";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -22,7 +22,7 @@ export function StudentDashboardMobileAnnouncements({
         <Card className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[11px] font-medium text-[var(--erg-blue)]">
+              <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[11px] font-medium text-[#696CFF]">
                 {copy.announcementTitle}
               </div>
               <h1 className="mt-4 text-[29px] font-semibold leading-[1.1]  text-slate-900">
@@ -30,8 +30,8 @@ export function StudentDashboardMobileAnnouncements({
               </h1>
               <p className="mt-3 text-sm leading-6 text-slate-600">{copy.announcementDescription}</p>
             </div>
-            <div className="grid h-11 w-11 place-items-center rounded-lg bg-[var(--erg-blue)] text-white shadow-sm">
-              <CampaignOutlinedIcon fontSize="small" />
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-[#696CFF] text-white shadow-sm">
+              <CampaignOutlinedIcon size={16} />
             </div>
           </div>
         </Card>
@@ -44,7 +44,7 @@ export function StudentDashboardMobileAnnouncements({
               className={cn(
                 "rounded-lg border bg-white p-4 shadow-sm transition",
                 selectedAnnouncementId === announcement.id
-                  ? "border-[var(--erg-blue)]/30 ring-2 ring-[var(--erg-blue)]/10"
+                  ? "border-[#696CFF]/30 ring-2 ring-[#696CFF]/10"
                   : "border-slate-200/80",
               )}
             >
@@ -53,7 +53,7 @@ export function StudentDashboardMobileAnnouncements({
                   <div className="flex flex-wrap items-center gap-2">
                     {announcement.isPinned ? (
                       <Badge tone="primary">
-                        <PushPinOutlinedIcon fontSize="small" />
+                        <PushPinOutlinedIcon size={16} />
                         {copy.announcementPinnedLabel}
                       </Badge>
                     ) : null}
@@ -88,7 +88,7 @@ function Badge({
       className={cn(
         "inline-flex items-center gap-1 rounded-full px-3 py-1 text-[11px] font-medium ",
         tone === "primary"
-          ? "bg-[#ebf3fc] text-[var(--erg-blue)]"
+          ? "bg-[rgba(105, 108, 255, 0.08)] text-[#696CFF]"
           : "border border-slate-200 bg-slate-50 text-slate-600",
       )}
     >

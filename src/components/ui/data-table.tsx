@@ -14,7 +14,8 @@ import { ArrowDownAZ, ArrowUpAZ, ChevronLeft, ChevronRight, Columns3 } from "luc
 import { useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { LmsCheckbox, LmsSearchInput } from "@/components/ui/lms-kit";
+import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
+import { LmsSearchInput } from "@/components/ui/search-input";
 import {
   Table,
   TableBody,

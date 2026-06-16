@@ -1,9 +1,9 @@
 import { useState } from "react";
-import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
-import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import { ChevronDown as ExpandMoreOutlinedIcon } from "lucide-react";
+import { LogIn as LoginOutlinedIcon } from "lucide-react";
+import { LogOut as LogoutOutlinedIcon } from "lucide-react";
+import { Bell as NotificationsNoneOutlinedIcon } from "lucide-react";
+import { Settings as SettingsOutlinedIcon } from "lucide-react";
 
 import { BrandWordmark } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-ui";
 import type { ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
@@ -83,15 +83,15 @@ export function StudentBrandHeader({
               className={cn(
                 "relative inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-transparent px-3 text-sm font-semibold transition",
                 activePage === item.key
-                  ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm after:absolute after:inset-x-3 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[var(--erg-blue)]"
-                  : "text-slate-600 hover:border-[#d9e0ea] hover:bg-white hover:text-[var(--erg-blue)]",
+                  ? "border-[rgba(105, 108, 255, 0.24)] bg-white text-[#696CFF] shadow-sm after:absolute after:inset-x-3 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[#696CFF]"
+                  : "text-slate-600 hover:border-[#d9e0ea] hover:bg-white hover:text-[#696CFF]",
               )}
               onClick={() => onPageChange(item.key)}
             >
               {item.icon}
               {item.label}
               {item.key === "announcements" && announcementUnreadCount > 0 ? (
-                <span className="grid min-w-5 place-items-center rounded-full bg-[var(--erg-red)] px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm">
+                <span className="grid min-w-5 place-items-center rounded-full bg-[#FF5630] px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm">
                   {announcementUnreadCount}
                 </span>
               ) : null}
@@ -171,16 +171,16 @@ function ProfileMenu({
         type="button"
         aria-expanded={menuOpen}
         className={cn(
-          "flex min-w-[148px] items-center gap-2 rounded-lg border bg-white px-2 py-1.5 text-left shadow-sm transition hover:border-[#b8d6fa] hover:bg-white",
-          menuOpen ? "border-[#b8d6fa] text-[var(--erg-blue)] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#d7e0ec]",
+          "flex min-w-[148px] items-center gap-2 rounded-lg border bg-white px-2 py-1.5 text-left shadow-sm transition hover:border-[rgba(105, 108, 255, 0.24)] hover:bg-white",
+          menuOpen ? "border-[rgba(105, 108, 255, 0.24)] text-[#696CFF] ring-2 ring-[rgba(105, 108, 255, 0.24)]" : "border-[#d7e0ec]",
         )}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[var(--erg-blue)] text-xs font-semibold text-white">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#696CFF] text-xs font-semibold text-white">
           {initial}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block max-w-[98px] truncate text-sm font-semibold leading-4 text-[var(--erg-blue)]">{studentName}</span>
+          <span className="block max-w-[98px] truncate text-sm font-semibold leading-4 text-[#696CFF]">{studentName}</span>
           <span className="mt-0.5 flex items-center gap-1.5 text-[11px] leading-4 text-slate-500">
             <span>{studentClass}</span>
             <span className="h-0.5 w-0.5 rounded-full bg-slate-300" />
@@ -189,7 +189,7 @@ function ProfileMenu({
         </span>
         <ExpandMoreOutlinedIcon
           className={cn("shrink-0 text-slate-400 transition", menuOpen ? "rotate-180" : "rotate-0")}
-          fontSize="small"
+          size={16}
         />
       </button>
 
@@ -203,21 +203,21 @@ function ProfileMenu({
           <div className="grid gap-1 p-2">
             <button
               type="button"
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]"
+              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[rgba(105, 108, 255, 0.08)] hover:text-[#696CFF]"
               onClick={handleAccountClick}
             >
-              <SettingsOutlinedIcon fontSize="small" />
+              <SettingsOutlinedIcon size={16} />
               {copy.accountTitle}
             </button>
             <button
               type="button"
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-[var(--erg-blue-light)]",
-                account ? "text-[var(--erg-red)]" : "text-[var(--erg-blue)]",
+                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-[rgba(105, 108, 255, 0.08)]",
+                account ? "text-[#FF5630]" : "text-[#696CFF]",
               )}
               onClick={handleAuthClick}
             >
-              {account ? <LogoutOutlinedIcon fontSize="small" /> : <LoginOutlinedIcon fontSize="small" />}
+              {account ? <LogoutOutlinedIcon size={16} /> : <LoginOutlinedIcon size={16} />}
               {account ? copy.signOut : copy.signIn}
             </button>
           </div>
@@ -249,14 +249,14 @@ function NotificationMenu({
         aria-expanded={menuOpen}
         aria-label={copy.notificationTitle}
         className={cn(
-          "relative grid h-10 w-10 place-items-center rounded-lg border bg-white text-[var(--erg-blue)] shadow-sm transition hover:border-[#b8d6fa] hover:bg-white",
-          menuOpen ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#d7e0ec]",
+          "relative grid h-10 w-10 place-items-center rounded-lg border bg-white text-[#696CFF] shadow-sm transition hover:border-[rgba(105, 108, 255, 0.24)] hover:bg-white",
+          menuOpen ? "border-[rgba(105, 108, 255, 0.24)] ring-2 ring-[rgba(105, 108, 255, 0.24)]" : "border-[#d7e0ec]",
         )}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
-        <NotificationsNoneOutlinedIcon fontSize="small" />
+        <NotificationsNoneOutlinedIcon size={16} />
         {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[var(--erg-red)] px-1 text-[10px] font-semibold text-white">
+          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#FF5630] px-1 text-[10px] font-semibold text-white">
             {unreadCount}
           </span>
         ) : null}
@@ -265,7 +265,7 @@ function NotificationMenu({
       {menuOpen ? (
         <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-lg border border-[#d7e0ec] bg-white shadow-sm">
           <div className="border-b border-[#edf1f5] px-4 py-3">
-            <div className="text-sm font-semibold text-[var(--erg-blue)]">{copy.notificationTitle}</div>
+            <div className="text-sm font-semibold text-[#696CFF]">{copy.notificationTitle}</div>
           </div>
           <div className="max-h-[360px] overflow-y-auto p-2">
             {notifications.length > 0 ? (
@@ -274,8 +274,8 @@ function NotificationMenu({
                   key={notification.id}
                   type="button"
                   className={cn(
-                    "w-full rounded-md px-3 py-2 text-left transition hover:bg-[var(--erg-blue-light)]",
-                    notification.unread ? "bg-[var(--erg-blue)]/5" : "bg-white",
+                    "w-full rounded-md px-3 py-2 text-left transition hover:bg-[rgba(105, 108, 255, 0.08)]",
+                    notification.unread ? "bg-[#696CFF]/5" : "bg-white",
                   )}
                   onClick={() =>
                     onNotificationClick({
@@ -288,7 +288,7 @@ function NotificationMenu({
                     <span
                       className={cn(
                         "mt-1 h-2 w-2 shrink-0 rounded-full",
-                        notification.unread ? "bg-[var(--erg-red)]" : "bg-slate-300",
+                        notification.unread ? "bg-[#FF5630]" : "bg-slate-300",
                       )}
                     />
                     <span className="min-w-0">

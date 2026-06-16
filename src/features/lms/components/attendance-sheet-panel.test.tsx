@@ -10,6 +10,20 @@ const students = classroomStudents.filter((student) => student.classId === selec
 beforeEach(() => {
   vi.useFakeTimers();
   vi.setSystemTime(new Date("2026-06-02T12:00:00+07:00"));
+
+  Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: vi.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  });
 });
 
 afterEach(() => {
@@ -48,10 +62,13 @@ test("shows up to five future attendance columns and keeps them empty", () => {
 test("clamps a future selected date back to today", () => {
   render(<AttendanceSheetPanel selectedClass={selectedClass} selectedSchoolName="ERG Alpha Campus" students={students} />);
 
-  const dateInput = screen.getByLabelText("Chọn ngày trọng tâm") as HTMLInputElement;
-  fireEvent.change(dateInput, { target: { value: "2026-06-05" } });
+  const dateBtn = screen.getByLabelText("Chọn ngày trọng tâm");
+  fireEvent.click(dateBtn);
 
-  expect(dateInput.value).toBe("2026-06-02");
+  const day5Btn = screen.getByRole("button", { name: "5" });
+  fireEvent.click(day5Btn);
+
+  expect(dateBtn).toHaveTextContent("02/06/2026");
   expect(screen.getByText("Điểm danh 30/05 - 06/06")).toBeInTheDocument();
   expect(screen.getByText("03/06")).toBeInTheDocument();
   expect(screen.getByText("04/06")).toBeInTheDocument();

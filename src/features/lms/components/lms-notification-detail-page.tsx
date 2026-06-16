@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Bell, Building2, CalendarClock, Hash, Megaphone, MoreVertical, ServerCog, Settings } from "lucide-react";
+import Notifications from "@mui/icons-material/Notifications";
+import { ArrowLeft, Building2, CalendarClock, Hash, Megaphone, MoreVertical, ServerCog, Settings } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -236,7 +237,7 @@ export function LmsNotificationDetailPage({
 
             <div className="mt-6 rounded-xl border border-[#d7e2ef] bg-[#f8fbff] p-4">
               <div className="flex items-center gap-2 text-sm font-black text-slate-950">
-                <Bell data-icon="inline-start" />
+                <Notifications data-icon="inline-start" />
                 Nội dung xử lý
               </div>
               <p className="mt-2 text-sm font-medium leading-7 text-slate-600">

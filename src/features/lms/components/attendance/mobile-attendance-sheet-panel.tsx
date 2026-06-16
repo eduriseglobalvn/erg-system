@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, Download, Search, UserRound } from "lucide-react";
 
-import { Input } from "@/components/ui/dashboard-kit";
+import { Input } from "@/components/ui/input";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { AttendanceColumn, AttendanceStatus, CurriculumItem } from "@/features/lms/components/attendance-sheet-panel";
 import { cn } from "@/lib/utils";

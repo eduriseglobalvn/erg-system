@@ -1,6 +1,6 @@
-import BrokenImageOutlinedIcon from "@mui/icons-material/BrokenImageOutlined";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import { ImageOff as BrokenImageOutlinedIcon } from "@/components/mui-icon-shim";
+import { Trash2 as DeleteOutlinedIcon } from "@/components/mui-icon-shim";
+import { Image as ImageOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorSlideMedia } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -33,7 +33,7 @@ export function MediaAttachmentPanel({
             className="classic-editor__ghost-action"
             onClick={onPickMedia}
           >
-            <ImageOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+            <ImageOutlinedIcon className="h-4 w-4" size="1em" />
             <span>{media ? t("quiz.replaceImage") : t("quiz.addImage")}</span>
           </button>
           {media ? (
@@ -42,7 +42,7 @@ export function MediaAttachmentPanel({
               className="classic-editor__ghost-action is-danger"
               onClick={onRemoveMedia}
             >
-              <DeleteOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+              <DeleteOutlinedIcon className="h-4 w-4" size="1em" />
               <span>{t("common.remove")}</span>
             </button>
           ) : null}
@@ -59,7 +59,7 @@ export function MediaAttachmentPanel({
             />
           ) : (
             <div className="classic-editor__media-preview-empty">
-              <BrokenImageOutlinedIcon className="h-8 w-8" fontSize="inherit" />
+              <BrokenImageOutlinedIcon className="h-8 w-8" size="1em" />
               <span>{t("quiz.noImageAttached")}</span>
             </div>
           )}

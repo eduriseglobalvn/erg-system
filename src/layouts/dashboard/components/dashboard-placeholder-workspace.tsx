@@ -1,7 +1,8 @@
 import { ArrowLeft, CheckCircle2, ClipboardList, Layers3 } from "lucide-react";
 
 import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/platform/i18n";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 

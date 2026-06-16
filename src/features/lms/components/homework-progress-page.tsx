@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CheckCircle2, Clock3, FileCheck2, Search, UsersRound } from "lucide-react";
 
-import { Badge, Button } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   loadLmsAssignmentProgressWorkspace,
   type LmsAssignmentProgressWorkspace,

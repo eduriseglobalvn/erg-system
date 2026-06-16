@@ -1,13 +1,13 @@
 import { useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
-import RemoveIcon from "@mui/icons-material/Remove";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import AddIcon from "@mui/icons-material/Add";
+import { ArrowDown as ArrowDownwardIcon } from "@/components/mui-icon-shim";
+import { ArrowUp as ArrowUpwardIcon } from "@/components/mui-icon-shim";
+import { Copy as ContentCopyIcon } from "@/components/mui-icon-shim";
+import { Scissors as ContentCutIcon } from "@/components/mui-icon-shim";
+import { Clipboard as ContentPasteIcon } from "@/components/mui-icon-shim";
+import { Trash2 as DeleteOutlinedIcon } from "@/components/mui-icon-shim";
+import { Minus as RemoveIcon } from "@/components/mui-icon-shim";
+import { Eye as VisibilityIcon } from "@/components/mui-icon-shim";
+import { Plus as AddIcon } from "@/components/mui-icon-shim";
 
 import {
   OfficeChevronDownSmallIcon,
@@ -96,21 +96,21 @@ export function QuizEditorOutline({
 
     if (isGroup) {
       return [
-        { label: t("quiz.previewGroup"), icon: <VisibilityIcon className="h-3.5 w-3.5" fontSize="inherit" />, onSelect: () => onSelectGroup(contextMenu.target.groupId) },
-        { label: t("common.cut"), icon: <ContentCutIcon className="h-3.5 w-3.5" fontSize="inherit" />, dividerBefore: true, disabled: !canRemoveGroup, onSelect: onCut },
-        { label: t("common.copy"), icon: <ContentCopyIcon className="h-3.5 w-3.5" fontSize="inherit" />, onSelect: onCopy },
-        { label: t("common.paste"), icon: <ContentPasteIcon className="h-3.5 w-3.5" fontSize="inherit" />, disabled: !canPaste, onSelect: onPaste },
-        { label: t("common.duplicate"), icon: <ContentCopyIcon className="h-3.5 w-3.5" fontSize="inherit" />, dividerBefore: true, onSelect: onDuplicate },
-        { label: t("common.remove"), icon: <DeleteOutlinedIcon className="h-3.5 w-3.5" fontSize="inherit" />, disabled: !canRemoveGroup, onSelect: onRemove },
-        { label: t("quiz.moveUp"), icon: <ArrowUpwardIcon className="h-3.5 w-3.5" fontSize="inherit" />, dividerBefore: true, disabled: groupIndex <= 1, onSelect: () => onMove("up") },
+        { label: t("quiz.previewGroup"), icon: <VisibilityIcon className="h-3.5 w-3.5" size="1em" />, onSelect: () => onSelectGroup(contextMenu.target.groupId) },
+        { label: t("common.cut"), icon: <ContentCutIcon className="h-3.5 w-3.5" size="1em" />, dividerBefore: true, disabled: !canRemoveGroup, onSelect: onCut },
+        { label: t("common.copy"), icon: <ContentCopyIcon className="h-3.5 w-3.5" size="1em" />, onSelect: onCopy },
+        { label: t("common.paste"), icon: <ContentPasteIcon className="h-3.5 w-3.5" size="1em" />, disabled: !canPaste, onSelect: onPaste },
+        { label: t("common.duplicate"), icon: <ContentCopyIcon className="h-3.5 w-3.5" size="1em" />, dividerBefore: true, onSelect: onDuplicate },
+        { label: t("common.remove"), icon: <DeleteOutlinedIcon className="h-3.5 w-3.5" size="1em" />, disabled: !canRemoveGroup, onSelect: onRemove },
+        { label: t("quiz.moveUp"), icon: <ArrowUpwardIcon className="h-3.5 w-3.5" size="1em" />, dividerBefore: true, disabled: groupIndex <= 1, onSelect: () => onMove("up") },
         {
           label: t("quiz.moveDown"),
-          icon: <ArrowDownwardIcon className="h-3.5 w-3.5" fontSize="inherit" />,
+          icon: <ArrowDownwardIcon className="h-3.5 w-3.5" size="1em" />,
           disabled: groupIndex < 1 || groupIndex >= groups.length - 1,
           onSelect: () => onMove("down"),
         },
-        { label: t("quiz.collapseAll"), icon: <RemoveIcon className="h-3.5 w-3.5" fontSize="inherit" />, dividerBefore: true, onSelect: onCollapseAll },
-        { label: t("quiz.expandAll"), icon: <AddIcon className="h-3.5 w-3.5" fontSize="inherit" />, onSelect: onExpandAll },
+        { label: t("quiz.collapseAll"), icon: <RemoveIcon className="h-3.5 w-3.5" size="1em" />, dividerBefore: true, onSelect: onCollapseAll },
+        { label: t("quiz.expandAll"), icon: <AddIcon className="h-3.5 w-3.5" size="1em" />, onSelect: onExpandAll },
       ] satisfies QuizEditorContextMenuItem[];
     }
 

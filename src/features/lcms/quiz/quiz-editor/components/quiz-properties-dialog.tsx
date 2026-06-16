@@ -1,10 +1,10 @@
 import { useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
-import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import { X as CloseIcon } from "@/components/mui-icon-shim";
+import { LineChart as InsightsOutlinedIcon } from "@/components/mui-icon-shim";
+import { Lock as LockOutlinedIcon } from "@/components/mui-icon-shim";
+import { HelpCircle as QuizOutlinedIcon } from "@/components/mui-icon-shim";
+import { Settings as SettingsOutlinedIcon } from "@/components/mui-icon-shim";
+import { Sliders as TuneOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { resolveQuizFontStack } from "@/config/fonts";
 import {
@@ -72,11 +72,11 @@ export function QuizPropertiesDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            <SettingsOutlinedIcon className="h-4 w-4 text-[#41688f]" fontSize="inherit" />
+            <SettingsOutlinedIcon className="h-4 w-4 text-[#41688f]" size="1em" />
             <span>{t("quiz.quizProperties")}</span>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" size="1em" />
           </button>
         </div>
 
@@ -92,7 +92,7 @@ export function QuizPropertiesDialog({
                   onClick={() => setActiveTab(tabId)}
                   className={cn("classic-editor__property-tab", activeTab === tabId && "is-active")}
                 >
-                  <Icon className="h-4 w-4" fontSize="inherit" />
+                  <Icon className="h-4 w-4" size="1em" />
                   <span>{t(getTabLabelKey(tabId))}</span>
                 </button>
               );

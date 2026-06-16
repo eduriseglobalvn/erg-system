@@ -1,5 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
-import type { LucideIcon } from "lucide-react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 
 import { ERG_ASSETS } from "@/config/seo";
 
@@ -10,7 +9,7 @@ type PortalMobileLoginShellCopy = {
   title: string;
   trustItems: Array<{
     caption: string;
-    icon: LucideIcon;
+    icon: ElementType;
     label: string;
   }>;
 };
@@ -28,11 +27,7 @@ export function PortalMobileLoginShell({
       <div style={styles.glowBottom} />
       <div style={styles.content}>
         <header style={styles.header}>
-          <div style={styles.logoShell}>
-            <img alt="ERG" src={ERG_ASSETS.mobileLogo} style={styles.logo} />
-          </div>
-          <p style={styles.appName}>ERG LMS</p>
-          <p style={styles.portalName}>{copy.mobileLabel}</p>
+          <img alt="ERG" src={ERG_ASSETS.logo} style={styles.logo} />
         </header>
 
         <section style={styles.formSlot}>{children}</section>
@@ -44,7 +39,7 @@ export function PortalMobileLoginShell({
 const styles = {
   screen: {
     background:
-      "radial-gradient(circle at 50% -8%, rgba(49, 134, 246, 0.20), transparent 36%), linear-gradient(180deg, #f3f7fc 0%, #edf3fa 54%, #e8eff7 100%)",
+      "linear-gradient(rgba(255,255,255,0.10), rgba(255,255,255,0.10)), url('https://media.erg.edu.vn/logo/bg.jpg') center / cover no-repeat",
     color: "#0f172a",
     fontFamily: "var(--font-app)",
     minHeight: "100svh",
@@ -87,37 +82,12 @@ const styles = {
     justifyItems: "center",
     textAlign: "center",
   },
-  logoShell: {
-    alignItems: "center",
-    background: "rgba(255,255,255,0.82)",
-    border: "1px solid rgba(49, 134, 246, 0.14)",
-    borderRadius: 20,
-    boxShadow: "0 18px 36px rgba(49, 134, 246, 0.16)",
-    display: "inline-flex",
-    height: 58,
-    justifyContent: "center",
-    marginBottom: 12,
-    width: 58,
-  },
   logo: {
     display: "block",
-    height: 40,
+    filter: "drop-shadow(0 12px 26px rgba(72, 81, 156, 0.16))",
+    height: "auto",
     objectFit: "contain",
-    width: 40,
-  },
-  appName: {
-    color: "#1677e8",
-    fontSize: 25,
-    fontWeight: 850,
-    letterSpacing: 0,
-    margin: 0,
-  },
-  portalName: {
-    color: "#8b95a5",
-    fontSize: 11,
-    fontWeight: 700,
-    letterSpacing: 0,
-    margin: "5px 0 0",
+    width: 112,
   },
   formSlot: {
     marginTop: 34,

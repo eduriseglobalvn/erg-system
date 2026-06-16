@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Bell, ChevronDown, Download, RefreshCw, WifiOff } from "lucide-react";
+import Notifications from "@mui/icons-material/Notifications";
+import { ChevronDown, Download, RefreshCw, WifiOff } from "lucide-react";
 
 import { ERG_ASSETS } from "@/config/seo";
 
@@ -94,7 +95,7 @@ export function LmsMobileTopBar({
               className="relative grid h-10 w-10 place-items-center rounded-full border border-[#e6edf5] bg-white text-slate-800 shadow-[0_6px_16px_rgba(15,23,42,0.06)]"
               onClick={onOpenNotifications}
             >
-              <Bell className="h-[18px] w-[18px]" />
+              <Notifications className="h-[18px] w-[18px]" />
               {unreadNotificationCount ? (
                 <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#d13438] px-1 text-[11px] font-black leading-none text-white ring-2 ring-white">
                   {unreadNotificationCount > 9 ? "9+" : unreadNotificationCount}

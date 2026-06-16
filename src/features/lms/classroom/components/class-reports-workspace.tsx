@@ -7,7 +7,9 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress";
 import {
   classroomSchools,
   getLeaderboard,

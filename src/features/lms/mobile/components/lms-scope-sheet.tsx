@@ -1,6 +1,6 @@
 import { Building2, Check, GraduationCap } from "lucide-react";
 
-import { LmsSelect } from "@/components/ui/lms-kit";
+import { LmsSelect } from "@/components/ui/lms-select";
 import { cn } from "@/lib/utils";
 
 import { MobileBottomSheet } from "./mobile-bottom-sheet";

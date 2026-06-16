@@ -1,7 +1,9 @@
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import { MessageSquare as ForumOutlinedIcon } from "lucide-react";
+import { CheckCircle2 as TaskAltOutlinedIcon } from "lucide-react";
 
-import { Button, Card, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProgressBar } from "@/components/ui/progress";
 import type {
   StudentDashboardAssignment,
   StudentDashboardProfile,
@@ -56,7 +58,7 @@ export function StudentDashboardMobileOverview({
     <section className="px-4 py-4">
       <div className="space-y-3.5">
         <Card className="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[10px] font-semibold text-[var(--erg-blue)]">
+          <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[10px] font-semibold text-[#696CFF]">
             {heroEyebrow}
           </div>
           <h1 className="mt-4 text-[27px] font-semibold leading-[1.12]  text-[#0f172a]">
@@ -72,7 +74,7 @@ export function StudentDashboardMobileOverview({
 
           <div className="mt-4 flex gap-3">
             <Button
-              className="h-10 flex-1 rounded-lg bg-[var(--erg-blue)] text-[14px] font-semibold text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
+              className="h-10 flex-1 rounded-lg bg-[#696CFF] text-[14px] font-semibold text-white shadow-sm hover:bg-[#585BE0]"
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {primaryAction}
@@ -116,7 +118,7 @@ export function StudentDashboardMobileOverview({
         <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="text-[20px] font-semibold leading-none  text-slate-900">{todayTitle}</div>
-            <button type="button" className="text-[13px] font-semibold text-[var(--erg-blue)]" onClick={() => onPageChange("assignments")}>
+            <button type="button" className="text-[13px] font-semibold text-[#696CFF]" onClick={() => onPageChange("assignments")}>
               {secondaryAction}
             </button>
           </div>
@@ -138,10 +140,10 @@ export function StudentDashboardMobileOverview({
                   </div>
                   <button
                     type="button"
-                    className="grid h-10 min-w-10 place-items-center rounded-lg bg-[var(--erg-blue)] px-3 text-white shadow-sm"
+                    className="grid h-10 min-w-10 place-items-center rounded-lg bg-[#696CFF] px-3 text-white shadow-sm"
                     onClick={() => onOpenAssignment(assignment.id)}
                   >
-                    <TaskAltOutlinedIcon fontSize="small" />
+                    <TaskAltOutlinedIcon size={16} />
                   </button>
                 </div>
 
@@ -153,7 +155,7 @@ export function StudentDashboardMobileOverview({
                   <ProgressBar
                     value={assignment.progressRate}
                     className="mt-2 h-2 bg-slate-100"
-                    indicatorClassName={assignment.status === "overdue" ? "bg-[var(--erg-red)]" : "bg-[var(--erg-blue)]"}
+                    indicatorClassName={assignment.status === "overdue" ? "bg-[#FF5630]" : "bg-[#696CFF]"}
                   />
                   <p className="mt-3 text-[14px] leading-6 text-slate-600">{assignment.focusNote}</p>
                 </div>
@@ -165,8 +167,8 @@ export function StudentDashboardMobileOverview({
         <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between gap-3">
             <div className="text-[20px] font-semibold leading-none  text-slate-900">{discussionSectionTitle}</div>
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]" onClick={() => onPageChange("discussion")}>
-              <ForumOutlinedIcon fontSize="small" />
+            <button type="button" className="grid h-9 w-9 place-items-center rounded-lg bg-[rgba(105, 108, 255, 0.08)] text-[#696CFF]" onClick={() => onPageChange("discussion")}>
+              <ForumOutlinedIcon size={16} />
             </button>
           </div>
 
@@ -209,7 +211,7 @@ function MobileStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
       <div className="text-[10px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-[28px] font-semibold leading-none  text-[var(--erg-blue)]">{value}</div>
+      <div className="mt-1 text-[28px] font-semibold leading-none  text-[#696CFF]">{value}</div>
     </div>
   );
 }

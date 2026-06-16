@@ -4,7 +4,7 @@ import {
   GraduationCap,
   Link as LinkIcon,
   Presentation,
-} from "lucide-react";
+} from "@/components/mui-icon-shim";
 
 import type {
   LearningResourceResourceCard,

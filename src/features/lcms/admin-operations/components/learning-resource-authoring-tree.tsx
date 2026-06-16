@@ -13,7 +13,7 @@ import {
   Plus,
   Presentation,
   Video,
-} from "lucide-react";
+} from "@/components/mui-icon-shim";
 
 import { WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
 import type { StudioNode, StudioNodeKind } from "@/features/lcms/admin-operations/types/learning-resource-authoring";

@@ -22,7 +22,8 @@ export const queryKeys = {
     bootstrap: () => ["dashboard", "bootstrap"] as const,
   },
   lmsTeacherShell: {
-    bootstrap: () => ["lms-teacher-shell", "bootstrap"] as const,
+    bootstrap: () => ["dashboard", "bootstrap"] as const,
+    homeworkWorkspace: () => ["lms-teacher-shell", "teacher-homework-workspace"] as const,
   },
   questionBank: {
     workspace: () => ["question-bank", "workspace"] as const,

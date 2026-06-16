@@ -2,7 +2,7 @@ import { useMemo, useState, type KeyboardEvent } from "react";
 import { ChevronDown, Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
 import { AppSelect } from "@/components/ui/app-select";
-import { Input } from "@/components/ui/dashboard-kit";
+import { Input } from "@/components/ui/input";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score-sheet-panel";
 import { cn } from "@/lib/utils";

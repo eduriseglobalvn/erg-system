@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import { ChevronDown as ArrowDropDownIcon } from "@/components/mui-icon-shim";
 
 import { cn } from "@/utils/cn";
 
@@ -43,7 +43,7 @@ export function ToolbarButton({
     >
       <span className="classic-editor__toolbar-icon">{iconNode}</span>
       <span className="classic-editor__toolbar-text">{label}</span>
-      {caret ? <ArrowDropDownIcon className="classic-editor__toolbar-caret h-3 w-3" fontSize="inherit" /> : <span className="h-3" />}
+      {caret ? <ArrowDropDownIcon className="classic-editor__toolbar-caret h-3 w-3" size="1em" /> : <span className="h-3" />}
     </button>
   );
 }
@@ -87,7 +87,7 @@ export function PptTool({
     >
       <span className="classic-editor__ppt-tool-icon">{icon}</span>
       <span className="classic-editor__ppt-tool-label">{label}</span>
-      {caret ? <ArrowDropDownIcon className="h-3 w-3 text-[#7d7d7d]" fontSize="inherit" /> : null}
+      {caret ? <ArrowDropDownIcon className="h-3 w-3 text-[#7d7d7d]" size="1em" /> : null}
     </button>
   );
 }

@@ -1,8 +1,9 @@
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import { User as AccountCircleOutlinedIcon } from "lucide-react";
+import { LogIn as LoginOutlinedIcon } from "lucide-react";
+import { LogOut as LogoutOutlinedIcon } from "lucide-react";
 
-import { Button, Card } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import type { ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
@@ -32,11 +33,11 @@ export function StudentDashboardMobileAccount({
       <div className="space-y-4">
         <Card className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-lg bg-[var(--erg-blue)] text-xl font-semibold text-white shadow-sm">
+            <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#696CFF] text-xl font-semibold text-white shadow-sm">
               {profile.name.slice(0, 1)}
             </div>
             <div className="min-w-0">
-              <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[11px] font-medium text-[var(--erg-blue)]">
+              <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[11px] font-medium text-[#696CFF]">
                 {copy.accountTitle}
               </div>
               <h1 className="mt-3 text-[28px] font-semibold leading-[1.1]  text-slate-900">
@@ -57,8 +58,8 @@ export function StudentDashboardMobileAccount({
 
         <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]">
-              <AccountCircleOutlinedIcon fontSize="small" />
+            <div className="grid h-10 w-10 place-items-center rounded-lg bg-[rgba(105, 108, 255, 0.08)] text-[#696CFF]">
+              <AccountCircleOutlinedIcon size={16} />
             </div>
             <div>
               <h2 className="text-base font-semibold text-slate-900">{copy.loginStateTitle}</h2>
@@ -73,12 +74,12 @@ export function StudentDashboardMobileAccount({
           </div>
 
           <div className="mt-4 grid gap-3">
-            <Button className="h-11 rounded-lg bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={onSignIn}>
-              <LoginOutlinedIcon fontSize="small" />
+            <Button className="h-11 rounded-lg bg-[#696CFF] text-white hover:bg-[#585BE0]" onClick={onSignIn}>
+              <LoginOutlinedIcon size={16} />
               {copy.signIn}
             </Button>
             <Button variant="outline" className="h-11 rounded-lg border-slate-200 bg-white text-slate-700" onClick={onSignOut}>
-              <LogoutOutlinedIcon fontSize="small" />
+              <LogoutOutlinedIcon size={16} />
               {copy.signOut}
             </Button>
           </div>

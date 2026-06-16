@@ -1,27 +1,15 @@
-import { useMemo, useRef, useState, type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
-import {
-  getCoreRowModel,
-  getFilteredRowModel,
-  getSortedRowModel,
-  useReactTable,
-  type ColumnDef,
-  type ColumnFiltersState,
-  type SortingState,
-} from "@tanstack/react-table";
-import { ArrowDownAZ, ArrowUpAZ, ChevronDown, Filter, History, LockKeyhole, Plus, Search, X } from "lucide-react";
+import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { Button, Chip, Menu, MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import { Add, Check, Download, FilterList, Lock, Search } from "@mui/icons-material";
 import { toast } from "sonner";
 
-import { Input } from "@/components/ui/dashboard-kit";
-import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
+import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";
 import { MobileScoreSheetPanel } from "@/features/lms/components/score/mobile-score-sheet-panel";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useVirtualList } from "@/hooks/use-virtual-list";
-import { cn } from "@/lib/utils";
-import { AppSelect } from "@/components/ui/app-select";
-import { LmsCheckbox } from "@/components/ui/lms-kit";
 
 export type ScoreColumn = {
   id: string;
@@ -50,14 +38,6 @@ type ClassificationLog = {
   comment: string;
 };
 
-type StudentDraft = {
-  name: string;
-  username: string;
-  password: string;
-  state: StudentState;
-  note: string;
-};
-
 type ScoreSheetPanelProps = {
   selectedClass?: ClassroomSnapshot;
   selectedSchoolName: string;
@@ -65,14 +45,14 @@ type ScoreSheetPanelProps = {
 };
 
 const baseScoreColumns: ScoreColumn[] = [
-  { id: "topic-tech", label: "Căn bản công nghệ", maxScore: 1000, kind: "topic" },
+  { id: "topic-tech", label: "Căn bản CN", maxScore: 1000, kind: "topic" },
   { id: "topic-citizen", label: "Công dân số", maxScore: 1000, kind: "topic" },
-  { id: "topic-info", label: "Quản lý thông tin", maxScore: 1000, kind: "topic" },
-  { id: "topic-content", label: "Sáng tạo nội dung", maxScore: 1000, kind: "topic" },
-  { id: "topic-communication", label: "Giao tiếp kỹ thuật số", maxScore: 1000, kind: "topic" },
+  { id: "topic-info", label: "QL thông tin", maxScore: 1000, kind: "topic" },
+  { id: "topic-content", label: "Sáng tạo ND", maxScore: 1000, kind: "topic" },
+  { id: "topic-communication", label: "Giao tiếp", maxScore: 1000, kind: "topic" },
   { id: "topic-collab", label: "Cộng tác", maxScore: 1000, kind: "topic" },
-  { id: "topic-security", label: "An toàn bảo mật", maxScore: 1000, kind: "topic" },
-  { id: "review-01", label: "Ôn thi IC3 1", maxScore: 1000, kind: "quiz" },
+  { id: "topic-security", label: "An toàn", maxScore: 1000, kind: "topic" },
+  { id: "review-01", label: "Ôn thi IC3", maxScore: 1000, kind: "quiz" },
 ];
 
 const classificationOptions: Classification[] = ["A", "B", "C", "D", "E"];
@@ -88,106 +68,62 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
   const [classificationFilter, setClassificationFilter] = useState<Classification[]>(classificationOptions);
   const [classificationSort, setClassificationSort] = useState<ClassificationSort>(null);
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
-  const [classificationLogs, setClassificationLogs] = useState<Record<string, ClassificationLog[]>>({});
-  const [logStudentId, setLogStudentId] = useState<string | null>(null);
   const [pendingClassification, setPendingClassification] = useState<{ student: ClassroomStudent; from: Classification; to: Classification } | null>(null);
   const [classificationComment, setClassificationComment] = useState("");
   const [studentStates, setStudentStates] = useState<Record<string, StudentState>>({});
-  const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentDraft>>({});
+  const [studentDrafts, setStudentDrafts] = useState<Record<string, { name: string; username: string; password: string; state: StudentState; note: string }>>({});
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; student: ClassroomStudent } | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [filterAnchor, setFilterAnchor] = useState<null | HTMLElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const debouncedSearchQuery = useDebouncedValue(searchQuery);
 
   const scoreColumns = [...baseScoreColumns, ...offlineColumns];
-  const scoreColumnWidth = `clamp(116px, calc((100vw - 580px) / ${scoreColumns.length}), 172px)`;
-  const scoreTableWidth = `max(100%, ${530 + scoreColumns.length * 116}px)`;
-  const selectedStudent = students.find((student) => student.id === selectedStudentId) ?? null;
-  const scoreTableColumns = useMemo<ColumnDef<ClassroomStudent>[]>(
-    () => [
-      {
-        accessorFn: (student) => studentStates[student.id] ?? "active",
-        id: "state",
-        sortingFn: (rowA, rowB, columnId) => {
-          const stateA = rowA.getValue<StudentState>(columnId);
-          const stateB = rowB.getValue<StudentState>(columnId);
-          if (stateA === stateB) return 0;
-          return stateA === "disabled" ? 1 : -1;
-        },
-      },
-      {
-        accessorFn: (student) => getStudentClassification(student, manualClassifications),
-        filterFn: (row, columnId, filterValue) => {
-          const selected = filterValue as Classification[];
-          return selected.includes(row.getValue<Classification>(columnId));
-        },
-        id: "classification",
-        sortingFn: (rowA, rowB, columnId) => {
-          const rankA = classificationOptions.indexOf(rowA.getValue<Classification>(columnId));
-          const rankB = classificationOptions.indexOf(rowB.getValue<Classification>(columnId));
-          return rankA - rankB;
-        },
-      },
-      {
-        accessorFn: (student) => student.name,
-        filterFn: (row, columnId, filterValue) => {
-          const normalizedQuery = String(filterValue ?? "").trim().toLowerCase();
-          return !normalizedQuery || row.getValue<string>(columnId).toLowerCase().includes(normalizedQuery);
-        },
-        id: "student",
-        sortingFn: (rowA, rowB, columnId) => rowA.getValue<string>(columnId).localeCompare(rowB.getValue<string>(columnId), "vi"),
-      },
-    ],
-    [manualClassifications, studentStates],
-  );
-  const scoreColumnFilters = useMemo<ColumnFiltersState>(
-    () => [
-      { id: "classification", value: classificationFilter },
-      { id: "student", value: debouncedSearchQuery },
-    ],
-    [classificationFilter, debouncedSearchQuery],
-  );
-  const scoreSorting = useMemo<SortingState>(
-    () => [
-      { desc: false, id: "state" },
-      ...(classificationSort ? [{ desc: classificationSort === "desc", id: "classification" } as const] : []),
-      { desc: false, id: "student" },
-    ],
-    [classificationSort],
-  );
-  const scoreTable = useReactTable({
-    columns: scoreTableColumns,
-    data: students,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      columnFilters: scoreColumnFilters,
-      sorting: scoreSorting,
-    },
-  });
-  const sortedStudentRows = scoreTable.getRowModel().rows;
-  const sortedStudents = sortedStudentRows.map((row) => row.original);
+  const selectedStudent = students.find((s) => s.id === selectedStudentId) ?? null;
+
+  const filteredStudents = useMemo(() => {
+    let result = [...students];
+
+    // Search filter
+    if (debouncedSearchQuery) {
+      const query = debouncedSearchQuery.toLowerCase();
+      result = result.filter((s) => s.name.toLowerCase().includes(query));
+    }
+
+    // Classification filter
+    result = result.filter((s) => {
+      const cls = getStudentClassification(s, manualClassifications);
+      return classificationFilter.includes(cls);
+    });
+
+    // Sort by classification
+    if (classificationSort) {
+      result.sort((a, b) => {
+        const clsA = getStudentClassification(a, manualClassifications);
+        const clsB = getStudentClassification(b, manualClassifications);
+        const idxA = classificationOptions.indexOf(clsA);
+        const idxB = classificationOptions.indexOf(clsB);
+        return classificationSort === "asc" ? idxA - idxB : idxB - idxA;
+      });
+    }
+
+    // Disabled students at bottom
+    const active = result.filter((s) => (studentStates[s.id] ?? "active") === "active");
+    const disabled = result.filter((s) => (studentStates[s.id] ?? "active") === "disabled");
+    return [...active, ...disabled];
+  }, [students, debouncedSearchQuery, classificationFilter, classificationSort, manualClassifications, studentStates]);
+
   const rowVirtualizer = useVirtualList({
-    count: sortedStudents.length,
-    estimateSize: 36,
+    count: filteredStudents.length,
+    estimateSize: 40,
     overscan: 10,
     scrollRef: tableScrollRef,
   });
   const measuredVirtualRows = rowVirtualizer.getVirtualItems();
-  const virtualRows = measuredVirtualRows.length
-    ? measuredVirtualRows
-    : Array.from({ length: Math.min(sortedStudents.length, 20) }, (_, index) => ({
-        end: (index + 1) * 28,
-        index,
-        start: index * 28,
-      }));
-  const virtualTotalSize = Math.max(rowVirtualizer.getTotalSize(), sortedStudents.length * 28);
-  const tableColumnCount = 4 + scoreColumns.length;
 
   function addOfflineColumn() {
-    const label = offlineColumnName.trim() || `Bài offline ${offlineColumns.length + 1}`;
+    const label = offlineColumnName.trim() || `Offline ${offlineColumns.length + 1}`;
     setOfflineColumns((columns) => [
       ...columns,
       { id: `offline-${Date.now()}-${columns.length}`, label, maxScore: 10, kind: "offline" },
@@ -205,12 +141,6 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
     setBonusScores((current) => ({ ...current, [studentId]: score.replace(",", ".") }));
   }
 
-  function commitScoreInputOnEnter(event: KeyboardEvent<HTMLInputElement>) {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    event.currentTarget.blur();
-  }
-
   function requestClassificationChange(student: ClassroomStudent, next: Classification) {
     const previous = getStudentClassification(student, manualClassifications);
     if (previous === next) return;
@@ -222,23 +152,9 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
     if (!pendingClassification || !classificationComment.trim()) return;
     const { student, from, to } = pendingClassification;
     setManualClassifications((current) => ({ ...current, [student.id]: to }));
-    setClassificationLogs((current) => ({
-      ...current,
-      [student.id]: [
-        {
-          id: `log-${Date.now()}`,
-          at: new Date().toLocaleString("vi-VN"),
-          by: "Giáo viên phụ trách",
-          from,
-          to,
-          comment: classificationComment.trim(),
-        },
-        ...(current[student.id] ?? []),
-      ],
-    }));
     setPendingClassification(null);
     setClassificationComment("");
-    toast.success("Da cap nhat xep loai");
+    toast.success("Đã cập nhật xếp loại");
   }
 
   function openStudentDetail(student: ClassroomStudent) {
@@ -249,26 +165,10 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
     }));
   }
 
-  function updateStudentDraft(studentId: string, patch: Partial<StudentDraft>) {
-    const student = students.find((item) => item.id === studentId);
-    if (!student) return;
-    setStudentDrafts((current) => ({
-      ...current,
-      [studentId]: { ...(current[studentId] ?? createStudentDraft(student, studentStates[studentId] ?? "active")), ...patch },
-    }));
-    if (patch.state) {
-      setStudentStates((current) => ({ ...current, [studentId]: patch.state ?? "active" }));
-    }
-  }
-
   function disableStudent(student: ClassroomStudent) {
     setStudentStates((current) => ({ ...current, [student.id]: "disabled" }));
-    setStudentDrafts((current) => ({
-      ...current,
-      [student.id]: { ...(current[student.id] ?? createStudentDraft(student, "disabled")), state: "disabled" },
-    }));
-    setNotice(`Đã khóa elearning và đưa ${student.name} xuống cuối danh sách`);
-    toast.success("Da khoa tai khoan elearning");
+    setNotice(`Đã khóa ${student.name}`);
+    toast.success("Đã khóa tài khoản");
   }
 
   if (isMobile) {
@@ -277,9 +177,9 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
         <MobileScoreSheetPanel
           addOfflineColumn={addOfflineColumn}
           bonusScores={bonusScores}
-          commitScoreInputOnEnter={commitScoreInputOnEnter}
-          getClassification={(student) => getStudentClassification(student, manualClassifications)}
-          getStudentState={(student) => studentStates[student.id] ?? "active"}
+          commitScoreInputOnEnter={() => {}}
+          getClassification={(s) => getStudentClassification(s, manualClassifications)}
+          getStudentState={(s) => studentStates[s.id] ?? "active"}
           manualScores={manualScores}
           offlineColumnName={offlineColumnName}
           onOfflineColumnNameChange={setOfflineColumnName}
@@ -294,587 +194,546 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
           selectedClass={selectedClass}
           selectedSchoolName={selectedSchoolName}
           selectedSubject={selectedSubject}
-          sortedStudents={sortedStudents}
-          studentNameFor={(student) => studentDrafts[student.id]?.name ?? student.name}
+          sortedStudents={filteredStudents}
+          studentNameFor={(s) => studentDrafts[s.id]?.name ?? s.name}
           subjectOptions={lmsSubjectOptions}
         />
-
-        {selectedStudent ? (
+        {selectedStudent && (
           <StudentProfileDetailDrawer
             draft={studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")}
             onClose={() => setSelectedStudentId(null)}
-            onUpdate={(patch) => updateStudentDraft(selectedStudent.id, patch)}
-            onStatusChange={(state) => updateStudentDraft(selectedStudent.id, { state })}
-            statusLabel="Tr?ng th?i t?i kho?n"
+            onUpdate={(patch) => setStudentDrafts((current) => ({ ...current, [selectedStudent.id]: { ...current[selectedStudent.id], ...patch } }))}
+            onStatusChange={(state) => setStudentDrafts((current) => ({ ...current, [selectedStudent.id]: { ...current[selectedStudent.id], state } }))}
+            statusLabel="Trạng thái"
             statusOptions={[
-              { label: "?ang h?c", value: "active" },
-              { label: "Ngh? h?c / kh?a t?i kho?n", value: "disabled" },
+              { label: "Đang học", value: "active" },
+              { label: "Nghỉ học", value: "disabled" },
             ]}
             statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")).state}
             student={selectedStudent}
           />
-        ) : null}
-
-        {pendingClassification ? (
+        )}
+        {pendingClassification && (
           <ClassificationChangeDialog
             comment={classificationComment}
             pending={pendingClassification}
-            onCancel={() => {
-              setPendingClassification(null);
-              setClassificationComment("");
-            }}
+            onCancel={() => { setPendingClassification(null); setClassificationComment(""); }}
             onCommentChange={setClassificationComment}
             onSave={saveClassificationChange}
           />
-        ) : null}
+        )}
       </>
     );
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 px-2 py-2 xl:px-3">
-      <section className="rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-sm shadow-slate-200/30">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="min-w-[220px] flex-1">
-            <div className="text-sm font-semibold leading-5 text-slate-950">{selectedClass?.className ?? "Lớp học"}</div>
-            <div className="text-[13px] font-semibold text-slate-600">
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, padding: 16, gap: 16 }}>
+      {/* Header */}
+      <div style={{
+        padding: 16,
+        borderRadius: 8,
+        backgroundColor: "white",
+        border: "1px solid #e5e7eb",
+      }}>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16 }}>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <Typography sx={{ fontSize: 18, fontWeight: 700 }}>{selectedClass?.className ?? "Lớp học"}</Typography>
+            <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
               {selectedSchoolName} · {students.length} học sinh · {scoreColumns.length} cột điểm
-            </div>
+            </Typography>
           </div>
-          {notice ? <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[13px] font-semibold text-[var(--erg-blue)]">{notice}</span> : null}
-          <div className="flex min-w-0 flex-1 flex-wrap items-center justify-end gap-2 lg:flex-nowrap">
-            <label className="flex h-9 min-w-[178px] items-center gap-2 rounded-lg border border-[#b8c8db] bg-white px-3 shadow-[var(--shadow-xs)] transition focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
-              <span className="shrink-0 text-[13px] font-semibold text-slate-500">Môn</span>
-              <AppSelect
-                aria-label="Chọn môn học"
-                data-inline-select="true"
-                value={selectedSubject}
-                onChange={(event) => setSelectedSubject(event.target.value)}
-                className="h-7 min-w-0 flex-1 border-0 bg-transparent px-0 pr-5 text-[14px] font-bold text-slate-900 shadow-none outline-none"
-              >
-                {lmsSubjectOptions.map((subject) => (
-                  <option key={subject} value={subject}>
-                    {subject}
-                  </option>
-                ))}
-              </AppSelect>
-            </label>
-            <div className="relative min-w-[220px] flex-1 lg:max-w-[340px]">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-              <Input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Tìm học sinh"
-                className="h-9 border-[#cbd7e6] bg-white pl-8 text-[14px] shadow-none focus:bg-white"
-              />
-            </div>
-            <input
-              value={offlineColumnName}
-              onChange={(event) => setOfflineColumnName(event.target.value)}
-              placeholder="Tên cột offline"
-              className="h-9 w-40 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-medium outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-            />
-            <button
-              type="button"
-              onClick={addOfflineColumn}
-              aria-label="Tạo cột offline"
-              title="Tạo cột offline"
-              className="inline-flex h-9 min-w-[148px] shrink-0 items-center justify-center gap-2 rounded-lg px-3 text-[0px] font-bold shadow-[var(--shadow-xs)] transition hover:opacity-90"
+
+          {notice && (
+            <Chip label={notice} size="small" sx={{ backgroundColor: "#EEF2FF", color: "#696CFF" }} />
+          )}
+
+          <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
+            <select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
               style={{
-                backgroundColor: "var(--erg-blue)",
-                border: "1px solid var(--erg-blue)",
-                color: "#ffffff",
-                fontSize: "0px",
+                height: 40,
+                padding: "0 12px",
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                fontSize: 14,
+                minWidth: 160,
               }}
             >
-              <Plus className="h-3.5 w-3.5" style={{ color: "#ffffff" }} />
-              <span style={{ color: "#ffffff", fontSize: "14px" }}>Tạo cột offline</span>
-              Tạo cột offline
-            </button>
-          </div>
-        </div>
-      </section>
+              {lmsSubjectOptions.map((subject) => (
+                <option key={subject} value={subject}>{subject}</option>
+              ))}
+            </select>
 
-      <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#d9e2ef] bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#d9e2ef] px-2.5 py-1.5">
-          <h2 className="text-base font-bold text-slate-950">Bảng điểm theo chủ đề</h2>
-          <div className="flex items-center gap-1.5 text-[13px] font-semibold">
-            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Điểm mới nhất</span>
-            <span className="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700">Hover xem lịch sử</span>
-            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">- là chưa làm</span>
-          </div>
-        </div>
-        <div ref={tableScrollRef} className="min-h-0 flex-1 overflow-auto">
-          <table style={{ width: scoreTableWidth }} className="erg-data-table table-fixed border-separate border-spacing-0 text-[13px]">
-            <thead>
-              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
-                <ScoreHeaderCell className="sticky left-0 top-0 z-40 w-[44px]">STT</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[44px] top-0 z-40 w-[260px] text-left">Học sinh</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[304px] top-0 z-40 w-[88px]">Điểm +/-</ScoreHeaderCell>
-                <ScoreHeaderCell className="sticky left-[392px] top-0 z-40 w-[118px]">
-                  <ClassificationFilterMenu
-                    selected={classificationFilter}
-                    sort={classificationSort}
-                    onApply={(nextSelected, nextSort) => {
-                      setClassificationFilter(nextSelected);
-                      setClassificationSort(nextSort);
+            <TextField
+              size="small"
+              placeholder="Tìm học sinh"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: <Search sx={{ fontSize: 18, color: "#6b7280" }} />,
+                },
+              }}
+              sx={{ minWidth: 180 }}
+            />
+
+            <Button
+              size="small"
+              onClick={(e) => setFilterAnchor(e.currentTarget)}
+              startIcon={<FilterList />}
+              sx={{
+                border: "1px solid #e5e7eb",
+                borderRadius: 1.5,
+                textTransform: "none",
+                backgroundColor: classificationFilter.length < classificationOptions.length ? "#EEF2FF" : "white",
+              }}
+            >
+              Lọc
+            </Button>
+            <Menu
+              anchorEl={filterAnchor}
+              open={Boolean(filterAnchor)}
+              onClose={() => setFilterAnchor(null)}
+            >
+              <MenuItem onClick={() => setClassificationSort(classificationSort === "asc" ? "desc" : classificationSort === "desc" ? null : "asc")}>
+                <FilterList sx={{ mr: 1, fontSize: 18 }} />
+                Sắp xếp: {classificationSort === "asc" ? "A→Z" : classificationSort === "desc" ? "Z→A" : "Mặc định"}
+              </MenuItem>
+              <div style={{ padding: "8px 16px", borderTop: "1px solid #e5e7eb" }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 600, mb: 1 }}>Xếp loại:</Typography>
+                {classificationOptions.map((opt) => (
+                  <MenuItem
+                    key={opt}
+                    onClick={() => {
+                      const next = classificationFilter.includes(opt)
+                        ? classificationFilter.filter((o) => o !== opt)
+                        : [...classificationFilter, opt];
+                      setClassificationFilter(next);
                     }}
-                  />
-                </ScoreHeaderCell>
-                {scoreColumns.map((column) => (
-                  <ScoreHeaderCell key={column.id} style={{ width: scoreColumnWidth }} className={cn("sticky top-0 z-30", column.kind === "offline" && "bg-amber-50 text-amber-700")}>
-                    <span title={`Điểm tối đa: ${column.maxScore}`} className="block cursor-help leading-4">
-                      {column.label}
-                    </span>
-                  </ScoreHeaderCell>
+                    dense
+                  >
+                    {classificationFilter.includes(opt) ? <Check sx={{ mr: 1, fontSize: 16 }} /> : <span style={{ width: 24 }} />}
+                    <Chip
+                      label={opt}
+                      size="small"
+                      sx={{
+                        backgroundColor: classificationFilter.includes(opt) ? getClassificationBg(opt) : "#f3f4f6",
+                        color: classificationFilter.includes(opt) ? getClassificationColor(opt) : "inherit",
+                      }}
+                    />
+                  </MenuItem>
                 ))}
-              </tr>
-            </thead>
-            <tbody>
-              {virtualRows[0]?.start ? (
-                <tr aria-hidden="true">
-                  <td colSpan={tableColumnCount} style={{ height: virtualRows[0].start }} />
-                </tr>
-              ) : null}
-              {virtualRows.map((virtualRow) => {
-                const index = virtualRow.index;
-                const studentRow = sortedStudentRows[index];
-                const student = studentRow?.original;
-                if (!student) return null;
-                const sourceStudentIndex = studentRow.index;
-                const studentState = studentStates[student.id] ?? "active";
-                const classification = getStudentClassification(student, manualClassifications);
-                return (
-                  <tr key={student.id} className={cn("group", studentState === "disabled" && "text-slate-400")}>
-                    <ScoreStickyCell className={cn("left-0 z-20 w-[44px] text-center text-slate-500", studentState === "disabled" && "bg-slate-100")}>{index + 1}</ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[44px] z-20 w-[260px]", studentState === "disabled" && "bg-slate-100")}>
-                      <button
-                        type="button"
-                        className={cn("block max-w-full whitespace-normal text-left font-bold leading-5 text-[var(--erg-blue)] hover:underline", studentState === "disabled" && "text-slate-400")}
-                        onClick={() => openStudentDetail(student)}
-                        onContextMenu={(event) => {
-                          event.preventDefault();
-                          setContextMenu({ x: event.clientX, y: event.clientY, student });
+              </div>
+            </Menu>
+
+            <TextField
+              size="small"
+              placeholder="Tên cột offline"
+              value={offlineColumnName}
+              onChange={(e) => setOfflineColumnName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addOfflineColumn()}
+              sx={{ width: 140 }}
+            />
+            <Button
+              variant="contained"
+              size="small"
+              startIcon={<Add />}
+              onClick={addOfflineColumn}
+              sx={{
+                backgroundColor: "#696CFF",
+                "&:hover": { backgroundColor: "#5a5ce6" },
+                borderRadius: 1.5,
+                textTransform: "none",
+                fontWeight: 600,
+              }}
+            >
+              Tạo cột
+            </Button>
+          </Stack>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div style={{ display: "flex", gap: 8, paddingLeft: 8 }}>
+        <Chip label="Điểm mới nhất" size="small" sx={{ bgcolor: "#dcfce7", color: "#16a34a", fontSize: 11 }} />
+        <Chip label="Hover xem lịch sử" size="small" sx={{ bgcolor: "#fef3c7", color: "#d97706", fontSize: 11 }} />
+        <Chip label="- là chưa làm" size="small" sx={{ bgcolor: "#f3f4f6", color: "#6b7280", fontSize: 11 }} />
+      </div>
+
+      {/* Table Container */}
+      <div
+        ref={tableScrollRef}
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflow: "auto",
+          backgroundColor: "white",
+          border: "1px solid #e5e7eb",
+          borderRadius: 8,
+        }}
+      >
+        <table style={{
+          width: "100%",
+          minWidth: 800,
+          borderCollapse: "collapse",
+          fontSize: 13,
+          fontFamily: "inherit",
+        }}>
+          <thead style={{ position: "sticky", top: 0, zIndex: 10 }}>
+            <tr style={{ backgroundColor: "#f8fafc" }}>
+              <th style={thStyle(48)}>STT</th>
+              <th style={thStyle(200)}>Học sinh</th>
+              <th style={thStyle(80)}>Điểm +/-</th>
+              <th style={thStyle(100)}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                  Xếp loại
+                  <FilterList style={{ fontSize: 14 }} />
+                </div>
+              </th>
+              {scoreColumns.map((col) => (
+                <th
+                  key={col.id}
+                  style={{
+                    ...thStyle(140),
+                    backgroundColor: col.kind === "offline" ? "#fef3c7" : "#f8fafc",
+                    color: col.kind === "offline" ? "#92400e" : "#374151",
+                  }}
+                >
+                  <Tooltip title={`Điểm tối đa: ${col.maxScore}`}>
+                    <span style={{ cursor: "help" }}>{col.label}</span>
+                  </Tooltip>
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {measuredVirtualRows.map((virtualRow) => {
+              const student = filteredStudents[virtualRow.index];
+              if (!student) return null;
+
+              const studentState = studentStates[student.id] ?? "active";
+              const classification = getStudentClassification(student, manualClassifications);
+              const isDisabled = studentState === "disabled";
+
+              return (
+                <tr
+                  key={student.id}
+                  style={{
+                    height: virtualRow.end - virtualRow.start,
+                    opacity: isDisabled ? 0.5 : 1,
+                  }}
+                >
+                  <td style={tdStyle(48, "center")}>{virtualRow.index + 1}</td>
+                  <td style={tdStyle(200)}>
+                    <button
+                      onClick={() => openStudentDetail(student)}
+                      onContextMenu={(e) => {
+                        e.preventDefault();
+                        setContextMenu({ x: e.clientX, y: e.clientY, student });
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        color: isDisabled ? "#9ca3af" : "#696CFF",
+                        cursor: "pointer",
+                        textAlign: "left",
+                      }}
+                    >
+                      {studentDrafts[student.id]?.name ?? student.name}
+                    </button>
+                  </td>
+                  <td style={tdStyle(80, "center")}>
+                    <input
+                      type="text"
+                      value={bonusScores[student.id] ?? ""}
+                      onChange={(e) => updateBonusScore(student.id, e.target.value)}
+                      style={{
+                        width: "100%",
+                        height: 28,
+                        border: "1px solid #e5e7eb",
+                        borderRadius: 4,
+                        textAlign: "center",
+                        fontSize: 13,
+                        fontWeight: 600,
+                        padding: "0 4px",
+                      }}
+                    />
+                  </td>
+                  <td style={tdStyle(100, "center")}>
+                    <select
+                      value={classification}
+                      onChange={(e) => requestClassificationChange(student, e.target.value as Classification)}
+                      style={{
+                        minWidth: 56,
+                        height: 32,
+                        borderRadius: 16,
+                        fontSize: 12,
+                        fontWeight: 700,
+                        border: "1px solid",
+                        borderColor: getClassificationBorder(classification),
+                        backgroundColor: getClassificationBg(classification),
+                        color: getClassificationColor(classification),
+                        cursor: "pointer",
+                      }}
+                    >
+                      {classificationOptions.map((opt) => (
+                        <option key={opt} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  </td>
+                  {scoreColumns.map((col) => {
+                    const attempts = getMockAttempts(student, col, virtualRow.index, scoreColumns.indexOf(col));
+                    const latest = attempts[0];
+                    const score = manualScores[`${col.id}:${student.id}`] ?? (latest ? formatScore(latest.score) : "");
+
+                    return (
+                      <td
+                        key={col.id}
+                        style={{
+                          ...tdStyle(140, "center"),
+                          backgroundColor: col.kind === "offline"
+                            ? "#fefce8"
+                            : latest
+                              ? getScoreBg(latest?.score, col.maxScore)
+                              : "white",
+                          cursor: "help",
                         }}
                       >
-                        {studentDrafts[student.id]?.name ?? student.name}
-                      </button>
-                    </ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[304px] z-20 w-[88px] text-center", studentState === "disabled" && "bg-slate-100")}>
-                      <input
-                        value={bonusScores[student.id] ?? ""}
-                        onChange={(event) => updateBonusScore(student.id, event.target.value)}
-                        onKeyDown={commitScoreInputOnEnter}
-                        className="h-7 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-700 outline-none focus:border-[var(--primary)] focus:bg-white"
-                        placeholder="0"
-                      />
-                    </ScoreStickyCell>
-                    <ScoreStickyCell className={cn("left-[392px] z-20 w-[118px]", studentState === "disabled" && "bg-slate-100")}>
-                      <div className="group/log relative">
-                        <AppSelect
-                          variant="native"
-                          data-classification-select="true"
-                          data-classification={classification}
-                          value={classification}
-                          onChange={(event) => requestClassificationChange(student, event.target.value as Classification)}
-                          className={cn("h-8 w-full rounded-full border text-center text-[13px] font-bold outline-none transition", classificationClass(classification))}
-                          style={{ textAlignLast: "center" }}
-                        >
-                          {classificationOptions.map((option) => <option key={option}>{option}</option>)}
-                        </AppSelect>
-                        {(classificationLogs[student.id]?.length ?? 0) > 0 ? (
-                          <button
-                            type="button"
-                            className="absolute right-1 top-1 grid h-4 w-4 place-items-center rounded-full bg-white/90 text-[var(--erg-blue)] shadow-sm ring-1 ring-[#b8d6fa] hover:bg-slate-50"
-                            onClick={() => setLogStudentId((current) => (current === student.id ? null : student.id))}
-                            aria-label={`Xem log xếp loại của ${student.name}`}
-                          >
-                            <History className="h-3 w-3" />
-                          </button>
-                        ) : null}
-                        {logStudentId === student.id ? <ClassificationLogPopup logs={classificationLogs[student.id] ?? []} onClose={() => setLogStudentId(null)} /> : null}
-                      </div>
-                    </ScoreStickyCell>
-                    {scoreColumns.map((column, columnIndex) => {
-                      if (column.kind === "offline") {
-                        return (
-                          <td key={column.id} style={{ width: scoreColumnWidth }} className="h-10 border-b border-r border-[#cbd7e6] bg-amber-50/40 px-1.5 text-center group-hover:!bg-[var(--erg-blue-light)]">
-                            <input
-                              value={manualScores[`${column.id}:${student.id}`] ?? ""}
-                              onChange={(event) => updateManualScore(column.id, student.id, event.target.value)}
-                              onKeyDown={commitScoreInputOnEnter}
-                              className="h-7 w-full rounded border border-transparent bg-transparent text-center font-semibold text-slate-800 outline-none focus:border-amber-300 focus:bg-white"
-                              inputMode="decimal"
-                              placeholder="-"
-                              aria-label={`${student.name} ${column.label}`}
-                            />
-                          </td>
-                        );
-                      }
-
-                      const attempts = getMockAttempts(student, column, sourceStudentIndex, columnIndex);
-                      const latest = attempts[0];
-                      return (
-                        <td key={column.id} style={{ width: scoreColumnWidth }} className={cn("group/score relative h-10 border-b border-r border-[#cbd7e6] px-1.5 text-center font-semibold group-hover:!bg-[var(--erg-blue-light)]", scoreCellClass(latest?.score, column.maxScore))}>
-                          {latest ? formatScore(latest.score) : "-"}
-                          {latest ? <ScoreAttemptPopup attempts={attempts} maxScore={column.maxScore} /> : null}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                );
-              })}
-              {virtualTotalSize - (virtualRows.at(-1)?.end ?? 0) > 0 ? (
-                <tr aria-hidden="true">
-                  <td colSpan={tableColumnCount} style={{ height: virtualTotalSize - (virtualRows.at(-1)?.end ?? 0) }} />
+                        {col.kind === "offline" ? (
+                          <input
+                            type="text"
+                            value={score}
+                            onChange={(e) => updateManualScore(col.id, student.id, e.target.value)}
+                            placeholder="-"
+                            style={{
+                              width: "100%",
+                              height: 32,
+                              border: "1px solid #fef3c7",
+                              borderRadius: 4,
+                              textAlign: "center",
+                              fontSize: 13,
+                              fontWeight: 600,
+                              padding: "0 4px",
+                              backgroundColor: "transparent",
+                            }}
+                          />
+                        ) : latest ? (
+                          <Tooltip title={`${latest.duration} · ${latest.takenAt} · ${attempts.length} lần`}>
+                            <span style={{ fontWeight: 600 }}>{formatScore(latest.score)}</span>
+                          </Tooltip>
+                        ) : (
+                          <span style={{ color: "#d1d5db" }}>-</span>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
-              ) : null}
-            </tbody>
-          </table>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div
+          style={{
+            position: "fixed",
+            top: contextMenu.y,
+            left: contextMenu.x,
+            zIndex: 100,
+            backgroundColor: "white",
+            border: "1px solid #e5e7eb",
+            borderRadius: 8,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            minWidth: 180,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ padding: "8px 12px", borderBottom: "1px solid #e5e7eb" }}>
+            <div style={{ fontSize: 13, fontWeight: 600 }}>{contextMenu.student.name}</div>
+          </div>
+          <button
+            onClick={() => { setNotice("Đã mở thêm HS chuyển lớp"); setContextMenu(null); }}
+            style={menuItemStyle}
+          >
+            <Add style={{ fontSize: 18 }} />
+            Thêm HS chuyển lớp
+          </button>
+          <button
+            onClick={() => { disableStudent(contextMenu.student); setContextMenu(null); }}
+            style={{ ...menuItemStyle, color: "#dc2626" }}
+          >
+            <Lock style={{ fontSize: 18 }} />
+            Nghỉ học / khóa
+          </button>
         </div>
-      </section>
+      )}
+      {contextMenu && (
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 99 }}
+          onClick={() => setContextMenu(null)}
+        />
+      )}
 
-      <ScoreStudentContextMenu
-        menu={contextMenu}
-        onAddTransferStudent={() => {
-          setNotice("Đã mở thao tác thêm học sinh chuyển lớp vào");
-          setContextMenu(null);
-        }}
-        onDisableStudent={(student) => {
-          disableStudent(student);
-          setContextMenu(null);
-        }}
-        onClose={() => setContextMenu(null)}
-      />
-
-      {selectedStudent ? (
+      {/* Student Detail */}
+      {selectedStudent && (
         <StudentProfileDetailDrawer
           draft={studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")}
           onClose={() => setSelectedStudentId(null)}
-          onUpdate={(patch) => updateStudentDraft(selectedStudent.id, patch)}
-          onStatusChange={(state) => updateStudentDraft(selectedStudent.id, { state })}
-          statusLabel="Tr?ng th?i t?i kho?n"
+          onUpdate={(patch) => setStudentDrafts((current) => ({ ...current, [selectedStudent.id]: { ...current[selectedStudent.id], ...patch } }))}
+          onStatusChange={(state) => setStudentDrafts((current) => ({ ...current, [selectedStudent.id]: { ...current[selectedStudent.id], state } }))}
+          statusLabel="Trạng thái"
           statusOptions={[
-            { label: "?ang h?c", value: "active" },
-            { label: "Ngh? h?c / kh?a t?i kho?n", value: "disabled" },
+            { label: "Đang học", value: "active" },
+            { label: "Nghỉ học", value: "disabled" },
           ]}
           statusValue={(studentDrafts[selectedStudent.id] ?? createStudentDraft(selectedStudent, studentStates[selectedStudent.id] ?? "active")).state}
           student={selectedStudent}
         />
-      ) : null}
+      )}
 
-      {pendingClassification ? (
+      {/* Classification Change Dialog */}
+      {pendingClassification && (
         <ClassificationChangeDialog
           comment={classificationComment}
           pending={pendingClassification}
-          onCancel={() => {
-            setPendingClassification(null);
-            setClassificationComment("");
-          }}
+          onCancel={() => { setPendingClassification(null); setClassificationComment(""); }}
           onCommentChange={setClassificationComment}
           onSave={saveClassificationChange}
         />
-      ) : null}
+      )}
     </div>
   );
 }
 
-function ClassificationFilterMenu({
-  onApply,
-  selected,
-  sort,
-}: {
-  onApply: (selected: Classification[], sort: ClassificationSort) => void;
-  selected: Classification[];
-  sort: ClassificationSort;
-}) {
-  const [open, setOpen] = useState(false);
-  const [draftSelected, setDraftSelected] = useState<Classification[]>(selected);
-  const [draftSort, setDraftSort] = useState<ClassificationSort>(sort);
-  const [query, setQuery] = useState("");
-  const debouncedQuery = useDebouncedValue(query);
-  const visibleOptions = classificationOptions.filter((option) => option.toLowerCase().includes(debouncedQuery.trim().toLowerCase()));
-  const allChecked = draftSelected.length === classificationOptions.length;
-  const isFiltered = selected.length !== classificationOptions.length || Boolean(sort);
-
-  function openMenu() {
-    setDraftSelected(selected);
-    setDraftSort(sort);
-    setQuery("");
-    setOpen(true);
-  }
-
-  function toggleOption(option: Classification) {
-    const next = draftSelected.includes(option) ? draftSelected.filter((item) => item !== option) : [...draftSelected, option];
-    setDraftSelected(next);
-    onApply(next, draftSort);
-  }
-
-  function toggleAll() {
-    const next = allChecked ? [] : classificationOptions;
-    setDraftSelected(next);
-    onApply(next, draftSort);
-  }
-
-  return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={openMenu}
-        className={cn(
-          "mx-auto grid h-9 w-full grid-cols-[18px_1fr_18px] items-center gap-1 rounded-lg border bg-white px-1.5 text-[13px] font-bold text-slate-800 shadow-none hover:border-[#b8c8db]",
-          isFiltered ? "border-[#b8d6fa] text-[var(--erg-blue)]" : "border-[#cbd7e6]",
-        )}
-        aria-expanded={open}
-      >
-        <span />
-        <span className="text-center">Xếp loại</span>
-        <span className="flex items-center justify-end gap-0.5">
-          <Filter className="h-3 w-3" />
-          <ChevronDown className="h-3 w-3" />
-        </span>
-      </button>
-      {open ? (
-        <>
-          <button type="button" aria-label="Đóng bộ lọc xếp loại" className="fixed inset-0 z-[55] cursor-default" onClick={() => setOpen(false)} />
-          <div className="absolute left-0 top-10 z-[60] w-72 rounded-lg border border-[#b8c8db] bg-white p-2.5 text-left normal-case text-slate-800 shadow-md shadow-slate-900/10">
-            <button
-              type="button"
-              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold hover:bg-slate-50", draftSort === "asc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
-              onClick={() => { setDraftSort("asc"); onApply(draftSelected, "asc"); }}
-            >
-              <ArrowDownAZ className="h-4 w-4" />
-              Sắp xếp A đến Z
-            </button>
-            <button
-              type="button"
-              className={cn("flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold hover:bg-slate-50", draftSort === "desc" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}
-              onClick={() => { setDraftSort("desc"); onApply(draftSelected, "desc"); }}
-            >
-              <ArrowUpAZ className="h-4 w-4" />
-              Sắp xếp Z đến A
-            </button>
-            <button
-              type="button"
-              className="mt-1 flex w-full items-center gap-2 rounded px-2 py-1.5 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 hover:text-rose-600"
-              onClick={() => {
-                onApply(classificationOptions, null);
-                setOpen(false);
-              }}
-            >
-              <X className="h-4 w-4" />
-              Xóa bộ lọc
-            </button>
-            <div className="my-2 border-t border-[#dbe4f0]" />
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-500" />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Tìm xếp loại"
-                className="h-9 w-full rounded-lg border border-[#b8c8db] pl-8 pr-2 text-[13px] font-semibold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-              />
-            </div>
-            <div className="mt-2 max-h-48 overflow-auto rounded-lg border border-[#dbe4f0] bg-[#fbfdff] p-1">
-              <CheckRow checked={allChecked} label="Chọn tất cả" onToggle={toggleAll} />
-              {visibleOptions.map((option) => (
-                <CheckRow key={option} checked={draftSelected.includes(option)} label={option} onToggle={() => toggleOption(option)} />
-              ))}
-            </div>
-            <div className="mt-2 flex justify-end gap-2">
-              <button type="button" className="h-8 rounded-lg border border-[#cbd7e6] px-3 text-[13px] font-semibold text-slate-700 hover:bg-slate-50" onClick={() => setOpen(false)}>
-                Hủy
-              </button>
-              <button
-                type="button"
-                className="h-8 rounded-lg bg-[var(--erg-blue)] px-3 text-[13px] font-bold text-white hover:bg-[var(--erg-blue-hover)]"
-                onClick={() => {
-                  onApply(draftSelected, draftSort);
-                  setOpen(false);
-                }}
-              >
-                Áp dụng
-              </button>
-            </div>
-          </div>
-        </>
-      ) : null}
-    </div>
-  );
-}
-
-function CheckRow({ checked, label, onToggle }: { checked: boolean; label: string; onToggle: () => void }) {
-  return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] font-semibold text-slate-800 hover:bg-[#eef6ff]"
-      onClick={onToggle}
-    >
-      <span className="inline-flex shrink-0" onClick={(event) => event.stopPropagation()}>
-        <LmsCheckbox checked={checked} onCheckedChange={onToggle} aria-label={label} />
-      </span>
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function ScoreAttemptPopup({ attempts, maxScore }: { attempts: ScoreAttempt[]; maxScore: number }) {
-  const best = attempts.reduce((currentBest, attempt) => (attempt.score > currentBest.score ? attempt : currentBest), attempts[0]);
-  return (
-    <div className="pointer-events-none absolute left-1/2 top-7 z-50 hidden w-72 -translate-x-1/2 rounded-lg border border-[#cbd7e6] bg-white p-3 text-left shadow-sm shadow-slate-900/15 group-hover/score:block">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-[13px] font-bold text-slate-500">Điểm cao nhất</div>
-          <div className="mt-1 text-xl font-semibold text-emerald-700">{formatScore(best.score)}/{maxScore}</div>
-          <div className="mt-1 text-[13px] font-semibold text-slate-600">{best.duration} · {best.takenAt}</div>
-        </div>
-        <span className="rounded bg-[var(--erg-blue-light)] px-2 py-1 text-[13px] font-bold text-[var(--erg-blue)]">{attempts.length} lần</span>
-      </div>
-      <div className="mt-3 border-t border-[#dbe4f0] pt-2">
-        <div className="mb-1 text-[13px] font-bold text-slate-500">3 lần gần đây</div>
-        {attempts.slice(0, 3).map((attempt) => (
-          <div key={attempt.id} className="ml-3 flex items-center justify-between gap-2 py-1 text-[13px] font-semibold">
-            <span className="text-slate-700">{formatScore(attempt.score)}/{maxScore}</span>
-            <span className="text-slate-400">{attempt.duration} · {attempt.takenAt}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function ClassificationLogPopup({ logs, onClose }: { logs: ClassificationLog[]; onClose: () => void }) {
-  return (
-    <>
-      <button type="button" aria-label="Đóng log xếp loại" className="fixed inset-0 z-[55] cursor-default" onClick={onClose} />
-      <div className="absolute left-full top-0 z-[60] ml-2 w-96 rounded-lg border border-[#cbd7e6] bg-white p-3 text-left shadow-sm shadow-slate-900/20">
-        <div className="flex items-center justify-between gap-2 border-b border-[#dbe4f0] pb-2">
-          <div>
-            <div className="text-[13px] font-bold text-slate-500">Log xếp loại</div>
-            <div className="mt-0.5 text-[13px] font-semibold text-slate-800">{logs.length} lần chỉnh tay có ghi chú</div>
-          </div>
-          <button type="button" className="grid h-7 w-7 place-items-center rounded text-slate-400 hover:bg-slate-100 hover:text-slate-700" onClick={onClose}>
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-        <div className="mt-3 grid max-h-72 gap-2 overflow-auto">
-          {logs.map((log) => (
-            <div key={log.id} className="rounded-md border border-[#dbe4f0] bg-slate-50 p-2.5 text-[13px]">
-              <div className="flex items-center justify-between gap-2">
-                <div className="font-semibold text-slate-900">{log.from} → {log.to}</div>
-                <div className="text-slate-400">{log.at}</div>
-              </div>
-              <div className="mt-0.5 text-slate-500">{log.by}</div>
-              <div className="mt-2 rounded border border-white bg-white px-2 py-1.5 font-semibold leading-5 text-slate-700">{log.comment}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  );
-}
+const menuItemStyle: React.CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: 8,
+  width: "100%",
+  padding: "8px 12px",
+  border: "none",
+  background: "none",
+  fontSize: 13,
+  fontWeight: 500,
+  cursor: "pointer",
+  textAlign: "left",
+};
 
 function ClassificationChangeDialog({
   comment,
+  pending,
   onCancel,
   onCommentChange,
   onSave,
-  pending,
 }: {
   comment: string;
+  pending: { student: ClassroomStudent; from: Classification; to: Classification };
   onCancel: () => void;
   onCommentChange: (value: string) => void;
   onSave: () => void;
-  pending: { student: ClassroomStudent; from: Classification; to: Classification };
 }) {
   const canSave = comment.trim().length > 0;
   return (
-    <>
-      <button type="button" aria-label="Đóng đổi xếp loại" className="fixed inset-0 z-[110] bg-slate-950/30" onClick={onCancel} />
-      <div className="fixed left-1/2 top-1/2 z-[120] w-[460px] max-w-[calc(100vw-24px)] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[#cbd7e6] bg-white shadow-sm">
-        <div className="border-b border-[#dbe4f0] p-4">
-          <div className="text-sm font-semibold text-slate-950">Đổi xếp loại học sinh</div>
-          <div className="mt-1 text-xs font-semibold text-slate-500">{pending.student.name}</div>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 200,
+      }}
+      onClick={onCancel}
+    >
+      <div
+        style={{
+          width: 460,
+          maxWidth: "90vw",
+          backgroundColor: "white",
+          borderRadius: 8,
+          overflow: "hidden",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div style={{ padding: 16, borderBottom: "1px solid #e5e7eb" }}>
+          <Typography sx={{ fontWeight: 600 }}>Đổi xếp loại học sinh</Typography>
+          <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.5 }}>{pending.student.name}</Typography>
         </div>
-        <div className="p-4">
-          <div className="flex items-center gap-2 text-sm font-semibold">
-            <span className={cn("rounded border px-2 py-1", classificationClass(pending.from))}>{pending.from}</span>
-            <span className="text-slate-400">→</span>
-            <span className={cn("rounded border px-2 py-1", classificationClass(pending.to))}>{pending.to}</span>
-          </div>
-          <label className="mt-4 block">
-            <span className="mb-1 block text-[13px] font-semibold text-slate-600">Comment bắt buộc</span>
+        <div style={{ padding: 16 }}>
+          <Stack direction="row" spacing={1} alignItems="center">
+            <Chip label={pending.from} sx={getClassificationChipSx(pending.from)} />
+            <Typography sx={{ color: "#6b7280" }}>→</Typography>
+            <Chip label={pending.to} sx={getClassificationChipSx(pending.to)} />
+          </Stack>
+          <div style={{ marginTop: 16 }}>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, mb: 0.5, color: "#6b7280" }}>Comment bắt buộc</Typography>
             <textarea
               value={comment}
-              onChange={(event) => onCommentChange(event.target.value)}
-              className="min-h-28 w-full rounded-lg border border-[#cbd7e6] px-3 py-2 text-sm font-semibold text-slate-800 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-              placeholder="Nhập lý do đổi xếp loại để giáo viên sau theo dõi được lịch sử."
+              onChange={(e) => onCommentChange(e.target.value)}
+              placeholder="Nhập lý do đổi xếp loại..."
               autoFocus
+              style={{
+                width: "100%",
+                minHeight: 80,
+                padding: 12,
+                borderRadius: 8,
+                border: "1px solid #e5e7eb",
+                fontSize: 14,
+                resize: "vertical",
+              }}
             />
-          </label>
-          <div className="mt-2 text-[13px] font-semibold text-slate-600">Chỉ khi bấm Lưu thì hệ thống mới ghi log và comment.</div>
+          </div>
         </div>
-        <div className="flex justify-end gap-2 border-t border-[#dbe4f0] p-3">
-          <button type="button" className="h-9 rounded-md border border-[#cbd7e6] px-3 text-[13px] font-semibold text-slate-600 hover:bg-slate-50" onClick={onCancel}>
+        <div style={{ padding: 16, borderTop: "1px solid #e5e7eb", display: "flex", justifyContent: "flex-end", gap: 8 }}>
+          <Button onClick={onCancel} variant="outlined" sx={{ borderRadius: 1.5, textTransform: "none" }}>
             Hủy
-          </button>
-          <button
-            type="button"
-            className={cn("h-9 rounded-md px-3 text-[13px] font-semibold text-white", canSave ? "bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]" : "cursor-not-allowed bg-slate-300")}
-            disabled={!canSave}
+          </Button>
+          <Button
             onClick={onSave}
+            disabled={!canSave}
+            variant="contained"
+            sx={{
+              borderRadius: 1.5,
+              textTransform: "none",
+              fontWeight: 600,
+              backgroundColor: "#696CFF",
+              "&:hover": { backgroundColor: "#5a5ce6" },
+            }}
           >
             Lưu thay đổi
-          </button>
+          </Button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-function ScoreStudentContextMenu({
-  menu,
-  onAddTransferStudent,
-  onClose,
-  onDisableStudent,
-}: {
-  menu: { x: number; y: number; student: ClassroomStudent } | null;
-  onAddTransferStudent: () => void;
-  onClose: () => void;
-  onDisableStudent: (student: ClassroomStudent) => void;
-}) {
-  if (!menu) return null;
-  return (
-    <>
-      <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
-      <div className="fixed z-[80] w-60 overflow-hidden rounded-lg border border-[#cbd7e6] bg-white py-1 text-sm shadow-sm shadow-slate-900/15" style={{ left: menu.x, top: menu.y }}>
-        <div className="border-b border-[#dbe4f0] px-3 py-2">
-          <div className="truncate text-[13px] font-bold text-slate-950">{menu.student.name}</div>
-          <div className="mt-0.5 text-[13px] font-semibold text-slate-600">{menu.student.className}</div>
-        </div>
-        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-slate-700 hover:bg-slate-50 hover:text-[var(--erg-blue)]" onClick={onAddTransferStudent}>
-          <Plus className="h-3.5 w-3.5" />
-          Thêm HS chuyển lớp vào
-        </button>
-        <button type="button" className="flex w-full items-center gap-2 px-3 py-2 text-left text-[13px] font-semibold text-rose-700 hover:bg-rose-50" onClick={() => onDisableStudent(menu.student)}>
-          <LockKeyhole className="h-3.5 w-3.5" />
-          Nghỉ học / khóa tài khoản
-        </button>
-      </div>
-    </>
-  );
-}
+const thStyle = (width?: string | number) => ({
+  padding: "8px 4px",
+  border: "1px solid #e5e7eb",
+  borderTop: "none",
+  fontSize: 11,
+  fontWeight: 700,
+  textAlign: "center" as const,
+  position: "sticky" as const,
+  top: 0,
+  zIndex: 1,
+  width,
+});
 
-function ScoreHeaderCell({ children, className, style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
-  return <th style={style} className={cn("h-10 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-2 text-center align-middle", className)}>{children}</th>;
-}
-
-function ScoreStickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return <td className={cn("sticky h-10 border-b border-r border-[#cbd7e6] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>{children}</td>;
-}
-
+const tdStyle = (width?: string | number, textAlign: "left" | "center" = "left") => ({
+  padding: "4px",
+  border: "1px solid #e5e7eb",
+  textAlign,
+  width,
+});
 
 function getMockAttempts(student: ClassroomStudent, column: ScoreColumn, studentIndex: number, columnIndex: number): ScoreAttempt[] {
   if ((studentIndex + columnIndex) % 6 === 0) return [];
@@ -905,38 +764,62 @@ function getStudentClassification(student: ClassroomStudent, manual: Record<stri
   return "E";
 }
 
-function classificationClass(classification: Classification) {
-  if (classification === "A") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (classification === "B") return "border-blue-200 bg-blue-50 text-[var(--erg-blue)]";
-  if (classification === "C") return "border-yellow-200 bg-yellow-50 text-yellow-800";
-  if (classification === "D") return "border-orange-200 bg-orange-50 text-orange-700";
-  if (classification === "E") return "border-rose-200 bg-rose-50 text-rose-700";
-  return "border-rose-200 bg-rose-50 text-rose-700";
+function getClassificationBg(c: Classification) {
+  switch (c) {
+    case "A": return "#dcfce7";
+    case "B": return "#dbeafe";
+    case "C": return "#fef3c7";
+    case "D": return "#fed7aa";
+    case "E": return "#fee2e2";
+    default: return "#fee2e2";
+  }
 }
 
-function scoreCellClass(score: number | undefined, maxScore: number) {
-  if (score === undefined) return "bg-white text-slate-300";
+function getClassificationColor(c: Classification) {
+  switch (c) {
+    case "A": return "#16a34a";
+    case "B": return "#2563eb";
+    case "C": return "#d97706";
+    case "D": return "#ea580c";
+    case "E": return "#dc2626";
+    default: return "#dc2626";
+  }
+}
+
+function getClassificationBorder(c: Classification) {
+  switch (c) {
+    case "A": return "#bbf7d0";
+    case "B": return "#bfdbfe";
+    case "C": return "#fde68a";
+    case "D": return "#fdba74";
+    case "E": return "#fecaca";
+    default: return "#fecaca";
+  }
+}
+
+function getClassificationChipSx(c: Classification) {
+  return {
+    backgroundColor: getClassificationBg(c),
+    color: getClassificationColor(c),
+    fontWeight: 700,
+    fontSize: 14,
+  };
+}
+
+function getScoreBg(score: number | undefined, maxScore: number) {
+  if (score === undefined) return "white";
   const rate = score / maxScore;
-  if (rate < 0.5) return "bg-rose-50 text-rose-700";
-  if (rate >= 0.8) return "bg-emerald-50 text-emerald-700";
-  return "bg-white text-slate-700";
+  if (rate < 0.5) return "#fee2e2";
+  if (rate >= 0.8) return "#dcfce7";
+  return "white";
 }
 
-function createStudentDraft(student: ClassroomStudent, state: StudentState): StudentDraft {
-  const baseUsername = removeVietnameseMarks(student.name).toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
+function createStudentDraft(student: ClassroomStudent, state: StudentState) {
   return {
     name: student.name,
-    username: baseUsername || student.id,
+    username: student.name.toLowerCase().replace(/[^a-z0-9]+/g, "."),
     password: `${student.avatarSeed.toLowerCase()}@2026`,
     state,
     note: student.mentorNote,
   };
-}
-
-function removeVietnameseMarks(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
 }

@@ -1,8 +1,10 @@
 import { useRef } from "react";
 
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, ProgressBar } from "@/components/ui/dashboard-kit";
-import { LmsCheckbox } from "@/components/ui/lms-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ProgressBar } from "@/components/ui/progress";
+import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { useVirtualList } from "@/hooks/use-virtual-list";
 import { cn } from "@/lib/utils";

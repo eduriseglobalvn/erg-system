@@ -36,13 +36,16 @@ export function normalizeSsoReturnTo(rawReturnTo: string) {
 }
 
 export function isAllowedSsoReturnHost(hostname: string) {
-  const normalized = hostname.trim().toLowerCase();
+  let normalized = hostname.trim().toLowerCase();
+  normalized = normalized.replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
   return LOCALHOSTS.has(normalized) || [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
 }
 
 function isAllowedSsoReturnUrl(url: URL) {
-  if (LOCALHOSTS.has(url.hostname.toLowerCase())) return true;
-  return ALLOWED_PORTAL_HOSTS.has(url.host.toLowerCase());
+  const hostname = url.hostname.toLowerCase().replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
+  const host = url.host.toLowerCase().replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
+  if (LOCALHOSTS.has(hostname)) return true;
+  return ALLOWED_PORTAL_HOSTS.has(host);
 }
 
 function getNestedLoginRedirect(url: URL) {

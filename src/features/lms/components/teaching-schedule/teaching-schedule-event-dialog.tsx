@@ -1,6 +1,6 @@
+import Notifications from "@mui/icons-material/Notifications";
 import {
   AlignLeft,
-  Bell,
   CalendarDays,
   Check,
   Clock3,
@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 
-import type { TeachingScheduleDraft, TeachingScheduleStatus } from "./teaching-schedule-types";
+import type { TeachingScheduleDraft, TeachingScheduleStatus } from "./teaching-schedule-types";
 import { AppSelect } from "@/components/ui/app-select";
 
 const statusOptions: Array<{ label: string; value: TeachingScheduleStatus }> = [
@@ -114,7 +114,7 @@ export function TeachingScheduleEventDialog({
             <Field value={draft.room} onChange={(value) => updateDraft("room", value)} placeholder="Phòng học" />
           </div>
 
-          <Bell className="mt-2 hidden h-5 w-5 text-[var(--muted-foreground)] md:block" />
+          <Notifications className="mt-2 hidden h-5 w-5 text-[var(--muted-foreground)] md:block" />
           <div className="flex flex-wrap items-center gap-2">
             <Chip>30 phút trước</Chip>
             <Chip>Email</Chip>

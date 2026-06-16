@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
-import { ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Clipboard, Copy, FileCheck, FileQuestion, FileText, Folder, FolderPlus, Monitor, MoreHorizontal, Pencil, Plus, Presentation, RefreshCw, Search, Scissors, Trash2 } from "lucide-react";
+import { ArrowUpRight, BookOpen, ChevronLeft, ChevronRight, Clipboard, Copy, FileCheck, FileQuestion, FileText, Folder, FolderPlus, Monitor, MoreHorizontal, Pencil, Plus, Presentation, RefreshCw, Search, Scissors, Trash2 } from "@/components/mui-icon-shim";
 
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 import {
   deleteLearningResourceResource,
   loadLearningResourceResourceDetail,

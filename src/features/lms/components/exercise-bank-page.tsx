@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { BookOpenCheck, Clock3, Copy, Eye, FileQuestion, Filter, ListChecks, Plus, Search, Send } from "lucide-react";
 
-import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";

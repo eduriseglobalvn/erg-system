@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshCw, Trash2, FileSpreadsheet } from "lucide-react";
+import { RefreshCw, Trash2, FileSpreadsheet } from "@/components/mui-icon-shim";
 
 import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";

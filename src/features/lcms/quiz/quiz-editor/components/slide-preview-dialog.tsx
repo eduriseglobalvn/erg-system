@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import CheckCircleOutlinedIcon from "@mui/icons-material/CheckCircleOutlined";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-import CloseIcon from "@mui/icons-material/Close";
-import DownloadIcon from "@mui/icons-material/Download";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { CheckCircle2 as CheckCircleOutlinedIcon } from "@/components/mui-icon-shim";
+import { ChevronLeft as ChevronLeftIcon } from "@/components/mui-icon-shim";
+import { ChevronRight as ChevronRightIcon } from "@/components/mui-icon-shim";
+import { UploadCloud as CloudUploadIcon } from "@/components/mui-icon-shim";
+import { X as CloseIcon } from "@/components/mui-icon-shim";
+import { Download as DownloadIcon } from "@/components/mui-icon-shim";
+import { Play as PlayArrowIcon } from "@/components/mui-icon-shim";
 
 import { LearnerQuestionAuthoringPreview } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview";
 import { QuizEditorSlideRender } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render";
@@ -76,11 +76,11 @@ export function SlidePreviewDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            {isPublishMode ? <CloudUploadIcon className="h-4 w-4 text-[#4a79b1]" fontSize="inherit" /> : <PlayArrowIcon className="h-4 w-4 text-[#4a79b1]" fontSize="inherit" />}
+            {isPublishMode ? <CloudUploadIcon className="h-4 w-4 text-[#4a79b1]" size="1em" /> : <PlayArrowIcon className="h-4 w-4 text-[#4a79b1]" size="1em" />}
             <span>{title}</span>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" size="1em" />
           </button>
         </div>
 
@@ -126,7 +126,7 @@ export function SlidePreviewDialog({
                   }}
                   disabled={currentIndex === 0}
                 >
-                  <ChevronLeftIcon className="h-4 w-4" fontSize="inherit" />
+                  <ChevronLeftIcon className="h-4 w-4" size="1em" />
                 </button>
                 <span className="classic-editor__slide-preview-stage-label">
                   {currentIndex + 1}/{slides.length} - {currentSlide.title}
@@ -140,7 +140,7 @@ export function SlidePreviewDialog({
                   }}
                   disabled={currentIndex === slides.length - 1}
                 >
-                  <ChevronRightIcon className="h-4 w-4" fontSize="inherit" />
+                  <ChevronRightIcon className="h-4 w-4" size="1em" />
                 </button>
 
                 <div className="classic-editor__slide-preview-review-tabs">
@@ -204,12 +204,12 @@ export function SlidePreviewDialog({
                   URL.revokeObjectURL(url);
                 }}
               >
-                <DownloadIcon className="h-4 w-4" fontSize="inherit" />
+                <DownloadIcon className="h-4 w-4" size="1em" />
                 <span>{t("quiz.exportJson")}</span>
               </button>
             ) : (
               <button type="button" className="classic-editor__dialog-primary" onClick={onClose}>
-                <CheckCircleOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+                <CheckCircleOutlinedIcon className="h-4 w-4" size="1em" />
                 <span>{t("common.done")}</span>
               </button>
             )}

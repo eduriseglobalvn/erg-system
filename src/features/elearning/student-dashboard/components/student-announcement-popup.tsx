@@ -55,7 +55,7 @@ export function StudentAnnouncementPopup({
     >
       <div className="pointer-events-none flex min-h-full items-center justify-center p-4 sm:p-6">
         <div
-          className="pointer-events-auto w-full max-w-[760px] cursor-pointer overflow-hidden rounded-lg border border-[var(--erg-blue)]/10 bg-white shadow-sm transition "
+          className="pointer-events-auto w-full max-w-[760px] cursor-pointer overflow-hidden rounded-lg border border-[#696CFF]/10 bg-white shadow-sm transition "
           onClick={handleCardClick}
           role="button"
           tabIndex={0}
@@ -66,12 +66,12 @@ export function StudentAnnouncementPopup({
             }
           }}
         >
-          <div className="h-2 w-full bg-[var(--erg-red)]" />
+          <div className="h-2 w-full bg-[#FF5630]" />
           <div className="space-y-5 p-5 sm:p-7">
             <div className="flex items-start justify-between gap-4">
               <div className="flex flex-wrap items-center gap-3">
                 {announcement.isPinned ? (
-                  <span className="rounded-full bg-[var(--erg-red)]/10 px-3 py-1.5 text-xs font-medium text-[var(--erg-red)]">
+                  <span className="rounded-full bg-[#FF5630]/10 px-3 py-1.5 text-xs font-medium text-[#FF5630]">
                     {pinnedLabel}
                   </span>
                 ) : null}
@@ -90,7 +90,7 @@ export function StudentAnnouncementPopup({
             </div>
 
             <div>
-              <h2 className="text-xl font-semibold leading-tight text-[var(--erg-blue)] ">{announcement.title}</h2>
+              <h2 className="text-xl font-semibold leading-tight text-[#696CFF] ">{announcement.title}</h2>
               <p className="mt-3 text-base leading-8 text-slate-600 sm:text-lg">{announcement.content}</p>
             </div>
 
@@ -109,7 +109,7 @@ export function StudentAnnouncementPopup({
                 </button>
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                   <div className="text-sm text-slate-500">{autoDismissLabel}</div>
-                  <div className="shrink-0 rounded-lg bg-[var(--erg-blue)] px-5 py-3 text-white shadow-sm">
+                  <div className="shrink-0 rounded-lg bg-[#696CFF] px-5 py-3 text-white shadow-sm">
                     <div className="text-sm font-semibold ">{ctaLabel}</div>
                   </div>
                 </div>
@@ -118,7 +118,7 @@ export function StudentAnnouncementPopup({
 
             <div className="h-2 overflow-hidden rounded-full bg-slate-100">
               <div
-                className={cn("h-full rounded-full bg-[var(--erg-blue)]")}
+                className={cn("h-full rounded-full bg-[#696CFF]")}
                 style={{ animation: "student-announcement-popup-countdown 30s linear forwards" }}
               />
             </div>

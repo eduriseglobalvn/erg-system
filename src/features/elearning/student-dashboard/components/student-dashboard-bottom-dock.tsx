@@ -25,7 +25,7 @@ export function StudentDashboardBottomDock({
                 type="button"
                 className={cn(
                   "relative grid min-h-[54px] place-items-center rounded-md border border-transparent px-1 py-1.5 text-center font-semibold transition",
-                  active ? "border-[#b8d6fa] bg-white text-[var(--erg-blue)] shadow-sm after:absolute after:inset-x-4 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[var(--erg-blue)]" : "text-slate-500 hover:bg-white hover:text-slate-800",
+                  active ? "border-[rgba(105, 108, 255, 0.24)] bg-white text-[#696CFF] shadow-sm after:absolute after:inset-x-4 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[#696CFF]" : "text-slate-500 hover:bg-white hover:text-slate-800",
                 )}
                 onClick={() => onPageChange(item.key)}
               >

@@ -2,7 +2,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, LogOut, MapPin, MonitorSmartphone, Search } from "lucide-react";
 
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { queryKeys } from "@/lib/query-keys";
 import { listMyLoginSessions, type LoginSessionLog } from "@/platform/auth/api/account-api";
 import { cn } from "@/lib/utils";

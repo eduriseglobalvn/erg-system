@@ -20,12 +20,14 @@ import {
   RefreshCw,
   UsersRound,
   type LucideIcon,
-} from "lucide-react";
+} from "@/components/mui-icon-shim";
 import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge, Input, Textarea } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { TsForm } from "@/components/ui/tanstack-form";
 import {

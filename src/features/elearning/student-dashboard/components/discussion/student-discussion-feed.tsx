@@ -20,7 +20,7 @@ import {
   AvatarFallback,
 } from "@/components/ui/avatar";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type {
   StudentDiscussionComment,
@@ -100,7 +100,7 @@ export function StudentDiscussionFeed({
       <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,920px)_260px] 2xl:grid-cols-[280px_minmax(0,980px)_280px] xl:items-start xl:justify-center">
         <aside className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm xl:block">
           <div className="text-xs font-semibold text-slate-400">ERG Social</div>
-          <h1 className="mt-2 text-xl font-semibold leading-tight text-[var(--erg-blue)]">{copy.discussionTitle}</h1>
+          <h1 className="mt-2 text-xl font-semibold leading-tight text-[#696CFF]">{copy.discussionTitle}</h1>
           <p className="mt-2 text-sm leading-6 text-slate-600">{copy.discussionDescription}</p>
           <div className="mt-4 rounded-lg bg-slate-50 p-3">
             <div className="text-xs font-semibold text-slate-400">Lớp học</div>
@@ -171,7 +171,7 @@ export function StudentDiscussionFeed({
                 onChange={handlePostAttachmentChange}
               />
               <Button
-                className="rounded-full bg-[var(--erg-blue)] px-5 text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
+                className="rounded-full bg-[#696CFF] px-5 text-white shadow-sm hover:bg-[#585BE0]"
                 disabled={!postDraft.trim() && postAttachments.length === 0}
                 type="submit"
               >
@@ -195,7 +195,7 @@ export function StudentDiscussionFeed({
             ))
           ) : (
             <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-              <h2 className="text-lg font-semibold text-[var(--erg-blue)]">{copy.discussionEmptyTitle}</h2>
+              <h2 className="text-lg font-semibold text-[#696CFF]">{copy.discussionEmptyTitle}</h2>
               <p className="mt-2 text-sm text-slate-500">{copy.discussionEmptyDescription}</p>
             </div>
           )}
@@ -274,7 +274,7 @@ function PostCard({
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <h2 className="font-semibold leading-5 text-slate-950">{post.authorName}</h2>
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-[var(--erg-blue)]">
+              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-[#696CFF]">
                 {post.className}
               </span>
             </div>
@@ -333,7 +333,7 @@ function PostCard({
         <div className="flex gap-2">
           <Avatar initials="VL" size="sm" />
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-200 focus-within:ring-[var(--erg-blue)]/25">
+            <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-200 focus-within:ring-[#696CFF]/25">
               <input
                 id={`comment-input-${post.id}`}
                 className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
@@ -347,7 +347,7 @@ function PostCard({
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`comment-image-${post.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
               <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[var(--erg-blue-hover)] disabled:bg-slate-300"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#696CFF] text-white transition hover:bg-[#585BE0] disabled:bg-slate-300"
                 disabled={!commentDraft.trim() && commentAttachments.length === 0}
                 type="button"
                 onClick={submitComment}
@@ -427,7 +427,7 @@ function PostDetailDialog({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="font-semibold leading-5 text-slate-950">{post.authorName}</h3>
-                  <span className="text-sm font-semibold text-[var(--erg-blue)]">· Theo dõi</span>
+                  <span className="text-sm font-semibold text-[#696CFF]">· Theo dõi</span>
                 </div>
                 <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
                   <span>{post.createdAtLabel}</span>
@@ -506,7 +506,7 @@ function PostDetailDialog({
                 <ComposerActionIcons />
                 <AttachmentUploadButton compact inputId={`modal-comment-image-${post.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
                 <button
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-[var(--erg-blue)] disabled:opacity-50"
+                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-[#696CFF] disabled:opacity-50"
                   disabled={!commentDraft.trim() && commentAttachments.length === 0}
                   type="button"
                   onClick={submitComment}
@@ -594,7 +594,7 @@ function CommentItem({
             compact
             onReaction={(reaction) => onCommentReaction(postId, comment.id, reaction)}
           />
-          <button className="transition hover:text-[var(--erg-blue)]" type="button" onClick={() => setIsReplying(!isReplying)}>
+          <button className="transition hover:text-[#696CFF]" type="button" onClick={() => setIsReplying(!isReplying)}>
             {copy.discussionReplyAction}
           </button>
           <SocialReactionCountBadge reactions={comment.reactions} total={reactionTotal} />
@@ -602,7 +602,7 @@ function CommentItem({
 
         {isReplying ? (
           <div className="mt-2">
-            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 focus-within:ring-2 focus-within:ring-[var(--erg-blue)]/20">
+            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 focus-within:ring-2 focus-within:ring-[#696CFF]/20">
               <input
                 className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-500"
                 placeholder={`Trả lời ${comment.authorName}...`}
@@ -615,7 +615,7 @@ function CommentItem({
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`reply-image-${comment.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
               <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--erg-blue)] text-white transition hover:bg-[var(--erg-blue-hover)] disabled:bg-slate-300"
+                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#696CFF] text-white transition hover:bg-[#585BE0] disabled:bg-slate-300"
                 disabled={!replyDraft.trim() && replyAttachments.length === 0}
                 type="button"
                 onClick={submitReply}
@@ -670,7 +670,7 @@ function AttachmentUploadButton({
   if (compact) {
     return (
       <>
-        <label className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[var(--erg-blue)]" htmlFor={inputId} title={label}>
+        <label className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" htmlFor={inputId} title={label}>
           <Camera className="h-4 w-4" />
         </label>
         <input
@@ -716,13 +716,13 @@ function AttachmentUploadButton({
 function ComposerActionIcons() {
   return (
     <span className="hidden shrink-0 items-center gap-1 sm:inline-flex">
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[var(--erg-blue)]" type="button" title="Cảm xúc">
+      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="Cảm xúc">
         <SmilePlus className="h-4 w-4" />
       </button>
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[var(--erg-blue)]" type="button" title="GIF">
+      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="GIF">
         <Gift className="h-4 w-4" />
       </button>
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[var(--erg-blue)]" type="button" title="Sticker">
+      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="Sticker">
         <Sticker className="h-4 w-4" />
       </button>
     </span>
@@ -813,7 +813,7 @@ function Avatar({ initials, size }: { initials: string; size: "sm" | "lg" }) {
     <ShadcnAvatar className={cn("shrink-0 rounded-full ring-2 ring-white", size === "lg" ? "size-11" : "size-8")}>
       <AvatarFallback
         className={cn(
-          "rounded-full bg-[var(--erg-blue)] font-semibold text-white",
+          "rounded-full bg-[#696CFF] font-semibold text-white",
           size === "lg" ? "text-sm" : "text-xs",
         )}
       >

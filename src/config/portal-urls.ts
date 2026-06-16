@@ -17,7 +17,18 @@ function getRuntimePortalHost(host: string) {
 export function getPortalUrl(host: string, path: string) {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   const protocol = typeof window === "undefined" ? "http:" : window.location.protocol;
-  return `${protocol}//${getRuntimePortalHost(host)}${normalizedPath}`;
+  
+  let resolvedHost = host;
+  if (typeof window !== "undefined") {
+    const currentHostname = window.location.hostname.toLowerCase();
+    if (currentHostname.endsWith(".org.edu.local")) {
+      resolvedHost = resolvedHost.replace("erg.edu.local", "org.edu.local");
+    } else if (currentHostname.endsWith(".org.edu.vn")) {
+      resolvedHost = resolvedHost.replace("erg.edu.vn", "org.edu.vn");
+    }
+  }
+
+  return `${protocol}//${getRuntimePortalHost(resolvedHost)}${normalizedPath}`;
 }
 
 export function getLmsPortalUrl(path = "/") {
@@ -44,7 +55,12 @@ export function isPortalHost(targetHost: string | string[]) {
   const currentHostname = window.location.hostname.toLowerCase();
 
   return hosts.some((host) => {
-    const normalizedHost = host.toLowerCase();
+    let normalizedHost = host.toLowerCase();
+    if (currentHostname.endsWith(".org.edu.local")) {
+      normalizedHost = normalizedHost.replace("erg.edu.local", "org.edu.local");
+    } else if (currentHostname.endsWith(".org.edu.vn")) {
+      normalizedHost = normalizedHost.replace("erg.edu.vn", "org.edu.vn");
+    }
     return currentHost === normalizedHost || currentHostname === normalizedHost;
   });
 }
@@ -54,15 +70,25 @@ export function shouldRedirectLocalPortal(targetHost: string) {
 
   const currentHost = window.location.host.toLowerCase();
   const currentHostname = window.location.hostname.toLowerCase();
-  const runtimeTargetHost = getRuntimePortalHost(targetHost).toLowerCase();
 
-  if (currentHost === runtimeTargetHost || currentHostname === targetHost.toLowerCase()) return false;
+  let resolvedTargetHost = targetHost;
+  if (currentHostname.endsWith(".org.edu.local")) {
+    resolvedTargetHost = resolvedTargetHost.replace("erg.edu.local", "org.edu.local");
+  } else if (currentHostname.endsWith(".org.edu.vn")) {
+    resolvedTargetHost = resolvedTargetHost.replace("erg.edu.vn", "org.edu.vn");
+  }
+
+  const runtimeTargetHost = getRuntimePortalHost(resolvedTargetHost).toLowerCase();
+
+  if (currentHost === runtimeTargetHost || currentHostname === resolvedTargetHost.toLowerCase()) return false;
 
   return (
     currentHostname === "localhost" ||
     currentHostname === "127.0.0.1" ||
     currentHostname === "::1" ||
     currentHostname.endsWith(".erg.edu.local") ||
-    currentHostname.endsWith(".erg.edu.vn")
+    currentHostname.endsWith(".erg.edu.vn") ||
+    currentHostname.endsWith(".org.edu.local") ||
+    currentHostname.endsWith(".org.edu.vn")
   );
 }

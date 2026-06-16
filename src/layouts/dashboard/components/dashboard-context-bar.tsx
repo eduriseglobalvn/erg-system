@@ -68,14 +68,14 @@ function ScopeAvatar({
 
   if (kind === "system") {
     return (
-      <div className={cn(baseClassName, "bg-[var(--primary)] text-white")}>
+      <div className={cn(baseClassName, "bg-[#696CFF] text-white")}>
         <ShieldIcon className="size-5" />
       </div>
     );
   }
 
   return (
-    <div className={cn(baseClassName, "bg-slate-100 text-slate-700 ring-1 ring-slate-200")}>
+    <div className={cn(baseClassName, "bg-[rgba(145,158,171,0.12)] text-[#637381]")}>
       <span className="text-[11px] font-semibold">{getInitials(label) || <SchoolIcon className="size-4" />}</span>
     </div>
   );
@@ -121,7 +121,7 @@ export function DashboardContextBar({
     : "Co so giao duc";
 
   return (
-    <header className="sticky top-0 z-30 border-b border-[#cbd7e6] bg-white shadow-[0_1px_0_rgba(15,23,42,0.05)]">
+    <header className="sticky top-0 z-30 border-b border-[rgba(145,158,171,0.12)] bg-white shadow-none">
       <div className="flex min-h-14 w-full items-center justify-between gap-3 px-6 py-2">
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <DropdownMenu>
@@ -129,8 +129,8 @@ export function DashboardContextBar({
               <button
                 type="button"
                 className={cn(
-                  "inline-flex h-10 max-w-full items-center gap-3 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-2 text-left text-slate-950 outline-none transition",
-                  "hover:border-[#b8c8db] hover:bg-white hover:shadow-[var(--shadow-xs)] focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+                  "inline-flex h-10 max-w-full items-center gap-3 rounded-lg border border-[rgba(145,158,171,0.2)] bg-white px-3 text-left text-slate-950 outline-none transition",
+                  "hover:border-[#696CFF] hover:bg-[rgba(105,108,255,0.02)] focus-visible:ring-2 focus-visible:ring-[#696CFF]",
                 )}
               >
                 <ScopeAvatar kind={isGlobalScope ? "system" : "school"} label={scopeTitle} className="size-8 rounded-md" />
@@ -144,7 +144,7 @@ export function DashboardContextBar({
               </button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="start" className="w-80 rounded-lg border border-[#c7d3e2] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.14),0_2px_6px_rgba(15,23,42,0.08)] data-open:animate-none data-closed:animate-none">
+            <DropdownMenuContent align="start" className="w-80 rounded-lg border border-[rgba(145,158,171,0.12)] bg-white p-2 shadow-[0_12px_28px_rgba(0,0,0,0.15)] data-open:animate-none data-closed:animate-none">
               <DropdownMenuLabel className="px-3 py-2 text-[11px] font-semibold text-slate-500">
                 Phạm vi quản lý
               </DropdownMenuLabel>
@@ -154,7 +154,7 @@ export function DashboardContextBar({
                   onClick={() => onSelectScopeRoot("global")}
                   className={cn(
                     "flex cursor-pointer items-center gap-3 rounded-md p-3",
-                    activePortal === "lms" && isGlobalScope ? "bg-[var(--accent-soft)] font-semibold text-[var(--primary)] shadow-[inset_3px_0_0_var(--primary)]" : "hover:bg-[#f8fbff]",
+                    activePortal === "lms" && isGlobalScope ? "bg-[rgba(105,108,255,0.08)] font-semibold text-[#696CFF] shadow-[inset_3px_0_0_#696CFF]" : "hover:bg-slate-50",
                   )}
                 >
                   <ScopeAvatar kind="system" label={ergSystemUnit?.name || "Hệ thống ERG"} className="size-9 rounded-lg" />
@@ -167,8 +167,7 @@ export function DashboardContextBar({
                 </DropdownMenuItem>
               ) : null}
 
-
-              {scopeUnits.length ? <DropdownMenuSeparator className="my-2" /> : null}
+              {scopeUnits.length ? <DropdownMenuSeparator className="my-2 border-[rgba(145,158,171,0.12)]" /> : null}
 
               <div className="max-h-60 overflow-y-auto">
                 {scopeUnits.map((unit) => (
@@ -177,7 +176,7 @@ export function DashboardContextBar({
                     onClick={() => onSelectScopeRoot(unit.id)}
                     className={cn(
                       "mb-1 flex cursor-pointer items-center gap-3 rounded-md p-3",
-                      activePortal === "lms" && !isGlobalScope && selectedSchoolId === unit.id ? "bg-[var(--accent-soft)] font-semibold text-[var(--primary)] shadow-[inset_3px_0_0_var(--primary)]" : "hover:bg-[#f8fbff]",
+                      activePortal === "lms" && !isGlobalScope && selectedSchoolId === unit.id ? "bg-[rgba(105,108,255,0.08)] font-semibold text-[#696CFF] shadow-[inset_3px_0_0_#696CFF]" : "hover:bg-slate-50",
                     )}
                   >
                     <ScopeAvatar kind="school" label={unit.name} className="size-8 rounded-md" />
@@ -193,7 +192,7 @@ export function DashboardContextBar({
 
               {canAccessGlobalErg ? (
                 <>
-                  <DropdownMenuSeparator className="my-2" />
+                  <DropdownMenuSeparator className="my-2 border-[rgba(145,158,171,0.12)]" />
                   <DropdownMenuItem
                     className="flex cursor-pointer items-center gap-3 rounded-md p-3 text-emerald-700 hover:bg-emerald-50"
                     onClick={() => onOpenLeaf("admin-create-unit")}
@@ -210,7 +209,7 @@ export function DashboardContextBar({
 
           {activePortal === "lms" && !isGlobalScope ? (
             <>
-              <div className="h-8 w-px bg-slate-200" />
+              <div className="h-8 w-px bg-[rgba(145,158,171,0.12)]" />
 
               {canSelectClass ? (
                 <DropdownMenu>
@@ -218,11 +217,11 @@ export function DashboardContextBar({
                     <button
                       type="button"
                       className={cn(
-                        "inline-flex h-9 items-center gap-2 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-3 text-left transition hover:border-[#b8c8db] hover:bg-white hover:shadow-[var(--shadow-xs)]",
-                        "focus-visible:ring-2 focus-visible:ring-[var(--ring)]",
+                        "inline-flex h-9 items-center gap-2 rounded-lg border border-[rgba(145,158,171,0.2)] bg-white px-3 text-left transition hover:border-[#696CFF] hover:bg-[rgba(105,108,255,0.02)]",
+                        "focus-visible:ring-2 focus-visible:ring-[#696CFF]",
                       )}
                     >
-                      <div className="grid size-6 place-items-center rounded-md bg-[var(--accent-soft)] text-[var(--primary)] ring-1 ring-[#b8d6fa]">
+                      <div className="grid size-6 place-items-center rounded-md bg-[rgba(105,108,255,0.08)] text-[#696CFF] ring-1 ring-[rgba(105,108,255,0.16)]">
                         <LayoutGridIcon className="size-4" />
                       </div>
                       <div className="flex flex-col">
@@ -240,7 +239,7 @@ export function DashboardContextBar({
                       </div>
                     </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-64 rounded-lg border border-[#c7d3e2] p-2 shadow-[0_12px_28px_rgba(15,23,42,0.14),0_2px_6px_rgba(15,23,42,0.08)]">
+                  <DropdownMenuContent align="start" className="w-64 rounded-lg border border-[rgba(145,158,171,0.12)] p-2 shadow-[0_12px_28px_rgba(0,0,0,0.15)]">
                     <DropdownMenuLabel className="px-3 py-2 text-[11px] font-semibold text-slate-500">
                       Lớp học đang quản lý
                     </DropdownMenuLabel>
@@ -250,7 +249,7 @@ export function DashboardContextBar({
                         onClick={() => onSelectClass(classroom.id)}
                         className={cn(
                           "mb-1 flex cursor-pointer items-center gap-3 rounded-md p-3",
-                          selectedClassId === classroom.id ? "bg-[var(--accent-soft)] font-semibold text-[var(--primary)] shadow-[inset_3px_0_0_var(--primary)]" : "hover:bg-[#f8fbff]",
+                          selectedClassId === classroom.id ? "bg-[rgba(105,108,255,0.08)] font-semibold text-[#696CFF] shadow-[inset_3px_0_0_#696CFF]" : "hover:bg-slate-50",
                         )}
                       >
                         <div className="flex size-8 items-center justify-center rounded-md bg-slate-100 text-[11px] font-semibold text-slate-600">
@@ -273,12 +272,12 @@ export function DashboardContextBar({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative size-10 rounded-full p-0 hover:bg-[#f8fbff] focus-visible:ring-2 focus-visible:ring-[var(--ring)]">
+              <Button variant="ghost" className="relative size-10 rounded-full p-0 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-[#696CFF]">
                 <Avatar className="size-8 overflow-hidden rounded-full border border-slate-200 bg-white shadow-sm">
                   {accountAvatar ? (
                     <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
                   ) : (
-                    <span className="grid h-full w-full place-items-center bg-[var(--primary)] text-[11px] font-semibold text-white">
+                    <span className="grid h-full w-full place-items-center bg-[#696CFF] text-[11px] font-semibold text-white">
                       {getInitials(accountName)}
                     </span>
                   )}
@@ -286,14 +285,14 @@ export function DashboardContextBar({
                 <span className="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white bg-emerald-500" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-lg border border-[#c7d3e2] bg-white p-2 shadow-[0_12px_28px_rgba(15,23,42,0.14),0_2px_6px_rgba(15,23,42,0.08)]">
+            <DropdownMenuContent align="end" sideOffset={10} className="w-72 rounded-lg border border-[rgba(145,158,171,0.12)] bg-white p-2 shadow-[0_12px_28px_rgba(0,0,0,0.15)]">
               <DropdownMenuLabel className="px-2 py-2">
                 <div className="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
                   <Avatar className="size-12 overflow-hidden rounded-lg border border-white shadow-sm">
                     {accountAvatar ? (
                       <img src={accountAvatar} alt={accountName} className="h-full w-full object-cover" />
                     ) : (
-                      <span className="grid h-full w-full place-items-center bg-[var(--primary)] text-sm font-semibold text-white">
+                      <span className="grid h-full w-full place-items-center bg-[#696CFF] text-sm font-semibold text-white">
                         {getInitials(accountName)}
                       </span>
                     )}
@@ -307,7 +306,7 @@ export function DashboardContextBar({
                   </div>
                 </div>
               </DropdownMenuLabel>
-              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuSeparator className="my-2 border-[rgba(145,158,171,0.12)]" />
               <DropdownMenuItem asChild className="flex cursor-pointer items-center gap-3 rounded-lg p-2.5 hover:bg-slate-50">
                 <Link to="/profile">
                   <UserIcon className="size-4 text-slate-500" />
@@ -318,7 +317,7 @@ export function DashboardContextBar({
                 <SettingsIcon className="size-4 text-slate-500" />
                 <span className="text-sm">Cài đặt</span>
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="my-2" />
+              <DropdownMenuSeparator className="my-2 border-[rgba(145,158,171,0.12)]" />
               <DropdownMenuItem className="flex cursor-pointer items-center gap-3 rounded-lg p-2.5 text-red-600 hover:bg-red-50" onClick={onLogout}>
                 <LogOutIcon className="size-4" />
                 <span className="text-sm font-medium">Đăng xuất</span>

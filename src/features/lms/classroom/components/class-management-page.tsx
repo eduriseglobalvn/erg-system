@@ -2,7 +2,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Search } from "lucide-react";
 
-import { Input } from "@/components/ui/dashboard-kit";
+import { Input } from "@/components/ui/input";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";

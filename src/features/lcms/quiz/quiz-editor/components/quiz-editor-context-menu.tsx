@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { createPortal } from "react-dom";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { ChevronRight as ChevronRightIcon } from "@/components/mui-icon-shim";
 
 import { cn } from "@/utils/cn";
 
@@ -146,7 +146,7 @@ function MenuPanel({
               <span className="classic-editor__context-icon">{item.icon ?? ""}</span>
               <span className="classic-editor__context-label">{item.label}</span>
               <span className="classic-editor__context-arrow">
-                {item.children?.length ? <ChevronRightIcon fontSize="inherit" /> : null}
+                {item.children?.length ? <ChevronRightIcon size="1em" /> : null}
               </span>
             </button>
 

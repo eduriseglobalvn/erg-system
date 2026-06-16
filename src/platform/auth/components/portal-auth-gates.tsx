@@ -2,17 +2,27 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { Navigate, useLocation, useNavigate } from "@/routes/router-compat";
 import { useForm } from "@tanstack/react-form";
 import {
-  BarChart3,
-  BookOpenCheck,
-  ClipboardCheck,
-  GraduationCap,
-  KeyRound,
-  LibraryBig,
-  Presentation,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Chip,
+  TextField,
+  Typography,
+  Alert,
+  Fade,
+} from "@mui/material";
+import {
+  BarChartRounded as BarChart3,
+  MenuBookRounded as BookOpenCheck,
+  FactCheckRounded as ClipboardCheck,
+  SchoolRounded as GraduationCap,
+  KeyRounded as KeyRound,
+  LocalLibraryRounded as LibraryBig,
+  PresentToAllRounded as Presentation,
   School,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react";
+  VerifiedUserRounded as ShieldCheck,
+} from "@mui/icons-material";
 
 import { ERG_ASSETS } from "@/config/seo";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
@@ -28,8 +38,7 @@ import { buildRedirectPath, isAuthOnlyRedirect } from "@/platform/auth/utils/aut
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ApiClientError } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
-import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/ui/tanstack-form";
 
 type PortalKey = NonNullable<StoredAuthSession["portal"]>;
 type AuthSession = ReturnType<typeof useAuthSession>;
@@ -49,13 +58,13 @@ type PortalLoginPageProps = {
 type PortalVisualItem = {
   label: string;
   caption: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
 };
 
 type PortalMetric = {
   label: string;
   value: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
 };
 
 type PortalLoginCopy = {
@@ -497,83 +506,17 @@ function PortalLoginShell({ children, copy }: { children: ReactNode; copy: Porta
 
   return (
     <main
-      className="grid min-h-svh place-items-center overflow-hidden bg-[var(--erg-bg)] px-4 py-8 text-slate-950 sm:px-6 lg:px-8"
-      style={{ paddingBottom: isMobile ? 24 : undefined, paddingTop: isMobile ? 24 : undefined }}
+      className="relative grid min-h-screen overflow-hidden bg-[#dfeeff] bg-cover bg-center px-4 py-6 text-[#1C252E] sm:px-6"
+      style={{ backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')" }}
     >
-      <section
-        className="grid w-full max-w-[1060px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm lg:grid-cols-[minmax(0,1fr)_minmax(360px,430px)]"
-        style={{
-          display: "grid",
-          gridTemplateColumns: isMobile ? "minmax(0,1fr)" : undefined,
-          minHeight: isMobile ? "auto" : undefined,
-          width: "100%",
-        }}
-      >
-        {!isMobile ? (
-        <aside className="relative hidden min-h-[620px] overflow-hidden bg-[var(--erg-blue)] p-8 text-white lg:block">
-          <div className="relative z-10 flex h-full flex-col">
-            <img alt="ERG" className="h-12 w-fit rounded-lg bg-white px-3 py-2 object-contain" src={ERG_ASSETS.logo} />
+      <div className="pointer-events-none absolute inset-0 bg-white/10" />
 
-            <div className="mt-8 inline-flex w-fit rounded-md border border-white/15 bg-white/10 px-4 py-2 text-[11px] font-semibold text-white/85">
-              {copy.badge}
-            </div>
-            <h1 className="mt-5 max-w-xl text-xl font-semibold leading-tight text-white">
-              {copy.title}
-            </h1>
-            <p className="mt-3 max-w-lg text-sm leading-6 text-white/78">{copy.description}</p>
-
-            <div className="mt-8 grid gap-4 sm:grid-cols-3">
-              {copy.trustItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <div key={item.label} className="rounded-lg border border-white/12 bg-white/10 px-4 py-4 shadow-sm backdrop-blur">
-                    <Icon className="h-5 w-5 text-white" />
-                    <p className="mt-3 text-xs font-semibold text-white">{item.label}</p>
-                    <p className="mt-1 text-[11px] font-semibold text-white/58">{item.caption}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-7 rounded-lg border border-white/12 bg-white/12 p-5 shadow-sm backdrop-blur">
-              <p className="text-[11px] font-semibold text-white/50">{copy.visualKicker}</p>
-              <h2 className="mt-3 max-w-md text-lg font-semibold leading-tight text-white">{copy.visualTitle}</h2>
-              <p className="mt-3 text-sm leading-6 text-white/68">{copy.visualDescription}</p>
-
-              <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                {copy.metrics.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label} className="rounded-lg bg-white px-4 py-3 text-slate-950">
-                      <Icon className="h-4 w-4 text-[var(--erg-blue)]" />
-                      <p className="mt-3 text-lg font-semibold">{item.value}</p>
-                      <p className="mt-1 text-xs font-semibold text-slate-500">{item.label}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </aside>
-        ) : null}
-
-        <div
-          className="flex min-h-[620px] items-center bg-white px-5 py-6 sm:px-8"
-          style={{ minHeight: isMobile ? "auto" : undefined, padding: isMobile ? "20px 16px 24px" : undefined }}
-        >
-          <div className="mx-auto w-full max-w-[420px]">
-            <div
-              className="mb-6 flex items-center gap-3 lg:hidden"
-              style={{ alignItems: "center", display: "flex", gap: 12, marginBottom: 20 }}
-            >
-              <img alt="ERG" className="h-11 w-auto object-contain" src={ERG_ASSETS.logo} style={{ height: 42, width: "auto", objectFit: "contain" }} />
-              <div>
-                <p className="text-[10px] font-semibold text-[var(--erg-blue)]" style={{ color: "var(--erg-blue)", fontSize: 10, fontWeight: 600, letterSpacing: 0, textTransform: "none" }}>{copy.badge}</p>
-                <p className="text-sm font-semibold text-slate-500" style={{ color: "#64748b", fontSize: 14, fontWeight: 600, marginTop: 4 }}>{copy.mobileLabel}</p>
-              </div>
-            </div>
-            {children}
-          </div>
+      <section className="relative z-10 mx-auto flex w-full max-w-[460px] flex-col justify-center">
+        <div className="rounded-[24px] border border-white/55 bg-white/32 p-5 shadow-[0_30px_90px_rgba(72,81,156,0.20)] backdrop-blur-2xl sm:p-7">
+          <header className="mb-7 grid justify-items-center text-center">
+            <img alt="ERG" className="h-auto w-28 object-contain drop-shadow-[0_12px_26px_rgba(72,81,156,0.16)]" src={ERG_ASSETS.logo} />
+          </header>
+          {children}
         </div>
       </section>
     </main>
@@ -584,18 +527,39 @@ function NoticeBanner({ notice }: { notice: AuthSession["notice"] }) {
   if (!notice) return null;
 
   return (
-    <div
-      className={cn(
-        "mb-4 rounded-lg border px-4 py-3 text-sm font-medium shadow-sm",
-        notice.tone === "success"
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : notice.tone === "error"
-            ? "border-rose-200 bg-rose-50 text-rose-700"
-            : "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-      )}
-    >
-      {notice.message}
-    </div>
+    <Fade in>
+      <Alert
+        severity={notice.tone === "success" ? "success" : notice.tone === "error" ? "error" : "info"}
+        sx={{
+          mb: 2.5,
+          borderRadius: 1.5,
+          fontSize: 14,
+          "& .MuiAlert-icon": {
+            fontSize: 20,
+          },
+          ...(notice.tone === "success" && {
+            bgcolor: "rgba(34,197,94,0.08)",
+            border: "1px solid rgba(34,197,94,0.2)",
+            color: "#15803D",
+            "& .MuiAlert-icon": { color: "#15803D" },
+          }),
+          ...(notice.tone === "error" && {
+            bgcolor: "rgba(239,68,68,0.08)",
+            border: "1px solid rgba(239,68,68,0.2)",
+            color: "#B91C1C",
+            "& .MuiAlert-icon": { color: "#B91C1C" },
+          }),
+          ...(notice.tone === "info" && {
+            bgcolor: "rgba(0,184,217,0.08)",
+            border: "1px solid rgba(0,184,217,0.2)",
+            color: "#007A8C",
+            "& .MuiAlert-icon": { color: "#007A8C" },
+          }),
+        }}
+      >
+        {notice.message}
+      </Alert>
+    </Fade>
   );
 }
 
@@ -608,98 +572,216 @@ function OnboardingPanel({ auth }: { auth: AuthSession }) {
   });
 
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-      <div className="inline-flex rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-semibold text-[var(--erg-blue)]">
-        Onboarding
-      </div>
-      <h2 className="mt-4 text-lg font-semibold text-[#242424]">Hoàn tất hồ sơ trước khi vào LMS</h2>
-      <p className="mt-2 text-sm leading-7 text-slate-500">
-        Lần đầu đăng nhập cần có họ tên và số điện thoại để admin ERG quản lý phân quyền, hỗ trợ tài khoản và đối soát lớp học.
-      </p>
+    <Card
+      sx={{
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 2,
+        boxShadow: "none",
+      }}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Chip
+          label="Onboarding"
+          size="small"
+          sx={{
+            bgcolor: "rgba(105,108,255,0.1)",
+            color: "#696CFF",
+            fontSize: 11,
+            fontWeight: 600,
+            height: 24,
+          }}
+        />
+        <Typography
+          sx={{
+            mt: 2,
+            fontSize: 18,
+            fontWeight: 600,
+            color: "#242424",
+          }}
+        >
+          Hoàn tất hồ sơ trước khi vào LMS
+        </Typography>
+        <Typography
+          sx={{
+            mt: 1,
+            fontSize: 14,
+            color: "#64748b",
+            lineHeight: 1.6,
+          }}
+        >
+          Lần đầu đăng nhập cần có họ tên và số điện thoại để admin ERG quản lý phân quyền, hỗ trợ tài khoản và đối soát lớp học.
+        </Typography>
 
-      <TsForm
-        className="mt-6 space-y-4"
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
-        <form.Field
-          name="fullName"
-          validators={{
-            onChange: ({ value }) => validateRequired(value, "Họ và tên"),
+        <TsForm
+          className="mt-3 flex flex-col gap-2.5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
           }}
         >
-          {(field) => (
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
-              Họ và tên
-              <input
-                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => {
-                  field.handleChange(event.target.value);
-                  auth.setProfileForm({ ...auth.profileForm, fullName: event.target.value });
-                }}
-                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-              />
-              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-            </label>
-          )}
-        </form.Field>
-        <form.Field
-          name="phone"
-          validators={{
-            onChange: ({ value }) => validateRequired(value, "Số điện thoại"),
-          }}
-        >
-          {(field) => (
-            <label className="grid gap-2 text-sm font-medium text-slate-700">
-              Số điện thoại
-              <input
-                className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                inputMode="tel"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => {
-                  field.handleChange(event.target.value);
-                  auth.setProfileForm({ ...auth.profileForm, phone: event.target.value });
-                }}
-                aria-invalid={field.state.meta.errors.length ? "true" : undefined}
-              />
-              <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
-            </label>
-          )}
-        </form.Field>
-        <label className="grid gap-2 text-sm font-medium text-slate-700">
-          Chức danh
-          <input
-            className="h-10 rounded-md border border-[#d7e0ec] bg-white px-3 text-sm outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-            value={auth.profileForm.title}
-            onChange={(event) => auth.setProfileForm({ ...auth.profileForm, title: event.target.value })}
-          />
-        </label>
-        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-          {([canSubmit, isSubmitting]) => (
-            <button
-              className="inline-flex h-12 w-full items-center justify-center rounded-lg bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
-              disabled={!canSubmit || isSubmitting}
-              type="submit"
+          <form.Field
+            name="fullName"
+            validators={{
+              onChange: ({ value }) => validateRequired(value, "Họ và tên"),
+            }}
+          >
+            {(field) => (
+              <Box>
+                <Typography
+                  component="label"
+                  sx={{
+                    display: "block",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#374151",
+                    mb: 1,
+                  }}
+                >
+                  Họ và tên
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    auth.setProfileForm({ ...auth.profileForm, fullName: event.target.value });
+                  }}
+                  error={!!field.state.meta.errors.length}
+                  helperText={field.state.meta.errors[0]}
+                  placeholder="Nhập họ và tên"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 1.5,
+                      "& fieldset": { borderColor: "#D1D5DB" },
+                      "&:hover fieldset": { borderColor: "#9CA3AF" },
+                      "&.Mui-focused fieldset": { borderColor: "#696CFF" },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </form.Field>
+          <form.Field
+            name="phone"
+            validators={{
+              onChange: ({ value }) => validateRequired(value, "Số điện thoại"),
+            }}
+          >
+            {(field) => (
+              <Box>
+                <Typography
+                  component="label"
+                  sx={{
+                    display: "block",
+                    fontSize: 14,
+                    fontWeight: 500,
+                    color: "#374151",
+                    mb: 1,
+                  }}
+                >
+                  Số điện thoại
+                </Typography>
+                <TextField
+                  fullWidth
+                  size="small"
+                  inputMode="tel"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => {
+                    field.handleChange(event.target.value);
+                    auth.setProfileForm({ ...auth.profileForm, phone: event.target.value });
+                  }}
+                  error={!!field.state.meta.errors.length}
+                  helperText={field.state.meta.errors[0]}
+                  placeholder="Nhập số điện thoại"
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: 1.5,
+                      "& fieldset": { borderColor: "#D1D5DB" },
+                      "&:hover fieldset": { borderColor: "#9CA3AF" },
+                      "&.Mui-focused fieldset": { borderColor: "#696CFF" },
+                    },
+                  }}
+                />
+              </Box>
+            )}
+          </form.Field>
+          <Box>
+            <Typography
+              component="label"
+              sx={{
+                display: "block",
+                fontSize: 14,
+                fontWeight: 500,
+                color: "#374151",
+                mb: 1,
+              }}
             >
-              Lưu và tiếp tục
-            </button>
-          )}
-        </form.Subscribe>
-      </TsForm>
-    </div>
+              Chức danh
+            </Typography>
+            <TextField
+              fullWidth
+              size="small"
+              value={auth.profileForm.title}
+              onChange={(event) => auth.setProfileForm({ ...auth.profileForm, title: event.target.value })}
+              placeholder="Nhập chức danh (tùy chọn)"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 1.5,
+                  "& fieldset": { borderColor: "#D1D5DB" },
+                  "&:hover fieldset": { borderColor: "#9CA3AF" },
+                  "&.Mui-focused fieldset": { borderColor: "#696CFF" },
+                },
+              }}
+            />
+          </Box>
+          <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+            {([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={!canSubmit || isSubmitting}
+                sx={{
+                  mt: 1,
+                  height: 44,
+                  borderRadius: 1.5,
+                  fontSize: 14,
+                  fontWeight: 600,
+                  textTransform: "none",
+                  bgcolor: "#1C252E",
+                  "&:hover": { bgcolor: "#374151" },
+                }}
+              >
+                Lưu và tiếp tục
+              </Button>
+            )}
+          </form.Subscribe>
+        </TsForm>
+      </CardContent>
+    </Card>
   );
 }
 
 export function NoPermissionNotice({ accountEmail, portal }: { accountEmail: string; portal: PortalKey }) {
   return (
-    <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm">
+    <Alert
+      severity="warning"
+      sx={{
+        mb: 2.5,
+        borderRadius: 1.5,
+        fontSize: 14,
+        bgcolor: "rgba(255,171,0,0.1)",
+        border: "1px solid rgba(255,171,0,0.2)",
+        color: "#B76E00",
+        "& .MuiAlert-icon": { color: "#B76E00" },
+      }}
+    >
       Tài khoản {accountEmail} chưa có quyền truy cập {portal}. Vui lòng đăng nhập bằng tài khoản được cấp quyền.
-    </div>
+    </Alert>
   );
 }

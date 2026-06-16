@@ -1,7 +1,7 @@
 import { useRef, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
-import CheckIcon from "@mui/icons-material/Check";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Check as CheckIcon } from "@/components/mui-icon-shim";
+import { X as CloseIcon } from "@/components/mui-icon-shim";
+import { ChevronDown as ExpandMoreIcon } from "@/components/mui-icon-shim";
 
 import {
   getQuizEditorLayoutTemplate,
@@ -541,8 +541,8 @@ function DragDropPreview({
 
       {showResultTargets ? (
         <div className="classic-slide__result-targets">
-          <span className="classic-slide__result-target classic-slide__result-target--correct"><CheckIcon className="h-4 w-4" fontSize="inherit" /></span>
-          <span className="classic-slide__result-target classic-slide__result-target--wrong"><CloseIcon className="h-4 w-4" fontSize="inherit" /></span>
+          <span className="classic-slide__result-target classic-slide__result-target--correct"><CheckIcon className="h-4 w-4" size="1em" /></span>
+          <span className="classic-slide__result-target classic-slide__result-target--wrong"><CloseIcon className="h-4 w-4" size="1em" /></span>
         </div>
       ) : null}
     </div>
@@ -613,7 +613,7 @@ function FeedbackLayerPreview({
         <div className={cn("classic-slide__feedback-card", mode === "correct" ? "is-correct" : "is-incorrect")}>
           <div className="classic-slide__feedback-card-header">
             <span>{heading.replace(":", "")}</span>
-            <span className="classic-slide__feedback-card-caret"><ExpandMoreIcon className="h-4 w-4" fontSize="inherit" /></span>
+            <span className="classic-slide__feedback-card-caret"><ExpandMoreIcon className="h-4 w-4" size="1em" /></span>
           </div>
           <div className="classic-slide__feedback-card-body">
             <p className="classic-slide__feedback-copy" style={buildPreviewTextStyle(slide, "feedback", 15)}>
@@ -651,7 +651,7 @@ function FeedbackLayerPreview({
       <div className={cn("classic-slide__feedback-card", mode === "correct" ? "is-correct" : "is-incorrect")}>
         <div className="classic-slide__feedback-card-header">
           <span>{heading.replace(":", "")}</span>
-          <span className="classic-slide__feedback-card-caret"><ExpandMoreIcon className="h-4 w-4" fontSize="inherit" /></span>
+          <span className="classic-slide__feedback-card-caret"><ExpandMoreIcon className="h-4 w-4" size="1em" /></span>
         </div>
         <div className="classic-slide__feedback-card-body">
           <div className="classic-slide__feedback-question" style={buildPreviewTitleStyle(slide, 18)}>
@@ -747,7 +747,7 @@ function ResultPreview({ slide }: { slide: QuizEditorSlide }) {
             : "classic-slide__result-icon is-fail"
         }
       >
-        {isPassed ? <CheckIcon className="h-8 w-8" fontSize="inherit" /> : <CloseIcon className="h-8 w-8" fontSize="inherit" />}
+        {isPassed ? <CheckIcon className="h-8 w-8" size="1em" /> : <CloseIcon className="h-8 w-8" size="1em" />}
       </div>
       <div className="classic-slide__result-copy" style={buildPreviewTextStyle(slide, "feedback", 16)}>
         {isPassed ? passMessage : failMessage}

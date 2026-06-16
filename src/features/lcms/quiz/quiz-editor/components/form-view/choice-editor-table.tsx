@@ -1,5 +1,5 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { Plus as AddIcon } from "@/components/mui-icon-shim";
+import { Trash2 as DeleteOutlineOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorChoice } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -82,13 +82,13 @@ export function ChoiceEditorTable({
             onClick={() => removeChoice(choice.id)}
             aria-label={t("common.remove")}
           >
-            <DeleteOutlineOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+            <DeleteOutlineOutlinedIcon className="h-4 w-4" size="1em" />
           </button>
         </div>
       ))}
 
       <button type="button" className="classic-editor__choice-add-button" onClick={addChoice}>
-        <AddIcon className="h-4 w-4" fontSize="inherit" />
+        <AddIcon className="h-4 w-4" size="1em" />
         <span>{t("quiz.typeToAddChoice")}</span>
       </button>
     </div>

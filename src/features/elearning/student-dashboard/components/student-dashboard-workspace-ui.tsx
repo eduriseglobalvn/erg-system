@@ -1,7 +1,10 @@
 import { type ReactNode } from "react";
 
 import { ErgFooter } from "@/components/erg-footer";
-import { Badge, Button, Card, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProgressBar } from "@/components/ui/progress";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentAssignmentAttempt, StudentAssignmentStatus, StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getBestAttempt } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
@@ -40,11 +43,11 @@ export function BrandWordmark() {
   return (
     <div className="flex min-w-0 items-center gap-3">
       <div className="flex items-end text-xl font-semibold leading-none">
-        <span className="text-[var(--erg-blue)]">ER</span>
-        <span className="text-[var(--erg-red)]">G</span>
+        <span className="text-[#696CFF]">ER</span>
+        <span className="text-[#FF5630]">G</span>
       </div>
       <div className="hidden min-w-0 sm:block">
-        <div className="truncate text-base font-semibold leading-none text-[var(--erg-blue)]">EDURISE GLOBAL</div>
+        <div className="truncate text-base font-semibold leading-none text-[#696CFF]">EDURISE GLOBAL</div>
         <div className="mt-1 text-[11px] font-medium text-slate-400">Learn today, lead tomorrow</div>
       </div>
     </div>
@@ -63,7 +66,7 @@ export function PageTitle({
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-5">
       <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-slate-100 text-[var(--erg-blue)]">
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-slate-100 text-[#696CFF]">
           {icon}
         </span>
         <div>
@@ -86,8 +89,8 @@ export function SectionHeader({
 }) {
   return (
     <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-      <h2 className="text-lg font-semibold text-[var(--erg-blue)]">{title}</h2>
-      <button type="button" className="text-sm font-semibold text-[var(--erg-blue)]" onClick={onAction}>
+      <h2 className="text-lg font-semibold text-[#696CFF]">{title}</h2>
+      <button type="button" className="text-sm font-semibold text-[#696CFF]" onClick={onAction}>
         {actionLabel}
       </button>
     </div>
@@ -108,12 +111,12 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
             <span className="text-sm text-slate-500">{assignment.dueLabel}</span>
           </div>
 
-          <h2 className="mt-2 text-lg font-semibold leading-snug text-[var(--erg-blue)]">{assignment.title}</h2>
+          <h2 className="mt-2 text-lg font-semibold leading-snug text-[#696CFF]">{assignment.title}</h2>
         </div>
 
         <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 md:w-[148px] md:text-right">
           <div className="text-xs font-semibold text-slate-500">{copy.bestScoreLabel}</div>
-          <div className="mt-1 text-xl font-semibold text-[var(--erg-blue)]">
+          <div className="mt-1 text-xl font-semibold text-[#696CFF]">
             {bestAttempt ? copy.scoreBadge(bestAttempt.score, bestAttempt.maxScore) : copy.pendingScore}
           </div>
         </div>
@@ -143,7 +146,7 @@ function AttemptResultRow({ attempt, copy }: { attempt: StudentAssignmentAttempt
           {copy.attemptDurationLabel}: {attempt.durationLabel}
         </div>
       </div>
-      <div className="mt-2 text-lg font-semibold text-[var(--erg-blue)]">{copy.scoreBadge(attempt.score, attempt.maxScore)}</div>
+      <div className="mt-2 text-lg font-semibold text-[#696CFF]">{copy.scoreBadge(attempt.score, attempt.maxScore)}</div>
     </div>
   );
 }
@@ -172,7 +175,7 @@ export function AssignmentCard({
               <CompactBadge>{assignment.subjectLabel}</CompactBadge>
             </div>
 
-            <h3 className={cn("mt-2 font-semibold leading-snug text-[var(--erg-blue)]", compact ? "text-base" : "text-lg")}>{assignment.title}</h3>
+            <h3 className={cn("mt-2 font-semibold leading-snug text-[#696CFF]", compact ? "text-base" : "text-lg")}>{assignment.title}</h3>
             {!compact ? (
               <div className="mt-2 flex flex-wrap gap-3 text-sm text-slate-500">
                 <span>{assignment.teacherName}</span>
@@ -188,7 +191,7 @@ export function AssignmentCard({
 
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             {assignment.score !== null ? (
-              <Badge className="border-[var(--erg-blue)]/10 bg-[var(--erg-blue)]/5 text-[var(--erg-blue)]" tone="outline">
+              <Badge className="border-[#696CFF]/10 bg-[#696CFF]/5 text-[#696CFF]" tone="outline">
                 {copy.scoreLabel}: {copy.scoreBadge(assignment.score, assignment.maxScore)}
               </Badge>
             ) : null}
@@ -198,8 +201,8 @@ export function AssignmentCard({
               className={cn(
                 actionable
                   ? assignment.status === "overdue"
-                    ? "bg-[var(--erg-red)] text-white hover:bg-[#b0001d]"
-                    : "bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]"
+                    ? "bg-[#FF5630] text-white hover:bg-[#E04B26]"
+                    : "bg-[#696CFF] text-white hover:bg-[#585BE0]"
                   : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
               )}
               onClick={actionable ? onOpen : undefined}
@@ -244,7 +247,7 @@ function CompactStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-slate-50 px-3 py-3">
       <div className="text-xs font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-[var(--erg-blue)]">{value}</div>
+      <div className="mt-1 text-lg font-semibold text-[#696CFF]">{value}</div>
     </div>
   );
 }
@@ -253,7 +256,7 @@ export function ProfileStat({ label, value, tone = "default" }: { label: string;
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3">
       <div className="text-xs font-semibold text-slate-400">{label}</div>
-      <div className={cn("mt-1 text-xl font-semibold", tone === "danger" ? "text-[var(--erg-red)]" : "text-[var(--erg-blue)]")}>
+      <div className={cn("mt-1 text-xl font-semibold", tone === "danger" ? "text-[#FF5630]" : "text-[#696CFF]")}>
         {value}
       </div>
     </div>

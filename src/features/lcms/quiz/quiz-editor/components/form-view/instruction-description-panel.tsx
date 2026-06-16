@@ -1,5 +1,5 @@
-import AddIcon from "@mui/icons-material/Add";
-import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
+import { Plus as AddIcon } from "@/components/mui-icon-shim";
+import { Trash2 as DeleteOutlineOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -31,7 +31,7 @@ export function InstructionDescriptionPanel({
       <div className="classic-editor__instruction-panel-header">
         <p>{t("common.description")}</p>
         <button type="button" className="classic-editor__ghost-action" onClick={addItem}>
-          <AddIcon className="h-4 w-4" fontSize="inherit" />
+          <AddIcon className="h-4 w-4" size="1em" />
           <span>Add step</span>
         </button>
       </div>
@@ -51,7 +51,7 @@ export function InstructionDescriptionPanel({
               onClick={() => removeItem(index)}
               aria-label={t("common.remove")}
             >
-              <DeleteOutlineOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+              <DeleteOutlineOutlinedIcon className="h-4 w-4" size="1em" />
             </button>
           </div>
         ))}

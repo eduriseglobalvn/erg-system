@@ -4,14 +4,15 @@ import { Calendar, RefreshCw, Search } from "lucide-react";
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { AssignHomeworkFooter } from "@/features/lms/components/assign-homework-footer";
 import { allGroupSourcesFilterValue, assignmentGroups } from "@/features/lms/components/assign-homework-groups";
-import { mockAssignmentResources } from "@/features/lms/components/assign-homework-resources";
 import { getClassStudents, getMockBirthDate, getMockStudentLevel, StudentLevelBadge } from "@/features/lms/components/assign-homework-student-utils";
 
 import { classroomStudents, defaultClassId } from "@/features/lms/classroom/api/mock-classroom-data";
+import { assignmentSubjects } from "@/features/lms/classroom/components/class-students-workspace.constants";
+import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
-import { LmsCheckbox } from "@/components/ui/lms-kit";
+import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 
 
@@ -91,7 +92,12 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   );
   const [searchQuery, setSearchQuery] = useState("");
   
-  const [selectedResourceId, setSelectedResourceId] = useState<string>("res-1");
+  const [selectedSubjectId, setSelectedSubjectId] = useState(() => assignmentSubjects[0]?.id ?? "");
+  const [selectedLevelId, setSelectedLevelId] = useState(() => assignmentSubjects[0]?.levels[0]?.id ?? "");
+  const [selectedResourceIds, setSelectedResourceIds] = useState<Set<string>>(() => {
+    const firstItem = assignmentSubjects[0]?.levels[0]?.topics[0]?.items[0];
+    return firstItem ? new Set([firstItem.id]) : new Set();
+  });
   const [resourceSearch, setResourceSearch] = useState("");
   const [mobileValidationError, setMobileValidationError] = useState("");
 
@@ -248,22 +254,55 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
     setStep((currentStep) => Math.min(2, currentStep + 1));
   };
 
-  const handleFinish = () => {
-    onCreateAssignment(title, subject);
+  const selectedSubject = assignmentSubjects.find((item) => item.id === selectedSubjectId) ?? assignmentSubjects[0];
+  const selectedLevel = selectedSubject?.levels.find((item) => item.id === selectedLevelId) ?? selectedSubject?.levels[0];
+  const resourceSearchTerm = resourceSearch.trim().toLowerCase();
+  const filteredResourceTopics =
+    selectedLevel?.topics
+      .map((topic) => ({
+        ...topic,
+        items: topic.items.filter((item) =>
+          [item.title, item.activityLabel, item.topicLabel, item.kind, item.durationLabel]
+            .join(" ")
+            .toLowerCase()
+            .includes(resourceSearchTerm),
+        ),
+      }))
+      .filter((topic) => topic.items.length > 0) ?? [];
+  const filteredResourceCount = filteredResourceTopics.reduce((total, topic) => total + topic.items.length, 0);
+  const selectedResourceCount = selectedResourceIds.size;
+  const selectedResourceLabel =
+    selectedResourceCount === 0
+      ? "Chưa chọn bài"
+      : selectedResourceCount === 1
+        ? "1 bài đã chọn"
+        : `${selectedResourceCount} bài đã chọn`;
+
+  const handleSubjectChange = (subjectId: string) => {
+    const nextSubject = assignmentSubjects.find((item) => item.id === subjectId) ?? assignmentSubjects[0];
+    setSelectedSubjectId(nextSubject?.id ?? "");
+    setSelectedLevelId(nextSubject?.levels[0]?.id ?? "");
+    setResourceSearch("");
   };
 
-  const filteredResources = mockAssignmentResources.filter((r) =>
-    r.name.toLowerCase().includes(resourceSearch.trim().toLowerCase()) ||
-    r.category.toLowerCase().includes(resourceSearch.trim().toLowerCase()) ||
-    r.subject.toLowerCase().includes(resourceSearch.trim().toLowerCase())
-  );
-  const resourcesByCategory = Array.from(new Set(filteredResources.map((resource) => resource.category))).map((category) => ({
-    category,
-    resources: filteredResources.filter((resource) => resource.category === category),
-  }));
+  const toggleResourceSelection = (resourceId: string) => {
+    setSelectedResourceIds((current) => {
+      const next = new Set(current);
+      if (next.has(resourceId)) {
+        next.delete(resourceId);
+      } else {
+        next.add(resourceId);
+      }
+      return next;
+    });
+  };
+
+  const handleFinish = () => {
+    onCreateAssignment(title, selectedSubject?.label ?? subject);
+  };
 
   if (isMobile) {
-    const selectedResource = mockAssignmentResources.find((resource) => resource.id === selectedResourceId);
+    const selectedResource = selectedLevel?.topics.flatMap((topic) => topic.items).find((resource) => selectedResourceIds.has(resource.id));
     const isClassMode = targetType === "class";
     const isGroupMode = targetType === "group";
     const mobileSelectedCount = isClassMode
@@ -500,7 +539,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                 <div className="border-b border-[#dbe4f0] px-4 py-3">
                   <div className="text-[13px] font-bold text-slate-500">Tài nguyên</div>
                   <div className="mt-0.5 text-[15px] font-extrabold text-slate-950">
-                    {selectedResource?.name ?? "Chọn một tài nguyên"}
+                    {selectedResource?.title ?? selectedResourceLabel}
                   </div>
                 </div>
                 <div className="grid gap-3 p-3">
@@ -515,9 +554,9 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                     />
                   </div>
                   <MobileAssignmentResourceList
-                    onSelectResource={setSelectedResourceId}
-                    resources={filteredResources}
-                    selectedResourceId={selectedResourceId}
+                    onToggleResource={toggleResourceSelection}
+                    resources={filteredResourceTopics.flatMap((topic) => topic.items)}
+                    selectedResourceIds={selectedResourceIds}
                   />
                   <div className="rounded-[16px] border border-[#d9e2ef] bg-[#f8fbff] p-3">
                     <div className="text-[13px] font-extrabold text-slate-950">Xac nhan giao bai</div>
@@ -527,12 +566,16 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                         <span className="min-w-0 truncate text-right text-slate-950">{title || "Chua nhap"}</span>
                       </div>
                       <div className="flex justify-between gap-3">
-                        <span>Doi tuong</span>
+                        <span>Đối tượng</span>
                         <span className="text-slate-950">{mobileSelectedCount} da chon</span>
                       </div>
                       <div className="flex justify-between gap-3">
+                        <span>Bài tập</span>
+                        <span className="text-slate-950">{selectedResourceLabel}</span>
+                      </div>
+                      <div className="flex justify-between gap-3">
                         <span>Học liệu</span>
-                        <span className="min-w-0 truncate text-right text-slate-950">{selectedResource?.name ?? "Chưa chọn"}</span>
+                        <span className="min-w-0 truncate text-right text-slate-950">{selectedResource?.title ?? "Chưa chọn"}</span>
                       </div>
                       <div className="flex justify-between gap-3">
                         <span>Thoi gian</span>
@@ -681,15 +724,15 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
           <div className="w-full h-full px-4 py-4 space-y-4 flex flex-col min-h-0 md:px-8 md:py-6">
 
             {/* Card: Assignment setup */}
-            <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-5 py-4 shadow-[var(--shadow-xs)]">
-              <div className="mb-4">
-                <div>
-                  <h2 className="text-sm font-semibold text-slate-900">Thiết lập giao bài</h2>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-600">Chọn đối tượng, đặt tên bài và thời gian làm bài trong một hàng.</p>
-                </div>
+            <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-4 py-3 shadow-[var(--shadow-xs)]">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-bold text-slate-900">Thiết lập giao bài</h2>
+                <span className="hidden rounded-md bg-[#f8fbff] px-2.5 py-1 text-[12px] font-bold text-slate-500 xl:inline-flex">
+                  {selectedStudentIds.size} học sinh đã chọn
+                </span>
               </div>
 
-              <div className="grid grid-cols-1 gap-3 xl:grid-cols-[220px_minmax(260px,1fr)_150px_170px_220px_220px]">
+              <div className="grid grid-cols-1 gap-3 xl:grid-cols-[210px_minmax(260px,1fr)_130px_160px_210px_210px]">
                 <label className="grid gap-1.5">
                   <span className="text-[13px] font-semibold text-slate-600">Đối tượng giao bài</span>
                   <div className="relative">
@@ -1173,93 +1216,131 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
           <div className="w-full h-full px-4 py-4 flex flex-col min-h-0 md:px-8 md:py-6">
             <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
               <div className="lms-modal-header shrink-0 border-b border-[#dbe4f0] px-5 py-3">
-                <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-sm font-semibold text-slate-900">Chọn tài nguyên bài tập</h2>
-                    <p className="mt-1 text-[13px] font-semibold text-slate-600">
-                      Chọn đề hoặc bộ câu hỏi từ thư viện hệ thống. Danh sách được chia theo danh mục để dễ tìm.
-                    </p>
+                    <h2 className="text-sm font-semibold text-slate-900">Chọn bài tập</h2>
+                    <p className="mt-0.5 text-[13px] font-semibold text-slate-500">{selectedSubject?.label ?? "Môn học"} · {selectedLevel?.label ?? "Level"} · {selectedResourceLabel}</p>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-[13px] font-semibold text-[var(--erg-blue)]">{attemptLimit} lần làm</span>
                     <span className="rounded-md border border-[#b8d6fa] bg-white px-3 py-1 text-[13px] font-semibold text-[var(--erg-blue)]">{maxDurationMinutes} phút tối đa</span>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <div className="relative w-full max-w-sm">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-                    <input type="text" placeholder="Tìm theo tên, danh mục hoặc môn học..." value={resourceSearch}
-                      onChange={(e) => setResourceSearch(e.target.value)}
-                      className="w-full rounded-lg border border-[#d7e0ec] bg-white py-2.5 pl-9 pr-4 text-[14px] font-semibold text-slate-900 transition focus:border-[var(--erg-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]" />
-                  </div>
-                  <span className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-[13px] font-bold text-slate-700">
-                    {filteredResources.length} tài nguyên phù hợp
-                  </span>
-                </div>
               </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto bg-[#f8fbff] p-4">
-                {resourcesByCategory.map(({ category, resources }) => (
-                  <div key={category} className="mb-4 overflow-hidden rounded-lg border border-[#dbe4f0] bg-white shadow-[var(--shadow-xs)] last:mb-0">
-                    <div className="flex items-center justify-between gap-3 border-b border-[#dbe4f0] bg-[#f8fbff] px-5 py-3">
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-900">{category}</h3>
-                        <p className="mt-0.5 text-[13px] font-semibold text-slate-500">{resources.length} tài nguyên trong danh mục</p>
+              <div className="grid min-h-0 flex-1 grid-cols-[280px_minmax(0,1fr)] overflow-hidden bg-[#f8fbff]">
+                <aside className="min-h-0 border-r border-[#dbe4f0] bg-white p-4">
+                  <div className="grid gap-3">
+                    <label className="grid gap-1.5">
+                      <span className="text-[12px] font-bold text-slate-600">Môn học</span>
+                      <AppSelect
+                        value={selectedSubject?.id ?? ""}
+                        onChange={(event) => handleSubjectChange(event.target.value)}
+                        className="h-10 w-full rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                      >
+                        {assignmentSubjects.map((item) => (
+                          <option key={item.id} value={item.id}>{item.label}</option>
+                        ))}
+                      </AppSelect>
+                    </label>
+                    <div className="grid gap-2">
+                      <div className="text-[12px] font-bold text-slate-600">Level</div>
+                      {selectedSubject?.levels.map((level) => {
+                        const active = level.id === selectedLevel?.id;
+                        return (
+                          <button
+                            key={level.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedLevelId(level.id);
+                              setResourceSearch("");
+                            }}
+                            className={cn(
+                              "rounded-lg border px-3 py-2.5 text-left transition",
+                              active ? "border-[#9ec9f4] bg-[#eef7ff] shadow-[0_8px_20px_rgba(15,108,189,0.08)]" : "border-[#dbe4f0] bg-white hover:border-[#b8d6fa] hover:bg-[#f8fbff]",
+                            )}
+                          >
+                            <span className={cn("block text-[13px] font-extrabold", active ? "text-[#0f6cbd]" : "text-slate-900")}>{level.label}</span>
+                            <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">{level.description}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </aside>
+
+                <div className="flex min-h-0 flex-col">
+                  <div className="shrink-0 border-b border-[#dbe4f0] bg-white px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="relative min-w-[320px] flex-1">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
+                        <input
+                          type="text"
+                          placeholder="Tìm bài trong level đang chọn..."
+                          value={resourceSearch}
+                          onChange={(event) => setResourceSearch(event.target.value)}
+                          className="h-10 w-full rounded-lg border border-[#d7e0ec] bg-white pl-9 pr-4 text-[14px] font-semibold text-slate-900 transition focus:border-[var(--erg-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                        />
                       </div>
-                      <span className="rounded-full bg-white px-2.5 py-1 text-[13px] font-bold text-slate-600 shadow-sm">
-                        Category
+                      <span className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2 text-[13px] font-bold text-slate-700">
+                        {filteredResourceCount} bài phù hợp
                       </span>
                     </div>
-                    <MobileAssignmentResourceList
-                      onSelectResource={setSelectedResourceId}
-                      resources={resources}
-                      selectedResourceId={selectedResourceId}
-                    />
-                    <div className="hidden overflow-x-auto md:block">
-                      <table className="erg-data-table min-w-[980px] w-full border-collapse text-sm">
-                        <thead>
-                          <tr>
-                            <th className="py-3 px-5 w-12" />
-                            <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal">Tên tài nguyên</th>
-                            <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-32">Khối lớp</th>
-                            <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-32">Môn học</th>
-                            <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-32">Số lần làm</th>
-                            <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-40">Thời gian tối đa</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {resources.map((res) => (
-                            <tr key={res.id} onClick={() => setSelectedResourceId(res.id)}
-                              className={cn("cursor-pointer transition-colors",
-                                selectedResourceId === res.id ? "bg-[var(--erg-blue-light)] hover:bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]")}>
-                              <td className="py-4 px-5">
-                                <div className={cn(
-                                  "mx-auto flex items-center justify-center h-[18px] w-[18px] rounded-full border transition",
-                                  selectedResourceId === res.id ? "border-[var(--erg-blue)]" : "border-slate-300"
-                                )}>
-                                  {selectedResourceId === res.id && <div className="h-[8px] w-[8px] rounded-full bg-[var(--erg-blue)]" />}
-                                </div>
-                              </td>
-                              <td className="py-4 px-4 font-medium text-[var(--erg-blue)]">{res.name}</td>
-                              <td className="py-4 px-4 text-[13px] font-semibold text-slate-600">{res.grade}</td>
-                              <td className="py-4 px-4">
-                                <span className="inline-flex rounded-md border border-[#dbe4f0] bg-[#f8fbff] px-2 py-0.5 text-[13px] font-bold text-slate-700">{res.subject}</span>
-                              </td>
-                              <td className="py-4 px-4 text-[13px] font-semibold text-slate-700">{res.attemptLimit} lần</td>
-                              <td className="py-4 px-4 text-[13px] font-semibold text-slate-700">{res.maxDurationMinutes} phút</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
+                  </div>
+                  <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                    <div className="grid gap-3">
+                      {filteredResourceTopics.map((topic) => (
+                        <section key={topic.id} className="overflow-hidden rounded-lg border border-[#dbe4f0] bg-white shadow-[var(--shadow-xs)]">
+                          <div className="flex items-center justify-between gap-3 border-b border-[#edf2f7] bg-[#fbfdff] px-4 py-3">
+                            <div>
+                              <h3 className="text-sm font-extrabold text-slate-900">{topic.label}</h3>
+                              <p className="mt-0.5 text-[12px] font-semibold text-slate-500">{topic.items.length} bài trong chủ đề</p>
+                            </div>
+                            <span className="rounded-full border border-[#dbe4f0] bg-white px-2.5 py-1 text-[12px] font-bold text-slate-600">
+                              {selectedSubject?.label}
+                            </span>
+                          </div>
+                          <div className="divide-y divide-[#edf2f7]">
+                            {topic.items.map((item) => {
+                              const checked = selectedResourceIds.has(item.id);
+                              return (
+                                <button
+                                  key={item.id}
+                                  type="button"
+                                  onClick={() => toggleResourceSelection(item.id)}
+                                  className={cn(
+                                    "grid w-full grid-cols-[28px_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 text-left transition",
+                                    checked ? "bg-[#eef7ff]" : "bg-white hover:bg-[#f8fbff]",
+                                  )}
+                                >
+                                  <AssignmentCheckbox checked={checked} onChange={() => toggleResourceSelection(item.id)} label={`Chọn ${item.title}`} />
+                                  <span className="min-w-0">
+                                    <span className={cn("block truncate text-[14px] font-bold", checked ? "text-[#0f6cbd]" : "text-slate-900")}>{item.title}</span>
+                                    <span className="mt-1 flex flex-wrap gap-1.5 text-[12px] font-semibold text-slate-500">
+                                      <span>{item.activityLabel}</span>
+                                      <span>·</span>
+                                      <span>{item.questionCount} câu</span>
+                                      <span>·</span>
+                                      <span>{item.durationLabel}</span>
+                                    </span>
+                                  </span>
+                                  <span className={cn("rounded-md border px-2.5 py-1 text-[12px] font-extrabold", item.kind === "test" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-[#B8EDF7] bg-[#E6F9FD] text-[#007A91]")}>
+                                    {item.kind === "test" ? "Test" : "Train"}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </section>
+                      ))}
                     </div>
+                    {filteredResourceTopics.length === 0 ? (
+                      <div className="flex h-full min-h-60 items-center justify-center rounded-lg border border-dashed border-[#cbd7e6] bg-white text-center text-sm font-semibold text-slate-500">
+                        Không tìm thấy bài phù hợp trong level đang chọn.
+                      </div>
+                    ) : null}
                   </div>
-                ))}
-
-                {resourcesByCategory.length === 0 ? (
-                  <div className="flex h-full min-h-60 items-center justify-center rounded-lg border border-dashed border-[#cbd7e6] bg-white text-center text-sm font-semibold text-slate-500">
-                    Không tìm thấy tài nguyên phù hợp với từ khóa hiện tại.
-                  </div>
-                ) : null}
+                </div>
               </div>
             </section>
           </div>
@@ -1285,6 +1366,7 @@ function AssignmentCheckbox({ checked, onChange, label }: { checked: boolean; on
       <LmsCheckbox
         aria-label={label}
         checked={checked}
+        className="checked:border-[#696CFF] checked:bg-[#696CFF] data-[checked=true]:border-[#696CFF] data-[checked=true]:bg-[#696CFF] data-[indeterminate=true]:border-[#696CFF] data-[indeterminate=true]:bg-[#696CFF] hover:border-[#696CFF] focus-visible:ring-[#696CFF]/20"
         onCheckedChange={() => onChange()}
       />
     </span>
@@ -1300,8 +1382,8 @@ function StudentProgressCell({ value }: { value: number }) {
       <div className="flex items-center justify-between gap-2 text-[13px] font-semibold text-slate-700">
         <span>{value}%</span>
       </div>
-      <div className="mt-1 h-1.5 overflow-hidden rounded-md bg-slate-100">
-        <div className="h-full rounded-full bg-emerald-400" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
+      <div className="mt-1 h-1.5 overflow-hidden rounded-md bg-[#EEF2F7]">
+        <div className="h-full rounded-full bg-[#696CFF]" style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
       </div>
     </div>
   );
@@ -1326,18 +1408,18 @@ function StudentSelectionTable({
     <div className={cn("min-h-0 flex-1 overflow-auto", className)}>
       <table className="erg-data-table min-w-[1160px] w-full border-separate border-spacing-0 text-[14px]">
         <thead>
-          <tr className="bg-[#eef4fb] text-[13px] font-bold tracking-normal text-slate-700">
-            <th className="sticky left-0 top-0 z-40 w-12 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-center">
+          <tr className="bg-[#F4F6F8] text-[13px] font-bold tracking-normal text-[#344054]">
+            <th className="sticky left-0 top-0 z-40 w-12 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-center">
               <AssignmentCheckbox checked={allSelected} onChange={onToggleAll} label="Chọn tất cả học sinh" />
             </th>
-            <th className="sticky left-12 top-0 z-40 w-14 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-center">STT</th>
-            <th className="sticky left-[104px] top-0 z-40 w-52 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Học sinh</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Ngày sinh</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Lớp</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Xếp loại</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Bài hiện tại</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Tiến độ</th>
-            <th className="top-0 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-3 py-3 text-left">Hoạt động gần nhất</th>
+            <th className="sticky left-12 top-0 z-40 w-14 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-center">STT</th>
+            <th className="sticky left-[104px] top-0 z-40 w-52 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Học sinh</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Ngày sinh</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Lớp</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Xếp loại</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Bài hiện tại</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Tiến độ</th>
+            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Hoạt động gần nhất</th>
           </tr>
         </thead>
         <tbody>
@@ -1375,7 +1457,6 @@ function StudentSelectionTable({
 }
 
 type AssignmentGroupItem = (typeof assignmentGroups)[number];
-type AssignmentResourceItem = (typeof mockAssignmentResources)[number];
 
 function MobileAssignProgress({
   selectedCount,
@@ -1551,18 +1632,18 @@ function MobileGradeClassList({
 }
 
 function MobileAssignmentResourceList({
-  onSelectResource,
+  onToggleResource,
   resources,
-  selectedResourceId,
+  selectedResourceIds,
 }: {
-  onSelectResource: (resourceId: string) => void;
-  resources: AssignmentResourceItem[];
-  selectedResourceId: string;
+  onToggleResource: (resourceId: string) => void;
+  resources: AssignmentCatalogItem[];
+  selectedResourceIds: Set<string>;
 }) {
   return (
     <div className="grid gap-3 bg-[#f3f6fb] p-3 md:hidden">
       {resources.map((resource) => {
-        const selected = selectedResourceId === resource.id;
+        const selected = selectedResourceIds.has(resource.id);
         return (
           <button
             key={resource.id}
@@ -1571,13 +1652,18 @@ function MobileAssignmentResourceList({
               "min-h-[76px] rounded-[16px] border px-3 py-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)] transition active:scale-[0.99]",
               selected ? "border-[#b8d6fa] bg-[#eff7ff]" : "border-white bg-white",
             )}
-            onClick={() => onSelectResource(resource.id)}
+            onClick={() => onToggleResource(resource.id)}
           >
-            <span className="block truncate text-[14px] font-bold text-slate-950">{resource.name}</span>
+            <span className="flex items-start gap-2">
+              <AssignmentCheckbox checked={selected} onChange={() => onToggleResource(resource.id)} label={`Chọn ${resource.title}`} />
+              <span className="min-w-0">
+                <span className="block truncate text-[14px] font-bold text-slate-950">{resource.title}</span>
+              </span>
+            </span>
             <span className="mt-1 flex flex-wrap gap-1.5 text-[12px] font-semibold text-slate-600">
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.grade}</span>
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.subject}</span>
-              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.maxDurationMinutes} phút</span>
+              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.levelLabel}</span>
+              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.topicLabel}</span>
+              <span className="rounded-md border border-[#d9e2ef] bg-white px-2 py-0.5">{resource.durationLabel}</span>
             </span>
           </button>
         );

@@ -1,5 +1,6 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { memo, useEffect, useMemo, useState } from "react";
+import { Button, Stack, Typography } from "@mui/material";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
@@ -10,18 +11,7 @@ import type {
   WeeklyClassLogSummary,
   WeeklyClassLogWeek,
 } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
-import { cn } from "@/lib/utils";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
-
-// Inline minimal student data for @mention autocomplete — avoids importing
-// the full 13KB mock-classroom-data which is teacher-shell-only concern.
-const CLASS_LOG_STUDENTS: Array<{ id: string; name: string }> = [
-  { id: "student-1", name: "Võ Ngọc Linh" },
-  ...Array.from(
-    { length: 13 },
-    (_, i) => ({ id: `student-${i + 2}`, name: `Học sinh ${i + 2}` }),
-  ),
-];
 
 type WeeklyClassLogPageProps = {
   selectedClass?: ClassroomSnapshot;
@@ -29,24 +19,10 @@ type WeeklyClassLogPageProps = {
   teacherName: string;
 };
 
-type StudentMentionOption = {
-  id: string;
-  name: string;
-};
-
 type PeriodCompletionState = "empty" | "complete" | "incomplete";
 
-const STORAGE_KEY = "erg:lms:weekly-class-log:v3";
+const STORAGE_KEY = "erg:lms:weekly-class-log:v5";
 const morningPeriodCount = 5;
-const periodFields: Array<keyof WeeklyClassLogPeriod> = [
-  "className",
-  "ppct",
-  "absent",
-  "lesson",
-  "comment",
-  "disciplineScore",
-  "teacherSignature",
-];
 
 export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName }: WeeklyClassLogPageProps) {
   const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(() => loadStoredWeeks());
@@ -55,10 +31,6 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
   const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
   const selectedWeekIndex = weeks.findIndex((week) => week.id === selectedWeek.id);
   const computedSummary = useMemo(() => buildWeeklySummary(selectedWeek), [selectedWeek]);
-  const studentMentionOptions = useMemo(
-    () => CLASS_LOG_STUDENTS,
-    [],
-  );
   const isLocked = selectedWeek.status === "locked";
 
   useEffect(() => {
@@ -70,7 +42,6 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
       currentWeeks.map((week) => (week.id === selectedWeek.id ? normalizeWeekSignatures(updater(week), teacherName) : week)),
     );
   }
-
 
   function updateDay(dayId: string, value: string) {
     if (isLocked) return;
@@ -105,109 +76,204 @@ export function WeeklyClassLogPage({ selectedClass: _selectedClass, teacherName 
   }
 
   return (
-    <section className="flex min-h-full bg-[var(--background)] text-[var(--foreground)]" data-testid="weekly-class-log-page">
-      <div className="min-w-0 flex-1 px-3 py-3 md:px-5 md:py-4">
-        <div className="sticky top-0 z-30 -mx-3 mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] bg-[var(--card)]/95 px-3 py-3 backdrop-blur md:-mx-5 md:px-5">
-          <h1 className="font-[var(--font-heading)] text-[22px] font-semibold leading-7 tracking-normal text-[var(--foreground)]">Sổ Đầu Bài</h1>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, padding: 16 }}>
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 16,
+        marginBottom: 16,
+        paddingBottom: 16,
+        borderBottom: "1px solid #e5e7eb",
+      }}>
+        <Typography sx={{ fontSize: 22, fontWeight: 600 }}>Sổ Đầu Bài</Typography>
 
-          <div className="ml-auto flex flex-wrap items-center gap-2">
-            <select
-              value={selectedSubject}
-              onChange={(event) => setSelectedSubject(event.target.value)}
-              className="erg-select-control h-10 min-w-40 rounded-lg py-0 pl-3.5 text-sm"
-              aria-label="Chọn môn học"
+        <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
+          <select
+            value={selectedSubject}
+            onChange={(e) => setSelectedSubject(e.target.value)}
+            style={{
+              height: 40,
+              padding: "0 12px",
+              borderRadius: 8,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+              minWidth: 160,
+            }}
+          >
+            {lmsSubjectOptions.map((subject) => (
+              <option key={subject} value={subject}>{subject}</option>
+            ))}
+          </select>
+
+          <select
+            value={selectedWeek.id}
+            onChange={(e) => setSelectedWeekId(e.target.value)}
+            style={{
+              height: 40,
+              padding: "0 12px",
+              borderRadius: 8,
+              border: "1px solid #e5e7eb",
+              fontSize: 14,
+              minWidth: 200,
+            }}
+          >
+            {weeks.map((week) => (
+              <option key={week.id} value={week.id}>
+                {week.label} · {compactWeekDateRange(week)}
+              </option>
+            ))}
+          </select>
+
+          <div style={{ display: "flex", borderRadius: 8, overflow: "hidden", border: "1px solid #e5e7eb" }}>
+            <Button
+              onClick={() => goToWeek(1)}
+              disabled={selectedWeekIndex >= weeks.length - 1}
+              startIcon={<ChevronLeft sx={{ fontSize: 18 }} />}
+              sx={{
+                borderRadius: 0,
+                textTransform: "none",
+                fontWeight: 600,
+                minWidth: 100,
+              }}
             >
-              {lmsSubjectOptions.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedWeek.id}
-              onChange={(event) => setSelectedWeekId(event.target.value)}
-              className="erg-select-control h-10 min-w-56 rounded-lg py-0 pl-3.5 text-sm"
-              aria-label="Chọn tuần"
+              Trước
+            </Button>
+            <Button
+              onClick={() => goToWeek(-1)}
+              disabled={selectedWeekIndex <= 0}
+              endIcon={<ChevronRight sx={{ fontSize: 18 }} />}
+              sx={{
+                borderRadius: 0,
+                textTransform: "none",
+                fontWeight: 600,
+                minWidth: 100,
+              }}
             >
-              {weeks.map((week) => (
-                <option key={week.id} value={week.id}>
-                  {week.label} · {compactWeekDateRange(week)}
-                </option>
+              Sau
+            </Button>
+          </div>
+        </Stack>
+      </div>
+
+      {/* Main Content */}
+      <div style={{
+        flex: 1,
+        minHeight: 0,
+        display: "flex",
+        borderRadius: 8,
+        backgroundColor: "white",
+        border: "1px solid #e5e7eb",
+        overflow: "hidden",
+      }}>
+        {/* Table Section */}
+        <div style={{ flex: 1, minWidth: 0, overflow: "auto" }}>
+          <table style={{
+            width: "100%",
+            minWidth: 1200,
+            borderCollapse: "collapse",
+            fontSize: 13,
+            fontFamily: "inherit",
+          }}>
+            <thead>
+              <tr style={{ backgroundColor: "#f8fafc" }}>
+                <th style={thStyle(100)}>Thứ, ngày</th>
+                <th style={thStyle(60)}>Buổi</th>
+                <th style={thStyle(40)}>Tiết</th>
+                <th style={thStyle(70)}>Lớp</th>
+                <th style={thStyle(60)}>PPCT</th>
+                <th style={thStyle(120)}>HS vắng</th>
+                <th style={thStyle()}>Tên bài học, nội dung</th>
+                <th style={thStyle()}>Nhận xét</th>
+                <th style={thStyle(70)}>Kỷ luật</th>
+                <th style={thStyle(80)}>GV ký</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selectedWeek.days.map((day) => (
+                <DayRows
+                  key={day.id}
+                  day={day}
+                  disabled={isLocked}
+                  teacherName={teacherName}
+                  onUpdateDay={updateDay}
+                  onUpdatePeriod={updatePeriod}
+                />
               ))}
-            </select>
-            <div className="ml-1 inline-flex h-10 overflow-hidden rounded-xl border border-[#cfdbea] bg-white shadow-[0_1px_2px_rgb(15_23_42/0.04)]" aria-label="Điều hướng tuần">
-              <button
-                type="button"
-                onClick={() => goToWeek(1)}
-                disabled={selectedWeekIndex >= weeks.length - 1}
-                className="inline-flex h-full min-w-[116px] items-center justify-center gap-1.5 border-r border-[#dbe4f0] px-3 text-sm font-bold text-slate-700 transition hover:bg-[#f3f8ff] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-slate-400"
-                aria-label="Tuần trước"
+            </tbody>
+          </table>
+        </div>
+
+        {/* Summary Sidebar */}
+        <div style={{
+          width: 280,
+          flexShrink: 0,
+          borderLeft: "1px solid #e5e7eb",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "auto",
+        }}>
+          <div style={{
+            padding: "12px 16px",
+            textAlign: "center",
+            borderBottom: "1px solid #e5e7eb",
+            backgroundColor: "#f3f4f6",
+            fontWeight: 600,
+            fontSize: 14,
+          }}>
+            Tổng kết tuần
+          </div>
+
+          <div style={{ padding: "12px 16px", borderBottom: "1px solid #e5e7eb" }}>
+            {[
+              { label: "Vắng", field: "absence" as const },
+              { label: "Đi muộn", field: "late" as const },
+              { label: "Vi phạm", field: "otherViolation" as const },
+              { label: "Điểm cuối tuần", field: "finalScore" as const },
+              { label: "Học tập", field: "learning" as const },
+              { label: "Kỷ luật", field: "discipline" as const },
+              { label: "Vệ sinh", field: "hygiene" as const },
+              { label: "Điểm trừ", field: "deduction" as const },
+              { label: "Điểm TB", field: "average" as const },
+              { label: "Đạt tuần tốt", field: "goodWeek" as const },
+            ].map(({ label, field }) => (
+              <div
+                key={field}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "6px 0",
+                  borderBottom: "1px dotted #e5e7eb",
+                }}
               >
-                <ChevronLeft className="h-4 w-4" />
-                <span>Tuần trước</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => goToWeek(-1)}
-                disabled={selectedWeekIndex <= 0}
-                className="inline-flex h-full min-w-[104px] items-center justify-center gap-1.5 px-3 text-sm font-bold text-slate-700 transition hover:bg-[#f3f8ff] hover:text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:bg-[#f8fafc] disabled:text-slate-400"
-                aria-label="Tuần sau"
-              >
-                <span>Tuần sau</span>
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                <span style={{ fontSize: 12, color: "#6b7280" }}>{label}:</span>
+                <span style={{ fontSize: 12, fontWeight: 600 }}>{computedSummary[field]}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ borderBottom: "1px solid #e5e7eb" }}>
+            <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: "1px solid #e5e7eb" }}>
+              Kiến nghị GVBM
+            </div>
+            <div style={{ padding: "12px 16px", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>
+              {computedSummary.subjectTeacherProposal || "Không có"}
+            </div>
+          </div>
+
+          <div>
+            <div style={{ padding: "8px 16px", textAlign: "center", fontWeight: 600, fontSize: 13, borderBottom: "1px solid #e5e7eb" }}>
+              Ý kiến GVCN
+            </div>
+            <div style={{ padding: "12px 16px", fontSize: 12, color: "#6b7280", fontStyle: "italic" }}>
+              {computedSummary.homeroomTeacherOpinion || "Không có"}
             </div>
           </div>
         </div>
-        <div className="overflow-auto rounded-lg border border-[#d9e2ef] bg-[var(--card)] shadow-[var(--shadow-xs)]">
-          <div className="grid min-w-[1540px] grid-cols-[minmax(0,1fr)_280px]">
-            <table className="erg-data-table w-full table-fixed border-collapse text-[13px] leading-5 text-[var(--foreground)]" style={{ contentVisibility: "auto" }}>
-              <colgroup>
-                <col className="w-[80px]" />
-                  <col className="w-[64px]" />
-                  <col className="w-[44px]" />
-                <col className="w-[70px]" />
-                <col className="w-[52px]" />
-                <col className="w-[110px]" />
-                <col className="w-[380px]" />
-                <col className="w-[320px]" />
-                <col className="w-[78px]" />
-                <col className="w-[76px]" />
-              </colgroup>
-              <thead>
-                <tr>
-                  <HeaderCell>Thứ, ngày</HeaderCell>
-                  <HeaderCell>Buổi</HeaderCell>
-                  <HeaderCell>Tiết</HeaderCell>
-                  <HeaderCell>Lớp</HeaderCell>
-                  <HeaderCell>Tiết PPCT</HeaderCell>
-                  <HeaderCell>Học sinh vắng</HeaderCell>
-                  <HeaderCell>Tên bài học, nội dung công việc</HeaderCell>
-                  <HeaderCell>Nhận xét</HeaderCell>
-                  <HeaderCell>Kỷ luật</HeaderCell>
-                  <HeaderCell>GV dạy kí tên</HeaderCell>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedWeek.days.map((day) => (
-                  <DayRows
-                    key={day.id}
-                    day={day}
-                    disabled={isLocked}
-                    teacherName={teacherName}
-                    onUpdateDay={updateDay}
-                    onUpdatePeriod={updatePeriod}
-                    studentMentionOptions={studentMentionOptions}
-                  />
-                ))}
-              </tbody>
-            </table>
-
-            <WeeklySummary summary={computedSummary} />
-          </div>
-        </div>
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -216,295 +282,207 @@ const DayRows = memo(function DayRows({
   disabled,
   onUpdateDay,
   onUpdatePeriod,
-  studentMentionOptions,
   teacherName,
 }: {
   day: WeeklyClassLogDay;
   disabled: boolean;
   onUpdateDay: (dayId: string, value: string) => void;
   onUpdatePeriod: (dayId: string, periodId: string, field: keyof WeeklyClassLogPeriod, value: string) => void;
-  studentMentionOptions: StudentMentionOption[];
   teacherName: string;
 }) {
   const dayState = getGroupedPeriodState(day.periods);
+
   return (
     <>
-      {day.periods.map((period, index) => (
-        <tr key={period.id} className={cn("min-h-10 align-top", periodRowClass(getPeriodCompletionState(period)))}>
-          {index === 0 ? (
-            <td rowSpan={day.periods.length} className={cn("border border-[var(--border)] px-2 text-center align-middle", periodRowClass(dayState))}>
-              <div>{day.label}</div>
-              <input
-                value={day.date}
-                disabled={disabled}
-                onChange={(event) => onUpdateDay(day.id, event.target.value)}
-                className="mt-1 w-full rounded bg-[var(--surface-hover)] text-[var(--muted-foreground)] px-1 py-0.5 text-center text-[12px] font-medium text-[var(--muted-foreground)] outline-none focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--ring)] disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
-              />
+      {day.periods.map((period, index) => {
+        const rowState = getPeriodCompletionState(period);
+        const bgColor = rowState === "complete" ? "#dcfce7" : rowState === "incomplete" ? "#fee2e2" : "white";
+        const isMorning = index < morningPeriodCount;
+
+        return (
+          <tr key={period.id} style={{ backgroundColor: bgColor }}>
+            {/* Day/Date - merged for first period */}
+            {index === 0 && (
+              <td rowSpan={day.periods.length} style={{ ...tdStyle(100), verticalAlign: "middle", textAlign: "center" }}>
+                <div style={{ fontSize: 11, fontWeight: 600 }}>{day.label}</div>
+                <input
+                  type="date"
+                  value={day.date}
+                  disabled={disabled}
+                  onChange={(e) => onUpdateDay(day.id, e.target.value)}
+                  style={{
+                    marginTop: 4,
+                    width: "100%",
+                    padding: "2px 4px",
+                    fontSize: 11,
+                    borderRadius: 4,
+                    border: "1px solid #e5e7eb",
+                    textAlign: "center",
+                  }}
+                />
+              </td>
+            )}
+
+            {/* Session */}
+            {index === 0 && (
+              <td rowSpan={morningPeriodCount} style={{ ...tdStyle(60), verticalAlign: "middle", textAlign: "center", backgroundColor: "#f3f4f6", fontWeight: 600 }}>
+                Sáng
+              </td>
+            )}
+            {index === morningPeriodCount && (
+              <td rowSpan={day.periods.length - morningPeriodCount} style={{ ...tdStyle(60), verticalAlign: "middle", textAlign: "center", backgroundColor: "#f3f4f6", fontWeight: 600 }}>
+                Chiều
+              </td>
+            )}
+
+            {/* Period number */}
+            <td style={{ ...tdStyle(40), textAlign: "center", fontWeight: 600 }}>
+              {(index % morningPeriodCount) + 1}
             </td>
-          ) : null}
-          {index === 0 || index === morningPeriodCount ? (
-            <td rowSpan={morningPeriodCount} className={cn("border border-[var(--border)] bg-[var(--muted)]/70 px-1.5 py-1 text-center align-middle font-semibold text-[var(--muted-foreground)]", periodRowClass(getGroupedPeriodState(day.periods.slice(index, index + morningPeriodCount))))}>
-              {index === 0 ? "Sáng" : "Chiều"}
-            </td>
-          ) : null}
-          <td className={cn("border border-[var(--border)] border-b border-dotted border-b-[var(--border)] px-1.5 py-1 text-center font-semibold text-[var(--muted-foreground)]", periodRowClass(getPeriodCompletionState(period)))}>{(index % morningPeriodCount) + 1}</td>
-          {periodFields.map((field) => (
+
+            {/* Class */}
             <EditableCell
-              key={field}
-              center={isCenteredField(field)}
-              disabled={disabled || field === "teacherSignature"}
-              field={field}
-              mentionOptions={isStudentMentionField(field) ? studentMentionOptions : undefined}
-              rowState={getPeriodCompletionState(period)}
-              value={field === "teacherSignature" ? getTeacherSignature(period, teacherName) : period[field]}
-              onChange={(value) => onUpdatePeriod(day.id, period.id, field, value)}
+              value={period.className}
+              onChange={(v) => onUpdatePeriod(day.id, period.id, "className", v)}
+              disabled={disabled}
+              center
             />
-          ))}
-        </tr>
-      ))}
+
+            {/* PPCT */}
+            <EditableCell
+              value={period.ppct}
+              onChange={(v) => onUpdatePeriod(day.id, period.id, "ppct", v)}
+              disabled={disabled}
+              center
+            />
+
+            {/* Absent */}
+            <EditableCell
+              value={period.absent}
+              onChange={(v) => onUpdatePeriod(day.id, period.id, "absent", v)}
+              disabled={disabled}
+              multiline
+            />
+
+            {/* Lesson */}
+            <EditableCell
+              value={period.lesson}
+              onChange={(v) => onUpdatePeriod(day.id, period.id, "lesson", v)}
+              disabled={disabled}
+              multiline
+            />
+
+            {/* Comment */}
+            <EditableCell
+              value={period.comment}
+              onChange={(v) => onUpdatePeriod(day.id, period.id, "comment", v)}
+              disabled={disabled}
+              multiline
+            />
+
+            {/* Discipline Score */}
+            <td style={{ ...tdStyle(70), textAlign: "center" }}>
+              <select
+                value={period.disciplineScore || ""}
+                onChange={(e) => onUpdatePeriod(day.id, period.id, "disciplineScore", e.target.value)}
+                disabled={disabled}
+                style={{
+                  fontSize: 11,
+                  padding: "2px 4px",
+                  borderRadius: 4,
+                  border: "1px solid #e5e7eb",
+                  backgroundColor: "transparent",
+                  cursor: disabled ? "not-allowed" : "pointer",
+                }}
+              >
+                <option value="">-</option>
+                <option value="Đạt">Đạt</option>
+                <option value="Chưa đạt">Chưa đạt</option>
+              </select>
+            </td>
+
+            {/* Teacher Signature */}
+            <td style={{ ...tdStyle(80), textAlign: "center", fontWeight: 600, fontSize: 11 }}>
+              {period.className && period.ppct && period.lesson && period.comment && period.disciplineScore ? teacherName : ""}
+            </td>
+          </tr>
+        );
+      })}
     </>
   );
 });
 
-const WeeklySummary = memo(function WeeklySummary({
-  summary,
-}: {
-  summary: WeeklyClassLogSummary;
-}) {
-  const rows: Array<{ field: keyof WeeklyClassLogSummary; label: string }> = [
-    { field: "absence", label: "Vắng" },
-    { field: "late", label: "Đi học muộn" },
-    { field: "otherViolation", label: "Vi phạm khác" },
-    { field: "finalScore", label: "Điểm cuối tuần" },
-    { field: "learning", label: "Học tập" },
-    { field: "discipline", label: "Kỷ luật" },
-    { field: "hygiene", label: "Vệ sinh" },
-    { field: "deduction", label: "Điểm trừ" },
-    { field: "average", label: "Điểm TB của tuần" },
-    { field: "goodWeek", label: "Đạt tuần học tốt" },
-    { field: "rank", label: "Xếp thứ" },
-    { field: "unsignedSubjects", label: "Số tiết GVBM không kí" },
-    { field: "subjectNotes", label: "Thuộc các lớp" },
-  ];
-
-  return (
-    <aside className="border-l border-[var(--border)] text-[13px] text-[var(--foreground)]">
-      <div className="border-b border-[var(--border)] bg-[var(--muted)]/70 py-3 text-center text-sm font-semibold text-[var(--foreground)]">Tổng kết tuần</div>
-      <div className="min-h-[312px] border-b border-[var(--border)] px-3 py-2">
-        {rows.map((row) => (
-          <label key={row.field} className="flex min-h-8 items-center gap-1.5 border-b border-dotted border-[var(--border)] border-b border-dotted py-1 text-[13px]">
-            <span className="shrink-0">{row.label}:</span>
-            <input
-              value={summary[row.field]}
-              disabled
-              readOnly
-              className="min-w-0 flex-1 bg-transparent font-medium text-[var(--foreground)] outline-none disabled:text-[var(--muted-foreground)]"
-            />
-          </label>
-        ))}
-      </div>
-      <SummaryTextArea
-        label="Kiến nghị của GVBM"
-        value={summary.subjectTeacherProposal}
-      />
-      <SummaryTextArea
-        label="Ý kiến của GVCN"
-        value={summary.homeroomTeacherOpinion}
-      />
-    </aside>
-  );
-});
-
-const SummaryTextArea = memo(function SummaryTextArea({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <>
-      <div className="border-b border-[var(--border)] py-2 text-center text-sm font-semibold">{label}</div>
-      <textarea
-        value={value}
-        disabled
-        readOnly
-        className="h-28 w-full resize-none bg-transparent px-3 py-2 text-[13px] font-medium leading-7 text-[var(--foreground)] outline-none disabled:text-[var(--muted-foreground)]"
-      />
-    </>
-  );
-});
-
-const HeaderCell = memo(function HeaderCell({
-  children,
-  colSpan,
-  rowSpan,
-}: {
-  children: string;
-  colSpan?: number;
-  rowSpan?: number;
-}) {
-  return (
-    <th colSpan={colSpan} rowSpan={rowSpan} className="border border-[#cbd7e6] bg-[#eef4fb] px-2 py-2.5 text-center text-[13px] font-bold leading-4 text-slate-700">
-      {children}
-    </th>
-  );
-});
-
-// ---------------------------------------------------------------------------
-// EditableCell – lightweight native <input> + <select>.
-// Replaced textarea (350 nodes) + JS resize + Radix AppSelect with minimal DOM.
-// Mention overlay only activates on focused cells that support @mentions.
-// ---------------------------------------------------------------------------
 const EditableCell = memo(function EditableCell({
-  center,
-  disabled,
-  field,
-  mentionOptions,
-  onChange,
-  rowState,
   value,
+  onChange,
+  disabled,
+  center,
+  multiline,
 }: {
-  center?: boolean;
-  disabled: boolean;
-  field: keyof WeeklyClassLogPeriod;
-  mentionOptions?: StudentMentionOption[];
-  onChange: (value: string) => void;
-  rowState: PeriodCompletionState;
   value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+  center?: boolean;
+  multiline?: boolean;
 }) {
-  const [isFocused, setIsFocused] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState("");
-  const [mentionStart, setMentionStart] = useState<number | null>(null);
+  const style: React.CSSProperties = {
+    padding: "2px 4px",
+    border: "1px solid transparent",
+    fontSize: 11,
+    width: "100%",
+    backgroundColor: "transparent",
+    textAlign: center ? "center" : "left",
+    cursor: disabled ? "not-allowed" : "text",
+  };
 
-  // Lazy mention filter — only computed when mention menu is open
-  const filteredMentionOptions = useMemo(() => {
-    if (!mentionOptions?.length || mentionStart === null) return [];
-    const normalizedQuery = normalizeSearchText(mentionQuery);
-    return mentionOptions
-      .filter((student) => mentionMatchesQuery(student.name, normalizedQuery))
-      .slice(0, 6);
-  }, [mentionOptions, mentionQuery, mentionStart]);
-
-  // disciplineScore → native <select> (was Radix AppSelect)
-  if (field === "disciplineScore") {
+  if (multiline) {
     return (
-      <td className={cn("border border-[var(--border)] border-b border-dotted border-b-[var(--border)] p-0 focus-within:bg-[var(--accent-soft)]", periodRowClass(rowState))}>
-        <select
+      <td style={{ ...tdStyle(), padding: "2px 4px" }}>
+        <textarea
           value={value}
+          onChange={(e) => onChange(e.target.value)}
           disabled={disabled}
-          onChange={(event) => onChange(event.target.value)}
-          className="erg-select-control erg-select-cell h-9 w-full rounded-none bg-transparent px-1 pl-2 pr-7 text-center text-[13px] font-semibold text-[var(--foreground)] shadow-none outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50"
-        >
-          <option value=""></option>
-          <option value="Đạt">Đạt</option>
-          <option value="Chưa đạt">Chưa đạt</option>
-        </select>
+          rows={1}
+          style={{
+            ...style,
+            resize: "vertical",
+            minHeight: 24,
+            overflow: "hidden",
+          }}
+        />
       </td>
     );
   }
 
-  const handleInputChange = useCallback((nextValue: string, caretPosition: number | null) => {
-    onChange(nextValue);
-    if (!mentionOptions?.length || caretPosition === null) {
-      setMentionStart(null);
-      setMentionQuery("");
-      return;
-    }
-    const mentionMatch = getActiveMentionQuery(nextValue, caretPosition);
-    if (!mentionMatch) {
-      setMentionStart(null);
-      setMentionQuery("");
-      return;
-    }
-    setMentionStart(mentionMatch.start);
-    setMentionQuery(mentionMatch.query);
-  }, [onChange, mentionOptions]);
-
-  const insertMention = useCallback((studentName: string) => {
-    if (mentionStart === null) return;
-    const before = value.slice(0, mentionStart);
-    const after = value.slice(mentionStart + 1 + mentionQuery.length);
-    const nextValue = `${before}${studentName} ${after}`;
-    onChange(nextValue);
-    setMentionStart(null);
-    setMentionQuery("");
-  }, [value, mentionStart, mentionQuery, onChange]);
-
-  const controlClassName = cn(
-    "block min-h-9 w-full min-w-0 bg-transparent px-2 py-1.5 text-[13px] font-medium leading-5 outline-none disabled:bg-transparent disabled:text-[var(--muted-foreground)]/50",
-    mentionOptions?.length && !isFocused ? "text-transparent caret-[var(--foreground)]" : "text-[var(--foreground)]",
-    center && "text-center",
-  );
-  const useMultilineControl = field === "absent" || field === "lesson" || field === "comment";
-
   return (
-    <td className={cn("relative overflow-visible border border-[var(--border)] border-b border-dotted border-b-[var(--border)] p-0", periodRowClass(rowState))}>
-      {/* Mention overlay: renders highlighted names behind the transparent input when blurred */}
-      {mentionOptions?.length && !isFocused && value ? (
-        <div
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none absolute inset-0 whitespace-pre-wrap break-words px-2 py-1.5 text-[13px] font-medium leading-5 text-[var(--foreground)]",
-            center && "text-center",
-          )}
-        >
-          {renderMentionText(value, mentionOptions)}
-        </div>
-      ) : null}
-      {useMultilineControl ? (
-        <textarea
-          value={value}
-          disabled={disabled}
-          rows={getEditableCellRows(field, value)}
-          onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => {
-            window.setTimeout(() => {
-              setMentionStart(null);
-              setMentionQuery("");
-              setIsFocused(false);
-            }, 120);
-          }}
-          className={cn(controlClassName, "resize-none overflow-hidden whitespace-pre-wrap break-words [field-sizing:content]")}
-        />
-      ) : (
-        <input
-          type="text"
-          value={value}
-          disabled={disabled}
-          onChange={(event) => handleInputChange(event.target.value, event.target.selectionStart)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => {
-            window.setTimeout(() => {
-              setMentionStart(null);
-              setMentionQuery("");
-              setIsFocused(false);
-            }, 120);
-          }}
-          className={controlClassName}
-        />
-      )}
-      {/* Mention dropdown */}
-      {filteredMentionOptions.length ? (
-        <div className="absolute left-1 top-[calc(100%-1px)] z-50 w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)] py-1 text-left shadow-[var(--shadow-sm)]">
-          {filteredMentionOptions.map((student) => (
-            <button
-              key={student.id}
-              type="button"
-              onMouseDown={(event) => {
-                event.preventDefault();
-                insertMention(student.name);
-              }}
-              className="block w-full truncate px-3 py-2 text-left text-[13px] font-semibold text-[var(--muted-foreground)] hover:bg-[var(--surface-hover)] hover:text-[var(--primary)]"
-            >
-              @{student.name}
-            </button>
-          ))}
-        </div>
-      ) : null}
+    <td style={{ ...tdStyle(), padding: "2px 4px" }}>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        disabled={disabled}
+        style={style}
+      />
     </td>
   );
+});
+
+const thStyle = (width?: string | number) => ({
+  padding: "10px 8px",
+  border: "1px solid #e5e7eb",
+  fontSize: 11,
+  fontWeight: 700,
+  textAlign: "center" as const,
+  backgroundColor: "#f8fafc",
+  whiteSpace: "nowrap" as const,
+  width,
+});
+
+const tdStyle = (width?: string | number) => ({
+  padding: "4px",
+  border: "1px solid #e5e7eb",
+  fontSize: 12,
+  width,
 });
 
 function loadStoredWeeks() {
@@ -579,12 +557,6 @@ function getGroupedPeriodState(periods: WeeklyClassLogPeriod[]): PeriodCompletio
   return "empty";
 }
 
-function periodRowClass(state: PeriodCompletionState) {
-  if (state === "complete") return "bg-emerald-50/70";
-  if (state === "incomplete") return "bg-rose-50/60";
-  return "bg-[var(--card)]";
-}
-
 function buildWeeklySummary(week: WeeklyClassLogWeek): WeeklyClassLogSummary {
   const periods = week.days.flatMap((day) => day.periods);
   const filledPeriods = periods.filter((period) => period.className || period.ppct || period.lesson || period.comment || period.absent);
@@ -597,7 +569,7 @@ function buildWeeklySummary(week: WeeklyClassLogWeek): WeeklyClassLogSummary {
     ...week.summary,
     absence: absentNotes.length ? absentNotes.join("; ") : "Không ghi nhận",
     late: "Không ghi nhận",
-    otherViolation: notAchievedCount ? `${notAchievedCount} tiết chưa đạt kỷ luật` : "Không ghi nhận",
+    otherViolation: notAchievedCount ? `${notAchievedCount} tiết chưa đạt` : "Không ghi nhận",
     finalScore: "",
     learning: "",
     discipline: filledPeriods.length ? `${achievedCount}/${filledPeriods.length} tiết đạt` : "",
@@ -618,86 +590,6 @@ function selectedClassesFromPeriods(periods: WeeklyClassLogPeriod[]) {
   return classes.join(", ");
 }
 
-function isCenteredField(field: keyof WeeklyClassLogPeriod) {
-  return field === "ppct" || field === "disciplineScore" || field === "teacherSignature" || field === "className";
-}
-
-function isStudentMentionField(field: keyof WeeklyClassLogPeriod) {
-  return field === "absent" || field === "comment";
-}
-
-function getEditableCellRows(field: keyof WeeklyClassLogPeriod, value: string) {
-  const charsPerLine =
-    field === "absent" ? 16 :
-    field === "comment" ? 44 :
-    56;
-
-  return value
-    .split("\n")
-    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0);
-}
-
-function normalizeSearchText(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-}
-
-function mentionMatchesQuery(studentName: string, normalizedQuery: string) {
-  const queryParts = normalizedQuery.split(/\s+/).filter(Boolean);
-  if (!queryParts.length) return true;
-
-  const normalizedName = normalizeSearchText(studentName);
-  return queryParts.every((part) => normalizedName.includes(part));
-}
-
-function getActiveMentionQuery(value: string, caretPosition: number) {
-  const beforeCaret = value.slice(0, caretPosition);
-  const atIndex = beforeCaret.lastIndexOf("@");
-  if (atIndex < 0) return null;
-
-  const characterBeforeAt = beforeCaret[atIndex - 1];
-  if (characterBeforeAt && !/\s/.test(characterBeforeAt)) return null;
-
-  const query = beforeCaret.slice(atIndex + 1);
-  if (/[\n\r,;]$/.test(query) || query.length > 60) return null;
-
-  return { query, start: atIndex };
-}
-
-function renderMentionText(value: string, mentionOptions: StudentMentionOption[]) {
-  if (!value) return null;
-
-  const names = mentionOptions.map((option) => option.name).sort((a, b) => b.length - a.length);
-  const parts: Array<string | { mention: string }> = [];
-  let index = 0;
-
-  while (index < value.length) {
-    const mentionName = names.find((name) => value.slice(index, index + name.length) === name);
-
-    if (mentionName) {
-      parts.push({ mention: mentionName });
-      index += mentionName.length;
-      continue;
-    }
-
-    parts.push(value[index]);
-    index += 1;
-  }
-
-  return parts.map((part, partIndex) =>
-    typeof part === "string" ? (
-      <span key={partIndex}>{part}</span>
-    ) : (
-      <span key={partIndex} className="font-medium text-[var(--primary)]">
-        {part.mention}
-      </span>
-    ),
-  );
-}
-
 function compactWeekDateRange(week: WeeklyClassLogWeek) {
   return `${week.fromDate.slice(0, 5)} - ${week.toDate.slice(0, 5)}`;
 }
-

@@ -1,23 +1,23 @@
 import { useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
-import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import AltRouteIcon from "@mui/icons-material/AltRoute";
-import AudiotrackIcon from "@mui/icons-material/Audiotrack";
-import CalculateIcon from "@mui/icons-material/Calculate";
-import CloseIcon from "@mui/icons-material/Close";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ContentCutIcon from "@mui/icons-material/ContentCut";
-import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import FormatBoldIcon from "@mui/icons-material/FormatBold";
-import FormatItalicIcon from "@mui/icons-material/FormatItalic";
-import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
-import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
-import PreviewIcon from "@mui/icons-material/Preview";
-import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
-import SpellcheckIcon from "@mui/icons-material/Spellcheck";
-import StarIcon from "@mui/icons-material/Star";
-import StickyNote2Icon from "@mui/icons-material/StickyNote2";
-import TextFieldsIcon from "@mui/icons-material/TextFields";
-import TuneIcon from "@mui/icons-material/Tune";
+import { ImagePlus as AddPhotoAlternateIcon } from "@/components/mui-icon-shim";
+import { GitBranch as AltRouteIcon } from "@/components/mui-icon-shim";
+import { Music as AudiotrackIcon } from "@/components/mui-icon-shim";
+import { Calculator as CalculateIcon } from "@/components/mui-icon-shim";
+import { X as CloseIcon } from "@/components/mui-icon-shim";
+import { Copy as ContentCopyIcon } from "@/components/mui-icon-shim";
+import { Scissors as ContentCutIcon } from "@/components/mui-icon-shim";
+import { Clipboard as ContentPasteIcon } from "@/components/mui-icon-shim";
+import { Bold as FormatBoldIcon } from "@/components/mui-icon-shim";
+import { Italic as FormatItalicIcon } from "@/components/mui-icon-shim";
+import { Underline as FormatUnderlinedIcon } from "@/components/mui-icon-shim";
+import { Video as OndemandVideoIcon } from "@/components/mui-icon-shim";
+import { Eye as PreviewIcon } from "@/components/mui-icon-shim";
+import { SquarePen as RateReviewOutlinedIcon } from "@/components/mui-icon-shim";
+import { SpellCheck as SpellcheckIcon } from "@/components/mui-icon-shim";
+import { Star as StarIcon } from "@/components/mui-icon-shim";
+import { StickyNote as StickyNote2Icon } from "@/components/mui-icon-shim";
+import { Type as TextFieldsIcon } from "@/components/mui-icon-shim";
+import { Sliders as TuneIcon } from "@/components/mui-icon-shim";
 
 import { resolveQuizFontStack } from "@/config/fonts";
 import { ChoiceEditorTable } from "@/features/lcms/quiz/quiz-editor/components/form-view/choice-editor-table";
@@ -276,14 +276,14 @@ export function QuestionEditorDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            <TextFieldsIcon className="h-4 w-4 text-[#41688f]" fontSize="inherit" />
+            <TextFieldsIcon className="h-4 w-4 text-[#41688f]" size="1em" />
             <span>{t("quiz.questionEditor")}</span>
             <small>
               {groupTitle ?? t("quiz.ungrouped")} / {t(getSlideKindLabelKey(draftSlide.kind))}
             </small>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" size="1em" />
           </button>
         </div>
 
@@ -299,17 +299,17 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-clipboard">
             <div className="classic-editor__question-editor-clipboard">
               <QuestionEditorRibbonButton
-                icon={<ContentCutIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+                icon={<ContentCutIcon className="h-3.5 w-3.5" size="1em" />}
                 label={t("common.cut")}
                 onClick={() => void handleClipboardCommand("cut")}
               />
               <QuestionEditorRibbonButton
-                icon={<ContentCopyIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+                icon={<ContentCopyIcon className="h-3.5 w-3.5" size="1em" />}
                 label={t("common.copy")}
                 onClick={() => void handleClipboardCommand("copy")}
               />
               <QuestionEditorRibbonButton
-                icon={<ContentPasteIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+                icon={<ContentPasteIcon className="h-3.5 w-3.5" size="1em" />}
                 label={t("common.paste")}
                 onClick={() => void handleClipboardCommand("paste")}
               />
@@ -351,7 +351,7 @@ export function QuestionEditorDialog({
                   onClick={() => updateTextStyle({ bold: !resolvedTextStyle.bold })}
                   title={t("common.font")}
                 >
-                  <FormatBoldIcon className="h-4 w-4" fontSize="inherit" />
+                  <FormatBoldIcon className="h-4 w-4" size="1em" />
                 </button>
                 <button
                   type="button"
@@ -359,7 +359,7 @@ export function QuestionEditorDialog({
                   onClick={() => updateTextStyle({ italic: !resolvedTextStyle.italic })}
                   title={t("common.font")}
                 >
-                  <FormatItalicIcon className="h-4 w-4" fontSize="inherit" />
+                  <FormatItalicIcon className="h-4 w-4" size="1em" />
                 </button>
                 <button
                   type="button"
@@ -367,7 +367,7 @@ export function QuestionEditorDialog({
                   onClick={() => updateTextStyle({ underline: !resolvedTextStyle.underline })}
                   title={t("common.font")}
                 >
-                  <FormatUnderlinedIcon className="h-4 w-4" fontSize="inherit" />
+                  <FormatUnderlinedIcon className="h-4 w-4" size="1em" />
                 </button>
               </div>
             </div>
@@ -377,7 +377,7 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-score">
             <div className="classic-editor__question-editor-stack">
               <label className="classic-editor__question-editor-row-label">
-                <StarIcon className="h-4 w-4 text-[#f4a300]" fontSize="inherit" />
+                <StarIcon className="h-4 w-4 text-[#f4a300]" size="1em" />
                 <span>{t("common.score")}</span>
                 <input
                   type="number"
@@ -389,7 +389,7 @@ export function QuestionEditorDialog({
                 />
               </label>
               <label className="classic-editor__question-editor-row-label">
-                <TuneIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
+                <TuneIcon className="h-4 w-4 text-[#54769f]" size="1em" />
                 <span>{t("common.attempts")}</span>
                 <input
                   type="number"
@@ -406,7 +406,7 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-feedback">
             <div className="classic-editor__question-editor-stack">
               <label className="classic-editor__question-editor-row-label">
-                <RateReviewOutlinedIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
+                <RateReviewOutlinedIcon className="h-4 w-4 text-[#54769f]" size="1em" />
                 <span>{t("common.feedback")}</span>
                 <AppSelect
                   value={feedbackValue}
@@ -418,7 +418,7 @@ export function QuestionEditorDialog({
                 </AppSelect>
               </label>
               <label className="classic-editor__question-editor-row-label">
-                <AltRouteIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
+                <AltRouteIcon className="h-4 w-4 text-[#54769f]" size="1em" />
                 <span>{t("common.branching")}</span>
                 <AppSelect
                   value={branchingValue}
@@ -437,31 +437,31 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-insert">
             <div className="classic-editor__question-editor-insert-row">
               <QuestionEditorRibbonButton
-                icon={<AddPhotoAlternateIcon className="h-5 w-5" fontSize="inherit" />}
+                icon={<AddPhotoAlternateIcon className="h-5 w-5" size="1em" />}
                 label={draftSlide.media ? t("quiz.replaceImage") : t("common.picture")}
                 onClick={handlePickMedia}
                 variant="tile"
               />
               <QuestionEditorRibbonButton
-                icon={<StickyNote2Icon className="h-5 w-5" fontSize="inherit" />}
+                icon={<StickyNote2Icon className="h-5 w-5" size="1em" />}
                 label={t("player.notes")}
                 disabled
                 variant="tile"
               />
               <QuestionEditorRibbonButton
-                icon={<CalculateIcon className="h-5 w-5" fontSize="inherit" />}
+                icon={<CalculateIcon className="h-5 w-5" size="1em" />}
                 label={t("common.equation")}
                 disabled
                 variant="tile"
               />
               <QuestionEditorRibbonButton
-                icon={<AudiotrackIcon className="h-5 w-5" fontSize="inherit" />}
+                icon={<AudiotrackIcon className="h-5 w-5" size="1em" />}
                 label={t("common.audio")}
                 disabled
                 variant="tile"
               />
               <QuestionEditorRibbonButton
-                icon={<OndemandVideoIcon className="h-5 w-5" fontSize="inherit" />}
+                icon={<OndemandVideoIcon className="h-5 w-5" size="1em" />}
                 label={t("common.video")}
                 disabled
                 variant="tile"
@@ -473,7 +473,7 @@ export function QuestionEditorDialog({
           <div className="classic-editor__question-editor-group is-review">
             <div className="classic-editor__question-editor-review-row">
               <QuestionEditorRibbonButton
-                icon={<SpellcheckIcon className="h-6 w-6" fontSize="inherit" />}
+                icon={<SpellcheckIcon className="h-6 w-6" size="1em" />}
                 label="Spell"
                 variant="large"
                 disabled
@@ -483,7 +483,7 @@ export function QuestionEditorDialog({
                 className="classic-editor__question-editor-tool is-large"
                 onClick={() => onPreview(draftSlide)}
               >
-                <PreviewIcon className="h-7 w-7" fontSize="inherit" />
+                <PreviewIcon className="h-7 w-7" size="1em" />
                 <span>{t("common.preview")}</span>
               </button>
             </div>

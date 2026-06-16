@@ -1,18 +1,20 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useNavigate } from "@/routes/router-compat";
 import { useQuery } from "@tanstack/react-query";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
-import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import {
+  User as AccountCircleOutlinedIcon,
+  ArrowLeft as ArrowBackOutlinedIcon,
+  ClipboardCheck as AssignmentTurnedInOutlinedIcon,
+  MessageSquare as ForumOutlinedIcon,
+  LogIn as LoginOutlinedIcon,
+  LogOut as LogoutOutlinedIcon,
+  Bell as NotificationsNoneOutlinedIcon,
+  GraduationCap as SchoolOutlinedIcon,
+} from "lucide-react";
 import { queryKeys } from "@/lib/query-keys";
 
 import { PlayerShell } from "@/components/quiz/player-shell";
-import { Button } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
 import {
   getCurrentElearningViewerSession,
   logoutElearningViewerSession,
@@ -368,14 +370,14 @@ export function StudentDashboardWorkspace() {
           <div className="flex items-center justify-between gap-3 px-3 py-3 sm:px-4">
             <Button
               variant="outline"
-              className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
+              className="border-slate-200 bg-white text-[#696CFF] hover:bg-slate-50"
               onClick={() => setViewState({ type: "dashboard" })}
             >
               <ArrowBackOutlinedIcon fontSize="inherit" />
               {copy.backToDashboard}
             </Button>
             <div className="min-w-0 text-right">
-              <div className="truncate text-sm font-semibold text-[var(--erg-blue)]">{currentAssignment.title}</div>
+              <div className="truncate text-sm font-semibold text-[#696CFF]">{currentAssignment.title}</div>
               <div className="text-xs text-slate-500">{currentAssignment.subjectLabel}</div>
             </div>
           </div>
@@ -596,14 +598,14 @@ function OverviewView({
 
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button
-              className="bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]"
+              className="bg-[#696CFF] px-4 text-white hover:bg-[#585BE0]"
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {copy.primaryAction}
             </Button>
             <Button
               variant="outline"
-              className="border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
+              className="border-slate-200 bg-white text-[#696CFF] hover:bg-slate-50"
               onClick={() => onPageChange("assignments")}
             >
               {copy.secondaryAction}
@@ -618,7 +620,7 @@ function OverviewView({
                 {announcement?.isPinned ? <CompactBadge>{copy.announcementPinnedLabel}</CompactBadge> : null}
                 <CompactBadge>{announcement?.targetLabel ?? profile.className}</CompactBadge>
               </div>
-              <h2 className="mt-2 text-lg font-semibold text-[var(--erg-blue)]">
+              <h2 className="mt-2 text-lg font-semibold text-[#696CFF]">
                 {announcement?.title ?? copy.announcementHeroTitle}
               </h2>
               <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">
@@ -633,7 +635,7 @@ function OverviewView({
 
             <Button
               variant="outline"
-              className="shrink-0 border-slate-200 bg-white text-[var(--erg-blue)] hover:bg-slate-50"
+              className="shrink-0 border-slate-200 bg-white text-[#696CFF] hover:bg-slate-50"
               onClick={() => onPageChange("announcements")}
             >
               {copy.announcementTitle}
@@ -668,11 +670,11 @@ function OverviewView({
             <button
               key={post.id}
               type="button"
-              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-[var(--erg-blue)]/20 hover:bg-white"
+              className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-[#696CFF]/20 hover:bg-white"
               onClick={() => onPageChange("discussion")}
             >
               <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                <span className="rounded-full bg-white px-2.5 py-1 text-[var(--erg-blue)]">{post.className}</span>
+                <span className="rounded-full bg-white px-2.5 py-1 text-[#696CFF]">{post.className}</span>
                 <span>{post.authorName}</span>
                 <span>•</span>
                 <span>{post.createdAtLabel}</span>
@@ -783,7 +785,7 @@ function AnnouncementsView({
             className={cn(
               "rounded-lg border bg-white p-4 transition",
               selectedAnnouncementId === announcement.id
-                ? "border-[var(--erg-blue)] shadow-sm ring-2 ring-[var(--erg-blue)]/10"
+                ? "border-[#696CFF] shadow-sm ring-2 ring-[#696CFF]/10"
                 : "border-slate-200",
             )}
           >
@@ -793,7 +795,7 @@ function AnnouncementsView({
                   {announcement.isPinned ? <CompactBadge>{copy.announcementPinnedLabel}</CompactBadge> : null}
                   <CompactBadge>{announcement.targetLabel}</CompactBadge>
                 </div>
-                <h2 className="mt-2 text-lg font-semibold text-[var(--erg-blue)]">{announcement.title}</h2>
+                <h2 className="mt-2 text-lg font-semibold text-[#696CFF]">{announcement.title}</h2>
                 <p className="mt-1 max-w-4xl text-sm leading-6 text-slate-600">{announcement.content}</p>
               </div>
               <div className="shrink-0 rounded-lg bg-slate-50 px-3 py-2 text-right text-xs text-slate-500">
@@ -837,7 +839,7 @@ function AccountView({
         <section className="rounded-lg border border-slate-200 bg-white p-5">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <div className="grid h-14 w-14 place-items-center rounded-lg bg-[var(--erg-blue)] text-lg font-semibold text-white">
+              <div className="grid h-14 w-14 place-items-center rounded-lg bg-[#696CFF] text-lg font-semibold text-white">
                 {profile.name.slice(0, 1)}
               </div>
               <div>
@@ -858,20 +860,20 @@ function AccountView({
         </section>
 
         <section className="rounded-lg border border-slate-200 bg-white p-5">
-          <h3 className="text-lg font-semibold text-[var(--erg-blue)]">{copy.loginStateTitle}</h3>
+          <h3 className="text-lg font-semibold text-[#696CFF]">{copy.loginStateTitle}</h3>
           <div className="mt-4 rounded-lg bg-slate-50 p-4 text-sm leading-7 text-slate-600">
             <div className="font-semibold text-slate-900">{account?.name ?? copy.guestLabel}</div>
             <div>{account?.email ?? copy.guestLabel}</div>
             <div>{account ? copy.signedInAs : copy.guestLabel}</div>
           </div>
 
-          <h3 className="mt-6 text-lg font-semibold text-[var(--erg-blue)]">{copy.accountActionsTitle}</h3>
+          <h3 className="mt-6 text-lg font-semibold text-[#696CFF]">{copy.accountActionsTitle}</h3>
           <div className="mt-4 grid gap-3">
-            <Button className="bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={onSignIn}>
+            <Button className="bg-[#696CFF] text-white hover:bg-[#585BE0]" onClick={onSignIn}>
               <LoginOutlinedIcon fontSize="inherit" />
               {copy.signIn}
             </Button>
-            <Button variant="outline" className="border-slate-200 bg-white text-[var(--erg-red)] hover:bg-rose-50" onClick={onSignOut}>
+            <Button variant="outline" className="border-slate-200 bg-white text-[#FF5630] hover:bg-rose-50" onClick={onSignOut}>
               <LogoutOutlinedIcon fontSize="inherit" />
               {copy.signOut}
             </Button>

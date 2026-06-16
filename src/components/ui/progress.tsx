@@ -20,17 +20,35 @@ function Progress({
       data-slot="progress"
       aria-valuenow={clampedValue}
       className={cn(
-        "relative flex h-1 w-full items-center overflow-x-hidden rounded-full bg-[#e8edf5]",
+        "relative flex h-2 w-full items-center overflow-x-hidden rounded-full bg-[rgba(145,158,171,0.12)]",
         className
       )}
       {...props}
     >
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className={cn("size-full flex-1 bg-[var(--erg-blue)] transition-all", indicatorClassName)}
+        className={cn("size-full flex-1 bg-[var(--primary)] transition-all", indicatorClassName)}
         style={{ transform: `translateX(-${100 - clampedValue}%)` }}
       />
     </ProgressPrimitive.Root>
+  )
+}
+
+export function ProgressBar({
+  value,
+  className,
+  indicatorClassName,
+}: {
+  value: number
+  className?: string
+  indicatorClassName?: string
+}) {
+  return (
+    <Progress
+      value={value}
+      className={className}
+      indicatorClassName={indicatorClassName}
+    />
   )
 }
 

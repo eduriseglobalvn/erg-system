@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
-import PreviewIcon from "@mui/icons-material/Preview";
+import { X as CloseIcon } from "@/components/mui-icon-shim";
+import { Palette as PaletteOutlinedIcon } from "@/components/mui-icon-shim";
+import { Eye as PreviewIcon } from "@/components/mui-icon-shim";
 
 import {
   getQuizThemeStyle,
@@ -75,11 +75,11 @@ export function PlayerTemplateDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            <PaletteOutlinedIcon className="h-4 w-4 text-[#41688f]" fontSize="inherit" />
+            <PaletteOutlinedIcon className="h-4 w-4 text-[#41688f]" size="1em" />
             <span>{t("quiz.playerTemplate")}</span>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" size="1em" />
           </button>
         </div>
 
@@ -455,7 +455,7 @@ export function PlayerTemplateDialog({
                 </div>
 
                 <div className="classic-editor__player-preview-meta">
-                  <PreviewIcon className="h-4 w-4 text-[#5c7da5]" fontSize="inherit" />
+                  <PreviewIcon className="h-4 w-4 text-[#5c7da5]" size="1em" />
                   <span>
                     {draft.soundEffect === "subtle"
                       ? t("quiz.playerTemplateSoundOn")

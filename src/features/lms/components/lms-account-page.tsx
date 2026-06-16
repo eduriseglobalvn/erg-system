@@ -11,7 +11,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge, Button, Input } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { cn } from "@/lib/utils";
@@ -72,7 +74,7 @@ export function LmsAccountPage({
                 <CalendarClock data-icon="inline-start" />
                 Lịch sử đăng nhập
               </Button>
-              <Button variant="danger" onClick={signOut}>
+              <Button variant="destructive" onClick={signOut}>
                 <LogOut data-icon="inline-start" />
                 Đăng xuất
               </Button>

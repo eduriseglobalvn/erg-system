@@ -34,7 +34,7 @@ test("NavUser uses Fluent avatar fallback and a shadcn locale toggle group", asy
   );
 
   expect(screen.getByText("Nguyen Ngoc Anh")).toBeInTheDocument();
-  expect(container.querySelector("[data-slot='avatar-fallback']")).toHaveClass("bg-[var(--erg-blue)]");
+  expect(container.querySelector("[data-slot='avatar-fallback']")).toHaveClass("bg-[var(--primary)]");
 
   fireEvent.pointerDown(screen.getByRole("button", { name: /Nguyen Ngoc Anh/ }));
 

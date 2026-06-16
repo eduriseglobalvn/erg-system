@@ -1,5 +1,3 @@
-import type { EventInput } from "@fullcalendar/core";
-
 export type TeachingScheduleStatus = "confirmed" | "draft" | "needs-material";
 
 export type TeachingScheduleMeta = {
@@ -16,7 +14,7 @@ export type TeachingScheduleMeta = {
   subjectLabel?: string;
 };
 
-export type TeachingScheduleEvent = EventInput & {
+export type TeachingScheduleEvent = {
   id: string;
   title: string;
   start: string;

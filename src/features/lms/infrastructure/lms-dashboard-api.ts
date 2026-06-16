@@ -85,6 +85,10 @@ type SessionCurrentResponseDTO = {
   }>;
 };
 
+const SESSION_BOOTSTRAP_CACHE_MS = 60_000;
+let currentSessionBootstrapCache: { data: SessionCurrentResponseDTO; expiresAt: number } | null = null;
+let currentSessionBootstrapRequest: Promise<SessionCurrentResponseDTO> | null = null;
+
 export type LmsDashboardBootstrap = {
   classes: ClassroomSnapshot[];
   managementScope: ManagementScope;
@@ -117,7 +121,28 @@ export async function loadCurrentSessionBootstrap() {
     return null;
   }
 
-  return apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current");
+  const now = Date.now();
+  if (currentSessionBootstrapCache && currentSessionBootstrapCache.expiresAt > now) {
+    return currentSessionBootstrapCache.data;
+  }
+
+  if (currentSessionBootstrapRequest) {
+    return currentSessionBootstrapRequest;
+  }
+
+  currentSessionBootstrapRequest = apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current")
+    .then((data) => {
+      currentSessionBootstrapCache = {
+        data,
+        expiresAt: Date.now() + SESSION_BOOTSTRAP_CACHE_MS,
+      };
+      return data;
+    })
+    .finally(() => {
+      currentSessionBootstrapRequest = null;
+    });
+
+  return currentSessionBootstrapRequest;
 }
 
 export async function listManageableUnits() {

@@ -1,7 +1,8 @@
 import { type ReactNode } from "react";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2, Search } from "@/components/mui-icon-shim";
 
-import { Card, CardContent, Input, inputClassName } from "@/components/ui/dashboard-kit";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input, inputClassName } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 

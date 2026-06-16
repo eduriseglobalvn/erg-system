@@ -2,7 +2,10 @@ import type { ReactNode } from "react";
 
 import { Check, ClipboardCheck, X } from "lucide-react";
 
-import { Badge, Button, Input, Textarea } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import type { AssignmentCatalogItem, AssignmentLevel, AssignmentSubject, AssignmentTopic } from "./class-students-workspace.types";

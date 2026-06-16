@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { ChevronLeft, Search } from "lucide-react";
+import { ChevronLeft, Search } from "@/components/mui-icon-shim";
 
-import { Badge, Button, Input, inputClassName } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input, inputClassName } from "@/components/ui/input";
 import {
   ContentLinkField,
   ContentTextFields,

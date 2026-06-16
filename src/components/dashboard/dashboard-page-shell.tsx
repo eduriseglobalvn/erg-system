@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
-import { Badge, Card } from "@/components/ui/dashboard-kit";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 type DashboardPageShellProps = {

@@ -1,11 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Bell, Building2, CheckCheck, Megaphone, MoreVertical, ServerCog, Settings, X } from "lucide-react";
+import {
+  Badge,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  List,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Popover,
+  Stack,
+  Typography,
+} from "@mui/material";
+import {
+  Business,
+  Campaign,
+  MarkEmailRead,
+  Notifications,
+  NotificationsNone,
+  Settings,
+} from "@mui/icons-material";
 import { toast } from "sonner";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   fetchNotificationFeed,
   fetchUnreadNotificationCount,
@@ -15,7 +34,6 @@ import {
   type LmsNotificationType,
   type NotificationFeedItem,
 } from "@/features/notifications/api/notification-api";
-import { cn } from "@/lib/utils";
 import { useNavigate } from "@/routes/router-compat";
 
 const LMS_NOTIFICATION_PORTAL = "lms";
@@ -25,6 +43,7 @@ export function LmsNotificationCenter() {
   const queryClient = useQueryClient();
   const shownToastRef = useRef<string | null>(null);
   const [tab, setTab] = useState<"all" | "unread">("all");
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const notificationsQuery = useQuery({
     queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 5),
@@ -80,143 +99,191 @@ export function LmsNotificationCenter() {
   }
 
   function openNotificationDetail(notification: NotificationFeedItem) {
+    setAnchorEl(null);
     navigate(`/notifications/${notification.id}`);
   }
 
+  function handleOpen(event: React.MouseEvent<HTMLElement>) {
+    setAnchorEl(event.currentTarget);
+  }
+
+  function handleClose() {
+    setAnchorEl(null);
+  }
+
+  const open = Boolean(anchorEl);
+
   return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <span
-          role="button"
-          tabIndex={0}
-          aria-label="Thông báo"
-          className="relative grid size-9 place-items-center rounded-md text-slate-500 transition hover:bg-[#f3f4f6] hover:text-[var(--erg-blue)]"
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              event.preventDefault();
-              event.currentTarget.click();
-            }
-          }}
-        >
-          <Bell className="size-5" />
-          {unreadCount ? (
-            <span className="absolute right-0.5 top-0.5 flex size-5 items-center justify-center rounded-full bg-[#d13438] text-[11px] font-bold leading-none text-white ring-2 ring-white">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          ) : null}
-        </span>
-      </PopoverTrigger>
-      <PopoverContent
-        align="end"
-        sideOffset={10}
-        collisionPadding={12}
-        className="w-[min(470px,calc(100vw-20px))] gap-0 overflow-hidden rounded-xl border border-[#d7e2ef] bg-white p-0 shadow-[0_18px_44px_rgba(15,23,42,0.14)]"
+    <>
+      <IconButton
+        onClick={handleOpen}
+        sx={{
+          color: "text.secondary",
+          "&:hover": { bgcolor: "action.hover" },
+        }}
       >
-        <div className="border-b border-[#eef2f7] bg-white px-4 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-base font-bold leading-6 text-slate-950">Thông báo</h2>
-            <div className="flex items-center gap-1">
+        {unreadCount > 0 ? (
+          <Badge badgeContent={unreadCount > 99 ? "99+" : unreadCount} color="error">
+            <Notifications sx={{ fontSize: 22 }} />
+          </Badge>
+        ) : (
+          <NotificationsNone sx={{ fontSize: 22 }} />
+        )}
+      </IconButton>
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{
+          paper: {
+            sx: {
+              width: 470,
+              maxWidth: "calc(100vw - 20px)",
+              borderRadius: 3,
+              boxShadow: "0 18px 44px rgba(15,23,42,0.14)",
+              overflow: "hidden",
+            },
+          },
+        }}
+      >
+        {/* Header */}
+        <Box sx={{ px: 3, py: 2, borderBottom: "1px solid", borderColor: "divider" }}>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 700 }}>Thông báo</Typography>
+            <Stack direction="row" spacing={0.5}>
               <Button
-                variant="ghost"
-                size="sm"
-                className="h-8 shrink-0 rounded-md px-2 text-xs font-bold text-[var(--erg-blue)]"
-                disabled={!unreadCount || markAllReadMutation.isPending}
+                size="small"
                 onClick={markAllAsRead}
+                disabled={!unreadCount || markAllReadMutation.isPending}
+                sx={{
+                  fontSize: 12,
+                  fontWeight: 600,
+                  color: "primary.main",
+                  textTransform: "none",
+                  borderRadius: 1.5,
+                }}
+                startIcon={<MarkEmailRead sx={{ fontSize: 16 }} />}
               >
-                <CheckCheck data-icon="inline-start" />
                 Đọc tất cả
               </Button>
-              <button
-                type="button"
-                aria-label="Cài đặt thông báo"
-                className="grid size-8 place-items-center rounded-full text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-900"
-              >
-                <Settings className="size-4" />
-              </button>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center gap-2">
-            <NotificationTab active={tab === "all"} label="Tất cả" onClick={() => setTab("all")} />
-            <NotificationTab active={tab === "unread"} label="Chưa đọc" onClick={() => setTab("unread")} />
-          </div>
-        </div>
+              <IconButton size="small" sx={{ color: "text.secondary" }}>
+                <Settings sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Stack>
+          </Box>
 
-        <div className="max-h-[min(470px,calc(100vh-210px))] overflow-y-auto bg-white">
+          {/* Tabs */}
+          <Stack direction="row" spacing={1}>
+            <Chip
+              label="Tất cả"
+              onClick={() => setTab("all")}
+              variant={tab === "all" ? "filled" : "outlined"}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+                bgcolor: tab === "all" ? "primary.light" : "transparent",
+                color: tab === "all" ? "primary.main" : "text.secondary",
+                "&:hover": { bgcolor: tab === "all" ? "primary.light" : "action.hover" },
+              }}
+            />
+            <Chip
+              label="Chưa đọc"
+              onClick={() => setTab("unread")}
+              variant={tab === "unread" ? "filled" : "outlined"}
+              sx={{
+                fontWeight: 700,
+                borderRadius: 2,
+                bgcolor: tab === "unread" ? "primary.light" : "transparent",
+                color: tab === "unread" ? "primary.main" : "text.secondary",
+                "&:hover": { bgcolor: tab === "unread" ? "primary.light" : "action.hover" },
+              }}
+            />
+          </Stack>
+        </Box>
+
+        {/* Content */}
+        <Box sx={{ maxHeight: 470, overflow: "auto" }}>
           {notificationsQuery.isLoading ? (
-            <NotificationPopoverState label="Đang tải thông báo..." />
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <Typography sx={{ color: "text.secondary", fontWeight: 500 }}>Đang tải thông báo...</Typography>
+            </Box>
           ) : notificationsQuery.isError ? (
-            <NotificationPopoverState label="Không tải được thông báo." />
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <Typography sx={{ color: "error.main", fontWeight: 500 }}>Không tải được thông báo.</Typography>
+            </Box>
           ) : latestNotifications.length ? (
             <>
-              <div className="px-4 pb-2 pt-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-950">Quan trọng</h3>
-                  <button type="button" onClick={() => navigate("/notifications")} className="text-sm font-semibold text-[var(--erg-blue)]">
+              {/* Important */}
+              <Box sx={{ px: 3, py: 2 }}>
+                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
+                  <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Quan trọng</Typography>
+                  <Button
+                    size="small"
+                    onClick={() => navigate("/notifications")}
+                    sx={{ fontSize: 12, fontWeight: 600, color: "primary.main", textTransform: "none", p: 0 }}
+                  >
                     Xem tất cả
-                  </button>
-                </div>
-                <div className="grid gap-2">
-                  {latestNotifications.slice(0, 1).map((notification) => (
-                    <NotificationFeedCard
-                      key={notification.id}
-                      notification={notification}
-                      unread={notification.unread}
-                      onOpen={() => openNotification(notification)}
-                      thumbnail
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-[#eef2f7] px-4 pb-3 pt-4">
-                <h3 className="mb-2 text-sm font-bold text-slate-950">Các thông báo khác</h3>
-                <div className="grid gap-2">
-                  {latestNotifications.slice(1).map((notification) => (
-                    <NotificationFeedCard
-                      key={notification.id}
-                      notification={notification}
-                      unread={notification.unread}
-                      onOpen={() => openNotification(notification)}
-                      thumbnail={notification.type === "general"}
-                    />
-                  ))}
-                </div>
-              </div>
+                  </Button>
+                </Box>
+                {latestNotifications.slice(0, 1).map((notification) => (
+                  <NotificationFeedCard
+                    key={notification.id}
+                    notification={notification}
+                    unread={notification.unread}
+                    onOpen={() => openNotification(notification)}
+                    thumbnail
+                  />
+                ))}
+              </Box>
+
+              <Divider />
+
+              {/* Others */}
+              <Box sx={{ px: 3, py: 2 }}>
+                <Typography sx={{ fontSize: 13, fontWeight: 700, mb: 1.5 }}>Các thông báo khác</Typography>
+                {latestNotifications.slice(1).map((notification) => (
+                  <NotificationFeedCard
+                    key={notification.id}
+                    notification={notification}
+                    unread={notification.unread}
+                    onOpen={() => openNotification(notification)}
+                    thumbnail={notification.type === "general"}
+                  />
+                ))}
+              </Box>
             </>
           ) : (
-            <NotificationPopoverState label={tab === "unread" ? "Không còn thông báo chưa đọc." : "Chưa có thông báo."} />
+            <Box sx={{ py: 6, textAlign: "center" }}>
+              <Typography sx={{ color: "text.secondary", fontWeight: 500 }}>
+                {tab === "unread" ? "Không còn thông báo chưa đọc." : "Chưa có thông báo."}
+              </Typography>
+            </Box>
           )}
-        </div>
+        </Box>
 
-        <div className="border-t border-[#eef2f7] bg-white px-5 py-3">
-          <Button variant="ghost" size="sm" className="h-9 w-full rounded-lg text-sm font-black text-[var(--erg-blue)]" onClick={() => navigate("/notifications")}>
+        {/* Footer */}
+        <Divider />
+        <Box sx={{ px: 3, py: 1.5 }}>
+          <Button
+            fullWidth
+            onClick={() => navigate("/notifications")}
+            sx={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: "primary.main",
+              textTransform: "none",
+              borderRadius: 2,
+              py: 1,
+            }}
+          >
             Xem tất cả thông báo
           </Button>
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
-}
-
-function NotificationTab({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      className={cn(
-        "rounded-full px-4 py-2 text-sm font-black transition",
-        active ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "text-slate-700 hover:bg-[#f3f4f6]",
-      )}
-      onClick={onClick}
-    >
-      {label}
-    </button>
-  );
-}
-
-function NotificationPopoverState({ label }: { label: string }) {
-  return (
-    <div className="px-5 py-8 text-center text-sm font-semibold leading-6 text-slate-500">
-      {label}
-    </div>
+        </Box>
+      </Popover>
+    </>
   );
 }
 
@@ -231,49 +298,97 @@ function NotificationFeedCard({
   thumbnail?: boolean;
   unread: boolean;
 }) {
+  const iconClass = notificationIconClass(notification.type);
+  const Icon = notification.type === "company" ? Business : notification.type === "system" ? Notifications : Campaign;
+
   return (
-    <button
-      type="button"
+    <ListItemButton
       onClick={onOpen}
-      className="group grid w-full grid-cols-[56px_minmax(0,1fr)_auto] items-start gap-3 rounded-xl border border-[#e5ebf3] bg-white px-3 py-3 text-left shadow-[0_1px_2px_rgba(15,23,42,0.035)] transition hover:border-[#b8d6fa] hover:bg-[#f8fbff]"
+      sx={{
+        borderRadius: 2,
+        mb: 1,
+        px: 2,
+        py: 1.5,
+        border: "1px solid",
+        borderColor: "divider",
+        bgcolor: "background.paper",
+        "&:hover": {
+          bgcolor: "action.hover",
+          borderColor: "primary.light",
+        },
+      }}
     >
-      <NotificationIcon type={notification.type} />
-      <span className="min-w-0">
-        <span className="block text-[15px] font-medium leading-6 text-slate-900">
-          <span className="font-bold">{notificationLabel(notification.type)}</span> · {notification.title}
-        </span>
-        <span className="mt-0.5 block text-sm leading-5 text-slate-600">{notification.description}</span>
-        <span className="mt-1 block text-xs font-bold text-slate-500">{notification.timeLabel}</span>
-      </span>
-      <span className="flex min-w-0 items-center gap-3">
-        {thumbnail ? <span className={cn("hidden h-12 w-20 rounded-md md:block", notificationThumbnailClass(notification.type))} /> : null}
-        {unread ? <span className="size-3 rounded-full bg-[var(--erg-blue)]" /> : null}
-        <MoreVertical className="size-4 text-slate-500 opacity-0 transition group-hover:opacity-100" />
-      </span>
-    </button>
-  );
-}
-
-function NotificationIcon({ type }: { type: LmsNotificationType }) {
-  const Icon = type === "company" ? Building2 : type === "system" ? ServerCog : Megaphone;
-
-  return (
-    <span className={cn("grid size-12 shrink-0 place-items-center rounded-full text-white", notificationIconClass(type))}>
-      <Icon className="size-5" />
-    </span>
+      <ListItemIcon sx={{ minWidth: 52 }}>
+        <Box
+          sx={{
+            width: 44,
+            height: 44,
+            borderRadius: "50%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            bgcolor: iconClass.bg,
+            color: "white",
+          }}
+        >
+          <Icon sx={{ fontSize: 22 }} />
+        </Box>
+      </ListItemIcon>
+      <ListItemText
+        primary={
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{notificationLabel(notification.type)}</Typography>
+            <Typography sx={{ fontSize: 14, fontWeight: 500 }}>· {notification.title}</Typography>
+          </Box>
+        }
+        secondary={
+          <>
+            <Typography sx={{ fontSize: 13, color: "text.secondary", display: "block" }}>
+              {notification.description}
+            </Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 500, color: "text.disabled", mt: 0.5 }}>
+              {notification.timeLabel}
+            </Typography>
+          </>
+        }
+      />
+      {thumbnail && (
+        <Box
+          sx={{
+            width: 60,
+            height: 40,
+            borderRadius: 1,
+            bgcolor: notificationThumbnailClass(notification.type),
+            mr: 1,
+            display: { xs: "none", md: "block" },
+          }}
+        />
+      )}
+      {unread && (
+        <Box
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            bgcolor: "primary.main",
+            flexShrink: 0,
+          }}
+        />
+      )}
+    </ListItemButton>
   );
 }
 
 function notificationIconClass(type: LmsNotificationType) {
-  if (type === "company") return "bg-slate-700";
-  if (type === "system") return "bg-[var(--erg-blue)]";
-  return "bg-amber-500";
+  if (type === "company") return { bg: "grey.700" };
+  if (type === "system") return { bg: "primary.main" };
+  return { bg: "warning.main" };
 }
 
 function notificationThumbnailClass(type: LmsNotificationType) {
-  if (type === "company") return "bg-[linear-gradient(135deg,#0f172a,#64748b)]";
-  if (type === "system") return "bg-[linear-gradient(135deg,#0068d9,#9cc9ff)]";
-  return "bg-[linear-gradient(135deg,#f59e0b,#fde68a)]";
+  if (type === "company") return "linear-gradient(135deg, #0f172a, #64748b)";
+  if (type === "system") return "linear-gradient(135deg, #0068d9, #9cc9ff)";
+  return "linear-gradient(135deg, #f59e0b, #fde68a)";
 }
 
 function notificationLabel(type: LmsNotificationType) {
@@ -285,39 +400,101 @@ function notificationLabel(type: LmsNotificationType) {
 function showSystemToast(notification: NotificationFeedItem, onOpenDetail: (notification: NotificationFeedItem) => void) {
   toast.custom(
     (toastId) => (
-      <div className="relative flex w-[380px] max-w-[calc(100vw-32px)] items-start gap-3 rounded-xl border border-[#b8d6fa] bg-white p-4 pr-11 text-left shadow-[0_16px_42px_rgba(15,23,42,0.16)] transition duration-300 ease-out">
-        <button
-          type="button"
+      <Box
+        sx={{
+          position: "relative",
+          display: "flex",
+          width: 380,
+          maxWidth: "calc(100vw - 32px)",
+          alignItems: "flex-start",
+          gap: 2,
+          borderRadius: 3,
+          border: "1px solid",
+          borderColor: "primary.light",
+          bgcolor: "background.paper",
+          p: 2.5,
+          pr: 5,
+          boxShadow: "0 16px 42px rgba(15,23,42,0.16)",
+        }}
+      >
+        <Button
           onClick={() => {
             toast.dismiss(toastId);
             onOpenDetail(notification);
           }}
-          className="flex min-w-0 flex-1 items-start gap-3 text-left outline-none"
+          sx={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            minWidth: 0,
+            borderRadius: 3,
+            p: 2.5,
+            justifyContent: "flex-start",
+            textAlign: "left",
+            "&:hover": { bgcolor: "action.hover" },
+          }}
         >
-          <NotificationIcon type="system" />
-          <span className="min-w-0 flex-1">
-            <span className="flex items-center gap-2">
-              <Badge variant="secondary" className="rounded-md bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
-                Hệ thống
-              </Badge>
-              <span className="text-[13px] font-semibold text-slate-600">{notification.timeLabel}</span>
-            </span>
-            <span className="mt-2 block text-sm font-semibold leading-5 text-slate-950">{notification.title}</span>
-            <span className="mt-1 block text-sm leading-5 text-slate-600">{notification.description}</span>
-          </span>
-        </button>
-        <button
-          type="button"
-          aria-label="Đóng thông báo"
-          onClick={(event) => {
-            event.stopPropagation();
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, minWidth: 0 }}>
+            <Box
+              sx={{
+                width: 44,
+                height: 44,
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "primary.main",
+                color: "white",
+                flexShrink: 0,
+              }}
+            >
+              <Notifications sx={{ fontSize: 22 }} />
+            </Box>
+            <Box sx={{ minWidth: 0, flex: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
+                <Badge
+                  label="Hệ thống"
+                  sx={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    bgcolor: "primary.light",
+                    color: "primary.main",
+                    borderRadius: 1,
+                    px: 1,
+                    py: 0.25,
+                  }}
+                />
+                <Typography sx={{ fontSize: 12, fontWeight: 500, color: "text.secondary" }}>
+                  {notification.timeLabel}
+                </Typography>
+              </Box>
+              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "text.primary" }}>
+                {notification.title}
+              </Typography>
+              <Typography sx={{ fontSize: 13, color: "text.secondary", mt: 0.5 }}>
+                {notification.description}
+              </Typography>
+            </Box>
+          </Box>
+        </Button>
+        <IconButton
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
             toast.dismiss(toastId);
           }}
-          className="absolute right-3 top-3 grid size-8 place-items-center rounded-lg text-slate-500 transition hover:bg-[#f3f4f6] hover:text-slate-800"
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: "text.secondary",
+          }}
         >
-          <X className="size-4" />
-        </button>
-      </div>
+          <Settings sx={{ fontSize: 16 }} />
+        </IconButton>
+      </Box>
     ),
     { className: "lms-system-toast", duration: 5200 },
   );

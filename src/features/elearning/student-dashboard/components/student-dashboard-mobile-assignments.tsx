@@ -1,7 +1,9 @@
-import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import { ClipboardCheck as AssignmentTurnedInOutlinedIcon } from "lucide-react";
+import { ChevronRight as ChevronRightRoundedIcon } from "lucide-react";
 
-import { Button, Card, ProgressBar } from "@/components/ui/dashboard-kit";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ProgressBar } from "@/components/ui/progress";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
@@ -26,7 +28,7 @@ export function StudentDashboardMobileAssignments({
         <Card className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[11px] font-medium text-[var(--erg-blue)]">
+              <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[11px] font-medium text-[#696CFF]">
                 {copy.assignmentsTitle}
               </div>
               <h1 className="mt-4 text-[29px] font-semibold leading-[1.1]  text-slate-900">
@@ -34,8 +36,8 @@ export function StudentDashboardMobileAssignments({
               </h1>
               <p className="mt-3 text-sm leading-6 text-slate-600">{copy.assignmentsDescription}</p>
             </div>
-            <div className="grid h-11 w-11 place-items-center rounded-lg bg-[var(--erg-blue)] text-white shadow-sm">
-              <AssignmentTurnedInOutlinedIcon fontSize="small" />
+            <div className="grid h-11 w-11 place-items-center rounded-lg bg-[#696CFF] text-white shadow-sm">
+              <AssignmentTurnedInOutlinedIcon size={16} />
             </div>
           </div>
 
@@ -79,7 +81,7 @@ export function StudentDashboardMobileAssignments({
                 <ProgressBar
                   value={assignment.progressRate}
                   className="mt-2 h-2 bg-slate-100"
-                  indicatorClassName={assignment.status === "overdue" ? "bg-[var(--erg-red)]" : "bg-[var(--erg-blue)]"}
+                  indicatorClassName={assignment.status === "overdue" ? "bg-[#FF5630]" : "bg-[#696CFF]"}
                 />
               </div>
 
@@ -93,11 +95,11 @@ export function StudentDashboardMobileAssignments({
                   </div>
                 </div>
                 <Button
-                  className="h-11 rounded-lg bg-[var(--erg-blue)] px-4 text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
+                  className="h-11 rounded-lg bg-[#696CFF] px-4 text-white shadow-sm hover:bg-[#585BE0]"
                   onClick={() => onOpenAssignment(assignment.id)}
                 >
                   {copy.assignmentAction(assignment.status)}
-                  <ChevronRightRoundedIcon fontSize="small" />
+                  <ChevronRightRoundedIcon size={16} />
                 </Button>
               </div>
             </Card>
@@ -126,7 +128,7 @@ function MobileMetric({
   value: string;
 }) {
   const valueClassName =
-    tone === "danger" ? "text-[var(--erg-red)]" : tone === "primary" ? "text-[var(--erg-blue)]" : "text-slate-900";
+    tone === "danger" ? "text-[#FF5630]" : tone === "primary" ? "text-[#696CFF]" : "text-slate-900";
 
   return (
     <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
