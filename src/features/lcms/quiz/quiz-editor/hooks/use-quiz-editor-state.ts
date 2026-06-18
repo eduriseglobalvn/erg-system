@@ -19,6 +19,7 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
 import type {
   IntroSlideKind,
+  QuestionCreationPreset,
   QuestionType,
   QuizEditorChoice,
   QuizEditorDragDropItem,
@@ -165,7 +166,7 @@ export function useQuizEditorState() {
     setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: importedSlides[0]!.id });
   }
 
-  function addQuestion(type: QuestionType) {
+  function addQuestion(type: QuestionType, preset?: QuestionCreationPreset) {
     const defaultFeedbackRows = createFeedbackRows(
       quizProject.questionDefaults.correctFeedback,
       quizProject.questionDefaults.incorrectFeedback,
@@ -174,6 +175,18 @@ export function useQuizEditorState() {
         ? { ...row, score: quizProject.questionDefaults.positivePoints }
         : { ...row, score: quizProject.questionDefaults.negativePoints },
     );
+
+    const choices =
+      preset === "yes-no"
+        ? [
+            createChoice(createId("choice"), tr("player.yes"), true),
+            createChoice(createId("choice"), tr("player.no"), false),
+          ]
+        : [
+            createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
+            createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
+            createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
+          ];
 
     insertSlide({
       id: createId("slide"),
@@ -189,11 +202,7 @@ export function useQuizEditorState() {
         },
       },
       choiceControlType: type === "multiple-choice" || type === "true-false" ? "radio" : "checkbox",
-      choices: [
-        createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
-        createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
-        createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
-      ],
+      choices,
       feedbackRows: defaultFeedbackRows,
       options: createQuestionOptions({
         shuffleAnswers: quizProject.questionDefaults.shuffleAnswers,

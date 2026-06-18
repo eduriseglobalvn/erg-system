@@ -1,8 +1,16 @@
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
+
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
+import {
+  buildPreviewTextStyle,
+  buildPreviewTitleStyle,
+} from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render-utils";
 import { useI18n } from "@/platform/i18n";
 import { createInitialAnswer } from "@/lib/quiz";
 import type { AnswerPayload, Question } from "@/lib/types";
@@ -10,6 +18,7 @@ import type {
   QuizEditorChoice,
   QuizEditorDragDropItem,
   QuizEditorFeedbackRow,
+  QuizEditorHotspotArea,
   QuizEditorSlide,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { cn } from "@/utils/cn";
@@ -25,7 +34,9 @@ type LearnerQuestionAuthoringPreviewProps = {
   onUpdateInstructions: (items: string[]) => void;
   onUpdateChoices?: (items: QuizEditorChoice[]) => void;
   onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
+  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
   onUpdateFeedbackRows?: (rows: QuizEditorFeedbackRow[]) => void;
+  onPickMedia?: () => void;
 };
 
 const previewTheme = {
@@ -45,7 +56,9 @@ export function LearnerQuestionAuthoringPreview({
   onUpdateInstructions,
   onUpdateChoices,
   onUpdateDragDropItems,
+  onUpdateHotspotAreas,
   onUpdateFeedbackRows,
+  onPickMedia,
 }: LearnerQuestionAuthoringPreviewProps) {
   const { t } = useI18n();
   const learnerQuestion = useMemo(() => buildLearnerQuestion(slide, t), [slide, t]);
@@ -100,6 +113,7 @@ export function LearnerQuestionAuthoringPreview({
   const feedback = getFeedbackText(slide, previewMode);
   const submitted = previewMode !== "question";
   const directEditing = !readOnly && previewMode === "question";
+  const answerTextStyle = buildPreviewTextStyle(slide, "answer", 22);
 
   return (
     <LearnerPreviewShell
@@ -112,8 +126,11 @@ export function LearnerQuestionAuthoringPreview({
         {directEditing ? (
           <LearnerDirectQuestionEditor
             slide={slide}
+            answerTextStyle={answerTextStyle}
             onUpdateChoices={onUpdateChoices}
             onUpdateDragDropItems={onUpdateDragDropItems}
+            onUpdateHotspotAreas={onUpdateHotspotAreas}
+            onPickMedia={onPickMedia}
           />
         ) : (
           <QuestionRenderer
@@ -132,11 +149,11 @@ export function LearnerQuestionAuthoringPreview({
             {previewMode === "correct" ? t("common.correct") : t("common.incorrect")}
           </div>
           {!readOnly && onUpdateFeedbackRows ? (
-            <textarea
+            <BufferedTextarea
               className="classic-editor__learner-feedback-input"
               value={feedback ?? ""}
-              onChange={(event) =>
-                onUpdateFeedbackRows(updateFeedbackText(slide.feedbackRows, previewMode, event.target.value))
+              onCommit={(value) =>
+                onUpdateFeedbackRows(updateFeedbackText(slide.feedbackRows, previewMode, value))
               }
               aria-label={previewMode === "correct" ? t("quiz.correctFeedback") : t("quiz.incorrectFeedback")}
             />
@@ -167,6 +184,7 @@ function LearnerPreviewShell({
     themeId: themeId ?? previewTheme.themeId,
     theme: themeId ? null : previewTheme.theme,
   };
+  const titleTextStyle = buildPreviewTitleStyle(slide, 34);
 
   return (
     <QuizThemeSurface quiz={previewQuizTheme} className="classic-editor__learner-surface">
@@ -181,11 +199,12 @@ function LearnerPreviewShell({
             {readOnly ? (
               <h2 className="classic-editor__learner-title-readonly">{slide.title}</h2>
             ) : (
-              <textarea
+              <BufferedTextarea
                 value={slide.title}
                 rows={2}
                 className="classic-editor__learner-title-input"
-                onChange={(event) => onUpdateTitle(event.target.value)}
+                style={titleTextStyle}
+                onCommit={onUpdateTitle}
                 aria-label={t("common.questionTitle")}
               />
             )}
@@ -257,10 +276,10 @@ function LearnerInstructionScreen({
               <p>{item}</p>
             ) : (
               <>
-                <textarea
+                <BufferedTextarea
                   value={item}
                   rows={2}
-                  onChange={(event) => updateInstruction(index, event.target.value)}
+                  onCommit={(value) => updateInstruction(index, value)}
                   aria-label={`${t("common.description")} ${index + 1}`}
                 />
                 <button type="button" onClick={() => removeInstruction(index)} aria-label={t("common.remove")}>
@@ -358,19 +377,36 @@ function LearnerResultScreen({ slide }: { slide: QuizEditorSlide }) {
 
 function LearnerDirectQuestionEditor({
   slide,
+  answerTextStyle,
   onUpdateChoices,
   onUpdateDragDropItems,
+  onUpdateHotspotAreas,
+  onPickMedia,
 }: {
   slide: QuizEditorSlide;
+  answerTextStyle?: CSSProperties;
   onUpdateChoices?: (items: QuizEditorChoice[]) => void;
   onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
+  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
+  onPickMedia?: () => void;
 }) {
   const { t } = useI18n();
+
+  if (slide.kind === "hotspot") {
+    return (
+      <LearnerDirectHotspotEditor
+        slide={slide}
+        onUpdateHotspotAreas={onUpdateHotspotAreas}
+        onPickMedia={onPickMedia}
+      />
+    );
+  }
 
   if (slide.kind === "drag-and-drop" || slide.kind === "matching") {
     return (
       <LearnerDirectMatchEditor
         slide={slide}
+        answerTextStyle={answerTextStyle}
         onUpdateDragDropItems={onUpdateDragDropItems}
       />
     );
@@ -380,6 +416,7 @@ function LearnerDirectQuestionEditor({
     return (
       <LearnerDirectChoiceEditor
         slide={slide}
+        answerTextStyle={answerTextStyle}
         onUpdateChoices={onUpdateChoices}
       />
     );
@@ -395,9 +432,11 @@ function LearnerDirectQuestionEditor({
 
 function LearnerDirectChoiceEditor({
   slide,
+  answerTextStyle,
   onUpdateChoices,
 }: {
   slide: QuizEditorSlide;
+  answerTextStyle?: CSSProperties;
   onUpdateChoices?: (items: QuizEditorChoice[]) => void;
 }) {
   const { t } = useI18n();
@@ -456,33 +495,251 @@ function LearnerDirectChoiceEditor({
           >
             {choice.correct ? "✓" : ""}
           </button>
-          <input
+          {choice.media?.src ? (
+            <img
+              className="classic-editor__learner-inline-image"
+              src={choice.media.src}
+              alt={choice.media.alt || choice.label}
+            />
+          ) : null}
+          <BufferedTextarea
             value={choice.label}
-            onChange={(event) => updateChoice(choice.id, { label: event.target.value })}
+            rows={1}
+            className="classic-editor__learner-direct-textarea"
+            style={answerTextStyle}
+            onCommit={(value) => updateChoice(choice.id, { label: value })}
+            mediaTarget={{ kind: "choice", id: choice.id }}
             aria-label={`${t("common.option")} ${index + 1}`}
           />
-          <button
-            type="button"
-            className="classic-editor__learner-direct-remove"
-            onClick={() => removeChoice(choice.id)}
-            aria-label={t("common.remove")}
-          >
-            x
-          </button>
+          <Tooltip title={t("common.remove")} arrow placement="left">
+            <IconButton
+              type="button"
+              size="small"
+              className="classic-editor__learner-direct-remove"
+              onClick={() => removeChoice(choice.id)}
+              aria-label={t("common.remove")}
+            >
+              <CloseRoundedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
         </div>
       ))}
-      <button type="button" className="classic-editor__learner-direct-add" onClick={addChoice}>
-        + {t("common.option")}
-      </button>
+      <Button
+        type="button"
+        className="classic-editor__learner-direct-add"
+        onClick={addChoice}
+        startIcon={<AddRoundedIcon />}
+        variant="text"
+      >
+        {t("common.option")}
+      </Button>
     </div>
   );
 }
 
+function LearnerDirectHotspotEditor({
+  slide,
+  onUpdateHotspotAreas,
+  onPickMedia,
+}: {
+  slide: QuizEditorSlide;
+  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
+  onPickMedia?: () => void;
+}) {
+  const { t } = useI18n();
+  const image = slide.media;
+  const imageFrameRef = useRef<HTMLDivElement | null>(null);
+  const [dragDraft, setDragDraft] = useState<{
+    pointerId: number;
+    start: { x: number; y: number };
+    current: { x: number; y: number };
+  } | null>(null);
+  const correctArea = slide.hotspotAreas?.find((area) => area.correct) ?? null;
+  const previewArea = dragDraft ? createAreaFromPoints(dragDraft.start, dragDraft.current, correctArea?.id) : correctArea;
+
+  function readPoint(event: ReactPointerEvent<HTMLDivElement>) {
+    const target = imageFrameRef.current;
+    if (!target) return null;
+
+    const rect = target.getBoundingClientRect();
+    return {
+      x: clampUnit((event.clientX - rect.left) / rect.width),
+      y: clampUnit((event.clientY - rect.top) / rect.height),
+    };
+  }
+
+  function commitArea(nextArea: QuizEditorHotspotArea) {
+    onUpdateHotspotAreas?.([
+      {
+        ...nextArea,
+        id: correctArea?.id ?? nextArea.id,
+        shape: "rect",
+        correct: true,
+      },
+    ]);
+  }
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!image?.src || !onUpdateHotspotAreas || event.button !== 0) return;
+    const point = readPoint(event);
+    if (!point) return;
+
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setDragDraft({ pointerId: event.pointerId, start: point, current: point });
+  }
+
+  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragDraft || dragDraft.pointerId !== event.pointerId) return;
+    const point = readPoint(event);
+    if (!point) return;
+
+    setDragDraft({ ...dragDraft, current: point });
+  }
+
+  function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (!dragDraft || dragDraft.pointerId !== event.pointerId) return;
+    const point = readPoint(event) ?? dragDraft.current;
+    const dragDistance = Math.hypot(point.x - dragDraft.start.x, point.y - dragDraft.start.y);
+    const nextArea =
+      dragDistance < 0.015
+        ? createCenteredHotspotArea(point, correctArea?.id)
+        : createAreaFromPoints(dragDraft.start, point, correctArea?.id);
+
+    commitArea(nextArea);
+    setDragDraft(null);
+  }
+
+  function clearArea() {
+    onUpdateHotspotAreas?.([]);
+  }
+
+  if (!image?.src) {
+    return (
+      <div className="classic-editor__learner-hotspot-empty">
+        <div className="classic-editor__learner-hotspot-empty-icon" aria-hidden="true">
+          <AddRoundedIcon />
+        </div>
+        <strong>{t("quiz.hotspot")}</strong>
+        <span>Thêm ảnh để tạo Click Map, sau đó bấm hoặc kéo trên ảnh để đặt vùng đáp án đúng.</span>
+        <Button type="button" variant="contained" onClick={onPickMedia} startIcon={<AddRoundedIcon />}>
+          {t("quiz.addImage")}
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="classic-editor__learner-hotspot-editor">
+      <div className="classic-editor__learner-hotspot-toolbar">
+        <div>
+          <strong>{t("quiz.hotspot")}</strong>
+          <span>Bấm để đặt nhanh, hoặc kéo để vẽ vùng đúng như bản đồ đáp án.</span>
+        </div>
+        <div className="classic-editor__learner-hotspot-actions">
+          <Button type="button" size="small" variant="outlined" onClick={onPickMedia}>
+            {t("quiz.replaceImage")}
+          </Button>
+          <Button type="button" size="small" variant="text" color="error" onClick={clearArea} disabled={!correctArea}>
+            {t("common.remove")}
+          </Button>
+        </div>
+      </div>
+
+      <div className="classic-editor__learner-hotspot-stage">
+        <div
+          ref={imageFrameRef}
+          className={cn("classic-editor__learner-hotspot-image-frame", onUpdateHotspotAreas && "is-editable")}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={() => setDragDraft(null)}
+        >
+          <img src={image.src} alt={image.alt || slide.title} draggable={false} />
+          {previewArea ? <HotspotAreaOverlay area={previewArea} isDraft={Boolean(dragDraft)} /> : null}
+        </div>
+      </div>
+
+      <div className="classic-editor__learner-hotspot-meta" aria-live="polite">
+        {correctArea ? (
+          <>
+            <span>X {Math.round(correctArea.x * 100)}%</span>
+            <span>Y {Math.round(correctArea.y * 100)}%</span>
+            <span>W {Math.round(correctArea.width * 100)}%</span>
+            <span>H {Math.round(correctArea.height * 100)}%</span>
+          </>
+        ) : (
+          <span>{t("player.clickImagePrompt")}</span>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function HotspotAreaOverlay({ area, isDraft }: { area: QuizEditorHotspotArea; isDraft: boolean }) {
+  return (
+    <div
+      className={cn("classic-editor__learner-hotspot-area", isDraft && "is-draft")}
+      style={{
+        left: `${area.x * 100}%`,
+        top: `${area.y * 100}%`,
+        width: `${area.width * 100}%`,
+        height: `${area.height * 100}%`,
+      }}
+    >
+      <span>Đúng</span>
+      <i className="is-top-left" />
+      <i className="is-top-right" />
+      <i className="is-bottom-left" />
+      <i className="is-bottom-right" />
+    </div>
+  );
+}
+
+function createCenteredHotspotArea(point: { x: number; y: number }, id = createDraftId("hotspot")): QuizEditorHotspotArea {
+  const width = 0.18;
+  const height = 0.16;
+
+  return {
+    id,
+    shape: "rect",
+    x: Math.min(clampUnit(point.x - width / 2), 1 - width),
+    y: Math.min(clampUnit(point.y - height / 2), 1 - height),
+    width,
+    height,
+    correct: true,
+  };
+}
+
+function createAreaFromPoints(
+  start: { x: number; y: number },
+  end: { x: number; y: number },
+  id = createDraftId("hotspot"),
+): QuizEditorHotspotArea {
+  const minX = Math.min(start.x, end.x);
+  const minY = Math.min(start.y, end.y);
+  const maxX = Math.max(start.x, end.x);
+  const maxY = Math.max(start.y, end.y);
+  const width = Math.max(maxX - minX, 0.04);
+  const height = Math.max(maxY - minY, 0.04);
+
+  return {
+    id,
+    shape: "rect",
+    x: clampUnit(minX),
+    y: clampUnit(minY),
+    width: Math.min(width, 1 - clampUnit(minX)),
+    height: Math.min(height, 1 - clampUnit(minY)),
+    correct: true,
+  };
+}
+
 function LearnerDirectMatchEditor({
   slide,
+  answerTextStyle,
   onUpdateDragDropItems,
 }: {
   slide: QuizEditorSlide;
+  answerTextStyle?: CSSProperties;
   onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
 }) {
   const { t } = useI18n();
@@ -513,48 +770,238 @@ function LearnerDirectMatchEditor({
   }
 
   return (
-    <div className="classic-editor__learner-direct-match">
-      <div className="classic-editor__learner-direct-match-head">
-        <span>{t("common.dragItem")}</span>
-        <span>{t("common.dropTarget")}</span>
-      </div>
+    <Box className="classic-editor__learner-direct-match">
+      <Box className="classic-editor__learner-direct-match-head">
+        <Typography component="span" variant="caption">
+          {t("common.dragItem")}
+        </Typography>
+        <Typography component="span" variant="caption" aria-hidden="true">
+          =
+        </Typography>
+        <Typography component="span" variant="caption">
+          {t("common.dropTarget")}
+        </Typography>
+      </Box>
       {items.map((item) => (
-        <div key={item.id} className="classic-editor__learner-direct-match-row">
-          <div className="classic-editor__learner-direct-drag-card">
-            <input
+        <Box key={item.id} className="classic-editor__learner-direct-match-row">
+          <Box className="classic-editor__learner-direct-drag-card">
+            <Typography component="span" variant="caption" className="classic-editor__learner-direct-field-label">
+              {t("common.dragItem")}
+            </Typography>
+            {item.media?.src ? (
+              <Box className="classic-editor__learner-inline-media-frame">
+                <img
+                  className="classic-editor__learner-inline-image"
+                  src={item.media.src}
+                  alt={item.media.alt || item.label}
+                />
+              </Box>
+            ) : null}
+            <BufferedInput
               value={item.emoji}
               maxLength={3}
-              onChange={(event) => updateItem(item.id, { emoji: event.target.value })}
+              onCommit={(value) => updateItem(item.id, { emoji: value })}
               aria-label="Icon"
             />
-            <input
+            <BufferedTextarea
               value={item.label}
-              onChange={(event) => updateItem(item.id, { label: event.target.value })}
+              rows={1}
+              className="classic-editor__learner-direct-textarea"
+              style={answerTextStyle}
+              onCommit={(value) => updateItem(item.id, { label: value })}
+              mediaTarget={{ kind: "drag-item", id: item.id, field: "label" }}
               aria-label={t("common.dragItem")}
             />
-          </div>
-          <div className="classic-editor__learner-direct-link-dot" />
-          <input
-            className="classic-editor__learner-direct-target"
-            value={item.target}
-            onChange={(event) => updateItem(item.id, { target: event.target.value })}
-            aria-label={t("common.dropTarget")}
-          />
-          <button
-            type="button"
-            className="classic-editor__learner-direct-remove"
-            onClick={() => removeItem(item.id)}
-            aria-label={t("common.remove")}
-          >
-            x
-          </button>
-        </div>
+          </Box>
+          <Typography className="classic-editor__learner-direct-equals" component="span" aria-hidden="true">
+            =
+          </Typography>
+          <Box className="classic-editor__learner-direct-target-card">
+            <Typography component="span" variant="caption" className="classic-editor__learner-direct-field-label">
+              {t("common.dropTarget")}
+            </Typography>
+            {item.targetMedia?.src ? (
+              <Box className="classic-editor__learner-inline-media-frame">
+                <img
+                  className="classic-editor__learner-inline-image"
+                  src={item.targetMedia.src}
+                  alt={item.targetMedia.alt || item.target}
+                />
+              </Box>
+            ) : null}
+            <BufferedTextarea
+              className="classic-editor__learner-direct-target classic-editor__learner-direct-textarea"
+              value={item.target}
+              rows={1}
+              style={answerTextStyle}
+              onCommit={(value) => updateItem(item.id, { target: value })}
+              mediaTarget={{ kind: "drag-item", id: item.id, field: "target" }}
+              aria-label={t("common.dropTarget")}
+            />
+          </Box>
+          <Tooltip title={t("common.remove")} arrow placement="left">
+            <IconButton
+              type="button"
+              size="small"
+              className="classic-editor__learner-direct-remove"
+              onClick={() => removeItem(item.id)}
+              aria-label={t("common.remove")}
+            >
+              <CloseRoundedIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       ))}
-      <button type="button" className="classic-editor__learner-direct-add" onClick={addItem}>
-        + {t("common.dragItem")}
-      </button>
-    </div>
+      <Button
+        type="button"
+        className="classic-editor__learner-direct-add"
+        onClick={addItem}
+        startIcon={<AddRoundedIcon />}
+        variant="text"
+      >
+        {t("common.dragItem")}
+      </Button>
+    </Box>
   );
+}
+
+type BufferedTextProps = {
+  value: string;
+  onCommit: (value: string) => void;
+  className?: string;
+  style?: CSSProperties;
+  rows?: number;
+  maxLength?: number;
+  mediaTarget?: {
+    kind: "choice" | "drag-item";
+    id: string;
+    field?: "label" | "target";
+  };
+  "aria-label"?: string;
+};
+
+function BufferedInput({
+  value,
+  onCommit,
+  className,
+  style,
+  maxLength,
+  mediaTarget,
+  "aria-label": ariaLabel,
+}: BufferedTextProps) {
+  const { draft, handleBlur, handleChange, handleFocus } = useBufferedText(value, onCommit);
+
+  return (
+    <input
+      className={className}
+      value={draft}
+      style={style}
+      maxLength={maxLength}
+      data-media-target-kind={mediaTarget?.kind}
+      data-media-target-id={mediaTarget?.id}
+      data-media-target-field={mediaTarget?.field}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onChange={(event) => handleChange(event.target.value)}
+      aria-label={ariaLabel}
+    />
+  );
+}
+
+function BufferedTextarea({
+  value,
+  onCommit,
+  className,
+  style,
+  rows,
+  mediaTarget,
+  "aria-label": ariaLabel,
+}: BufferedTextProps) {
+  const { draft, handleBlur, handleChange, handleFocus } = useBufferedText(value, onCommit);
+  const textAreaRef = useAutoResizeTextarea(draft);
+
+  return (
+    <textarea
+      ref={textAreaRef}
+      className={className}
+      value={draft}
+      rows={rows}
+      style={style}
+      data-media-target-kind={mediaTarget?.kind}
+      data-media-target-id={mediaTarget?.id}
+      data-media-target-field={mediaTarget?.field}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onChange={(event) => handleChange(event.target.value)}
+      aria-label={ariaLabel}
+    />
+  );
+}
+
+function useAutoResizeTextarea(value: string) {
+  const ref = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }, [value]);
+
+  return ref;
+}
+
+function useBufferedText(value: string, onCommit: (value: string) => void) {
+  const [draft, setDraft] = useState(value);
+  const commitRef = useRef(onCommit);
+  const focusedRef = useRef(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    commitRef.current = onCommit;
+  }, [onCommit]);
+
+  useEffect(() => {
+    if (!focusedRef.current) {
+      setDraft(value);
+    }
+  }, [value]);
+
+  useEffect(
+    () => () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    },
+    [],
+  );
+
+  function commit(nextValue: string) {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    commitRef.current(nextValue);
+  }
+
+  function handleChange(nextValue: string) {
+    setDraft(nextValue);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    timerRef.current = setTimeout(() => commitRef.current(nextValue), 90);
+  }
+
+  function handleFocus() {
+    focusedRef.current = true;
+  }
+
+  function handleBlur() {
+    focusedRef.current = false;
+    commit(draft);
+  }
+
+  return { draft, handleBlur, handleChange, handleFocus };
 }
 
 function buildLearnerQuestion(
@@ -635,17 +1082,19 @@ function buildLearnerQuestion(
           width: 1200,
           height: 675,
         },
-        hotspotAreas: [
-          {
-            id: `${slide.id}-hotspot-1`,
-            shape: "rect",
-            x: 0.36,
-            y: 0.3,
-            width: 0.28,
-            height: 0.28,
-            correct: true,
-          },
-        ],
+        hotspotAreas: slide.hotspotAreas?.length
+          ? slide.hotspotAreas
+          : [
+              {
+                id: `${slide.id}-hotspot-1`,
+                shape: "rect",
+                x: 0.36,
+                y: 0.3,
+                width: 0.28,
+                height: 0.28,
+                correct: true,
+              },
+            ],
       };
     default:
       return null;
@@ -814,6 +1263,10 @@ function isChoiceAuthoringSlide(kind: QuizEditorSlide["kind"]) {
 
 function createDraftId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
+}
+
+function clampUnit(value: number) {
+  return Math.min(Math.max(value, 0), 1);
 }
 
 function extractCorrectScore(slide: QuizEditorSlide) {

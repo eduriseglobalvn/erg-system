@@ -1,9 +1,13 @@
 import { FormViewRibbon } from "@/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon";
-import type { IntroSlideKind, QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type {
+  IntroSlideKind,
+  QuestionCreationPreset,
+  QuestionType,
+} from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 type RibbonProps = {
   onAddQuestionGroup: () => void;
-  onAddQuestion: (type: QuestionType) => void;
+  onAddQuestion: (type: QuestionType, preset?: QuestionCreationPreset) => void;
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenQuizProperties: () => void;
   onOpenResults: () => void;

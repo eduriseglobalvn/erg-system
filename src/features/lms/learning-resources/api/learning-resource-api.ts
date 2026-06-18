@@ -797,8 +797,14 @@ export function getMockLearningResourceLibraryCategories(): LearningResourceCate
     parentId: category.subjectId,
     icon: category.subjectId === "mock-stem" ? "stem" : "certificate",
   }));
+  const sectionFolders: LearningResourceCategory[] = mockLearningResourceAuthoringTaxonomy.sections.map((section) => ({
+    id: section.id,
+    label: section.label,
+    parentId: section.categoryId,
+    icon: "document",
+  }));
 
-  return [...subjectRoots, ...categoryFolders];
+  return [...subjectRoots, ...categoryFolders, ...sectionFolders];
 }
 
 export function getDefaultMockLearningResourceLibrarySelection(gradeId: string) {

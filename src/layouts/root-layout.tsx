@@ -34,9 +34,9 @@ export function RootLayout() {
       logoutAccount();
       logoutStudentSession();
 
-      if (location.pathname === "/login") return;
+      if (window.location.pathname === "/login") return;
 
-      const currentPath = `${location.pathname}${location.search}${location.hash}`;
+      const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
       const redirect = currentPath && currentPath !== "/" ? `?redirect=${encodeURIComponent(currentPath)}` : "";
       navigate(`/login${redirect}`, { replace: true });
     }
@@ -48,7 +48,7 @@ export function RootLayout() {
       window.removeEventListener(AUTH_SESSION_INVALID_EVENT, redirectToLogin);
       window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, redirectToLogin);
     };
-  }, [location.hash, location.pathname, location.search, navigate]);
+  }, [navigate]);
 
   return (
     <TooltipProvider>

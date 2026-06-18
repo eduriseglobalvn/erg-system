@@ -11,6 +11,16 @@ export const monoFontStack = '"JetBrains Mono", "SF Mono", ui-monospace, monospa
 export const quizFontStacks = {
   "Public Sans": appFontStack,
   "Fraunces": headingFontStack,
+  "Arial": 'Arial, "Helvetica Neue", sans-serif',
+  "Times New Roman": '"Times New Roman", Times, serif',
+  "Calibri": 'Calibri, "Segoe UI", sans-serif',
+  "Cambria": 'Cambria, Georgia, serif',
+  "Georgia": 'Georgia, "Times New Roman", serif',
+  "Verdana": 'Verdana, Geneva, sans-serif',
+  "Tahoma": 'Tahoma, Geneva, sans-serif',
+  "Trebuchet MS": '"Trebuchet MS", Arial, sans-serif',
+  "Segoe UI": '"Segoe UI", "Public Sans", sans-serif',
+  "Courier New": '"Courier New", Courier, monospace',
   "Default": appFontStack,
 } as const;
 

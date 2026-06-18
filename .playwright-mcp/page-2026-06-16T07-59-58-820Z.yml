@@ -1,0 +1,457 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - button "Thu gon menu" [ref=e6] [cursor=pointer]:
+        - img [ref=e7]
+      - button "Logo" [ref=e10] [cursor=pointer]:
+        - img "ERG" [ref=e11]
+      - navigation [ref=e13]:
+        - list [ref=e15]:
+          - listitem [ref=e16]:
+            - button "Trang chủ" [ref=e17] [cursor=pointer]:
+              - img [ref=e19]
+              - generic [ref=e24]: Trang chủ
+          - listitem [ref=e25]:
+            - button "Báo cáo" [ref=e26] [cursor=pointer]:
+              - img [ref=e28]
+              - generic [ref=e32]: Báo cáo
+              - img [ref=e33]
+          - listitem [ref=e35]:
+            - button "Lịch toàn trung tâm beta" [ref=e36] [cursor=pointer]:
+              - img [ref=e38]
+              - generic [ref=e42]:
+                - generic [ref=e43]: Lịch toàn trung tâm
+                - generic [ref=e44]: beta
+        - generic [ref=e45]:
+          - generic [ref=e47]: CRM & Hiệu suất
+          - list [ref=e48]:
+            - listitem [ref=e49]:
+              - button "Khách hàng" [ref=e50] [cursor=pointer]:
+                - img [ref=e52]
+                - generic [ref=e57]: Khách hàng
+            - listitem [ref=e58]:
+              - button "Công việc" [ref=e59] [cursor=pointer]:
+                - img [ref=e61]
+                - generic [ref=e66]: Công việc
+        - generic [ref=e67]:
+          - generic [ref=e69]: Giảng dạy
+          - list [ref=e70]:
+            - listitem [ref=e71]:
+              - button "Học viên" [ref=e72] [cursor=pointer]:
+                - img [ref=e74]
+                - generic [ref=e77]: Học viên
+                - img [ref=e78]
+            - listitem [ref=e80]:
+              - button "Khóa học" [ref=e81] [cursor=pointer]:
+                - img [ref=e83]
+                - generic [ref=e88]: Khóa học
+            - listitem [ref=e89]:
+              - button "Lớp học" [ref=e90] [cursor=pointer]:
+                - img [ref=e92]
+                - generic [ref=e97]: Lớp học
+            - listitem [ref=e98]:
+              - button "Buổi học" [ref=e99] [cursor=pointer]:
+                - img [ref=e101]
+                - generic [ref=e106]: Buổi học
+            - listitem [ref=e107]:
+              - button "Bài tập" [ref=e108] [cursor=pointer]:
+                - img [ref=e110]
+                - generic [ref=e115]: Bài tập
+            - listitem [ref=e116]:
+              - button "Bài tập & tài liệu" [ref=e117] [cursor=pointer]:
+                - img [ref=e119]
+                - generic [ref=e122]: Bài tập & tài liệu
+                - img [ref=e123]
+            - listitem [ref=e125]:
+              - button "Tạo Quiz" [ref=e126] [cursor=pointer]:
+                - img [ref=e128]
+                - generic [ref=e133]: Tạo Quiz
+            - listitem [ref=e134]:
+              - button "Quản lý học liệu" [ref=e135] [cursor=pointer]:
+                - img [ref=e137]
+                - generic [ref=e142]: Quản lý học liệu
+        - generic [ref=e143]:
+          - generic [ref=e145]: Quản lý
+          - list [ref=e146]:
+            - listitem [ref=e147]:
+              - button "Nhân sự" [ref=e148] [cursor=pointer]:
+                - img [ref=e150]
+                - generic [ref=e153]: Nhân sự
+                - img [ref=e154]
+            - listitem [ref=e156]:
+              - button "Tài chính" [ref=e157] [cursor=pointer]:
+                - img [ref=e159]
+                - generic [ref=e162]: Tài chính
+                - img [ref=e163]
+            - listitem [ref=e165]:
+              - button "Khác" [ref=e166] [cursor=pointer]:
+                - img [ref=e168]
+                - generic [ref=e171]: Khác
+                - img [ref=e172]
+        - generic [ref=e174]:
+          - generic [ref=e176]: Hệ thống
+          - list [ref=e177]:
+            - listitem [ref=e178]:
+              - button "Thiết lập" [ref=e179] [cursor=pointer]:
+                - img [ref=e181]
+                - generic [ref=e184]: Thiết lập
+                - img [ref=e185]
+            - listitem [ref=e187]:
+              - button "Tích hợp" [ref=e188] [cursor=pointer]:
+                - img [ref=e190]
+                - generic [ref=e193]: Tích hợp
+                - img [ref=e194]
+    - generic [ref=e196]:
+      - banner [ref=e197]:
+        - generic [ref=e198]:
+          - generic "Chất lượng kết nối" [ref=e199]:
+            - img [ref=e200]
+            - paragraph [ref=e202]: Mạng tốt
+          - button "Tìm kiếm nhanh" [ref=e203] [cursor=pointer]:
+            - img [ref=e204]
+            - generic [ref=e206]: ⌘K
+          - button "Ngôn ngữ" [ref=e207] [cursor=pointer]:
+            - paragraph [ref=e208]: VN
+          - button "Trợ lý" [ref=e209] [cursor=pointer]:
+            - img [ref=e210]
+          - generic [ref=e212]:
+            - button "Thông báo" [ref=e213] [cursor=pointer]:
+              - img [ref=e214]
+            - generic [ref=e216]: "24"
+          - button "Thiết lập" [ref=e217] [cursor=pointer]:
+            - img [ref=e218]
+          - button "ERG Super Admin" [ref=e220] [cursor=pointer]:
+            - generic [ref=e221]: E
+      - main [ref=e222]:
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e227]:
+              - button [ref=e228] [cursor=pointer]
+              - button "Home" [ref=e230] [cursor=pointer]
+              - button "Help" [ref=e231] [cursor=pointer]
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - button "Câu hỏi" [ref=e236] [cursor=pointer]:
+                  - img [ref=e238]
+                  - generic [ref=e240]: Câu hỏi
+                  - img [ref=e241]
+                - button "Nhóm câu hỏi" [active] [ref=e243] [cursor=pointer]:
+                  - img [ref=e245]
+                  - generic [ref=e247]: Nhóm câu hỏi
+                - button "Giới thiệu" [ref=e249] [cursor=pointer]:
+                  - img [ref=e251]
+                  - generic [ref=e253]: Giới thiệu
+                  - img [ref=e254]
+                - generic [ref=e256]: Mới
+              - generic [ref=e257]:
+                - button "Thuộc tính bài kiểm tra" [ref=e258] [cursor=pointer]:
+                  - img [ref=e260]
+                  - generic [ref=e262]: Thuộc tính bài kiểm tra
+                - button "Giao diện player" [ref=e263] [cursor=pointer]:
+                  - img [ref=e265]
+                  - generic [ref=e271]: Giao diện player
+                - generic [ref=e272]: Cài đặt
+              - generic [ref=e273]:
+                - button "Xem trước" [ref=e274] [cursor=pointer]:
+                  - img [ref=e276]
+                  - generic [ref=e278]: Xem trước
+                - button "Xuất bản" [ref=e279] [cursor=pointer]:
+                  - img [ref=e281]
+                  - generic [ref=e283]: Xuất bản
+                - generic [ref=e284]: Xuất bản
+              - generic [ref=e285]:
+                - button "Quản lý kết quả" [ref=e286] [cursor=pointer]:
+                  - img [ref=e288]
+                  - generic [ref=e291]: Quản lý kết quả
+                - generic [ref=e292]: Kết quả
+          - generic [ref=e293]:
+            - complementary [ref=e294]:
+              - generic [ref=e296]:
+                - generic [ref=e297]: Quản lý câu hỏi
+                - generic [ref=e298]: Đây là bài kiểm tra mẫu
+              - generic [ref=e299]:
+                - generic [ref=e300]: Sắp xếp câu hỏi theo
+                - combobox [ref=e301] [cursor=pointer]:
+                  - generic: Loại câu hỏi
+                  - img
+              - generic [ref=e303]:
+                - img [ref=e304]
+                - textbox [ref=e307]:
+                  - /placeholder: Tìm kiếm
+              - generic [ref=e308]:
+                - generic [ref=e309]:
+                  - img [ref=e310]
+                  - generic [ref=e312]: Đây là bài kiểm tra mẫu
+                - generic [ref=e313]:
+                  - button "Tất cả loại câu hỏi 15" [ref=e314] [cursor=pointer]:
+                    - generic [ref=e315]: Tất cả loại câu hỏi
+                    - generic [ref=e316]: "15"
+                  - button "Trang hướng dẫn 1" [ref=e317] [cursor=pointer]:
+                    - generic [ref=e318]: Trang hướng dẫn
+                    - generic [ref=e319]: "1"
+                  - button "Chọn nhiều đáp án 1" [ref=e320] [cursor=pointer]:
+                    - generic [ref=e321]: Chọn nhiều đáp án
+                    - generic [ref=e322]: "1"
+                  - button "Chọn một đáp án 1" [ref=e323] [cursor=pointer]:
+                    - generic [ref=e324]: Chọn một đáp án
+                    - generic [ref=e325]: "1"
+                  - button "Đúng / Sai 1" [ref=e326] [cursor=pointer]:
+                    - generic [ref=e327]: Đúng / Sai
+                    - generic [ref=e328]: "1"
+                  - button "Kéo và thả 1" [ref=e329] [cursor=pointer]:
+                    - generic [ref=e330]: Kéo và thả
+                    - generic [ref=e331]: "1"
+                  - button "Nối cặp 1" [ref=e332] [cursor=pointer]:
+                    - generic [ref=e333]: Nối cặp
+                    - generic [ref=e334]: "1"
+                  - button "Sắp xếp thứ tự 1" [ref=e335] [cursor=pointer]:
+                    - generic [ref=e336]: Sắp xếp thứ tự
+                    - generic [ref=e337]: "1"
+                  - button "Điền vào chỗ trống 1" [ref=e338] [cursor=pointer]:
+                    - generic [ref=e339]: Điền vào chỗ trống
+                    - generic [ref=e340]: "1"
+                  - button "Chọn từ danh sách 1" [ref=e341] [cursor=pointer]:
+                    - generic [ref=e342]: Chọn từ danh sách
+                    - generic [ref=e343]: "1"
+                  - button "Kéo từ 1" [ref=e344] [cursor=pointer]:
+                    - generic [ref=e345]: Kéo từ
+                    - generic [ref=e346]: "1"
+                  - button "Điểm nóng 1" [ref=e347] [cursor=pointer]:
+                    - generic [ref=e348]: Điểm nóng
+                    - generic [ref=e349]: "1"
+                  - button "Trả lời ngắn 1" [ref=e350] [cursor=pointer]:
+                    - generic [ref=e351]: Trả lời ngắn
+                    - generic [ref=e352]: "1"
+                  - button "Số học 1" [ref=e353] [cursor=pointer]:
+                    - generic [ref=e354]: Số học
+                    - generic [ref=e355]: "1"
+                  - button "Thang Likert 1" [ref=e356] [cursor=pointer]:
+                    - generic [ref=e357]: Thang Likert
+                    - generic [ref=e358]: "1"
+                  - button "Tự luận 1" [ref=e359] [cursor=pointer]:
+                    - generic [ref=e360]: Tự luận
+                    - generic [ref=e361]: "1"
+            - main [ref=e362]:
+              - generic [ref=e364]:
+                - generic [ref=e365]:
+                  - generic [ref=e366]:
+                    - generic [ref=e367]: Quản lý câu hỏi
+                    - strong [ref=e368]: Đây là bài kiểm tra mẫu
+                  - generic [ref=e369]:
+                    - generic [ref=e370]: 15 câu hỏi
+                    - generic [ref=e371]: 3 nhóm
+                    - generic [ref=e372]: Tất cả loại câu hỏi
+                  - generic [ref=e373]:
+                    - button "Mở trình sửa" [disabled] [ref=e374]:
+                      - img [ref=e375]
+                      - generic [ref=e377]: Mở trình sửa
+                    - button "Nhân bản" [disabled] [ref=e378]:
+                      - img [ref=e379]
+                      - generic [ref=e381]: Nhân bản
+                    - button "Xóa" [disabled] [ref=e382]:
+                      - img [ref=e383]
+                      - generic [ref=e385]: Xóa
+                - table [ref=e387]:
+                  - rowgroup [ref=e388]:
+                    - 'row "ID Loại câu hỏi: Câu hỏi Phản hồi Nhóm Điểm Media Chỉnh sửa" [ref=e389]':
+                      - columnheader "ID" [ref=e390]
+                      - columnheader "Loại câu hỏi:" [ref=e391]
+                      - columnheader "Câu hỏi" [ref=e392]
+                      - columnheader "Phản hồi" [ref=e393]
+                      - columnheader "Nhóm" [ref=e394]
+                      - columnheader "Điểm" [ref=e395]
+                      - columnheader "Media" [ref=e396]
+                      - columnheader "Chỉnh sửa" [ref=e397]
+                  - rowgroup [ref=e398]:
+                    - 'row "1 Trang hướng dẫn Đây là bài kiểm tra mẫu Không Nhóm giới thiệu 0 Hướng dẫn Chỉnh sửa: Đây là bài kiểm tra mẫu" [ref=e399]':
+                      - cell "1" [ref=e400]
+                      - cell "Trang hướng dẫn" [ref=e401]
+                      - cell "Đây là bài kiểm tra mẫu" [ref=e402]:
+                        - button "Đây là bài kiểm tra mẫu" [ref=e403] [cursor=pointer]:
+                          - generic [ref=e404]: Đây là bài kiểm tra mẫu
+                      - cell "Không" [ref=e405]
+                      - cell "Nhóm giới thiệu" [ref=e406]
+                      - cell "0" [ref=e407]
+                      - cell "Hướng dẫn" [ref=e408]
+                      - 'cell "Chỉnh sửa: Đây là bài kiểm tra mẫu" [ref=e409]':
+                        - 'button "Chỉnh sửa: Đây là bài kiểm tra mẫu" [ref=e410] [cursor=pointer]': Chỉnh sửa
+                    - 'row "2 Chọn nhiều đáp án Món nào sau đây là nguồn chất xơ? Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Món nào sau đây là nguồn chất xơ?" [ref=e411]':
+                      - cell "2" [ref=e412]
+                      - cell "Chọn nhiều đáp án" [ref=e413]
+                      - cell "Món nào sau đây là nguồn chất xơ?" [ref=e414]:
+                        - button "Món nào sau đây là nguồn chất xơ?" [ref=e415] [cursor=pointer]:
+                          - generic [ref=e416]: Món nào sau đây là nguồn chất xơ?
+                      - cell "Theo kết quả" [ref=e417]
+                      - cell "Nhóm câu hỏi 1" [ref=e418]
+                      - cell "10" [ref=e419]
+                      - cell "Không" [ref=e420]
+                      - 'cell "Chỉnh sửa: Món nào sau đây là nguồn chất xơ?" [ref=e421]':
+                        - 'button "Chỉnh sửa: Món nào sau đây là nguồn chất xơ?" [ref=e422] [cursor=pointer]': Chỉnh sửa
+                    - 'row "3 Chọn một đáp án A slice of toast has fewer calories than a slice of bread. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: A slice of toast has fewer calories than a slice of bread." [ref=e423]':
+                      - cell "3" [ref=e424]
+                      - cell "Chọn một đáp án" [ref=e425]
+                      - cell "A slice of toast has fewer calories than a slice of bread." [ref=e426]:
+                        - button "A slice of toast has fewer calories than a slice of bread." [ref=e427] [cursor=pointer]:
+                          - generic [ref=e428]: A slice of toast has fewer calories than a slice of bread.
+                      - cell "Theo kết quả" [ref=e429]
+                      - cell "Nhóm câu hỏi 1" [ref=e430]
+                      - cell "10" [ref=e431]
+                      - cell "Không" [ref=e432]
+                      - 'cell "Chỉnh sửa: A slice of toast has fewer calories than a slice of bread." [ref=e433]':
+                        - 'button "Chỉnh sửa: A slice of toast has fewer calories than a slice of bread." [ref=e434] [cursor=pointer]': Chỉnh sửa
+                    - 'row "4 Đúng / Sai Fresh fruit and vegetables can be part of a balanced breakfast. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Fresh fruit and vegetables can be part of a balanced breakfast." [ref=e435]':
+                      - cell "4" [ref=e436]
+                      - cell "Đúng / Sai" [ref=e437]
+                      - cell "Fresh fruit and vegetables can be part of a balanced breakfast." [ref=e438]:
+                        - button "Fresh fruit and vegetables can be part of a balanced breakfast." [ref=e439] [cursor=pointer]:
+                          - generic [ref=e440]: Fresh fruit and vegetables can be part of a balanced breakfast.
+                      - cell "Theo kết quả" [ref=e441]
+                      - cell "Nhóm câu hỏi 1" [ref=e442]
+                      - cell "10" [ref=e443]
+                      - cell "Không" [ref=e444]
+                      - 'cell "Chỉnh sửa: Fresh fruit and vegetables can be part of a balanced breakfast." [ref=e445]':
+                        - 'button "Chỉnh sửa: Fresh fruit and vegetables can be part of a balanced breakfast." [ref=e446] [cursor=pointer]': Chỉnh sửa
+                    - 'row "5 Kéo và thả Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh. Theo kết quả Nhóm câu hỏi 1 10 9 mục Chỉnh sửa: Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh." [ref=e447]':
+                      - cell "5" [ref=e448]
+                      - cell "Kéo và thả" [ref=e449]
+                      - cell "Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh." [ref=e450]:
+                        - button "Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh." [ref=e451] [cursor=pointer]:
+                          - generic [ref=e452]: Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh.
+                      - cell "Theo kết quả" [ref=e453]
+                      - cell "Nhóm câu hỏi 1" [ref=e454]
+                      - cell "10" [ref=e455]
+                      - cell "9 mục" [ref=e456]
+                      - 'cell "Chỉnh sửa: Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh." [ref=e457]':
+                        - 'button "Chỉnh sửa: Sắp xếp thực phẩm vào nhóm lành mạnh và không lành mạnh." [ref=e458] [cursor=pointer]': Chỉnh sửa
+                    - 'row "6 Nối cặp Match each learning activity with the best tool. Theo kết quả Nhóm câu hỏi 1 10 3 mục Chỉnh sửa: Match each learning activity with the best tool." [ref=e459]':
+                      - cell "6" [ref=e460]
+                      - cell "Nối cặp" [ref=e461]
+                      - cell "Match each learning activity with the best tool." [ref=e462]:
+                        - button "Match each learning activity with the best tool." [ref=e463] [cursor=pointer]:
+                          - generic [ref=e464]: Match each learning activity with the best tool.
+                      - cell "Theo kết quả" [ref=e465]
+                      - cell "Nhóm câu hỏi 1" [ref=e466]
+                      - cell "10" [ref=e467]
+                      - cell "3 mục" [ref=e468]
+                      - 'cell "Chỉnh sửa: Match each learning activity with the best tool." [ref=e469]':
+                        - 'button "Chỉnh sửa: Match each learning activity with the best tool." [ref=e470] [cursor=pointer]': Chỉnh sửa
+                    - 'row "7 Sắp xếp thứ tự Put the lesson planning steps in the correct order. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Put the lesson planning steps in the correct order." [ref=e471]':
+                      - cell "7" [ref=e472]
+                      - cell "Sắp xếp thứ tự" [ref=e473]
+                      - cell "Put the lesson planning steps in the correct order." [ref=e474]:
+                        - button "Put the lesson planning steps in the correct order." [ref=e475] [cursor=pointer]:
+                          - generic [ref=e476]: Put the lesson planning steps in the correct order.
+                      - cell "Theo kết quả" [ref=e477]
+                      - cell "Nhóm câu hỏi 1" [ref=e478]
+                      - cell "10" [ref=e479]
+                      - cell "Không" [ref=e480]
+                      - 'cell "Chỉnh sửa: Put the lesson planning steps in the correct order." [ref=e481]':
+                        - 'button "Chỉnh sửa: Put the lesson planning steps in the correct order." [ref=e482] [cursor=pointer]': Chỉnh sửa
+                    - 'row "8 Điền vào chỗ trống Complete the sentence: Fiber helps support ____. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Complete the sentence: Fiber helps support ____." [ref=e483]':
+                      - cell "8" [ref=e484]
+                      - cell "Điền vào chỗ trống" [ref=e485]
+                      - 'cell "Complete the sentence: Fiber helps support ____." [ref=e486]':
+                        - 'button "Complete the sentence: Fiber helps support ____." [ref=e487] [cursor=pointer]':
+                          - generic [ref=e488]: "Complete the sentence: Fiber helps support ____."
+                      - cell "Theo kết quả" [ref=e489]
+                      - cell "Nhóm câu hỏi 1" [ref=e490]
+                      - cell "10" [ref=e491]
+                      - cell "Không" [ref=e492]
+                      - 'cell "Chỉnh sửa: Complete the sentence: Fiber helps support ____." [ref=e493]':
+                        - 'button "Chỉnh sửa: Complete the sentence: Fiber helps support ____." [ref=e494] [cursor=pointer]': Chỉnh sửa
+                    - 'row "9 Chọn từ danh sách Select the best category for each food. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Select the best category for each food." [ref=e495]':
+                      - cell "9" [ref=e496]
+                      - cell "Chọn từ danh sách" [ref=e497]
+                      - cell "Select the best category for each food." [ref=e498]:
+                        - button "Select the best category for each food." [ref=e499] [cursor=pointer]:
+                          - generic [ref=e500]: Select the best category for each food.
+                      - cell "Theo kết quả" [ref=e501]
+                      - cell "Nhóm câu hỏi 1" [ref=e502]
+                      - cell "10" [ref=e503]
+                      - cell "Không" [ref=e504]
+                      - 'cell "Chỉnh sửa: Select the best category for each food." [ref=e505]':
+                        - 'button "Chỉnh sửa: Select the best category for each food." [ref=e506] [cursor=pointer]': Chỉnh sửa
+                    - 'row "10 Kéo từ Drag the words into the correct nutrition sentence. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Drag the words into the correct nutrition sentence." [ref=e507]':
+                      - cell "10" [ref=e508]
+                      - cell "Kéo từ" [ref=e509]
+                      - cell "Drag the words into the correct nutrition sentence." [ref=e510]:
+                        - button "Drag the words into the correct nutrition sentence." [ref=e511] [cursor=pointer]:
+                          - generic [ref=e512]: Drag the words into the correct nutrition sentence.
+                      - cell "Theo kết quả" [ref=e513]
+                      - cell "Nhóm câu hỏi 1" [ref=e514]
+                      - cell "10" [ref=e515]
+                      - cell "Không" [ref=e516]
+                      - 'cell "Chỉnh sửa: Drag the words into the correct nutrition sentence." [ref=e517]':
+                        - 'button "Chỉnh sửa: Drag the words into the correct nutrition sentence." [ref=e518] [cursor=pointer]': Chỉnh sửa
+                    - 'row "11 Điểm nóng Click the area that shows a healthy food option. Theo kết quả Nhóm câu hỏi 1 10 hotspot-mock.svg Chỉnh sửa: Click the area that shows a healthy food option." [ref=e519]':
+                      - cell "11" [ref=e520]
+                      - cell "Điểm nóng" [ref=e521]
+                      - cell "Click the area that shows a healthy food option." [ref=e522]:
+                        - button "Click the area that shows a healthy food option." [ref=e523] [cursor=pointer]:
+                          - generic [ref=e524]: Click the area that shows a healthy food option.
+                      - cell "Theo kết quả" [ref=e525]
+                      - cell "Nhóm câu hỏi 1" [ref=e526]
+                      - cell "10" [ref=e527]
+                      - cell "hotspot-mock.svg" [ref=e528]
+                      - 'cell "Chỉnh sửa: Click the area that shows a healthy food option." [ref=e529]':
+                        - 'button "Chỉnh sửa: Click the area that shows a healthy food option." [ref=e530] [cursor=pointer]': Chỉnh sửa
+                    - 'row "12 Trả lời ngắn Name one healthy snack you can prepare quickly. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Name one healthy snack you can prepare quickly." [ref=e531]':
+                      - cell "12" [ref=e532]
+                      - cell "Trả lời ngắn" [ref=e533]
+                      - cell "Name one healthy snack you can prepare quickly." [ref=e534]:
+                        - button "Name one healthy snack you can prepare quickly." [ref=e535] [cursor=pointer]:
+                          - generic [ref=e536]: Name one healthy snack you can prepare quickly.
+                      - cell "Theo kết quả" [ref=e537]
+                      - cell "Nhóm câu hỏi 1" [ref=e538]
+                      - cell "10" [ref=e539]
+                      - cell "Không" [ref=e540]
+                      - 'cell "Chỉnh sửa: Name one healthy snack you can prepare quickly." [ref=e541]':
+                        - 'button "Chỉnh sửa: Name one healthy snack you can prepare quickly." [ref=e542] [cursor=pointer]': Chỉnh sửa
+                    - 'row "13 Số học How many servings of fruit are shown? Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: How many servings of fruit are shown?" [ref=e543]':
+                      - cell "13" [ref=e544]
+                      - cell "Số học" [ref=e545]
+                      - cell "How many servings of fruit are shown?" [ref=e546]:
+                        - button "How many servings of fruit are shown?" [ref=e547] [cursor=pointer]:
+                          - generic [ref=e548]: How many servings of fruit are shown?
+                      - cell "Theo kết quả" [ref=e549]
+                      - cell "Nhóm câu hỏi 1" [ref=e550]
+                      - cell "10" [ref=e551]
+                      - cell "Không" [ref=e552]
+                      - 'cell "Chỉnh sửa: How many servings of fruit are shown?" [ref=e553]':
+                        - 'button "Chỉnh sửa: How many servings of fruit are shown?" [ref=e554] [cursor=pointer]': Chỉnh sửa
+                    - 'row "14 Thang Likert Rate your confidence explaining balanced nutrition. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Rate your confidence explaining balanced nutrition." [ref=e555]':
+                      - cell "14" [ref=e556]
+                      - cell "Thang Likert" [ref=e557]
+                      - cell "Rate your confidence explaining balanced nutrition." [ref=e558]:
+                        - button "Rate your confidence explaining balanced nutrition." [ref=e559] [cursor=pointer]:
+                          - generic [ref=e560]: Rate your confidence explaining balanced nutrition.
+                      - cell "Theo kết quả" [ref=e561]
+                      - cell "Nhóm câu hỏi 1" [ref=e562]
+                      - cell "10" [ref=e563]
+                      - cell "Không" [ref=e564]
+                      - 'cell "Chỉnh sửa: Rate your confidence explaining balanced nutrition." [ref=e565]':
+                        - 'button "Chỉnh sửa: Rate your confidence explaining balanced nutrition." [ref=e566] [cursor=pointer]': Chỉnh sửa
+                    - 'row "15 Tự luận Explain how you would teach healthy food choices to your class. Theo kết quả Nhóm câu hỏi 1 10 Không Chỉnh sửa: Explain how you would teach healthy food choices to your class." [ref=e567]':
+                      - cell "15" [ref=e568]
+                      - cell "Tự luận" [ref=e569]
+                      - cell "Explain how you would teach healthy food choices to your class." [ref=e570]:
+                        - button "Explain how you would teach healthy food choices to your class." [ref=e571] [cursor=pointer]:
+                          - generic [ref=e572]: Explain how you would teach healthy food choices to your class.
+                      - cell "Theo kết quả" [ref=e573]
+                      - cell "Nhóm câu hỏi 1" [ref=e574]
+                      - cell "10" [ref=e575]
+                      - cell "Không" [ref=e576]
+                      - 'cell "Chỉnh sửa: Explain how you would teach healthy food choices to your class." [ref=e577]':
+                        - 'button "Chỉnh sửa: Explain how you would teach healthy food choices to your class." [ref=e578] [cursor=pointer]': Chỉnh sửa
+          - generic [ref=e579]:
+            - generic [ref=e580]: Nhóm 3 trên 3
+            - generic [ref=e581]:
+              - generic [ref=e582]: Đây là bài kiểm tra mẫu
+              - generic [ref=e583]: 3 nhóm
+              - generic [ref=e584]: 15 câu hỏi
+              - generic [ref=e585]: Nhóm câu hỏi 2
+  - region "Notifications alt+T"
+  - generic [ref=e586]:
+    - img [ref=e588]
+    - button "Open Tanstack query devtools" [ref=e636] [cursor=pointer]:
+      - img [ref=e637]

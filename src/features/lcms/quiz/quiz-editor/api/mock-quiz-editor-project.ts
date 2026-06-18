@@ -453,6 +453,17 @@ function createHotspotSlide(): QuizEditorSlide {
       alt: "Fruit and candy hotspot mock image",
       name: "hotspot-mock.svg",
     },
+    hotspotAreas: [
+      {
+        id: "hotspot-fruit",
+        shape: "rect",
+        x: 0.18,
+        y: 0.28,
+        width: 0.24,
+        height: 0.44,
+        correct: true,
+      },
+    ],
     layers: [tr("quiz.correctFeedback"), tr("quiz.incorrectFeedback"), tr("quiz.hotspot")],
   });
 }

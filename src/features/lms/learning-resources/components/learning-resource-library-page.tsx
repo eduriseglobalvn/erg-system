@@ -1,24 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "@/routes/router-compat";
 import {
-  ChevronLeft,
   ChevronRight,
   FileQuestion,
   FileText,
   Folder,
-  Monitor,
   MonitorPlay,
-  Presentation,
   RefreshCw,
   Search,
+  Presentation,
   type LucideIcon,
 } from "lucide-react";
+import {
+  Clipboard as CommandClipboard,
+  Copy as CommandCopy,
+  FileQuestion as CommandFileQuestion,
+  Folder as CommandFolder,
+  MoreHorizontal as CommandMoreHorizontal,
+  Pencil as CommandPencil,
+  Presentation as CommandPresentation,
+  Scissors as CommandScissors,
+  Trash2 as CommandTrash2,
+} from "@/components/mui-icon-shim";
 
 import {
-  ExplorerViewToggle,
+  LearningResourceExplorerCardGrid,
+  LearningResourceExplorerCommandBar,
+  LearningResourceExplorerShell,
+  LearningResourceExplorerTreePane,
+  LearningResourceExplorerTreeRow,
+  LearningResourceExplorerTopBar,
   LearningResourceFolderTile,
   LearningResourceSquareCard,
   WindowsFolderIcon,
+  type LearningResourceExplorerCommand,
   type ExplorerViewMode,
 } from "@/components/learning-resources/explorer-ui";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
@@ -44,7 +59,6 @@ import { displayText } from "@/features/lms/learning-resources/components/learni
 import { ResourceViewerModal } from "@/features/lms/learning-resources/components/learning-resource-viewer-modal";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import { cn } from "@/lib/utils";
 
 const fileIcons: Record<LearningResourceFileType, LucideIcon> = {
   PDF: FileText,
@@ -64,7 +78,7 @@ function matchesResource(
   resource: LearningResourceResource,
   selected: { gradeId: string; subjectId: string; categoryId: string; keyword: string },
 ) {
-  const categoryMatches = resource.categoryId === selected.categoryId;
+  const categoryMatches = resource.categoryId === selected.categoryId || resource.sectionId === selected.categoryId;
   const categoryOwnsSubject = ["giao-duc-stem", "ic3-digital-literacy", "mos", "tin-hoc-pho-thong"].includes(selected.categoryId);
   const subjectMatches = categoryOwnsSubject || selected.subjectId === "all" || resource.subjectId === selected.subjectId;
   const gradeMatches =
@@ -155,27 +169,60 @@ function getCategoryPathFrom(categories: LearningResourceCategory[], categoryId:
 function CategoryTree({
   activeCategoryId,
   categories,
+  onOpenResource,
   onSelectCategory,
+  resources,
 }: {
   activeCategoryId: string;
   categories: LearningResourceCategory[];
+  onOpenResource: (resource: LearningResourceResource) => void;
   onSelectCategory: (categoryId: string) => void;
+  resources: LearningResourceResource[];
 }) {
-  const topLevelCategories = getTopLevelCategoriesFrom(categories);
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set());
+  const topLevelCategories = useMemo(() => getTopLevelCategoriesFrom(categories), [categories]);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(() => new Set(topLevelCategories.map((category) => category.id)));
+  const resourcesByCategory = useMemo(() => {
+    const grouped = new Map<string, LearningResourceResource[]>();
+    resources.forEach((resource) => {
+      const bucket = grouped.get(resource.categoryId) ?? [];
+      bucket.push(resource);
+      grouped.set(resource.categoryId, bucket);
+    });
+    return grouped;
+  }, [resources]);
+  const resourcesBySection = useMemo(() => {
+    const grouped = new Map<string, LearningResourceResource[]>();
+    resources.forEach((resource) => {
+      const bucket = grouped.get(resource.sectionId) ?? [];
+      bucket.push(resource);
+      grouped.set(resource.sectionId, bucket);
+    });
+    return grouped;
+  }, [resources]);
 
   useEffect(() => {
     if (!activeCategoryId) return;
-    const parent = categories.find((cat) => cat.id === activeCategoryId)?.parentId;
-    if (parent) {
-      setExpandedIds((prev) => {
-        if (prev.has(parent)) return prev;
-        const next = new Set(prev);
-        next.add(parent);
-        return next;
-      });
+    const nextParents = new Set<string>();
+    let parent = categories.find((cat) => cat.id === activeCategoryId)?.parentId;
+    while (parent) {
+      nextParents.add(parent);
+      parent = categories.find((cat) => cat.id === parent)?.parentId;
     }
+    if (!nextParents.size) return;
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      nextParents.forEach((id) => next.add(id));
+      return next;
+    });
   }, [activeCategoryId, categories]);
+
+  useEffect(() => {
+    if (!topLevelCategories.length) return;
+    setExpandedIds((prev) => {
+      if (prev.size) return prev;
+      return new Set(topLevelCategories.map((category) => category.id));
+    });
+  }, [topLevelCategories]);
 
   function toggleExpand(id: string, event?: React.MouseEvent) {
     if (event) {
@@ -192,75 +239,60 @@ function CategoryTree({
     });
   }
 
+  function renderCategory(category: LearningResourceCategory, depth = 0) {
+    const children = getCategoryChildrenFrom(categories, category.id);
+    const categoryResources = children.length > 0 ? [] : [...(resourcesBySection.get(category.id) ?? []), ...(resourcesByCategory.get(category.id) ?? [])];
+    const hasChildren = children.length > 0 || categoryResources.length > 0;
+    const isSelected = category.id === activeCategoryId;
+    const isExpanded = expandedIds.has(category.id);
+
+    return (
+      <div key={category.id}>
+        <LearningResourceExplorerTreeRow
+          label={displayText(category.label)}
+          title={displayText(category.label)}
+          depth={depth}
+          selected={isSelected}
+          expanded={isExpanded}
+          hasChildren={hasChildren}
+          icon={<WindowsFolderIcon open={isExpanded} />}
+          onSelect={() => {
+            onSelectCategory(category.id);
+            if (hasChildren) {
+              setExpandedIds((prev) => {
+                if (prev.has(category.id)) return prev;
+                const next = new Set(prev);
+                next.add(category.id);
+                return next;
+              });
+            }
+          }}
+          onToggle={() => toggleExpand(category.id)}
+        />
+
+        {hasChildren && isExpanded ? (
+          <div className="mt-0.5 space-y-0.5">
+            {children.map((child) => renderCategory(child, depth + 1))}
+            {categoryResources.map((resource) => (
+              <LearningResourceExplorerTreeRow
+                key={resource.id}
+                label={displayText(resource.title)}
+                title={displayText(resource.title)}
+                depth={depth + 1}
+                icon={<ResourceExplorerIcon resource={resource} />}
+                onSelect={() => onOpenResource(resource)}
+              />
+            ))}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+
   return (
-    <aside className="lms-resource-tree min-h-0 overflow-y-auto border-r border-[#e5e5e5] bg-[#fafafa] px-1.5 py-2 [scrollbar-gutter:stable]">
-      <nav className="space-y-0.5 pt-1">
-        {topLevelCategories.map((category) => {
-          const children = getCategoryChildrenFrom(categories, category.id);
-          const isSelected = category.id === activeCategoryId;
-          const isExpanded = expandedIds.has(category.id);
-
-          return (
-            <div key={category.id}>
-              <button
-                type="button"
-                onClick={() => {
-                  onSelectCategory(category.id);
-                  setExpandedIds((prev) => {
-                    if (prev.has(category.id)) return prev;
-                    const next = new Set(prev);
-                    next.add(category.id);
-                    return next;
-                  });
-                }}
-                data-resource-active={isSelected ? "true" : undefined}
-                className={cn(
-                  "relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition",
-                  isSelected
-                    ? "bg-[#cfe6ff] font-semibold !text-[#0b3f7a] before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)] [&_svg]:!text-[#0b6fcf]"
-                    : "text-slate-800 hover:bg-white",
-                )}
-              >
-                <span
-                  onClick={(e) => toggleExpand(category.id, e)}
-                  className="grid h-5 w-5 place-items-center rounded hover:bg-black/5"
-                >
-                  <ChevronRight className={cn("h-3.5 w-3.5 shrink-0 transition-transform", isSelected ? "!text-[#0b6fcf]" : "text-slate-500", isExpanded && "rotate-90")} />
-                </span>
-                <WindowsFolderIcon open={isExpanded} />
-                <span className={cn("min-w-0 flex-1 truncate", isSelected ? "!text-[#0b3f7a]" : "text-slate-800")}>{displayText(category.label)}</span>
-              </button>
-              {children.length > 0 && isExpanded ? (
-                <div className="ml-5 space-y-0.5">
-                  {children.map((child) => {
-                    const isChildActive = child.id === activeCategoryId;
-
-                    return (
-                      <button
-                        key={child.id}
-                        type="button"
-                        onClick={() => onSelectCategory(child.id)}
-                        data-resource-active={isChildActive ? "true" : undefined}
-                        className={cn(
-                          "relative flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13px] transition",
-                          isChildActive
-                            ? "bg-[#cfe6ff] font-semibold !text-[#0b3f7a] before:absolute before:left-0 before:top-1.5 before:h-5 before:w-0.5 before:rounded-full before:bg-[var(--erg-blue)] [&_svg]:!text-[#0b6fcf]"
-                            : "text-slate-800 hover:bg-white",
-                        )}
-                      >
-                        <span className="w-3.5" />
-                        <WindowsFolderIcon open={isChildActive} />
-                        <span className={cn("min-w-0 flex-1 truncate", isChildActive ? "!text-[#0b3f7a]" : "text-slate-800")}>{displayText(child.label)}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </div>
-          );
-        })}
-      </nav>
-    </aside>
+    <LearningResourceExplorerTreePane className="lms-resource-tree">
+      {topLevelCategories.map((category) => renderCategory(category))}
+    </LearningResourceExplorerTreePane>
   );
 }
 
@@ -347,6 +379,7 @@ function LearningResourceExplorer({
   sections,
   subjects,
   totalVisibleResources,
+  treeResources,
   viewerLoadingResourceId,
 }: {
   activeCategoryId: string;
@@ -362,6 +395,7 @@ function LearningResourceExplorer({
   sections: LearningResourceResourceSection[];
   subjects: LearningResourceSubject[];
   totalVisibleResources: number;
+  treeResources: LearningResourceResource[];
   viewerLoadingResourceId: string | null;
 }) {
   const activeCategory = categories.find((category) => category.id === activeCategoryId);
@@ -390,10 +424,41 @@ function LearningResourceExplorer({
     });
     return items;
   }, [activeSubject, categoryPath, activeCategoryId]);
+  const explorerBreadcrumbItems = useMemo(() => (
+    breadcrumbItems.map((item) => ({
+      label: displayText(item.label),
+      onClick: () => onSelectCategory(item.categoryId),
+    }))
+  ), [breadcrumbItems, onSelectCategory]);
+  const selectedExplorerUrl = explorerBreadcrumbItems.map((item) => item.label).join(" / ");
+  const parentCategoryId = categoryPath.length > 1 ? categoryPath[categoryPath.length - 2]?.id : undefined;
 
-  const itemCount = childCategories.length + resources.length;
+  const paneResources = childCategories.length ? [] : resources;
+  const itemCount = childCategories.length + paneResources.length;
   const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
+  const commandActions = useMemo<LearningResourceExplorerCommand[]>(() => [
+    { disabled: true, icon: <CommandFolder className="h-4 w-4" />, label: "New folder" },
+    { disabled: true, icon: <CommandPresentation className="h-4 w-4" />, label: "Thêm bài giảng" },
+    { disabled: true, icon: <CommandFileQuestion className="h-4 w-4" />, label: "Thêm bài tập" },
+    { icon: null, label: "separator-primary", variant: "separator" },
+    { disabled: true, icon: <CommandScissors className="h-4 w-4" />, label: "Cut", title: "Cut", variant: "icon" },
+    {
+      icon: <CommandCopy className="h-4 w-4" />,
+      label: "Copy URL",
+      onClick: () => {
+        if (typeof window !== "undefined" && navigator.clipboard) {
+          void navigator.clipboard.writeText(window.location.href);
+        }
+      },
+      title: "Copy URL",
+      variant: "icon",
+    },
+    { disabled: true, icon: <CommandClipboard className="h-4 w-4" />, label: "Paste", title: "Paste", variant: "icon" },
+    { disabled: true, icon: <CommandPencil className="h-4 w-4" />, label: "Rename", title: "Rename", variant: "icon" },
+    { disabled: true, icon: <CommandTrash2 className="h-4 w-4" />, label: "Delete", title: "Delete", variant: "icon" },
+    { icon: <CommandMoreHorizontal className="h-4 w-4" />, label: "More", title: "More", variant: "icon" },
+  ], []);
 
   function openContextMenu(event: { preventDefault: () => void; stopPropagation: () => void }) {
     event.preventDefault();
@@ -414,7 +479,7 @@ function LearningResourceExplorer({
         onOpenResource={onOpenResource}
         onRefresh={onRefresh}
         onSelectCategory={onSelectCategory}
-        resources={resources}
+        resources={paneResources}
         totalVisibleResources={totalVisibleResources}
         viewerLoadingResourceId={viewerLoadingResourceId}
       />
@@ -422,128 +487,102 @@ function LearningResourceExplorer({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white text-[14px] text-slate-900 shadow-sm">
-      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#dbe4f0] bg-[#f8fbff] px-3">
-        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-white disabled:opacity-70" disabled>
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-500 hover:bg-white disabled:opacity-70" disabled>
-          <ChevronRight className="h-4 w-4" />
-        </button>
-        <button type="button" className="grid h-8 w-8 place-items-center rounded-md text-slate-600 hover:bg-white" onClick={onRefresh}>
-          <RefreshCw className="h-4 w-4" />
-        </button>
-        <div className="flex h-10 min-w-0 flex-1 items-center overflow-hidden rounded-lg border border-[#d7e0ec] bg-white px-2 shadow-sm">
-          <Monitor className="mx-2 h-4 w-4 shrink-0 text-[var(--erg-blue)]" />
-          {breadcrumbItems.map((item, index) => (
-            <span key={`${item.label}-${index}`} className="flex min-w-0 items-center">
-              {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
-              <button
-                type="button"
-                onClick={() => onSelectCategory(item.categoryId)}
-                className={`cursor-pointer truncate rounded px-1.5 py-0.5 text-[13px] outline-none transition-colors duration-150 hover:bg-slate-100 ${
-                  index === breadcrumbItems.length - 1 ? "font-medium text-slate-950" : "text-slate-700 hover:text-slate-950"
-                }`}
-              >
-                {displayText(item.label)}
-              </button>
-            </span>
-          ))}
-        </div>
-        <div className="lms-resource-search-control flex h-10 w-[300px] max-w-[32vw] items-center rounded-lg border border-[#d7e0ec] bg-white px-3 shadow-sm focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
-          <Search className="mr-2 h-4 w-4 text-[var(--erg-blue)]" />
-          <input
-            value={keyword}
-            onChange={(event) => onKeywordChange(event.target.value)}
-            placeholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
-            className="lms-resource-search-input min-w-0 flex-1 bg-transparent text-[14px] font-semibold outline-none placeholder:text-[#64748b]"
-            type="text"
-          />
-        </div>
-      </div>
-
-      <div className="flex h-12 shrink-0 items-center gap-2 border-b border-[#dbe4f0] bg-white px-3">
-        <span className="text-[13px] font-semibold text-slate-800">{displayText(activeCategory?.label) || "Kho học liệu"}</span>
-        <span className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-2.5 py-1 text-[13px] font-bold text-slate-700">{itemCount} mục</span>
-        <ExplorerViewToggle viewMode={viewMode} onViewModeChange={setViewMode} />
-      </div>
+    <LearningResourceExplorerShell className="flex h-full flex-col">
+      <LearningResourceExplorerTopBar
+        breadcrumbItems={explorerBreadcrumbItems}
+        canGoBack={Boolean(parentCategoryId)}
+        onBack={() => {
+          if (parentCategoryId) onSelectCategory(parentCategoryId);
+        }}
+        onRefresh={onRefresh}
+        searchLabel="Tìm kiếm học liệu LMS"
+        searchPlaceholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
+        searchValue={keyword}
+        title={selectedExplorerUrl}
+        onSearchChange={onKeywordChange}
+      />
+      <LearningResourceExplorerCommandBar actions={commandActions} viewMode={viewMode} onViewModeChange={setViewMode} />
 
       <div className="grid min-h-0 flex-1 grid-cols-[250px_minmax(0,1fr)] overflow-hidden">
-        <CategoryTree activeCategoryId={activeCategoryId} categories={categories} onSelectCategory={onSelectCategory} />
+        <CategoryTree
+          activeCategoryId={activeCategoryId}
+          categories={categories}
+          onOpenResource={onOpenResource}
+          onSelectCategory={onSelectCategory}
+          resources={treeResources}
+        />
 
         <section className="min-h-0 min-w-0 overflow-hidden bg-white" onContextMenu={(event) => openContextMenu(event)}>
           {viewMode === "list" ? (
             <>
-              <div className="grid grid-cols-[minmax(260px,1fr)_155px_120px_95px] border-b border-[#cbd7e6] bg-[#eef4fb] text-[13px] font-bold text-slate-700">
-                <span className="border-r border-[#e5e5e5] px-4 py-2">Tên</span>
-                <span className="border-r border-[#e5e5e5] px-3 py-2">Cập nhật</span>
-                <span className="border-r border-[#e5e5e5] px-3 py-2">Loại</span>
-                <span className="px-3 py-2">Dung lượng</span>
+              <div className="grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
+                <span className="border-r border-[#e5e7eb] px-4 py-1.5">Tên</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Cập nhật</span>
+                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Loại</span>
+                <span className="px-3 py-1.5">Dung lượng</span>
               </div>
-              <div className="h-[calc(100%-33px)] overflow-y-auto [scrollbar-gutter:stable]">
+              <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
                 {childCategories.map((category) => (
                   <button
                     key={category.id}
                     type="button"
                     onClick={() => onSelectCategory(category.id)}
                     onContextMenu={openContextMenu}
-                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f8fbff]"
+                    className="grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#eef6ff]"
                   >
                     <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
                       <WindowsFolderIcon />
-                      <span className="truncate font-medium text-slate-900">{displayText(category.label)}</span>
+                      <span className="truncate font-medium text-[#111827]">{displayText(category.label)}</span>
                     </span>
-                    <span className="truncate px-3 text-slate-600">{getStableDate(category.id)}</span>
-                    <span className="truncate px-3 text-slate-600">Thư mục</span>
-                    <span className="truncate px-3 text-slate-600" />
+                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(category.id)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">Thư mục</span>
+                    <span className="truncate px-3 text-[#4b5563]" />
                   </button>
                 ))}
 
-                {resources.map((resource) => (
+                {paneResources.map((resource) => (
                   <button
                     key={resource.id}
                     type="button"
                     onClick={() => onOpenResource(resource)}
                     onContextMenu={openContextMenu}
-                    className="grid h-9 w-full grid-cols-[minmax(260px,1fr)_155px_120px_95px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#f8fbff]"
+                    className="grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#eef6ff]"
                   >
                     <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
                       <ResourceExplorerIcon resource={resource} />
-                      <span className="truncate text-slate-900">{displayText(resource.title)}</span>
+                      <span className="truncate text-[#111827]">{displayText(resource.title)}</span>
                     </span>
-                    <span className="truncate px-3 text-slate-600">{getStableDate(resource.id)}</span>
-                    <span className="truncate px-3 text-slate-600">{getExplorerType(resource)}</span>
-                    <span className="truncate px-3 text-slate-600">{getExplorerSize(resource)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">{getExplorerType(resource)}</span>
+                    <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
                   </button>
                 ))}
               </div>
             </>
           ) : (
-              <div className="h-full overflow-y-auto p-4 [scrollbar-gutter:stable]">
-                <div className="lms-resource-card-grid grid grid-cols-[repeat(auto-fill,minmax(210px,1fr))] gap-4">
-                {childCategories.map((category) => (
-                  <div
-                    key={category.id}
-                    onContextMenu={openContextMenu}
-                  >
-                    <LearningResourceFolderTile
-                      label={displayText(category.label)}
-                      onClick={() => onSelectCategory(category.id)}
-                    />
-                  </div>
-                ))}
+            <LearningResourceExplorerCardGrid className="p-5" contentClassName="lms-resource-card-grid">
+              {childCategories.map((category) => (
+                <div
+                  key={category.id}
+                  onContextMenu={openContextMenu}
+                >
+                  <LearningResourceFolderTile
+                    label={displayText(category.label)}
+                    onClick={() => onSelectCategory(category.id)}
+                  />
+                </div>
+              ))}
 
-                {resources.map((resource) => (
-                  <div
-                    key={resource.id}
-                    className="lms-resource-activity-card"
-                    onContextMenu={openContextMenu}
-                  >
-                    <LearningActivityCard resource={resource} onOpen={onOpenResource} />
-                  </div>
-                ))}
-              </div>
-            </div>
+              {paneResources.map((resource) => (
+                <div
+                  key={resource.id}
+                  className="lms-resource-activity-card"
+                  onContextMenu={openContextMenu}
+                >
+                  <LearningActivityCard resource={resource} onOpen={onOpenResource} />
+                </div>
+              ))}
+            </LearningResourceExplorerCardGrid>
           )}
 
           {libraryError ? (
@@ -560,11 +599,7 @@ function LearningResourceExplorer({
         </section>
       </div>
 
-      <div className="flex h-9 shrink-0 items-center justify-between border-t border-[#dbe4f0] bg-[#fafafa] px-3 text-[13px] font-semibold text-slate-700">
-        <span>{itemCount} mục</span>
-        <span>{displayText(activeGrade?.label) || "-"} / {displayText(activeCategory?.label) || "Kho học liệu"} / {totalVisibleResources} học liệu</span>
-      </div>
-    </div>
+    </LearningResourceExplorerShell>
   );
 }
 
@@ -802,6 +837,27 @@ export function LearningResourceLibraryPage() {
     })).filter((section) => section.resources.length > 0);
   }, [activeCategoryId, activeGradeId, activeSubjectId, keyword, librarySections]);
 
+  const treeResources = useMemo(() => {
+    const keywordValue = keyword.trim().toLowerCase();
+    return librarySections.flatMap((section) =>
+      section.resources.filter((resource) => {
+        const subjectMatches = activeSubjectId === "all" || resource.subjectId === activeSubjectId;
+        const gradeMatches =
+          !resource.gradeId ||
+          resource.gradeId === activeGradeId ||
+          ["ic3", "mos", "tin-hoc"].includes(resource.subjectId) ||
+          resource.subjectId.startsWith("mock-");
+        const keywordMatches =
+          keywordValue.length === 0 ||
+          [resource.title, resource.subtitle, resource.formatBadge, resource.viewer.title]
+            .join(" ")
+            .toLowerCase()
+            .includes(keywordValue);
+        return subjectMatches && gradeMatches && keywordMatches;
+      }),
+    );
+  }, [activeGradeId, activeSubjectId, keyword, librarySections]);
+
   const totalVisibleResources = visibleSections.reduce((total, section) => total + section.resources.length, 0);
 
   async function handleOpenResource(resource: LearningResourceResource) {
@@ -823,8 +879,8 @@ export function LearningResourceLibraryPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-64px)] min-h-0 flex-col overflow-hidden bg-[#f8fbff] md:h-[calc(100vh-64px)]">
-      <div className="min-h-0 flex-1 p-2 md:p-3">
+    <div className="flex h-[calc(100dvh-64px)] min-h-0 flex-col overflow-hidden bg-white md:h-[calc(100vh-64px)]">
+      <div className="min-h-0 flex-1 p-0">
         <LearningResourceExplorer
           activeCategoryId={activeCategoryId}
           activeGradeId={activeGradeId}
@@ -839,6 +895,7 @@ export function LearningResourceLibraryPage() {
           sections={visibleSections}
           subjects={subjects}
           totalVisibleResources={totalVisibleResources}
+          treeResources={treeResources}
           viewerLoadingResourceId={viewerLoadingResourceId}
         />
       </div>

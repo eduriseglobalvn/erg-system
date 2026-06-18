@@ -1,6 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import type { ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { Box, ButtonBase, Divider, Paper, Typography } from "@mui/material";
 import { Palette as PaletteOutlinedIcon } from "@/components/mui-icon-shim";
+import { ChevronDown as ArrowDropDownIcon } from "@/components/mui-icon-shim";
 import { Eye as PreviewIcon } from "@/components/mui-icon-shim";
 import { Upload as PublishIcon } from "@/components/mui-icon-shim";
 import { HelpCircle as QuizOutlinedIcon } from "@/components/mui-icon-shim";
@@ -10,14 +13,16 @@ import { Table as TableRowsIcon } from "@/components/mui-icon-shim";
 import { LineChart as InsightsOutlinedIcon } from "@/components/mui-icon-shim";
 
 import { IntroductionMenu, QuestionMenu } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus";
-import { RibbonGroup, ToolbarButton } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-primitives";
 import { useI18n } from "@/platform/i18n";
-import type { IntroSlideKind, QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
+import type {
+  IntroSlideKind,
+  QuestionCreationPreset,
+  QuestionType,
+} from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 type FormViewRibbonProps = {
   onAddQuestionGroup: () => void;
-  onAddQuestion: (type: QuestionType) => void;
+  onAddQuestion: (type: QuestionType, preset?: QuestionCreationPreset) => void;
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenQuizProperties: () => void;
   onOpenResults: () => void;
@@ -37,7 +42,6 @@ export function FormViewRibbon({
   onOpenPublish,
 }: FormViewRibbonProps) {
   const { t } = useI18n();
-  const [activeTab, setActiveTab] = useState<"Home" | "Help">("Home");
   const [openMenu, setOpenMenu] = useState<"question" | "introduction" | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const ribbonRef = useRef<HTMLDivElement | null>(null);
@@ -67,7 +71,7 @@ export function FormViewRibbon({
       if (!trigger) return;
 
       const rect = trigger.getBoundingClientRect();
-      const estimatedWidth = openMenu === "question" ? 474 : 358;
+      const estimatedWidth = openMenu === "question" ? 224 : 358;
       const viewportPadding = 8;
 
       setMenuPosition({
@@ -90,113 +94,88 @@ export function FormViewRibbon({
   }, [openMenu]);
 
   return (
-    <div ref={ribbonRef} className="classic-editor__form-ribbon">
-      <div className="classic-editor__form-tabs">
-        <button type="button" className="classic-editor__app-button">
-          <span className="classic-editor__app-button-lines" />
-        </button>
-        {(["Home", "Help"] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setActiveTab(tab)}
-            className={cn("classic-editor__form-tab", activeTab === tab && "is-active")}
-          >
-            {t(tab === "Home" ? "quiz.formTabHome" : "quiz.formTabHelp")}
-          </button>
-        ))}
-      </div>
+    <Box ref={ribbonRef} className="classic-editor__form-ribbon classic-editor__mui-form-ribbon">
+      <Paper
+        square
+        elevation={0}
+        className="classic-editor__mui-ribbon-surface"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          minHeight: 64,
+          overflowX: "auto",
+          borderBottom: "1px solid var(--classic-fluent-border, #d7e0ec)",
+          bgcolor: "rgba(255, 255, 255, 0.88)",
+          px: 1.5,
+          py: 0.75,
+          backdropFilter: "saturate(160%) blur(14px)",
+        }}
+      >
+        <RibbonSection label={t("common.new")}>
+          <Box ref={questionTriggerRef}>
+            <RibbonAction
+              label={t("common.question")}
+              icon={<QuizOutlinedIcon size="1em" />}
+              active={openMenu === "question"}
+              caret
+              primary
+              onClick={() => setOpenMenu((current) => (current === "question" ? null : "question"))}
+            />
+          </Box>
+          <RibbonAction
+            label={t("common.questionGroup")}
+            icon={<TableRowsIcon size="1em" />}
+            wide
+            onClick={onAddQuestionGroup}
+          />
+          <Box ref={introductionTriggerRef}>
+            <RibbonAction
+              label={t("common.introduction")}
+              icon={<SlideshowOutlinedIcon size="1em" />}
+              active={openMenu === "introduction"}
+              caret
+              wide
+              onClick={() => setOpenMenu((current) => (current === "introduction" ? null : "introduction"))}
+            />
+          </Box>
+        </RibbonSection>
 
-      <div className="classic-editor__ribbon">
-        {activeTab === "Home" ? (
-          <div className="classic-editor__ribbon-scroll">
-            <RibbonGroup label={t("common.new")}>
-              <div ref={questionTriggerRef}>
-                <ToolbarButton
-                  label={t("common.question")}
-                  iconNode={<QuizOutlinedIcon className="h-6 w-6" size="1em" />}
-                  caret
-                  size="regular"
-                  active={openMenu === "question"}
-                  onClick={() => setOpenMenu((current) => (current === "question" ? null : "question"))}
-                />
-              </div>
-              <ToolbarButton
-                label={t("common.questionGroup")}
-                iconNode={<TableRowsIcon className="h-6 w-6" size="1em" />}
-                size="regular"
-                onClick={onAddQuestionGroup}
-              />
-              <div ref={introductionTriggerRef}>
-                <ToolbarButton
-                  label={t("common.introduction")}
-                  iconNode={<SlideshowOutlinedIcon className="h-6 w-6" size="1em" />}
-                  caret
-                  size="regular"
-                  active={openMenu === "introduction"}
-                  onClick={() => setOpenMenu((current) => (current === "introduction" ? null : "introduction"))}
-                />
-              </div>
-            </RibbonGroup>
+        <Divider flexItem orientation="vertical" sx={{ borderColor: "rgba(145, 158, 171, 0.22)" }} />
 
-            <RibbonGroup label={t("common.settings")}>
-              <ToolbarButton
-                label={t("quiz.quizProperties")}
-                iconNode={<SettingsOutlinedIcon className="h-6 w-6" size="1em" />}
-                size="wide"
-                onClick={onOpenQuizProperties}
-              />
-              <ToolbarButton
-                label={t("quiz.playerTemplate")}
-                iconNode={<PaletteOutlinedIcon className="h-6 w-6" size="1em" />}
-                size="wide"
-                onClick={onOpenPlayerTemplate}
-              />
-            </RibbonGroup>
+        <RibbonSection label={t("common.settings")}>
+          <RibbonAction
+            label={t("quiz.quizProperties")}
+            icon={<SettingsOutlinedIcon size="1em" />}
+            wide
+            onClick={onOpenQuizProperties}
+          />
+          <RibbonAction
+            label={t("quiz.playerTemplate")}
+            icon={<PaletteOutlinedIcon size="1em" />}
+            wide
+            onClick={onOpenPlayerTemplate}
+          />
+        </RibbonSection>
 
-            <RibbonGroup label={t("common.publish")}>
-              <ToolbarButton
-                label={t("common.preview")}
-                iconNode={<PreviewIcon className="h-6 w-6" size="1em" />}
-                size="regular"
-                onClick={onOpenPreview}
-              />
-              <ToolbarButton
-                label={t("common.publish")}
-                iconNode={<PublishIcon className="h-6 w-6" size="1em" />}
-                size="regular"
-                onClick={onOpenPublish}
-              />
-            </RibbonGroup>
+        <Divider flexItem orientation="vertical" sx={{ borderColor: "rgba(145, 158, 171, 0.22)" }} />
 
-            <RibbonGroup label={t("common.results")}>
-              <ToolbarButton
-                label={t("quiz.manageResults")}
-                iconNode={<InsightsOutlinedIcon className="h-6 w-6" size="1em" />}
-                size="wide"
-                onClick={onOpenResults}
-              />
-            </RibbonGroup>
-          </div>
-        ) : (
-          <div className="classic-editor__ribbon-scroll classic-editor__ribbon-scroll--help">
-            <div className="classic-editor__ribbon-help">
-              <div className="classic-editor__ribbon-help-card">
-                <div className="classic-editor__ribbon-help-title">{t("quiz.helpQuickStartTitle")}</div>
-                <p>{t("quiz.helpQuickStartCopy")}</p>
-              </div>
-              <div className="classic-editor__ribbon-help-card">
-                <div className="classic-editor__ribbon-help-title">{t("quiz.helpOrganizeTitle")}</div>
-                <p>{t("quiz.helpOrganizeCopy")}</p>
-              </div>
-              <div className="classic-editor__ribbon-help-card">
-                <div className="classic-editor__ribbon-help-title">{t("quiz.helpPublishTitle")}</div>
-                <p>{t("quiz.helpPublishCopy")}</p>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+        <RibbonSection label={t("common.publish")}>
+          <RibbonAction label={t("common.preview")} icon={<PreviewIcon size="1em" />} onClick={onOpenPreview} />
+          <RibbonAction label={t("common.publish")} icon={<PublishIcon size="1em" />} onClick={onOpenPublish} />
+        </RibbonSection>
+
+        <Divider flexItem orientation="vertical" sx={{ borderColor: "rgba(145, 158, 171, 0.22)" }} />
+
+        <RibbonSection label={t("common.results")}>
+          <RibbonAction
+            label={t("quiz.manageResults")}
+            icon={<InsightsOutlinedIcon size="1em" />}
+            wide
+            onClick={onOpenResults}
+          />
+        </RibbonSection>
+      </Paper>
 
       {openMenu && menuPosition
         ? createPortal(
@@ -207,8 +186,8 @@ export function FormViewRibbon({
             >
               {openMenu === "question" ? (
                 <QuestionMenu
-                  onSelect={(type) => {
-                    onAddQuestion(type);
+                  onSelect={(type, preset) => {
+                    onAddQuestion(type, preset);
                     setOpenMenu(null);
                   }}
                 />
@@ -224,6 +203,103 @@ export function FormViewRibbon({
             document.body,
           )
         : null}
-    </div>
+    </Box>
+  );
+}
+
+function RibbonSection({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <Box component="section" sx={{ display: "flex", minWidth: "max-content", flexDirection: "column", gap: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>{children}</Box>
+      <Typography
+        component="div"
+        sx={{
+          color: "text.secondary",
+          fontSize: 10.5,
+          fontWeight: 700,
+          lineHeight: 1,
+          textAlign: "center",
+          textTransform: "uppercase",
+        }}
+      >
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+function RibbonAction({
+  label,
+  icon,
+  active = false,
+  caret = false,
+  primary = false,
+  wide = false,
+  onClick,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  active?: boolean;
+  caret?: boolean;
+  primary?: boolean;
+  wide?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <ButtonBase
+      type="button"
+      aria-label={label}
+      aria-pressed={active || undefined}
+      onClick={onClick}
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 0.75,
+        height: 36,
+        minWidth: primary ? 118 : wide ? 152 : 104,
+        justifyContent: "center",
+        border: "1px solid",
+        borderColor: active ? "rgba(15, 108, 189, 0.36)" : "rgba(145, 158, 171, 0.22)",
+        borderRadius: "10px",
+        bgcolor: active ? "rgba(15, 108, 189, 0.09)" : "rgba(255, 255, 255, 0.76)",
+        color: active ? "var(--erg-blue, #0f6cbd)" : "#263445",
+        px: 1.25,
+        fontSize: 12,
+        fontWeight: 700,
+        lineHeight: 1,
+        boxShadow: active ? "inset 0 0 0 1px rgba(15, 108, 189, 0.08)" : "none",
+        transition: "background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease",
+        "&:hover": {
+          borderColor: "rgba(15, 108, 189, 0.34)",
+          bgcolor: "rgba(15, 108, 189, 0.06)",
+          color: "var(--erg-blue, #0f6cbd)",
+        },
+        "&:active": {
+          transform: "translateY(1px)",
+        },
+        "& svg": {
+          width: 17,
+          height: 17,
+          flex: "0 0 auto",
+        },
+      }}
+    >
+      {icon}
+      <Typography
+        component="span"
+        sx={{
+          maxWidth: wide ? 128 : 84,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          fontSize: "inherit",
+          fontWeight: "inherit",
+          lineHeight: 1,
+        }}
+      >
+        {label}
+      </Typography>
+      {caret ? <ArrowDropDownIcon size="1em" /> : null}
+    </ButtonBase>
   );
 }

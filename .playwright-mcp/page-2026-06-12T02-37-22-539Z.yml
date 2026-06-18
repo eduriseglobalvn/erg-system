@@ -1,0 +1,372 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - button "Thu gọn menu" [ref=e6] [cursor=pointer]:
+        - img [ref=e7]
+      - button "Logo" [ref=e10] [cursor=pointer]:
+        - img [ref=e11]
+      - generic [ref=e13]:
+        - navigation [ref=e14]:
+          - list [ref=e16]:
+            - button "Trang chủ" [ref=e17] [cursor=pointer]:
+              - img [ref=e19]
+              - generic [ref=e24]: Trang chủ
+            - button "Báo cáo" [ref=e25] [cursor=pointer]:
+              - img [ref=e27]
+              - generic [ref=e30]: Báo cáo
+              - img [ref=e31]
+            - button "Lịch toàn trung tâm beta" [ref=e33] [cursor=pointer]:
+              - img [ref=e35]
+              - generic [ref=e39]:
+                - generic [ref=e40]: Lịch toàn trung tâm
+                - generic [ref=e41]: beta
+          - generic [ref=e42]:
+            - paragraph [ref=e43]: CRM & Hiệu suất
+            - list [ref=e44]:
+              - button "Khách hàng" [ref=e45] [cursor=pointer]:
+                - img [ref=e47]
+                - generic [ref=e52]: Khách hàng
+              - button "Công việc" [ref=e53] [cursor=pointer]:
+                - img [ref=e55]
+                - generic [ref=e60]: Công việc
+          - generic [ref=e61]:
+            - paragraph [ref=e62]: Giảng dạy
+            - list [ref=e63]:
+              - button "Học viên" [ref=e64] [cursor=pointer]:
+                - img [ref=e66]
+                - generic [ref=e69]: Học viên
+                - img [ref=e70]
+              - button "Khóa học" [ref=e72] [cursor=pointer]:
+                - img [ref=e74]
+                - generic [ref=e79]: Khóa học
+              - button "Lớp học" [ref=e80] [cursor=pointer]:
+                - img [ref=e82]
+                - generic [ref=e87]: Lớp học
+              - button "Buổi học" [ref=e88] [cursor=pointer]:
+                - img [ref=e90]
+                - generic [ref=e95]: Buổi học
+              - button "Bài tập" [ref=e96] [cursor=pointer]:
+                - img [ref=e98]
+                - generic [ref=e103]: Bài tập
+              - button "Bài tập & tài liệu" [ref=e104] [cursor=pointer]:
+                - img [ref=e106]
+                - generic [ref=e109]: Bài tập & tài liệu
+                - img [ref=e110]
+              - button "Tạo Quiz" [ref=e112] [cursor=pointer]:
+                - img [ref=e114]
+                - generic [ref=e120]: Tạo Quiz
+              - button "Quản lý học liệu" [ref=e121] [cursor=pointer]:
+                - img [ref=e123]
+                - generic [ref=e128]: Quản lý học liệu
+          - generic [ref=e129]:
+            - paragraph [ref=e130]: Quản lý
+            - list [ref=e131]:
+              - button "Nhân sự" [ref=e132] [cursor=pointer]:
+                - img [ref=e134]
+                - generic [ref=e137]: Nhân sự
+                - img [ref=e138]
+              - button "Tài chính" [ref=e140] [cursor=pointer]:
+                - img [ref=e142]
+                - generic [ref=e145]: Tài chính
+                - img [ref=e146]
+              - button "Khác" [ref=e148] [cursor=pointer]:
+                - img [ref=e150]
+                - generic [ref=e154]: Khác
+                - img [ref=e155]
+          - generic [ref=e157]:
+            - paragraph [ref=e158]: Hệ thống
+            - list [ref=e159]:
+              - button "Thiết lập" [ref=e160] [cursor=pointer]:
+                - img [ref=e162]
+                - generic [ref=e165]: Thiết lập
+                - img [ref=e166]
+              - button "Tích hợp" [ref=e168] [cursor=pointer]:
+                - img [ref=e170]
+                - generic [ref=e173]: Tích hợp
+                - img [ref=e174]
+        - generic [ref=e176]:
+          - generic [ref=e177]:
+            - generic [ref=e178]: EDU
+            - generic [ref=e179]: ADVANCED
+          - paragraph [ref=e180]: Trung tâm CenterUp - Demo
+          - generic [ref=e182]:
+            - paragraph [ref=e183]: Bộ nhớ
+            - paragraph [ref=e184]: 98.4GB / 200GB
+          - 'button "Số dư: 513.105" [ref=e187] [cursor=pointer]':
+            - text: "Số dư: 513.105"
+            - img [ref=e189]
+          - generic [ref=e191]:
+            - button "Mua Coin" [ref=e192] [cursor=pointer]
+            - button "Nâng cấp" [ref=e193] [cursor=pointer]
+          - button "Trung tâm trợ giúp" [ref=e194] [cursor=pointer]:
+            - img [ref=e196]
+            - text: Trung tâm trợ giúp
+    - generic [ref=e486]:
+      - banner [ref=e487]:
+        - generic [ref=e198]:
+          - generic [ref=e199]:
+            - generic [ref=e200]: EDU
+            - paragraph [ref=e201]: CenterUp - Demo
+            - generic [ref=e202]: ADVANCED
+            - img [ref=e203]
+          - generic "Chất lượng kết nối" [ref=e205]:
+            - img [ref=e206]
+            - paragraph [ref=e208]: Mạng tốt
+          - button "Tìm kiếm nhanh" [ref=e209] [cursor=pointer]:
+            - img [ref=e210]
+            - generic [ref=e212]: ⌘K
+          - button "Ngôn ngữ" [ref=e213] [cursor=pointer]:
+            - paragraph [ref=e214]: VN
+          - button "Trợ lý" [ref=e215] [cursor=pointer]:
+            - img [ref=e216]
+          - generic [ref=e218]:
+            - button "Thông báo" [ref=e219] [cursor=pointer]:
+              - img [ref=e220]
+            - generic [ref=e222]: "24"
+          - button "Thiết lập" [ref=e223] [cursor=pointer]:
+            - img [ref=e224]
+          - button "ERG Super Admin" [ref=e226] [cursor=pointer]:
+            - generic [ref=e227]: E
+      - main [ref=e228]:
+        - generic [ref=e488]:
+          - generic [ref=e489]:
+            - navigation [ref=e490]:
+              - list [ref=e491]:
+                - listitem [ref=e229]:
+                  - paragraph [ref=e230]: Trang chủ
+            - heading "Trang chủ" [level=5] [ref=e232]
+          - generic [ref=e493]:
+            - generic [ref=e233]:
+              - generic [ref=e234]:
+                - generic [ref=e237]:
+                  - heading "Công việc" [level=6] [ref=e238]
+                  - generic [ref=e239]: "5"
+                - generic [ref=e242] [cursor=pointer]:
+                  - checkbox [checked] [ref=e243]
+                  - generic [ref=e244]: Thu gọn
+              - separator
+              - generic [ref=e246]:
+                - generic:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - table [ref=e251]:
+                          - rowgroup [ref=e252]:
+                            - row "Tên công việc Trạng thái Người phụ trách Người quản lý" [ref=e253]:
+                              - columnheader "Tên công việc" [ref=e254]
+                              - columnheader "Trạng thái" [ref=e255]
+                              - columnheader "Người phụ trách" [ref=e256]
+                              - columnheader "Người quản lý" [ref=e257]
+                          - rowgroup [ref=e258]:
+                            - row "Chưa cập nhật ***DFD4 Quá hạn +4 +4" [ref=e259] [cursor=pointer]:
+                              - cell "Chưa cập nhật ***DFD4" [ref=e260]:
+                                - generic [ref=e261]:
+                                  - paragraph [ref=e262]: Chưa cập nhật
+                                  - paragraph [ref=e263]: "***DFD4"
+                              - cell "Quá hạn" [ref=e264]:
+                                - generic [ref=e266]: Quá hạn
+                              - cell "+4" [ref=e267]:
+                                - paragraph [ref=e268]: "+4"
+                              - cell "+4" [ref=e269]:
+                                - paragraph [ref=e270]: "+4"
+                            - row "Gọi điện ***08D7 Quá hạn Phan Ngọc Ánh Ngọc Huyền" [ref=e271] [cursor=pointer]:
+                              - cell "Gọi điện ***08D7" [ref=e272]:
+                                - generic [ref=e273]:
+                                  - paragraph [ref=e274]: Gọi điện
+                                  - paragraph [ref=e275]: "***08D7"
+                              - cell "Quá hạn" [ref=e276]:
+                                - generic [ref=e278]: Quá hạn
+                              - cell "Phan Ngọc Ánh" [ref=e279]:
+                                - paragraph [ref=e280]: Phan Ngọc Ánh
+                              - cell "Ngọc Huyền" [ref=e281]:
+                                - paragraph [ref=e282]: Ngọc Huyền
+                            - row "Soạn giáo trình ***2C92 Chưa bắt đầu +1 Nhung Nguyễn" [ref=e283] [cursor=pointer]:
+                              - cell "Soạn giáo trình ***2C92" [ref=e284]:
+                                - generic [ref=e285]:
+                                  - paragraph [ref=e286]: Soạn giáo trình
+                                  - paragraph [ref=e287]: "***2C92"
+                              - cell "Chưa bắt đầu" [ref=e288]:
+                                - generic [ref=e290]: Chưa bắt đầu
+                              - cell "+1" [ref=e291]:
+                                - paragraph [ref=e292]: "+1"
+                              - cell "Nhung Nguyễn" [ref=e293]:
+                                - paragraph [ref=e294]: Nhung Nguyễn
+                            - row "Chưa cập nhật ***83FD Chưa cập nhật Phan Ngọc Ánh Phan Ngọc Ánh" [ref=e295] [cursor=pointer]:
+                              - cell "Chưa cập nhật ***83FD" [ref=e296]:
+                                - generic [ref=e297]:
+                                  - paragraph [ref=e298]: Chưa cập nhật
+                                  - paragraph [ref=e299]: "***83FD"
+                              - cell "Chưa cập nhật" [ref=e300]:
+                                - generic [ref=e302]: Chưa cập nhật
+                              - cell "Phan Ngọc Ánh" [ref=e303]:
+                                - paragraph [ref=e304]: Phan Ngọc Ánh
+                              - cell "Phan Ngọc Ánh" [ref=e305]:
+                                - paragraph [ref=e306]: Phan Ngọc Ánh
+                        - generic [ref=e308]:
+                          - paragraph [ref=e309]: Dòng/trang
+                          - generic [ref=e310]:
+                            - combobox "Dòng/trang" [ref=e311] [cursor=pointer]
+                            - textbox: "5"
+                            - img
+                          - paragraph [ref=e312]: 1–4 of 4
+                          - generic [ref=e313]:
+                            - button "Go to previous page" [disabled]:
+                              - img
+                            - button "Go to next page" [disabled]:
+                              - img
+            - generic [ref=e314]:
+              - generic [ref=e315]:
+                - generic [ref=e316]:
+                  - generic [ref=e319]:
+                    - heading "Đơn xin nghỉ học viên chờ duyệt" [level=6] [ref=e320]
+                    - generic [ref=e321]: "45"
+                  - generic [ref=e324] [cursor=pointer]:
+                    - checkbox [checked] [ref=e325]
+                    - generic [ref=e326]: Thu gọn
+                - separator [ref=e327]
+                - generic [ref=e332]:
+                  - table [ref=e333]:
+                    - rowgroup [ref=e334]:
+                      - row "Học viên Thông tin liên hệ Lớp học Thời gian nghỉ" [ref=e335]:
+                        - columnheader "Học viên" [ref=e336]
+                        - columnheader "Thông tin liên hệ" [ref=e337]
+                        - columnheader "Lớp học" [ref=e338]
+                        - columnheader "Thời gian nghỉ" [ref=e339]
+                    - rowgroup [ref=e340]:
+                      - row "Phan Ngọc Ánh centerup@gmail.com IELTS 7.0 11/06 00:00 - 12/06 00:00" [ref=e341] [cursor=pointer]:
+                        - cell "Phan Ngọc Ánh" [ref=e342]:
+                          - paragraph [ref=e343]: Phan Ngọc Ánh
+                        - cell "centerup@gmail.com" [ref=e344]:
+                          - paragraph [ref=e345]: centerup@gmail.com
+                        - cell "IELTS 7.0" [ref=e346]:
+                          - paragraph [ref=e347]: IELTS 7.0
+                        - cell "11/06 00:00 - 12/06 00:00" [ref=e348]:
+                          - paragraph [ref=e349]: 11/06 00:00 - 12/06 00:00
+                      - row "Phan Ngọc Ánh centerup@gmail.com IELTS 7.0 11/06 00:00 - 12/06 00:00" [ref=e350] [cursor=pointer]:
+                        - cell "Phan Ngọc Ánh" [ref=e351]:
+                          - paragraph [ref=e352]: Phan Ngọc Ánh
+                        - cell "centerup@gmail.com" [ref=e353]:
+                          - paragraph [ref=e354]: centerup@gmail.com
+                        - cell "IELTS 7.0" [ref=e355]:
+                          - paragraph [ref=e356]: IELTS 7.0
+                        - cell "11/06 00:00 - 12/06 00:00" [ref=e357]:
+                          - paragraph [ref=e358]: 11/06 00:00 - 12/06 00:00
+                      - row "Phan Ngọc Ánh centerup@gmail.com IELTS 7.0 11/06 00:00 - 12/06 00:00" [ref=e359] [cursor=pointer]:
+                        - cell "Phan Ngọc Ánh" [ref=e360]:
+                          - paragraph [ref=e361]: Phan Ngọc Ánh
+                        - cell "centerup@gmail.com" [ref=e362]:
+                          - paragraph [ref=e363]: centerup@gmail.com
+                        - cell "IELTS 7.0" [ref=e364]:
+                          - paragraph [ref=e365]: IELTS 7.0
+                        - cell "11/06 00:00 - 12/06 00:00" [ref=e366]:
+                          - paragraph [ref=e367]: 11/06 00:00 - 12/06 00:00
+                      - row "Phan Ngọc Ánh centerup@gmail.com IELTS 7.0 11/06 00:00 - 12/06 00:00" [ref=e368] [cursor=pointer]:
+                        - cell "Phan Ngọc Ánh" [ref=e369]:
+                          - paragraph [ref=e370]: Phan Ngọc Ánh
+                        - cell "centerup@gmail.com" [ref=e371]:
+                          - paragraph [ref=e372]: centerup@gmail.com
+                        - cell "IELTS 7.0" [ref=e373]:
+                          - paragraph [ref=e374]: IELTS 7.0
+                        - cell "11/06 00:00 - 12/06 00:00" [ref=e375]:
+                          - paragraph [ref=e376]: 11/06 00:00 - 12/06 00:00
+                      - row "Phan Ngọc Ánh centerup@gmail.com IELTS 7.0 11/06 00:00 - 12/06 00:00" [ref=e377] [cursor=pointer]:
+                        - cell "Phan Ngọc Ánh" [ref=e378]:
+                          - paragraph [ref=e379]: Phan Ngọc Ánh
+                        - cell "centerup@gmail.com" [ref=e380]:
+                          - paragraph [ref=e381]: centerup@gmail.com
+                        - cell "IELTS 7.0" [ref=e382]:
+                          - paragraph [ref=e383]: IELTS 7.0
+                        - cell "11/06 00:00 - 12/06 00:00" [ref=e384]:
+                          - paragraph [ref=e385]: 11/06 00:00 - 12/06 00:00
+                  - generic [ref=e387]:
+                    - paragraph [ref=e388]: Dòng/trang
+                    - generic [ref=e389]:
+                      - combobox "Dòng/trang" [ref=e390] [cursor=pointer]
+                      - textbox: "5"
+                      - img
+                    - paragraph [ref=e391]: 1–5 of 45
+                    - generic [ref=e392]:
+                      - button "Go to previous page" [disabled]:
+                        - img
+                      - button "Go to next page" [ref=e393] [cursor=pointer]:
+                        - img [ref=e394]
+              - generic [ref=e396]:
+                - generic [ref=e397]:
+                  - generic [ref=e400]:
+                    - heading "Đơn xin nghỉ nhân viên chờ duyệt" [level=6] [ref=e401]
+                    - generic [ref=e402]: "4"
+                  - generic [ref=e405] [cursor=pointer]:
+                    - checkbox [checked] [ref=e406]
+                    - generic [ref=e407]: Thu gọn
+                - separator [ref=e408]
+                - generic [ref=e413]:
+                  - table [ref=e414]:
+                    - rowgroup [ref=e415]:
+                      - row "Nhân viên Thông tin Thời gian nghỉ" [ref=e416]:
+                        - columnheader "Nhân viên" [ref=e417]
+                        - columnheader "Thông tin" [ref=e418]
+                        - columnheader "Thời gian nghỉ" [ref=e419]
+                    - rowgroup [ref=e420]:
+                      - row "Quỳnh Đinh quynh.dinh@... 05/04 - 06/04/2025" [ref=e421] [cursor=pointer]:
+                        - cell "Quỳnh Đinh" [ref=e422]:
+                          - paragraph [ref=e423]: Quỳnh Đinh
+                        - cell "quynh.dinh@..." [ref=e424]:
+                          - paragraph [ref=e425]: quynh.dinh@...
+                        - cell "05/04 - 06/04/2025" [ref=e426]:
+                          - paragraph [ref=e427]: 05/04 - 06/04/2025
+                      - row "Quỳnh Đinh quynh.dinh@... 05/04 - 06/04/2025" [ref=e428] [cursor=pointer]:
+                        - cell "Quỳnh Đinh" [ref=e429]:
+                          - paragraph [ref=e430]: Quỳnh Đinh
+                        - cell "quynh.dinh@..." [ref=e431]:
+                          - paragraph [ref=e432]: quynh.dinh@...
+                        - cell "05/04 - 06/04/2025" [ref=e433]:
+                          - paragraph [ref=e434]: 05/04 - 06/04/2025
+                      - row "Quỳnh Đinh quynh.dinh@... 05/04 - 06/04/2025" [ref=e435] [cursor=pointer]:
+                        - cell "Quỳnh Đinh" [ref=e436]:
+                          - paragraph [ref=e437]: Quỳnh Đinh
+                        - cell "quynh.dinh@..." [ref=e438]:
+                          - paragraph [ref=e439]: quynh.dinh@...
+                        - cell "05/04 - 06/04/2025" [ref=e440]:
+                          - paragraph [ref=e441]: 05/04 - 06/04/2025
+                      - row "Quỳnh Đinh quynh.dinh@... 05/04 - 06/04/2025" [ref=e442] [cursor=pointer]:
+                        - cell "Quỳnh Đinh" [ref=e443]:
+                          - paragraph [ref=e444]: Quỳnh Đinh
+                        - cell "quynh.dinh@..." [ref=e445]:
+                          - paragraph [ref=e446]: quynh.dinh@...
+                        - cell "05/04 - 06/04/2025" [ref=e447]:
+                          - paragraph [ref=e448]: 05/04 - 06/04/2025
+                  - generic [ref=e450]:
+                    - paragraph [ref=e451]: Dòng/trang
+                    - generic [ref=e452]:
+                      - combobox "Dòng/trang" [ref=e453] [cursor=pointer]
+                      - textbox: "5"
+                      - img
+                    - paragraph [ref=e454]: 1–4 of 4
+                    - generic [ref=e455]:
+                      - button "Go to previous page" [disabled]:
+                        - img
+                      - button "Go to next page" [disabled]:
+                        - img
+            - generic [ref=e456]:
+              - heading "Lịch dạy" [level=6] [ref=e461]
+              - separator [ref=e462]
+              - generic [ref=e467]:
+                - paragraph [ref=e468]: 08/06 - 14/06/2026
+                - generic [ref=e469]:
+                  - paragraph [ref=e470]: T2
+                  - paragraph [ref=e471]: T3
+                  - paragraph [ref=e472]: T4
+                  - paragraph [ref=e473]: T5
+                  - paragraph [ref=e474]: T6
+                  - paragraph [ref=e475]: T7
+                  - paragraph [ref=e476]: CN
+                  - generic [ref=e477] [cursor=pointer]: "8"
+                  - generic [ref=e478] [cursor=pointer]: "9"
+                  - generic [ref=e479] [cursor=pointer]: "10"
+                  - generic [ref=e480] [cursor=pointer]: "11"
+                  - generic [ref=e481] [cursor=pointer]: "12"
+                  - generic [ref=e482] [cursor=pointer]: "13"
+                  - generic [ref=e483] [cursor=pointer]: "14"
+                - paragraph [ref=e484]: Thứ năm, 11/06/2026
+                - paragraph [ref=e485]: Không có sự kiện trong ngày này.
+  - region "Notifications alt+T"

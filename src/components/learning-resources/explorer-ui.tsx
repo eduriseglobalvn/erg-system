@@ -1,12 +1,343 @@
-import { LayoutGrid, List, Play, Timer } from "lucide-react";
-import type { MouseEventHandler } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  List,
+  Monitor,
+  Play,
+  RefreshCw,
+  Search,
+  Plus,
+  Timer,
+} from "lucide-react";
+import type { MouseEventHandler, ReactNode } from "react";
+
+import { cn } from "@/lib/utils";
 
 export type ExplorerViewMode = "grid" | "list";
+
+type LearningResourceExplorerShellProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+export function LearningResourceExplorerShell({
+  children,
+  className,
+}: LearningResourceExplorerShellProps) {
+  return (
+    <div
+      className={cn(
+        "min-h-0 flex-1 overflow-hidden rounded-lg border border-slate-200 bg-white text-[13px] text-slate-900 shadow-sm",
+        className,
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+type LearningResourceExplorerBreadcrumbItem = {
+  label: string;
+  onClick: () => void;
+};
+
+type LearningResourceExplorerTopBarProps = {
+  breadcrumbItems: LearningResourceExplorerBreadcrumbItem[];
+  canGoBack?: boolean;
+  className?: string;
+  onBack?: () => void;
+  onRefresh: () => void;
+  searchLabel: string;
+  searchPlaceholder: string;
+  searchValue: string;
+  title?: string;
+  onSearchChange: (value: string) => void;
+};
+
+export function LearningResourceExplorerTopBar({
+  breadcrumbItems,
+  canGoBack = false,
+  className,
+  onBack,
+  onRefresh,
+  searchLabel,
+  searchPlaceholder,
+  searchValue,
+  title,
+  onSearchChange,
+}: LearningResourceExplorerTopBarProps) {
+  return (
+    <div className={cn("flex h-12 shrink-0 items-center gap-2 border-b border-slate-200 bg-slate-50 px-3", className)}>
+      <button
+        type="button"
+        className={cn(
+          "grid h-8 w-8 shrink-0 place-items-center rounded text-[#374151] hover:bg-[#eef6ff] disabled:cursor-not-allowed disabled:text-[#c7d0da]",
+        )}
+        onClick={onBack}
+        disabled={!canGoBack}
+        aria-label="Quay lại"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded text-[#c7d0da] disabled:cursor-not-allowed"
+        disabled
+        aria-label="Tiến tới"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+      <button
+        type="button"
+        className="grid h-8 w-8 shrink-0 place-items-center rounded text-[#374151] hover:bg-[#eef6ff]"
+        onClick={onRefresh}
+        aria-label="Tải lại"
+      >
+        <RefreshCw className="h-4 w-4" />
+      </button>
+      <div
+        className="flex h-8 min-w-0 flex-1 items-center overflow-hidden rounded-md bg-white px-2 shadow-sm"
+        title={title}
+      >
+        {breadcrumbItems.length ? <Monitor className="mx-2 h-4 w-4 shrink-0 text-[#52616f]" /> : null}
+        {breadcrumbItems.map((item, index) => (
+          <span key={`${item.label}-${index}`} className="flex min-w-0 items-center">
+            {index > 0 ? <ChevronRight className="mx-1 h-3.5 w-3.5 shrink-0 text-[#6b7280]" /> : null}
+            <button
+              type="button"
+              onClick={item.onClick}
+              className={cn(
+                "cursor-pointer truncate rounded px-1.5 py-0.5 text-left text-[13px] outline-none transition-colors duration-150 hover:bg-slate-200/60",
+                index === breadcrumbItems.length - 1 ? "font-medium text-[#111827]" : "text-[#1f2937] hover:text-[#111827]",
+              )}
+            >
+              {item.label}
+            </button>
+          </span>
+        ))}
+      </div>
+      <label className="flex h-8 w-[280px] max-w-[28vw] shrink-0 items-center rounded-md bg-white px-3 shadow-sm">
+        <span className="sr-only">{searchLabel}</span>
+        <Search className="mr-2 h-4 w-4 text-[#52616f]" />
+        <input
+          value={searchValue}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={searchPlaceholder}
+          className="min-w-0 flex-1 bg-transparent text-[13px] outline-none placeholder:text-[#64748b]"
+          type="text"
+        />
+      </label>
+    </div>
+  );
+}
+
+export type LearningResourceExplorerCommand = {
+  disabled?: boolean;
+  icon: ReactNode;
+  label: string;
+  onClick?: () => void;
+  title?: string;
+  variant?: "text" | "icon" | "separator";
+};
+
+type LearningResourceExplorerCommandBarProps = {
+  actions: LearningResourceExplorerCommand[];
+  className?: string;
+  viewMode: ExplorerViewMode;
+  onViewModeChange: (mode: ExplorerViewMode) => void;
+};
+
+export function LearningResourceExplorerCommandBar({
+  actions,
+  className,
+  viewMode,
+  onViewModeChange,
+}: LearningResourceExplorerCommandBarProps) {
+  return (
+    <div className={cn("flex h-12 shrink-0 items-center gap-1 border-b border-slate-200 bg-white px-3", className)}>
+      {actions.map((action, index) => {
+        if (action.variant === "separator") {
+          return <div key={`${action.label}-${index}`} className="mx-2 h-7 w-px bg-[#e5e7eb]" />;
+        }
+
+        if (action.variant === "icon") {
+          return (
+            <button
+              key={`${action.label}-${index}`}
+              type="button"
+              onClick={action.onClick}
+              disabled={action.disabled}
+              className="grid h-9 w-9 place-items-center rounded text-[#8aa6c1] hover:bg-[#eef6ff] disabled:cursor-not-allowed disabled:opacity-50"
+              title={action.title ?? action.label}
+              aria-label={action.label}
+            >
+              {action.icon}
+            </button>
+          );
+        }
+
+        return (
+          <button
+            key={`${action.label}-${index}`}
+            type="button"
+            onClick={action.onClick}
+            disabled={action.disabled}
+            className="inline-flex h-9 items-center gap-2 rounded px-2 text-[#1f2937] hover:bg-[#eef6ff] disabled:cursor-not-allowed disabled:opacity-50"
+            title={action.title ?? action.label}
+          >
+            {action.icon}
+            <span>{action.label}</span>
+          </button>
+        );
+      })}
+      <ExplorerViewToggle viewMode={viewMode} onViewModeChange={onViewModeChange} />
+    </div>
+  );
+}
+
+type LearningResourceExplorerTreePaneProps = {
+  children: ReactNode;
+  className?: string;
+  navClassName?: string;
+  onContextMenu?: MouseEventHandler<HTMLElement>;
+};
+
+export function LearningResourceExplorerTreePane({
+  children,
+  className,
+  navClassName,
+  onContextMenu,
+}: LearningResourceExplorerTreePaneProps) {
+  return (
+    <aside
+      className={cn(
+        "min-h-0 overflow-y-auto border-r border-[#e5e7eb] bg-[#fbfbfb] px-1.5 py-2 [scrollbar-gutter:stable]",
+        className,
+      )}
+      onContextMenu={onContextMenu}
+    >
+      <nav className={cn("space-y-0.5 pt-1", navClassName)}>{children}</nav>
+    </aside>
+  );
+}
+
+type LearningResourceExplorerTreeRowProps = {
+  action?: ReactNode;
+  actionDisabled?: boolean;
+  actionLabel?: string;
+  depth?: number;
+  expanded?: boolean;
+  hasChildren?: boolean;
+  icon: ReactNode;
+  indentBase?: number;
+  indentStep?: number;
+  label: string;
+  onAction?: () => void;
+  onContextMenu?: MouseEventHandler<HTMLDivElement>;
+  onSelect: () => void;
+  onToggle?: () => void;
+  selected?: boolean;
+  title?: string;
+};
+
+export function LearningResourceExplorerTreeRow({
+  action,
+  actionDisabled,
+  actionLabel = "Thêm bên trong",
+  depth = 0,
+  expanded = false,
+  hasChildren = false,
+  icon,
+  indentBase = 6,
+  indentStep = 18,
+  label,
+  onAction,
+  onContextMenu,
+  onSelect,
+  onToggle,
+  selected = false,
+  title,
+}: LearningResourceExplorerTreeRowProps) {
+  return (
+    <div
+      className={cn(
+        "group relative flex h-8 w-full items-center justify-between gap-1 rounded-sm px-1.5 py-0 text-[13px] transition",
+        selected
+          ? "bg-[#dceeff] font-semibold text-[#0b3f7a] [&_svg]:text-[#0b6fcf]"
+          : "text-[#111827] hover:bg-[#eef6ff]",
+      )}
+      style={{ paddingLeft: `${indentBase + Math.min(depth, 8) * indentStep}px` }}
+      onContextMenu={onContextMenu}
+    >
+      <div className="flex min-w-0 flex-1 items-center gap-1.5">
+        {hasChildren ? (
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onToggle?.();
+            }}
+            className="grid h-6 w-5 shrink-0 place-items-center rounded text-[#6b7280] hover:bg-black/5"
+            aria-label={expanded ? "Thu gọn" : "Mở rộng"}
+          >
+            <ChevronRight className={cn("h-3.5 w-3.5 transition-transform duration-150", expanded ? "rotate-90" : undefined)} />
+          </button>
+        ) : (
+          <span className="w-5 shrink-0" />
+        )}
+        <button
+          type="button"
+          onClick={onSelect}
+          className={cn("flex min-w-0 flex-1 items-center gap-1.5 text-left", action || onAction ? "pr-7" : undefined)}
+          title={title ?? label}
+        >
+          <span className="shrink-0">{icon}</span>
+          <span className={cn("min-w-0 flex-1 truncate", selected ? "font-semibold text-[#0b3f7a]" : "font-medium text-[#111827]")}>
+            {label}
+          </span>
+        </button>
+      </div>
+      {action || onAction ? (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onAction?.();
+          }}
+          disabled={actionDisabled}
+          className="absolute right-2 top-1/2 grid h-6 w-6 shrink-0 -translate-y-1/2 place-items-center rounded bg-white/80 text-[#9ca3af] opacity-0 shadow-sm backdrop-blur-sm transition-opacity hover:bg-white hover:text-[var(--erg-blue)] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1]"
+          aria-label={actionLabel}
+        >
+          {action ?? <Plus className="h-3.5 w-3.5" />}
+        </button>
+      ) : null}
+    </div>
+  );
+}
 
 type WindowsFolderIconProps = {
   open?: boolean;
   size?: "sm" | "lg";
 };
+
+type LearningResourceExplorerCardGridProps = {
+  children: ReactNode;
+  className?: string;
+  contentClassName?: string;
+};
+
+export function LearningResourceExplorerCardGrid({
+  children,
+  className,
+  contentClassName,
+}: LearningResourceExplorerCardGridProps) {
+  return (
+    <div className={cn("h-full overflow-y-auto p-4 [scrollbar-gutter:stable]", className)}>
+      <div className={cn("grid grid-cols-[repeat(auto-fill,210px)] gap-4", contentClassName)}>{children}</div>
+    </div>
+  );
+}
 
 export function WindowsFolderIcon({ open = false, size = "sm" }: WindowsFolderIconProps) {
   const dimensions = size === "lg" ? "h-[88px] w-[96px]" : "h-[22px] w-[24px]";
@@ -110,10 +441,10 @@ export function LearningResourceFolderTile({
       onContextMenu={onContextMenu}
       onDoubleClick={onDoubleClick}
       title={title}
-      className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-lg border px-4 text-center transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] ${
+      className={`group relative flex aspect-square w-full flex-col items-center justify-center overflow-hidden rounded-sm border px-4 text-center transition focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)] ${
         selected
-          ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] shadow-sm ring-1 ring-inset ring-[#b8d6fa]"
-          : "border-[#d7e0ec] bg-white hover:border-[#b8d6fa] hover:bg-[#f7fbff]"
+          ? "border-[#99c8ff] bg-[#dceeff] ring-1 ring-inset ring-[#99c8ff]"
+          : "border-transparent bg-transparent hover:bg-[#eef6ff]"
       }`}
     >
       <span className="absolute inset-x-0 top-[45%] flex -translate-y-1/2 items-center justify-center">
@@ -121,7 +452,7 @@ export function LearningResourceFolderTile({
           <WindowsFolderIcon size="lg" open={open} />
         </span>
       </span>
-      <span className="absolute inset-x-4 bottom-5 line-clamp-2 text-[13px] font-medium leading-5 text-slate-900">
+      <span className="absolute inset-x-4 bottom-5 line-clamp-2 text-[13px] font-medium leading-5 text-[#111827]">
         {label}
       </span>
     </button>

@@ -16,6 +16,8 @@ export type QuestionType =
   | "likert-scale"
   | "essay";
 
+export type QuestionCreationPreset = "yes-no";
+
 export type IntroSlideKind = "intro-slide" | "user-info" | "instruction-slide";
 
 export type SlideKind = "info-slide" | "result-slide" | IntroSlideKind | QuestionType;
@@ -59,6 +61,7 @@ export type QuizEditorChoice = {
   id: string;
   label: string;
   correct: boolean;
+  media?: QuizEditorSlideMedia | null;
 };
 
 export type QuizEditorSlideMedia = {
@@ -73,6 +76,18 @@ export type QuizEditorDragDropItem = {
   label: string;
   emoji: string;
   target: string;
+  media?: QuizEditorSlideMedia | null;
+  targetMedia?: QuizEditorSlideMedia | null;
+};
+
+export type QuizEditorHotspotArea = {
+  id: string;
+  shape: "rect";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  correct: boolean;
 };
 
 export type QuizEditorFeedbackBranching = "By Result" | "Next Question" | "Finish Quiz";
@@ -164,6 +179,7 @@ export type QuizEditorSlide = {
   choices?: QuizEditorChoice[];
   choiceControlType?: "checkbox" | "radio";
   dragDropItems?: QuizEditorDragDropItem[];
+  hotspotAreas?: QuizEditorHotspotArea[];
   feedbackRows?: QuizEditorFeedbackRow[];
   activeResultTab?: "passed" | "failed";
   finishAction?: string;

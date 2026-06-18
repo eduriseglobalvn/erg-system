@@ -1,7 +1,6 @@
 import { memo, type MouseEvent } from "react";
 import {
   BookMarked,
-  ChevronRight,
   ClipboardList,
   FileCheck,
   FileText,
@@ -10,14 +9,12 @@ import {
   HelpCircle,
   Image as ImageIcon,
   Link as LinkIcon,
-  Plus,
   Presentation,
   Video,
 } from "@/components/mui-icon-shim";
 
-import { WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
+import { LearningResourceExplorerTreeRow, WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
 import type { StudioNode, StudioNodeKind } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import { cn } from "@/lib/utils";
 
 export const ExplorerTreeRow = memo(function ExplorerTreeRow({
   node,
@@ -39,55 +36,54 @@ export const ExplorerTreeRow = memo(function ExplorerTreeRow({
   onOpenContextMenu: (event: MouseEvent, node: StudioNode) => void;
 }) {
   const hasChildren = node.children.length > 0;
+
   return (
-    <div
-      className={cn(
-        "group relative flex items-center justify-between gap-1.5 rounded-sm py-1.5 px-2 text-[13px] transition",
-        selected ? "bg-[#dceeff] font-semibold text-[#0b3f7a] [&_svg]:text-[#0b6fcf]" : "text-[#111827] hover:bg-[#eef6ff]",
-      )}
-      style={{ paddingLeft: `${8 + Math.min(depth, 8) * 14}px` }}
+    <LearningResourceExplorerTreeRow
+      label={node.label}
+      title={node.label}
+      depth={depth}
+      indentBase={22}
+      selected={selected}
+      expanded={expanded}
+      hasChildren={hasChildren}
+      icon={getNodeIcon(node, selected || expanded)}
+      onSelect={() => onSelectNode(node.id)}
+      onToggle={() => onToggleNode(node.id)}
+      onAction={() => onCreateChild(node)}
+      actionDisabled={!node.optionId}
       onContextMenu={(event) => onOpenContextMenu(event, node)}
-    >
-      <div className="flex min-w-0 flex-1 items-center gap-2">
-        {hasChildren ? (
-          <button
-            type="button"
-            onClick={() => onToggleNode(node.id)}
-            className="grid h-5 w-5 shrink-0 place-items-center rounded text-[#6b7280] hover:bg-slate-200/50"
-            aria-label={expanded ? "Thu gọn" : "Mở rộng"}
-          >
-            <ChevronRight className={cn("h-3.5 w-3.5 transition-transform duration-150", expanded ? "rotate-90" : undefined)} />
-          </button>
-        ) : (
-          <span className="w-3.5 shrink-0" />
-        )}
-        <button
-          type="button"
-          onClick={() => onSelectNode(node.id)}
-          className="flex min-w-0 flex-1 items-center gap-2 text-left pr-8"
-        >
-          <span className="shrink-0">
-            {getNodeIcon(node, selected || expanded)}
-          </span>
-          <span className={cn("truncate", selected ? "font-semibold text-[#0b3f7a]" : "font-medium text-[#111827]")} title={node.label}>
-            {node.label}
-          </span>
-        </button>
-      </div>
-      <button
-        type="button"
-        onClick={() => onCreateChild(node)}
-        disabled={!node.optionId}
-        className="absolute right-2 top-1/2 -translate-y-1/2 shadow-sm bg-white/80 backdrop-blur-sm grid h-6 w-6 shrink-0 place-items-center rounded text-[#9ca3af] opacity-0 hover:bg-white hover:text-[var(--erg-blue)] group-hover:opacity-100 disabled:cursor-not-allowed disabled:text-[#cbd5e1] transition-opacity"
-        aria-label="Thêm nội dung bên trong"
-      >
-        <Plus className="h-3.5 w-3.5" />
-      </button>
-    </div>
+    />
   );
 });
 
 export function getNodeIcon(node: StudioNode, expanded?: boolean) {
+  const displayKind = node.metadata?.displayKind;
+  if (displayKind === "lecture") {
+    return <Presentation className="h-4 w-4" />;
+  }
+  if (displayKind === "exercise") {
+    return <FileCheck className="h-4 w-4" />;
+  }
+  if (displayKind === "resource") {
+    return <FileText className="h-4 w-4" />;
+  }
+  if (
+    node.kind === "group" ||
+    node.kind === "folder" ||
+    node.kind === "category" ||
+    node.kind === "bookSeries" ||
+    node.kind === "lesson" ||
+    node.kind === "section"
+  ) {
+    return <WindowsFolderIcon open={expanded} />;
+  }
+  if (node.kind === "topic" && node.children.length > 0) {
+    return <WindowsFolderIcon open={expanded} />;
+  }
+  if (node.kind === "topic") {
+    return <FileText className="h-4 w-4" />;
+  }
+
   const text = `${node.label} ${node.description ?? ""}`.toLowerCase();
   if (text.includes("audio") || text.includes("âm thanh") || text.includes("phát âm")) {
     return <Headphones className="h-4 w-4" />;
@@ -115,12 +111,6 @@ export function getNodeIcon(node: StudioNode, expanded?: boolean) {
   }
   if (text.includes("unit") || text.includes("lesson") || text.includes("bài ")) {
     return <GraduationCap className="h-4 w-4" />;
-  }
-  if (node.kind === "group" || node.kind === "folder") {
-    return <WindowsFolderIcon open={expanded} />;
-  }
-  if (node.kind === "lesson") {
-    return <FileText className="h-4 w-4" />;
   }
   return <HelpCircle className="h-4 w-4" />;
 }
