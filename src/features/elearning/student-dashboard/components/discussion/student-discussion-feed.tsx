@@ -1,17 +1,16 @@
+import Box from "@mui/material/Box";
 import { useMemo, useState } from "react";
-import {
-  Camera,
-  Gift,
-  Globe2,
-  ImagePlus,
-  MessageCircle,
-  MoreHorizontal,
-  Send,
-  Share2,
-  SmilePlus,
-  Sticker,
-  X,
-} from "lucide-react";
+import Camera from "@mui/icons-material/PhotoCameraRounded";
+import Gift from "@mui/icons-material/GifBoxRounded";
+import Globe2 from "@mui/icons-material/PublicRounded";
+import ImagePlus from "@mui/icons-material/AddPhotoAlternateRounded";
+import MessageCircle from "@mui/icons-material/ChatBubbleOutlineRounded";
+import MoreHorizontal from "@mui/icons-material/MoreHorizRounded";
+import Send from "@mui/icons-material/SendRounded";
+import Share2 from "@mui/icons-material/ShareRounded";
+import SmilePlus from "@mui/icons-material/AddReactionRounded";
+import Sticker from "@mui/icons-material/StickyNote2Rounded";
+import X from "@mui/icons-material/CloseRounded";
 import { useForm } from "@tanstack/react-form";
 
 import MuiAvatar from "@mui/material/Avatar";
@@ -26,7 +25,6 @@ import type {
   StudentDiscussionReactionKey,
 } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import { getCommentCount, getFeedPostActivityMs } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
-import { cn } from "@/lib/utils";
 
 type DiscussionFeedCopy = {
   discussionAttachmentAction: string;
@@ -94,39 +92,39 @@ export function StudentDiscussionFeed({
   }
 
   return (
-    <section className="mx-auto w-full max-w-[1680px] px-4 py-5">
-      <div className="grid gap-5 xl:grid-cols-[260px_minmax(0,920px)_260px] 2xl:grid-cols-[280px_minmax(0,980px)_280px] xl:items-start xl:justify-center">
-        <aside className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm xl:block">
-          <div className="text-xs font-semibold text-slate-400">ERG Social</div>
-          <h1 className="mt-2 text-xl font-semibold leading-tight text-[#696CFF]">{copy.discussionTitle}</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{copy.discussionDescription}</p>
-          <div className="mt-4 rounded-lg bg-slate-50 p-3">
-            <div className="text-xs font-semibold text-slate-400">Lớp học</div>
-            <div className="mt-1 text-sm font-semibold text-slate-900">{studentClass}</div>
-          </div>
-        </aside>
+    <Box component="section" sx={{"marginInline":"auto","width":"100%","maxWidth":"1680px","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 5)"}}>
+      <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xl: "260px minmax(0,920px) 260px", "2xl": "280px minmax(0,980px) 280px" }, justifyContent: { xl: "center" }, alignItems: { xl: "start" } }}>
+        <Box component="aside" sx={{"display":"none","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 80rem))":{"display":"block"}}}>
+          <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>ERG Social</Box>
+          <Box component="h1" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"1.25rem","lineHeight":"1.25","fontWeight":"600","color":"#696CFF"}}>{copy.discussionTitle}</Box>
+          <Box component="p" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>{copy.discussionDescription}</Box>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","borderRadius":"0.5rem","backgroundColor":"oklch(98.4% 0.003 247.858)","padding":"calc(0.25rem * 3)"}}>
+            <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>Lớp học</Box>
+            <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{studentClass}</Box>
+          </Box>
+        </Box>
 
-        <div className="min-w-0 space-y-4">
-          <TsForm
-            className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
+        <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)",":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 4) * 0)","marginBlockEnd":"calc(calc(0.25rem * 4) * calc(1 - 0))"}}}>
+          <Box component={TsForm}
+            sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 1, boxShadow: 1, overflow: "hidden" }}
             onSubmit={(event) => {
               event.preventDefault();
               event.stopPropagation();
               void postForm.handleSubmit();
             }}
           >
-            <div className="flex items-center gap-3 border-b border-slate-100 p-4">
+            <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","padding":"calc(0.25rem * 4)"}}>
               <Avatar initials={getInitials(studentName)} size="lg" />
-              <button
+              <Box component="button"
                 type="button"
-                className="min-h-11 flex-1 rounded-full bg-slate-100 px-4 text-left text-sm font-medium text-slate-500 transition hover:bg-slate-200"
+                sx={{"minHeight":"calc(0.25rem * 11)","flex":"1","borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 4)","textAlign":"left","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"500","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)"}}}}
                 onClick={() => document.getElementById("student-discussion-post-box")?.focus()}
               >
                 {firstName} ơi, bạn đang muốn hỏi gì?
-              </button>
-            </div>
+              </Box>
+            </Box>
 
-            <div className="p-4">
+            <Box component="div" sx={{"padding":"calc(0.25rem * 4)"}}>
               <postForm.Field
                 name="content"
                 validators={{
@@ -136,9 +134,9 @@ export function StudentDiscussionFeed({
               >
                 {(field) => (
                   <>
-                    <textarea
+                    <Box component="textarea"
                       id="student-discussion-post-box"
-                      className="min-h-24 w-full resize-none rounded-lg border border-transparent bg-white px-2 py-2 text-[15px] leading-7 text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-slate-200 focus:bg-slate-50"
+                      sx={{"minHeight":"calc(0.25rem * 24)","width":"100%","resize":"none","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"transparent","backgroundColor":"#fff","paddingInline":"calc(0.25rem * 2)","paddingBlock":"calc(0.25rem * 2)","fontSize":"15px","lineHeight":"calc(0.25rem * 7)","color":"oklch(27.9% 0.041 260.031)","outlineStyle":"none","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&::placeholder":{"color":"oklch(70.4% 0.04 256.788)"},"&:focus":{"borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)"}}}
                       placeholder="Chia sẻ câu hỏi, bài khó, mẹo học hoặc ảnh bài làm..."
                       value={field.state.value}
                       onBlur={field.handleBlur}
@@ -159,9 +157,9 @@ export function StudentDiscussionFeed({
                   setPostAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId))
                 }
               />
-            </div>
+            </Box>
 
-            <div className="grid gap-3 border-t border-slate-100 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+            <Box component="div" sx={{"display":"grid","gap":"calc(0.25rem * 3)","borderTopStyle":"solid","borderTopWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","padding":"calc(0.25rem * 4)","@media ((min-width: 40rem))":{"gridTemplateColumns":"1fr auto","alignItems":"center"}}}>
               <AttachmentUploadButton
                 hint={copy.discussionAttachmentHint}
                 inputId="student-discussion-post-images"
@@ -170,15 +168,15 @@ export function StudentDiscussionFeed({
               />
               <Button
                 variant="contained"
-                startIcon={<Send className="h-4 w-4" />}
-                className="rounded-full bg-[#696CFF] px-5 text-white shadow-sm hover:bg-[#585BE0]"
+                startIcon={<Send sx={{ fontSize: 16 }} />}
+                sx={{"borderRadius":"9999px","backgroundColor":"#696CFF","paddingInline":"calc(0.25rem * 5)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
                 disabled={!postDraft.trim() && postAttachments.length === 0}
                 type="submit"
               >
                 {copy.discussionPostAction}
               </Button>
-            </div>
-          </TsForm>
+            </Box>
+          </Box>
 
           {sortedPosts.length > 0 ? (
             sortedPosts.map((post) => (
@@ -193,25 +191,25 @@ export function StudentDiscussionFeed({
               />
             ))
           ) : (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-white p-10 text-center">
-              <h2 className="text-lg font-semibold text-[#696CFF]">{copy.discussionEmptyTitle}</h2>
-              <p className="mt-2 text-sm text-slate-500">{copy.discussionEmptyDescription}</p>
-            </div>
+            <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"dashed","borderWidth":"1px","borderColor":"oklch(86.9% 0.022 252.894)","backgroundColor":"#fff","padding":"calc(0.25rem * 10)","textAlign":"center"}}>
+              <Box component="h2" sx={{"fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"#696CFF"}}>{copy.discussionEmptyTitle}</Box>
+              <Box component="p" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{copy.discussionEmptyDescription}</Box>
+            </Box>
           )}
-        </div>
+        </Box>
 
-        <aside className="hidden rounded-lg border border-slate-200 bg-white p-4 shadow-sm xl:block">
-          <div className="text-sm font-semibold text-slate-950">Đang nổi bật</div>
-          <div className="mt-3 space-y-3">
+        <Box component="aside" sx={{"display":"none","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 80rem))":{"display":"block"}}}>
+          <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>Đang nổi bật</Box>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 3)",":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"}}}>
             {sortedPosts.slice(0, 3).map((post) => (
-              <button key={post.id} className="block w-full rounded-lg bg-slate-50 p-3 text-left transition hover:bg-slate-100" type="button" onClick={() => setSelectedPostId(post.id)}>
-                <div className="line-clamp-2 text-sm font-semibold leading-5 text-slate-900">{post.content}</div>
-                <div className="mt-2 text-xs text-slate-500">{getCommentCount(post.comments)} bình luận</div>
-              </button>
+              <Box component="button" key={post.id} sx={{"display":"block","width":"100%","borderRadius":"0.5rem","backgroundColor":"oklch(98.4% 0.003 247.858)","padding":"calc(0.25rem * 3)","textAlign":"left","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}} type="button" onClick={() => setSelectedPostId(post.id)}>
+                <Box component="div" sx={{"overflow":"hidden","display":"-webkit-box","WebkitBoxOrient":"vertical","WebkitLineClamp":"2","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 5)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{post.content}</Box>
+                <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>{getCommentCount(post.comments)} bình luận</Box>
+              </Box>
             ))}
-          </div>
-        </aside>
-      </div>
+          </Box>
+        </Box>
+      </Box>
 
       {selectedPost ? (
         <PostDetailDialog
@@ -224,7 +222,7 @@ export function StudentDiscussionFeed({
           onPostReaction={onPostReaction}
         />
       ) : null}
-    </section>
+    </Box>
   );
 }
 
@@ -263,60 +261,60 @@ function PostCard({
   }
 
   return (
-    <article
-      className="scroll-mt-24 overflow-visible rounded-lg border border-slate-200 bg-white shadow-sm"
+    <Box component="article"
+      sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 1, boxShadow: 1, overflow: "visible", scrollMarginTop: 96 }}
       id={getPostDomId(post.id)}
     >
-      <header className="flex items-start justify-between gap-3 p-4">
-        <div className="flex min-w-0 gap-3">
+      <Box component="header" sx={{"display":"flex","alignItems":"flex-start","justifyContent":"space-between","gap":"calc(0.25rem * 3)","padding":"calc(0.25rem * 4)"}}>
+        <Box component="div" sx={{"display":"flex","minWidth":"calc(0.25rem * 0)","gap":"calc(0.25rem * 3)"}}>
           <Avatar initials={post.authorInitials} size="lg" />
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <h2 className="font-semibold leading-5 text-slate-950">{post.authorName}</h2>
-              <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-[#696CFF]">
+          <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+            <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","columnGap":"calc(0.25rem * 2)","rowGap":"calc(0.25rem * 1)"}}>
+              <Box component="h2" sx={{"fontWeight":"600","lineHeight":"calc(0.25rem * 5)","color":"oklch(12.9% 0.042 264.695)"}}>{post.authorName}</Box>
+              <Box component="span" sx={{"borderRadius":"0.375rem","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 2)","paddingBlock":"calc(0.25rem * 0.5)","fontSize":"11px","fontWeight":"600","color":"#696CFF"}}>
                 {post.className}
-              </span>
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+              </Box>
+            </Box>
+            <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>
               <span>{post.createdAtLabel}</span>
-              <Globe2 className="h-3.5 w-3.5" />
+              <Globe2 sx={{ fontSize: 14 }} />
               {post.relatedAssignmentTitle ? <span>{copy.discussionRelatedLabel}: {post.relatedAssignmentTitle}</span> : null}
-            </div>
-          </div>
-        </div>
-        <button className="grid h-9 w-9 place-items-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700" type="button">
-          <MoreHorizontal className="h-5 w-5" />
-        </button>
-      </header>
+            </Box>
+          </Box>
+        </Box>
+        <Box component="button" sx={{"display":"grid","height":"calc(0.25rem * 9)","width":"calc(0.25rem * 9)","placeItems":"center","borderRadius":"9999px","color":"oklch(70.4% 0.04 256.788)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)","color":"oklch(37.2% 0.044 257.287)"}}}} type="button">
+          <MoreHorizontal sx={{ fontSize: 20 }} />
+        </Box>
+      </Box>
 
-      <button className="block w-full px-4 pb-3 text-left" type="button" onClick={onOpenDetails}>
-        <p className="whitespace-pre-line text-[15px] leading-7 text-slate-800">{post.content}</p>
+      <Box component="button" sx={{"display":"block","width":"100%","paddingInline":"calc(0.25rem * 4)","paddingBottom":"calc(0.25rem * 3)","textAlign":"left"}} type="button" onClick={onOpenDetails}>
+        <Box component="p" sx={{"whiteSpace":"pre-line","fontSize":"15px","lineHeight":"calc(0.25rem * 7)","color":"oklch(27.9% 0.041 260.031)"}}>{post.content}</Box>
         {post.moderationWarning ? <ModerationNotice copy={copy} /> : null}
         <AttachmentGrid attachments={post.attachments} />
-      </button>
+      </Box>
 
-      <div className="mx-4 flex items-center justify-between border-y border-slate-100 py-2 text-sm text-slate-500">
+      <Box component="div" sx={{"marginInline":"calc(0.25rem * 4)","display":"flex","alignItems":"center","justifyContent":"space-between","borderBlockStyle":"solid","borderBlockWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","paddingBlock":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>
         <SocialReactionSummary reactions={post.reactions} total={reactionTotal} />
         <span>{commentCount} bình luận · 62 lượt chia sẻ</span>
-      </div>
+      </Box>
 
-      <div className="mx-2 grid grid-cols-3 gap-1 border-b border-slate-100 p-2">
+      <Box component="div" sx={{"marginInline":"calc(0.25rem * 2)","display":"grid","gridTemplateColumns":"repeat(3, minmax(0, 1fr))","gap":"calc(0.25rem * 1)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","padding":"calc(0.25rem * 2)"}}>
         <SocialReactionAction activeReaction={post.viewerReaction} onReaction={(reaction) => onPostReaction(post.id, reaction)} />
-        <button
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+        <Box component="button"
+          sx={{"display":"inline-flex","height":"calc(0.25rem * 10)","alignItems":"center","justifyContent":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(44.6% 0.043 257.281)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}}
           type="button"
           onClick={onOpenDetails}
         >
-          <MessageCircle className="h-4 w-4" />
+          <MessageCircle sx={{ fontSize: 16 }} />
           Bình luận
-        </button>
-        <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-slate-600 transition hover:bg-slate-100" type="button">
-          <Share2 className="h-4 w-4" />
+        </Box>
+        <Box component="button" sx={{"display":"inline-flex","height":"calc(0.25rem * 10)","alignItems":"center","justifyContent":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(44.6% 0.043 257.281)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}} type="button">
+          <Share2 sx={{ fontSize: 16 }} />
           Chia sẻ
-        </button>
-      </div>
+        </Box>
+      </Box>
 
-      <div className="space-y-3 bg-slate-50/70 p-4">
+      <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"},"backgroundColor":"color-mix(in srgb, oklch(98.4% 0.003 247.858) 70%, transparent)","@supports (color: color-mix(in lab, red, red))":{"backgroundColor":"color-mix(in oklab, oklch(98.4% 0.003 247.858) 70%, transparent)"},"padding":"calc(0.25rem * 4)"}}>
         {post.comments.slice(0, 3).map((comment) => (
           <CommentItem
             key={comment.id}
@@ -329,13 +327,13 @@ function PostCard({
           />
         ))}
 
-        <div className="flex gap-2">
+        <Box component="div" sx={{"display":"flex","gap":"calc(0.25rem * 2)"}}>
           <Avatar initials="VL" size="sm" />
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 ring-1 ring-slate-200 focus-within:ring-[#696CFF]/25">
-              <input
+          <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)","flex":"1"}}>
+            <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","backgroundColor":"#fff","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000,  0 0 0 calc(1px + 0px) currentcolor, 0 0 #0000","&:focus-within":{}}}>
+              <Box component="input"
                 id={`comment-input-${post.id}`}
-                className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
+                sx={{"height":"calc(0.25rem * 8)","minWidth":"calc(0.25rem * 0)","flex":"1","backgroundColor":"transparent","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","outlineStyle":"none","&::placeholder":{"color":"oklch(70.4% 0.04 256.788)"}}}
                 placeholder={copy.discussionReplyPlaceholder}
                 value={commentDraft}
                 onChange={(event) => setCommentDraft(event.target.value)}
@@ -345,15 +343,15 @@ function PostCard({
               />
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`comment-image-${post.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
-              <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#696CFF] text-white transition hover:bg-[#585BE0] disabled:bg-slate-300"
+              <Box component="button"
+                sx={{"display":"grid","height":"calc(0.25rem * 8)","width":"calc(0.25rem * 8)","flexShrink":"0","placeItems":"center","borderRadius":"9999px","backgroundColor":"#696CFF","color":"#fff","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}},"&:disabled":{"backgroundColor":"oklch(86.9% 0.022 252.894)"}}}
                 disabled={!commentDraft.trim() && commentAttachments.length === 0}
                 type="button"
                 onClick={submitComment}
               >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
+                <Send sx={{ fontSize: 16 }} />
+              </Box>
+            </Box>
             <AttachmentPreview
               compact
               attachments={commentAttachments}
@@ -362,10 +360,10 @@ function PostCard({
                 setCommentAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId))
               }
             />
-          </div>
-        </div>
-      </div>
-    </article>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -406,73 +404,73 @@ function PostDetailDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 px-3 py-4 backdrop-blur-sm">
-      <article className="flex max-h-[92vh] w-full max-w-[880px] flex-col overflow-hidden rounded-lg bg-white shadow-sm">
-        <header className="relative shrink-0 border-b border-slate-200 px-14 py-3 text-center">
-          <h2 className="line-clamp-2 text-lg font-medium leading-tight text-slate-950">Bài viết của {post.authorName}</h2>
-          <button
-            className="absolute right-3 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-slate-100 text-slate-700 transition hover:bg-slate-200"
+    <Box component="div" sx={{"position":"fixed","inset":"calc(0.25rem * 0)","zIndex":"50","display":"grid","placeItems":"center","backgroundColor":"color-mix(in srgb, oklch(12.9% 0.042 264.695) 55%, transparent)","@supports (color: color-mix(in lab, red, red))":{"backgroundColor":"color-mix(in oklab, oklch(12.9% 0.042 264.695) 55%, transparent)"},"paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 4)","WebkitBackdropFilter":"blur(8px)        ","backdropFilter":"blur(8px)        "}}>
+      <Box component="article" sx={{ bgcolor: "background.paper", borderRadius: 1, boxShadow: 1, display: "flex", flexDirection: "column", maxHeight: "92vh", maxWidth: 880, overflow: "hidden", width: "100%" }}>
+        <Box component="header" sx={{"position":"relative","flexShrink":"0","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","paddingInline":"calc(0.25rem * 14)","paddingBlock":"calc(0.25rem * 3)","textAlign":"center"}}>
+          <Box component="h2" sx={{"overflow":"hidden","display":"-webkit-box","WebkitBoxOrient":"vertical","WebkitLineClamp":"2","fontSize":"1.125rem","lineHeight":"1.25","fontWeight":"500","color":"oklch(12.9% 0.042 264.695)"}}>Bài viết của {post.authorName}</Box>
+          <Box component="button"
+            sx={{"position":"absolute","right":"calc(0.25rem * 3)","top":"calc(1 / 2 * 100%)","display":"grid","height":"calc(0.25rem * 10)","width":"calc(0.25rem * 10)","translate":"0 calc(calc(1 / 2 * 100%) * -1)","placeItems":"center","borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)","color":"oklch(37.2% 0.044 257.287)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)"}}}}
             type="button"
             onClick={onClose}
           >
-            <X className="h-6 w-6" />
-          </button>
-        </header>
+            <X sx={{ fontSize: 24 }} />
+          </Box>
+        </Box>
 
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <div className="flex items-start justify-between gap-3 p-4">
-            <div className="flex min-w-0 gap-3">
+        <Box component="div" sx={{"minHeight":"calc(0.25rem * 0)","flex":"1","overflowY":"auto"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"flex-start","justifyContent":"space-between","gap":"calc(0.25rem * 3)","padding":"calc(0.25rem * 4)"}}>
+            <Box component="div" sx={{"display":"flex","minWidth":"calc(0.25rem * 0)","gap":"calc(0.25rem * 3)"}}>
               <Avatar initials={post.authorInitials} size="lg" />
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold leading-5 text-slate-950">{post.authorName}</h3>
-                  <span className="text-sm font-semibold text-[#696CFF]">· Theo dõi</span>
-                </div>
-                <div className="mt-1 flex items-center gap-1 text-xs text-slate-500">
+              <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+                <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
+                  <Box component="h3" sx={{"fontWeight":"600","lineHeight":"calc(0.25rem * 5)","color":"oklch(12.9% 0.042 264.695)"}}>{post.authorName}</Box>
+                  <Box component="span" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"#696CFF"}}>· Theo dõi</Box>
+                </Box>
+                <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","display":"flex","alignItems":"center","gap":"calc(0.25rem * 1)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>
                   <span>{post.createdAtLabel}</span>
                   <span>·</span>
-                  <Globe2 className="h-3.5 w-3.5" />
-                </div>
-              </div>
-            </div>
-            <button className="grid h-9 w-9 place-items-center rounded-full text-slate-500 transition hover:bg-slate-100" type="button">
-              <MoreHorizontal className="h-5 w-5" />
-            </button>
-          </div>
+                  <Globe2 sx={{ fontSize: 14 }} />
+                </Box>
+              </Box>
+            </Box>
+            <Box component="button" sx={{"display":"grid","height":"calc(0.25rem * 9)","width":"calc(0.25rem * 9)","placeItems":"center","borderRadius":"9999px","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}} type="button">
+              <MoreHorizontal sx={{ fontSize: 20 }} />
+            </Box>
+          </Box>
 
-          <div className="px-4 pb-4">
-            <p className="whitespace-pre-line text-[15px] leading-7 text-slate-900">{post.content}</p>
+          <Box component="div" sx={{"paddingInline":"calc(0.25rem * 4)","paddingBottom":"calc(0.25rem * 4)"}}>
+            <Box component="p" sx={{"whiteSpace":"pre-line","fontSize":"15px","lineHeight":"calc(0.25rem * 7)","color":"oklch(20.8% 0.042 265.755)"}}>{post.content}</Box>
             {post.moderationWarning ? <ModerationNotice copy={copy} /> : null}
-          </div>
+          </Box>
 
           <AttachmentGrid attachments={post.attachments} hero />
 
-          <div className="mx-4 flex items-center justify-between border-y border-slate-200 py-2 text-sm text-slate-500">
+          <Box component="div" sx={{"marginInline":"calc(0.25rem * 4)","display":"flex","alignItems":"center","justifyContent":"space-between","borderBlockStyle":"solid","borderBlockWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","paddingBlock":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>
             <SocialReactionSummary reactions={post.reactions} total={reactionTotal} />
-            <div className="flex items-center gap-3">
+            <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)"}}>
               <span>{commentCount} bình luận</span>
               <span>62 lượt chia sẻ</span>
-            </div>
-          </div>
+            </Box>
+          </Box>
 
-          <div className="mx-2 grid grid-cols-3 gap-1 border-b border-slate-100 p-2">
+          <Box component="div" sx={{"marginInline":"calc(0.25rem * 2)","display":"grid","gridTemplateColumns":"repeat(3, minmax(0, 1fr))","gap":"calc(0.25rem * 1)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","padding":"calc(0.25rem * 2)"}}>
             <SocialReactionAction activeReaction={post.viewerReaction} onReaction={(reaction) => onPostReaction(post.id, reaction)} />
-            <button
-              className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+            <Box component="button"
+              sx={{"display":"inline-flex","height":"calc(0.25rem * 10)","alignItems":"center","justifyContent":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(44.6% 0.043 257.281)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}}
               type="button"
               onClick={() => document.getElementById(`modal-comment-input-${post.id}`)?.focus()}
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle sx={{ fontSize: 16 }} />
               Bình luận
-            </button>
-            <button className="inline-flex h-10 items-center justify-center gap-2 rounded-lg text-sm font-semibold text-slate-600 transition hover:bg-slate-100" type="button">
-              <Share2 className="h-4 w-4" />
+            </Box>
+            <Box component="button" sx={{"display":"inline-flex","height":"calc(0.25rem * 10)","alignItems":"center","justifyContent":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(44.6% 0.043 257.281)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)"}}}} type="button">
+              <Share2 sx={{ fontSize: 16 }} />
               Chia sẻ
-            </button>
-          </div>
+            </Box>
+          </Box>
 
-          <div className="space-y-3 bg-white px-4 py-4">
-            <div className="text-sm font-semibold text-slate-500">Phù hợp nhất ▾</div>
+          <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"},"backgroundColor":"#fff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)"}}>
+            <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>Phù hợp nhất ▾</Box>
             {post.comments.map((comment) => (
               <CommentItem
                 key={comment.id}
@@ -484,17 +482,17 @@ function PostDetailDialog({
                 onCommentReaction={onCommentReaction}
               />
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <footer className="shrink-0 border-t border-slate-200 bg-white p-3">
-          <div className="flex gap-2">
+        <Box component="footer" sx={{"flexShrink":"0","borderTopStyle":"solid","borderTopWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 3)"}}>
+          <Box component="div" sx={{"display":"flex","gap":"calc(0.25rem * 2)"}}>
             <Avatar initials={getInitials(studentName)} size="sm" />
-            <div className="min-w-0 flex-1">
-              <div className="flex min-h-12 items-center gap-2 rounded-lg bg-slate-100 px-3 py-2">
-                <input
+            <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)","flex":"1"}}>
+              <Box component="div" sx={{"display":"flex","minHeight":"calc(0.25rem * 12)","alignItems":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)"}}>
+                <Box component="input"
                   id={`modal-comment-input-${post.id}`}
-                  className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-500"
+                  sx={{"height":"calc(0.25rem * 8)","minWidth":"calc(0.25rem * 0)","flex":"1","backgroundColor":"transparent","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","outlineStyle":"none","&::placeholder":{"color":"oklch(55.4% 0.046 257.417)"}}}
                   placeholder={`Bình luận dưới tên ${studentName}`}
                   value={commentDraft}
                   onChange={(event) => setCommentDraft(event.target.value)}
@@ -504,15 +502,15 @@ function PostDetailDialog({
                 />
                 <ComposerActionIcons />
                 <AttachmentUploadButton compact inputId={`modal-comment-image-${post.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
-                <button
-                  className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-slate-400 transition hover:bg-slate-200 hover:text-[#696CFF] disabled:opacity-50"
+                <Box component="button"
+                  sx={{"display":"grid","height":"calc(0.25rem * 8)","width":"calc(0.25rem * 8)","flexShrink":"0","placeItems":"center","borderRadius":"9999px","color":"oklch(70.4% 0.04 256.788)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)","color":"#696CFF"}},"&:disabled":{"opacity":"50%"}}}
                   disabled={!commentDraft.trim() && commentAttachments.length === 0}
                   type="button"
                   onClick={submitComment}
                 >
-                  <Send className="h-4 w-4" />
-                </button>
-              </div>
+                  <Send sx={{ fontSize: 16 }} />
+                </Box>
+              </Box>
               <AttachmentPreview
                 compact
                 attachments={commentAttachments}
@@ -521,11 +519,11 @@ function PostDetailDialog({
                   setCommentAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId))
                 }
               />
-            </div>
-          </div>
-        </footer>
-      </article>
-    </div>
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -566,44 +564,37 @@ function CommentItem({
   }
 
   return (
-    <div
-      className={cn(
-        "relative flex gap-2",
-        depth > 1 && "ml-7",
-        comment.replies.length > 0 &&
-          "before:absolute before:left-4 before:top-9 before:h-[calc(100%-2.25rem)] before:w-px before:bg-slate-200",
-      )}
-    >
+    <Box sx={{ display: "flex", gap: 1, ml: depth > 1 ? 3.5 : 0, position: "relative", ...(comment.replies.length > 0 ? { "&::before": { bgcolor: "divider", content: '\"\"', height: "calc(100% - 2.25rem)", left: 16, position: "absolute", top: 36, width: 1 } } : {}) }}>
       <Avatar initials={comment.authorInitials} size="sm" />
-      <div className="min-w-0 flex-1">
-        <div className="inline-block max-w-full rounded-lg bg-slate-100 px-3 py-2">
-          <div className="flex items-center gap-1.5 text-sm font-semibold text-slate-950">
+      <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)","flex":"1"}}>
+        <Box component="div" sx={{"display":"inline-block","maxWidth":"100%","borderRadius":"0.5rem","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 1.5)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>
             <span>{comment.authorName}</span>
-            {depth === 1 ? <span className="rounded bg-slate-200 px-1.5 py-0.5 text-[10px] text-slate-600">Tác giả</span> : null}
-          </div>
-          <p className="mt-0.5 whitespace-pre-line text-sm leading-6 text-slate-700">{comment.content}</p>
+            {depth === 1 ? <Box component="span" sx={{"borderRadius":"0.25rem","backgroundColor":"oklch(92.9% 0.013 255.508)","paddingInline":"calc(0.25rem * 1.5)","paddingBlock":"calc(0.25rem * 0.5)","fontSize":"10px","color":"oklch(44.6% 0.043 257.281)"}}>Tác giả</Box> : null}
+          </Box>
+          <Box component="p" sx={{"marginTop":"calc(0.25rem * 0.5)","whiteSpace":"pre-line","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(37.2% 0.044 257.287)"}}>{comment.content}</Box>
           {comment.moderationWarning ? <ModerationNotice copy={copy} compact /> : null}
           <AttachmentGrid attachments={comment.attachments} compact />
-        </div>
+        </Box>
 
-        <div className="mt-1 flex flex-wrap items-center gap-3 px-2 text-xs font-semibold text-slate-500">
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 3)","paddingInline":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>
           <span>{comment.createdAtLabel}</span>
           <SocialReactionAction
             activeReaction={comment.viewerReaction}
             compact
             onReaction={(reaction) => onCommentReaction(postId, comment.id, reaction)}
           />
-          <button className="transition hover:text-[#696CFF]" type="button" onClick={() => setIsReplying(!isReplying)}>
+          <Box component="button" sx={{"transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"color":"#696CFF"}}}} type="button" onClick={() => setIsReplying(!isReplying)}>
             {copy.discussionReplyAction}
-          </button>
+          </Box>
           <SocialReactionCountBadge reactions={comment.reactions} total={reactionTotal} />
-        </div>
+        </Box>
 
         {isReplying ? (
-          <div className="mt-2">
-            <div className="flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 focus-within:ring-2 focus-within:ring-[#696CFF]/20">
-              <input
-                className="h-8 min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-500"
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)"}}>
+            <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)","&:focus-within":{"boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000,  0 0 0 calc(2px + 0px) currentcolor, 0 0 #0000"}}}>
+              <Box component="input"
+                sx={{"height":"calc(0.25rem * 8)","minWidth":"calc(0.25rem * 0)","flex":"1","backgroundColor":"transparent","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","outlineStyle":"none","&::placeholder":{"color":"oklch(55.4% 0.046 257.417)"}}}
                 placeholder={`Trả lời ${comment.authorName}...`}
                 value={replyDraft}
                 onChange={(event) => setReplyDraft(event.target.value)}
@@ -613,15 +604,15 @@ function CommentItem({
               />
               <ComposerActionIcons />
               <AttachmentUploadButton compact inputId={`reply-image-${comment.id}`} label={copy.discussionAttachmentAction} onChange={handleAttachmentChange} />
-              <button
-                className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#696CFF] text-white transition hover:bg-[#585BE0] disabled:bg-slate-300"
+              <Box component="button"
+                sx={{"display":"grid","height":"calc(0.25rem * 8)","width":"calc(0.25rem * 8)","flexShrink":"0","placeItems":"center","borderRadius":"9999px","backgroundColor":"#696CFF","color":"#fff","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}},"&:disabled":{"backgroundColor":"oklch(86.9% 0.022 252.894)"}}}
                 disabled={!replyDraft.trim() && replyAttachments.length === 0}
                 type="button"
                 onClick={submitReply}
               >
-                <Send className="h-4 w-4" />
-              </button>
-            </div>
+                <Send sx={{ fontSize: 16 }} />
+              </Box>
+            </Box>
             <AttachmentPreview
               compact
               attachments={replyAttachments}
@@ -630,11 +621,11 @@ function CommentItem({
                 setReplyAttachments((current) => current.filter((attachment) => attachment.id !== attachmentId))
               }
             />
-          </div>
+          </Box>
         ) : null}
 
         {comment.replies.length > 0 ? (
-          <div className="mt-3 space-y-3">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 3)",":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"}}}>
             {comment.replies.map((reply) => (
               <CommentItem
                 key={reply.id}
@@ -646,10 +637,10 @@ function CommentItem({
                 onCommentReaction={onCommentReaction}
               />
             ))}
-          </div>
+          </Box>
         ) : null}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -669,12 +660,12 @@ function AttachmentUploadButton({
   if (compact) {
     return (
       <>
-        <label className="grid h-8 w-8 shrink-0 cursor-pointer place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" htmlFor={inputId} title={label}>
-          <Camera className="h-4 w-4" />
-        </label>
-        <input
+        <Box component="label" sx={{"display":"grid","height":"calc(0.25rem * 8)","width":"calc(0.25rem * 8)","flexShrink":"0","cursor":"pointer","placeItems":"center","borderRadius":"9999px","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)","color":"#696CFF"}}}} htmlFor={inputId} title={label}>
+          <Camera sx={{ fontSize: 16 }} />
+        </Box>
+        <Box component="input"
           accept="image/*"
-          className="sr-only"
+          sx={{"position":"absolute","width":"1px","height":"1px","padding":"0","margin":"-1px","overflow":"hidden","clipPath":"inset(50%)","whiteSpace":"nowrap","borderWidth":"0"}}
           id={inputId}
           multiple
           type="file"
@@ -688,17 +679,17 @@ function AttachmentUploadButton({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <label
-        className="inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+    <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
+      <Box component="label"
+        sx={{"display":"inline-flex","height":"calc(0.25rem * 10)","cursor":"pointer","alignItems":"center","gap":"calc(0.25rem * 2)","borderRadius":"9999px","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(90.5% 0.093 164.15)","backgroundColor":"oklch(97.9% 0.021 166.113)","paddingInline":"calc(0.25rem * 4)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(50.8% 0.118 165.612)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(95% 0.052 163.051)"}}}}
         htmlFor={inputId}
       >
-        <ImagePlus className="h-4 w-4" />
+        <ImagePlus sx={{ fontSize: 16 }} />
         {label}
-      </label>
-      <input
+      </Box>
+      <Box component="input"
         accept="image/*"
-        className="sr-only"
+        sx={{"position":"absolute","width":"1px","height":"1px","padding":"0","margin":"-1px","overflow":"hidden","clipPath":"inset(50%)","whiteSpace":"nowrap","borderWidth":"0"}}
         id={inputId}
         multiple
         type="file"
@@ -707,24 +698,24 @@ function AttachmentUploadButton({
           event.target.value = "";
         }}
       />
-      {hint ? <span className="text-xs text-slate-500">{hint}</span> : null}
-    </div>
+      {hint ? <Box component="span" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>{hint}</Box> : null}
+    </Box>
   );
 }
 
 function ComposerActionIcons() {
   return (
-    <span className="hidden shrink-0 items-center gap-1 sm:inline-flex">
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="Cảm xúc">
-        <SmilePlus className="h-4 w-4" />
-      </button>
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="GIF">
-        <Gift className="h-4 w-4" />
-      </button>
-      <button className="grid h-7 w-7 place-items-center rounded-full text-slate-500 transition hover:bg-slate-200 hover:text-[#696CFF]" type="button" title="Sticker">
-        <Sticker className="h-4 w-4" />
-      </button>
-    </span>
+    <Box component="span" sx={{"display":"none","flexShrink":"0","alignItems":"center","gap":"calc(0.25rem * 1)","@media ((min-width: 40rem))":{"display":"inline-flex"}}}>
+      <Box component="button" sx={{"display":"grid","height":"calc(0.25rem * 7)","width":"calc(0.25rem * 7)","placeItems":"center","borderRadius":"9999px","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)","color":"#696CFF"}}}} type="button" title="Cảm xúc">
+        <SmilePlus sx={{ fontSize: 16 }} />
+      </Box>
+      <Box component="button" sx={{"display":"grid","height":"calc(0.25rem * 7)","width":"calc(0.25rem * 7)","placeItems":"center","borderRadius":"9999px","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)","color":"#696CFF"}}}} type="button" title="GIF">
+        <Gift sx={{ fontSize: 16 }} />
+      </Box>
+      <Box component="button" sx={{"display":"grid","height":"calc(0.25rem * 7)","width":"calc(0.25rem * 7)","placeItems":"center","borderRadius":"9999px","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(92.9% 0.013 255.508)","color":"#696CFF"}}}} type="button" title="Sticker">
+        <Sticker sx={{ fontSize: 16 }} />
+      </Box>
+    </Box>
   );
 }
 
@@ -742,21 +733,21 @@ function AttachmentPreview({
   if (attachments.length === 0) return null;
 
   return (
-    <div className={cn("mt-3 grid gap-2", compact ? "grid-cols-[repeat(auto-fill,minmax(56px,1fr))]" : "grid-cols-2")}>
+    <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: compact ? "repeat(auto-fill,minmax(56px,1fr))" : "repeat(2,minmax(0,1fr))", mt: 1.5 }}>
       {attachments.map((attachment) => (
-        <div key={attachment.id} className={cn("group relative overflow-hidden rounded-lg bg-slate-100", compact ? "h-14" : "h-40")}>
-          <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
-          <button
-            className="absolute right-2 top-2 grid h-7 w-7 place-items-center rounded-full bg-slate-950/75 text-white opacity-90 transition hover:bg-slate-950"
+        <Box key={attachment.id} sx={{ bgcolor: "#f1f5f9", borderRadius: 1, height: compact ? 56 : 160, overflow: "hidden", position: "relative" }}>
+          <Box component="img" alt={attachment.name} sx={{"height":"100%","width":"100%","objectFit":"cover"}} src={attachment.url} />
+          <Box component="button"
+            sx={{"position":"absolute","right":"calc(0.25rem * 2)","top":"calc(0.25rem * 2)","display":"grid","height":"calc(0.25rem * 7)","width":"calc(0.25rem * 7)","placeItems":"center","borderRadius":"9999px","backgroundColor":"color-mix(in srgb, oklch(12.9% 0.042 264.695) 75%, transparent)","@supports (color: color-mix(in lab, red, red))":{"backgroundColor":"color-mix(in oklab, oklch(12.9% 0.042 264.695) 75%, transparent)"},"color":"#fff","opacity":"90%","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(12.9% 0.042 264.695)"}}}}
             title={removeLabel}
             type="button"
             onClick={() => onRemove(attachment.id)}
           >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
+            <X sx={{ fontSize: 16 }} />
+          </Box>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 
@@ -773,37 +764,37 @@ function AttachmentGrid({
 
   if (hero) {
     return (
-      <div className="grid overflow-hidden border-y border-slate-200 bg-slate-100">
+      <Box component="div" sx={{"display":"grid","overflow":"hidden","borderBlockStyle":"solid","borderBlockWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(96.8% 0.007 247.896)"}}>
         {attachments.slice(0, 1).map((attachment) => (
-          <a key={attachment.id} className="block max-h-[520px] bg-slate-950" href={attachment.url} rel="noreferrer" target="_blank">
-            <img alt={attachment.name} className="mx-auto max-h-[520px] w-full object-cover" src={attachment.url} />
-          </a>
+          <Box component="a" key={attachment.id} sx={{"display":"block","maxHeight":"520px","backgroundColor":"oklch(12.9% 0.042 264.695)"}} href={attachment.url} rel="noreferrer" target="_blank">
+            <Box component="img" alt={attachment.name} sx={{"marginInline":"auto","maxHeight":"520px","width":"100%","objectFit":"cover"}} src={attachment.url} />
+          </Box>
         ))}
-      </div>
+      </Box>
     );
   }
 
   return (
-    <div className={cn("mt-3 grid overflow-hidden rounded-lg border border-slate-200", compact ? "max-w-[260px] grid-cols-2" : "grid-cols-2")}>
+    <Box sx={{ border: "1px solid", borderColor: "divider", borderRadius: 1, display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", maxWidth: compact ? 260 : undefined, mt: 1.5, overflow: "hidden" }}>
       {attachments.slice(0, 4).map((attachment, index) => (
-        <a key={attachment.id} className={cn("relative block bg-slate-100", compact ? "h-24" : "h-48")} href={attachment.url} rel="noreferrer" target="_blank">
-          <img alt={attachment.name} className="h-full w-full object-cover" src={attachment.url} />
+        <Box component="a" key={attachment.id} sx={{ bgcolor: "#f1f5f9", display: "block", height: compact ? 96 : 192, position: "relative" }} href={attachment.url} rel="noreferrer" target="_blank">
+          <Box component="img" alt={attachment.name} sx={{"height":"100%","width":"100%","objectFit":"cover"}} src={attachment.url} />
           {index === 3 && attachments.length > 4 ? (
-            <span className="absolute inset-0 grid place-items-center bg-slate-950/55 text-xl font-semibold text-white">
+            <Box component="span" sx={{"position":"absolute","inset":"calc(0.25rem * 0)","display":"grid","placeItems":"center","backgroundColor":"color-mix(in srgb, oklch(12.9% 0.042 264.695) 55%, transparent)","@supports (color: color-mix(in lab, red, red))":{"backgroundColor":"color-mix(in oklab, oklch(12.9% 0.042 264.695) 55%, transparent)"},"fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"#fff"}}>
               +{attachments.length - 4}
-            </span>
+            </Box>
           ) : null}
-        </a>
+        </Box>
       ))}
-    </div>
+    </Box>
   );
 }
 
 function ModerationNotice({ compact, copy }: { compact?: boolean; copy: DiscussionFeedCopy }) {
   return (
-    <div className={cn("mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 font-semibold text-amber-700", compact ? "text-[11px]" : "text-xs")}>
+    <Box sx={{ bgcolor: "#fffbeb", border: "1px solid #fde68a", borderRadius: 1, color: "#b45309", fontSize: compact ? 11 : 12, fontWeight: 600, mt: 1, px: 1.5, py: 1 }}>
       {copy.discussionModerationWarning}
-    </div>
+    </Box>
   );
 }
 
@@ -812,8 +803,8 @@ function Avatar({ initials, size }: { initials: string; size: "sm" | "lg" }) {
 
   return (
     <MuiAvatar
-      className="shrink-0"
       sx={{
+        flexShrink: 0,
         width: dimension,
         height: dimension,
         bgcolor: "#696CFF",

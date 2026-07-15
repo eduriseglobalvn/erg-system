@@ -1,4 +1,7 @@
 import { type FormEvent } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 
 import { ERG_ASSETS } from "@/config/seo";
 import { LocaleSwitcher } from "@/components/locale-switcher";
@@ -6,7 +9,6 @@ import { AccountPanel } from "@/platform/auth/components/account-panel";
 import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/utils/cn";
 
 export function AuthWorkspace() {
   const { t } = useI18n();
@@ -44,36 +46,24 @@ export function AuthWorkspace() {
   }
 
   return (
-    <main
-      className="relative grid min-h-screen overflow-hidden bg-[#dfeeff] bg-cover bg-center px-4 py-5 text-[#1C252E] sm:px-6 lg:px-8"
-      style={{ backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')" }}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-white/10" />
+    <Box component="main" sx={{ backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')", backgroundPosition: "center", backgroundSize: "cover", bgcolor: "#dfeeff", color: "#1C252E", display: "grid", minHeight: "100vh", overflow: "hidden", px: { xs: 2, sm: 3, lg: 4 }, py: 2.5, position: "relative" }}>
+      <Box sx={{ bgcolor: "rgba(255,255,255,0.1)", inset: 0, pointerEvents: "none", position: "absolute" }} />
 
-      <div className="relative z-10 flex w-full items-start justify-end">
-        <LocaleSwitcher className="w-full max-w-[260px] rounded-xl border-white/50 bg-white/45 shadow-[0_16px_34px_rgba(57,78,124,0.10)] backdrop-blur-xl" />
-      </div>
+      <Box sx={{ alignItems: "flex-start", display: "flex", justifyContent: "flex-end", position: "relative", width: "100%", zIndex: 10 }}>
+        <Box sx={{ backdropFilter: "blur(16px)", bgcolor: "rgba(255,255,255,0.45)", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(57,78,124,0.1)", maxWidth: 260, width: "100%" }}><LocaleSwitcher /></Box>
+      </Box>
 
-      <div className="relative z-10 mx-auto flex w-full max-w-[460px] flex-col justify-center pb-10 pt-4 sm:pb-14">
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", mx: "auto", maxWidth: 460, pb: { xs: 5, sm: 7 }, position: "relative", pt: 2, width: "100%", zIndex: 10 }}>
         {auth.notice ? (
-          <div
-            className={cn(
-              "mb-4 rounded-xl border px-4 py-3 text-sm font-semibold shadow-[0_16px_34px_rgba(57,78,124,0.10)] backdrop-blur-xl",
-              auth.notice.tone === "success"
-                ? "border-emerald-200/80 bg-emerald-50/70 text-emerald-700"
-                : auth.notice.tone === "error"
-                  ? "border-rose-200/80 bg-rose-50/70 text-rose-700"
-                  : "border-cyan-200/80 bg-cyan-50/70 text-cyan-800",
-            )}
-          >
+          <Alert severity={auth.notice.tone === "success" ? "success" : auth.notice.tone === "error" ? "error" : "info"} sx={{ backdropFilter: "blur(16px)", boxShadow: "0 16px 34px rgba(57,78,124,0.1)", fontSize: 14, fontWeight: 700, mb: 2 }}>
             {auth.notice.message}
-          </div>
+          </Alert>
         ) : null}
 
-        <section className="rounded-[24px] border border-white/55 bg-white/32 p-5 shadow-[0_30px_90px_rgba(72,81,156,0.20)] backdrop-blur-2xl sm:p-7">
-          <div className="mb-7 grid justify-items-center text-center">
-            <img alt="ERG" className="h-auto w-28 object-contain drop-shadow-[0_12px_26px_rgba(72,81,156,0.16)]" src={ERG_ASSETS.logo} />
-          </div>
+        <Paper component="section" elevation={0} sx={{ backdropFilter: "blur(24px)", bgcolor: "rgba(255,255,255,0.32)", border: "1px solid rgba(255,255,255,0.55)", borderRadius: 3, boxShadow: "0 30px 90px rgba(72,81,156,0.2)", p: { xs: 2.5, sm: 3.5 } }}>
+          <Box sx={{ display: "grid", justifyItems: "center", mb: 3.5, textAlign: "center" }}>
+            <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ filter: "drop-shadow(0 12px 26px rgba(72,81,156,0.16))", height: "auto", objectFit: "contain", width: 112 }} />
+          </Box>
 
           {!auth.account ? (
             <AuthFormPanel
@@ -107,8 +97,8 @@ export function AuthWorkspace() {
               onLogout={auth.actions.signOut}
             />
           )}
-        </section>
-      </div>
-    </main>
+        </Paper>
+      </Box>
+    </Box>
   );
 }

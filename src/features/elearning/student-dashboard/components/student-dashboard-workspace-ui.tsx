@@ -1,3 +1,4 @@
+import Box from "@mui/material/Box";
 import { type ReactNode } from "react";
 
 import Button from "@mui/material/Button";
@@ -9,49 +10,50 @@ import { ErgFooter } from "@/components/erg-footer";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentAssignmentAttempt, StudentAssignmentStatus, StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getBestAttempt } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
-import { cn } from "@/lib/utils";
 
 const assignmentStatusMeta: Record<
   StudentAssignmentStatus,
   {
-    chipClassName: string;
+    chipBackground: string;
+    chipBorder: string;
+    chipColor: string;
     progressColor: string;
-    cardClassName: string;
+    cardBorder: string;
   }
 > = {
   not_started: {
-    chipClassName: "border-slate-200 bg-slate-50 text-slate-600",
+    chipBackground: "#f8fafc", chipBorder: "#e2e8f0", chipColor: "#475569",
     progressColor: "#94a3b8",
-    cardClassName: "border-slate-200",
+    cardBorder: "#e2e8f0",
   },
   in_progress: {
-    chipClassName: "border-amber-200 bg-amber-50 text-amber-700",
+    chipBackground: "#fffbeb", chipBorder: "#fde68a", chipColor: "#b45309",
     progressColor: "#f59e0b",
-    cardClassName: "border-amber-100",
+    cardBorder: "#fef3c7",
   },
   submitted: {
-    chipClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    chipBackground: "#ecfdf5", chipBorder: "#a7f3d0", chipColor: "#047857",
     progressColor: "#10b981",
-    cardClassName: "border-emerald-100",
+    cardBorder: "#d1fae5",
   },
   overdue: {
-    chipClassName: "border-rose-200 bg-rose-50 text-rose-700",
+    chipBackground: "#fff1f2", chipBorder: "#fecdd3", chipColor: "#be123c",
     progressColor: "#f43f5e",
-    cardClassName: "border-rose-100",
+    cardBorder: "#ffe4e6",
   },
 };
 export function BrandWordmark() {
   return (
-    <div className="flex min-w-0 items-center gap-3">
-      <div className="flex items-end text-xl font-semibold leading-none">
-        <span className="text-[#696CFF]">ER</span>
-        <span className="text-[#FF5630]">G</span>
-      </div>
-      <div className="hidden min-w-0 sm:block">
-        <div className="truncate text-base font-semibold leading-none text-[#696CFF]">EDURISE GLOBAL</div>
-        <div className="mt-1 text-[11px] font-medium text-slate-400">Learn today, lead tomorrow</div>
-      </div>
-    </div>
+    <Box component="div" sx={{"display":"flex","minWidth":"calc(0.25rem * 0)","alignItems":"center","gap":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"display":"flex","alignItems":"flex-end","fontSize":"1.25rem","lineHeight":"1","fontWeight":"600"}}>
+        <Box component="span" sx={{"color":"#696CFF"}}>ER</Box>
+        <Box component="span" sx={{"color":"#FF5630"}}>G</Box>
+      </Box>
+      <Box component="div" sx={{"display":"none","minWidth":"calc(0.25rem * 0)","@media ((min-width: 40rem))":{"display":"block"}}}>
+        <Box component="div" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"1rem","lineHeight":"1","fontWeight":"600","color":"#696CFF"}}>EDURISE GLOBAL</Box>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"11px","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>Learn today, lead tomorrow</Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -65,17 +67,17 @@ export function PageTitle({
   title: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-5">
-      <div className="flex items-start gap-3">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-slate-100 text-[#696CFF]">
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)"}}>
+      <Box component="div" sx={{"display":"flex","alignItems":"flex-start","gap":"calc(0.25rem * 3)"}}>
+        <Box component="span" sx={{"display":"grid","height":"calc(0.25rem * 10)","width":"calc(0.25rem * 10)","flexShrink":"0","placeItems":"center","borderRadius":"0.375rem","backgroundColor":"oklch(96.8% 0.007 247.896)","color":"#696CFF"}}>
           {icon}
-        </span>
+        </Box>
         <div>
-          <h1 className="text-xl font-semibold text-slate-950">{title}</h1>
-          <p className="mt-1 max-w-3xl text-sm leading-6 text-slate-600">{description}</p>
+          <Box component="h1" sx={{"fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{title}</Box>
+          <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","maxWidth":"48rem","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>{description}</Box>
         </div>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -89,12 +91,12 @@ export function SectionHeader({
   title: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-      <h2 className="text-lg font-semibold text-[#696CFF]">{title}</h2>
-      <button type="button" className="text-sm font-semibold text-[#696CFF]" onClick={onAction}>
+    <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="h2" sx={{"fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"#696CFF"}}>{title}</Box>
+      <Box component="button" type="button" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"#696CFF"}} onClick={onAction}>
         {actionLabel}
-      </button>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -103,52 +105,52 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
   const recentAttempts = assignment.attempts.slice(0, 3);
 
   return (
-    <article className="border-b border-slate-100 p-4 last:border-b-0">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+    <Box component="article" sx={{ borderBottom: "1px solid", borderColor: "#f1f5f9", p: 2, "&:last-of-type": { borderBottom: 0 } }}>
+      <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 3)","@media ((min-width: 48rem))":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
+        <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+          <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
             <StatusPill status={assignment.status} label={assignment.statusLabel} />
             <CompactBadge>{assignment.subjectLabel}</CompactBadge>
-            <span className="text-sm text-slate-500">{assignment.dueLabel}</span>
-          </div>
+            <Box component="span" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{assignment.dueLabel}</Box>
+          </Box>
 
-          <h2 className="mt-2 text-lg font-semibold leading-snug text-[#696CFF]">{assignment.title}</h2>
-        </div>
+          <Box component="h2" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"1.125rem","lineHeight":"1.375","fontWeight":"600","color":"#696CFF"}}>{assignment.title}</Box>
+        </Box>
 
-        <div className="w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 md:w-[148px] md:text-right">
-          <div className="text-xs font-semibold text-slate-500">{copy.bestScoreLabel}</div>
-          <div className="mt-1 text-xl font-semibold text-[#696CFF]">
+        <Box component="div" sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media ((min-width: 48rem))":{"width":"148px","textAlign":"right"}}}>
+          <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>{copy.bestScoreLabel}</Box>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"#696CFF"}}>
             {bestAttempt ? copy.scoreBadge(bestAttempt.score, bestAttempt.maxScore) : copy.pendingScore}
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Box>
+      </Box>
 
-      <div className="mt-3">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400">
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 3)"}}>
+        <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>
           <span>{copy.recentResultsTitle}</span>
           <span>{recentAttempts.length}/{Math.min(assignment.attempts.length, 3)}</span>
-        </div>
-        <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        </Box>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","display":"grid","gap":"calc(0.25rem * 2)","@media ((min-width: 40rem))":{"gridTemplateColumns":"repeat(3, minmax(0, 1fr))"}}}>
           {recentAttempts.map((attempt) => (
             <AttemptResultRow key={attempt.id} attempt={attempt} copy={copy} />
           ))}
-        </div>
-      </div>
-    </article>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
 function AttemptResultRow({ attempt, copy }: { attempt: StudentAssignmentAttempt; copy: DashboardCopy }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2">
-      <div className="min-w-0">
-        <div className="truncate text-sm font-semibold text-slate-950">{attempt.completedAtLabel}</div>
-        <div className="mt-1 text-xs text-slate-500">
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 2)"}}>
+      <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+        <Box component="div" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{attempt.completedAtLabel}</Box>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>
           {copy.attemptDurationLabel}: {attempt.durationLabel}
-        </div>
-      </div>
-      <div className="mt-2 text-lg font-semibold text-[#696CFF]">{copy.scoreBadge(attempt.score, attempt.maxScore)}</div>
-    </div>
+        </Box>
+      </Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"#696CFF"}}>{copy.scoreBadge(attempt.score, attempt.maxScore)}</Box>
+    </Box>
   );
 }
 
@@ -167,30 +169,30 @@ export function AssignmentCard({
   const actionable = assignment.status !== "submitted";
 
   return (
-    <Card className={cn("rounded-lg border bg-white shadow-none", statusMeta.cardClassName)}>
-      <div className={compact ? "p-3" : "p-4"}>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
+    <Card sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: statusMeta.cardBorder, borderRadius: 1, boxShadow: "none" }}>
+      <Box sx={{ p: compact ? 1.5 : 2 }}>
+        <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","@media ((min-width: 64rem))":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
+          <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+            <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
               <StatusPill status={assignment.status} label={assignment.statusLabel} />
               <CompactBadge>{assignment.subjectLabel}</CompactBadge>
-            </div>
+            </Box>
 
-            <h3 className={cn("mt-2 font-semibold leading-snug text-[#696CFF]", compact ? "text-base" : "text-lg")}>{assignment.title}</h3>
+            <Box component="h3" sx={{ color: "#696CFF", fontSize: compact ? 16 : 18, fontWeight: 600, lineHeight: 1.375, m: 0, mt: 1 }}>{assignment.title}</Box>
             {!compact ? (
-              <div className="mt-2 flex flex-wrap gap-3 text-sm text-slate-500">
+              <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","display":"flex","flexWrap":"wrap","gap":"calc(0.25rem * 3)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>
                 <span>{assignment.teacherName}</span>
                 <span>•</span>
                 <span>{assignment.dueLabel}</span>
                 <span>•</span>
                 <span>{assignment.lastActivityLabel}</span>
-              </div>
+              </Box>
             ) : (
-              <div className="mt-2 text-sm text-slate-500">{assignment.dueLabel}</div>
+              <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{assignment.dueLabel}</Box>
             )}
-          </div>
+          </Box>
 
-          <div className="flex shrink-0 flex-wrap items-center gap-2">
+          <Box component="div" sx={{"display":"flex","flexShrink":"0","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
             {assignment.score !== null ? (
               <Chip
                 variant="outlined"
@@ -202,40 +204,34 @@ export function AssignmentCard({
 
             <Button
               variant={actionable ? "contained" : "outlined"}
-              className={cn(
-                actionable
-                  ? assignment.status === "overdue"
-                    ? "bg-[#FF5630] text-white hover:bg-[#E04B26]"
-                    : "bg-[#696CFF] text-white hover:bg-[#585BE0]"
-                  : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50",
-              )}
+              sx={actionable ? { bgcolor: assignment.status === "overdue" ? "#FF5630" : "#696CFF", color: "common.white", "&:hover": { bgcolor: assignment.status === "overdue" ? "#E04B26" : "#585BE0" } } : { bgcolor: "background.paper", borderColor: "divider", color: "text.secondary" }}
               onClick={actionable ? onOpen : undefined}
               disabled={!actionable}
             >
               {copy.assignmentAction(assignment.status)}
             </Button>
-          </div>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_112px_112px]">
-          <div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-xs font-semibold text-slate-400">{copy.progressLabel}</span>
-              <span className="text-sm font-semibold text-slate-900">{assignment.progressRate}%</span>
-            </div>
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { md: "minmax(0,1fr) 112px 112px" }, mt: 2 }}>
+          <Box>
+            <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
+              <Box component="span" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>{copy.progressLabel}</Box>
+              <Box component="span" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{assignment.progressRate}%</Box>
+            </Box>
             <LinearProgress
               variant="determinate"
               value={assignment.progressRate}
-              className="mt-2"
               sx={{
+                mt: 1,
                 height: 10,
                 borderRadius: 1,
                 bgcolor: "rgb(241 245 249)",
                 "& .MuiLinearProgress-bar": { bgcolor: statusMeta.progressColor },
               }}
             />
-            {!compact ? <p className="mt-2 text-sm leading-6 text-slate-500">{assignment.focusNote}</p> : null}
-          </div>
+            {!compact ? <Box component="p" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(55.4% 0.046 257.417)"}}>{assignment.focusNote}</Box> : null}
+          </Box>
 
           {!compact ? (
             <>
@@ -243,45 +239,45 @@ export function AssignmentCard({
               <CompactStat label={copy.scoreLabel} value={assignment.score !== null ? `${assignment.score}` : copy.pendingScore} />
             </>
           ) : null}
-        </div>
-      </div>
+        </Box>
+      </Box>
     </Card>
   );
 }
 
 export function CompactBadge({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-semibold text-slate-600">
+    <Box component="span" sx={{"display":"inline-flex","alignItems":"center","borderRadius":"9999px","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1)","fontSize":"11px","fontWeight":"600","color":"oklch(44.6% 0.043 257.281)"}}>
       {children}
-    </span>
+    </Box>
   );
 }
 
 function CompactStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-3">
-      <div className="text-xs font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-[#696CFF]">{value}</div>
-    </div>
+    <Box component="div" sx={{"borderRadius":"0.5rem","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"#696CFF"}}>{value}</Box>
+    </Box>
   );
 }
 
 export function ProfileStat({ label, value, tone = "default" }: { label: string; value: string; tone?: "default" | "danger" }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3">
-      <div className="text-xs font-semibold text-slate-400">{label}</div>
-      <div className={cn("mt-1 text-xl font-semibold", tone === "danger" ? "text-[#FF5630]" : "text-[#696CFF]")}>
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      <Box sx={{ color: tone === "danger" ? "#FF5630" : "#696CFF", fontSize: 20, fontWeight: 600, mt: 0.5 }}>
         {value}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
 export function StatusPill({ status, label }: { status: StudentAssignmentStatus; label: string }) {
   return (
-    <span className={cn("inline-flex items-center whitespace-nowrap rounded-md border px-2.5 py-1 text-[11px] font-semibold ", assignmentStatusMeta[status].chipClassName)}>
+    <Box component="span" sx={{ alignItems: "center", bgcolor: assignmentStatusMeta[status].chipBackground, border: "1px solid", borderColor: assignmentStatusMeta[status].chipBorder, borderRadius: 1, color: assignmentStatusMeta[status].chipColor, display: "inline-flex", fontSize: 11, fontWeight: 600, px: 1.25, py: 0.5, whiteSpace: "nowrap" }}>
       {label}
-    </span>
+    </Box>
   );
 }
 

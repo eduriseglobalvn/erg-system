@@ -1,11 +1,26 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
-import { Eye, EyeOff, Loader2, Sparkles, X } from "lucide-react";
+import AutoAwesomeRoundedIcon from "@mui/icons-material/AutoAwesomeRounded";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { useForm } from "@tanstack/react-form";
+
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import Checkbox from "@mui/material/Checkbox";
+import CircularProgress from "@mui/material/CircularProgress";
+import Dialog from "@mui/material/Dialog";
+import Divider from "@mui/material/Divider";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import TextField from "@mui/material/TextField";
 
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { GoogleIcon } from "@/platform/auth/components/auth-icons";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { cn } from "@/lib/utils";
 
 type TeacherAuthDialogProps = {
   open: boolean;
@@ -67,92 +82,69 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
   }
 
   return (
-    <div
-      aria-modal="true"
-      className="fixed inset-0 z-[260] grid place-items-center bg-slate-950/45 px-3 py-6 backdrop-blur-[2px]"
-      role="dialog"
-      onMouseDown={() => onOpenChange(false)}
-    >
-      <div
-        className="relative grid max-h-[92vh] w-full max-w-[1024px] overflow-hidden rounded-[10px] border border-slate-200 bg-white shadow-sm md:grid-cols-[1.05fr_minmax(0,1fr)]"
-        onMouseDown={(event) => event.stopPropagation()}
-      >
-        <button
+    <Dialog open={open} onClose={() => onOpenChange(false)} maxWidth={false} slotProps={{ backdrop: { sx: { backdropFilter: "blur(2px)", bgcolor: "rgba(15,23,42,0.45)" } }, paper: { sx: { maxHeight: "92vh", maxWidth: 1024, overflow: "hidden", width: "100%" } } }}>
+      <Box sx={{ display: "grid", gridTemplateColumns: { md: "1.05fr minmax(0,1fr)" }, position: "relative" }}>
+        <IconButton
           aria-label="Đóng"
-          className="absolute right-4 top-4 z-20 inline-flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
-          type="button"
+          size="small"
+          sx={{ position: "absolute", right: 16, top: 16, zIndex: 20 }}
           onClick={() => onOpenChange(false)}
         >
-          <X className="h-4 w-4" />
-        </button>
+          <CloseRoundedIcon sx={{ fontSize: 18 }} />
+        </IconButton>
 
-        <div className="relative hidden overflow-hidden bg-[var(--erg-blue)] p-8 text-white md:flex md:flex-col">
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 rounded-md border border-white/20 bg-white/10 px-3 py-2 text-[11px] font-semibold text-white/80">
-              <Sparkles className="h-3.5 w-3.5" />
+        <Box sx={{ bgcolor: "primary.main", color: "primary.contrastText", display: { xs: "none", md: "flex" }, flexDirection: "column", overflow: "hidden", p: 4, position: "relative" }}>
+          <Box sx={{ position: "relative", zIndex: 10 }}>
+            <Box sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 1, color: "rgba(255,255,255,0.8)", display: "inline-flex", fontSize: 11, fontWeight: 700, gap: 1, px: 1.5, py: 1 }}>
+              <AutoAwesomeRoundedIcon sx={{ fontSize: 14 }} />
               Teacher Hub Access
-            </div>
-            <h2 className="mt-6 max-w-md text-xl font-semibold leading-tight">
+            </Box>
+            <Box component="h2" sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, m: 0, maxWidth: 448, mt: 3 }}>
               Cổng dành riêng cho giảng viên ERG.
-            </h2>
-            <p className="mt-4 max-w-md text-sm leading-6 text-white/80">
+            </Box>
+            <Box component="p" sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.5, m: 0, maxWidth: 448, mt: 2 }}>
               Đăng nhập bằng email nội bộ hoặc Google để truy cập kho học liệu, bài giảng và không gian làm việc của giáo viên.
-            </p>
+            </Box>
 
-            <div className="mt-8 space-y-3">
+            <Box sx={{ display: "grid", gap: 1.5, mt: 4 }}>
               {[
                 "Đăng nhập thường và Google dùng cùng một phiên hệ thống.",
                 "Tài khoản mới có thể đăng ký ngay trong hộp thoại này.",
                 "Sau khi xác thực, bạn sẽ quay lại đúng Teacher Hub hiện tại.",
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-lg border border-white/15 bg-white/10 px-4 py-3">
-                  <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-white" />
-                  <p className="text-sm leading-6 text-white/85">{item}</p>
-                </div>
+                <Box key={item} sx={{ alignItems: "flex-start", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, display: "flex", gap: 1.5, px: 2, py: 1.5 }}>
+                  <Box component="span" sx={{ bgcolor: "common.white", borderRadius: "50%", flexShrink: 0, height: 10, mt: 0.5, width: 10 }} />
+                  <Box component="p" sx={{ color: "rgba(255,255,255,0.85)", fontSize: 14, lineHeight: 1.5, m: 0 }}>{item}</Box>
+                </Box>
               ))}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
 
-        <div className="max-h-[92vh] overflow-y-auto bg-white p-4 sm:p-8">
-          <div className="mr-8 grid grid-cols-2 rounded-lg border border-slate-200 bg-slate-50 p-1">
+        <Box sx={{ bgcolor: "background.paper", maxHeight: "92vh", overflowY: "auto", p: { xs: 2, sm: 4 } }}>
+          <Paper elevation={0} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", mr: 4, p: 0.5 }}>
             {[
               { mode: "login" as const, label: "Đăng nhập" },
               { mode: "register" as const, label: "Đăng ký" },
             ].map((item) => (
-              <button
+              <ButtonBase
                 key={item.mode}
-                className={cn(
-                  "rounded-md px-5 py-2 text-sm font-semibold transition",
-                  auth.mode === item.mode
-                    ? "bg-white text-[var(--erg-blue)] shadow-sm"
-                    : "text-slate-950 hover:text-[var(--erg-blue)]",
-                )}
-                type="button"
+                sx={{ bgcolor: auth.mode === item.mode ? "background.paper" : "transparent", borderRadius: 1, boxShadow: auth.mode === item.mode ? 1 : 0, color: auth.mode === item.mode ? "primary.main" : "text.primary", fontSize: 14, fontWeight: 700, px: 2.5, py: 1, "&:hover": { color: "primary.main" } }}
                 onClick={() => {
                   auth.setMode(item.mode);
                   auth.setNotice(null);
                 }}
               >
                 {item.label}
-              </button>
+              </ButtonBase>
             ))}
-          </div>
+          </Paper>
 
-          <div className="mt-8 rounded-lg border border-slate-200 bg-white px-6 py-7 shadow-sm">
+          <Paper elevation={1} sx={{ border: "1px solid", borderColor: "divider", mt: 4, px: 3, py: 3.5 }}>
             {auth.notice ? (
-              <div
-                className={cn(
-                  "mb-5 rounded-lg border px-4 py-3 text-sm font-medium",
-                  auth.notice.tone === "success"
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                    : auth.notice.tone === "error"
-                      ? "border-rose-200 bg-rose-50 text-rose-700"
-                      : "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-                )}
-              >
+              <Alert severity={auth.notice.tone === "success" ? "success" : auth.notice.tone === "error" ? "error" : "info"} sx={{ fontSize: 14, fontWeight: 500, mb: 2.5 }}>
                 {auth.notice.message}
-              </div>
+              </Alert>
             ) : null}
 
             {auth.mode === "login" ? (
@@ -190,10 +182,10 @@ export function TeacherAuthDialog({ open, onOpenChange, onAuthenticated }: Teach
                 onSwitchToLogin={() => auth.setMode("login")}
               />
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Paper>
+        </Box>
+      </Box>
+    </Dialog>
   );
 }
 
@@ -233,19 +225,19 @@ function TeacherLoginForm({
 
   return (
     <>
-      <div className="text-center">
-        <h2 className="text-xl font-semibold  text-slate-950">Đăng nhập Teacher Hub</h2>
-        <p className="mt-3 text-sm leading-6 text-slate-500">Sử dụng email nội bộ hoặc Google để vào cổng giảng viên.</p>
-      </div>
+      <Box sx={{ textAlign: "center" }}>
+        <Box component="h2" sx={{ fontSize: 20, fontWeight: 700, m: 0 }}>Đăng nhập Teacher Hub</Box>
+        <Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, m: 0, mt: 1.5 }}>Sử dụng email nội bộ hoặc Google để vào cổng giảng viên.</Box>
+      </Box>
 
-      <div className="mt-6 space-y-4">
+      <Box sx={{ display: "grid", gap: 2, mt: 3 }}>
         <AuthSocialButton icon={<GoogleIcon />} label="Đăng nhập với Google" onClick={() => onProviderLogin("google")} />
-      </div>
+      </Box>
 
       <DividerText text="Hoặc tiếp tục với" />
 
-      <TsForm
-        className="mt-6 space-y-5"
+      <Box component={TsForm}
+        sx={{ display: "grid", gap: 2.5, mt: 3 }}
         onSubmit={(event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -260,9 +252,8 @@ function TeacherLoginForm({
         >
           {(field) => (
             <AuthField label="Email">
-              <input
+              <TextField fullWidth size="small"
                 autoComplete="username"
-                className={authInputClassName}
                 placeholder="m@example.com"
                 type="email"
                 value={field.state.value}
@@ -288,9 +279,9 @@ function TeacherLoginForm({
         <AuthField
           label="Mật khẩu"
           action={
-            <button className="text-sm font-medium text-slate-600 hover:text-slate-900" type="button" onClick={onForgotPassword}>
+            <ButtonBase sx={{ color: "text.secondary", fontSize: 14, fontWeight: 500, "&:hover": { color: "text.primary" } }} onClick={onForgotPassword}>
               Quên mật khẩu?
-            </button>
+            </ButtonBase>
           }
         >
           <PasswordInput
@@ -310,32 +301,24 @@ function TeacherLoginForm({
           )}
         </form.Field>
 
-        <label className="inline-flex items-center gap-3 text-sm text-slate-700">
-          <input
-            checked={rememberMe}
-            className="h-4 w-4 rounded border-slate-300 accent-[var(--erg-blue)]"
-            type="checkbox"
-            onChange={(event) => onRememberMeChange(event.target.checked)}
-          />
-          Ghi nhớ đăng nhập
-        </label>
+        <FormControlLabel control={<Checkbox checked={rememberMe} onChange={(event) => onRememberMeChange(event.target.checked)} size="small" />} label="Ghi nhớ đăng nhập" sx={{ color: "text.secondary", m: 0, "& .MuiFormControlLabel-label": { fontSize: 14 } }} />
 
         <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
           {([canSubmit, formSubmitting]) => (
-        <button className={authSubmitClassName} disabled={!canSubmit || isSubmitting || formSubmitting} type="submit">
-          {isSubmitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        <Button disabled={!canSubmit || isSubmitting || formSubmitting} type="submit" variant="contained">
+          {isSubmitting || formSubmitting ? <CircularProgress color="inherit" size={16} sx={{ mr: 1 }} /> : null}
           Đăng nhập
-        </button>
+        </Button>
           )}
         </form.Subscribe>
-      </TsForm>
+      </Box>
 
-      <div className="mt-5 text-center text-sm text-slate-600">
+      <Box sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
         Chưa có tài khoản?{" "}
-        <button className="font-semibold text-slate-900 underline underline-offset-4" type="button" onClick={onSwitchToSignup}>
+        <ButtonBase sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, textDecoration: "underline", textUnderlineOffset: 4 }} onClick={onSwitchToSignup}>
           Đăng ký ngay
-        </button>
-      </div>
+        </ButtonBase>
+      </Box>
     </>
   );
 }
@@ -380,8 +363,8 @@ function TeacherRegisterForm({
 
   return (
     <>
-      <TsForm
-        className="mt-6 space-y-5"
+      <Box component={TsForm}
+        sx={{ display: "grid", gap: 2.5, mt: 3 }}
         onSubmit={(event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -396,9 +379,8 @@ function TeacherRegisterForm({
         >
           {(field) => (
             <AuthField label="Ho va ten">
-              <input
+              <TextField fullWidth size="small"
                 autoComplete="name"
-                className={authInputClassName}
                 placeholder="Nguyen Van A"
                 type="text"
                 value={field.state.value}
@@ -422,9 +404,8 @@ function TeacherRegisterForm({
         >
           {(field) => (
             <AuthField label="Email">
-              <input
+              <TextField fullWidth size="small"
                 autoComplete="email"
-                className={authInputClassName}
                 placeholder="m@example.com"
                 type="email"
                 value={field.state.value}
@@ -494,20 +475,20 @@ function TeacherRegisterForm({
 
         <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
           {([canSubmit, formSubmitting]) => (
-            <button className={authSubmitClassName} disabled={!canSubmit || isSubmitting || formSubmitting} type="submit">
-              {isSubmitting || formSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            <Button disabled={!canSubmit || isSubmitting || formSubmitting} type="submit" variant="contained">
+              {isSubmitting || formSubmitting ? <CircularProgress color="inherit" size={16} sx={{ mr: 1 }} /> : null}
               Tao tai khoan
-            </button>
+            </Button>
           )}
         </form.Subscribe>
-      </TsForm>
+      </Box>
 
-      <div className="mt-5 text-center text-sm text-slate-600">
+      <Box sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
         Đã có tài khoản?{" "}
-        <button className="font-semibold text-slate-900 underline underline-offset-4" type="button" onClick={onSwitchToLogin}>
+        <ButtonBase sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, textDecoration: "underline", textUnderlineOffset: 4 }} onClick={onSwitchToLogin}>
           Đăng nhập
-        </button>
-      </div>
+        </ButtonBase>
+      </Box>
     </>
   );
 }
@@ -522,36 +503,37 @@ function AuthField({
   label: string;
 }) {
   return (
-    <label className="block">
-      <span className="mb-2 flex items-center justify-between gap-3 text-sm font-medium text-slate-800">
-        <span>{label}</span>
+    <Box component="label" sx={{ display: "block" }}>
+      <Box component="span" sx={{ alignItems: "center", color: "text.primary", display: "flex", fontSize: 14, fontWeight: 500, gap: 1.5, justifyContent: "space-between", mb: 1 }}>
+        <Box component="span">{label}</Box>
         {action}
-      </span>
+      </Box>
       {children}
-    </label>
+    </Box>
   );
 }
 
 function AuthSocialButton({ icon, label, onClick }: { icon: ReactNode; label: string; onClick: () => void }) {
   return (
-    <button
-      className="flex h-9 w-full items-center justify-center gap-3 rounded-md border border-slate-200 bg-white text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
-      type="button"
+    <Button
+      fullWidth
+      sx={{ height: 36 }}
+      variant="outlined"
       onClick={onClick}
     >
       {icon}
       {label}
-    </button>
+    </Button>
   );
 }
 
 function DividerText({ text }: { text: string }) {
   return (
-    <div className="mt-6 flex items-center gap-3 text-sm text-slate-400">
-      <div className="h-px flex-1 bg-slate-200" />
-      <span>{text}</span>
-      <div className="h-px flex-1 bg-slate-200" />
-    </div>
+    <Box sx={{ alignItems: "center", color: "text.disabled", display: "flex", fontSize: 14, gap: 1.5, mt: 3 }}>
+      <Divider sx={{ flex: 1 }} />
+      <Box component="span">{text}</Box>
+      <Divider sx={{ flex: 1 }} />
+    </Box>
   );
 }
 
@@ -573,25 +555,25 @@ function PasswordInput({
   onShowPasswordToggle: () => void;
 }) {
   return (
-    <div className="relative">
-      <input
+    <Box sx={{ position: "relative" }}>
+      <TextField fullWidth size="small"
         aria-invalid={invalid ? "true" : undefined}
         autoComplete={autoComplete}
-        className={cn(authInputClassName, "pr-10")}
         type={showPassword ? "text" : "password"}
         value={value}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.value)}
+        sx={{ "& .MuiInputBase-input": { pr: 5 } }}
       />
-      <button
+      <IconButton
         aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-        className="absolute right-0 top-0 flex h-full w-10 items-center justify-center text-slate-400 transition hover:text-slate-700"
-        type="button"
+        size="small"
+        sx={{ color: "text.disabled", height: "100%", position: "absolute", right: 0, top: 0, width: 40, "&:hover": { color: "text.secondary" } }}
         onClick={onShowPasswordToggle}
       >
-        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </button>
-    </div>
+        {showPassword ? <VisibilityOffRoundedIcon sx={{ fontSize: 16 }} /> : <VisibilityRoundedIcon sx={{ fontSize: 16 }} />}
+      </IconButton>
+    </Box>
   );
 }
 
@@ -611,9 +593,3 @@ function validatePassword(value: string) {
   if (!value) return "Mật khẩu là bắt buộc.";
   return value.length >= 6 ? undefined : "Mật khẩu tối thiểu 6 ký tự.";
 }
-
-const authInputClassName =
-  "h-9 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm text-[#242424] outline-none transition placeholder:text-[#707070] focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
-
-const authSubmitClassName =
-  "inline-flex h-9 w-full items-center justify-center gap-2 rounded-md bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)] disabled:cursor-not-allowed disabled:opacity-70";

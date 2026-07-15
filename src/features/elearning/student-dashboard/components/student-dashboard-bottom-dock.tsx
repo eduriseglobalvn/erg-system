@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Paper from "@mui/material/Paper";
+
 import type { StudentDockPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import { cn } from "@/lib/utils";
 
 export function StudentDashboardBottomDock({
   activePage,
@@ -13,29 +16,42 @@ export function StudentDashboardBottomDock({
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 px-4 pb-[calc(env(safe-area-inset-bottom,0px)+0.7rem)]">
-      <div className="mx-auto max-w-md rounded-lg border border-[#d7e0ec] bg-[#f6f8fb] px-1.5 py-1.5 shadow-[0_-2px_10px_rgba(15,23,42,0.08)]">
-        <div className="grid grid-cols-5 gap-0.5">
+    <Box component="nav" sx={{ bottom: 0, left: 0, px: 2, pb: "calc(env(safe-area-inset-bottom, 0px) + 0.7rem)", position: "fixed", right: 0, zIndex: 40 }}>
+      <Paper elevation={0} sx={{ bgcolor: "#f6f8fb", border: "1px solid #d7e0ec", boxShadow: "0 -2px 10px rgba(15,23,42,0.08)", mx: "auto", maxWidth: 448, p: 0.75 }}>
+        <Box sx={{ display: "grid", gap: 0.25, gridTemplateColumns: "repeat(5, minmax(0, 1fr))" }}>
           {items.map((item) => {
             const active = activePage === item.key;
 
             return (
-              <button
+              <ButtonBase
                 key={item.key}
-                type="button"
-                className={cn(
-                  "relative grid min-h-[54px] place-items-center rounded-md border border-transparent px-1 py-1.5 text-center font-semibold transition",
-                  active ? "border-[rgba(105, 108, 255, 0.24)] bg-white text-[#696CFF] shadow-sm after:absolute after:inset-x-4 after:bottom-1 after:h-0.5 after:rounded-full after:bg-[#696CFF]" : "text-slate-500 hover:bg-white hover:text-slate-800",
-                )}
+                sx={{
+                  border: "1px solid",
+                  borderColor: active ? "rgba(105,108,255,0.24)" : "transparent",
+                  borderRadius: 1,
+                  boxShadow: active ? 1 : 0,
+                  color: active ? "#696CFF" : "text.secondary",
+                  display: "grid",
+                  fontWeight: 600,
+                  minHeight: 54,
+                  p: "6px 4px",
+                  placeItems: "center",
+                  position: "relative",
+                  textAlign: "center",
+                  transition: "background-color 160ms ease, color 160ms ease, box-shadow 160ms ease",
+                  ...(active
+                    ? { bgcolor: "background.paper", "&::after": { bgcolor: "#696CFF", borderRadius: 999, bottom: 4, content: '\"\"', height: 2, left: 16, position: "absolute", right: 16 } }
+                    : { "&:hover": { bgcolor: "background.paper", color: "text.primary" } }),
+                }}
                 onClick={() => onPageChange(item.key)}
               >
-                <span className="grid h-4 place-items-center [&_svg]:h-[17px] [&_svg]:w-[17px]">{item.icon}</span>
-                <span className="mt-0.5 text-[10px] font-semibold leading-3.5">{item.label}</span>
-              </button>
+                <Box component="span" sx={{ display: "grid", height: 16, placeItems: "center", "& svg": { fontSize: 17, height: 17, width: 17 } }}>{item.icon}</Box>
+                <Box component="span" sx={{ fontSize: 10, fontWeight: 600, lineHeight: "14px", mt: 0.5 }}>{item.label}</Box>
+              </ButtonBase>
             );
           })}
-        </div>
-      </div>
-    </nav>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

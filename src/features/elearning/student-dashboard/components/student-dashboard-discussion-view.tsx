@@ -1,33 +1,29 @@
 import { useRef, useState, type ReactNode } from "react";
-import {
-  Camera,
-  Image as ImageIcon,
-  MessageCircle,
-  MoreHorizontal,
-  Send,
-  Share2,
-  Smile,
-  ThumbsUp,
-} from "lucide-react";
-import {
-  Avatar,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  Paper,
-  Snackbar,
-  Stack as MuiStack,
-  TextField,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import Camera from "@mui/icons-material/PhotoCameraRounded";
+import ImageIcon from "@mui/icons-material/ImageRounded";
+import MessageCircle from "@mui/icons-material/ChatBubbleOutlineRounded";
+import MoreHorizontal from "@mui/icons-material/MoreHorizRounded";
+import Send from "@mui/icons-material/SendRounded";
+import Share2 from "@mui/icons-material/ShareRounded";
+import Smile from "@mui/icons-material/SentimentSatisfiedAltRounded";
+import ThumbsUp from "@mui/icons-material/ThumbUpAltOutlined";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import IconButton from "@mui/material/IconButton";
+import Paper from "@mui/material/Paper";
+import Snackbar from "@mui/material/Snackbar";
+import MuiStack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
 import type {
   StudentDiscussionComment,
@@ -137,9 +133,9 @@ export function DiscussionView({
   return (
     <Stack spacing={1.45}>
       <DiscussionPageHeader
-        className={studentClass}
+        studentClass={studentClass}
         description={copy.discussionDescription}
-        icon={<MessageCircle size={18} />}
+        icon={<MessageCircle sx={{ fontSize: 18 }} />}
         title={copy.discussionTitle}
       />
 
@@ -178,7 +174,7 @@ export function DiscussionView({
             <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={1} sx={{ pl: { xs: 0, sm: 5.5 } }}>
               <Stack direction="row" spacing={0.75}>
                 <Button
-                  startIcon={<ImageIcon size={16} />}
+                  startIcon={<ImageIcon sx={{ fontSize: 16 }} />}
                   size="small"
                   variant="text"
                   onClick={() => fileInputRef.current?.click()}
@@ -200,7 +196,7 @@ export function DiscussionView({
                 />
               </Stack>
               <Button
-                endIcon={<Send size={16} />}
+                endIcon={<Send sx={{ fontSize: 16 }} />}
                 variant="contained"
                 onClick={submitPost}
                 sx={{
@@ -315,7 +311,7 @@ function FacebookPostCard({
               </Typography>
             </Box>
             <IconButton aria-label="Tùy chọn bài viết" size="small" sx={{ color: "#65676B" }}>
-              <MoreHorizontal size={20} />
+              <MoreHorizontal sx={{ fontSize: 20 }} />
             </IconButton>
           </Stack>
 
@@ -584,7 +580,7 @@ function ReactionActionButton({
     >
       <Button
         fullWidth={!compact}
-        startIcon={compact ? undefined : active ? <span>{active.icon}</span> : <ThumbsUp size={18} />}
+        startIcon={compact ? undefined : active ? <span>{active.icon}</span> : <ThumbsUp sx={{ fontSize: 18 }} />}
         variant="text"
         onClick={() => onReaction(activeReaction ?? "like")}
         sx={{
@@ -702,7 +698,7 @@ function ReactionInsertButton({ onPick }: { onPick: (reaction: StudentDiscussion
 
   return (
     <Box onMouseEnter={openPicker} onMouseLeave={scheduleClose} sx={{ position: "relative" }}>
-      <Button startIcon={<Smile size={16} />} size="small" variant="text" sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 800 }}>
+      <Button startIcon={<Smile sx={{ fontSize: 16 }} />} size="small" variant="text" sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 800 }}>
         Cảm xúc
       </Button>
       <ReactionPicker
@@ -754,8 +750,8 @@ function PostEngagementBar({
     >
       <Stack direction="row" spacing={{ xs: 1.55, sm: 2.15 }} alignItems="center">
         <ReactionStatButton activeReaction={activeReaction} count={reactionTotal} onReaction={onReaction} />
-        <EngagementStatButton icon={<MessageCircle size={19} />} value={formatCompactCount(commentCount)} onClick={onCommentClick} />
-        <EngagementStatButton icon={<Share2 size={19} />} value={formatCompactCount(shareCount)} onClick={onShareClick} />
+        <EngagementStatButton icon={<MessageCircle sx={{ fontSize: 19 }} />} value={formatCompactCount(commentCount)} onClick={onCommentClick} />
+        <EngagementStatButton icon={<Share2 sx={{ fontSize: 19 }} />} value={formatCompactCount(shareCount)} onClick={onShareClick} />
       </Stack>
       <ReactionGlyphStack reactions={reactions} />
     </Stack>
@@ -834,7 +830,7 @@ function ReactionStatButton({
       >
         <Stack direction="row" spacing={0.65} alignItems="center">
           <Box sx={{ display: "inline-flex", fontSize: active ? 16 : 0, lineHeight: 0 }}>
-            {active ? active.icon : <ThumbsUp size={19} />}
+            {active ? active.icon : <ThumbsUp sx={{ fontSize: 19 }} />}
           </Box>
           <Typography variant="body2" sx={{ color: "inherit", fontSize: 14, fontWeight: 750, lineHeight: 1 }}>
             {formatCompactCount(count)}
@@ -906,11 +902,11 @@ function ComposerToolbar({
   return (
     <Stack direction="row" spacing={0.25} sx={{ color: "#65676B", mt: 0.45, pl: 1 }}>
       <ReactionIconButton onPick={onPickReaction} />
-      <IconButton aria-label="Thêm ảnh" size="small" onClick={onAddImage}><Camera size={16} /></IconButton>
-      <IconButton aria-label="Thêm ảnh minh họa" size="small" onClick={onAddImage}><ImageIcon size={16} /></IconButton>
+      <IconButton aria-label="Thêm ảnh" size="small" onClick={onAddImage}><Camera sx={{ fontSize: 16 }} /></IconButton>
+      <IconButton aria-label="Thêm ảnh minh họa" size="small" onClick={onAddImage}><ImageIcon sx={{ fontSize: 16 }} /></IconButton>
       <Box sx={{ flex: 1 }} />
       <IconButton aria-label="Gửi" size="small" onClick={onSend} sx={{ color: canSend ? "#1877F2" : "#BCC0C4" }}>
-        <Send size={16} />
+        <Send sx={{ fontSize: 16 }} />
       </IconButton>
     </Stack>
   );
@@ -935,7 +931,7 @@ function ReactionIconButton({ onPick }: { onPick: (reaction: StudentDiscussionRe
 
   return (
     <Box onMouseEnter={openPicker} onMouseLeave={scheduleClose} sx={{ position: "relative" }}>
-      <IconButton aria-label="Thêm cảm xúc" size="small"><Smile size={16} /></IconButton>
+      <IconButton aria-label="Thêm cảm xúc" size="small"><Smile sx={{ fontSize: 16 }} /></IconButton>
       <ReactionPicker
         open={open}
         onMouseEnter={openPicker}
@@ -1163,12 +1159,12 @@ function AttachmentGrid({
 }
 
 function DiscussionPageHeader({
-  className,
+  studentClass,
   description,
   icon,
   title,
 }: {
-  className: string;
+  studentClass: string;
   description: string;
   icon: ReactNode;
   title: string;
@@ -1183,7 +1179,7 @@ function DiscussionPageHeader({
           <Box sx={{ minWidth: 0 }}>
             <Stack direction="row" spacing={0.75} alignItems="center" sx={{ mb: 0.25 }}>
               <Chip
-                label={className}
+                label={studentClass}
                 size="small"
                 sx={{
                   bgcolor: "rgba(15,108,189,0.08)",

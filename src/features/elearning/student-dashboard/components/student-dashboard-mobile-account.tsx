@@ -1,6 +1,7 @@
-import { User as AccountCircleOutlinedIcon } from "lucide-react";
-import { LogIn as LoginOutlinedIcon } from "lucide-react";
-import { LogOut as LogoutOutlinedIcon } from "lucide-react";
+import Box from "@mui/material/Box";
+import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 
@@ -29,98 +30,98 @@ export function StudentDashboardMobileAccount({
   profile: StudentDashboardProfile;
 }) {
   return (
-    <section className="px-4 py-4">
-      <div className="space-y-4">
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="flex items-center gap-4">
-            <div className="grid h-16 w-16 place-items-center rounded-lg bg-[#696CFF] text-xl font-semibold text-white shadow-sm">
+    <Box component="section" sx={{"paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)"}}>
+      <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 4) * 0)","marginBlockEnd":"calc(calc(0.25rem * 4) * calc(1 - 0))"}}}>
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 4)"}}>
+            <Box component="div" sx={{"display":"grid","height":"calc(0.25rem * 16)","width":"calc(0.25rem * 16)","placeItems":"center","borderRadius":"0.5rem","backgroundColor":"#696CFF","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
               {profile.name.slice(0, 1)}
-            </div>
-            <div className="min-w-0">
-              <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[11px] font-medium text-[#696CFF]">
+            </Box>
+            <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+              <Box sx={{ bgcolor: "rgba(105,108,255,0.08)", borderRadius: 1, color: "#696CFF", display: "inline-flex", fontSize: 11, fontWeight: 500, px: 1.5, py: 0.5 }}>
                 {copy.accountTitle}
-              </div>
-              <h1 className="mt-3 text-[28px] font-semibold leading-[1.1]  text-slate-900">
+              </Box>
+              <Box component="h1" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"28px","fontWeight":"600","lineHeight":"1.1","color":"oklch(20.8% 0.042 265.755)"}}>
                 {profile.name}
-              </h1>
-              <p className="mt-1 text-sm text-slate-500">
+              </Box>
+              <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>
                 {profile.className} · {profile.schoolName}
-              </p>
-            </div>
-          </div>
+              </Box>
+            </Box>
+          </Box>
 
-          <div className="mt-5 grid grid-cols-3 gap-2.5">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 5)","display":"grid","gridTemplateColumns":"repeat(3, minmax(0, 1fr))","gap":"calc(0.25rem * 2.5)"}}>
             <Metric label={copy.stats.average} value={`${averageAssignmentScore}`} />
             <Metric label={copy.stats.completed} value={`${profile.completedAssignments}`} />
             <Metric label={copy.stats.open} value={`${openAssignments.length}`} />
-          </div>
+          </Box>
         </Card>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="grid h-10 w-10 place-items-center rounded-lg bg-[rgba(105, 108, 255, 0.08)] text-[#696CFF]">
-              <AccountCircleOutlinedIcon size={16} />
-            </div>
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)"}}>
+            <Box sx={{ bgcolor: "rgba(105,108,255,0.08)", borderRadius: 1, color: "#696CFF", display: "grid", height: 40, placeItems: "center", width: 40 }}>
+              <AccountCircleOutlinedIcon sx={{ fontSize: 16 }} />
+            </Box>
             <div>
-              <h2 className="text-base font-semibold text-slate-900">{copy.loginStateTitle}</h2>
-              <p className="text-sm text-slate-500">{copy.accountDescription}</p>
+              <Box component="h2" sx={{"fontSize":"1rem","lineHeight":"calc(1.5 / 1)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{copy.loginStateTitle}</Box>
+              <Box component="p" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{copy.accountDescription}</Box>
             </div>
-          </div>
+          </Box>
 
-          <div className="mt-4 rounded-lg bg-[#f8faff] px-4 py-4 text-sm leading-7 text-slate-600">
-            <div className="font-semibold text-slate-900">{account?.name ?? copy.guestLabel}</div>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","borderRadius":"0.5rem","backgroundColor":"#f8faff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 7)","color":"oklch(44.6% 0.043 257.281)"}}>
+            <Box component="div" sx={{"fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{account?.name ?? copy.guestLabel}</Box>
             <div>{account?.email ?? copy.guestLabel}</div>
             <div>{account ? copy.signedInAs : copy.guestLabel}</div>
-          </div>
+          </Box>
 
-          <div className="mt-4 grid gap-3">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gap":"calc(0.25rem * 3)"}}>
             <Button
               variant="contained"
-              startIcon={<LoginOutlinedIcon size={16} />}
-              className="h-11 rounded-lg bg-[#696CFF] text-white hover:bg-[#585BE0]"
+              startIcon={<LoginOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","backgroundColor":"#696CFF","color":"#fff","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
               onClick={onSignIn}
             >
               {copy.signIn}
             </Button>
             <Button
               variant="outlined"
-              startIcon={<LogoutOutlinedIcon size={16} />}
-              className="h-11 rounded-lg border-slate-200 bg-white text-slate-700"
+              startIcon={<LogoutOutlinedIcon sx={{ fontSize: 16 }} />}
+              sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","color":"oklch(37.2% 0.044 257.287)"}}
               onClick={onSignOut}
             >
               {copy.signOut}
             </Button>
-          </div>
+          </Box>
         </Card>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <h2 className="text-base font-semibold text-slate-900">{copy.learningProfileTitle}</h2>
-          <div className="mt-4 grid gap-3">
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="h2" sx={{"fontSize":"1rem","lineHeight":"calc(1.5 / 1)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{copy.learningProfileTitle}</Box>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gap":"calc(0.25rem * 3)"}}>
             <InfoRow label={copy.progressLabel} value={`${profile.weeklyGoalProgress}%`} />
             <InfoRow label={copy.assignmentsTitle} value={`${profile.completedAssignments}/${profile.totalAssignments}`} />
             <InfoRow label={copy.scoresTitle} value={`${profile.averageScore}`} />
             <InfoRow label={copy.notificationTitle} value={`${profile.homeroomTeacher}`} />
-          </div>
+          </Box>
         </Card>
-      </div>
-    </section>
+      </Box>
+    </Box>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
-      <div className="text-[11px] font-medium text-slate-400">{label}</div>
-      <div className="mt-1 text-xl font-semibold text-slate-900">{value}</div>
-    </div>
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fbfcff","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"fontSize":"11px","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{value}</Box>
+    </Box>
   );
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg bg-[#f8faff] px-4 py-3">
-      <div className="text-sm text-slate-500">{label}</div>
-      <div className="text-sm font-semibold text-slate-900">{value}</div>
-    </div>
+    <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)","borderRadius":"0.5rem","backgroundColor":"#f8faff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{label}</Box>
+      <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{value}</Box>
+    </Box>
   );
 }

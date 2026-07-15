@@ -1,5 +1,8 @@
 import { useEffect } from "react";
-import { ShieldAlert } from "lucide-react";
+import GppBadRoundedIcon from "@mui/icons-material/GppBadRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
 import { Link, useNavigate, useSearchParams } from "@/routes/router-compat";
 
 import { ERG_ASSETS } from "@/config/seo";
@@ -48,51 +51,54 @@ export function AccessDeniedPage() {
   }
 
   return (
-    <main className="grid min-h-svh place-items-center bg-[var(--erg-bg)] px-4 py-10 text-slate-950">
-      <section className="w-full max-w-[780px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-        <div className="grid md:grid-cols-[280px_minmax(0,1fr)]">
-          <aside className="bg-[var(--erg-blue)] p-8 text-white">
-            <img alt="ERG" className="h-12 w-fit rounded-lg bg-white px-3 py-2 object-contain" src={ERG_ASSETS.logo} />
-            <div className="mt-10 flex h-16 w-16 items-center justify-center rounded-lg bg-white/12 ring-1 ring-white/20">
-              <ShieldAlert className="h-8 w-8" />
-            </div>
-            <p className="mt-6 text-[11px] font-semibold text-white/60">Access denied</p>
-            <h1 className="mt-3 text-xl font-semibold leading-tight">Tài khoản chưa có quyền truy cập.</h1>
-          </aside>
+    <Box component="main" sx={{ bgcolor: "background.default", color: "text.primary", display: "grid", minHeight: "100svh", px: 2, py: 5, placeItems: "center" }}>
+      <Paper component="section" elevation={1} sx={{ border: "1px solid", borderColor: "divider", maxWidth: 780, overflow: "hidden", width: "100%" }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { md: "280px minmax(0,1fr)" } }}>
+          <Box component="aside" sx={{ bgcolor: "primary.main", color: "primary.contrastText", p: 4 }}>
+            <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ bgcolor: "common.white", borderRadius: 1, height: 48, objectFit: "contain", px: 1.5, py: 1, width: "fit-content" }} />
+            <Box sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.12)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 1, display: "flex", height: 64, justifyContent: "center", mt: 5, width: 64 }}>
+              <GppBadRoundedIcon sx={{ fontSize: 32 }} />
+            </Box>
+            <Box component="p" sx={{ color: "rgba(255,255,255,0.6)", fontSize: 11, fontWeight: 700, m: 0, mt: 3 }}>Access denied</Box>
+            <Box component="h1" sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, m: 0, mt: 1.5 }}>Tài khoản chưa có quyền truy cập.</Box>
+          </Box>
 
-          <div className="p-8 sm:p-10">
-            <p className="text-sm font-semibold text-[var(--erg-red)]">Không đủ quyền</p>
-            <h2 className="mt-3 text-xl font-semibold">Không thể vào {portalLabel}</h2>
-            <p className="mt-4 text-sm leading-7 text-slate-600">
+          <Box sx={{ p: { xs: 4, sm: 5 } }}>
+            <Box component="p" sx={{ color: "error.main", fontSize: 14, fontWeight: 700, m: 0 }}>Không đủ quyền</Box>
+            <Box component="h2" sx={{ fontSize: 20, fontWeight: 700, m: 0, mt: 1.5 }}>Không thể vào {portalLabel}</Box>
+            <Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, m: 0, mt: 2 }}>
               {email ? (
                 <>
-                  Tài khoản <span className="font-semibold text-slate-950">{email}</span> đã đăng nhập thành công nhưng chưa được cấp quyền vào {portalLabel}.
+                  Tài khoản <Box component="span" sx={{ color: "text.primary", fontWeight: 700 }}>{email}</Box> đã đăng nhập thành công nhưng chưa được cấp quyền vào {portalLabel}.
                 </>
               ) : (
                 <>Tài khoản hiện tại chưa được cấp quyền vào {portalLabel}.</>
               )}{" "}
               Vui lòng liên hệ quản trị viên ERG để được cấp quyền theo vai trò hoặc trường phụ trách.
-            </p>
+            </Box>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              <button
+            <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(2, minmax(0,1fr))" }, mt: 4 }}>
+              <Button
                 type="button"
                 onClick={loginAgain}
-                className="h-12 rounded-lg bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[var(--erg-blue-hover)]"
+                sx={{ height: 48, px: 2.5 }}
+                variant="contained"
               >
                 Đăng nhập tài khoản khác
-              </button>
-              <Link
+              </Button>
+              <Button
+                component={Link}
                 to="/"
-                className="inline-flex h-12 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:border-[var(--erg-blue)] hover:text-[var(--erg-blue)]"
+                sx={{ height: 48, px: 2.5 }}
+                variant="outlined"
               >
                 Về trang chủ
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+      </Paper>
+    </Box>
   );
 }
 

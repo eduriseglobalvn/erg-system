@@ -11,35 +11,36 @@ export function AuthHeroPanel() {
   ];
 
   return (
-    <div className="relative overflow-hidden bg-[var(--erg-blue)] p-6 text-white sm:p-7 lg:p-8">
-      <div className="relative flex h-full flex-col">
-        <span className="inline-flex w-fit items-center gap-2 rounded-md border border-white/25 bg-white/10 px-3 py-2 text-xs font-semibold text-white/90 shadow-sm">
+    <Box sx={{ bgcolor: "primary.main", color: "primary.contrastText", overflow: "hidden", p: { xs: 3, sm: 3.5, lg: 4 }, position: "relative" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", position: "relative" }}>
+        <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.25)", borderRadius: 1, boxShadow: 1, color: "rgba(255,255,255,0.9)", display: "inline-flex", fontSize: 12, fontWeight: 700, gap: 1, px: 1.5, py: 1, width: "fit-content" }}>
           <SparkleIcon />
           {t("auth.heroBadge")}
-        </span>
+        </Box>
 
-        <div className="mt-7 max-w-[520px]">
-          <h1 className="text-xl font-semibold leading-tight">
+        <Box sx={{ maxWidth: 520, mt: 3.5 }}>
+          <Box component="h1" sx={{ fontSize: 20, fontWeight: 700, lineHeight: 1.25, m: 0 }}>
             {t("auth.heroTitle")}
-          </h1>
-          <p className="mt-3 max-w-[480px] text-sm leading-6 text-white/80">
+          </Box>
+          <Box component="p" sx={{ color: "rgba(255,255,255,0.8)", fontSize: 14, lineHeight: 1.5, m: 0, maxWidth: 480, mt: 1.5 }}>
             {t("auth.heroSubtitle")}
-          </p>
-        </div>
+          </Box>
+        </Box>
 
-        <div className="mt-7 space-y-2.5">
+        <Box sx={{ display: "grid", gap: 1.25, mt: 3.5 }}>
           {authHighlights.map((item) => (
-            <div
+            <Box
               key={item}
-              className="flex items-start gap-3 rounded-lg border border-white/15 bg-white/10 px-3.5 py-2.5 shadow-sm"
+              sx={{ alignItems: "flex-start", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, boxShadow: 1, display: "flex", gap: 1.5, px: 1.75, py: 1.25 }}
             >
-              <span className="mt-1 h-2.5 w-2.5 rounded-full bg-white/95 shadow-sm" />
-              <p className="text-sm leading-6 text-white/88">{item}</p>
-            </div>
+              <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.95)", borderRadius: "50%", boxShadow: 1, height: 10, mt: 0.5, width: 10 }} />
+              <Box component="p" sx={{ color: "rgba(255,255,255,0.88)", fontSize: 14, lineHeight: 1.5, m: 0 }}>{item}</Box>
+            </Box>
           ))}
-        </div>
+        </Box>
 
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
+import Box from "@mui/material/Box";

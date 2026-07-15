@@ -1,4 +1,8 @@
 import type { ReactNode } from "react";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Divider from "@mui/material/Divider";
+import Paper from "@mui/material/Paper";
 import { Link } from "@/routes/router-compat";
 
 export function Field({
@@ -11,13 +15,13 @@ export function Field({
   action?: ReactNode;
 }) {
   return (
-    <label className="block" style={{ display: "block" }}>
-      <span className="mb-2 flex items-center justify-between gap-3 text-sm font-semibold text-slate-800" style={{ alignItems: "center", color: "#1e293b", display: "flex", fontSize: 14, fontWeight: 600, gap: 12, justifyContent: "space-between", marginBottom: 8 }}>
+    <Box component="label" sx={{ display: "block" }}>
+      <Box component="span" sx={{ alignItems: "center", color: "text.primary", display: "flex", fontSize: 14, fontWeight: 600, gap: 1.5, justifyContent: "space-between", mb: 1 }}>
         <span>{label}</span>
         {action}
-      </span>
+      </Box>
       {children}
-    </label>
+    </Box>
   );
 }
 
@@ -31,53 +35,48 @@ export function SocialButton({
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <ButtonBase
       onClick={onClick}
-      className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-[#d7e0ec] bg-white text-sm font-semibold text-[#242424] transition hover:border-[#b8d6fa] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-      style={{ alignItems: "center", backgroundColor: "#fff", border: "1px solid #d7e0ec", borderRadius: 6, color: "#242424", display: "flex", fontSize: 14, fontWeight: 600, gap: 10, height: 40, justifyContent: "center", width: "100%" }}
+      sx={{ bgcolor: "background.paper", border: "1px solid #d7e0ec", borderRadius: 1, color: "text.primary", display: "flex", fontSize: 14, fontWeight: 600, gap: 1.25, height: 40, width: "100%", "&:hover": { bgcolor: "background.paper", borderColor: "#b8d6fa" }, "&:focus-visible": { outline: "2px solid", outlineColor: "primary.light", outlineOffset: 2 } }}
     >
       {icon}
       {label}
-    </button>
+    </ButtonBase>
   );
 }
 
 export function DividerText({ text }: { text: string }) {
   return (
-    <div className="mt-6 flex items-center gap-4 text-sm text-slate-400" style={{ alignItems: "center", color: "#94a3b8", display: "flex", fontSize: 14, gap: 16, marginTop: 24 }}>
-      <div className="h-px flex-1 bg-slate-200" style={{ backgroundColor: "#e2e8f0", flex: 1, height: 1 }} />
-      <span>{text}</span>
-      <div className="h-px flex-1 bg-slate-200" style={{ backgroundColor: "#e2e8f0", flex: 1, height: 1 }} />
-    </div>
+    <Box sx={{ alignItems: "center", color: "text.disabled", display: "flex", fontSize: 14, gap: 2, mt: 3 }}>
+      <Divider sx={{ flex: 1 }} />
+      <Box component="span">{text}</Box>
+      <Divider sx={{ flex: 1 }} />
+    </Box>
   );
 }
 
 export function MetaBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-white/80">
+    <Box component="span" sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.8)", display: "inline-flex", fontSize: 12, fontWeight: 700, px: 1.5, py: 0.5 }}>
       {children}
-    </span>
+    </Box>
   );
 }
 
 export function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
-      <span className="text-slate-500">{label}</span>
-      <span className="text-right font-medium text-slate-900">{value}</span>
-    </div>
+    <Paper elevation={0} sx={{ alignItems: "flex-start", bgcolor: "background.default", border: "1px solid", borderColor: "divider", display: "flex", gap: 2, justifyContent: "space-between", px: 2, py: 1.5 }}>
+      <Box component="span" sx={{ color: "text.secondary" }}>{label}</Box>
+      <Box component="span" sx={{ color: "text.primary", fontWeight: 500, textAlign: "right" }}>{value}</Box>
+    </Paper>
   );
 }
 
 export function QuickLinkCard({ to, title, caption }: { to: string; title: string; caption: string }) {
   return (
-    <Link
-      className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-4 transition hover:border-slate-300 hover:bg-white"
-      to={to}
-    >
-      <div className="text-sm font-semibold text-slate-900">{title}</div>
-      <div className="mt-1 text-sm leading-6 text-slate-500">{caption}</div>
-    </Link>
+    <Paper component={Link} elevation={0} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", color: "inherit", display: "block", px: 2, py: 2, textDecoration: "none", transition: "background-color 160ms ease, border-color 160ms ease", "&:hover": { bgcolor: "background.paper", borderColor: "text.disabled" } }} to={to}>
+      <Box sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>{title}</Box>
+      <Box sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, mt: 0.5 }}>{caption}</Box>
+    </Paper>
   );
 }

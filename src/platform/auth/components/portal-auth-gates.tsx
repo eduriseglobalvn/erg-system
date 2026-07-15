@@ -1,28 +1,24 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { Navigate, useLocation, useNavigate } from "@/routes/router-compat";
 import { useForm } from "@tanstack/react-form";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  TextField,
-  Typography,
-  Alert,
-  Fade,
-} from "@mui/material";
-import {
-  BarChartRounded as BarChart3,
-  MenuBookRounded as BookOpenCheck,
-  FactCheckRounded as ClipboardCheck,
-  SchoolRounded as GraduationCap,
-  KeyRounded as KeyRound,
-  LocalLibraryRounded as LibraryBig,
-  PresentToAllRounded as Presentation,
-  School,
-  VerifiedUserRounded as ShieldCheck,
-} from "@mui/icons-material";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Fade from "@mui/material/Fade";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import BarChart3 from "@mui/icons-material/BarChartRounded";
+import BookOpenCheck from "@mui/icons-material/MenuBookRounded";
+import ClipboardCheck from "@mui/icons-material/FactCheckRounded";
+import GraduationCap from "@mui/icons-material/SchoolRounded";
+import KeyRound from "@mui/icons-material/KeyRounded";
+import LibraryBig from "@mui/icons-material/LocalLibraryRounded";
+import Presentation from "@mui/icons-material/PresentToAllRounded";
+import School from "@mui/icons-material/School";
+import ShieldCheck from "@mui/icons-material/VerifiedUserRounded";
 
 import { ERG_ASSETS } from "@/config/seo";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
@@ -516,21 +512,18 @@ function PortalLoginShell({ children, copy }: { children: ReactNode; copy: Porta
   }
 
   return (
-    <main
-      className="relative grid min-h-screen overflow-hidden bg-[#dfeeff] bg-cover bg-center px-4 py-6 text-[#1C252E] sm:px-6"
-      style={{ backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')" }}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-white/10" />
+    <Box component="main" sx={{ backgroundImage: "url('https://media.erg.edu.vn/logo/bg.jpg')", backgroundPosition: "center", backgroundSize: "cover", bgcolor: "#dfeeff", color: "#1C252E", display: "grid", minHeight: "100vh", overflow: "hidden", px: { xs: 2, sm: 3 }, py: 3, position: "relative" }}>
+      <Box sx={{ bgcolor: "rgba(255,255,255,0.1)", inset: 0, pointerEvents: "none", position: "absolute" }} />
 
-      <section className="relative z-10 mx-auto flex w-full max-w-[460px] flex-col justify-center">
-        <div className="rounded-[24px] border border-white/55 bg-white/32 p-5 shadow-[0_30px_90px_rgba(72,81,156,0.20)] backdrop-blur-2xl sm:p-7">
-          <header className="mb-7 grid justify-items-center text-center">
-            <img alt="ERG" className="h-auto w-28 object-contain drop-shadow-[0_12px_26px_rgba(72,81,156,0.16)]" src={ERG_ASSETS.logo} />
-          </header>
+      <Box component="section" sx={{ display: "flex", flexDirection: "column", justifyContent: "center", mx: "auto", maxWidth: 460, position: "relative", width: "100%", zIndex: 10 }}>
+        <Box sx={{ backdropFilter: "blur(24px)", bgcolor: "rgba(255,255,255,0.32)", border: "1px solid rgba(255,255,255,0.55)", borderRadius: 3, boxShadow: "0 30px 90px rgba(72,81,156,0.2)", p: { xs: 2.5, sm: 3.5 } }}>
+          <Box component="header" sx={{ display: "grid", justifyItems: "center", mb: 3.5, textAlign: "center" }}>
+            <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ filter: "drop-shadow(0 12px 26px rgba(72,81,156,0.16))", height: "auto", objectFit: "contain", width: 112 }} />
+          </Box>
           {children}
-        </div>
-      </section>
-    </main>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -625,8 +618,8 @@ export function OnboardingPanel({ auth }: { auth: AuthSession }) {
           Lần đầu đăng nhập cần có họ tên và số điện thoại để admin ERG quản lý phân quyền, hỗ trợ tài khoản và đối soát lớp học.
         </Typography>
 
-        <TsForm
-          className="mt-3 flex flex-col gap-2.5"
+        <Box component={TsForm}
+          sx={{ display: "flex", flexDirection: "column", gap: 1.25, mt: 1.5 }}
           onSubmit={(event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -773,7 +766,7 @@ export function OnboardingPanel({ auth }: { auth: AuthSession }) {
               </Button>
             )}
           </form.Subscribe>
-        </TsForm>
+        </Box>
       </CardContent>
     </Card>
   );

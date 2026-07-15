@@ -1,43 +1,39 @@
 ﻿import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Bell,
-  BookOpenCheck,
-  CheckCircle2,
-  ClipboardCheck,
-  Clock3,
-  GraduationCap,
-  Mail,
-  LogIn,
-  LogOut,
-  MessageSquare,
-  ShieldCheck,
-  Sparkles,
-  User,
-} from "lucide-react";
-import {
-  AppBar,
-  Avatar,
-  Badge,
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Divider,
-  IconButton,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Paper,
-  Stack as MuiStack,
-  Tab,
-  Tabs,
-  Tooltip,
-  Toolbar,
-  Typography,
-} from "@mui/material";
+import ArrowLeft from "@mui/icons-material/ArrowBackRounded";
+import Bell from "@mui/icons-material/NotificationsNoneRounded";
+import BookOpenCheck from "@mui/icons-material/AutoStoriesRounded";
+import CheckCircle2 from "@mui/icons-material/CheckCircleOutlineRounded";
+import ClipboardCheck from "@mui/icons-material/AssignmentTurnedInOutlined";
+import Clock3 from "@mui/icons-material/ScheduleRounded";
+import GraduationCap from "@mui/icons-material/SchoolRounded";
+import Mail from "@mui/icons-material/EmailOutlined";
+import LogIn from "@mui/icons-material/LoginRounded";
+import LogOut from "@mui/icons-material/LogoutRounded";
+import MessageSquare from "@mui/icons-material/ForumOutlined";
+import ShieldCheck from "@mui/icons-material/SecurityRounded";
+import Sparkles from "@mui/icons-material/AutoAwesomeRounded";
+import User from "@mui/icons-material/PersonOutlineRounded";
+import AppBar from "@mui/material/AppBar";
+import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
+import LinearProgress from "@mui/material/LinearProgress";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import MuiStack from "@mui/material/Stack";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
+import Tooltip from "@mui/material/Tooltip";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
 
 import { PlayerShell } from "@/components/quiz/player-shell";
 import { localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
@@ -509,7 +505,7 @@ export function StudentDashboardWorkspace() {
           <Toolbar sx={{ minHeight: { xs: 48, md: 46 }, gap: { xs: 1, md: 1.5 }, px: { xs: 1.25, md: 2 } }}>
             <Button
               size="small"
-              startIcon={<ArrowLeft size={18} />}
+              startIcon={<ArrowLeft sx={{ fontSize: 18 }} />}
               variant="outlined"
               onClick={() => setViewState({ type: "dashboard" })}
               sx={{
@@ -830,7 +826,7 @@ function TopMenuShell({
               value={item.key}
             />
           ))}
-          <Tab icon={<User size={16} />} iconPosition="start" label={copy.accountTitle} value="account" />
+          <Tab icon={<User sx={{ fontSize: 16 }} />} iconPosition="start" label={copy.accountTitle} value="account" />
         </Tabs>
 
         <Stack
@@ -856,7 +852,7 @@ function TopMenuShell({
               }}
             >
               <Badge color="error" badgeContent={totalUnread}>
-                <Bell size={18} />
+                <Bell sx={{ fontSize: 18 }} />
               </Badge>
             </IconButton>
           </Tooltip>
@@ -926,7 +922,7 @@ function TopMenuShell({
                   width: 32,
                 }}
               >
-                <MessageSquare size={16} />
+                <MessageSquare sx={{ fontSize: 16 }} />
               </Box>
               <Box sx={{ minWidth: 0 }}>
                 <Typography variant="body2" sx={{ color: MUI_TEXT, fontWeight: 700, lineHeight: 1.35 }}>
@@ -1111,10 +1107,10 @@ function OverviewView({
       </Card>
 
       <Box sx={{ display: "grid", gap: 1.75, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" } }}>
-        <MetricCard icon={<BookOpenCheck size={20} />} label={copy.stats.open} value={openAssignments.length} />
-        <MetricCard icon={<Clock3 size={20} />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
-        <MetricCard icon={<CheckCircle2 size={20} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${openAssignments.length + completedAssignments.length}`} />
-        <MetricCard icon={<GraduationCap size={20} />} label={copy.stats.average} tone="info" value={profile.averageScore} />
+        <MetricCard icon={<BookOpenCheck sx={{ fontSize: 20 }} />} label={copy.stats.open} value={openAssignments.length} />
+        <MetricCard icon={<Clock3 sx={{ fontSize: 20 }} />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
+        <MetricCard icon={<CheckCircle2 sx={{ fontSize: 20 }} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${openAssignments.length + completedAssignments.length}`} />
+        <MetricCard icon={<GraduationCap sx={{ fontSize: 20 }} />} label={copy.stats.average} tone="info" value={profile.averageScore} />
       </Box>
 
       <Box sx={{ display: "grid", gap: 1.75, gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.38fr) minmax(360px, 0.62fr)" } }}>
@@ -1193,13 +1189,13 @@ function AssignmentsView({
     <Stack spacing={2}>
       <PageHeader
         description={copy.assignmentsDescription}
-        icon={<ClipboardCheck size={20} />}
+        icon={<ClipboardCheck sx={{ fontSize: 20 }} />}
         title={copy.assignmentsTitle}
       />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
-        <MetricCard icon={<BookOpenCheck size={18} />} label={copy.stats.open} value={openAssignments.length} />
-        <MetricCard icon={<Clock3 size={18} />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
-        <MetricCard icon={<CheckCircle2 size={18} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${assignments.length}`} />
+        <MetricCard icon={<BookOpenCheck sx={{ fontSize: 18 }} />} label={copy.stats.open} value={openAssignments.length} />
+        <MetricCard icon={<Clock3 sx={{ fontSize: 18 }} />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
+        <MetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${assignments.length}`} />
       </Box>
       <SectionCard title={copy.todayTitle}>
         <Stack spacing={1.25}>
@@ -1223,7 +1219,7 @@ function AnnouncementsView({
 }) {
   return (
     <Stack spacing={2}>
-      <PageHeader description={copy.announcementDescription} icon={<Bell size={20} />} title={copy.announcementTitle} />
+      <PageHeader description={copy.announcementDescription} icon={<Bell sx={{ fontSize: 20 }} />} title={copy.announcementTitle} />
       <Card sx={elevatedCardSx}>
         <CardContent sx={{ p: { xs: 1.5, md: 2 } }}>
           <Stack spacing={1}>
@@ -1260,7 +1256,7 @@ function AccountView({
 }) {
   return (
     <Stack spacing={2}>
-      <PageHeader description={copy.accountDescription} icon={<User size={20} />} title={copy.accountTitle} />
+      <PageHeader description={copy.accountDescription} icon={<User sx={{ fontSize: 20 }} />} title={copy.accountTitle} />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 360px" } }}>
         <Card sx={{ ...elevatedCardSx, overflow: "hidden" }}>
           <CardContent sx={{ p: { xs: 2, md: 0 } }}>
@@ -1298,9 +1294,9 @@ function AccountView({
               </Stack>
             </Box>
             <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" }, mt: { xs: 2, md: 0 }, p: { xs: 0, md: 3 } }}>
-              <MetricCard icon={<Sparkles size={18} />} label={copy.stats.average} value={averageAssignmentScore} />
-              <MetricCard icon={<CheckCircle2 size={18} />} label={copy.stats.completed} tone="success" value={profile.completedAssignments} />
-              <MetricCard icon={<BookOpenCheck size={18} />} label={copy.assignmentsTitle} value={`${profile.completedAssignments}/${profile.totalAssignments}`} />
+              <MetricCard icon={<Sparkles sx={{ fontSize: 18 }} />} label={copy.stats.average} value={averageAssignmentScore} />
+              <MetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} tone="success" value={profile.completedAssignments} />
+              <MetricCard icon={<BookOpenCheck sx={{ fontSize: 18 }} />} label={copy.assignmentsTitle} value={`${profile.completedAssignments}/${profile.totalAssignments}`} />
             </Box>
           </CardContent>
         </Card>
@@ -1319,7 +1315,7 @@ function AccountView({
                   width: 38,
                 }}
               >
-                <ShieldCheck size={18} />
+                <ShieldCheck sx={{ fontSize: 18 }} />
               </Box>
               <Typography variant="subtitle2" sx={{ fontWeight: 900 }}>
                 {copy.loginStateTitle}
@@ -1337,13 +1333,13 @@ function AccountView({
             >
               <Stack spacing={1}>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <User size={16} color={MUI_MUTED} />
+                  <User sx={{ color: MUI_MUTED, fontSize: 16 }} />
                   <Typography variant="body2" sx={{ fontWeight: 800 }}>
                     {account?.name ?? copy.guestLabel}
                   </Typography>
                 </Stack>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <Mail size={16} color={MUI_MUTED} />
+                  <Mail sx={{ color: MUI_MUTED, fontSize: 16 }} />
                   <Typography variant="body2" color="text.secondary" sx={{ minWidth: 0, overflowWrap: "anywhere" }}>
                     {account?.email ?? copy.guestLabel}
                   </Typography>
@@ -1356,10 +1352,10 @@ function AccountView({
               </Stack>
             </Paper>
             <Stack spacing={1.25} sx={{ mt: 2 }}>
-              <Button startIcon={<LogIn size={16} />} variant="contained" onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2.25, minHeight: 42 }}>
+              <Button startIcon={<LogIn sx={{ fontSize: 16 }} />} variant="contained" onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2.25, minHeight: 42 }}>
                 {copy.signIn}
               </Button>
-              <Button startIcon={<LogOut size={16} />} color="error" variant="outlined" onClick={onSignOut} sx={{ borderRadius: 2.25, fontWeight: 900, minHeight: 42 }}>
+              <Button startIcon={<LogOut sx={{ fontSize: 16 }} />} color="error" variant="outlined" onClick={onSignOut} sx={{ borderRadius: 2.25, fontWeight: 900, minHeight: 42 }}>
                 {copy.signOut}
               </Button>
             </Stack>

@@ -1,5 +1,6 @@
-import { MessageSquare as ForumOutlinedIcon } from "lucide-react";
-import { CheckCircle2 as TaskAltOutlinedIcon } from "lucide-react";
+import Box from "@mui/material/Box";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
 
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -55,110 +56,110 @@ export function StudentDashboardMobileOverview({
   todayTitle: string;
 }) {
   return (
-    <section className="px-4 py-4">
-      <div className="space-y-3.5">
-        <Card className="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[10px] font-semibold text-[#696CFF]">
+    <Box component="section" sx={{"paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)"}}>
+      <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3.5) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3.5) * calc(1 - 0))"}}}>
+        <Card sx={{"overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box sx={{ bgcolor: "rgba(105,108,255,0.08)", borderRadius: 1, color: "#696CFF", display: "inline-flex", fontSize: 10, fontWeight: 600, px: 1.5, py: 0.5 }}>
             {heroEyebrow}
-          </div>
-          <h1 className="mt-4 text-[27px] font-semibold leading-[1.12]  text-[#0f172a]">
+          </Box>
+          <Box component="h1" sx={{"marginTop":"calc(0.25rem * 4)","fontSize":"27px","fontWeight":"600","lineHeight":"1.12","color":"#0f172a"}}>
             {heroTitle}
-          </h1>
-          <p className="mt-3 text-[14px] leading-6 text-slate-600">{heroDescription}</p>
+          </Box>
+          <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"14px","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>{heroDescription}</Box>
 
-          <div className="mt-4 grid grid-cols-3 gap-2.5">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gridTemplateColumns":"repeat(3, minmax(0, 1fr))","gap":"calc(0.25rem * 2.5)"}}>
             <MobileStat label="Open" value={`${openAssignments.length}`} />
             <MobileStat label="Done" value={`${profile.completedAssignments}`} />
             <MobileStat label="Avg" value={`${profile.averageScore}`} />
-          </div>
+          </Box>
 
-          <div className="mt-4 flex gap-3">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"flex","gap":"calc(0.25rem * 3)"}}>
             <Button
               variant="contained"
-              className="h-10 flex-1 rounded-lg bg-[#696CFF] text-[14px] font-semibold text-white shadow-sm hover:bg-[#585BE0]"
+              sx={{"height":"calc(0.25rem * 10)","flex":"1","borderRadius":"0.5rem","backgroundColor":"#696CFF","fontSize":"14px","fontWeight":"600","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {primaryAction}
             </Button>
             <Button
               variant="outlined"
-              className="h-10 rounded-lg border-slate-200 bg-white px-4 text-[14px] font-medium text-slate-700"
+              sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.5rem","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","paddingInline":"calc(0.25rem * 4)","fontSize":"14px","fontWeight":"500","color":"oklch(37.2% 0.044 257.287)"}}
               onClick={() => onPageChange("assignments")}
             >
               {secondaryAction}
             </Button>
-          </div>
+          </Box>
         </Card>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-2">
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
             {announcement?.isPinned ? <Capsule>{announcementPinnedLabel}</Capsule> : null}
             <Capsule>{announcement?.targetLabel ?? profile.className}</Capsule>
-          </div>
-          <h2 className="mt-4 text-[20px] font-semibold leading-[1.15]  text-slate-900">
+          </Box>
+          <Box component="h2" sx={{"marginTop":"calc(0.25rem * 4)","fontSize":"20px","fontWeight":"600","lineHeight":"1.15","color":"oklch(20.8% 0.042 265.755)"}}>
             {announcement?.title ?? "Lịch học và bài ưu tiên tuần này"}
-          </h2>
-          <p className="mt-3 text-[14px] leading-6 text-slate-600">
+          </Box>
+          <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"14px","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>
             {announcement?.content ?? "Khi giáo viên gửi thông báo mới, nội dung quan trọng sẽ hiện tại đây."}
-          </p>
+          </Box>
           {announcement ? (
-            <div className="mt-4 text-xs font-semibold text-slate-500">
+            <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>
               {announcement.teacherName} · {announcement.createdAtLabel}
-            </div>
+            </Box>
           ) : null}
 
           <Button
             variant="outlined"
             fullWidth
-            className="mt-4 h-10 rounded-lg border-slate-200 bg-white text-[14px] font-medium text-slate-700"
+            sx={{"marginTop":"calc(0.25rem * 4)","height":"calc(0.25rem * 10)","borderRadius":"0.5rem","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","fontSize":"14px","fontWeight":"500","color":"oklch(37.2% 0.044 257.287)"}}
             onClick={() => onPageChange("announcements")}
           >
             Thông báo giáo viên
           </Button>
         </Card>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none  text-slate-900">{todayTitle}</div>
-            <button type="button" className="text-[13px] font-semibold text-[#696CFF]" onClick={() => onPageChange("assignments")}>
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
+            <Box component="div" sx={{"fontSize":"20px","fontWeight":"600","lineHeight":"1","color":"oklch(20.8% 0.042 265.755)"}}>{todayTitle}</Box>
+            <Box component="button" type="button" sx={{"fontSize":"13px","fontWeight":"600","color":"#696CFF"}} onClick={() => onPageChange("assignments")}>
               {secondaryAction}
-            </button>
-          </div>
+            </Box>
+          </Box>
 
-          <div className="mt-4 space-y-3">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)",":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"}}}>
             {openAssignments.slice(0, 3).map((assignment) => (
-              <article
+              <Box component="article"
                 key={assignment.id}
-                className="rounded-lg border border-slate-200 bg-[#fafbff] p-4"
+                sx={{ bgcolor: "#fafbff", border: "1px solid", borderColor: "divider", borderRadius: 1, p: 2 }}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
+                <Box component="div" sx={{"display":"flex","alignItems":"flex-start","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
+                  <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+                    <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"11px","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>
                       <Capsule>{assignment.statusLabel}</Capsule>
                       <Capsule>{assignment.subjectLabel}</Capsule>
-                    </div>
-                    <h3 className="mt-3 text-[17px] font-semibold leading-6 text-slate-900">{assignment.title}</h3>
-                    <p className="mt-1 text-[14px] text-slate-500">{assignment.dueLabel}</p>
-                  </div>
-                  <button
+                    </Box>
+                    <Box component="h3" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"17px","fontWeight":"600","lineHeight":"calc(0.25rem * 6)","color":"oklch(20.8% 0.042 265.755)"}}>{assignment.title}</Box>
+                    <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"14px","color":"oklch(55.4% 0.046 257.417)"}}>{assignment.dueLabel}</Box>
+                  </Box>
+                  <Box component="button"
                     type="button"
-                    className="grid h-10 min-w-10 place-items-center rounded-lg bg-[#696CFF] px-3 text-white shadow-sm"
+                    sx={{"display":"grid","height":"calc(0.25rem * 10)","minWidth":"calc(0.25rem * 10)","placeItems":"center","borderRadius":"0.5rem","backgroundColor":"#696CFF","paddingInline":"calc(0.25rem * 3)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}
                     onClick={() => onOpenAssignment(assignment.id)}
                   >
-                    <TaskAltOutlinedIcon size={16} />
-                  </button>
-                </div>
+                    <TaskAltOutlinedIcon sx={{ fontSize: 16 }} />
+                  </Box>
+                </Box>
 
-                <div className="mt-4">
-                  <div className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-400">
+                <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)"}}>
+                  <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>
                     <span>Progress</span>
                     <span>{assignment.progressRate}%</span>
-                  </div>
+                  </Box>
                   <LinearProgress
                     variant="determinate"
                     value={assignment.progressRate}
-                    className="mt-2"
-                    sx={{
+                  sx={{
+                      mt: 1,
                       height: 8,
                       borderRadius: 1,
                       bgcolor: "rgb(241 245 249)",
@@ -167,61 +168,61 @@ export function StudentDashboardMobileOverview({
                       },
                     }}
                   />
-                  <p className="mt-3 text-[14px] leading-6 text-slate-600">{assignment.focusNote}</p>
-                </div>
-              </article>
+                  <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"14px","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>{assignment.focusNote}</Box>
+                </Box>
+              </Box>
             ))}
-          </div>
+          </Box>
         </Card>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none  text-slate-900">{discussionSectionTitle}</div>
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-lg bg-[rgba(105, 108, 255, 0.08)] text-[#696CFF]" onClick={() => onPageChange("discussion")}>
-              <ForumOutlinedIcon size={16} />
-            </button>
-          </div>
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
+            <Box component="div" sx={{"fontSize":"20px","fontWeight":"600","lineHeight":"1","color":"oklch(20.8% 0.042 265.755)"}}>{discussionSectionTitle}</Box>
+            <Box component="button" type="button" sx={{ bgcolor: "rgba(105,108,255,0.08)", border: 0, borderRadius: 1, color: "#696CFF", display: "grid", height: 36, placeItems: "center", width: 36 }} onClick={() => onPageChange("discussion")}>
+              <ForumOutlinedIcon sx={{ fontSize: 16 }} />
+            </Box>
+          </Box>
 
-          <div className="mt-4 space-y-3">
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)",":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"}}}>
             {discussionPosts.map((post) => (
-              <button
+              <Box component="button"
                 key={post.id}
                 type="button"
-                className="w-full rounded-lg border border-slate-200 bg-[#fafbff] px-4 py-4 text-left transition hover:bg-white"
+                sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fafbff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)","textAlign":"left","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#fff"}}}}
                 onClick={() => onPageChange("discussion")}
               >
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
+                <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>
                   <Capsule>{post.className}</Capsule>
                   <span>{post.authorName}</span>
                   <span>·</span>
                   <span>{post.createdAtLabel}</span>
-                </div>
-                <p className="mt-3 line-clamp-2 whitespace-pre-line text-[14px] leading-6 text-slate-700">{post.content}</p>
-                <div className="mt-3 text-xs font-semibold text-slate-400">
+                </Box>
+                <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","overflow":"hidden","display":"-webkit-box","WebkitBoxOrient":"vertical","WebkitLineClamp":"2","whiteSpace":"pre-line","fontSize":"14px","lineHeight":"calc(0.25rem * 6)","color":"oklch(37.2% 0.044 257.287)"}}>{post.content}</Box>
+                <Box component="div" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>
                   {post.commentCount} replies
-                </div>
-              </button>
+                </Box>
+              </Box>
             ))}
-          </div>
+          </Box>
         </Card>
-      </div>
-    </section>
+      </Box>
+    </Box>
   );
 }
 
 function Capsule({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold text-slate-500">
+    <Box component="span" sx={{"display":"inline-flex","alignItems":"center","borderRadius":"9999px","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1)","fontSize":"10px","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>
       {children}
-    </span>
+    </Box>
   );
 }
 
 function MobileStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
-      <div className="text-[10px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-[28px] font-semibold leading-none  text-[#696CFF]">{value}</div>
-    </div>
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fbfcff","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"fontSize":"10px","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"28px","fontWeight":"600","lineHeight":"1","color":"#696CFF"}}>{value}</Box>
+    </Box>
   );
 }

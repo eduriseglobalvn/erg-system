@@ -6,16 +6,25 @@ import {
   type KeyboardEventHandler,
   type ReactNode,
 } from "react";
-import { Building2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import PersonRoundedIcon from "@mui/icons-material/PersonRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 import { useForm } from "@tanstack/react-form";
 
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import Checkbox from "@mui/material/Checkbox";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import FormHelperText from "@mui/material/FormHelperText";
 import InputBase from "@mui/material/InputBase";
-import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/ui/tanstack-form";
 import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
 import type { AuthMode, LoginFormState, RegisterFormState } from "@/platform/auth/types/auth-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/utils/cn";
 
 export function AuthFormPanel({
   mode,
@@ -112,16 +121,16 @@ export function AuthFormPanel({
   }
 
   return (
-    <section className="w-full">
+    <Box component="section" sx={{ width: "100%" }}>
       {false && allowRegister ? (
-        <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-white/55 bg-white/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-xl">
+        <Box sx={{ backdropFilter: "blur(16px)", bgcolor: "rgba(255,255,255,0.35)", border: "1px solid rgba(255,255,255,0.55)", borderRadius: 1.5, boxShadow: "inset 0 1px 0 rgba(255,255,255,0.55)", display: "grid", gap: 0.5, gridTemplateColumns: "repeat(2,minmax(0,1fr))", mb: 2.5, p: 0.5 }}>
           <SegmentButton active={effectiveMode === "login"} onClick={() => onModeChange("login")}>
             {t("auth.login")}
           </SegmentButton>
           <SegmentButton active={effectiveMode === "register"} onClick={() => onModeChange("register")}>
             {t("auth.register")}
           </SegmentButton>
-        </div>
+        </Box>
       ) : null}
 
       {effectiveMode === "login" ? (
@@ -132,22 +141,22 @@ export function AuthFormPanel({
           />
 
           {false && allowGoogle ? (
-            <div className="mt-6">
+            <Box sx={{ mt: 3 }}>
               <button
                 type="button"
                 hidden
                 onClick={() => undefined}
               />
-              <div className="mt-5 flex items-center gap-3 text-xs font-semibold text-slate-500/80">
-                <span className="h-px flex-1 bg-white/60" />
-                <span>Hoặc tiếp tục với</span>
-                <span className="h-px flex-1 bg-white/60" />
-              </div>
-            </div>
+              <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", fontSize: 12, fontWeight: 700, gap: 1.5, mt: 2.5 }}>
+                <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.6)", flex: 1, height: 1 }} />
+                <Box component="span">Hoặc tiếp tục với</Box>
+                <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.6)", flex: 1, height: 1 }} />
+              </Box>
+            </Box>
           ) : null}
 
-          <TsForm
-            className="mt-5 space-y-4"
+          <Box component={TsForm}
+            sx={{ display: "grid", gap: 2, mt: 2.5 }}
             onSubmit={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -164,7 +173,7 @@ export function AuthFormPanel({
                 <GlassField
                   autoComplete="username"
                   error={field.state.meta.errors[0]}
-                  icon={<Mail size={18} />}
+                  icon={<EmailRoundedIcon sx={{ fontSize: 18 }} />}
                   label={credentialLabel ?? t("auth.email")}
                   onBlur={field.handleBlur}
                   onChange={(value) => {
@@ -189,7 +198,7 @@ export function AuthFormPanel({
                   ref={passwordInputRef}
                   autoComplete="current-password"
                   error={field.state.meta.errors[0]}
-                  icon={<LockKeyhole size={18} />}
+                  icon={<LockRoundedIcon sx={{ fontSize: 18 }} />}
                   label={t("auth.password")}
                   onBlur={field.handleBlur}
                   onChange={(value) => {
@@ -200,44 +209,34 @@ export function AuthFormPanel({
                   type={showPassword ? "text" : "password"}
                   value={field.state.value}
                   action={
-                    <button
+                    <ButtonBase
                       aria-label={t("auth.showHidePassword")}
-                      className="grid h-9 w-9 place-items-center rounded-lg text-slate-500 transition hover:bg-white/55 hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-[rgba(105,108,255,0.18)]"
-                      type="button"
+                      sx={{ borderRadius: 1, color: "text.secondary", display: "grid", height: 36, placeItems: "center", width: 36, "&:hover": { bgcolor: "rgba(255,255,255,0.55)", color: "text.primary" }, "&:focus-visible": { outline: "2px solid rgba(105,108,255,0.18)" } }}
                       onClick={onShowPasswordToggle}
                     >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
+                      {showPassword ? <VisibilityOffRoundedIcon sx={{ fontSize: 18 }} /> : <VisibilityRoundedIcon sx={{ fontSize: 18 }} />}
+                    </ButtonBase>
                   }
                 />
               )}
             </loginTanstackForm.Field>
 
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <label className="inline-flex min-h-8 items-center gap-2 font-medium text-slate-600">
-                <input
-                  checked={rememberMe}
-                  className="h-3.5 w-3.5 rounded border-white/60 accent-[#696CFF]"
-                  type="checkbox"
-                  onChange={(event) => onRememberMeChange(event.target.checked)}
-                />
-                <span>{t("auth.rememberMe")}</span>
-              </label>
-              <button
-                className="min-h-8 font-semibold text-[#5558e8] underline-offset-4 transition hover:text-[#3f42c8] hover:underline"
-                type="button"
+            <Box sx={{ alignItems: "center", display: "flex", fontSize: 12, gap: 1.5, justifyContent: "space-between" }}>
+              <FormControlLabel control={<Checkbox checked={rememberMe} onChange={(event) => onRememberMeChange(event.target.checked)} size="small" />} label={t("auth.rememberMe")} sx={{ color: "text.secondary", m: 0, minHeight: 32, "& .MuiFormControlLabel-label": { fontSize: 12, fontWeight: 500 } }} />
+              <ButtonBase
+                sx={{ color: "#5558e8", fontSize: 12, fontWeight: 700, minHeight: 32, "&:hover": { color: "#3f42c8", textDecoration: "underline" } }}
                 onClick={onForgotPassword}
               >
                 {t("auth.forgotPassword")}
-              </button>
-            </div>
+              </ButtonBase>
+            </Box>
 
             <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button
                   variant="contained"
                   fullWidth
-                  className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
+                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 800, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
                   type="submit"
@@ -246,27 +245,26 @@ export function AuthFormPanel({
                 </Button>
               )}
             </loginTanstackForm.Subscribe>
-          </TsForm>
+          </Box>
 
           {false && allowRegister ? (
-            <p className="mt-5 text-center text-sm text-slate-600">
+            <Box component="p" sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
               {t("auth.noAccount")}
-              <button
-                className="ml-1 font-semibold text-slate-900 underline underline-offset-4 transition hover:text-[#696CFF]"
-                type="button"
+              <ButtonBase
+                sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
                 onClick={() => onModeChange("register")}
               >
                 {t("auth.registerNow")}
-              </button>
-            </p>
+              </ButtonBase>
+            </Box>
           ) : null}
         </>
       ) : (
         <>
           <AuthHeading title={t("auth.createTeacherAccount")} subtitle={t("auth.registerSubtitle")} center />
 
-          <TsForm
-            className="mt-6 space-y-4"
+          <Box component={TsForm}
+            sx={{ display: "grid", gap: 2, mt: 3 }}
             onSubmit={(event) => {
               event.preventDefault();
               event.stopPropagation();
@@ -282,7 +280,7 @@ export function AuthFormPanel({
               {(field) => (
                 <GlassField
                   error={field.state.meta.errors[0]}
-                  icon={<UserRound size={18} />}
+                  icon={<PersonRoundedIcon sx={{ fontSize: 18 }} />}
                   label={t("auth.fullName")}
                   onBlur={field.handleBlur}
                   onChange={(value) => {
@@ -305,7 +303,7 @@ export function AuthFormPanel({
                 <GlassField
                   autoComplete="email"
                   error={field.state.meta.errors[0]}
-                  icon={<Mail size={18} />}
+                  icon={<EmailRoundedIcon sx={{ fontSize: 18 }} />}
                   label={t("auth.internalEmail")}
                   onBlur={field.handleBlur}
                   onChange={(value) => {
@@ -320,14 +318,14 @@ export function AuthFormPanel({
             </registerTanstackForm.Field>
 
             <GlassField
-              icon={<Building2 size={18} />}
+              icon={<BusinessRoundedIcon sx={{ fontSize: 18 }} />}
               label={t("auth.department")}
               onChange={(value) => onRegisterFormChange({ ...registerForm, department: value })}
               placeholder={t("auth.placeholderDepartment")}
               value={registerForm.department}
             />
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { sm: "repeat(2,minmax(0,1fr))" } }}>
               <registerTanstackForm.Field
                 name="password"
                 validators={{
@@ -337,7 +335,7 @@ export function AuthFormPanel({
                 {(field) => (
                   <GlassField
                     error={field.state.meta.errors[0]}
-                    icon={<LockKeyhole size={18} />}
+                    icon={<LockRoundedIcon sx={{ fontSize: 18 }} />}
                     label={t("auth.password")}
                     onBlur={field.handleBlur}
                     onChange={(value) => {
@@ -363,7 +361,7 @@ export function AuthFormPanel({
                 {(field) => (
                   <GlassField
                     error={field.state.meta.errors[0]}
-                    icon={<LockKeyhole size={18} />}
+                    icon={<LockRoundedIcon sx={{ fontSize: 18 }} />}
                     label={t("auth.confirmPassword")}
                     onBlur={field.handleBlur}
                     onChange={(value) => {
@@ -376,14 +374,14 @@ export function AuthFormPanel({
                   />
                 )}
               </registerTanstackForm.Field>
-            </div>
+            </Box>
 
             <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button
                   variant="contained"
                   fullWidth
-                  className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
+                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 800, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
                   type="submit"
@@ -392,30 +390,29 @@ export function AuthFormPanel({
                 </Button>
               )}
             </registerTanstackForm.Subscribe>
-          </TsForm>
+          </Box>
 
-          <p className="mt-5 text-center text-sm text-slate-600">
+          <Box component="p" sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
             {t("auth.hasAccount")}
-            <button
-              className="ml-1 font-semibold text-slate-900 underline underline-offset-4 transition hover:text-[#696CFF]"
-              type="button"
+            <ButtonBase
+              sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
               onClick={() => onModeChange("login")}
             >
               {t("auth.backToLogin")}
-            </button>
-          </p>
+            </ButtonBase>
+          </Box>
         </>
       )}
-    </section>
+    </Box>
   );
 }
 
 function AuthHeading({ center, subtitle, title }: { center?: boolean; subtitle: string; title: string }) {
   return (
-    <header className={cn(center ? "text-center" : "text-left")}>
-      <h1 className="text-[26px] font-bold leading-tight text-[#1C252E]">{title}</h1>
-      <p className={cn("mt-2 text-sm leading-6 text-slate-600", center && "mx-auto max-w-[360px]")}>{subtitle}</p>
-    </header>
+    <Box component="header" sx={{ textAlign: center ? "center" : "left" }}>
+      <Box component="h1" sx={{ color: "#1C252E", fontSize: 26, fontWeight: 700, lineHeight: 1.25, m: 0 }}>{title}</Box>
+      <Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, m: 0, mt: 1, ...(center ? { mx: "auto", maxWidth: 360 } : {}) }}>{subtitle}</Box>
+    </Box>
   );
 }
 
@@ -429,18 +426,12 @@ function SegmentButton({
   onClick: () => void;
 }) {
   return (
-    <button
-      className={cn(
-        "h-10 rounded-lg text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-[rgba(105,108,255,0.20)]",
-        active
-          ? "bg-white text-[#1C252E] shadow-[0_10px_22px_rgba(105,108,255,0.12)]"
-          : "text-slate-600 hover:bg-white/40 hover:text-[#1C252E]",
-      )}
-      type="button"
+    <ButtonBase
+      sx={{ borderRadius: 1, color: active ? "#1C252E" : "text.secondary", height: 40, fontSize: 14, fontWeight: 700, ...(active ? { bgcolor: "background.paper", boxShadow: "0 10px 22px rgba(105,108,255,0.12)" } : { "&:hover": { bgcolor: "rgba(255,255,255,0.4)", color: "#1C252E" } }), "&:focus-visible": { outline: "2px solid rgba(105,108,255,0.2)" } }}
       onClick={onClick}
     >
       {children}
-    </button>
+    </ButtonBase>
   );
 }
 
@@ -472,20 +463,15 @@ const GlassField = forwardRef<HTMLInputElement, {
   ref,
 ) {
     return (
-      <label className="grid gap-2">
-        <span className="text-xs font-semibold text-slate-700">{label}</span>
-        <span
-          className={cn(
-            "flex min-h-11 items-center gap-2 rounded-xl border border-white/60 bg-white/55 px-3 text-slate-500 shadow-[inset_0_1px_0_rgba(255,255,255,0.65)] backdrop-blur-xl transition focus-within:border-[#696CFF]/55 focus-within:bg-white/75 focus-within:ring-4 focus-within:ring-[#696CFF]/10",
-            error && "border-rose-300/80 ring-4 ring-rose-500/10",
-          )}
-        >
+      <Box component="label" sx={{ display: "grid", gap: 1 }}>
+        <Box component="span" sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700 }}>{label}</Box>
+        <Box component="span" sx={{ alignItems: "center", backdropFilter: "blur(16px)", bgcolor: "rgba(255,255,255,0.55)", border: "1px solid", borderColor: error ? "error.light" : "rgba(255,255,255,0.6)", borderRadius: 1.5, boxShadow: error ? "0 0 0 4px rgba(244,63,94,0.1)" : "inset 0 1px 0 rgba(255,255,255,0.65)", color: "text.secondary", display: "flex", gap: 1, minHeight: 44, px: 1.5, transition: "border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease", "&:focus-within": { bgcolor: "rgba(255,255,255,0.75)", borderColor: "rgba(105,108,255,0.55)", boxShadow: "0 0 0 4px rgba(105,108,255,0.1)" } }}>
           {icon}
           <InputBase
             fullWidth
             error={Boolean(error)}
             autoComplete={autoComplete}
-            className="h-10"
+            sx={{ height: 40 }}
             placeholder={placeholder}
             inputRef={ref}
             type={type}
@@ -495,9 +481,9 @@ const GlassField = forwardRef<HTMLInputElement, {
             onKeyDown={onKeyDown}
           />
           {action}
-        </span>
-        <TsFormMessage className="text-xs font-semibold text-rose-600">{error}</TsFormMessage>
-      </label>
+        </Box>
+        <FormHelperText error sx={{ fontSize: 12, fontWeight: 700, m: 0 }}>{error}</FormHelperText>
+      </Box>
     );
 });
 

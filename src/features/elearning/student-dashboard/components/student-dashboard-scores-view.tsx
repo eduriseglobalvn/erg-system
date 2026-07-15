@@ -1,15 +1,15 @@
 import type { ReactNode } from "react";
-import { CheckCircle2, Clock3, GraduationCap } from "lucide-react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Chip,
-  LinearProgress,
-  Paper,
-  Stack as MuiStack,
-  Typography,
-} from "@mui/material";
+import CheckCircle2 from "@mui/icons-material/CheckCircleOutlineRounded";
+import Clock3 from "@mui/icons-material/ScheduleRounded";
+import GraduationCap from "@mui/icons-material/SchoolRounded";
+import Box from "@mui/material/Box";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
+import MuiStack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
@@ -63,11 +63,11 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
 
   return (
     <Stack spacing={2}>
-      <ScoresPageHeader description={copy.scoresDescription} icon={<GraduationCap size={20} />} title={copy.scoresTitle} />
+      <ScoresPageHeader description={copy.scoresDescription} icon={<GraduationCap sx={{ fontSize: 20 }} />} title={copy.scoresTitle} />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
-        <ScoreMetricCard icon={<GraduationCap size={18} />} label={copy.bestScoreLabel} tone="success" value={bestScore} />
-        <ScoreMetricCard icon={<CheckCircle2 size={18} />} label={copy.stats.completed} value={attemptedAssignments.length} />
-        <ScoreMetricCard icon={<Clock3 size={18} />} label={copy.recentResultsTitle} tone="info" value={totalAttempts} />
+        <ScoreMetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.bestScoreLabel} tone="success" value={bestScore} />
+        <ScoreMetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} value={attemptedAssignments.length} />
+        <ScoreMetricCard icon={<Clock3 sx={{ fontSize: 18 }} />} label={copy.recentResultsTitle} tone="info" value={totalAttempts} />
       </Box>
       <Card sx={elevatedCardSx}>
         <Stack

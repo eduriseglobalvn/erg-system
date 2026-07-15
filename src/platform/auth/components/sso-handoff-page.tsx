@@ -1,4 +1,7 @@
 import { useEffect } from "react";
+import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
+import Typography from "@mui/material/Typography";
 import { useSearchParams } from "@/routes/router-compat";
 
 import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
@@ -40,11 +43,11 @@ export function SsoHandoffPage() {
   }, [returnTo]);
 
   return (
-    <div className="grid min-h-svh place-items-center bg-slate-50">
-      <div className="text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-[var(--erg-blue)]" />
-        <p className="mt-4 text-sm text-slate-500">Đang chuyển tiếp đăng nhập...</p>
-      </div>
-    </div>
+    <Box sx={{ bgcolor: "background.default", display: "grid", minHeight: "100svh", placeItems: "center" }}>
+      <Box sx={{ textAlign: "center" }}>
+        <CircularProgress size={32} />
+        <Typography color="text.secondary" sx={{ fontSize: 14, mt: 2 }}>Đang chuyển tiếp đăng nhập...</Typography>
+      </Box>
+    </Box>
   );
 }

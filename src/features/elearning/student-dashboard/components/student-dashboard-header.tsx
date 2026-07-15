@@ -1,9 +1,10 @@
+import Box from "@mui/material/Box";
 import { useState } from "react";
-import { ChevronDown as ExpandMoreOutlinedIcon } from "lucide-react";
-import { LogIn as LoginOutlinedIcon } from "lucide-react";
-import { LogOut as LogoutOutlinedIcon } from "lucide-react";
-import { Bell as NotificationsNoneOutlinedIcon } from "lucide-react";
-import { Settings as SettingsOutlinedIcon } from "lucide-react";
+import ExpandMoreOutlinedIcon from "@mui/icons-material/ExpandMoreOutlined";
+import LoginOutlinedIcon from "@mui/icons-material/LoginOutlined";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
+import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 import { BrandWordmark } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-ui";
 import type { ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
@@ -13,7 +14,6 @@ import type {
   StudentDiscussionNotification,
   StudentPageKey,
 } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import { cn } from "@/lib/utils";
 
 export function StudentBrandHeader({
   account,
@@ -44,12 +44,12 @@ export function StudentBrandHeader({
   const [notificationMenuOpen, setNotificationMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-[1480px] flex-col gap-3 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex min-w-0 items-center justify-between gap-4">
+    <Box component="header" sx={{"position":"sticky","top":"calc(0.25rem * 0)","zIndex":"30","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff"}}>
+      <Box component="div" sx={{"marginInline":"auto","display":"flex","maxWidth":"1480px","flexDirection":"column","gap":"calc(0.25rem * 3)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media ((min-width: 64rem))":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
+        <Box component="div" sx={{"display":"flex","minWidth":"calc(0.25rem * 0)","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 4)"}}>
           <BrandWordmark />
-          <div className="lg:hidden">
-            <div className="flex items-center gap-2">
+          <Box component="div" sx={{"@media ((min-width: 64rem))":{"display":"none"}}}>
+            <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
               <NotificationMenu
                 copy={copy}
                 menuOpen={notificationMenuOpen}
@@ -71,35 +71,30 @@ export function StudentBrandHeader({
                 onSignIn={onSignIn}
                 onSignOut={onSignOut}
               />
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
 
-        <nav className="flex gap-1 overflow-x-auto pb-1 lg:pb-0">
+        <Box component="nav" sx={{"display":"flex","gap":"calc(0.25rem * 1)","overflowX":"auto","paddingBottom":"calc(0.25rem * 1)","@media ((min-width: 64rem))":{"paddingBottom":"calc(0.25rem * 0)"}}}>
           {copy.navItems.map((item) => (
-            <button
+            <Box component="button"
               key={item.key}
               type="button"
-              className={cn(
-                "relative inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-transparent px-3 text-sm font-semibold transition",
-                activePage === item.key
-                  ? "border-[rgba(105, 108, 255, 0.24)] bg-white text-[#696CFF] shadow-sm after:absolute after:inset-x-3 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-[#696CFF]"
-                  : "text-slate-600 hover:border-[#d9e0ea] hover:bg-white hover:text-[#696CFF]",
-              )}
+              sx={{ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: activePage === item.key ? "rgba(105,108,255,0.24)" : "transparent", borderRadius: 1, boxShadow: activePage === item.key ? 1 : 0, color: activePage === item.key ? "#696CFF" : "text.secondary", display: "inline-flex", flexShrink: 0, fontSize: 14, fontWeight: 700, gap: 1, height: 36, px: 1.5, position: "relative", transition: "border-color 160ms ease, color 160ms ease", ...(activePage === item.key ? { "&::after": { bgcolor: "#696CFF", borderRadius: 999, bottom: -4, content: '\"\"', height: 2, left: 12, position: "absolute", right: 12 } } : { "&:hover": { borderColor: "#d9e0ea", color: "#696CFF" } }) }}
               onClick={() => onPageChange(item.key)}
             >
               {item.icon}
               {item.label}
               {item.key === "announcements" && announcementUnreadCount > 0 ? (
-                <span className="grid min-w-5 place-items-center rounded-full bg-[#FF5630] px-1.5 py-0.5 text-[10px] font-medium text-white shadow-sm">
+                <Box component="span" sx={{"display":"grid","minWidth":"calc(0.25rem * 5)","placeItems":"center","borderRadius":"9999px","backgroundColor":"#FF5630","paddingInline":"calc(0.25rem * 1.5)","paddingBlock":"calc(0.25rem * 0.5)","fontSize":"10px","fontWeight":"500","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
                   {announcementUnreadCount}
-                </span>
+                </Box>
               ) : null}
-            </button>
+            </Box>
           ))}
-        </nav>
+        </Box>
 
-        <div className="hidden lg:flex lg:items-center lg:gap-2">
+        <Box component="div" sx={{"display":"none","@media ((min-width: 64rem))":{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}}>
           <NotificationMenu
             copy={copy}
             menuOpen={notificationMenuOpen}
@@ -121,9 +116,9 @@ export function StudentBrandHeader({
             onSignIn={onSignIn}
             onSignOut={onSignOut}
           />
-        </div>
-      </div>
-    </header>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
@@ -166,64 +161,55 @@ function ProfileMenu({
   }
 
   return (
-    <div className="relative">
-      <button
+    <Box component="div" sx={{"position":"relative"}}>
+      <Box component="button"
         type="button"
         aria-expanded={menuOpen}
-        className={cn(
-          "flex min-w-[148px] items-center gap-2 rounded-lg border bg-white px-2 py-1.5 text-left shadow-sm transition hover:border-[rgba(105, 108, 255, 0.24)] hover:bg-white",
-          menuOpen ? "border-[rgba(105, 108, 255, 0.24)] text-[#696CFF] ring-2 ring-[rgba(105, 108, 255, 0.24)]" : "border-[#d7e0ec]",
-        )}
+        sx={{ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: menuOpen ? "rgba(105,108,255,0.24)" : "#d7e0ec", borderRadius: 1, boxShadow: menuOpen ? "0 0 0 2px rgba(105,108,255,0.24)" : 1, color: menuOpen ? "#696CFF" : "inherit", display: "flex", gap: 1, minWidth: 148, px: 1, py: 0.75, textAlign: "left", transition: "border-color 160ms ease, box-shadow 160ms ease", "&:hover": { borderColor: "rgba(105,108,255,0.24)" } }}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[#696CFF] text-xs font-semibold text-white">
+        <Box component="span" sx={{"display":"grid","height":"calc(0.25rem * 8)","width":"calc(0.25rem * 8)","flexShrink":"0","placeItems":"center","borderRadius":"0.375rem","backgroundColor":"#696CFF","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"#fff"}}>
           {initial}
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="block max-w-[98px] truncate text-sm font-semibold leading-4 text-[#696CFF]">{studentName}</span>
-          <span className="mt-0.5 flex items-center gap-1.5 text-[11px] leading-4 text-slate-500">
+        </Box>
+        <Box component="span" sx={{"minWidth":"calc(0.25rem * 0)","flex":"1"}}>
+          <Box component="span" sx={{"display":"block","maxWidth":"98px","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 4)","fontWeight":"600","color":"#696CFF"}}>{studentName}</Box>
+          <Box component="span" sx={{"marginTop":"calc(0.25rem * 0.5)","display":"flex","alignItems":"center","gap":"calc(0.25rem * 1.5)","fontSize":"11px","lineHeight":"calc(0.25rem * 4)","color":"oklch(55.4% 0.046 257.417)"}}>
             <span>{studentClass}</span>
-            <span className="h-0.5 w-0.5 rounded-full bg-slate-300" />
-            <span className="max-w-[76px] truncate">{signedInLabel}</span>
-          </span>
-        </span>
-        <ExpandMoreOutlinedIcon
-          className={cn("shrink-0 text-slate-400 transition", menuOpen ? "rotate-180" : "rotate-0")}
-          size={16}
-        />
-      </button>
+            <Box component="span" sx={{"height":"calc(0.25rem * 0.5)","width":"calc(0.25rem * 0.5)","borderRadius":"9999px","backgroundColor":"oklch(86.9% 0.022 252.894)"}} />
+            <Box component="span" sx={{"maxWidth":"76px","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap"}}>{signedInLabel}</Box>
+          </Box>
+        </Box>
+        <ExpandMoreOutlinedIcon sx={{ flexShrink: 0, color: "text.disabled", fontSize: 16, transform: menuOpen ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 160ms ease" }} />
+      </Box>
 
       {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[260px] overflow-hidden rounded-lg border border-[#d7e0ec] bg-white shadow-sm">
-          <div className="border-b border-[#edf1f5] px-4 py-3">
-            <div className="text-sm font-semibold text-slate-950">{studentName}</div>
-            <div className="mt-1 text-xs text-slate-500">{studentClass}</div>
-          </div>
+        <Box sx={{ bgcolor: "background.paper", border: "1px solid #d7e0ec", borderRadius: 1, boxShadow: 1, overflow: "hidden", position: "absolute", right: 0, top: "calc(100% + 8px)", width: 260, zIndex: 50 }}>
+          <Box component="div" sx={{"borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"#edf1f5","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
+            <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{studentName}</Box>
+            <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>{studentClass}</Box>
+          </Box>
 
-          <div className="grid gap-1 p-2">
-            <button
+          <Box component="div" sx={{"display":"grid","gap":"calc(0.25rem * 1)","padding":"calc(0.25rem * 2)"}}>
+            <Box component="button"
               type="button"
-              className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-[rgba(105, 108, 255, 0.08)] hover:text-[#696CFF]"
+              sx={{ alignItems: "center", bgcolor: "transparent", border: 0, borderRadius: 1, color: "text.secondary", display: "flex", fontSize: 14, fontWeight: 700, gap: 1.5, px: 1.5, py: 1, "&:hover": { bgcolor: "rgba(105,108,255,0.08)", color: "#696CFF" } }}
               onClick={handleAccountClick}
             >
-              <SettingsOutlinedIcon size={16} />
+              <SettingsOutlinedIcon sx={{ fontSize: 16 }} />
               {copy.accountTitle}
-            </button>
-            <button
+            </Box>
+            <Box component="button"
               type="button"
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-semibold transition hover:bg-[rgba(105, 108, 255, 0.08)]",
-                account ? "text-[#FF5630]" : "text-[#696CFF]",
-              )}
+              sx={{ alignItems: "center", bgcolor: "transparent", border: 0, borderRadius: 1, color: account ? "#FF5630" : "#696CFF", display: "flex", fontSize: 14, fontWeight: 700, gap: 1.5, px: 1.5, py: 1, "&:hover": { bgcolor: "rgba(105,108,255,0.08)" } }}
               onClick={handleAuthClick}
             >
-              {account ? <LogoutOutlinedIcon size={16} /> : <LoginOutlinedIcon size={16} />}
+              {account ? <LogoutOutlinedIcon sx={{ fontSize: 16 }} /> : <LoginOutlinedIcon sx={{ fontSize: 16 }} />}
               {account ? copy.signOut : copy.signIn}
-            </button>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
       ) : null}
-    </div>
+    </Box>
   );
 }
 
@@ -243,40 +229,34 @@ function NotificationMenu({
   const unreadCount = notifications.filter((notification) => notification.unread).length;
 
   return (
-    <div className="relative">
-      <button
+    <Box component="div" sx={{"position":"relative"}}>
+      <Box component="button"
         type="button"
         aria-expanded={menuOpen}
         aria-label={copy.notificationTitle}
-        className={cn(
-          "relative grid h-10 w-10 place-items-center rounded-lg border bg-white text-[#696CFF] shadow-sm transition hover:border-[rgba(105, 108, 255, 0.24)] hover:bg-white",
-          menuOpen ? "border-[rgba(105, 108, 255, 0.24)] ring-2 ring-[rgba(105, 108, 255, 0.24)]" : "border-[#d7e0ec]",
-        )}
+        sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: menuOpen ? "rgba(105,108,255,0.24)" : "#d7e0ec", borderRadius: 1, boxShadow: menuOpen ? "0 0 0 2px rgba(105,108,255,0.24)" : 1, color: "#696CFF", display: "grid", height: 40, placeItems: "center", position: "relative", width: 40, "&:hover": { borderColor: "rgba(105,108,255,0.24)" } }}
         onClick={() => onMenuOpenChange(!menuOpen)}
       >
-        <NotificationsNoneOutlinedIcon size={16} />
+        <NotificationsNoneOutlinedIcon sx={{ fontSize: 16 }} />
         {unreadCount > 0 ? (
-          <span className="absolute -right-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[#FF5630] px-1 text-[10px] font-semibold text-white">
+          <Box component="span" sx={{"position":"absolute","right":"calc(0.25rem * -1)","top":"calc(0.25rem * -1)","display":"grid","height":"calc(0.25rem * 5)","minWidth":"calc(0.25rem * 5)","placeItems":"center","borderRadius":"9999px","backgroundColor":"#FF5630","paddingInline":"calc(0.25rem * 1)","fontSize":"10px","fontWeight":"600","color":"#fff"}}>
             {unreadCount}
-          </span>
+          </Box>
         ) : null}
-      </button>
+      </Box>
 
       {menuOpen ? (
-        <div className="absolute right-0 top-[calc(100%+8px)] z-50 w-[320px] overflow-hidden rounded-lg border border-[#d7e0ec] bg-white shadow-sm">
-          <div className="border-b border-[#edf1f5] px-4 py-3">
-            <div className="text-sm font-semibold text-[#696CFF]">{copy.notificationTitle}</div>
-          </div>
-          <div className="max-h-[360px] overflow-y-auto p-2">
+        <Box sx={{ bgcolor: "background.paper", border: "1px solid #d7e0ec", borderRadius: 1, boxShadow: 1, overflow: "hidden", position: "absolute", right: 0, top: "calc(100% + 8px)", width: 320, zIndex: 50 }}>
+          <Box component="div" sx={{"borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"#edf1f5","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
+            <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600","color":"#696CFF"}}>{copy.notificationTitle}</Box>
+          </Box>
+          <Box component="div" sx={{"maxHeight":"360px","overflowY":"auto","padding":"calc(0.25rem * 2)"}}>
             {notifications.length > 0 ? (
               notifications.map((notification) => (
-                <button
+                <Box component="button"
                   key={notification.id}
                   type="button"
-                  className={cn(
-                    "w-full rounded-md px-3 py-2 text-left transition hover:bg-[rgba(105, 108, 255, 0.08)]",
-                    notification.unread ? "bg-[#696CFF]/5" : "bg-white",
-                  )}
+                  sx={{ bgcolor: notification.unread ? "rgba(105,108,255,0.05)" : "background.paper", border: 0, borderRadius: 1, px: 1.5, py: 1, textAlign: "left", width: "100%", "&:hover": { bgcolor: "rgba(105,108,255,0.08)" } }}
                   onClick={() =>
                     onNotificationClick({
                       replyId: notification.replyId,
@@ -284,31 +264,26 @@ function NotificationMenu({
                     })
                   }
                 >
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={cn(
-                        "mt-1 h-2 w-2 shrink-0 rounded-full",
-                        notification.unread ? "bg-[#FF5630]" : "bg-slate-300",
-                      )}
-                    />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-semibold leading-5 text-slate-900">
+                  <Box component="div" sx={{"display":"flex","alignItems":"flex-start","gap":"calc(0.25rem * 2)"}}>
+                    <Box component="span" sx={{ bgcolor: notification.unread ? "#FF5630" : "#cbd5e1", borderRadius: "50%", flexShrink: 0, height: 8, mt: 0.5, width: 8 }} />
+                    <Box component="span" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+                      <Box component="span" sx={{"display":"block","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 5)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>
                         {notification.primaryText}
-                      </span>
-                      <span className="mt-0.5 block truncate text-xs leading-5 text-slate-500">
+                      </Box>
+                      <Box component="span" sx={{"marginTop":"calc(0.25rem * 0.5)","display":"block","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.75rem","lineHeight":"calc(0.25rem * 5)","color":"oklch(55.4% 0.046 257.417)"}}>
                         {notification.secondaryText}
-                      </span>
-                      <span className="mt-1 block text-xs text-slate-500">{notification.timeLabel}</span>
-                    </span>
-                  </div>
-                </button>
+                      </Box>
+                      <Box component="span" sx={{"marginTop":"calc(0.25rem * 1)","display":"block","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","color":"oklch(55.4% 0.046 257.417)"}}>{notification.timeLabel}</Box>
+                    </Box>
+                  </Box>
+                </Box>
               ))
             ) : (
-              <div className="px-3 py-6 text-center text-sm text-slate-500">{copy.notificationEmpty}</div>
+              <Box component="div" sx={{"paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 6)","textAlign":"center","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{copy.notificationEmpty}</Box>
             )}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
-    </div>
+    </Box>
   );
 }

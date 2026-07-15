@@ -1,7 +1,8 @@
+import Box from "@mui/material/Box";
 import type { ReactNode } from "react";
-import { BarChart3 as BarChartRoundedIcon } from "lucide-react";
-import { Trophy as EmojiEventsOutlinedIcon } from "lucide-react";
-import { LineChart as QueryStatsRoundedIcon } from "lucide-react";
+import BarChartRoundedIcon from "@mui/icons-material/BarChartRounded";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
+import QueryStatsRoundedIcon from "@mui/icons-material/QueryStatsRounded";
 
 import Card from "@mui/material/Card";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
@@ -23,86 +24,86 @@ export function StudentDashboardMobileScores({
     : 0;
 
   return (
-    <section className="px-4 py-4">
-      <div className="space-y-4">
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="flex items-start justify-between gap-3">
+    <Box component="section" sx={{"paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)"}}>
+      <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 4) * 0)","marginBlockEnd":"calc(calc(0.25rem * 4) * calc(1 - 0))"}}}>
+        <Card sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+          <Box component="div" sx={{"display":"flex","alignItems":"flex-start","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
             <div>
-              <div className="inline-flex rounded-md bg-[rgba(105, 108, 255, 0.08)] px-3 py-1 text-[11px] font-medium text-[#696CFF]">
+              <Box sx={{ bgcolor: "rgba(105,108,255,0.08)", borderRadius: 1, color: "#696CFF", display: "inline-flex", fontSize: 11, fontWeight: 500, px: 1.5, py: 0.5 }}>
                 {copy.scoresTitle}
-              </div>
-              <h1 className="mt-4 text-[29px] font-semibold leading-[1.1]  text-slate-900">
+              </Box>
+              <Box component="h1" sx={{"marginTop":"calc(0.25rem * 4)","fontSize":"29px","fontWeight":"600","lineHeight":"1.1","color":"oklch(20.8% 0.042 265.755)"}}>
                 {copy.recentResultsTitle}
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-slate-600">{copy.scoresDescription}</p>
+              </Box>
+              <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(44.6% 0.043 257.281)"}}>{copy.scoresDescription}</Box>
             </div>
-            <div className="grid h-11 w-11 place-items-center rounded-lg bg-[#696CFF] text-white shadow-sm">
-              <BarChartRoundedIcon size={16} />
-            </div>
-          </div>
+            <Box component="div" sx={{"display":"grid","height":"calc(0.25rem * 11)","width":"calc(0.25rem * 11)","placeItems":"center","borderRadius":"0.5rem","backgroundColor":"#696CFF","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+              <BarChartRoundedIcon sx={{ fontSize: 16 }} />
+            </Box>
+          </Box>
 
-          <div className="mt-5 grid grid-cols-3 gap-2.5">
-            <ScoreMetric icon={<QueryStatsRoundedIcon size={16} />} label={copy.stats.average} value={`${averageScore}`} />
-            <ScoreMetric icon={<EmojiEventsOutlinedIcon size={16} />} label={copy.bestScoreLabel} value={`${bestScore}`} />
-            <ScoreMetric icon={<BarChartRoundedIcon size={16} />} label={copy.stats.completed} value={`${attemptedAssignments.length}`} />
-          </div>
+          <Box component="div" sx={{"marginTop":"calc(0.25rem * 5)","display":"grid","gridTemplateColumns":"repeat(3, minmax(0, 1fr))","gap":"calc(0.25rem * 2.5)"}}>
+            <ScoreMetric icon={<QueryStatsRoundedIcon sx={{ fontSize: 16 }} />} label={copy.stats.average} value={`${averageScore}`} />
+            <ScoreMetric icon={<EmojiEventsOutlinedIcon sx={{ fontSize: 16 }} />} label={copy.bestScoreLabel} value={`${bestScore}`} />
+            <ScoreMetric icon={<BarChartRoundedIcon sx={{ fontSize: 16 }} />} label={copy.stats.completed} value={`${attemptedAssignments.length}`} />
+          </Box>
         </Card>
 
-        <div className="space-y-3">
+        <Box component="div" sx={{":where(& > :not(:last-child))":{"marginBlockStart":"calc(calc(0.25rem * 3) * 0)","marginBlockEnd":"calc(calc(0.25rem * 3) * calc(1 - 0))"}}}>
           {attemptedAssignments.length > 0 ? (
             attemptedAssignments.map((assignment) => (
               <Card
                 key={assignment.id}
-                className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm"
+                sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in srgb, oklch(92.9% 0.013 255.508) 80%, transparent)","@supports (color: color-mix(in lab, red, red))":{"borderColor":"color-mix(in oklab, oklch(92.9% 0.013 255.508) 80%, transparent)"},"backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
+                <Box component="div" sx={{"display":"flex","alignItems":"flex-start","justifyContent":"space-between","gap":"calc(0.25rem * 3)"}}>
+                  <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+                    <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
                       <Chip>{assignment.subjectLabel}</Chip>
                       <Chip>{assignment.statusLabel}</Chip>
-                    </div>
-                    <h2 className="mt-3 text-lg font-semibold leading-6 text-slate-900">{assignment.title}</h2>
-                    <p className="mt-1 text-sm text-slate-500">{assignment.teacherName}</p>
-                  </div>
-                  <div className="rounded-lg bg-[rgba(105, 108, 255, 0.08)] px-3 py-2 text-right">
-                    <div className="text-[11px] font-semibold text-[#696CFF]">{copy.scoreLabel}</div>
-                    <div className="mt-1 text-xl font-semibold text-[#696CFF]">
+                    </Box>
+                    <Box component="h2" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"1.125rem","lineHeight":"calc(0.25rem * 6)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{assignment.title}</Box>
+                    <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{assignment.teacherName}</Box>
+                  </Box>
+                  <Box sx={{ bgcolor: "rgba(105,108,255,0.08)", borderRadius: 1, px: 1.5, py: 1, textAlign: "right" }}>
+                    <Box component="div" sx={{"fontSize":"11px","fontWeight":"600","color":"#696CFF"}}>{copy.scoreLabel}</Box>
+                    <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"#696CFF"}}>
                       {assignment.score != null ? copy.scoreBadge(assignment.score, assignment.maxScore) : copy.pendingScore}
-                    </div>
-                  </div>
-                </div>
+                    </Box>
+                  </Box>
+                </Box>
 
-                <div className="mt-4 grid grid-cols-2 gap-3 rounded-lg bg-[#f8faff] px-4 py-3">
+                <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gridTemplateColumns":"repeat(2, minmax(0, 1fr))","gap":"calc(0.25rem * 3)","borderRadius":"0.5rem","backgroundColor":"#f8faff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)"}}>
                   <Meta label={copy.attemptDurationLabel} value={assignment.attempts.at(-1)?.durationLabel ?? "--"} />
                   <Meta label={copy.priority.title} value={assignment.attempts.at(-1)?.completedAtLabel ?? assignment.dueLabel} />
-                </div>
+                </Box>
               </Card>
             ))
           ) : (
-            <Card className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm leading-6 text-slate-500 shadow-sm">
+            <Card sx={{"borderRadius":"0.5rem","borderStyle":"dashed","borderWidth":"1px","borderColor":"oklch(86.9% 0.022 252.894)","backgroundColor":"#fff","padding":"calc(0.25rem * 6)","textAlign":"center","fontSize":"0.875rem","lineHeight":"calc(0.25rem * 6)","color":"oklch(55.4% 0.046 257.417)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
               {copy.noRecentResults}
             </Card>
           )}
-        </div>
-      </div>
-    </section>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
 function Chip({ children }: { children: string }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-600">
+    <Box component="span" sx={{"display":"inline-flex","alignItems":"center","borderRadius":"9999px","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1)","fontSize":"11px","fontWeight":"500","color":"oklch(44.6% 0.043 257.281)"}}>
       {children}
-    </span>
+    </Box>
   );
 }
 
 function Meta({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0">
-      <div className="text-[11px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-medium text-slate-700">{value}</div>
-    </div>
+    <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+      <Box component="div" sx={{"fontSize":"11px","fontWeight":"600","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"500","color":"oklch(37.2% 0.044 257.287)"}}>{value}</Box>
+    </Box>
   );
 }
 
@@ -116,12 +117,12 @@ function ScoreMetric({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
-      <div className="flex items-center gap-2 text-[#696CFF]">
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fbfcff","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 3)"}}>
+      <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)","color":"#696CFF"}}>
         {icon}
-        <span className="text-[11px] font-medium text-slate-400">{label}</span>
-      </div>
-      <div className="mt-2 text-xl font-semibold text-slate-900">{value}</div>
-    </div>
+        <Box component="span" sx={{"fontSize":"11px","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>{label}</Box>
+      </Box>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"oklch(20.8% 0.042 265.755)"}}>{value}</Box>
+    </Box>
   );
 }

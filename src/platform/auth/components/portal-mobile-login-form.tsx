@@ -1,5 +1,9 @@
 import { useRef, type CSSProperties, type FormEvent, type KeyboardEvent, type ReactNode } from "react";
-import { Apple, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
+import AppleIcon from "@mui/icons-material/Apple";
+import EmailRoundedIcon from "@mui/icons-material/EmailRounded";
+import LockRoundedIcon from "@mui/icons-material/LockRounded";
+import VisibilityOffRoundedIcon from "@mui/icons-material/VisibilityOffRounded";
+import VisibilityRoundedIcon from "@mui/icons-material/VisibilityRounded";
 
 import { useForm } from "@tanstack/react-form";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
@@ -124,7 +128,7 @@ export function PortalMobileLoginForm({
                 <label style={styles.field}>
                   <span style={styles.label}>{credentialLabel ?? t("auth.email")}</span>
                   <span style={styles.inputWrap}>
-                    <Mail color="#6b8aaa" size={17} />
+                    <EmailRoundedIcon sx={{ color: "#6b8aaa", fontSize: 17 }} />
                     <input
                       autoComplete="username"
                       inputMode="email"
@@ -156,7 +160,7 @@ export function PortalMobileLoginForm({
                 <label style={styles.field}>
                   <span style={styles.label}>{t("auth.password")}</span>
                   <span style={styles.inputWrap}>
-                    <LockKeyhole color="#6b8aaa" size={17} />
+                    <LockRoundedIcon sx={{ color: "#6b8aaa", fontSize: 17 }} />
                     <input
                       ref={passwordInputRef}
                       autoComplete="current-password"
@@ -177,7 +181,7 @@ export function PortalMobileLoginForm({
                       type="button"
                       onClick={onShowPasswordToggle}
                     >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showPassword ? <VisibilityOffRoundedIcon sx={{ fontSize: 20 }} /> : <VisibilityRoundedIcon sx={{ fontSize: 20 }} />}
                     </button>
                   </span>
                   <TsFormMessage style={styles.errorText}>{field.state.meta.errors[0]}</TsFormMessage>
@@ -222,7 +226,7 @@ export function PortalMobileLoginForm({
                   onClick={() => undefined}
                 />
                 <DisabledSocialButton label="Apple">
-                  <Apple fill="#111827" size={23} strokeWidth={0} />
+                  <AppleIcon sx={{ color: "#111827", fontSize: 23 }} />
                 </DisabledSocialButton>
               </div>
             </div>
