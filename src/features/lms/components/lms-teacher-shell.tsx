@@ -18,13 +18,7 @@ import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
-import {
-  Bell as BellIcon,
-  BookOpen as BookOpenIcon,
-  CalendarDays as CalendarDaysIcon,
-  ClipboardList,
-  type LucideIcon,
-} from "lucide-react";
+import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 
 import ErgPortalLayout, { type MenuGroup } from "@/components/portal/ErgPortalLayout";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
@@ -44,7 +38,7 @@ import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-das
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { hasApiBase } from "@/lib/api-client";
-import { LmsMobileShell, useLmsMobileBreakpoint } from "@/features/lms/mobile";
+import { LmsMobileShell, type LmsMobileDockItem, useLmsMobileBreakpoint } from "@/features/lms/mobile";
 import { fetchUnreadNotificationCount, notificationQueryKeys } from "@/features/notifications/api/notification-api";
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
 import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/features/lms/components/lms-teacher-shell-utils";
@@ -223,11 +217,11 @@ const LMS_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
-const lmsMobileDockItems: Array<{ id: LmsMobileSection; label: string; path: string; icon: LucideIcon }> = [
-  { id: "assignHomework", label: "Giao bài", path: "/homework/assign", icon: ClipboardList },
-  { id: "exerciseBank", label: "Kho bài", path: "/homework/exercise-bank", icon: BookOpenIcon },
-  { id: "schedule", label: "Lịch", path: "/calendar", icon: CalendarDaysIcon },
-  { id: "notifications", label: "Thông báo", path: "/notifications", icon: BellIcon },
+const lmsMobileDockItems: Array<LmsMobileDockItem<LmsMobileSection>> = [
+  { id: "assignHomework", label: "Giao bài", path: "/homework/assign", icon: AssignmentRoundedIcon },
+  { id: "exerciseBank", label: "Kho bài", path: "/homework/exercise-bank", icon: MenuBookRoundedIcon },
+  { id: "schedule", label: "Lịch", path: "/calendar", icon: CalendarMonthRoundedIcon },
+  { id: "notifications", label: "Thông báo", path: "/notifications", icon: NotificationsNoneRoundedIcon },
 ];
 
 function resolveSection(pathname: string): LmsSection {

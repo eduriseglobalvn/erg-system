@@ -1,13 +1,19 @@
-import { type LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+import type { SvgIconProps } from "@mui/material/SvgIcon";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-import { cn } from "@/lib/utils";
+export type LmsMobileDockIcon = ComponentType<SvgIconProps>;
 
 export type LmsMobileDockItem<TSection extends string> = {
+  badgeCount?: number;
+  icon: LmsMobileDockIcon;
   id: TSection;
   label: string;
   path: string;
-  icon: LucideIcon;
-  badgeCount?: number;
 };
 
 export function LmsBottomDock<TSection extends string>({
@@ -19,80 +25,97 @@ export function LmsBottomDock<TSection extends string>({
   items: Array<LmsMobileDockItem<TSection>>;
   onNavigate: (path: string) => void;
 }) {
-  const dockItemCount = Math.max(items.length, 1);
-
   return (
-    <nav
+    <Box
       aria-label="Điều hướng LMS mobile"
-      className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] xl:hidden"
+      component="nav"
+      sx={{
+        bottom: 0,
+        display: { xs: "block", xl: "none" },
+        left: 0,
+        px: 1.5,
+        pb: "calc(env(safe-area-inset-bottom, 0px) + 8px)",
+        position: "fixed",
+        right: 0,
+        zIndex: (theme) => theme.zIndex.appBar,
+      }}
     >
-      <div className="mx-auto max-w-[430px] rounded-[26px] border border-[#eef3f8] bg-white px-2.5 py-2.5 shadow-[0_18px_40px_rgba(15,23,42,0.16),0_1px_0_rgba(255,255,255,0.96)_inset]">
-        <div className="grid h-[68px] items-stretch" style={{ gridTemplateColumns: `repeat(${dockItemCount}, minmax(0, 1fr))` }}>
-          {items.map((item) => (
-            <DockButton
-              key={item.id}
-              active={activeSection === item.id}
-              badgeCount={item.badgeCount}
-              icon={item.icon}
-              label={item.label}
-              onClick={() => onNavigate(item.path)}
-            />
-          ))}
-        </div>
-      </div>
-    </nav>
+      <Paper
+        sx={{
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: "26px",
+          boxShadow: "0 18px 40px rgba(15,23,42,0.16)",
+          display: "grid",
+          gridTemplateColumns: `repeat(${Math.max(items.length, 1)}, minmax(0, 1fr))`,
+          height: 88,
+          mx: "auto",
+          maxWidth: 430,
+          p: 1.25,
+        }}
+      >
+        {items.map((item) => (
+          <DockButton
+            active={activeSection === item.id}
+            badgeCount={item.badgeCount}
+            icon={item.icon}
+            key={item.id}
+            label={item.label}
+            onClick={() => onNavigate(item.path)}
+          />
+        ))}
+      </Paper>
+    </Box>
   );
 }
 
-function DockButton({
-  active,
-  ariaLabel,
-  badgeCount,
-  icon: Icon,
-  label,
-  onClick,
-}: {
+function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
   active: boolean;
-  ariaLabel?: string;
   badgeCount?: number;
-  icon: LucideIcon;
+  icon: LmsMobileDockIcon;
   label: string;
   onClick: () => void;
 }) {
   return (
-    <button
-      type="button"
+    <ButtonBase
       aria-current={active ? "page" : undefined}
-      aria-label={ariaLabel ?? label}
-      className={cn(
-        "group relative flex min-h-14 min-w-0 flex-col items-center justify-center gap-1 rounded-[20px] text-center",
-        "transition-all duration-200 ease-out active:scale-[0.97]",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0f6cbd]/25",
-        active ? "bg-[#f0f7ff] text-[#0f6cbd]" : "text-[#6b7280] hover:bg-[#f6f9fc] hover:text-slate-900",
-      )}
+      aria-label={label}
       onClick={onClick}
+      sx={{
+        borderRadius: "20px",
+        color: active ? "primary.main" : "text.secondary",
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.5,
+        minHeight: 56,
+        minWidth: 0,
+        "&:active": { transform: "scale(0.97)" },
+        "&:hover": { bgcolor: active ? ergEnterpriseTokens.color.primarySofter : "action.hover" },
+      }}
     >
-      <span
-        className={cn(
-          "relative grid h-8 w-8 place-items-center rounded-full transition-colors duration-200",
-          active ? "bg-[#0f6cbd] text-white shadow-[0_8px_18px_rgba(15,108,189,0.24)]" : "bg-transparent text-[#202327] group-hover:text-[#0f6cbd]",
-        )}
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: active ? "primary.main" : "transparent",
+          borderRadius: "50%",
+          color: active ? "primary.contrastText" : "text.primary",
+          display: "flex",
+          height: 32,
+          justifyContent: "center",
+          position: "relative",
+          width: 32,
+        }}
       >
-        <Icon className="h-5 w-5" strokeWidth={active ? 2.35 : 2.1} />
+        <Icon sx={{ fontSize: 20 }} />
         {badgeCount ? (
-          <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#d13438] px-1 text-[10px] font-black leading-none text-white ring-2 ring-white">
+          <Box sx={{ alignItems: "center", bgcolor: "error.main", border: "2px solid", borderColor: "background.paper", borderRadius: 8, color: "error.contrastText", display: "flex", fontSize: 10, fontWeight: 800, justifyContent: "center", minHeight: 18, minWidth: 18, px: 0.25, position: "absolute", right: -6, top: -6 }}>
             {badgeCount > 9 ? "9+" : badgeCount}
-          </span>
+          </Box>
         ) : null}
-      </span>
-      <span
-        className={cn(
-          "block max-w-full truncate px-0.5 text-[11px] font-extrabold leading-none tracking-normal",
-          active ? "text-[#0f6cbd]" : "text-[#737984]",
-        )}
-      >
+      </Box>
+      <Typography color="inherit" noWrap sx={{ fontSize: 11, fontWeight: 800, lineHeight: 1, maxWidth: "100%", px: 0.25 }}>
         {label}
-      </span>
-    </button>
+      </Typography>
+    </ButtonBase>
   );
 }
