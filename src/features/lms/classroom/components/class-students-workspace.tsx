@@ -6,8 +6,8 @@ import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import {
   assignmentRuns,
   classroomSnapshots,
@@ -20,7 +20,8 @@ import {
   mapClassWorkspaceToStudents,
   type LmsClassWorkspace,
 } from "@/features/lms/api/lms-graphql-api";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
@@ -43,6 +44,15 @@ import {
   getInitialBatches,
   getStudentAssignmentSubject,
 } from "./class-students-workspace.utils";
+
+export function resolveClassStudentsWorkspaceStudents(
+  workspaceStudents: ClassroomStudent[],
+  fallbackStudents: ClassroomStudent[],
+  apiBacked: boolean,
+): ClassroomStudent[] {
+  if (apiBacked) return workspaceStudents;
+  return workspaceStudents.length ? workspaceStudents : fallbackStudents;
+}
 
 export function ClassStudentsWorkspace({
   activeLeaf,
@@ -79,7 +89,11 @@ export function ClassStudentsWorkspace({
   const paceStateUpdate = usePacedStateBatch();
   const apiBacked = hasApiBase();
   const classWorkspaceQuery = useQuery({
-    queryKey: ["lms", "class-students-workspace", "class-workspace", selectedSchoolId, selectedClassId],
+    queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
+      classId: selectedClassId,
+      schoolId: selectedSchoolId,
+      usage: "class-students-workspace",
+    }),
     queryFn: () =>
       loadLmsClassWorkspace({
         assignmentPage: 0,
@@ -121,8 +135,8 @@ export function ClassStudentsWorkspace({
     [classWorkspaceQuery.data, selectedClass],
   );
   const schoolStudents = useMemo(
-    () => (workspaceStudents.length ? workspaceStudents : fallbackSchoolStudents),
-    [fallbackSchoolStudents, workspaceStudents],
+    () => resolveClassStudentsWorkspaceStudents(workspaceStudents, fallbackSchoolStudents, apiBacked),
+    [apiBacked, fallbackSchoolStudents, workspaceStudents],
   );
 
   const visibleStudents = useMemo(() => {
@@ -270,7 +284,7 @@ export function ClassStudentsWorkspace({
       description={copy.description}
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
-        <Button variant="outline" onClick={() => onOpenLeaf("class-reports")}>
+        <Button variant="outlined" onClick={() => onOpenLeaf("class-reports")}>
           {copy.openReports}
         </Button>
       }
@@ -280,7 +294,7 @@ export function ClassStudentsWorkspace({
           title={copy.listTitle}
           description={copy.listDescription(visibleStudents.length, supportCount)}
           action={
-            <Button size="sm" variant="outline" onClick={selectSupportStudents} disabled={supportCount === 0}>
+            <Button size="small" variant="outlined" onClick={selectSupportStudents} disabled={supportCount === 0}>
               {copy.selectSupport}
             </Button>
           }
@@ -288,8 +302,10 @@ export function ClassStudentsWorkspace({
           <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_150px_150px_150px]">
             <div className="relative">
               <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-              <Input
-                className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-10 text-[14px] font-semibold"
+              <TextField
+                size="small"
+                fullWidth
+                sx={{ "& .MuiInputBase-input": { pl: "1.75rem" } }}
                 onChange={(event) => setSearchValue(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 value={searchValue}

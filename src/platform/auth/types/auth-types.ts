@@ -1,3 +1,5 @@
+import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
+
 export type AccountRole = "teacher" | "coordinator" | "admin";
 export type AuthProvider = "password" | "google" | "apple";
 
@@ -5,7 +7,6 @@ export type TeacherAccount = {
   id: string;
   fullName: string;
   email: string;
-  password: string;
   phone?: string;
   avatarUrl?: string;
   bio?: string;
@@ -14,6 +15,7 @@ export type TeacherAccount = {
   department: string;
   title: string;
   features: string[];
+  lifecycle?: TeacherAccountLifecycle;
   isProfileCompleted?: boolean;
   status?: string;
   createdAt: string;

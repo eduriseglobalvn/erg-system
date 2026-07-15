@@ -1,12 +1,11 @@
 "use client"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { useState } from "react"
+
+import Divider from "@mui/material/Divider"
+import ListItemIcon from "@mui/material/ListItemIcon"
+import Menu from "@mui/material/Menu"
+import MenuItem from "@mui/material/MenuItem"
 import { useI18n } from "@/platform/i18n"
 import {
   SidebarGroup,
@@ -39,6 +38,8 @@ export function NavProjects({
 }) {
   const { isMobile } = useSidebar()
   const { t } = useI18n()
+  const [menuState, setMenuState] = useState<{ anchorEl: HTMLElement; leafId: string } | null>(null)
+  const closeMenu = () => setMenuState(null)
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -52,38 +53,44 @@ export function NavProjects({
                 <span>{item.name}</span>
               </button>
             </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction
-                  showOnHover
-                  className="text-slate-500 hover:bg-white hover:text-[var(--erg-blue)] aria-expanded:bg-white aria-expanded:text-[var(--erg-blue)] aria-expanded:shadow-sm"
-                >
-                  <MoreHorizIcon />
-                  <span className="sr-only">{t("common.more")}</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-48 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem>
-                  <FolderIcon className="text-slate-500" fontSize="inherit" />
-                  <span>{t("common.viewProject")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <ArrowForwardIcon className="text-slate-500" fontSize="inherit" />
-                  <span>{t("common.shareProject")}</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <DeleteOutlinedIcon className="text-slate-500" fontSize="inherit" />
-                  <span>{t("common.deleteProject")}</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <SidebarMenuAction
+              showOnHover
+              onClick={(event) => setMenuState({ anchorEl: event.currentTarget, leafId: item.leafId })}
+              className="text-slate-500 hover:bg-white hover:text-[var(--erg-blue)] aria-expanded:bg-white aria-expanded:text-[var(--erg-blue)] aria-expanded:shadow-sm"
+            >
+              <MoreHorizIcon />
+              <span className="sr-only">{t("common.more")}</span>
+            </SidebarMenuAction>
           </SidebarMenuItem>
         ))}
+        <Menu
+          anchorEl={menuState?.anchorEl ?? null}
+          open={Boolean(menuState)}
+          onClose={closeMenu}
+          anchorOrigin={{ vertical: "top", horizontal: isMobile ? "right" : "left" }}
+          transformOrigin={{ vertical: "top", horizontal: isMobile ? "right" : "left" }}
+          slotProps={{ paper: { sx: { width: 192, borderRadius: 2 } } }}
+        >
+          <MenuItem onClick={closeMenu}>
+            <ListItemIcon>
+              <FolderIcon className="text-slate-500" fontSize="inherit" />
+            </ListItemIcon>
+            <span>{t("common.viewProject")}</span>
+          </MenuItem>
+          <MenuItem onClick={closeMenu}>
+            <ListItemIcon>
+              <ArrowForwardIcon className="text-slate-500" fontSize="inherit" />
+            </ListItemIcon>
+            <span>{t("common.shareProject")}</span>
+          </MenuItem>
+          <Divider />
+          <MenuItem onClick={closeMenu}>
+            <ListItemIcon>
+              <DeleteOutlinedIcon className="text-slate-500" fontSize="inherit" />
+            </ListItemIcon>
+            <span>{t("common.deleteProject")}</span>
+          </MenuItem>
+        </Menu>
         <SidebarMenuItem>
             <SidebarMenuButton className="text-slate-500 hover:text-[var(--erg-blue)]">
               <MoreHorizIcon className="text-slate-500" fontSize="inherit" />

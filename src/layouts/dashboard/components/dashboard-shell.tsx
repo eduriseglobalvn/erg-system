@@ -30,6 +30,7 @@ import type { ContentScope, DashboardUserPermissions, ManagementScope } from "@/
 
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { createPersistedStore } from "@/stores/persisted-store";
 
@@ -70,9 +71,10 @@ function scopesEqual(left: ManagementScope | null | undefined, right: Management
 }
 
 export function DashboardShell() {
-  const { actions: authActions } = useAuthSession();
+  const { actions: authActions, account } = useAuthSession();
   const { t } = useI18n();
   const apiBacked = hasApiBase();
+  const tenantId = getDefaultTenantId();
   const storedContext = useMemo(() => readStoredDashboardContext(), []);
   const [createdSchools, setCreatedSchools] = useState<ClassroomSchool[]>([]);
   const [createdCenterIds, setCreatedCenterIds] = useState<string[]>([]);
@@ -80,7 +82,7 @@ export function DashboardShell() {
     storedContext.managementScope ?? (apiBacked ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
   );
   const bootstrapQuery = useQuery({
-    queryKey: queryKeys.dashboard.bootstrap(),
+    queryKey: queryKeys.dashboard.bootstrap("lms", tenantId, account?.id),
     queryFn: loadLmsDashboardBootstrap,
     enabled: apiBacked,
     staleTime: 5 * 60_000,
@@ -92,6 +94,9 @@ export function DashboardShell() {
     () => bootstrapData?.permissions ?? {
       canAccessGlobalErg: !apiBacked,
       assignedCenterIds: apiBacked ? [] : classroomSchools.map((school) => school.id),
+      roles: apiBacked ? [] : ["teacher", "lms_teacher_standard"],
+      grantedPermissions: apiBacked ? [] : ["lms.*", "account.self.*"],
+      deniedPermissions: [],
     },
     [apiBacked, bootstrapData?.permissions],
   );

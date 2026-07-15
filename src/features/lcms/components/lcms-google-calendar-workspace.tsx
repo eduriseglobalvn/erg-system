@@ -1,20 +1,24 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Stack from "@mui/material/Stack";
 
 import {
-  CenterUpCalendarWorkspace,
-  type CenterUpCalendarEvent,
-  type CenterUpCalendarLaneSummary,
-  type CenterUpCalendarResolvedTone,
-  type CenterUpCalendarVisibleRange,
-  type CenterUpScheduleCatalog,
-  type CenterUpScheduleDraft,
-} from "@/components/shared/centerup-calendar-workspace";
-import type { MenuItem as CenterupMenuItem } from "@/components/portal/CenterUpLayout";
+  ErgCalendarWorkspace,
+  type ErgCalendarEvent,
+  type ErgCalendarLaneSummary,
+  type ErgCalendarResolvedTone,
+  type ErgCalendarVisibleRange,
+  type ErgScheduleCatalog,
+  type ErgScheduleDraft,
+} from "@/components/shared/erg-calendar-workspace";
+import type { MenuItem as ErgMenuItem } from "@/components/portal/ErgPortalLayout";
 import {
   createTeachingSchedule,
+  createTeachingScheduleRoom,
+  deleteTeachingScheduleEvent,
+  deleteTeacherSchedule,
   loadLcmsTeachingCalendarWorkspace,
   loadTeachingCalendarReferenceCatalog,
   mapScheduleDraftToBulkInput,
@@ -22,16 +26,23 @@ import {
   mapTeachingCalendarEvents,
   mergeTeachingCalendarCatalog,
   previewTeachingSchedule,
+  publishTeachingScheduleBatch,
+  teachingCalendarQueryKeys,
   TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
   TEACHING_CALENDAR_WORKSPACE_STALE_TIME_MS,
-  workspaceInputKey,
   type TeachingCalendarViewMode,
   type TeachingCalendarWorkspaceInput,
+  updateTeachingScheduleEvent,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
+import { createInitialCalendarRange } from "@/features/teaching-calendar/components/calendar-date-range";
+import { TeachingCalendarEventActions } from "@/features/teaching-calendar/components/teaching-calendar-event-actions";
+import { DeleteTeacherScheduleDialog } from "@/features/teaching-calendar/components/delete-teacher-schedule-dialog";
+import { TeachingScheduleBatchPanel } from "@/features/teaching-calendar/components/teaching-schedule-batch-panel";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 
 const lcmsCalendarLanes = ["Lịch theo trường", "Lịch theo giáo viên"];
 
-const schoolTones: CenterUpCalendarResolvedTone[] = [
+const schoolTones: ErgCalendarResolvedTone[] = [
   { background: "#D3E3FD", border: "#1A73E8", text: "#174EA6" },
   { background: "#CEEAD6", border: "#188038", text: "#137333" },
   { background: "#FAD2CF", border: "#D93025", text: "#B3261E" },
@@ -39,7 +50,7 @@ const schoolTones: CenterUpCalendarResolvedTone[] = [
   { background: "#FEEFC3", border: "#E37400", text: "#B06000" },
 ];
 
-const teacherTones: CenterUpCalendarResolvedTone[] = [
+const teacherTones: ErgCalendarResolvedTone[] = [
   { background: "#E8F2FF", border: "#0B5CAD", text: "#094C91" },
   { background: "#EAF7EF", border: "#167242", text: "#116136" },
   { background: "#FFF2E2", border: "#B06000", text: "#8A4600" },
@@ -48,7 +59,7 @@ const teacherTones: CenterUpCalendarResolvedTone[] = [
   { background: "#FFECEC", border: "#D93025", text: "#9A1D13" },
 ];
 
-const emptyScheduleCatalog: CenterUpScheduleCatalog = {
+const emptyScheduleCatalog: ErgScheduleCatalog = {
   assistantTeachers: [],
   classes: [],
   levels: [],
@@ -61,16 +72,19 @@ const emptyScheduleCatalog: CenterUpScheduleCatalog = {
 export default function LcmsGoogleCalendarWorkspace({
   activeItem: _activeItem,
 }: {
-  activeItem: CenterupMenuItem | null;
+  activeItem: ErgMenuItem | null;
 }) {
   const queryClient = useQueryClient();
-  const [visibleRange, setVisibleRange] = useState<CenterUpCalendarVisibleRange>(() => ({
-    activeLane: "Tất cả",
-    from: "2026-06-01",
+  const { session } = useAuthSession("lcms");
+  const tenantId = session?.tenantId ?? "";
+  const [initialRange] = useState(() => createInitialCalendarRange("month"));
+  const [visibleRange, setVisibleRange] = useState<ErgCalendarVisibleRange>(() => ({
+    activeLane: "Táº¥t cáº£",
+    from: initialRange.from,
     mode: "month",
     selectedScopeId: "",
     selectedScopeLabel: "",
-    to: "2026-06-30",
+    to: initialRange.to,
   }));
 
   const workspaceInput = useMemo<TeachingCalendarWorkspaceInput>(() => ({
@@ -78,16 +92,18 @@ export default function LcmsGoogleCalendarWorkspace({
     schoolIds: visibleRange.activeLane === lcmsCalendarLanes[0] && visibleRange.selectedScopeId ? [visibleRange.selectedScopeId] : undefined,
     statuses: ["DRAFT", "PUBLISHED"],
     teacherIds: visibleRange.activeLane === lcmsCalendarLanes[1] && visibleRange.selectedScopeId ? [visibleRange.selectedScopeId] : undefined,
+    tenantId,
     to: visibleRange.to,
     viewMode: mapLcmsLaneToViewMode(visibleRange.activeLane),
-  }), [visibleRange.activeLane, visibleRange.from, visibleRange.selectedScopeId, visibleRange.to]);
+  }), [tenantId, visibleRange.activeLane, visibleRange.from, visibleRange.selectedScopeId, visibleRange.to]);
 
   const workspaceQueryKey = useMemo(
-    () => ["teaching-calendar", "lcms", "workspace", ...workspaceInputKey(workspaceInput)] as const,
+    () => teachingCalendarQueryKeys.workspace("lcms", "workspace", workspaceInput),
     [workspaceInput],
   );
 
   const workspaceQuery = useQuery({
+    enabled: Boolean(tenantId),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
     queryFn: () => loadLcmsTeachingCalendarWorkspace(workspaceInput),
     queryKey: workspaceQueryKey,
@@ -99,9 +115,10 @@ export default function LcmsGoogleCalendarWorkspace({
   });
 
   const referenceCatalogQuery = useQuery({
+    enabled: Boolean(tenantId),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
     queryFn: () => loadTeachingCalendarReferenceCatalog("lcms"),
-    queryKey: ["teaching-calendar", "lcms", "reference-catalog"],
+    queryKey: teachingCalendarQueryKeys.referenceCatalog("lcms", tenantId),
     refetchOnMount: false,
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
@@ -122,7 +139,7 @@ export default function LcmsGoogleCalendarWorkspace({
       schools: referenceCatalogQuery.data.schools,
     };
   }, [apiCatalog, referenceCatalogQuery.data]);
-  const [stableScheduleCatalog, setStableScheduleCatalog] = useState<CenterUpScheduleCatalog | undefined>();
+  const [stableScheduleCatalog, setStableScheduleCatalog] = useState<ErgScheduleCatalog | undefined>();
 
   useEffect(() => {
     if (scheduleCatalog) {
@@ -131,17 +148,49 @@ export default function LcmsGoogleCalendarWorkspace({
   }, [scheduleCatalog]);
 
   const calendarCatalog = scheduleCatalog ?? stableScheduleCatalog ?? emptyScheduleCatalog;
-  const canCreateSchedule = workspaceQuery.data?.permissions?.canCreate !== false;
+  const canCreateSchedule = workspaceQuery.data?.permissions?.canCreate === true;
   const createScheduleMutation = useMutation({
-    mutationFn: (draft: CenterUpScheduleDraft) => createTeachingSchedule(mapScheduleDraftToBulkInput(draft), "lcms"),
+    mutationFn: (draft: ErgScheduleDraft) => createTeachingSchedule(mapScheduleDraftToBulkInput(draft, { tenantId }), "lcms"),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["teaching-calendar", "lcms"] });
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    },
+  });
+  const createRoomMutation = useMutation({
+    mutationFn: (input: { roomName: string; schoolId: string }) => createTeachingScheduleRoom({ ...input, tenantId }, "lcms"),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
     },
   });
   const previewScheduleMutation = useMutation({
-    mutationFn: (draft: CenterUpScheduleDraft) => previewTeachingSchedule(mapScheduleDraftToBulkInput({ ...draft, resolveMode: "REJECT" }), "lcms"),
+    mutationFn: (draft: ErgScheduleDraft) => previewTeachingSchedule(mapScheduleDraftToBulkInput({ ...draft, resolveMode: "REJECT" }, { tenantId }), "lcms"),
   });
-  const handleVisibleRangeChange = useCallback((nextRange: CenterUpCalendarVisibleRange) => {
+  const publishScheduleMutation = useMutation({
+    mutationFn: (batchId: string) => publishTeachingScheduleBatch(batchId, tenantId),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    },
+  });
+  const updateEventMutation = useMutation({
+    mutationFn: ({ event, update }: { event: ErgCalendarEvent; update: { note?: string; roomId?: string; roomName?: string } }) =>
+      updateTeachingScheduleEvent({ eventId: event.id, tenantId, ...update }, "lcms"),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    },
+  });
+  const deleteEventMutation = useMutation({
+    mutationFn: (event: ErgCalendarEvent) => deleteTeachingScheduleEvent({ eventId: event.id, tenantId }, "lcms"),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    },
+  });
+  const deleteTeacherScheduleMutation = useMutation({
+    mutationFn: (input: { dateFrom?: string; dateTo?: string; schoolIds?: string[]; teacherUserId: string }) =>
+      deleteTeacherSchedule({ ...input, tenantId }, "lcms"),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    },
+  });
+  const handleVisibleRangeChange = useCallback((nextRange: ErgCalendarVisibleRange) => {
     setVisibleRange((current) => (
       current.activeLane === nextRange.activeLane &&
       current.from === nextRange.from &&
@@ -155,25 +204,48 @@ export default function LcmsGoogleCalendarWorkspace({
   }, []);
 
   return (
-    <CenterUpCalendarWorkspace
+    <Stack spacing={2}>
+      <TeachingScheduleBatchPanel permissions={workspaceQuery.data?.permissions} tenantId={tenantId} />
+      {workspaceQuery.data?.permissions?.canDelete ? (
+        <DeleteTeacherScheduleDialog
+          onDelete={(input) => deleteTeacherScheduleMutation.mutateAsync(input)}
+          schools={calendarCatalog.schools}
+          teachers={calendarCatalog.teachers}
+        />
+      ) : null}
+      <ErgCalendarWorkspace
       calendarListTitle="Danh sách trường"
       createButtonLabel="Tạo lịch giảng dạy"
       emptyDayLabel="Không có lịch dạy trong ngày này."
       events={events}
       filterEventsByLane={false}
       filterEventsByScope={false}
-      initialDate="2026-06-12"
+      errorMessage={workspaceQuery.error instanceof Error ? workspaceQuery.error.message : referenceCatalogQuery.error instanceof Error ? referenceCatalogQuery.error.message : undefined}
+      initialDate={initialRange.initialDate}
       initialMode="month"
-      isLoading={workspaceQuery.isFetching || referenceCatalogQuery.isFetching || createScheduleMutation.isPending || previewScheduleMutation.isPending}
+      isLoading={!tenantId || workspaceQuery.isPending || referenceCatalogQuery.isPending || createScheduleMutation.isPending || previewScheduleMutation.isPending || publishScheduleMutation.isPending}
       lanes={lcmsCalendarLanes}
       monthCountLabel="lịch dạy"
       monthCountOverride={workspaceQuery.data?.events.length}
       onCreateSchedule={async (draft) => {
-        await createScheduleMutation.mutateAsync(draft);
+        return createScheduleMutation.mutateAsync(draft);
+      }}
+      onCreateRoom={(input) => createRoomMutation.mutateAsync(input)}
+      onPublishScheduleBatch={async (batchId) => {
+        await publishScheduleMutation.mutateAsync(batchId);
       }}
       onPreviewSchedule={(draft) => previewScheduleMutation.mutateAsync(draft)}
+      onRetry={() => void Promise.all([workspaceQuery.refetch(), referenceCatalogQuery.refetch()])}
       onVisibleRangeChange={handleVisibleRangeChange}
       permissions={workspaceQuery.data?.permissions}
+      renderEventActions={(event) => (
+        <TeachingCalendarEventActions
+          event={event}
+          onDelete={(selectedEvent) => deleteEventMutation.mutateAsync(selectedEvent).then(() => undefined)}
+          onUpdate={(selectedEvent, update) => updateEventMutation.mutateAsync({ event: selectedEvent, update }).then(() => undefined)}
+          permissions={workspaceQuery.data?.permissions}
+        />
+      )}
       resolveCalendarListTitle={resolveLcmsCalendarListTitle}
       resolveEventScopeLabel={resolveLcmsEventScopeLabel}
       resolveEventSummaryLabel={resolveLcmsEventSummaryLabel}
@@ -183,8 +255,9 @@ export default function LcmsGoogleCalendarWorkspace({
       resolveScopeSelectLabel={resolveLcmsScopeSelectLabel}
       scheduleCatalog={calendarCatalog}
       showCreateButton={canCreateSchedule}
-      todayDate="2026-06-13"
-    />
+      todayDate={initialRange.initialDate}
+      />
+    </Stack>
   );
 }
 
@@ -205,24 +278,24 @@ function resolveLcmsScopeSelectLabel(activeLane: string) {
   return activeLane;
 }
 
-function resolveLcmsEventScopeLabel(event: CenterUpCalendarEvent, activeLane: string) {
+function resolveLcmsEventScopeLabel(event: ErgCalendarEvent, activeLane: string) {
   if (activeLane === lcmsCalendarLanes[0]) return getEventSchool(event);
   if (activeLane === lcmsCalendarLanes[1]) return getEventTeacher(event);
   return getEventSchool(event);
 }
 
-function resolveLcmsEventSummaryLabel(event: CenterUpCalendarEvent, activeLane: string) {
+function resolveLcmsEventSummaryLabel(event: ErgCalendarEvent, activeLane: string) {
   if (activeLane === lcmsCalendarLanes[0]) return getEventTeacher(event);
   if (activeLane === lcmsCalendarLanes[1]) return getEventSchool(event);
   return getEventSchool(event);
 }
 
-function resolveLcmsEventTone(event: CenterUpCalendarEvent, activeLane: string) {
+function resolveLcmsEventTone(event: ErgCalendarEvent, activeLane: string) {
   if (activeLane === lcmsCalendarLanes[0]) return getTeacherTone(getEventTeacher(event));
   return getSchoolTone(getEventSchool(event));
 }
 
-function resolveLcmsLaneScopeOptions(activeLane: string, events: CenterUpCalendarEvent[], catalog: CenterUpScheduleCatalog): CenterUpCalendarLaneSummary[] {
+function resolveLcmsLaneScopeOptions(activeLane: string, events: ErgCalendarEvent[], catalog: ErgScheduleCatalog): ErgCalendarLaneSummary[] {
   if (activeLane === lcmsCalendarLanes[0]) {
     return buildEntitySummaries(getSchoolLabels(catalog, events), events, getEventSchool, getSchoolTone);
   }
@@ -234,7 +307,7 @@ function resolveLcmsLaneScopeOptions(activeLane: string, events: CenterUpCalenda
   return buildEntitySummaries(getSchoolLabels(catalog, events), events, getEventSchool, getSchoolTone);
 }
 
-function resolveLcmsLaneSummaries(activeLane: string, events: CenterUpCalendarEvent[], catalog: CenterUpScheduleCatalog): CenterUpCalendarLaneSummary[] {
+function resolveLcmsLaneSummaries(activeLane: string, events: ErgCalendarEvent[], catalog: ErgScheduleCatalog): ErgCalendarLaneSummary[] {
   if (activeLane === lcmsCalendarLanes[0]) {
     return buildEntitySummaries(getTeacherLabels(catalog, events), events, getEventTeacher, getTeacherTone);
   }
@@ -242,13 +315,13 @@ function resolveLcmsLaneSummaries(activeLane: string, events: CenterUpCalendarEv
   return buildEntitySummaries(getSchoolLabels(catalog, events), events, getEventSchool, getSchoolTone);
 }
 
-function getSchoolLabels(catalog: CenterUpScheduleCatalog, events: CenterUpCalendarEvent[]) {
+function getSchoolLabels(catalog: ErgScheduleCatalog, events: ErgCalendarEvent[]) {
   const catalogLabels = catalog.schools.map((school) => ({ id: school.id, label: school.name })).filter((school) => school.label);
   if (catalogLabels.length) return catalogLabels;
   return Array.from(new Set(events.map(getEventSchool))).map((label) => ({ id: label, label }));
 }
 
-function getTeacherLabels(catalog: CenterUpScheduleCatalog, events: CenterUpCalendarEvent[]) {
+function getTeacherLabels(catalog: ErgScheduleCatalog, events: ErgCalendarEvent[]) {
   const catalogTeachers = catalog.teachers ?? [];
   const catalogAssistantTeachers = catalog.assistantTeachers ?? [];
   const teachers = catalogTeachers.length ? catalogTeachers : catalogAssistantTeachers;
@@ -259,9 +332,9 @@ function getTeacherLabels(catalog: CenterUpScheduleCatalog, events: CenterUpCale
 
 function buildEntitySummaries(
   options: Array<{ id: string; label: string }>,
-  events: CenterUpCalendarEvent[],
-  resolveLabel: (event: CenterUpCalendarEvent) => string,
-  resolveTone: (label: string) => CenterUpCalendarResolvedTone,
+  events: ErgCalendarEvent[],
+  resolveLabel: (event: ErgCalendarEvent) => string,
+  resolveTone: (label: string) => ErgCalendarResolvedTone,
 ) {
   return options.filter((option, index, source) => option.label && source.findIndex((item) => item.id === option.id) === index).map((option) => ({
     color: resolveTone(option.label).border,
@@ -271,11 +344,11 @@ function buildEntitySummaries(
   }));
 }
 
-function getEventSchool(event: CenterUpCalendarEvent) {
+function getEventSchool(event: ErgCalendarEvent) {
   return event.school?.trim() || "Chưa xác định";
 }
 
-function getEventTeacher(event: CenterUpCalendarEvent) {
+function getEventTeacher(event: ErgCalendarEvent) {
   return event.teacher?.trim() || "Chưa phân công";
 }
 
@@ -287,7 +360,7 @@ function getTeacherTone(teacherName = "Chưa phân công") {
   return getStableTone(teacherName, teacherTones);
 }
 
-function getStableTone(value: string, tones: CenterUpCalendarResolvedTone[]) {
+function getStableTone(value: string, tones: ErgCalendarResolvedTone[]) {
   const hash = Array.from(value).reduce((total, char) => total + char.charCodeAt(0), 0);
   return tones[hash % tones.length];
 }

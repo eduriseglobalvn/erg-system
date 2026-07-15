@@ -3,9 +3,10 @@ import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import {
   createBrowserHistory,
   createHashHistory,
-  createRootRoute,
+  createRootRouteWithContext,
   createRoute,
   createRouter,
+  redirect,
 } from "@tanstack/react-router";
 
 import {
@@ -19,44 +20,39 @@ import {
   LMS_PORTAL_HOSTS,
   shouldRedirectLocalPortal,
 } from "@/config/portal-urls";
+import { crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
 import { shouldUseHashRouter } from "@/lib/platform";
 import { AuthenticatedAccountGate, PortalAuthGate, PortalLoginPage } from "@/platform/auth/components/portal-auth-gates";
 import { RootLayout } from "@/layouts/root-layout";
 import { Navigate } from "@/routes/router-compat";
+import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permissions/lms-permission-catalog";
+import { resolveAuthRouteAccess, type AuthRouteState } from "@/platform/auth/router/auth-route-context";
 
-const DashboardPage = lazy(() =>
-  import("@/pages/dashboard-page").then((module) => ({
-    default: module.DashboardPage,
-  })),
-);
+export type AppRouterContext = {
+  auth: AuthRouteState;
+};
+
+const DashboardPage = lazy(() => import("@/app/pages/lms/lms-page"));
 const CrmPage = lazy(() =>
-  import("@/pages/crm-page").then((module) => ({
+  import("@/app/pages/crm/crm-page").then((module) => ({
     default: module.CrmPage,
   })),
 );
-const LcmsPage = lazy(() =>
-  import("@/features/lcms").then((module) => ({
-    default: module.LcmsCenterupShell ?? module.LcmsPortalShell,
-  })),
-);
+const LcmsPage = lazy(() => import("@/app/pages/lcms/lcms-page"));
 const ProfilePage = lazy(() =>
-  import("@/pages/profile-page").then((module) => ({
+  import("@/app/pages/shared/profile-page").then((module) => ({
     default: module.ProfilePage,
   })),
 );
-const StudentPage = lazy(() =>
-  import("@/pages/student-page").then((module) => ({
-    default: module.StudentPage,
-  })),
-);
+const StudentPage = lazy(() => import("@/app/pages/elearning/elearning-page"));
 const QuestionTypeDemoPage = lazy(() =>
-  import("@/pages/question-type-demo-page").then((module) => ({
+  import("@/app/pages/shared/question-type-demo-page").then((module) => ({
     default: module.QuestionTypeDemoPage,
   })),
 );
 
 const NotFoundPage = lazy(() =>
-  import("@/pages/not-found-page").then((module) => ({
+  import("@/app/pages/shared/not-found-page").then((module) => ({
     default: module.NotFoundPage,
   })),
 );
@@ -65,6 +61,7 @@ const AccessDeniedPage = lazy(() =>
     default: module.AccessDeniedPage,
   })),
 );
+const TeacherOnboardingPage = lazy(() => import("@/app/pages/auth/teacher-onboarding-page"));
 
 function isLcmsPortalHost() {
   return isPortalHost(LCMS_PORTAL_HOSTS);
@@ -119,93 +116,6 @@ function pathStarts(path: string, prefix: string) {
   return path === prefix || path.startsWith(`${prefix}/`);
 }
 
-const lcmsWorkspacePaths = [
-  "schools",
-  "users",
-  "questions",
-  "quiz-bank",
-  "quiz-editor",
-  "assignments",
-  "rubrics",
-  "session-templates",
-  "report-templates",
-  "legal",
-  "settings",
-  // CenterUp-style LCMS pages — đảm bảo không trùng với LMS redirect routes
-  "courses",
-  "sessions",
-  "customers",
-  "center-tasks",
-  "students/list-center-student",
-  "students/list-student-course",
-  "students/list-class-enroll",
-  "students/list-student-session",
-  "students/list-student-assignment",
-  "students/student-absence",
-  "employees",
-  "employees/face-detection",
-  "employees/timesheet",
-  "employees/teacher-absence",
-  "finance/orders",
-  "finance/product-import-summaries",
-  "finance/incomes",
-  "finance/expenses",
-  "finance/refunds",
-  "finance/center-transactions",
-  "finance/center-transactions/coins",
-  "other/products",
-  "other/partners",
-  "report/dashboard-report",
-  "report/crm-report",
-  "report/student-report",
-  "report/task-report",
-  "report/cash-flow-report",
-  "report/pnl-report",
-  "report/sale-report",
-  "setting/setting-center-feature",
-  "setting/setting-center-role",
-  "setting/promotions/price-discount-programs",
-  "setting/promotions/vouchers",
-  "setting/promotions/discounts",
-  "setting/setting-center-task/task-status",
-  "setting/setting-center-customer/customer-status",
-  "setting/setting-class-room",
-  "setting/setting-calendar-event",
-  "setting/setting-criteria-score",
-  "setting/setting-income-expense",
-  "integration/setting-call-center",
-  "integration/setting-zalo-account",
-  "integration/setting-center-api-key",
-];
-// Các path này đã có route riêng (không thể thêm vào lcmsRoutes vì trùng lặp)
-// LCMS portal sẽ xử lý chúng trong catch-all route
-const crmPaths = [
-  "seo",
-  "seo/schools",
-  "seo/opportunities",
-  "seo/pnl",
-  "seo/follow-ups",
-  "seo/handover",
-];
-
-const lmsPaths = [
-  "home",
-  "dashboard",
-  "homework",
-  "homework/assign",
-  "homework/exercise-bank",
-  "homework/progress",
-  "homework/student-groups",
-  "notifications",
-  "account",
-  "account/login-logs",
-  "score",
-  "attendance",
-  "calendar",
-  "class-log",
-  "reports",
-];
-
 // Declarative host checking component
 function PortalRoute({
   allowedPortals,
@@ -252,7 +162,24 @@ function PortalRoute({
   );
 }
 
-const rootRoute = createRootRoute({ component: RootLayout });
+const rootRoute = createRootRouteWithContext<AppRouterContext>()({ component: RootLayout });
+
+function enforceProtectedRoute(
+  context: AppRouterContext,
+  location: { href: string },
+  portal: string,
+  permission: LmsPermission,
+) {
+  const decision = resolveAuthRouteAccess(context.auth, { portal, permission });
+  if (decision === "allow") return;
+  if (decision === "login") {
+    throw redirect({ to: "/login", search: { redirect: location.href } });
+  }
+  if (decision === "onboarding") {
+    throw redirect({ to: "/onboarding", search: { redirect: location.href } });
+  }
+  throw redirect({ to: "/access-denied", search: { portal, redirect: location.href } });
+}
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -297,6 +224,33 @@ const accessDeniedRoute = createRoute({
   ),
 });
 
+const onboardingRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/onboarding",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirect:
+      typeof search.redirect === "string" && search.redirect.startsWith("/") && !search.redirect.startsWith("//")
+        ? search.redirect
+        : "/home",
+  }),
+  beforeLoad: ({ context, location, search }) => {
+    if (!context.auth.authenticated) {
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+    if (context.auth.lifecycle?.status === "ACTIVE" && context.auth.lifecycle.nextSteps.length === 0) {
+      throw redirect({ href: search.redirect });
+    }
+    if (context.auth.lifecycle?.status === "INACTIVE" || context.auth.lifecycle?.status === "BLOCKED") {
+      throw redirect({ to: "/access-denied" });
+    }
+  },
+  component: () => (
+    <Suspense fallback={<RouteFallback />}>
+      <TeacherOnboardingPage />
+    </Suspense>
+  ),
+});
+
 const profileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile",
@@ -322,6 +276,9 @@ const questionTypesRoute = createRoute({
 const resourcesRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/resources",
+  beforeLoad: ({ context, location }) => {
+    if (isPortalHost(LMS_PORTAL_HOSTS)) enforceProtectedRoute(context, location, "lms", LMS_ROUTE_PERMISSIONS.resources);
+  },
   component: () => (
     <PortalRoute
       allowedPortals={["lcms", "lms"]}
@@ -344,7 +301,7 @@ const lcmsRoutes = lcmsWorkspacePaths.map((wPath) =>
       <PortalRoute
         allowedPortals={["lcms"]}
         element={withPortalAuth("lcms", <LcmsPage />)}
-        // KHÔNG redirect — nếu vào từ LMS/CRM thì show 404
+        // Do not redirect here; requests from LMS/CRM should render 404.
       />
     ),
   })
@@ -367,6 +324,10 @@ const lmsRoutes = lmsPaths.map((lPath) =>
   createRoute({
     getParentRoute: () => rootRoute,
     path: `/${lPath}`,
+    beforeLoad: ({ context, location }) => {
+      if (lPath === "calendar" && isLcmsPortalHost()) return;
+      enforceProtectedRoute(context, location, "lms", LMS_ROUTE_PERMISSIONS[lPath]);
+    },
     component: () => {
       if (lPath === "calendar" && isLcmsPortalHost()) {
         return withPortalAuth("lcms", <LcmsPage />);
@@ -389,7 +350,13 @@ const classesRedirectRoute = createRoute({
   component: () => {
     const isLcms = isPortalHost(LCMS_PORTAL_HOSTS);
     const isElearning = isPortalHost(ELEARNING_PORTAL_HOSTS);
-    if (isLcms) return withPortalAuth("lcms", <LcmsPage />);
+    if (isLcms) {
+      return (
+        <Suspense fallback={<RouteFallback />}>
+          <NotFoundPage />
+        </Suspense>
+      );
+    }
     if (isElearning) return <Navigate to="/" replace />;
     return <Navigate to="/homework" replace />;
   },
@@ -404,6 +371,8 @@ const homeworkClassesRedirectRoute = createRoute({
 const homeworkClassRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/homework/class",
+  beforeLoad: ({ context, location }) =>
+    enforceProtectedRoute(context, location, "lms", LMS_ROUTE_PERMISSIONS["homework/class"]),
   component: () => (
     <PortalRoute
       allowedPortals={["lms"]}
@@ -436,13 +405,13 @@ const catchAllRoute = createRoute({
     const path = stripPath(window.location.pathname);
     const isLms = isPortalHost(LMS_PORTAL_HOSTS);
     if (isLms) {
-      if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "hoclieu")) {
+      if (pathStarts(path, "kho-hoc-lieu")) {
         return <Navigate to="/resources" replace />;
       }
     }
     const isLcms = isLcmsPortalHost();
     if (isLcms) {
-      if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "hoclieu")) {
+      if (pathStarts(path, "kho-hoc-lieu")) {
         return <Navigate to="/resources" replace />;
       }
     }
@@ -453,7 +422,7 @@ const catchAllRoute = createRoute({
       if (path === "dashboard") {
         return <PortalHostRedirect targetHost={LMS_PORTAL_HOST} />;
       }
-      if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "chuong-trinh") || pathStarts(path, "hoclieu")) {
+      if (pathStarts(path, "kho-hoc-lieu") || pathStarts(path, "chuong-trinh")) {
         return <PortalHostRedirect targetHost={LMS_PORTAL_HOST} targetPath="/resources" />;
       }
       if (["cong-dong", "portfolio", "quizzes"].includes(path)) {
@@ -472,6 +441,7 @@ export const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   accessDeniedRoute,
+  onboardingRoute,
   profileRoute,
   questionTypesRoute,
   resourcesRoute,
@@ -493,6 +463,16 @@ export function createAppRouter() {
     defaultPreloadStaleTime: 0,
     history: shouldUseHashRouter() ? createHashHistory() : createBrowserHistory(),
     routeTree,
+    context: {
+      auth: {
+        authenticated: false,
+        lifecycle: null,
+        permissions: [],
+        deniedPermissions: [],
+        portals: [],
+        hasPermission: () => false,
+      },
+    },
   });
 }
 

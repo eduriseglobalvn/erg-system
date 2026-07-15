@@ -14,6 +14,7 @@ import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/te
 import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/learning-resource-dashboard-scope-context";
 import type { LearningResourceTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 
 type LearningResourceLibraryLesson = {
   id: string;
@@ -139,12 +140,27 @@ async function openLibraryResource(resource: LearningResourceResource) {
   return hydratedResource;
 }
 
-function libraryBootstrapQueryKey(schoolId: string, academicYear: string) {
-  return ["learning-resources", "library-bootstrap", schoolId, academicYear] as const;
+type LibraryQueryScope = {
+  accountId?: string | null;
+  academicYear: string;
+  schoolId: string;
+  tenantId?: string | null;
+};
+
+export function libraryBootstrapQueryKey({ academicYear, schoolId, tenantId }: Omit<LibraryQueryScope, "accountId">) {
+  return ["learning-resources", "library-bootstrap", normalizeLibraryTenant(tenantId), schoolId, academicYear] as const;
 }
 
-export function libraryProgressQueryKey(schoolId: string, academicYear: string) {
-  return ["learning-resources", "library-progress", schoolId, academicYear] as const;
+export function libraryProgressQueryKey({ accountId, academicYear, schoolId, tenantId }: LibraryQueryScope) {
+  return ["learning-resources", "library-progress", normalizeLibraryTenant(tenantId), normalizeLibraryAccount(accountId), schoolId, academicYear] as const;
+}
+
+function normalizeLibraryTenant(tenantId: LibraryQueryScope["tenantId"]) {
+  return tenantId?.trim() || getDefaultTenantId();
+}
+
+function normalizeLibraryAccount(accountId: LibraryQueryScope["accountId"]) {
+  return accountId?.trim() || "anonymous";
 }
 
 function progressMap(progress: LearningResourceLibraryProgressDTO | undefined) {
@@ -156,6 +172,9 @@ export function useLearningResourceLibraryCatalog() {
   const scope = useLearningResourceDashboardScope();
   const schoolId = scope?.selectedSchoolId ?? "";
   const academicYear = scope?.academicYear ?? getCurrentAcademicYear();
+  const tenantId = scope?.tenantId ?? getDefaultTenantId();
+  const accountId = scope?.accountId;
+  const libraryScope = useMemo(() => ({ accountId, academicYear, schoolId, tenantId }), [academicYear, accountId, schoolId, tenantId]);
 
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState("");
@@ -165,7 +184,7 @@ export function useLearningResourceLibraryCatalog() {
   const debouncedSearchValue = useDebouncedValue(searchValue);
 
   const libraryQuery = useQuery({
-    queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
+    queryKey: libraryBootstrapQueryKey(libraryScope),
     queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
     enabled: Boolean(schoolId),
     staleTime: 5 * 60_000,
@@ -175,7 +194,7 @@ export function useLearningResourceLibraryCatalog() {
   });
 
   const progressQuery = useQuery({
-    queryKey: libraryProgressQueryKey(schoolId, academicYear),
+    queryKey: libraryProgressQueryKey(libraryScope),
     queryFn: () => loadLearningResourceLibraryProgress({ schoolId, academicYear }),
     enabled: Boolean(schoolId),
     staleTime: 30_000,
@@ -192,11 +211,11 @@ export function useLearningResourceLibraryCatalog() {
     if (!schoolId) return;
 
     void queryClient.prefetchQuery({
-      queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
+      queryKey: libraryBootstrapQueryKey(libraryScope),
       queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
       staleTime: 5 * 60_000,
     });
-  }, [academicYear, queryClient, schoolId]);
+  }, [academicYear, libraryScope, queryClient, schoolId]);
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === effectiveSubjectId) ?? subjects[0] ?? null,
@@ -311,7 +330,7 @@ export function useLearningResourceLibraryCatalog() {
     loading,
     loadingSubject,
     onOpenResource: handleOpenResource,
-    progressQueryKey: libraryProgressQueryKey(schoolId, academicYear),
+    progressQueryKey: libraryProgressQueryKey(libraryScope),
     onSelectLesson: handleSelectLesson,
     onSelectSection: handleSelectSection,
     onSelectSubject: handleSelectSubject,

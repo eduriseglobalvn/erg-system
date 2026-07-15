@@ -6,11 +6,11 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ProgressBar } from "@/components/ui/progress";
-import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
+import LinearProgress from "@mui/material/LinearProgress";
+import Checkbox from "@mui/material/Checkbox";
 import {
   assignmentRuns,
   classroomSchools,
@@ -21,7 +21,7 @@ import {
 import type { AssignmentRun, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 type DeliveryMode = "all" | "selected";
@@ -135,7 +135,7 @@ export function AssessmentControlWorkspace({
             value={subject}
             onChange={setSubject}
           />
-          <Button variant="outline" onClick={() => onOpenLeaf("class-students")}>
+          <Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>
             {copy.backToTracking}
           </Button>
         </>
@@ -162,8 +162,10 @@ export function AssessmentControlWorkspace({
 
               <label className="block">
                 <span className="text-sm font-semibold text-slate-700">{copy.dueDateLabel}</span>
-                <Input
-                  className="mt-2"
+                <TextField
+                  size="small"
+                  fullWidth
+                  sx={{ mt: 1 }}
                   type="datetime-local"
                   value={dueDate}
                   onChange={(event) => setDueDate(event.target.value)}
@@ -219,7 +221,7 @@ export function AssessmentControlWorkspace({
               <div className="text-sm text-slate-500">
                 {copy.deliveryHint(selectedClass?.className ?? "-", school.name)}
               </div>
-              <Button disabled={!canDeliver} onClick={deliverAssignment}>
+              <Button variant="contained" disabled={!canDeliver} onClick={deliverAssignment}>
                 {copy.deliverAction}
               </Button>
             </div>
@@ -259,11 +261,17 @@ export function AssessmentControlWorkspace({
                       <div className="line-clamp-2 text-sm font-semibold text-slate-950">{assignment.title}</div>
                       <div className="mt-1 text-sm text-slate-500">{assignment.dueLabel}</div>
                     </div>
-                    <Badge tone={assignment.needsReviewCount > 12 ? "warning" : "secondary"}>
-                      {assignment.needsReviewCount} {copy.reviewLabel}
-                    </Badge>
+                    <Chip
+                      label={`${assignment.needsReviewCount} ${copy.reviewLabel}`}
+                      size="small"
+                      color={assignment.needsReviewCount > 12 ? "warning" : "secondary"}
+                    />
                   </div>
-                  <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-[var(--erg-blue)]" />
+                  <LinearProgress
+                    variant="determinate"
+                    value={assignment.completionRate}
+                    sx={{ mt: 2, height: 8, borderRadius: 1 }}
+                  />
                 </div>
               ))}
             </div>
@@ -344,7 +352,7 @@ function StudentCheck({
 }) {
   return (
     <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-[#cbd7e6] bg-white px-3 py-3 transition hover:bg-[#f8fbff]">
-      <LmsCheckbox checked={checked} onCheckedChange={onChange} />
+      <Checkbox checked={checked} onChange={onChange} />
       <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-[13px] font-bold text-white">
         {student.avatarSeed}
       </span>

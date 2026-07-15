@@ -1,6 +1,8 @@
+import { ChoiceOption, EditableChoiceOption } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import { useIsMobile } from "@/hooks/use-mobile";
+import type { Choice, Question } from "@/lib/types";
+import type { ReactNode } from "react";
 
 export function SingleChoiceQuestion({
   question,
@@ -8,126 +10,110 @@ export function SingleChoiceQuestion({
   onChange,
   submitted = false,
   reviewMode = false,
+  editable = false,
+  onQuestionChange,
 }: QuestionComponentProps) {
-  const isMobile = useIsMobile();
   const selectedId = value.choiceId;
+  const choices = question.choices ?? [];
 
-  if (isMobile) {
+  function emitChoices(nextChoices: Choice[]) {
+    onQuestionChange?.({ ...question, choices: nextChoices });
+  }
+
+  function updateChoice(choiceId: string, patch: Partial<Choice>) {
+    emitChoices(choices.map((choice) => (choice.id === choiceId ? { ...choice, ...patch } : choice)));
+  }
+
+  function toggleCorrect(choiceId: string) {
+    emitChoices(choices.map((choice) => ({ ...choice, correct: choice.id === choiceId })));
+  }
+
+  function removeChoice(choiceId: string) {
+    emitChoices(choices.filter((choice) => choice.id !== choiceId));
+  }
+
+  function addChoice() {
+    emitChoices([
+      ...choices,
+      {
+        id: createChoiceId("choice"),
+        label: `Option ${choices.length + 1}`,
+        correct: choices.length === 0,
+      },
+    ]);
+  }
+
+  if (editable && onQuestionChange) {
     return (
-      <div className="grid gap-3">
-        {question.contentImage ? <QuestionContentImage question={question} /> : null}
-        <div className="grid gap-2.5">
-          {question.choices?.map((choice) => {
-            const selected = selectedId === choice.id;
-            const showCorrect = reviewMode && choice.correct;
-            const showWrong = reviewMode && selected && !choice.correct;
-
-            return (
-              <button
-                key={choice.id}
-                type="button"
-                disabled={submitted}
-                className="grid min-h-[52px] w-full grid-cols-[28px_minmax(0,1fr)] items-center gap-3 rounded-md border bg-white px-4 py-3 text-left shadow-sm transition disabled:cursor-default"
-                style={{
-                  borderColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : selected ? "#76bff1" : "#e2e8f0",
-                  backgroundColor: showCorrect ? "#f7fff1" : showWrong ? "#fff7f6" : "#ffffff",
-                }}
-                onClick={() => {
-                  if (submitted) return;
-                  onChange({ choiceId: choice.id });
-                }}
-              >
-                <span
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full border bg-white"
-                  style={{
-                    borderColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : selected ? "#76bff1" : "#b8c4d0",
-                  }}
-                >
-                  {selected || showCorrect ? (
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{
-                        backgroundColor: showCorrect ? "#78b816" : showWrong ? "#ef6b5f" : "var(--erg-blue)",
-                      }}
-                    />
-                  ) : null}
-                </span>
-                <span className="text-[15px] leading-6 text-slate-600">{choice.label}</span>
-              </button>
-            );
-          })}
+      <QuestionChoiceLayout question={question}>
+        <div className="flex flex-col gap-4 sm:gap-5">
+          {choices.map((choice) => (
+            <EditableChoiceOption
+              key={choice.id}
+              correct={choice.correct}
+              label={choice.label}
+              mode="single"
+              onCorrectToggle={() => toggleCorrect(choice.id)}
+              onLabelChange={(label) => updateChoice(choice.id, { label })}
+              onRemove={choices.length > 2 ? () => removeChoice(choice.id) : undefined}
+            />
+          ))}
+          <button
+            type="button"
+            className="quiz-runtime-edit-add inline-flex min-h-10 w-fit items-center rounded-xl border border-[rgba(0,0,136,0.14)] bg-white px-5 text-sm font-extrabold text-[#000088] shadow-sm transition hover:bg-[#eef3ff]"
+            onClick={addChoice}
+          >
+            Add option
+          </button>
         </div>
-      </div>
+      </QuestionChoiceLayout>
     );
   }
 
   return (
-    <div className={`grid gap-5 ${question.contentImage ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(320px,1fr)] lg:items-start" : ""}`}>
-      <div className="flex flex-col gap-3 sm:gap-4">
-        {question.choices?.map((choice) => {
+    <QuestionChoiceLayout question={question}>
+      <div className="flex flex-col gap-4 sm:gap-5">
+        {choices.map((choice) => {
           const selected = selectedId === choice.id;
           const showCorrect = reviewMode && choice.correct;
           const showWrong = reviewMode && selected && !choice.correct;
-          const showStatus = reviewMode && (showCorrect || showWrong);
-          const containerStyle = showCorrect
-            ? { backgroundColor: "rgba(255,255,255,0.9)", borderColor: "transparent" }
-            : showWrong
-              ? { backgroundColor: "rgba(255,255,255,0.9)", borderColor: "transparent" }
-              : selected
-                ? { backgroundColor: "var(--quiz-option-selected-bg)" }
-                : undefined;
           return (
-            <button
+            <ChoiceOption
               key={choice.id}
-              type="button"
               disabled={submitted}
-              className="grid w-full grid-cols-[40px_36px_minmax(0,1fr)] items-start gap-3 rounded-lg border border-transparent px-2 py-3 text-left transition hover:bg-slate-200/20"
-              style={containerStyle}
+              mode="single"
               onClick={() => {
-                if (submitted) return;
                 onChange({ choiceId: choice.id });
               }}
+              reviewMode={reviewMode}
+              selected={selected}
+              showCorrect={showCorrect}
+              showWrong={showWrong}
             >
-              <ReviewStatusIcon correct={showCorrect} visible={showStatus} />
-              <span
-                className="mt-1 inline-flex h-7 w-7 flex-none items-center justify-center rounded-full border bg-white"
-                style={{
-                  borderColor: showCorrect ? "#78b816" : showWrong ? "#ff8b3d" : selected ? "var(--quiz-accent-start)" : "#cfd8df",
-                }}
-              >
-                {selected || showCorrect ? (
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: showCorrect ? "#78b816" : showWrong ? "#ff8b3d" : "var(--quiz-accent-start)" }}
-                  />
-                ) : null}
-              </span>
-              <span
-                className="text-xl leading-[1.5] sm:text-2xl"
-                style={{ color: showCorrect ? "#006d93" : showWrong ? "#ff8b3d" : reviewMode ? "#8fbfd3" : "var(--quiz-option-text)" }}
-              >
-                {choice.label}
-              </span>
-            </button>
+              {choice.label}
+            </ChoiceOption>
           );
         })}
       </div>
+    </QuestionChoiceLayout>
+  );
+}
+
+function QuestionChoiceLayout({
+  children,
+  question,
+}: {
+  children: ReactNode;
+  question: Question;
+}) {
+  return (
+    <div className={`quiz-answer-region quiz-choice-region grid gap-5 ${question.contentImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.75fr)] lg:items-start" : ""}`}>
+      {children}
       {question.contentImage ? <QuestionContentImage question={question} className="lg:sticky lg:top-0" /> : null}
     </div>
   );
 }
 
-function ReviewStatusIcon({ correct, visible }: { correct: boolean; visible: boolean }) {
-  if (!visible) {
-    return <span className="mt-0.5 h-8 w-8" />;
-  }
-
-  return (
-    <span
-      className="mt-0.5 grid h-8 w-8 place-items-center rounded-full text-lg font-semibold text-white"
-      style={{ backgroundColor: correct ? "#78b816" : "#e65a4d" }}
-    >
-      {correct ? "✓" : "×"}
-    </span>
-  );
+function createChoiceId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
 }

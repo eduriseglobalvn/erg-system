@@ -3,14 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Notifications from "@mui/icons-material/Notifications";
 import { ArrowLeft, Building2, CalendarClock, Hash, Megaphone, MoreVertical, ServerCog, Settings } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
 import {
   fetchNotificationDetail,
   fetchNotificationFeed,
   fetchUnreadNotificationCount,
   markNotificationRead,
   notificationQueryKeys,
+  resolveNotificationQueryScope,
   type LmsNotificationType,
   type NotificationDetailItem,
   type NotificationFeedItem,
@@ -28,20 +29,21 @@ export function LmsNotificationListPage({
   const queryClient = useQueryClient();
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const [tab, setTab] = useState<"all" | "unread">("all");
+  const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
   const notificationsQuery = useQuery({
-    queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 30),
+    queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 30, notificationScope),
     queryFn: () => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 30 }),
     staleTime: 30_000,
   });
   const unreadCountQuery = useQuery({
-    queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL),
+    queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL, notificationScope),
     queryFn: () => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL),
     staleTime: 30_000,
   });
   const markReadMutation = useMutation({
     mutationFn: (notificationId: string) => markNotificationRead(notificationId, LMS_NOTIFICATION_PORTAL),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL) });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL, notificationScope) });
     },
   });
 
@@ -153,8 +155,9 @@ export function LmsNotificationDetailPage({
   const queryClient = useQueryClient();
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const autoMarkedRef = useRef<string | null>(null);
+  const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
   const notificationQuery = useQuery({
-    queryKey: notificationQueryKeys.detail(LMS_NOTIFICATION_PORTAL, notificationId),
+    queryKey: notificationQueryKeys.detail(LMS_NOTIFICATION_PORTAL, notificationId, notificationScope),
     queryFn: () => fetchNotificationDetail(notificationId, LMS_NOTIFICATION_PORTAL),
     enabled: Boolean(notificationId),
     staleTime: 30_000,
@@ -162,7 +165,7 @@ export function LmsNotificationDetailPage({
   const markReadMutation = useMutation({
     mutationFn: (id: string) => markNotificationRead(id, LMS_NOTIFICATION_PORTAL),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL) });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL, notificationScope) });
     },
   });
   const notification = notificationQuery.data;
@@ -197,9 +200,7 @@ export function LmsNotificationDetailPage({
         <article className="rounded-[24px] border border-[#d9e2ef] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
           <div className="flex items-center gap-2">
             <NotificationDetailIcon notification={notification} />
-            <Badge variant="secondary" className={cn("rounded-full px-3 py-1 text-xs font-black", notificationBadgeClass(notification.type))}>
-              {notificationLabel(notification.type)}
-            </Badge>
+            <Chip label={notificationLabel(notification.type)} size="small" className={cn("rounded-full px-3 py-1 text-xs font-black", notificationBadgeClass(notification.type))} />
             {notification.unread ? <span className="rounded-full bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-black text-[var(--erg-blue)]">Chưa đọc</span> : null}
           </div>
           <h1 className="mt-5 text-2xl font-black leading-tight text-slate-950">{notification.title}</h1>
@@ -216,8 +217,7 @@ export function LmsNotificationDetailPage({
 
   return (
     <section className="mx-auto flex min-h-full max-w-6xl flex-col gap-4 px-5 py-5 xl:px-8">
-      <Button variant="ghost" className="w-fit rounded-md px-2 text-slate-600" onClick={onBack}>
-        <ArrowLeft data-icon="inline-start" />
+      <Button variant="text" startIcon={<ArrowLeft />} onClick={onBack} sx={{ width: "fit-content", borderRadius: "6px", px: 1, color: "rgb(71,85,105)" }}>
         Danh sách thông báo
       </Button>
 
@@ -226,10 +226,8 @@ export function LmsNotificationDetailPage({
           <div className="px-5 py-5 md:px-7 md:py-6">
             <div className="flex flex-wrap items-center gap-2">
               <NotificationDetailIcon notification={notification} />
-              <Badge variant="secondary" className={cn("rounded-md px-2.5 py-1 text-xs font-black", notificationBadgeClass(notification.type))}>
-                {notificationLabel(notification.type)}
-              </Badge>
-              {notification.unread ? <Badge variant="secondary" className="rounded-md bg-[#eef7f0] text-emerald-700">Chưa đọc</Badge> : null}
+              <Chip label={notificationLabel(notification.type)} size="small" className={cn("rounded-md px-2.5 py-1 text-xs font-black", notificationBadgeClass(notification.type))} />
+              {notification.unread ? <Chip label="Chưa đọc" size="small" className="rounded-md bg-[#eef7f0] text-emerald-700" /> : null}
             </div>
 
             <h1 className="mt-5 max-w-3xl text-2xl font-black leading-tight tracking-normal text-slate-950">{notification.title}</h1>
@@ -264,13 +262,10 @@ function NotificationNotFound({ onBack }: { onBack: () => void }) {
   return (
     <section className="mx-auto flex min-h-full max-w-3xl flex-col justify-center px-6 py-12">
       <div className="rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
-        <Badge variant="secondary" className="rounded-full bg-rose-50 text-rose-700">
-          Không tìm thấy
-        </Badge>
+        <Chip label="Không tìm thấy" size="small" className="rounded-full bg-rose-50 text-rose-700" />
         <h1 className="mt-4 text-xl font-semibold text-[var(--foreground)]">Thông báo không tồn tại</h1>
         <p className="mt-2 text-sm leading-6 text-slate-500">Thông báo này có thể đã bị xóa hoặc đường dẫn không còn hợp lệ.</p>
-        <Button className="mt-6" onClick={onBack}>
-          <ArrowLeft data-icon="inline-start" />
+        <Button variant="contained" startIcon={<ArrowLeft />} sx={{ mt: 3 }} onClick={onBack}>
           Quay lại danh sách
         </Button>
       </div>

@@ -2,12 +2,16 @@ import { expect, test } from "vitest";
 
 import {
   filterMockExercises,
+  filterExerciseLibraryItems,
   getAvailableContentOptions,
   isGoogleSlidesUrl,
+  mapQuizBankItemsToExercises,
   normalizeGoogleSlidesUrl,
+  resolveExerciseLibraryItems,
   shouldShowContentOption,
   type ExerciseLibraryItem,
 } from "./learning-resource-content-dialog";
+import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 
 const mockExercises: ExerciseLibraryItem[] = [
   {
@@ -46,10 +50,13 @@ test("shows lecture and exercise options only for child content under topic or s
 
 test("normalizes google slides viewer links to embed form", () => {
   expect(normalizeGoogleSlidesUrl("https://docs.google.com/presentation/d/abc123/edit#slide=id.p1")).toBe(
-    "https://docs.google.com/presentation/d/abc123/edit/embed?start=false&loop=false&delayms=3000",
+    "https://docs.google.com/presentation/d/abc123/embed?start=false&loop=false&delayms=3000",
   );
   expect(normalizeGoogleSlidesUrl("https://docs.google.com/presentation/d/abc123/embed")).toBe(
-    "https://docs.google.com/presentation/d/abc123/embed",
+    "https://docs.google.com/presentation/d/abc123/embed?start=false&loop=false&delayms=3000",
+  );
+  expect(normalizeGoogleSlidesUrl("https://docs.google.com/presentation/d/abc123/present?slide=id.p2")).toBe(
+    "https://docs.google.com/presentation/d/abc123/embed?start=false&loop=false&delayms=3000",
   );
 });
 
@@ -82,4 +89,76 @@ test("filters mock exercises by subject, topic, section, and query", () => {
       subjectId: "ic3",
     }).map((item) => item.id),
   ).toEqual(["ex-2"]);
+});
+
+test("maps and filters quiz bank items as attachable exercises", () => {
+  const quizzes: QuizBankItem[] = [
+    {
+      id: "quiz-1",
+      scope: { type: "global" },
+      title: "File management train quiz",
+      kind: "train",
+      status: "ready",
+      subjectId: "ic3-gs6",
+      subjectLabel: "IC3 GS6",
+      levelId: "level-1",
+      levelLabel: "Level 1",
+      topicLabels: ["File management"],
+      questionIds: ["q1", "q2"],
+      questionCount: 2,
+      durationLabel: "12 phut",
+      scopeLabel: "Dung chung",
+      sourceMode: "manual",
+      ownerLabel: "LCMS",
+      updatedAt: "2026-01-01",
+    },
+  ];
+
+  const exercises = mapQuizBankItemsToExercises(quizzes);
+
+  expect(exercises[0]).toMatchObject({
+    id: "quiz-1",
+    sourceLabel: "Quiz bank",
+    questionCount: 2,
+    durationMinutes: 12,
+  });
+  expect(
+    filterExerciseLibraryItems(exercises, {
+      query: "train",
+      subjectId: "mock-ic3-gs6",
+      subjectLabel: "IC3 GS6",
+      topicLabel: "File management",
+    }).map((item) => item.id),
+  ).toEqual(["quiz-1"]);
+});
+
+test("resolves exercise library without mock fallback when API base is configured", () => {
+  expect(resolveExerciseLibraryItems([], mockExercises, true)).toEqual([]);
+  expect(resolveExerciseLibraryItems([], mockExercises, false)).toEqual(mockExercises);
+});
+
+test("resolves quiz-bank exercises before using fallback exercise data", () => {
+  const quizzes: QuizBankItem[] = [
+    {
+      id: "quiz-2",
+      scope: { type: "global" },
+      title: "BE quiz",
+      kind: "test",
+      status: "ready",
+      subjectId: "ic3-gs6",
+      subjectLabel: "IC3 GS6",
+      levelId: "level-1",
+      levelLabel: "Level 1",
+      topicLabels: ["Files"],
+      questionIds: ["q1"],
+      questionCount: 1,
+      durationLabel: "10 phut",
+      scopeLabel: "Dung chung",
+      sourceMode: "manual",
+      ownerLabel: "LCMS",
+      updatedAt: "2026-01-01",
+    },
+  ];
+
+  expect(resolveExerciseLibraryItems(quizzes, mockExercises, true)).toMatchObject([{ id: "quiz-2", title: "BE quiz" }]);
 });

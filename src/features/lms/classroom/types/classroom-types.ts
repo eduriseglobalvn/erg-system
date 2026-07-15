@@ -33,6 +33,9 @@ export type ClassroomSnapshot = {
 
 export type AssignmentRun = {
   id: string;
+  quizId?: string | null;
+  quizVersionId?: string | null;
+  quizVersionLabel?: string | null;
   title: string;
   subjectLabel: string;
   targetLevel: string;

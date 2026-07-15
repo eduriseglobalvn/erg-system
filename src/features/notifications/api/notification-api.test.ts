@@ -3,6 +3,8 @@ import { afterEach, expect, test, vi } from "vitest";
 import { broadcastAdminNotification, fetchAdminNotificationStats } from "@/features/notifications/api/admin-notification-api";
 import {
   fetchNotificationFeed,
+  notificationQueryKeys,
+  resolveNotificationQueryScope,
   registerNotificationDevice,
 } from "@/features/notifications/api/notification-api";
 import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
@@ -65,7 +67,49 @@ test("fetches the LMS notification inbox from the v1 self API", async () => {
   expect(String(url)).toContain("status=unread");
   const headers = (init as RequestInit).headers as Headers;
   expect(headers.get("Authorization")).toBe("Bearer lms-token");
-  expect(headers.get("X-Portal")).toBe("lms");
+  expect(headers.has("X-Portal")).toBe(false);
+});
+
+test("scopes notification query keys by portal tenant and account", () => {
+  const scope = { tenantId: "tenant-a", accountId: "account-a" };
+
+  expect(notificationQueryKeys.root("lms", scope)).toEqual(["notifications", "lms", "tenant-a", "account-a"]);
+  expect(notificationQueryKeys.inbox("lms", "unread", 0, 20, scope)).toEqual([
+    "notifications",
+    "lms",
+    "tenant-a",
+    "account-a",
+    "inbox",
+    "unread",
+    0,
+    20,
+  ]);
+  expect(notificationQueryKeys.detail("lms", "notification-1", scope)).toEqual([
+    "notifications",
+    "lms",
+    "tenant-a",
+    "account-a",
+    "detail",
+    "notification-1",
+  ]);
+  expect(notificationQueryKeys.preferences("lms", scope)).toEqual([
+    "notifications",
+    "lms",
+    "tenant-a",
+    "account-a",
+    "preferences",
+  ]);
+  expect(notificationQueryKeys.device("lms", scope)).toEqual(["notification-devices", "lms", "tenant-a", "account-a"]);
+});
+
+test("resolves notification query scope from the active portal session", () => {
+  vi.stubEnv("VITE_TENANT_ID", "tenant-from-env");
+  storePortalSession("lms", "lms-token");
+
+  expect(resolveNotificationQueryScope("lms")).toEqual({
+    accountId: "lms-user",
+    tenantId: "tenant-from-env",
+  });
 });
 
 test("registers PWA devices against the notification device registry", async () => {
@@ -136,8 +180,8 @@ test("uses the admin portal for admin notification endpoints", async () => {
 
   const [, statsInit] = fetchMock.mock.calls[0] ?? [];
   const [, commandInit] = fetchMock.mock.calls[1] ?? [];
-  expect(((statsInit as RequestInit).headers as Headers).get("X-Portal")).toBe("admin");
-  expect(((commandInit as RequestInit).headers as Headers).get("X-Portal")).toBe("admin");
+  expect(((statsInit as RequestInit).headers as Headers).has("X-Portal")).toBe(false);
+  expect(((commandInit as RequestInit).headers as Headers).has("X-Portal")).toBe(false);
   expect(JSON.parse(String((commandInit as RequestInit).body))).toMatchObject({
     portal: "lms",
     priority: "normal",

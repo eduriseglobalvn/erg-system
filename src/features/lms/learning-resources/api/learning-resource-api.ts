@@ -26,7 +26,7 @@ import {
   type LmsLearningResourceProgress,
   type LmsLearningResourceTaxonomyNode,
 } from "@/features/lms/api/lms-graphql-api";
-import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { hasApiBase } from "@/lib/api-client";
 import { getApiBase } from "@/lib/platform";
 
 type LearningResourceResourceCardDTO = {
@@ -55,23 +55,6 @@ type LearningResourceResourceCardDTO = {
   updatedAt?: string;
 };
 
-type LearningResourceAssetDTO = {
-  id: string;
-  resourceId: string;
-  title?: string;
-  selectedFileType?: LearningResourceFileType | string;
-  fileType?: LearningResourceFileType | string;
-  fileTypeBadge?: string;
-  launchMode?: LearningResourceLaunchMode | string;
-  canDownload?: boolean;
-};
-
-type LearningResourceResourceDetailDTO = LearningResourceResourceCardDTO & {
-  description?: string;
-  assets?: LearningResourceAssetDTO[];
-  items?: LearningResourceResourceItemDTO[];
-};
-
 type LearningResourceResourceItemDTO = {
   id: string;
   assetId: string;
@@ -80,26 +63,6 @@ type LearningResourceResourceItemDTO = {
   sortOrder?: number;
   pageCount?: number;
   durationSec?: number;
-};
-
-type LearningResourceLaunchDTO = {
-  assetId: string;
-  resourceId: string;
-  selectedFileType?: LearningResourceFileType | string;
-  fileType?: LearningResourceFileType | string;
-  launchMode?: LearningResourceLaunchMode | string;
-  title?: string;
-  embedUrl?: string;
-  viewerTokenUrl?: string;
-  streamUrl?: string;
-  url?: string;
-  slideCount?: number;
-  slides?: LearningResourceLaunchSlideDTO[];
-  viewerManifest?: {
-    slideCount?: number;
-    slides?: LearningResourceLaunchSlideDTO[];
-  };
-  canDownload?: boolean;
 };
 
 type LearningResourceLaunchSlideDTO = {
@@ -569,14 +532,7 @@ export async function loadLearningResourceLibraryBootstrap(input: { schoolId: st
     return mockLibraryBootstrap(input);
   }
 
-  try {
-    const search = new URLSearchParams();
-    search.set("schoolId", input.schoolId);
-    search.set("academicYear", input.academicYear);
-    return await apiRequest<LearningResourceLibraryBootstrapDTO>(`/api/v1/hoclieu/library/bootstrap?${search.toString()}`);
-  } catch {
-    return mockLibraryBootstrap(input);
-  }
+  return { schoolId: input.schoolId, academicYear: input.academicYear, subjects: [] };
 }
 
 export async function loadLearningResourceLibraryProgress(input: { schoolId: string; academicYear: string }) {
@@ -593,25 +549,11 @@ export async function loadLearningResourceLibraryProgress(input: { schoolId: str
     return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies LearningResourceLibraryProgressDTO;
   }
 
-  try {
-    const search = new URLSearchParams();
-    search.set("schoolId", input.schoolId);
-    search.set("academicYear", input.academicYear);
-    return await apiRequest<LearningResourceLibraryProgressDTO>(`/api/v1/hoclieu/library/progress?${search.toString()}`);
-  } catch {
-    return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies LearningResourceLibraryProgressDTO;
-  }
+  return { schoolId: input.schoolId, academicYear: input.academicYear, lessons: [] } satisfies LearningResourceLibraryProgressDTO;
 }
 
 export async function saveExplorerOperation(operation: LearningResourceExplorerOperation): Promise<LearningResourceExplorerOperationResult> {
-  if (!hasApiBase()) {
-    return mockSaveExplorerOperation(operation);
-  }
-
-  return apiRequest<LearningResourceExplorerOperationResult>("/api/v1/hoclieu/library/explorer/operations", {
-    method: "POST",
-    body: JSON.stringify(operation),
-  });
+  return mockSaveExplorerOperation(operation);
 }
 
 export function saveCreateFolderOperation(input: Omit<CreateLearningResourceFolderOperation, "type">) {
@@ -656,7 +598,8 @@ export async function loadLearningResourceLibrarySections(): Promise<LearningRes
     const result = await listLearningResourceResources({ limit: 100 });
     const cards = result.data;
     return groupCardsBySection(cards.map(mapCardToResource));
-  } catch {
+  } catch (error) {
+    if (hasApiBase()) throw error;
     return LEARNING_RESOURCE_LIBRARY_SECTIONS;
   }
 }
@@ -690,7 +633,8 @@ export async function loadLearningResourceResourcesBySubject(subjectId: string):
     const result = await listLearningResourceResources({ subjectId, limit: 100 });
     const cards = result.data;
     return cards.map((card, index) => mapCardToResource(card, index));
-  } catch {
+  } catch (error) {
+    if (hasApiBase()) throw error;
     return LEARNING_RESOURCE_LIBRARY_SECTIONS.flatMap((section) => section.resources).filter((resource) => resource.subjectId === subjectId);
   }
 }
@@ -710,23 +654,13 @@ export async function loadLearningResourceResourceForViewer(resource: LearningRe
       };
     }
 
-    const launch = await apiRequest<LearningResourceLaunchDTO>(toApiRequestPath(resource.viewer.launchUrl));
-    return mergeLaunchIntoResource(resource, launch);
+    return resource;
   }
   if (resource.viewer.assetId && resource.launchMode === "google_slide_embed" && !resource.viewer.embedUrl) {
-    const launch = await apiRequest<LearningResourceLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(resource.viewer.assetId)}/launch`);
-    return mergeLaunchIntoResource(resource, launch);
+    return resource;
   }
   if (resource.viewer.embedUrl || resource.viewer.secureEmbedUrl || (resource.viewer.assetId && resource.viewer.slides?.length)) return resource;
-
-  const detail = await apiRequest<LearningResourceResourceDetailDTO>(`/api/v1/hoclieu/resources/${encodeURIComponent(resource.id)}`);
-  const mapped = mapDetailToResource(detail, resource);
-  const asset = detail.assets?.[0];
-
-  if (!asset?.id) return mapped;
-
-  const launch = await apiRequest<LearningResourceLaunchDTO>(`/api/v1/hoclieu/assets/${encodeURIComponent(asset.id)}/launch`);
-  return mergeLaunchIntoResource(mapped, launch);
+  return resource;
 }
 
 export function mapLibraryResourceToLearningResourceResource(
@@ -855,21 +789,6 @@ function groupCardsBySection(resources: LearningResourceResource[]): LearningRes
   }));
 }
 
-function mapDetailToResource(detail: LearningResourceResourceDetailDTO, fallback: LearningResourceResource): LearningResourceResource {
-  const resource = mapCardToResource(detail, fallback.sortOrder);
-  const items = detail.items?.length ? itemsToUnits(detail.items) : fallback.viewer.units;
-
-  return {
-    ...resource,
-    viewer: {
-      ...fallback.viewer,
-      ...resource.viewer,
-      description: detail.description || resource.viewer.description || fallback.viewer.description,
-      units: items,
-    },
-  };
-}
-
 function mapCardToResource(card: LearningResourceResourceCardDTO, sortOrder = 0): LearningResourceResource {
   const subjectId = card.subjectId || card.programSlug || "hoc-lieu";
   const categoryId = card.categoryId || card.groupId || subjectId;
@@ -922,35 +841,7 @@ function categoryForLearningResourceShell(card: LearningResourceResourceCardDTO)
   return card.categoryId || card.groupId || "hoc-lieu-giao-duc-khac";
 }
 
-function mergeLaunchIntoResource(resource: LearningResourceResource, launch: LearningResourceLaunchDTO): LearningResourceResource {
-  const fileType = normalizeFileType(launch.selectedFileType || launch.fileType || resource.fileType);
-  const launchMode = normalizeLaunchMode(launch.launchMode || "", fileType);
-  const streamUrl = toApiUrl(launch.streamUrl);
-  const embedUrl = normalizeViewerUrl(toApiUrl(launch.embedUrl || launch.url));
-  const viewerTokenUrl = toApiUrl(launch.viewerTokenUrl);
-  const slides = normalizeViewerSlides(launch.slides || launch.viewerManifest?.slides);
-
-  return {
-    ...resource,
-    fileType,
-    formatBadge: fileType,
-    launchMode,
-    isDownloadable: Boolean(launch.canDownload),
-    viewer: {
-      ...resource.viewer,
-      assetId: launch.assetId || resource.viewer.assetId,
-      resourceId: launch.resourceId || resource.viewer.resourceId,
-      title: launch.title || resource.viewer.title,
-      embedUrl,
-      secureEmbedUrl: streamUrl || viewerTokenUrl || resource.viewer.secureEmbedUrl,
-      launchUrl: undefined,
-      pageCount: launch.slideCount || launch.viewerManifest?.slideCount || slides.length || resource.viewer.pageCount,
-      slides: slides.length ? slides : resource.viewer.slides,
-    },
-  };
-}
-
-function itemsToUnits(items: LearningResourceResourceItemDTO[]): LearningResourceViewerUnit[] {
+export function itemsToUnits(items: LearningResourceResourceItemDTO[]): LearningResourceViewerUnit[] {
   const sorted = [...items].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0));
   const units = new Map<string, LearningResourceViewerUnit>();
 
@@ -1065,12 +956,6 @@ function toApiUrl(value?: string) {
   const apiBase = getApiBase();
   if (!apiBase || !value.startsWith("/")) return value;
   return `${apiBase}${value}`;
-}
-
-function toApiRequestPath(value: string) {
-  const apiBase = getApiBase();
-  if (apiBase && value.startsWith(apiBase)) return value.slice(apiBase.length) || "/";
-  return value;
 }
 
 function isApiLaunchUrl(value?: string) {

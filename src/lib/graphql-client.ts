@@ -47,6 +47,12 @@ export async function graphQlRequest<TData, TVariables extends Record<string, un
 
   assertSafeVariables(variables);
 
+  // X-Tenant-ID: backend không còn đọc từ client để authz (A1)
+  // - tenantId lấy từ session đã đăng nhập
+  // - Nếu FE gửi X-Tenant-ID mà khác tenant của session → 403
+  // → FE nên bỏ gửi X-Tenant-ID tới GraphQL, hoặc đảm bảo nó khớp session
+  // X-Portal: backend suy ra từ URL path, không cần gửi nữa
+  void tenantId;
   const payload = await apiRequest<GraphQlResponse<TData>>("/api/v1/graphql", {
     body: JSON.stringify({
       operationName,
@@ -56,10 +62,10 @@ export async function graphQlRequest<TData, TVariables extends Record<string, un
     method: "POST",
     portal,
     unwrapEnvelope: false,
-    headers: {
-      "X-Tenant-ID": tenantId,
-      "X-Portal": portal,
-    },
+    // headers: {
+    //   "X-Tenant-ID": tenantId,
+    //   "X-Portal": portal,
+    // },
   });
 
   if (!payload.data) {

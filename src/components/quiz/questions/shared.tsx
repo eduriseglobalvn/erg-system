@@ -72,21 +72,24 @@ export function InlineChoiceSelect({
   const isAnswered = Boolean(selectedValue);
   const isCorrect = reviewMode && isAnswered && selectedValue === correctValue;
   const isWrong = reviewMode && isAnswered && selectedValue !== correctValue;
+  const successColor = "#118D57";
+  const dangerColor = "#e82828";
 
   return (
     <div className="relative flex-none">
       <AppSelect
         aria-label={blank.statement}
+        data-quiz-player-select="true"
         className={`outline-none transition ${
           isMobile
-            ? "min-h-10 min-w-[92px] rounded-md border px-3 pr-9 text-sm font-medium"
-            : "min-h-13 min-w-[180px] rounded-lg border px-4 pr-10 text-lg font-medium"
+            ? "min-w-[104px]"
+            : "min-w-[220px]"
         }`}
         disabled={submitted}
         style={{
-          borderColor: isCorrect ? "#78b816" : isWrong ? "#ef6b5f" : "var(--quiz-canvas-border)",
-          backgroundColor: isCorrect ? "#fbfff4" : isWrong ? "#fff8f7" : "var(--quiz-input-bg)",
-          color: isCorrect ? "#66a80f" : isWrong ? "#df4f43" : "var(--quiz-option-text)",
+          borderColor: isCorrect ? "rgba(17,141,87,0.62)" : isWrong ? "rgba(232,40,40,0.62)" : "var(--quiz-canvas-border)",
+          backgroundColor: isCorrect ? "rgba(34,197,94,0.08)" : isWrong ? "rgba(232,40,40,0.055)" : "var(--quiz-input-bg)",
+          color: isCorrect ? successColor : isWrong ? dangerColor : "var(--quiz-option-text)",
         }}
         value={selectedValue}
         onChange={(event) =>
@@ -113,7 +116,7 @@ export function InlineChoiceSelect({
         <button
           type="button"
           aria-label="Xem đáp án đúng"
-          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border border-[#ef6b5f] font-semibold text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30 ${
+          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border border-[rgba(232,40,40,0.45)] font-semibold text-[#e82828] transition hover:bg-[rgba(232,40,40,0.08)] focus:outline-none focus:ring-2 focus:ring-[rgba(232,40,40,0.22)] ${
             isMobile ? "right-1.5 h-6 w-6 text-sm" : "right-2 h-7 w-7 text-base"
           }`}
           onClick={onRevealCorrectAnswer}

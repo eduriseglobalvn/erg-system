@@ -1,346 +1,291 @@
-import { useState } from "react";
-import { CalendarClock, KeyRound, LogOut, Mail, Phone, ShieldCheck, Smartphone, UserRound } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import HistoryIcon from "@mui/icons-material/History";
+import LogoutIcon from "@mui/icons-material/Logout";
+import LockIcon from "@mui/icons-material/Lock";
+import Avatar from "@mui/material/Avatar";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Divider from "@mui/material/Divider";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
-import { Avatar, AvatarBadge, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ErgTextField } from "@/components/erg-mui";
 import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { logoutAccount } from "@/platform/auth/api/auth-storage";
+  changeMyPassword,
+  requestRecoveryEmailChallenge,
+  updateMyTeacherProfile,
+  verifyRecoveryEmailChallenge,
+  type RecoveryEmailChallenge,
+} from "@/platform/auth/api/account-security-api";
+import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { cn } from "@/lib/utils";
+import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 
-type AccountDialog = "email" | "password" | "phone" | "mfa" | null;
+type AccountDialog = "phone" | "recovery" | "password" | null;
 
-const permissionLabels = ["Lớp học", "Bài tập", "Bảng điểm", "Điểm danh", "Tài nguyên", "Báo cáo"];
+const capabilities = [
+  ["Lớp học", "lms.class.read"],
+  ["Bài tập", "lms.assignment.read"],
+  ["Bảng điểm", "lms.grade.read"],
+  ["Điểm danh", "lms.attendance.read"],
+  ["Tài nguyên", "lms.resource.read"],
+  ["Báo cáo", "lms.report.read"],
+] as const;
 
-export function LmsAccountPage({
-  onLoginLogs,
-  onSignedOut,
-}: {
-  onLoginLogs: () => void;
-  onSignedOut: () => void;
-}) {
+export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () => void; onSignedOut: () => void }) {
   const auth = useAuthSession("lms");
-  const account = auth.account;
-  const [activeDialog, setActiveDialog] = useState<AccountDialog>(null);
-  const [secondaryEmailDraft, setSecondaryEmailDraft] = useState("");
-  const [phoneDraft, setPhoneDraft] = useState(account?.phone || "0909 888 666");
-  const displayName = account?.fullName || "ERG Super Admin";
-  const email = account?.email || "admin@erg.edu.vn";
-  const role = account?.title || account?.role || "Quản trị viên";
-  const status = account?.status || "ACTIVE";
-  const accountId = account?.id || "usr_super_admin";
+  const [account, setAccount] = useState(auth.account);
+  const [dialog, setDialog] = useState<AccountDialog>(null);
+  const [phone, setPhone] = useState(auth.account?.phone ?? "");
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [challenge, setChallenge] = useState<RecoveryEmailChallenge | null>(null);
+  const [otp, setOtp] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    setAccount(auth.account);
+    setPhone(auth.account?.phone ?? "");
+  }, [
+    auth.account?.email,
+    auth.account?.fullName,
+    auth.account?.id,
+    auth.account?.lifecycle?.recoveryEmailMasked,
+    auth.account?.lifecycle?.recoveryEmailVerified,
+    auth.account?.phone,
+    auth.account?.status,
+  ]);
+
+  const effectiveCapabilities = useMemo(
+    () => capabilities.filter(([, permission]) => evaluatePermission({
+      permission,
+      grantedPermissions: auth.session?.permissions,
+      deniedPermissions: auth.session?.deniedPermissions,
+    })),
+    [auth.session?.deniedPermissions, auth.session?.permissions],
+  );
+
+  if (!account) return null;
+
+  function closeDialog() {
+    if (busy) return;
+    setDialog(null);
+    setError("");
+    setChallenge(null);
+    setOtp("");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  }
+
+  async function run(action: () => Promise<void>) {
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      await action();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Không thể cập nhật tài khoản.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function savePhone() {
+    if (!account) return;
+    if (!phone.trim()) {
+      setError("Vui lòng nhập số điện thoại.");
+      return;
+    }
+    void run(async () => {
+      const updated = await updateMyTeacherProfile({ fullName: account.fullName, phone: phone.trim() });
+      saveCurrentAccount(updated);
+      setAccount(updated);
+      setNotice("Đã cập nhật số điện thoại.");
+      setDialog(null);
+    });
+  }
+
+  function requestRecovery() {
+    if (!account) return;
+    const normalized = recoveryEmail.trim().toLowerCase();
+    if (normalized === account.email.trim().toLowerCase()) {
+      setError("Email khôi phục phải khác email đăng nhập.");
+      return;
+    }
+    void run(async () => {
+      setChallenge(await requestRecoveryEmailChallenge(normalized));
+      setNotice("Mã xác minh đã được gửi.");
+    });
+  }
+
+  function verifyRecovery() {
+    if (!account || !challenge) return;
+    const currentAccount = account;
+    void run(async () => {
+      const result = await verifyRecoveryEmailChallenge({ challengeId: challenge.challengeId, otp });
+      if (result.lifecycle) {
+        const updated = { ...currentAccount, lifecycle: result.lifecycle, isProfileCompleted: result.lifecycle.isProfileCompleted };
+        saveCurrentAccount(updated);
+        setAccount(updated);
+      }
+      setNotice("Email khôi phục đã được xác minh.");
+      setDialog(null);
+    });
+  }
+
+  function savePassword() {
+    if (!account) return;
+    const currentAccount = account;
+    if (newPassword.length < 12) {
+      setError("Mật khẩu mới cần ít nhất 12 ký tự.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError("Xác nhận mật khẩu chưa khớp.");
+      return;
+    }
+    void run(async () => {
+      const result = await changeMyPassword({ currentPassword, newPassword });
+      if (result.lifecycle) {
+        const updated = { ...currentAccount, lifecycle: result.lifecycle, isProfileCompleted: result.lifecycle.isProfileCompleted };
+        saveCurrentAccount(updated);
+        setAccount(updated);
+      }
+      setNotice("Mật khẩu đã được cập nhật. Các phiên khác đã bị thu hồi theo chính sách máy chủ.");
+      setDialog(null);
+    });
+  }
 
   function signOut() {
     auth.actions.signOut();
-    logoutAccount();
     onSignedOut();
   }
 
   return (
-    <section className="min-h-full bg-[#f8fbff] px-3 py-3 text-slate-950 xl:px-4">
-      <div className="mx-auto flex max-w-6xl flex-col gap-3">
-        <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-          <div className="flex flex-wrap items-center gap-4 px-5 py-5">
-            <Avatar size="lg" className="size-12 overflow-visible rounded-lg bg-[var(--primary)] ring-2 ring-[var(--ring)]">
-              <AvatarImage src={account?.avatarUrl} alt={displayName} />
-              <AvatarFallback className="rounded-lg bg-[var(--primary)] text-base font-semibold text-white">
-                {initials(displayName)}
-              </AvatarFallback>
-              <AvatarBadge className="size-4 border border-white bg-emerald-500 ring-2 ring-white" />
-            </Avatar>
+    <Box component="section" sx={{ bgcolor: "background.default", minHeight: "100%", p: { xs: 2, md: 3 } }}>
+      <Stack spacing={2.5} sx={{ mx: "auto", maxWidth: 1120 }}>
+        {error && !dialog ? <Alert severity="error">{error}</Alert> : null}
+        {notice ? <Alert severity="success" aria-live="polite">{notice}</Alert> : null}
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { xs: "flex-start", sm: "center" } }}>
+            <Avatar src={account.avatarUrl} sx={{ bgcolor: "primary.main", height: 52, width: 52 }}>{initials(account.fullName)}</Avatar>
+            <Box sx={{ flex: 1 }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+                <Typography component="h1" sx={{ fontWeight: 750 }} variant="h6">{account.fullName}</Typography>
+                <Chip color={account.status === "ACTIVE" ? "success" : "warning"} label={account.status ?? "UNKNOWN"} size="small" />
+              </Stack>
+              <Typography color="text.secondary" variant="body2">{account.email}</Typography>
+            </Box>
+            <Button startIcon={<HistoryIcon />} variant="outlined" onClick={onLoginLogs}>Lịch sử đăng nhập</Button>
+            <Button color="error" startIcon={<LogoutIcon />} variant="contained" onClick={signOut}>Đăng xuất</Button>
+          </Stack>
+        </Paper>
 
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-semibold leading-tight text-[var(--foreground)]">{displayName}</h1>
-                <Badge tone="success" className="tracking-normal">
-                  {status}
-                </Badge>
-              </div>
-              <p className="mt-1 truncate text-sm font-semibold text-slate-500">{email}</p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" onClick={onLoginLogs}>
-                <CalendarClock data-icon="inline-start" />
-                Lịch sử đăng nhập
-              </Button>
-              <Button variant="destructive" onClick={signOut}>
-                <LogOut data-icon="inline-start" />
-                Đăng xuất
-              </Button>
-            </div>
-          </div>
-        </section>
-
-        <div className="grid gap-3 xl:grid-cols-[1fr_380px]">
-          <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-            <SectionHeader
-              title="Thông tin tài khoản"
-              description="Thông tin định danh và liên hệ dùng khi giáo viên thao tác trên LMS."
-            />
-            <div className="grid gap-px bg-slate-100 md:grid-cols-2">
-              <InfoRow label="Họ tên" value={displayName} icon={UserRound} />
-              <InfoRow label="Mã tài khoản" value={accountId} />
-              <InfoRow label="Email chính" value={email} icon={Mail} />
-              <InfoRow
-                label="Email phụ"
-                value={secondaryEmailDraft || "Chưa thêm"}
-                icon={Mail}
-                actionLabel={secondaryEmailDraft ? "Cập nhật" : "Thêm email phụ"}
-                onAction={() => setActiveDialog("email")}
+        <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) minmax(320px, .7fr)" } }}>
+          <Paper variant="outlined">
+            <SectionTitle title="Thông tin tài khoản" description="Thông tin định danh và khôi phục được lưu trên máy chủ ERG." />
+            <Stack divider={<Divider flexItem />}>
+              <AccountRow label="Email đăng nhập" value={account.email} />
+              <AccountRow
+                label="Số điện thoại"
+                value={account.phone || "Chưa cập nhật"}
+                actionLabel="Cập nhật số điện thoại"
+                onAction={() => { setPhone(account.phone ?? ""); setDialog("phone"); }}
               />
-              <InfoRow label="Số điện thoại" value={phoneDraft} icon={Phone} actionLabel="Cập nhật" onAction={() => setActiveDialog("phone")} />
-              <InfoRow label="Vai trò" value={role} icon={ShieldCheck} />
-            </div>
-          </section>
+              <AccountRow
+                label="Email khôi phục"
+                value={account.lifecycle?.recoveryEmailMasked ?? "Chưa thiết lập"}
+                detail={account.lifecycle?.recoveryEmailVerified ? "Đã xác minh" : "Chưa xác minh"}
+                actionLabel="Cập nhật email khôi phục"
+                onAction={() => setDialog("recovery")}
+              />
+            </Stack>
+          </Paper>
+          <Paper variant="outlined">
+            <SectionTitle title="Bảo mật" description="Quản lý mật khẩu và phiên đăng nhập của chính bạn." />
+            <Stack spacing={2} sx={{ p: 2.5 }}>
+              <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+                <LockIcon color="primary" />
+                <Box sx={{ flex: 1 }}>
+                  <Typography sx={{ fontWeight: 650 }} variant="body2">Mật khẩu</Typography>
+                  <Typography color="text.secondary" variant="caption">Đổi mật khẩu sẽ thu hồi các phiên khác theo backend.</Typography>
+                </Box>
+              </Stack>
+              <Button fullWidth variant="outlined" onClick={() => setDialog("password")}>Đổi mật khẩu</Button>
+            </Stack>
+          </Paper>
+        </Box>
 
-          <section className="rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-            <SectionHeader title="Bảo mật" description="Các thiết lập quan trọng cho đăng nhập và xác minh." compact />
-            <div className="divide-y divide-slate-100">
-              <SecurityRow
-                icon={KeyRound}
-                title="Mật khẩu"
-                detail="Đã đặt mật khẩu đăng nhập."
-                actionLabel="Đổi"
-                onAction={() => setActiveDialog("password")}
-                tone="info"
-              />
-              <SecurityRow
-                icon={Mail}
-                title="Email xác minh"
-                detail="Email chính đã xác thực. Chỉ cho phép thêm email phụ."
-                actionLabel="Thêm phụ"
-                onAction={() => setActiveDialog("email")}
-                tone="success"
-              />
-              <SecurityRow
-                icon={Smartphone}
-                title="Xác thực 2 lớp"
-                detail="Chưa bật OTP cho thiết bị mới."
-                actionLabel="Bật"
-                onAction={() => setActiveDialog("mfa")}
-                tone="warning"
-              />
-              <SecurityRow
-                icon={CalendarClock}
-                title="Thiết bị đăng nhập"
-                detail="Theo dõi IP, vị trí, trình duyệt."
-                actionLabel="Xem"
-                onAction={onLoginLogs}
-                tone="neutral"
-              />
-            </div>
-          </section>
-        </div>
+        <Paper variant="outlined" sx={{ p: 2.5 }}>
+          <Typography component="h2" sx={{ fontWeight: 700 }} variant="subtitle1">Quyền truy cập LMS</Typography>
+          <Typography color="text.secondary" variant="body2">Khả năng hiệu lực từ session; deny luôn thắng allow.</Typography>
+          <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 2 }}>
+            {effectiveCapabilities.length ? effectiveCapabilities.map(([label]) => <Chip color="info" key={label} label={label} variant="outlined" />) : (
+              <Alert severity="warning">Session chưa có capability LMS hiệu lực.</Alert>
+            )}
+          </Stack>
+        </Paper>
+      </Stack>
 
-        <section className="rounded-lg border border-[#cbd7e6] bg-white px-5 py-4 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className="text-base font-semibold text-slate-950">Quyền truy cập LMS</h2>
-              <p className="mt-1 text-[13px] font-semibold text-slate-600">Các phạm vi đang được cấp cho tài khoản này.</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {permissionLabels.map((label) => (
-                <span key={label} className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] px-3 py-1.5 text-[13px] font-bold text-[#0f5ea8]">
-                  {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </section>
-      </div>
-
-      <AccountActionDialog
-        activeDialog={activeDialog}
-        primaryEmail={email}
-        secondaryEmailDraft={secondaryEmailDraft}
-        phoneDraft={phoneDraft}
-        setActiveDialog={setActiveDialog}
-        setSecondaryEmailDraft={setSecondaryEmailDraft}
-        setPhoneDraft={setPhoneDraft}
-      />
-    </section>
+      <Dialog fullWidth maxWidth="sm" open={Boolean(dialog)} onClose={closeDialog}>
+        <DialogTitle>{dialogTitle(dialog)}</DialogTitle>
+        <DialogContent dividers>
+          <Stack spacing={2}>
+            {error ? <Alert severity="error">{error}</Alert> : null}
+            {dialog === "phone" ? <ErgTextField autoFocus label="Số điện thoại" value={phone} onChange={(event) => setPhone(event.target.value)} /> : null}
+            {dialog === "recovery" ? (
+              <>
+                <ErgTextField autoFocus label="Email khôi phục" type="email" value={recoveryEmail} onChange={(event) => setRecoveryEmail(event.target.value)} />
+                {challenge ? <ErgTextField label="Mã xác minh" value={otp} onChange={(event) => setOtp(event.target.value)} /> : null}
+              </>
+            ) : null}
+            {dialog === "password" ? (
+              <>
+                <ErgTextField autoFocus label="Mật khẩu hiện tại" type="password" value={currentPassword} onChange={(event) => setCurrentPassword(event.target.value)} />
+                <ErgTextField label="Mật khẩu mới" type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} />
+                <ErgTextField label="Xác nhận mật khẩu mới" type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} />
+              </>
+            ) : null}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={busy} onClick={closeDialog}>Hủy</Button>
+          {dialog === "phone" ? <Button disabled={busy} variant="contained" onClick={savePhone}>Lưu số điện thoại</Button> : null}
+          {dialog === "recovery" ? <Button disabled={busy} variant="contained" onClick={challenge ? verifyRecovery : requestRecovery}>{challenge ? "Xác minh" : "Gửi mã xác minh"}</Button> : null}
+          {dialog === "password" ? <Button disabled={busy} variant="contained" onClick={savePassword}>Lưu mật khẩu mới</Button> : null}
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }
 
-function SectionHeader({ compact, description, title }: { compact?: boolean; description: string; title: string }) {
-  return (
-    <div className={cn("border-b border-slate-100 px-5", compact ? "py-4" : "py-4")}>
-      <h2 className="text-base font-semibold text-slate-950">{title}</h2>
-      <p className="mt-1 text-[13px] font-semibold text-slate-600">{description}</p>
-    </div>
-  );
+function SectionTitle({ description, title }: { description: string; title: string }) {
+  return <Box sx={{ borderBottom: 1, borderColor: "divider", p: 2.5 }}><Typography sx={{ fontWeight: 700 }}>{title}</Typography><Typography color="text.secondary" variant="body2">{description}</Typography></Box>;
 }
 
-function InfoRow({
-  actionLabel,
-  icon: Icon,
-  label,
-  onAction,
-  value,
-}: {
-  actionLabel?: string;
-  icon?: typeof UserRound;
-  label: string;
-  onAction?: () => void;
-  value?: string | null;
-}) {
-  return (
-    <div className="min-h-20 bg-white px-5 py-4">
-      <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600">
-        {Icon ? <Icon className="size-3.5" /> : null}
-        {label}
-      </div>
-      <div className="mt-2 text-sm font-semibold text-slate-900">{value || "-"}</div>
-      {actionLabel && onAction ? (
-        <button type="button" onClick={onAction} className="mt-2 text-[13px] font-bold text-[var(--erg-blue)] hover:underline">
-          {actionLabel}
-        </button>
-      ) : null}
-    </div>
-  );
+function AccountRow({ actionLabel, detail, label, onAction, value }: { actionLabel?: string; detail?: string; label: string; onAction?: () => void; value: string }) {
+  return <Stack direction="row" spacing={2} sx={{ alignItems: "center", p: 2.5 }}><Box sx={{ flex: 1 }}><Typography color="text.secondary" variant="caption">{label}</Typography><Typography sx={{ fontWeight: 650 }} variant="body2">{value}</Typography>{detail ? <Typography color="text.secondary" variant="caption">{detail}</Typography> : null}</Box>{actionLabel ? <Button size="small" onClick={onAction}>{actionLabel}</Button> : null}</Stack>;
 }
 
-function SecurityRow({
-  actionLabel,
-  detail,
-  icon: Icon,
-  onAction,
-  title,
-  tone,
-}: {
-  actionLabel: string;
-  detail: string;
-  icon: typeof ShieldCheck;
-  onAction: () => void;
-  title: string;
-  tone: "success" | "info" | "warning" | "neutral";
-}) {
-  return (
-    <div className="flex items-center gap-3 px-5 py-4">
-      <span
-        className={cn(
-          "grid size-10 shrink-0 place-items-center rounded-lg",
-          tone === "success" && "bg-emerald-50 text-emerald-600",
-          tone === "info" && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-          tone === "warning" && "bg-amber-50 text-amber-600",
-          tone === "neutral" && "bg-slate-100 text-slate-600",
-        )}
-      >
-        <Icon className="size-5" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-slate-950">{title}</span>
-        <span className="mt-1 block text-[13px] font-semibold leading-5 text-slate-600">{detail}</span>
-      </span>
-      <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={onAction}>
-        {actionLabel}
-      </Button>
-    </div>
-  );
-}
-
-function AccountActionDialog({
-  activeDialog,
-  primaryEmail,
-  secondaryEmailDraft,
-  phoneDraft,
-  setActiveDialog,
-  setSecondaryEmailDraft,
-  setPhoneDraft,
-}: {
-  activeDialog: AccountDialog;
-  primaryEmail: string;
-  secondaryEmailDraft: string;
-  phoneDraft: string;
-  setActiveDialog: (dialog: AccountDialog) => void;
-  setSecondaryEmailDraft: (value: string) => void;
-  setPhoneDraft: (value: string) => void;
-}) {
-  const title =
-    activeDialog === "email"
-      ? "Thêm email phụ"
-      : activeDialog === "password"
-        ? "Đổi mật khẩu"
-        : activeDialog === "phone"
-          ? "Cập nhật số điện thoại"
-          : "Bật xác thực 2 lớp";
-
-  return (
-    <Dialog open={activeDialog !== null} onOpenChange={(open) => !open && setActiveDialog(null)}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{getDialogDescription(activeDialog, primaryEmail)}</DialogDescription>
-        </DialogHeader>
-
-        {activeDialog === "email" ? (
-          <div className="grid gap-3">
-            <Input value={secondaryEmailDraft} onChange={(event) => setSecondaryEmailDraft(event.target.value)} placeholder="Email phụ" />
-            <Input placeholder="Mã xác minh gửi về email chính" />
-          </div>
-        ) : null}
-
-        {activeDialog === "password" ? (
-          <div className="grid gap-3">
-            <Input type="password" placeholder="Mật khẩu hiện tại" />
-            <Input type="password" placeholder="Mật khẩu mới" />
-            <Input type="password" placeholder="Nhập lại mật khẩu mới" />
-          </div>
-        ) : null}
-
-        {activeDialog === "phone" ? (
-          <div className="grid gap-3">
-            <Input value={phoneDraft} onChange={(event) => setPhoneDraft(event.target.value)} placeholder="Số điện thoại" />
-            <Input placeholder="Mã xác minh gửi về email chính" />
-          </div>
-        ) : null}
-
-        {activeDialog === "mfa" ? (
-          <div className="rounded-md border border-[#b8d6fa] bg-[var(--erg-blue-light)] p-4 text-sm leading-6 text-slate-600">
-            Khi bật 2FA, thiết bị mới sẽ cần thêm mã xác minh qua email hoặc ứng dụng OTP.
-          </div>
-        ) : null}
-
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="outline">Hủy</Button>
-          </DialogClose>
-          <Button onClick={() => setActiveDialog(null)}>Lưu thay đổi</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function getDialogDescription(activeDialog: AccountDialog, primaryEmail: string) {
-  if (activeDialog === "email") {
-    return `Email chính ${primaryEmail} không thể thay đổi. Mã xác minh sẽ được gửi về email chính để thêm email phụ.`;
-  }
-
-  if (activeDialog === "phone") {
-    return `Nhập số điện thoại mới. Mã xác minh sẽ được gửi về email chính ${primaryEmail}.`;
-  }
-
-  return "Nhập thông tin mới và mã xác minh để cập nhật tài khoản.";
+function dialogTitle(dialog: AccountDialog) {
+  if (dialog === "phone") return "Cập nhật số điện thoại";
+  if (dialog === "recovery") return "Cập nhật email khôi phục";
+  if (dialog === "password") return "Đổi mật khẩu";
+  return "Tài khoản";
 }
 
 function initials(value: string) {
-  return value
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(-2)
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase();
+  return value.split(/\s+/).filter(Boolean).slice(-2).map((part) => part[0]?.toUpperCase()).join("");
 }

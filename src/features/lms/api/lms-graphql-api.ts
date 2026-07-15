@@ -129,6 +129,7 @@ export type LmsAssignment = {
   id: string;
   academicClassId?: string | null;
   quizId?: string | null;
+  resources?: LmsAssignmentResource[] | null;
   subjectId?: string | null;
   dueAt?: string | null;
   status?: string | null;
@@ -136,6 +137,13 @@ export type LmsAssignment = {
   recipientMode?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
+};
+
+export type LmsAssignmentResource = {
+  quizId: string;
+  quizVersionId?: string | null;
+  quizVersionLabel?: string | null;
+  orderIndex?: number | null;
 };
 
 export type LmsClassWorkspace = {
@@ -375,6 +383,12 @@ query LmsClassWorkspace($input: ClassWorkspaceInput!) {
           status
           assignedBy
           recipientMode
+          resources {
+            quizId
+            quizVersionId
+            quizVersionLabel
+            orderIndex
+          }
           createdAt
           updatedAt
         }
@@ -419,6 +433,12 @@ query LmsTeacherHomeworkWorkspace($input: TeacherHomeworkWorkspaceInput) {
           status
           assignedBy
           recipientMode
+          resources {
+            quizId
+            quizVersionId
+            quizVersionLabel
+            orderIndex
+          }
           createdAt
           updatedAt
         }
@@ -492,6 +512,12 @@ query LmsAssignmentProgressWorkspace($input: AssignmentProgressWorkspaceInput!) 
         status
         assignedBy
         recipientMode
+        resources {
+          quizId
+          quizVersionId
+          quizVersionLabel
+          orderIndex
+        }
         createdAt
         updatedAt
       }
@@ -668,9 +694,13 @@ export function mapAssignmentsToRuns(
     const submittedCount = progress?.submittedCount ?? 0;
     const inProgressCount = progress?.inProgressCount ?? 0;
     const total = submittedCount + inProgressCount;
+    const primaryResource = primaryAssignmentResource(assignment);
 
     return {
       id: assignment.id,
+      quizId: primaryResource?.quizId ?? assignment.quizId ?? null,
+      quizVersionId: primaryResource?.quizVersionId ?? null,
+      quizVersionLabel: primaryResource?.quizVersionLabel ?? null,
       title: assignment.quizId ? `Bai tap ${assignment.quizId}` : assignment.id,
       subjectLabel: subjectLabel(assignment.subjectId),
       targetLevel: classOption?.name || assignment.academicClassId || "Lop da giao",
@@ -682,6 +712,12 @@ export function mapAssignmentsToRuns(
       dueLabel: formatDueLabel(assignment.dueAt),
     };
   });
+}
+
+function primaryAssignmentResource(assignment: LmsAssignment) {
+  return [...(assignment.resources ?? [])].sort(
+    (left, right) => (left.orderIndex ?? 0) - (right.orderIndex ?? 0),
+  )[0];
 }
 
 export function mapClassWorkspaceToStudents(

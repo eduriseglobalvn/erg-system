@@ -5,7 +5,8 @@ import type {
 } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import type { LocalContentItem } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
-export const USE_LEARNING_RESOURCE_AUTHORING_MOCK = true;
+// TODO(curriculum-api): remove this flag once canonical curriculum/content data is seeded for every environment.
+export const USE_LEARNING_RESOURCE_AUTHORING_MOCK = import.meta.env.VITE_LCMS_LEARNING_RESOURCE_MOCK === "true";
 
 const IC3_SUBJECT_ID = "mock-ic3-gs6";
 const STEM_SUBJECT_ID = "mock-stem";

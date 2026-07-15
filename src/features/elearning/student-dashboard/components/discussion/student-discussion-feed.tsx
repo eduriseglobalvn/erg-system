@@ -14,13 +14,11 @@ import {
 } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 
+import MuiAvatar from "@mui/material/Avatar";
+import Button from "@mui/material/Button";
+
 import { SocialReactionAction, SocialReactionCountBadge, SocialReactionSummary } from "@/components/social-reactions";
-import {
-  Avatar as ShadcnAvatar,
-  AvatarFallback,
-} from "@/components/ui/avatar";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import { Button } from "@/components/ui/button";
 import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type {
   StudentDiscussionComment,
@@ -171,11 +169,12 @@ export function StudentDiscussionFeed({
                 onChange={handlePostAttachmentChange}
               />
               <Button
+                variant="contained"
+                startIcon={<Send className="h-4 w-4" />}
                 className="rounded-full bg-[#696CFF] px-5 text-white shadow-sm hover:bg-[#585BE0]"
                 disabled={!postDraft.trim() && postAttachments.length === 0}
                 type="submit"
               >
-                <Send className="h-4 w-4" />
                 {copy.discussionPostAction}
               </Button>
             </div>
@@ -809,17 +808,23 @@ function ModerationNotice({ compact, copy }: { compact?: boolean; copy: Discussi
 }
 
 function Avatar({ initials, size }: { initials: string; size: "sm" | "lg" }) {
+  const dimension = size === "lg" ? 44 : 32;
+
   return (
-    <ShadcnAvatar className={cn("shrink-0 rounded-full ring-2 ring-white", size === "lg" ? "size-11" : "size-8")}>
-      <AvatarFallback
-        className={cn(
-          "rounded-full bg-[#696CFF] font-semibold text-white",
-          size === "lg" ? "text-sm" : "text-xs",
-        )}
-      >
-        {initials}
-      </AvatarFallback>
-    </ShadcnAvatar>
+    <MuiAvatar
+      className="shrink-0"
+      sx={{
+        width: dimension,
+        height: dimension,
+        bgcolor: "#696CFF",
+        color: "#fff",
+        fontWeight: 600,
+        fontSize: size === "lg" ? 14 : 12,
+        boxShadow: "0 0 0 2px #fff",
+      }}
+    >
+      {initials}
+    </MuiAvatar>
   );
 }
 

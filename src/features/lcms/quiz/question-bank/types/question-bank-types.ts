@@ -63,6 +63,7 @@ export type QuestionBankQuestion = {
   rationale?: string;
   answer?: string;
   choices?: QuestionBankChoice[];
+  settings?: Record<string, unknown>;
 };
 
 export type QuizBankItem = {
@@ -75,6 +76,7 @@ export type QuizBankItem = {
   subjectLabel: string;
   levelId: string;
   levelLabel: string;
+  categoryId?: string;
   topicLabels: string[];
   questionIds: string[];
   questionCount: number;

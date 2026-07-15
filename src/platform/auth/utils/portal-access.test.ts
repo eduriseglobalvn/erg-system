@@ -9,7 +9,6 @@ const teacherAccount: TeacherAccount = {
   id: "teacher-1",
   fullName: "Teacher One",
   email: "teacher@erg.edu.vn",
-  password: "",
   role: "teacher",
   provider: "password",
   department: "ERG",
@@ -19,11 +18,11 @@ const teacherAccount: TeacherAccount = {
   lastLoginAt: "2026-01-01T00:00:00.000Z",
 };
 
-test("allows teacher sessions to enter elearning", () => {
+test("allows teacher sessions to enter elearning only with explicit entitlement", () => {
   const teacherSession: StoredAuthSession = {
     accessToken: "teacher-token",
     portal: "lms",
-    portals: ["lms"],
+    portals: ["lms", "elearning"],
   };
 
   expect(
@@ -35,7 +34,7 @@ test("allows teacher sessions to enter elearning", () => {
   ).toBe(true);
 });
 
-test("allows admin accounts to enter elearning with teacher session", () => {
+test("does not grant elearning from admin role or email alone", () => {
   const adminAccount: TeacherAccount = {
     ...teacherAccount,
     email: "admin@erg.edu.vn",
@@ -53,7 +52,7 @@ test("allows admin accounts to enter elearning with teacher session", () => {
       teacherAccount: adminAccount,
       teacherSession,
     }),
-  ).toBe(true);
+  ).toBe(false);
 });
 
 test("allows elearning when a student session exists", () => {
@@ -107,7 +106,7 @@ test("allows CRM when the session has admin-style access", () => {
   ).toBe(true);
 });
 
-test("allows LCMS with an LMS teacher session", () => {
+test("does not merge LMS entitlement into LCMS", () => {
   const teacherSession: StoredAuthSession = {
     accessToken: "lms-token",
     portal: "lms",
@@ -120,5 +119,5 @@ test("allows LCMS with an LMS teacher session", () => {
       teacherAccount,
       teacherSession,
     }),
-  ).toBe(true);
+  ).toBe(false);
 });

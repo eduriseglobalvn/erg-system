@@ -32,13 +32,19 @@ import {
 } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession, loginStudent } from "@/platform/auth/api/student-auth-storage";
 import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
+import { ReauthDialog } from "@/platform/auth/components/reauth-dialog";
 import { PortalMobileLoginShell } from "@/platform/auth/components/portal-mobile-login-shell";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { buildRedirectPath, isAuthOnlyRedirect } from "@/platform/auth/utils/auth-redirects";
+import {
+  buildLoginRedirectTarget,
+  buildRedirectPath,
+  isAuthOnlyRedirect,
+} from "@/platform/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ApiClientError } from "@/lib/api-client";
+import { ApiClientError, isBffAuthEnabled } from "@/lib/api-client";
 import { TsForm } from "@/components/ui/tanstack-form";
+import { requiresTeacherOnboarding } from "@/platform/auth/types/account-lifecycle";
 
 type PortalKey = NonNullable<StoredAuthSession["portal"]>;
 type AuthSession = ReturnType<typeof useAuthSession>;
@@ -91,41 +97,46 @@ export function PortalAuthGate({ children, portal }: PortalAuthGateProps) {
   const location = useLocation();
   const redirect = buildRedirectPath(location.pathname, location.search, location.hash);
   const studentSession = getCurrentStudentSession();
-  const teacherAccount = portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
-  const teacherSession = portal === "elearning"
+  const teacherAccount = isBffAuthEnabled() ? auth.account : portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
+  const teacherSession = isBffAuthEnabled() ? auth.session : portal === "elearning"
     ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
     : readStoredAuthSession(portal);
 
   if (canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })) {
     if (needsOnboarding(teacherAccount)) {
-      return (
-        <PortalLoginShell copy={getPortalLoginCopy(portal)}>
-          <NoticeBanner notice={auth.notice} />
-          <OnboardingPanel auth={auth} />
-        </PortalLoginShell>
-      );
+      return <Navigate replace to={`/onboarding?redirect=${encodeURIComponent(redirect)}`} />;
     }
 
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <ReauthDialog
+          open={auth.reauthRequired}
+          onReauthenticate={auth.actions.reauthenticate}
+          onSignOut={auth.actions.signOut}
+        />
+      </>
+    );
   }
 
   if (teacherAccount) {
     return <Navigate replace to={accessDeniedPath(portal, teacherAccount.email, redirect)} />;
   }
 
-  return <Navigate replace to={`/login?redirect=${encodeURIComponent(redirect)}`} />;
+  const loginTarget = buildLoginRedirectTarget(location.pathname, location.search, location.hash);
+  return loginTarget ? <Navigate replace to={loginTarget} /> : null;
 }
 
 export function AuthenticatedAccountGate({ children }: { children: ReactNode }) {
   const auth = useAuthSession();
   const location = useLocation();
-  const redirect = buildRedirectPath(location.pathname, location.search, location.hash);
 
   if (auth.account) {
     return <>{children}</>;
   }
 
-  return <Navigate replace to={`/login?redirect=${encodeURIComponent(redirect)}`} />;
+  const loginTarget = buildLoginRedirectTarget(location.pathname, location.search, location.hash);
+  return loginTarget ? <Navigate replace to={loginTarget} /> : null;
 }
 
 export function PortalLoginPage({ badge, description, portal, title }: PortalLoginPageProps) {
@@ -143,8 +154,8 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     description: description ?? copy.description,
   };
   const studentSession = getCurrentStudentSession();
-  const teacherAccount = portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
-  const teacherSession = portal === "elearning"
+  const teacherAccount = isBffAuthEnabled() ? auth.account : portal === "elearning" ? getCurrentAccount("lms") ?? getCurrentAccount("lcms") : auth.account;
+  const teacherSession = isBffAuthEnabled() ? auth.session : portal === "elearning"
     ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
     : readStoredAuthSession(portal);
 
@@ -222,7 +233,7 @@ export function StudentPortalAuthGate({ children }: Omit<PortalAuthGateProps, "p
 }
 
 function needsOnboarding(account: AuthSession["account"]) {
-  return account?.isProfileCompleted === false;
+  return Boolean(account && (requiresTeacherOnboarding(account.lifecycle) || (!account.lifecycle && account.isProfileCompleted === false)));
 }
 
 async function safely(auth: AuthSession, run: () => unknown | Promise<unknown>, onAccessDenied?: () => void) {
@@ -563,7 +574,8 @@ function NoticeBanner({ notice }: { notice: AuthSession["notice"] }) {
   );
 }
 
-function OnboardingPanel({ auth }: { auth: AuthSession }) {
+/** @deprecated Kept temporarily for compatibility; routing now uses /onboarding. */
+export function OnboardingPanel({ auth }: { auth: AuthSession }) {
   const form = useForm({
     defaultValues: auth.profileForm,
     onSubmit: () => {

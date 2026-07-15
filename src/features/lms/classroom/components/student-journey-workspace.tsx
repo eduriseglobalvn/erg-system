@@ -7,9 +7,9 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
 import {
   classroomSchools,
   classroomStudents,
@@ -20,7 +20,7 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 export function StudentJourneyWorkspace({
@@ -84,7 +84,7 @@ export function StudentJourneyWorkspace({
             value={student?.id ?? ""}
             onChange={setStudentId}
           />
-          <Button variant="outline" onClick={() => onOpenLeaf("class-reports")}>
+          <Button variant="outlined" onClick={() => onOpenLeaf("class-reports")}>
             {copy.openReports}
           </Button>
         </>
@@ -141,7 +141,7 @@ export function StudentJourneyWorkspace({
                   <div className="text-sm font-semibold text-slate-950">{strength.label}</div>
                   <div className="text-sm font-semibold text-slate-900">{strength.value}%</div>
                 </div>
-                <ProgressBar value={strength.value} className="mt-3 h-2 bg-white" indicatorClassName="bg-[var(--erg-blue)]" />
+                <LinearProgress variant="determinate" value={strength.value} sx={{ mt: 1.5, height: 8, borderRadius: 1, bgcolor: "common.white" }} />
               </div>
             ))}
           </div>
@@ -167,9 +167,12 @@ export function StudentJourneyWorkspace({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="text-sm font-semibold text-slate-950">{milestone.title}</div>
-                    <Badge tone={milestone.state === "done" ? "success" : milestone.state === "current" ? "secondary" : "outline"}>
-                      {copy.milestoneState[milestone.state]}
-                    </Badge>
+                    <Chip
+                      label={copy.milestoneState[milestone.state]}
+                      size="small"
+                      variant={milestone.state === "next" ? "outlined" : "filled"}
+                      color={milestone.state === "done" ? "success" : "secondary"}
+                    />
                   </div>
                   <div className="mt-1 text-sm leading-6 text-slate-500">{milestone.detail}</div>
                 </div>

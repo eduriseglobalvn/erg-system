@@ -3,7 +3,6 @@ import { Apple, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 
 import { useForm } from "@tanstack/react-form";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
 import type {
   AuthMode,
   LoginFormState,
@@ -56,8 +55,10 @@ export function PortalMobileLoginForm({
   showPassword,
 }: PortalMobileLoginFormProps) {
   const { t } = useI18n();
+  void mode;
+  void onProviderLogin;
   const passwordInputRef = useRef<HTMLInputElement>(null);
-  const effectiveMode = allowRegister ? mode : "login";
+  const effectiveMode: AuthMode = "login";
   const loginTanstackForm = useForm({
     defaultValues: loginForm,
     onSubmit: () => onLoginSubmit(createHandledSubmitEvent()),
@@ -77,7 +78,7 @@ export function PortalMobileLoginForm({
   return (
     <section style={styles.card}>
       <div style={styles.cardAccent} />
-      {allowRegister ? (
+       {false && allowRegister ? (
         <div style={styles.segmentedControl}>
           <button
             style={effectiveMode === "login" ? styles.segmentedActive : styles.segmentedButton}
@@ -208,20 +209,17 @@ export function PortalMobileLoginForm({
             </loginTanstackForm.Subscribe>
           </TsForm>
 
-          {allowGoogle ? (
+          {false && allowGoogle ? (
             <div style={styles.socialArea}>
               <p style={styles.socialLabel}>Hoặc đăng nhập với</p>
               <div style={styles.socialButtons}>
                 <DisabledSocialButton label="Facebook">
                   <span style={styles.facebookGlyph}>f</span>
                 </DisabledSocialButton>
-                <GoogleSignInButton
-                  label={t("auth.loginWithGoogle")}
-                  onCredential={(idToken) => onProviderLogin("google", idToken)}
-                  onError={(message) => {
-                    console.warn(message);
-                  }}
-                  variant="icon"
+                <button
+                  hidden
+                  type="button"
+                  onClick={() => undefined}
                 />
                 <DisabledSocialButton label="Apple">
                   <Apple fill="#111827" size={23} strokeWidth={0} />

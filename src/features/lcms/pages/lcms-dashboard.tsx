@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * LCMS Dashboard — CenterUp EXACT Design
+ * LCMS Dashboard - ERG enterprise design
  * MUI v9 Table + Responsive Grid
  * 
  * Design tokens:

@@ -26,4 +26,7 @@ export type ContentScope =
 export type DashboardUserPermissions = {
   canAccessGlobalErg: boolean;
   assignedCenterIds: string[];
+  roles: string[];
+  grantedPermissions: string[];
+  deniedPermissions: string[];
 };

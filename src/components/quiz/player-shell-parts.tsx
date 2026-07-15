@@ -52,23 +52,20 @@ export function FinalResultScreen({
   );
 }
 
-export function QuestionFeedbackPanel({ result }: { result: AnswerResult }) {
-  const tone = result.correct ? "correct" : "wrong";
-  const title = result.correct ? "Đáp án chính xác!" : result.partiallyRight ? "Đáp án gần đúng!" : "Đáp án chưa đúng!";
-  const headerClass =
-    tone === "correct"
-      ? "bg-[#78b816]"
-      : result.partiallyRight
-        ? "bg-[#f59e0b]"
-        : "bg-[#e65a4d]";
+export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
+  const title = result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
+  const headerClass = result.correct ? "bg-[#22C55E]" : "bg-[#e82828]";
+  const message = result.correct ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
+  const panelClassName = floating
+    ? "w-full max-w-[884px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_44px_rgba(15,23,42,0.16)]"
+    : "mx-auto mt-8 w-full max-w-[884px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm";
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-[884px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+    <div className={panelClassName}>
       <div className={`flex min-h-12 items-center justify-between px-5 text-base font-semibold text-white ${headerClass}`}>
         <span>{title}</span>
-        <span className="text-xl font-light">⌄</span>
       </div>
-      <div className="px-5 py-5 text-base leading-7 text-slate-950">{result.message}</div>
+      <div className="px-5 py-5 text-base leading-7 text-slate-950">{message}</div>
     </div>
   );
 }
@@ -106,7 +103,7 @@ export function SubmitConfirmDialog({
               className="min-h-9 min-w-[136px] rounded-md bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"
             >
               {submitting
-                ? "SUBMITTING..."
+                ? "ĐANG NỘP..."
                 : isAllAnswered
                   ? resultDisplay.submitAllLabel
                   : resultDisplay.confirmYesLabel}

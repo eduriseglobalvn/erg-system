@@ -5,9 +5,9 @@ import { Maximize2 as OpenInFullIcon } from "@/components/mui-icon-shim";
 
 import { useI18n, type MessageKey } from "@/platform/i18n";
 import type {
-  QuestionManagerFilter,
   QuizEditorGroup,
   QuizEditorSlide,
+  SlideKind,
   SelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import {
@@ -20,8 +20,9 @@ type QuestionManagerTableProps = {
   quizTitle: string;
   groups: QuizEditorGroup[];
   selectedNode: SelectedEditorNode;
-  activeFilter: QuestionManagerFilter;
-  onSelectSlide: (groupId: string, slideId: string) => void;
+  lessonLabel: string;
+  lessonMeta: string;
+  topicLabel: string;
   onOpenEditor: () => void;
   onOpenEditorFor: (groupId: string, slideId: string) => void;
   onDuplicateSelected: () => void;
@@ -32,18 +33,38 @@ type QuestionManagerRow = {
   id: string;
   index: number;
   groupId: string;
-  groupTitle: string;
   slide: QuizEditorSlide;
 };
 
 type Translate = (key: MessageKey, params?: Record<string, string | number>) => string;
 
+const managerQuestionTypeLabels: Partial<Record<SlideKind, string>> = {
+  "instruction-slide": "Trang hướng dẫn",
+  "intro-slide": "Trang giới thiệu",
+  "user-info": "Thông tin học viên",
+  "true-false": "True/False",
+  "multiple-choice": "Multiple Choice",
+  "multiple-response": "Multiple Response",
+  "fill-in-the-blanks": "Fill in the Blank",
+  matching: "Matching",
+  sequence: "Sequence",
+  hotspot: "Click Map",
+  "drag-and-drop": "Drag and Drop",
+  "drag-the-words": "Drag the Words",
+  "select-from-lists": "Select from Lists",
+  numeric: "Numeric",
+  "short-answer": "Short Answer",
+  "likert-scale": "Likert Scale",
+  essay: "Essay",
+};
+
 export function QuestionManagerTable({
   quizTitle,
   groups,
   selectedNode,
-  activeFilter,
-  onSelectSlide,
+  lessonLabel,
+  lessonMeta,
+  topicLabel,
   onOpenEditor,
   onOpenEditorFor,
   onDuplicateSelected,
@@ -51,35 +72,24 @@ export function QuestionManagerTable({
 }: QuestionManagerTableProps) {
   const { t } = useI18n();
   const rows = useMemo<QuestionManagerRow[]>(() => {
-    let globalIndex = 0;
     const flattened = groups.flatMap((group) =>
       group.slides
         .filter((slide) => isQuestionManagerSlideKind(slide.kind))
-        .map((slide) => {
-          globalIndex += 1;
-          return {
-            id: slide.id,
-            index: globalIndex,
-            groupId: group.id,
-            groupTitle: group.title,
-            slide,
-          };
-        }),
+        .map((slide) => ({
+          id: slide.id,
+          groupId: group.id,
+          slide,
+        })),
     );
 
-    if (activeFilter === "all") {
-      return flattened;
-    }
-
-    return flattened.filter((row) => row.slide.kind === activeFilter);
-  }, [activeFilter, groups]);
+    return flattened.map((row, index) => ({
+      ...row,
+      index: index + 1,
+    }));
+  }, [groups]);
 
   const selectedSlideId = selectedNode.type === "slide" ? selectedNode.slideId : null;
   const selectedRow = rows.find((row) => row.slide.id === selectedSlideId) ?? null;
-  const activeScopeLabel =
-    activeFilter === "all"
-      ? t("quiz.allQuestionTypes")
-      : t(getSlideKindLabelKey(activeFilter));
 
   return (
     <main className="classic-editor__manager-canvas">
@@ -93,8 +103,9 @@ export function QuestionManagerTable({
 
             <div className="classic-editor__manager-strip-meta">
               <span>{t("quiz.questionCount", { count: rows.length })}</span>
-              <span>{t("quiz.groupCount", { count: groups.length })}</span>
-              <span>{activeScopeLabel}</span>
+              <span>{lessonLabel}</span>
+              <span>{lessonMeta}</span>
+              <span>{topicLabel}</span>
             </div>
 
             <div className="classic-editor__manager-toolbar">
@@ -128,78 +139,88 @@ export function QuestionManagerTable({
             </div>
           </div>
 
-          <div className="classic-editor__manager-table-wrap">
-            <table className="classic-editor__manager-table">
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>{t("common.questionType")}</th>
-                  <th>{t("common.question")}</th>
-                  <th>{t("common.feedback")}</th>
-                  <th>{t("common.group")}</th>
-                  <th>{t("common.score")}</th>
-                  <th>{t("common.media")}</th>
-                  <th>{t("common.edit")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.length ? (
-                  rows.map((row, rowIndex) => (
-                    <tr
-                      key={row.slide.id}
-                      className={cn(
-                        row.slide.id === selectedSlideId && "is-active",
-                        rowIndex % 2 === 1 && "is-alt",
-                      )}
-                      onClick={() => onSelectSlide(row.groupId, row.slide.id)}
-                      onDoubleClick={() => onOpenEditorFor(row.groupId, row.slide.id)}
-                    >
-                      <td className="classic-editor__manager-table-id">{row.index}</td>
-                      <td>{t(getSlideKindLabelKey(row.slide.kind))}</td>
-                      <td className="classic-editor__manager-table-question">
-                        <button
-                          type="button"
-                          className="classic-editor__manager-question-button"
-                          aria-pressed={row.slide.id === selectedSlideId}
-                          onClick={() => onSelectSlide(row.groupId, row.slide.id)}
-                        >
-                          <div>{row.slide.title}</div>
-                          {row.slide.description ? (
-                            <span>{row.slide.description}</span>
-                          ) : null}
-                        </button>
-                      </td>
-                      <td>{extractFeedbackLabel(row.slide, t)}</td>
-                      <td>{row.groupTitle}</td>
-                      <td>{extractPoints(row.slide)}</td>
-                      <td>{extractMediaLabel(row.slide, t)}</td>
-                      <td className="classic-editor__manager-table-actions">
-                        <button
-                          type="button"
-                          className="classic-editor__manager-inline-action"
-                          aria-label={`${t("common.edit")}: ${row.slide.title}`}
-                          onClick={() => onOpenEditorFor(row.groupId, row.slide.id)}
-                        >
-                          {t("common.edit")}
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={8}>
-                      <div className="classic-editor__manager-empty">
-                        {t("quiz.noQuestionsMatchFilter")}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="classic-editor__manager-list-wrap">
+            <div className="classic-editor__manager-list-head" aria-hidden="true">
+              <span>ID</span>
+              <span>Loại câu hỏi</span>
+              <span>Nội dung</span>
+              <span>Chủ đề</span>
+              <span>{t("common.feedback")}</span>
+            </div>
+            <div className="classic-editor__manager-list">
+              {rows.length ? (
+                rows.map((row, rowIndex) => (
+                  <button
+                    key={row.slide.id}
+                    type="button"
+                    className={cn(
+                      "classic-editor__manager-list-row",
+                      getManagerRowKindClass(row.slide.kind),
+                      row.slide.id === selectedSlideId && "is-active",
+                      rowIndex % 2 === 1 && "is-alt",
+                    )}
+                    aria-pressed={row.slide.id === selectedSlideId}
+                    onClick={() => onOpenEditorFor(row.groupId, row.slide.id)}
+                    onDoubleClick={() => onOpenEditorFor(row.groupId, row.slide.id)}
+                  >
+                    <span className="classic-editor__manager-list-id">{row.index}</span>
+                    <span className="classic-editor__manager-list-main">
+                      <span className="classic-editor__manager-list-type">
+                        {formatManagerQuestionType(row.slide, t)}
+                      </span>
+                      <span className="classic-editor__manager-list-question">
+                        {row.slide.title}
+                      </span>
+                      {row.slide.description ? (
+                        <span className="classic-editor__manager-list-description">
+                          {row.slide.description}
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="classic-editor__manager-list-topic">
+                      {topicLabel}
+                    </span>
+                    <span className="classic-editor__manager-list-feedback">
+                      {extractFeedbackLabel(row.slide, t)}
+                    </span>
+                  </button>
+                ))
+              ) : (
+                <div className="classic-editor__manager-empty">
+                  {t("quiz.noQuestionsMatchFilter")}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
     </main>
+  );
+}
+
+function formatManagerQuestionType(slide: QuizEditorSlide, t: Translate) {
+  if (slide.kind === "true-false" && isYesNoSlide(slide)) {
+    return "Yes/No";
+  }
+
+  const kind = slide.kind;
+  return managerQuestionTypeLabels[kind] ?? t(getSlideKindLabelKey(kind));
+}
+
+function getManagerRowKindClass(kind: SlideKind) {
+  return `is-kind-${kind.replaceAll("-", "_")}`;
+}
+
+function isYesNoSlide(slide: QuizEditorSlide) {
+  const normalizedChoices = (slide.choices ?? [])
+    .map((choice) => choice.label.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (normalizedChoices.length !== 2) return false;
+
+  return (
+    normalizedChoices.some((label) => ["yes", "y", "có", "co"].includes(label)) &&
+    normalizedChoices.some((label) => ["no", "n", "không", "khong"].includes(label))
   );
 }
 
@@ -209,30 +230,6 @@ function extractFeedbackLabel(slide: QuizEditorSlide, t: Translate) {
   }
 
   return formatFeedbackValue(slide.options?.feedback ?? "By Question", t);
-}
-
-function extractPoints(slide: QuizEditorSlide) {
-  const scoredRow =
-    slide.feedbackRows?.find((row) => row.kind === "correct") ??
-    slide.feedbackRows?.find((row) => row.kind === "answered");
-
-  return scoredRow?.score ?? 0;
-}
-
-function extractMediaLabel(slide: QuizEditorSlide, t: Translate) {
-  if (slide.media?.src) {
-    return slide.media.name ?? t("common.picture");
-  }
-
-  if (slide.dragDropItems?.length) {
-    return t("quiz.itemCount", { count: slide.dragDropItems.length });
-  }
-
-  if (slide.instructions?.length) {
-    return t("quiz.instructionsLabel");
-  }
-
-  return slide.description ? t("common.text") : t("common.none");
 }
 
 function formatFeedbackValue(

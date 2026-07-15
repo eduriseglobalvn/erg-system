@@ -3,18 +3,12 @@ import { useState, type FormEvent } from "react";
 import { Building2, CheckCircle2, MapPin, School } from "@/components/mui-icon-shim";
 import { useMutation } from "@tanstack/react-query";
 
-import { Button } from "@/components/ui/button";
+import Button from "@mui/material/Button";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogTitle from "@mui/material/DialogTitle";
+import TextField from "@mui/material/TextField";
 import {
   createEducationUnit,
   type LmsEducationUnitDTO,
@@ -121,22 +115,21 @@ export function CreateEducationUnitDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[760px] gap-0 p-0">
-        <TsForm onSubmit={handleSubmit}>
-          <DialogHeader className="border-b border-slate-200 bg-slate-50 px-6 py-5">
+    <Dialog open={open} onClose={() => onOpenChange(false)} fullWidth maxWidth={false} slotProps={{ paper: { sx: { maxWidth: 760 } } }}>
+      <TsForm onSubmit={handleSubmit}>
+        <div className="border-b border-slate-200 bg-slate-50 px-6 py-5">
             <div className="flex items-start gap-3 pr-8">
               <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary ring-1 ring-primary/10">
                 <School className="size-5" />
               </span>
               <div className="min-w-0">
-                <DialogTitle>Tạo cơ sở giáo dục</DialogTitle>
-                <DialogDescription>
+                <DialogTitle sx={{ p: 0 }}>Tạo cơ sở giáo dục</DialogTitle>
+                <p className="text-sm leading-5 text-slate-500">
                   Chọn loại đơn vị và nhập thông tin tối thiểu để khởi tạo cấu trúc LMS.
-                </DialogDescription>
+                </p>
               </div>
             </div>
-          </DialogHeader>
+          </div>
 
           <div className="grid gap-5 px-6 py-5">
             <section className="grid gap-3">
@@ -180,8 +173,9 @@ export function CreateEducationUnitDialog({
                   {(field) => (
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Tên cơ sở</span>
-                  <Input
-                    className="h-10 bg-white"
+                  <TextField
+                    size="small"
+                    fullWidth
                     placeholder={selectedType === "school" ? "VD: ERG Alpha School" : "VD: ERG East Learning Point"}
                     value={field.state.value}
                     onBlur={field.handleBlur}
@@ -189,7 +183,7 @@ export function CreateEducationUnitDialog({
                       field.handleChange(event.target.value);
                       setUnitName(event.target.value);
                     }}
-                    aria-invalid={field.state.meta.errors.length ? "true" : undefined}
+                    error={field.state.meta.errors.length > 0}
                   />
                   <TsFormMessage>{field.state.meta.errors[0]}</TsFormMessage>
                 </label>
@@ -197,8 +191,9 @@ export function CreateEducationUnitDialog({
                 </form.Field>
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Mã cơ sở</span>
-                  <Input
-                    className="h-10 bg-white"
+                  <TextField
+                    size="small"
+                    fullWidth
                     placeholder="VD: ERG-ALPHA"
                     value={unitCode}
                     onChange={(event) => setUnitCode(event.target.value)}
@@ -206,11 +201,11 @@ export function CreateEducationUnitDialog({
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Người phụ trách</span>
-                  <Input className="h-10 bg-white" placeholder="Tên quản trị viên" />
+                  <TextField size="small" fullWidth placeholder="Tên quản trị viên" />
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-sm font-medium text-slate-700">Số điện thoại</span>
-                  <Input className="h-10 bg-white" placeholder="09xx xxx xxx" />
+                  <TextField size="small" fullWidth placeholder="09xx xxx xxx" />
                 </label>
               </div>
 
@@ -229,22 +224,19 @@ export function CreateEducationUnitDialog({
             </section>
           </div>
 
-          <DialogFooter className="border-t border-slate-200 bg-slate-50 px-6 py-4">
-            <DialogClose asChild>
-              <Button type="button" variant="outline" size="lg">
-                Hủy
-              </Button>
-            </DialogClose>
+          <DialogActions className="border-t border-slate-200 bg-slate-50 px-6 py-4">
+            <Button type="button" variant="outlined" size="large" onClick={() => onOpenChange(false)}>
+              Hủy
+            </Button>
             <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
-            <Button type="submit" size="lg" disabled={!canSubmit || !unitName.trim() || createUnitMutation.isPending || isSubmitting}>
+            <Button type="submit" variant="contained" size="large" disabled={!canSubmit || !unitName.trim() || createUnitMutation.isPending || isSubmitting}>
               Tạo cơ sở
             </Button>
               )}
             </form.Subscribe>
-          </DialogFooter>
+          </DialogActions>
         </TsForm>
-      </DialogContent>
     </Dialog>
   );
 }

@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, RefreshCw, Search } from "@/components/mui-icon-shim";
 import { queryKeys } from "@/lib/query-keys";
-import { Button } from "@/components/ui/button";
+import Button from "@mui/material/Button";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import {
   AccessSection,
@@ -30,6 +31,8 @@ import {
   type EffectiveAccess,
   type UserAccessPolicy,
 } from "@/features/lcms/admin-operations/api/access-management-api";
+import { createTeacherAccount, type CreateTeacherAccountResponse } from "@/features/lcms/admin-operations/api/teacher-account-api";
+import { CreateTeacherAccountDialog } from "@/features/lcms/admin-operations/components/create-teacher-account-dialog";
 import {
   assignAdminUserRoles,
   getAdminUser,
@@ -91,6 +94,7 @@ export function UserAccessControlWorkspace({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [retryToken, setRetryToken] = useState(0);
+  const [createTeacherDialogOpen, setCreateTeacherDialogOpen] = useState(false);
   const debouncedQuery = useDebouncedValue(query);
   const debouncedScopeSearch = useDebouncedValue(scopeSearch);
   const paceStateUpdate = usePacedStateBatch();
@@ -106,6 +110,10 @@ export function UserAccessControlWorkspace({
   });
   const accessMutation = useMutation({
     mutationFn: ({ userId, policies }: { userId: string; policies: UserAccessPolicy[] }) => saveUserAccess(userId, { policies }),
+  });
+  const provisionTeacherMutation = useMutation({
+    mutationKey: queryKeys.adminOperations.userAccess.provision(),
+    mutationFn: createTeacherAccount,
   });
 
   useEffect(() => {
@@ -284,6 +292,13 @@ export function UserAccessControlWorkspace({
     setRetryToken((current) => current + 1);
   }
 
+  function handleTeacherCreated(response: CreateTeacherAccountResponse) {
+    setSelectedUserId(response.user.id);
+    setNotice("Tài khoản giáo viên đã được tạo. Trạng thái onboarding sẽ do backend quản lý.");
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status) });
+    setRetryToken((current) => current + 1);
+  }
+
   function applyUserDetail(userDetail: AdminUserDetail) {
     setSelectedUserDetail(userDetail);
     setProfileDraft({
@@ -413,16 +428,26 @@ export function UserAccessControlWorkspace({
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="max-w-3xl">
             <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--erg-blue)]">ERG Identity & Access Management</p>
-            <h2 className="mt-1.5 text-base font-bold text-slate-800">Quản lý thành viên và quyền truy cập</h2>
+            <h2 className="mt-1.5 text-base font-bold text-slate-800">Quản lý tài khoản & phân quyền hệ thống</h2>
             <p className="mt-1 text-xs text-slate-400">
-              Tra cứu hồ sơ, trạng thái kích hoạt, các nhóm quyền mặc định và phạm vi học liệu trên hệ thống LMS/LCMS.
+              Tập trung vào tài khoản nhân sự: chỉnh hồ sơ đăng nhập, active/deactive, gán vai trò và cấp quyền truy cập LMS/LCMS theo phạm vi hệ thống.
             </p>
             {scopeDescription ? <p className="mt-2 text-[10px] font-bold text-[var(--erg-blue)]">Cơ sở thụ hưởng: {scopeDescription}</p> : null}
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-slate-200 bg-white text-center divide-x divide-slate-200 shadow-sm shrink-0">
-            <HeaderMetric label="Tổng số" value={String(users.length)} />
-            <HeaderMetric label="Hoạt động" value={String(users.filter((user) => user.status === "ACTIVE").length)} />
-            <HeaderMetric label="Chưa onboarding" value={String(users.filter((user) => !user.isProfileCompleted).length)} />
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <Button
+              disabled={!options}
+              startIcon={<PersonAddIcon />}
+              variant="contained"
+              onClick={() => setCreateTeacherDialogOpen(true)}
+            >
+              Tạo tài khoản giáo viên
+            </Button>
+            <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-slate-200 bg-white text-center divide-x divide-slate-200 shadow-sm shrink-0">
+              <HeaderMetric label="Tổng tài khoản" value={String(users.length)} />
+              <HeaderMetric label="Đang active" value={String(users.filter((user) => user.status === "ACTIVE").length)} />
+              <HeaderMetric label="Chưa onboarding" value={String(users.filter((user) => !user.isProfileCompleted).length)} />
+            </div>
           </div>
         </div>
         {error && !hasLoadError ? <Banner tone="error">{error}</Banner> : null}
@@ -563,6 +588,13 @@ export function UserAccessControlWorkspace({
         </main>
       </div>
       )}
+      <CreateTeacherAccountDialog
+        open={createTeacherDialogOpen}
+        options={options ?? { modules: [], roleGroups: [], scopes: [] }}
+        onClose={() => setCreateTeacherDialogOpen(false)}
+        onCreated={handleTeacherCreated}
+        onProvision={(input) => provisionTeacherMutation.mutateAsync(input)}
+      />
     </div>
   );
 }
@@ -586,12 +618,12 @@ function UserAccessErrorState({
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant="outline"
-              size="sm"
+              variant="outlined"
+              size="small"
               onClick={onRetry}
+              startIcon={<RefreshCw className="h-3.5 w-3.5" />}
               className="h-8 border-rose-200 bg-white text-xs font-bold text-rose-700 hover:bg-rose-100"
             >
-              <RefreshCw className="h-3.5 w-3.5" />
               Tải lại
             </Button>
             <span className="text-[11px] font-semibold text-rose-700/80">Kiểm tra API IAM hoặc đăng nhập lại nếu phiên đã hết hạn.</span>

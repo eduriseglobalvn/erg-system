@@ -16,14 +16,46 @@ certs/
 .codex-chrome-*/
 .codex-qa/**/chrome-profile*/
 .omc/
+docs/**
+
+# Env (bổ sung tường minh ngoài *.local)
+.env
+.env.*
+!.env.example
+
+# Test / build output
+coverage/
+test-results/
+.vite/
+.playwright-mcp/
+.playwright-screens/
+
+# QA / debug artifacts
+.agent-artifacts/
+.codex-qa/
+.codex-tmp/
+.codex-*.log
+tmp/
+.tmp-*.png
+.tmp-*.log
+.vitest-report*
+capture-quiz.mjs
+centerup-*.png
+centerup-*.json
+centerup-*.html
+lcms-*.png
+menu-*.png
+quiz-*.png
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.superpowers/

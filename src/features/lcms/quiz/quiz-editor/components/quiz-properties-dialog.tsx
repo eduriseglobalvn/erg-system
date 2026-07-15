@@ -654,41 +654,6 @@ export function QuizPropertiesDialog({
             {activeTab === "question-settings" ? (
               <>
                 <PropertySection title={t("quiz.propertiesSectionQuestionDefaults")}>
-                  <div className="classic-editor__property-grid is-two">
-                    <PropertyField label={t("quiz.propertiesPositivePoints")}>
-                      <input
-                        type="number"
-                        value={draft.questionDefaults.positivePoints}
-                        onChange={(event) =>
-                          setDraft((current) => ({
-                            ...current,
-                            questionDefaults: {
-                              ...current.questionDefaults,
-                              positivePoints: Number(event.target.value),
-                            },
-                          }))
-                        }
-                        className="classic-editor__property-number"
-                      />
-                    </PropertyField>
-                    <PropertyField label={t("quiz.propertiesNegativePoints")}>
-                      <input
-                        type="number"
-                        value={draft.questionDefaults.negativePoints}
-                        onChange={(event) =>
-                          setDraft((current) => ({
-                            ...current,
-                            questionDefaults: {
-                              ...current.questionDefaults,
-                              negativePoints: Number(event.target.value),
-                            },
-                          }))
-                        }
-                        className="classic-editor__property-number"
-                      />
-                    </PropertyField>
-                  </div>
-
                   <div className="classic-editor__property-check-list">
                     <label className="classic-editor__property-check">
                       <input

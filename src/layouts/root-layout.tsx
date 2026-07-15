@@ -1,11 +1,10 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { AppSeo } from "@/components/seo/app-seo";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { useEffect, useMemo } from "react";
-import { Outlet, useLocation, useNavigate } from "@/routes/router-compat";
+import { Outlet, useNavigate } from "@/routes/router-compat";
 import {
   CRM_PORTAL_HOSTS,
   ELEARNING_PORTAL_HOSTS,
@@ -13,13 +12,12 @@ import {
   LMS_PORTAL_HOSTS,
   isPortalHost,
 } from "@/config/portal-urls";
-import MuiCenterupProvider from "@/themes/MuiCenterupProvider";
+import ErgMuiProvider from "@/themes/ErgMuiProvider";
 
 export function RootLayout() {
-  const location = useLocation();
   const navigate = useNavigate();
 
-  // Determine portal type from host — LMS/LCMS/CRM dùng MUI, elearning/other dùng shadcn/ui
+  // Determine portal type from host for auth/theme compatibility.
   const portal = useMemo(() => {
     if (typeof window === 'undefined') return 'default';
     if (isPortalHost(LMS_PORTAL_HOSTS)) return 'lms' as const;
@@ -51,12 +49,10 @@ export function RootLayout() {
   }, [navigate]);
 
   return (
-    <TooltipProvider>
-      <MuiCenterupProvider portal={portal}>
-        <AppSeo />
-        <Outlet />
-        <Toaster richColors position="top-right" />
-      </MuiCenterupProvider>
-    </TooltipProvider>
+    <ErgMuiProvider portal={portal}>
+      <AppSeo />
+      <Outlet />
+      <Toaster richColors position="top-right" />
+    </ErgMuiProvider>
   );
 }

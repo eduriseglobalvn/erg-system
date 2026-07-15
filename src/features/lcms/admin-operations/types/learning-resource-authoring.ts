@@ -27,9 +27,12 @@ export type StudioNode = {
 
 export type StudioSubject = LearningResourceSubject;
 
-export type TaxonomyCreateMode = "subject" | "root" | "child";
+export type TaxonomyCreateMode = "subject" | "level" | "topic" | "root" | "child";
 export type TaxonomyCreateKind = "category" | "section";
-export type TaxonomyDialogState = { mode: TaxonomyCreateMode; initialOption?: "category" | "section" | "lecture" | "exercise" | "resource" } | null;
+export type TaxonomyDialogState = {
+  mode: TaxonomyCreateMode;
+  initialOption?: "category" | "section" | "lecture" | "exercise" | "resource";
+} | null;
 
 export type LocalContentKind = "lecture" | "exercise";
 export type LocalContentItem = {
@@ -42,6 +45,10 @@ export type LocalContentItem = {
   description?: string;
   slidesUrl?: string;
   resourceUrl?: string;
+  sourceQuizId?: string;
+  sourceLabel?: string;
+  quizKind?: "train" | "test";
+  scopeLabel?: string;
   topicLabel?: string;
   sectionLabel?: string;
   questionCount?: number;

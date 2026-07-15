@@ -1,5 +1,5 @@
-import LcmsCenterupShell from "@/features/lcms/lcms-centerup-shell";
+import LcmsErgPortalShell from "@/features/lcms/lcms-erg-portal-shell";
 
 export function LcmsPortalShell() {
-  return <LcmsCenterupShell />;
+  return <LcmsErgPortalShell />;
 }

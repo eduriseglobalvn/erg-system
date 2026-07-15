@@ -1,10 +1,11 @@
 import { type ReactNode } from "react";
 
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
+
 import { ErgFooter } from "@/components/erg-footer";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ProgressBar } from "@/components/ui/progress";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentAssignmentAttempt, StudentAssignmentStatus, StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getBestAttempt } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
@@ -14,28 +15,28 @@ const assignmentStatusMeta: Record<
   StudentAssignmentStatus,
   {
     chipClassName: string;
-    progressClassName: string;
+    progressColor: string;
     cardClassName: string;
   }
 > = {
   not_started: {
     chipClassName: "border-slate-200 bg-slate-50 text-slate-600",
-    progressClassName: "bg-slate-400",
+    progressColor: "#94a3b8",
     cardClassName: "border-slate-200",
   },
   in_progress: {
     chipClassName: "border-amber-200 bg-amber-50 text-amber-700",
-    progressClassName: "bg-amber-500",
+    progressColor: "#f59e0b",
     cardClassName: "border-amber-100",
   },
   submitted: {
     chipClassName: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    progressClassName: "bg-emerald-500",
+    progressColor: "#10b981",
     cardClassName: "border-emerald-100",
   },
   overdue: {
     chipClassName: "border-rose-200 bg-rose-50 text-rose-700",
-    progressClassName: "bg-rose-500",
+    progressColor: "#f43f5e",
     cardClassName: "border-rose-100",
   },
 };
@@ -191,13 +192,16 @@ export function AssignmentCard({
 
           <div className="flex shrink-0 flex-wrap items-center gap-2">
             {assignment.score !== null ? (
-              <Badge className="border-[#696CFF]/10 bg-[#696CFF]/5 text-[#696CFF]" tone="outline">
-                {copy.scoreLabel}: {copy.scoreBadge(assignment.score, assignment.maxScore)}
-              </Badge>
+              <Chip
+                variant="outlined"
+                size="small"
+                label={`${copy.scoreLabel}: ${copy.scoreBadge(assignment.score, assignment.maxScore)}`}
+                sx={{ borderColor: "rgba(105,108,255,0.1)", bgcolor: "rgba(105,108,255,0.05)", color: "#696CFF" }}
+              />
             ) : null}
 
             <Button
-              variant={actionable ? "default" : "outline"}
+              variant={actionable ? "contained" : "outlined"}
               className={cn(
                 actionable
                   ? assignment.status === "overdue"
@@ -219,7 +223,17 @@ export function AssignmentCard({
               <span className="text-xs font-semibold text-slate-400">{copy.progressLabel}</span>
               <span className="text-sm font-semibold text-slate-900">{assignment.progressRate}%</span>
             </div>
-            <ProgressBar value={assignment.progressRate} className="mt-2 h-2.5 bg-slate-100" indicatorClassName={statusMeta.progressClassName} />
+            <LinearProgress
+              variant="determinate"
+              value={assignment.progressRate}
+              className="mt-2"
+              sx={{
+                height: 10,
+                borderRadius: 1,
+                bgcolor: "rgb(241 245 249)",
+                "& .MuiLinearProgress-bar": { bgcolor: statusMeta.progressColor },
+              }}
+            />
             {!compact ? <p className="mt-2 text-sm leading-6 text-slate-500">{assignment.focusNote}</p> : null}
           </div>
 

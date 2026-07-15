@@ -1,11 +1,3 @@
-/**
- * CRM Portal Shell — MUI CenterUp Theme
- * Converted from Tailwind/shadcn to MUI (2026-06-12)
- *
- * Sidebar: 280px, #1C252E
- * Header: 72px, white glass
- * Selected item: sky blue rgba(14,165,233,0.12)
- */
 'use client';
 
 import { useMemo } from 'react';
@@ -35,8 +27,8 @@ import { defaultClassId, defaultSchoolId } from '@/features/lms/classroom/api/mo
 import { DashboardContent } from '@/layouts/dashboard/components/dashboard-content';
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
 import type { ContentScope, ManagementScope } from '@/types/scope-types';
-import CenterUpLayout from '@/components/portal/CenterUpLayout';
-import type { MenuGroup, PortalInfo } from '@/components/portal/CenterUpLayout';
+import ErgPortalLayout from '@/components/portal/ErgPortalLayout';
+import type { MenuGroup, PortalInfo } from '@/components/portal/ErgPortalLayout';
 
 // =============================================================================
 // CRM Navigation Types & Data
@@ -110,7 +102,7 @@ const crmNavItems: CrmNavItem[] = [
 ];
 
 // =============================================================================
-// Convert CRM items to MenuGroup for CenterUpLayout
+// Convert CRM items to portal menu groups
 // =============================================================================
 
 function toMenuGroup(crmItems: CrmNavItem[]): MenuGroup[] {
@@ -198,18 +190,18 @@ export function CrmPortalShell() {
   }
 
   return (
-    <CenterUpLayout
+    <ErgPortalLayout
       menuGroups={menuGroups}
       portalInfo={portalInfo}
       notificationCount={24}
     >
       <CrmContent activeLeaf={activeLeaf} onOpenLeaf={openLeaf} account={account ?? undefined} />
-    </CenterUpLayout>
+    </ErgPortalLayout>
   );
 }
 
 // =============================================================================
-// CRM Content (inside CenterUpLayout)
+// CRM content
 // =============================================================================
 
 function CrmContent({

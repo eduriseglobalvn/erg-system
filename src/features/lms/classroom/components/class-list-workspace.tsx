@@ -7,11 +7,11 @@ import {
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
 import { DataTable } from "@/components/ui/data-table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Input } from "@/components/ui/input";
-import { ProgressBar } from "@/components/ui/progress";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import LinearProgress from "@mui/material/LinearProgress";
 import {
   classroomSchools,
   getSchoolSnapshots,
@@ -95,17 +95,20 @@ export function ClassListWorkspace({
               <div className="flex items-center justify-between text-sm">
                 <span className="font-semibold text-slate-950">{row.original.completionRate}%</span>
               </div>
-              <ProgressBar
-                className="mt-2 h-2"
-                indicatorClassName={row.original.riskStudents >= 5 ? "bg-amber-500" : "bg-emerald-500"}
+              <LinearProgress
+                variant="determinate"
                 value={row.original.completionRate}
+                color={row.original.riskStudents >= 5 ? "warning" : "success"}
+                sx={{ mt: 1, height: 8, borderRadius: 1 }}
               />
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Badge tone={archiveStatus === "review" ? "warning" : "success"}>
-                {archiveStatus === "review" ? "Cần rà soát" : "Sẵn sàng"}
-              </Badge>
+              <Chip
+                label={archiveStatus === "review" ? "Cần rà soát" : "Sẵn sàng"}
+                size="small"
+                color={archiveStatus === "review" ? "warning" : "success"}
+              />
               <span className="text-sm font-medium text-slate-500">{endedAt}</span>
             </div>
           );
@@ -116,10 +119,10 @@ export function ClassListWorkspace({
         id: "actions",
         cell: () => (
           <div className="flex gap-2 lg:justify-end">
-            <Button size="sm" variant="outline" onClick={() => onOpenLeaf("class-reports")}>
+            <Button size="small" variant="outlined" onClick={() => onOpenLeaf("class-reports")}>
               Báo cáo
             </Button>
-            <Button size="sm" onClick={() => onOpenLeaf("class-students")}>
+            <Button size="small" variant="contained" onClick={() => onOpenLeaf("class-students")}>
               Học sinh
             </Button>
           </div>
@@ -149,11 +152,11 @@ export function ClassListWorkspace({
         <div className="flex flex-wrap gap-2">
           {mode === "active" ? (
             <>
-              <Button variant="outline">Nhập từ Excel</Button>
-              <Button>Thêm lớp học</Button>
+              <Button variant="outlined">Nhập từ Excel</Button>
+              <Button variant="contained">Thêm lớp học</Button>
             </>
           ) : (
-            <Button variant="outline">Xuất báo cáo</Button>
+            <Button variant="outlined">Xuất báo cáo</Button>
           )}
         </div>
       }
@@ -163,7 +166,7 @@ export function ClassListWorkspace({
         description={`${selectedSchool.name} · ${filteredRows.length} lớp hiển thị`}
         action={
           mode === "active" ? (
-            <Button variant="outline" onClick={() => onOpenLeaf("class-students")}>
+            <Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>
               Xem học sinh
             </Button>
           ) : null
@@ -172,7 +175,9 @@ export function ClassListWorkspace({
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
+            <TextField
+              size="small"
+              fullWidth
               aria-label="Tìm lớp học"
               placeholder="Tìm theo tên lớp hoặc giáo viên"
               value={searchValue}
@@ -205,12 +210,15 @@ export function ClassListWorkspace({
         {filteredRows.length ? (
           <DataTable className="mt-4 rounded-lg" columns={columns} data={filteredRows} />
         ) : (
-          <EmptyState
-            className="mt-4"
-            title={mode === "active" ? "Chưa có lớp đang hoạt động" : "Chưa có lớp đã kết thúc"}
-            description="Thử đổi bộ lọc hoặc chọn trung tâm khác ở thanh Đang xem."
-            action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
-          />
+          <Box className="mt-4 rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-8 text-center">
+            <div className="text-sm font-semibold text-slate-950">
+              {mode === "active" ? "Chưa có lớp đang hoạt động" : "Chưa có lớp đã kết thúc"}
+            </div>
+            <div className="mt-2 text-sm text-slate-500">
+              Thử đổi bộ lọc hoặc chọn trung tâm khác ở thanh Đang xem.
+            </div>
+            <Button sx={{ mt: 2 }} variant="outlined" onClick={clearFilters}>Xóa bộ lọc</Button>
+          </Box>
         )}
       </DashboardSectionCard>
     </DashboardPageShell>

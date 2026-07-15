@@ -15,7 +15,6 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import {
@@ -192,7 +191,7 @@ function FilterBar({
           alignItems: "center",
         }}
       >
-        <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap sx={{ gap: 1.5 }}>
+        <Stack direction="row" spacing={1.5} useFlexGap sx={{ gap: 1.5, flexWrap: "wrap" }}>
           {/* Search */}
           <TextField
             placeholder={primaryPlaceholder}
@@ -233,7 +232,7 @@ function FilterBar({
               }}
               renderValue={(value) => (
                 <Typography sx={{ fontSize: 13, fontWeight: 500, color: "text.secondary" }}>
-                  {value || filter}
+                  {(value as string) || filter}
                 </Typography>
               )}
             >

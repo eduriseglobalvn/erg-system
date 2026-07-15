@@ -1,4 +1,9 @@
 import { defaultQuizFontFamily, resolveQuizFontStack } from "@/config/fonts";
+import {
+  createElearningSampleQuizEditorGroups,
+  elearningSampleFirstSlideId,
+  elearningSampleGroupId,
+} from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import { tr } from "@/platform/i18n";
@@ -194,6 +199,12 @@ export function createMockPlayerTemplate(): QuizPlayerTemplate {
 }
 
 export function createMockQuizEditorGroups(): QuizEditorGroup[] {
+  const elearningGroups = createElearningSampleQuizEditorGroups();
+  if (elearningGroups.length) return elearningGroups;
+  return createLegacyMockQuizEditorGroups();
+}
+
+function createLegacyMockQuizEditorGroups(): QuizEditorGroup[] {
   return [
     {
       id: "group-intro",
@@ -261,8 +272,8 @@ export function createMockResultSlide(): QuizEditorSlide {
 export function createMockSelectedEditorNode(): SelectedEditorNode {
   return {
     type: "slide",
-    groupId: "group-1",
-    slideId: "slide-drag-drop",
+    groupId: elearningSampleGroupId,
+    slideId: elearningSampleFirstSlideId,
   };
 }
 

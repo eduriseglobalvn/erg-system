@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api-client";
+import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 
 export type LearningResourceTaxonomyOption = {
   id: string;
@@ -100,12 +101,6 @@ type LearningResourceStudioBootstrap = {
   designerPresets?: LearningResourceTaxonomyResponse["designerPresets"];
 };
 
-type StudioTaxonomyNodeResponse = LearningResourceTaxonomyOption & {
-  kind?: string;
-  childCount?: number;
-  resourceCount?: number;
-};
-
 type StudioResourceResponse = {
   id: string;
   title: string;
@@ -122,6 +117,189 @@ type StudioResourceResponse = {
   status?: string;
   visibility?: string;
   updatedAt?: string;
+};
+
+type ContentItemResponse = {
+  id: string;
+  contentType?: string;
+  title: string;
+  description?: string;
+  status?: string;
+  visibility?: string;
+  updatedAt?: string;
+  assets?: ContentAssetResponse[];
+  placements?: ContentPlacementResponse[];
+};
+
+type ContentAssetResponse = {
+  id: string;
+  assetType?: string;
+  title?: string;
+  storageProvider?: string;
+  storageUrl?: string;
+  mimeType?: string;
+  byteSize?: number;
+  status?: string;
+  metadata?: Record<string, unknown>;
+  assetRole?: string;
+  sortOrder?: number;
+};
+
+type ContentPlacementResponse = {
+  id: string;
+  topicId: string;
+  contentRole?: string;
+  sortOrder?: number;
+  status?: string;
+};
+
+type GoogleSlidesLectureResponse = {
+  contentItem: ContentItemResponse;
+  contentAsset: ContentAssetResponse;
+  placement: ContentPlacementResponse;
+};
+
+type LearningResourceLibraryGraphQlInput = {
+  tenantId?: string;
+  educationUnitId?: string;
+  academicYear?: string;
+  subjectId?: string;
+  gradeId?: string;
+  categoryId?: string;
+  sectionId?: string;
+  topicId?: string;
+  status?: string;
+  visibility?: string;
+  page?: number;
+  size?: number;
+};
+
+type LearningResourceLibraryGraphQlNode = {
+  id: string;
+  kind?: string | null;
+  label?: string | null;
+  slug?: string | null;
+  parentId?: string | null;
+  subjectId?: string | null;
+  categoryId?: string | null;
+  sortOrder?: number | null;
+  status?: string | null;
+  description?: string | null;
+  childCount?: number | null;
+  resourceCount?: number | null;
+};
+
+type LearningResourceLibraryGraphQlCard = {
+  id: string;
+  subjectId?: string | null;
+  gradeId?: string | null;
+  categoryId?: string | null;
+  sectionId?: string | null;
+  topicId?: string | null;
+  title?: string | null;
+  slug?: string | null;
+  subtitle?: string | null;
+  thumbnailUrl?: string | null;
+  visibility?: string | null;
+  status?: string | null;
+  publishedAt?: string | null;
+  updatedAt?: string | null;
+};
+
+type LearningResourceLibraryGraphQl = {
+  tenantId?: string | null;
+  educationUnitId?: string | null;
+  taxonomyTree: LearningResourceLibraryGraphQlNode[];
+  resources: GraphQlPage<LearningResourceLibraryGraphQlCard>;
+};
+
+type LearningResourceLibraryGraphQlData = {
+  lms?: {
+    learningResourceLibrary?: LearningResourceLibraryGraphQl | null;
+  } | null;
+};
+
+const LearningResourceLibraryDocument = `
+query LcmsLearningResourceLibrary($input: LearningResourceLibraryInput) {
+  lms {
+    learningResourceLibrary(input: $input) {
+      tenantId
+      educationUnitId
+      taxonomyTree {
+        id
+        kind
+        label
+        slug
+        parentId
+        subjectId
+        categoryId
+        sortOrder
+        status
+        description
+        childCount
+        resourceCount
+      }
+      resources {
+        items {
+          id
+          subjectId
+          gradeId
+          categoryId
+          sectionId
+          topicId
+          title
+          slug
+          subtitle
+          thumbnailUrl
+          visibility
+          status
+          publishedAt
+          updatedAt
+        }
+        page
+        size
+        totalItems
+        totalPages
+        hasNext
+        hasPrevious
+      }
+    }
+  }
+}
+`;
+
+type CurriculumTreeResponse = {
+  subjects?: CurriculumTreeNodeResponse[];
+  levels?: CurriculumTreeNodeResponse[];
+  topics?: CurriculumTreeNodeResponse[];
+  fileTypes?: string[];
+  designerPresets?: LearningResourceTaxonomyResponse["designerPresets"];
+};
+
+type CurriculumTreeNodeResponse = {
+  id: string;
+  label?: string;
+  name?: string;
+  title?: string;
+  slug?: string;
+  parentId?: string;
+  subjectId?: string;
+  gradeId?: string;
+  categoryId?: string;
+  bookSeriesId?: string;
+  levelId?: string;
+  topicId?: string;
+  levelIds?: string[];
+  description?: string;
+  sortOrder?: number;
+  status?: string;
+  kind?: string;
+  type?: string;
+  nodeType?: string;
+  metadata?: Record<string, string>;
+  levels?: CurriculumTreeNodeResponse[];
+  topics?: CurriculumTreeNodeResponse[];
+  children?: CurriculumTreeNodeResponse[];
 };
 
 export type StudioAssetResponse = {
@@ -193,6 +371,7 @@ export type CreateLearningResourceResourcePayload = {
 
 export type CreateTaxonomyPayload = {
   id?: string;
+  code?: string;
   label: string;
   slug?: string;
   parentId?: string;
@@ -208,19 +387,170 @@ export type CreateTaxonomyPayload = {
   metadata?: Record<string, string>;
 };
 
+export type CurriculumTaxonomyImpact = {
+  nodeId: string;
+  nodeType: "subject" | "level" | "topic";
+  canHardDelete: boolean;
+  canArchive: boolean;
+  impact: {
+    questions: number;
+    quizzes: number;
+    publishedQuizVersions: number;
+    contentItems: number;
+    assignments: number;
+    studentAttempts: number;
+  };
+  recommendedActions: Array<"ARCHIVE" | "REASSIGN" | "MERGE" | "HARD_DELETE">;
+  source?: "api" | "estimated";
+};
+
+async function loadLearningResourceLibraryGraphQl(
+  input: Partial<LearningResourceLibraryGraphQlInput> = {},
+): Promise<LearningResourceLibraryGraphQl> {
+  const page = Number(input.page ?? 0);
+  const size = Number(input.size ?? 100);
+  const variables = {
+    input: compactObject({
+      tenantId: input.tenantId ?? getDefaultTenantId(),
+      educationUnitId: input.educationUnitId,
+      academicYear: input.academicYear,
+      subjectId: input.subjectId,
+      gradeId: input.gradeId,
+      categoryId: input.categoryId,
+      sectionId: input.sectionId,
+      topicId: input.topicId,
+      status: input.status ?? "active",
+      visibility: input.visibility,
+      page: Number.isFinite(page) && page >= 0 ? page : 0,
+      size: Number.isFinite(size) && size > 0 ? size : 100,
+    }),
+  };
+  const data = await graphQlRequest<LearningResourceLibraryGraphQlData, typeof variables>({
+    operationName: "LcmsLearningResourceLibrary",
+    portal: "lcms",
+    query: LearningResourceLibraryDocument,
+    variables,
+  });
+  const library = data.lms?.learningResourceLibrary;
+  if (!library) {
+    throw new Error("GraphQL learningResourceLibrary response is missing.");
+  }
+  return library;
+}
+
+function mapGraphQlLibraryToStudioBootstrap(library: LearningResourceLibraryGraphQl): LearningResourceStudioBootstrap {
+  const taxonomy = mapGraphQlLibraryToTaxonomies(library);
+  return {
+    subjects: taxonomy.subjects,
+    groups: taxonomy.categories,
+    categories: taxonomy.categories,
+    lessons: taxonomy.sections,
+    sections: taxonomy.sections,
+    resources: mapGraphQlLibraryToResources(library).data.map(mapCardToStudioResource),
+    fileTypes: taxonomy.fileTypes,
+    designerPresets: taxonomy.designerPresets,
+  };
+}
+
+function mapGraphQlLibraryToCurriculumTree(library: LearningResourceLibraryGraphQl): CurriculumTreeResponse {
+  const taxonomy = mapGraphQlLibraryToTaxonomies(library);
+  const levelsBySubject = groupBy(taxonomy.categories, (level) => level.subjectId || level.parentId || "");
+  const topicsByLevel = groupBy(taxonomy.topics, (topic) => topic.categoryId || topic.parentId || "");
+  const subjects = taxonomy.subjects.map((subject) => ({
+    ...taxonomyToCurriculumNode(subject, "subject"),
+    levels: (levelsBySubject.get(subject.id) ?? []).map((level) => ({
+      ...taxonomyToCurriculumNode(level, "level"),
+      topics: (topicsByLevel.get(level.id) ?? []).map((topic) => taxonomyToCurriculumNode(topic, "topic")),
+    })),
+  }));
+
+  return {
+    subjects,
+    levels: taxonomy.categories.map((level) => taxonomyToCurriculumNode(level, "level")),
+    topics: taxonomy.topics.map((topic) => taxonomyToCurriculumNode(topic, "topic")),
+    fileTypes: taxonomy.fileTypes,
+    designerPresets: taxonomy.designerPresets,
+  };
+}
+
+function mapGraphQlLibraryToTaxonomies(library: LearningResourceLibraryGraphQl): LearningResourceTaxonomyResponse {
+  const nodes = library.taxonomyTree ?? [];
+  const subjects = sortTaxonomies(
+    nodes
+      .filter((node) => graphQlNodeKind(node) === "subject")
+      .map((node) => mapGraphQlTaxonomyNode(node)),
+  );
+  const subjectIdByLevel = new Map<string, string>();
+  const categories = sortTaxonomies(
+    nodes
+      .filter((node) => graphQlNodeKind(node) === "level")
+      .map((node) => {
+        const subjectId = node.subjectId || node.parentId || undefined;
+        if (subjectId) subjectIdByLevel.set(node.id, subjectId);
+        return mapGraphQlTaxonomyNode(node, {
+          subjectId,
+          categoryId: node.id,
+          parentId: subjectId,
+        });
+      }),
+  );
+  const sections = sortTaxonomies(
+    nodes
+      .filter((node) => graphQlNodeKind(node) === "topic")
+      .map((node) => {
+        const categoryId = node.categoryId || node.parentId || undefined;
+        return mapGraphQlTaxonomyNode(node, {
+          subjectId: node.subjectId || subjectIdByLevel.get(categoryId || ""),
+          categoryId,
+          parentId: categoryId,
+          topicId: node.id,
+        });
+      }),
+  );
+
+  return {
+    grades: [],
+    subjects,
+    categories,
+    sections,
+    bookSeries: [],
+    topics: sections,
+    fileTypes: ["PDF", "PPTX", "VIDEO", "AUDIO", "LINK", "QUIZ"],
+    designerPresets: [],
+  };
+}
+
+function mapGraphQlLibraryToResources(
+  library: LearningResourceLibraryGraphQl,
+  scope: Record<string, unknown> = {},
+): LearningResourceResourceList {
+  const resources = library.resources;
+  const data = (resources?.items ?? []).map((card) => mapGraphQlResourceCard(card, scope));
+  return {
+    data,
+    total: resources?.totalItems ?? data.length,
+    page: (resources?.page ?? 0) + 1,
+    limit: resources?.size ?? data.length,
+  };
+}
+
 export function loadLearningResourceStudioBootstrap() {
-  return apiRequest<LearningResourceStudioBootstrap>("/api/v1/admin/hoclieu/studio/bootstrap");
+  return loadLearningResourceLibraryGraphQl().then(mapGraphQlLibraryToStudioBootstrap);
+}
+
+export function loadLearningResourceCurriculumTree() {
+  return loadLearningResourceLibraryGraphQl().then(mapGraphQlLibraryToCurriculumTree);
 }
 
 export async function loadLearningResourceTaxonomies() {
-  const bootstrap = await loadLearningResourceStudioBootstrap();
-  return mapStudioBootstrapToTaxonomies(bootstrap);
+  const library = await loadLearningResourceLibraryGraphQl({ size: 1 });
+  return mapGraphQlLibraryToTaxonomies(library);
 }
 
 export async function loadLearningResourceStudioWorkspaceData(limit = 120) {
-  const bootstrap = await loadLearningResourceStudioBootstrap();
-  const taxonomy = mapStudioBootstrapToTaxonomies(bootstrap);
-  const resources = mapStudioBootstrapToResources(bootstrap, limit);
+  const library = await loadLearningResourceLibraryGraphQl({ size: limit });
+  const taxonomy = mapGraphQlLibraryToTaxonomies(library);
+  const resources = mapGraphQlLibraryToResources(library, { limit });
 
   return {
     taxonomy,
@@ -256,92 +586,150 @@ export function listLearningResourceSubjects() {
 }
 
 export async function listLearningResourceResources(params: Record<string, string | number | undefined> = {}) {
-  const bootstrap = await loadLearningResourceStudioBootstrap();
   const limit = Number(params.limit ?? 100);
-  const resources = (bootstrap.resources ?? [])
-    .map(mapStudioResourceToCard)
-    .filter((resource) => !params.subjectId || resource.subjectId === params.subjectId)
-    .filter((resource) => !params.categoryId || resource.categoryId === params.categoryId)
-    .filter((resource) => !params.sectionId || resource.sectionId === params.sectionId)
-    .slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
-
-  return {
-    data: resources,
-    total: resources.length,
-    page: 1,
-    limit,
-  } satisfies LearningResourceResourceList;
+  const library = await loadLearningResourceLibraryGraphQl({
+    subjectId: stringParam(params.subjectId),
+    categoryId: stringParam(params.categoryId || params.levelId),
+    sectionId: stringParam(params.sectionId),
+    topicId: stringParam(params.topicId || params.sectionId),
+    size: Number.isFinite(limit) && limit > 0 ? limit : 100,
+  });
+  return mapGraphQlLibraryToResources(library, params);
 }
 
 export async function createLearningResourceResource(payload: CreateLearningResourceResourcePayload) {
-  const resource = await apiRequest<StudioResourceResponse>("/api/v1/admin/hoclieu/resources", {
-    method: "POST",
-    body: JSON.stringify(toStudioResourceRequest(payload)),
-  });
-  if (payload.upstreamUrl || payload.storageUrl) {
-    await createLearningResourceAsset(resource.id, {
-      title: payload.title,
-      selectedFileType: payload.selectedFileType,
-      originalFileName: payload.originalFileName || payload.title,
-      detectedMimeType: payload.detectedMimeType,
-      storageProvider: "google_drive",
-      storageUrl: payload.upstreamUrl || payload.storageUrl,
-      canDownload: payload.canDownload,
-      status: "ready",
-      totalSlides: payload.totalSlides,
+  if (payload.selectedFileType === "PPTX" && payload.topicId && payload.upstreamUrl) {
+    const lecture = await apiRequest<GoogleSlidesLectureResponse>("/api/content/lectures/google-slides", {
+      method: "POST",
+      body: JSON.stringify({
+        topicId: payload.topicId,
+        title: payload.title,
+        googleSlidesUrl: payload.upstreamUrl,
+        status: canonicalContentStatus(payload.status),
+        visibility: canonicalContentVisibility(payload.visibility),
+      }),
     });
+    return mapCanonicalContentItemToCard(
+      {
+        ...lecture.contentItem,
+        assets: [{ ...lecture.contentAsset, assetRole: "primary", sortOrder: 1 }],
+        placements: [lecture.placement],
+      },
+      payload,
+    );
   }
-  return mapStudioResourceToCard(resource);
+  const { contentItem, contentAsset, placement } = await createCanonicalLearningResource(payload);
+  return mapCanonicalContentItemToCard(
+    {
+      ...contentItem,
+      assets: contentAsset ? [{ ...contentAsset, assetRole: "primary", sortOrder: 1 }] : [],
+      placements: placement ? [placement] : [],
+    },
+    payload,
+  );
 }
 
 export async function updateLearningResourceResource(resourceId: string, payload: Partial<CreateLearningResourceResourcePayload>) {
-  const resource = await apiRequest<StudioResourceResponse>(`/api/v1/admin/hoclieu/resources/${encodeURIComponent(resourceId)}`, {
+  const contentItem = await apiRequest<ContentItemResponse>(`/api/content/items/${encodeURIComponent(resourceId)}`, {
     method: "PATCH",
-    body: JSON.stringify(toStudioResourceRequest(payload)),
+    body: JSON.stringify(compactObject({
+      contentType: payload.selectedFileType || payload.documentTypeId ? contentTypeForResource(payload) : undefined,
+      title: payload.title,
+      description: payload.description ?? payload.subtitle,
+      status: payload.status ? canonicalContentStatus(payload.status) : undefined,
+      visibility: payload.visibility ? canonicalContentVisibility(payload.visibility) : undefined,
+    })),
   });
-  return mapStudioResourceToCard(resource);
+  return mapCanonicalContentItemToCard(contentItem, payload);
 }
 
 export function deleteLearningResourceResource(resourceId: string) {
-  return apiRequest<{ deleted: boolean }>(`/api/v1/admin/hoclieu/resources/${encodeURIComponent(resourceId)}`, {
+  return apiRequest<{ deleted: boolean }>(`/api/content/items/${encodeURIComponent(resourceId)}`, {
     method: "DELETE",
   });
 }
 
 export async function loadLearningResourceResourceDetail(resourceId: string): Promise<LearningResourceResourceDetail> {
-  const detail = await apiRequest<StudioResourceResponse & { assets?: StudioAssetResponse[]; description?: string }>(
-    `/api/v1/hoclieu/resources/${encodeURIComponent(resourceId)}`,
-  );
+  const library = await loadLearningResourceLibraryGraphQl({ size: 100, status: undefined });
+  const resource = (library.resources.items ?? []).find((item) => item.id === resourceId);
+  const card = resource
+    ? mapGraphQlResourceCard(resource)
+    : {
+        id: resourceId,
+        slug: slugify(resourceId),
+        title: resourceId,
+        programSlug: "curriculum",
+        subjectId: "curriculum",
+        categoryId: "curriculum",
+        selectedFileType: "PDF",
+        fileTypeBadge: "PDF",
+        launchMode: "pdf_reader",
+        priceType: "free",
+        accessState: "open",
+        canDownload: false,
+      };
 
   return {
-    ...mapStudioResourceToCard(detail),
-    description: detail.description,
-    assets: (detail.assets ?? []).map(mapStudioAssetToDetail),
+    ...card,
+    description: card.subtitle,
+    assets: [],
   };
 }
 
 export async function createLearningResourceTaxonomy(kind: string, payload: CreateTaxonomyPayload) {
-  const path = payload.parentId
-    ? `/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(payload.parentId)}/children`
-    : "/api/v1/admin/hoclieu/taxonomy";
-  const node = await apiRequest<StudioTaxonomyNodeResponse>(path, {
+  const curriculumPath = curriculumTaxonomyPath(kind);
+  if (!curriculumPath) {
+    throw new Error(`Only subject, level, and topic taxonomy kinds are supported. Received "${kind}".`);
+  }
+  const createPath = curriculumPath === "levels" && payload.subjectId
+    ? `subjects/${encodeURIComponent(payload.subjectId)}/levels`
+    : curriculumPath === "topics" && (payload.categoryId || payload.parentId)
+      ? `levels/${encodeURIComponent(payload.categoryId || payload.parentId || "")}/topics`
+      : curriculumPath;
+  const node = await apiRequest<CurriculumTreeNodeResponse>(`/api/curriculum/${createPath}`, {
     method: "POST",
-    body: JSON.stringify(toStudioTaxonomyRequest(kind, payload)),
+    body: JSON.stringify(toCurriculumTaxonomyRequest(payload)),
   });
-  return mapStudioTaxonomyNode(node);
+  return mapCurriculumTaxonomyNode(node, payload);
 }
 
 export async function updateLearningResourceTaxonomy(kind: string, id: string, payload: Partial<CreateTaxonomyPayload>) {
-  const node = await apiRequest<StudioTaxonomyNodeResponse>(`/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(id)}`, {
+  const curriculumPath = curriculumTaxonomyPath(kind);
+  if (!curriculumPath) {
+    throw new Error(`Only subject, level, and topic taxonomy kinds are supported. Received "${kind}".`);
+  }
+  const node = await apiRequest<CurriculumTreeNodeResponse>(`/api/curriculum/${curriculumPath}/${encodeURIComponent(id)}`, {
     method: "PATCH",
-    body: JSON.stringify(toStudioTaxonomyRequest(kind, payload)),
+    body: JSON.stringify(toCurriculumTaxonomyRequest(payload)),
   });
-  return mapStudioTaxonomyNode(node);
+  return mapCurriculumTaxonomyNode(node, { id, ...payload });
 }
 
-export function deleteLearningResourceTaxonomy(_kind: string, id: string) {
-  return apiRequest<{ deleted: boolean }>(`/api/v1/admin/hoclieu/taxonomy/${encodeURIComponent(id)}`, {
+export function deleteLearningResourceTaxonomy(kind: string, id: string) {
+  const curriculumPath = curriculumTaxonomyPath(kind);
+  if (!curriculumPath) {
+    throw new Error(`Only subject, level, and topic taxonomy kinds are supported. Received "${kind}".`);
+  }
+  return apiRequest<{ deleted: boolean }>(`/api/curriculum/${curriculumPath}/${encodeURIComponent(id)}`, {
     method: "DELETE",
+  });
+}
+
+export function loadLearningResourceTaxonomyImpact(kind: string, id: string) {
+  const curriculumPath = curriculumTaxonomyPath(kind);
+  if (!curriculumPath) {
+    throw new Error(`Curriculum impact is only available for subject, level, and topic taxonomy kinds. Received "${kind}".`);
+  }
+  return apiRequest<CurriculumTaxonomyImpact>(`/api/curriculum/${curriculumPath}/${encodeURIComponent(id)}/impact`);
+}
+
+export function archiveLearningResourceTaxonomy(kind: string, id: string) {
+  const curriculumPath = curriculumTaxonomyPath(kind);
+  if (!curriculumPath) {
+    throw new Error(`Curriculum archive is only available for subject, level, and topic taxonomy kinds. Received "${kind}".`);
+  }
+  return apiRequest<LearningResourceTaxonomyOption>(`/api/curriculum/${curriculumPath}/${encodeURIComponent(id)}/archive`, {
+    method: "POST",
   });
 }
 
@@ -384,10 +772,7 @@ export function createLearningResourceAsset(
     metadata?: Record<string, unknown>;
   },
 ) {
-  return apiRequest<StudioAssetResponse>(`/api/v1/admin/hoclieu/resources/${encodeURIComponent(resourceId)}/assets`, {
-    method: "POST",
-    body: JSON.stringify(toStudioAssetRequest(input)),
-  });
+  return createCanonicalAssetForResource(resourceId, input);
 }
 
 export function updateLearningResourceAsset(
@@ -404,10 +789,10 @@ export function updateLearningResourceAsset(
     status?: string;
   },
 ) {
-  return apiRequest<StudioAssetResponse>(`/api/v1/admin/hoclieu/assets/${encodeURIComponent(assetId)}`, {
+  return apiRequest<ContentAssetResponse>(`/api/content/assets/${encodeURIComponent(assetId)}`, {
     method: "PATCH",
-    body: JSON.stringify(compactObject(input)),
-  }).then(mapStudioAssetToDetail);
+    body: JSON.stringify(toCanonicalAssetUpdateRequest(input)),
+  }).then((asset) => mapContentAssetToStudioAsset(asset, ""));
 }
 
 export function uploadLearningResourceResource(input: {
@@ -436,7 +821,7 @@ export function uploadLearningResourceResource(input: {
   tags?: string[];
   totalSlides?: number;
 }): Promise<{ resource: LearningResourceResourceCard; asset: StudioAssetResponse }> {
-  const { upstreamUrl, storageUrl, ...resourceInput } = input;
+  const { upstreamUrl, storageUrl, totalSlides, ...resourceInput } = input;
   return createLearningResourceResource({
     ...resourceInput,
     programSlug: input.programSlug || input.subjectId,
@@ -447,51 +832,118 @@ export function uploadLearningResourceResource(input: {
       file: input.file,
       storageProvider: upstreamUrl || storageUrl ? "google_drive" : undefined,
       storageUrl: upstreamUrl || storageUrl,
-      totalSlides: input.totalSlides,
+      totalSlides,
       canDownload: input.canDownload,
     });
     return { resource, asset };
   });
 }
 
-function toStudioResourceRequest(payload: Partial<CreateLearningResourceResourcePayload>) {
-  const fileType = payload.documentTypeId || payload.selectedFileType || "PDF";
-  return compactObject({
-    title: payload.title,
-    slug: payload.slug,
-    subtitle: payload.subtitle,
-    description: payload.description,
-    thumbnailUrl: payload.thumbnailUrl,
-    subjectId: payload.subjectId,
-    categoryId: payload.categoryId,
-    sectionId: payload.sectionId,
-    lessonId: payload.sectionId,
-    type: fileType,
-    documentTypeId: fileType,
-    fileType,
-    status: payload.status || "published",
-    visibility: normalizeVisibilityForStudio(payload.visibility),
-    programSlug: payload.programSlug || payload.subjectId,
-    canDownload: payload.canDownload,
+async function createCanonicalLearningResource(payload: CreateLearningResourceResourcePayload) {
+  const contentItem = await apiRequest<ContentItemResponse>("/api/content/items", {
+    method: "POST",
+    body: JSON.stringify({
+      contentType: contentTypeForResource(payload),
+      title: payload.title,
+      description: payload.description,
+      status: canonicalContentStatus(payload.status),
+      visibility: canonicalContentVisibility(payload.visibility),
+    }),
+  });
+
+  const contentAsset = await createCanonicalContentAsset(payload);
+  if (contentAsset) {
+    await apiRequest(`/api/content/items/${encodeURIComponent(contentItem.id)}/assets`, {
+      method: "POST",
+      body: JSON.stringify({
+        contentAssetId: contentAsset.id,
+        assetRole: "primary",
+        sortOrder: 1,
+        metadata: compactObject({
+          source: "learning-resource-authoring",
+          selectedFileType: payload.selectedFileType,
+        }),
+      }),
+    });
+  }
+
+  const placement = payload.topicId
+    ? await apiRequest<ContentPlacementResponse>(`/api/curriculum/topics/${encodeURIComponent(payload.topicId)}/content-items`, {
+        method: "POST",
+        body: JSON.stringify({
+          contentItemId: contentItem.id,
+          contentRole: contentRoleForResource(payload),
+          sortOrder: firstPositiveSortOrder(payload.items?.[0]?.sortOrder),
+          status: payload.status === "archived" ? "archived" : "active",
+        }),
+      })
+    : undefined;
+
+  return { contentItem, contentAsset, placement };
+}
+
+async function createCanonicalContentAsset(payload: CreateLearningResourceResourcePayload) {
+  const storageUrl = payload.upstreamUrl || payload.storageUrl;
+  const hasAssetMetadata = Boolean(storageUrl || payload.originalFileName || payload.detectedMimeType || payload.totalSlides);
+  if (!hasAssetMetadata) return null;
+
+  return apiRequest<ContentAssetResponse>("/api/content/assets", {
+    method: "POST",
+    body: JSON.stringify(toCanonicalAssetCreateRequest({
+      title: payload.title,
+      selectedFileType: payload.selectedFileType,
+      originalFileName: payload.originalFileName,
+      detectedMimeType: payload.detectedMimeType,
+      storageProvider: storageUrl ? "google_drive" : "metadata_only",
+      storageUrl,
+      status: payload.status === "archived" ? "archived" : "active",
+      totalSlides: payload.totalSlides,
+      canDownload: payload.canDownload,
+    })),
   });
 }
 
-function toStudioTaxonomyRequest(kind: string, payload: Partial<CreateTaxonomyPayload>) {
-  return compactObject({
-    id: payload.id,
-    kind: taxonomyKindForStudio(kind),
-    label: payload.label,
-    slug: payload.slug,
-    parentId: payload.parentId,
-    subjectId: payload.subjectId,
-    categoryId: payload.categoryId,
-    sortOrder: payload.sortOrder,
-    status: payload.status || "active",
-    description: payload.description,
+async function createCanonicalAssetForResource(
+  resourceId: string,
+  input: {
+    file?: File;
+    title?: string;
+    selectedFileType?: string;
+    launchMode?: string;
+    originalFileName?: string;
+    detectedMimeType?: string;
+    fileExtension?: string;
+    fileSizeBytes?: number;
+    storageProvider?: string;
+    storageUrl?: string;
+    canDownload?: boolean;
+    status?: string;
+    totalSlides?: number;
+    metadata?: Record<string, unknown>;
+  },
+): Promise<StudioAssetResponse> {
+  const asset = await apiRequest<ContentAssetResponse>("/api/content/assets", {
+    method: "POST",
+    body: JSON.stringify(toCanonicalAssetCreateRequest(input)),
   });
+
+  await apiRequest(`/api/content/items/${encodeURIComponent(resourceId)}/assets`, {
+    method: "POST",
+    body: JSON.stringify({
+      contentAssetId: asset.id,
+      assetRole: "primary",
+      sortOrder: 1,
+      metadata: compactObject({
+        source: "learning-resource-authoring",
+        selectedFileType: input.selectedFileType,
+      }),
+    }),
+  });
+
+  return mapContentAssetToStudioAsset(asset, resourceId);
 }
 
-function toStudioAssetRequest(input: {
+function toCanonicalAssetCreateRequest(input: {
   file?: File;
   title?: string;
   selectedFileType?: string;
@@ -507,117 +959,340 @@ function toStudioAssetRequest(input: {
   totalSlides?: number;
   metadata?: Record<string, unknown>;
 }) {
-  const fileName = input.originalFileName || input.file?.name || input.title || "hoc-lieu";
-  const selectedFileType = input.selectedFileType || input.fileExtension || "PDF";
-
+  const fileName = input.originalFileName || input.file?.name || input.title || "learning-resource";
+  const selectedFileType = normalizeStudioFileType(input.selectedFileType || input.fileExtension || "PDF");
   return compactObject({
+    assetType: canonicalAssetType({ selectedFileType }),
     title: input.title || fileName,
-    selectedFileType,
-    fileType: selectedFileType,
-    launchMode: input.launchMode || launchModeFor(selectedFileType),
-    originalFileName: fileName,
-    detectedMimeType: input.detectedMimeType || input.file?.type,
-    mimeType: input.detectedMimeType || input.file?.type,
-    fileExtension: input.fileExtension || extensionFromFileName(fileName),
-    extension: input.fileExtension || extensionFromFileName(fileName),
-    fileSizeBytes: input.fileSizeBytes ?? input.file?.size,
-    sizeBytes: input.fileSizeBytes ?? input.file?.size,
-    storageProvider: input.storageProvider || "metadata_only",
+    storageProvider: input.storageProvider || (input.storageUrl ? "google_drive" : "metadata_only"),
     storageUrl: input.storageUrl,
-    canDownload: Boolean(input.canDownload),
-    status: input.status || "ready",
-    metadata: googleSlideMetadata(input),
+    mimeType: input.detectedMimeType || input.file?.type,
+    byteSize: input.fileSizeBytes ?? input.file?.size,
+    status: input.status || "active",
+    metadata: compactObject({
+      ...(input.metadata ?? {}),
+      originalFileName: fileName,
+      selectedFileType,
+      launchMode: input.launchMode || launchModeFor(selectedFileType),
+      fileExtension: input.fileExtension || extensionFromFileName(fileName),
+      totalSlides: positiveInteger(input.totalSlides),
+      canDownload: input.canDownload,
+    }),
   });
 }
 
-function mapStudioBootstrapToTaxonomies(bootstrap: LearningResourceStudioBootstrap): LearningResourceTaxonomyResponse {
+function toCanonicalAssetUpdateRequest(input: {
+  title?: string;
+  selectedFileType?: string;
+  originalFileName?: string;
+  detectedMimeType?: string;
+  storageProvider?: string;
+  storageUrl?: string;
+  upstreamUrl?: string;
+  canDownload?: boolean;
+  status?: string;
+}) {
+  const selectedFileType = input.selectedFileType ? normalizeStudioFileType(input.selectedFileType) : undefined;
+  return compactObject({
+    assetType: selectedFileType ? canonicalAssetType({ selectedFileType }) : undefined,
+    title: input.title,
+    storageProvider: input.storageProvider || (input.upstreamUrl || input.storageUrl ? "google_drive" : undefined),
+    storageUrl: input.upstreamUrl || input.storageUrl,
+    mimeType: input.detectedMimeType,
+    status: input.status,
+    metadata: compactObject({
+      originalFileName: input.originalFileName,
+      selectedFileType,
+      launchMode: selectedFileType ? launchModeFor(selectedFileType) : undefined,
+      canDownload: input.canDownload,
+    }),
+  });
+}
+
+function canonicalAssetType(payload: Pick<CreateLearningResourceResourcePayload, "selectedFileType" | "documentTypeId">) {
+  const type = normalizeStudioFileType(payload.documentTypeId || payload.selectedFileType || "PDF");
+  if (type === "PPTX") return "GOOGLE_SLIDE";
+  if (type === "QUIZ") return "QUIZ_PACKAGE";
+  if (type === "VIDEO") return "VIDEO";
+  if (type === "AUDIO") return "AUDIO";
+  if (type === "LINK") return "EXTERNAL_LINK";
+  return "DOCUMENT";
+}
+
+function contentTypeForResource(payload: Partial<Pick<CreateLearningResourceResourcePayload, "selectedFileType" | "documentTypeId">>) {
+  const type = normalizeStudioFileType(payload.documentTypeId || payload.selectedFileType || "PDF");
+  if (type === "QUIZ") return "EXERCISE";
+  if (type === "PPTX" || type === "PDF" || type === "VIDEO" || type === "AUDIO" || type === "LINK") return "LECTURE";
+  return "DOCUMENT";
+}
+
+function contentRoleForResource(payload: Partial<Pick<CreateLearningResourceResourcePayload, "selectedFileType" | "documentTypeId">>) {
+  return contentTypeForResource(payload) === "EXERCISE" ? "EXERCISE" : "LECTURE";
+}
+
+function canonicalContentStatus(status?: string) {
+  if (!status || status === "published") return "published";
+  if (status === "ready") return "published";
+  if (status === "archived") return "archived";
+  return "draft";
+}
+
+function canonicalContentVisibility(visibility?: string) {
+  if (!visibility || visibility === "open" || visibility === "published") return "public";
+  if (visibility === "private") return "private";
+  return visibility;
+}
+
+function firstPositiveSortOrder(value?: number) {
+  return positiveInteger(value) ?? undefined;
+}
+
+function toCurriculumTaxonomyRequest(payload: Partial<CreateTaxonomyPayload>) {
+  return compactObject({
+    id: payload.id,
+    code: payload.code || payload.slug || slugify(payload.label || "node"),
+    name: payload.label,
+    slug: payload.slug,
+    parentId: payload.parentId,
+    subjectId: payload.subjectId,
+    gradeId: payload.gradeId,
+    levelId: payload.categoryId || payload.parentId,
+    categoryId: payload.categoryId,
+    bookSeriesId: payload.bookSeriesId,
+    topicId: payload.topicId,
+    levelIds: payload.levelIds,
+    sortOrder: payload.sortOrder,
+    status: payload.status,
+    description: payload.description,
+    metadata: payload.metadata,
+  });
+}
+
+function mapCurriculumTaxonomyNode(node: CurriculumTreeNodeResponse, fallback: Partial<LearningResourceTaxonomyOption> = {}): LearningResourceTaxonomyOption {
+  const categoryId = node.categoryId || node.levelId || fallback.categoryId;
   return {
-    grades: [],
-    subjects: sortTaxonomies(bootstrap.subjects ?? []),
-    categories: sortTaxonomies(bootstrap.groups ?? bootstrap.categories ?? []),
-    sections: sortTaxonomies(bootstrap.lessons ?? bootstrap.sections ?? []),
-    bookSeries: [],
-    topics: [],
-    fileTypes: bootstrap.fileTypes ?? [],
-    designerPresets: bootstrap.designerPresets,
+    id: node.id || fallback.id || "",
+    label: node.label || node.name || node.title || fallback.label || "",
+    slug: node.slug || fallback.slug,
+    parentId: node.parentId || fallback.parentId || categoryId,
+    subjectId: node.subjectId || fallback.subjectId,
+    gradeId: node.gradeId || fallback.gradeId,
+    categoryId,
+    bookSeriesId: node.bookSeriesId || fallback.bookSeriesId,
+    topicId: node.topicId || fallback.topicId,
+    levelIds: node.levelIds || fallback.levelIds,
+    description: node.description || fallback.description,
+    sortOrder: node.sortOrder ?? fallback.sortOrder,
+    status: node.status || fallback.status,
+    metadata: node.metadata || fallback.metadata,
   };
 }
 
-function mapStudioBootstrapToResources(bootstrap: LearningResourceStudioBootstrap, limit: number): LearningResourceResourceList {
-  const resources = (bootstrap.resources ?? []).map(mapStudioResourceToCard).slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
+function mapCanonicalContentItemToCard(
+  item: ContentItemResponse,
+  scope: Record<string, unknown> = {},
+): LearningResourceResourceCard {
+  const primaryPlacement = [...(item.placements ?? [])].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))[0];
+  const primaryAsset = [...(item.assets ?? [])].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0))[0];
+  const selectedFileType = fileTypeForCanonicalContent(item, primaryAsset);
+  const topicId = primaryPlacement?.topicId || String(scope.topicId || scope.sectionId || item.id);
+  const categoryId = String(scope.categoryId || scope.levelId || topicId);
+  const subjectId = String(scope.subjectId || "curriculum");
 
   return {
-    data: resources,
-    total: resources.length,
-    page: 1,
-    limit,
-  };
-}
-
-function mapStudioTaxonomyNode(node: StudioTaxonomyNodeResponse): LearningResourceTaxonomyOption {
-  return {
-    id: node.id,
-    label: node.label,
-    slug: node.slug,
-    parentId: node.parentId,
-    subjectId: node.subjectId,
-    categoryId: node.categoryId,
-    description: node.description,
-    sortOrder: node.sortOrder,
-    status: node.status,
-    metadata: node.metadata,
-  };
-}
-
-function mapStudioResourceToCard(resource: StudioResourceResponse): LearningResourceResourceCard {
-  const subjectId = resource.subjectId || "hoc-lieu";
-  const categoryId = resource.categoryId || resource.groupId || subjectId;
-  const sectionId = resource.sectionId || resource.lessonId || categoryId;
-  const fileType = normalizeStudioFileType(resource.fileType || resource.type || "PDF");
-
-  return {
-    id: resource.id,
-    slug: slugify(resource.title || resource.id),
-    title: resource.title,
-    subtitle: resource.subtitle,
-    thumbnailUrl: resource.thumbnailUrl,
+    id: item.id,
+    slug: slugify(item.title || item.id),
+    title: item.title,
+    subtitle: item.description,
     programSlug: subjectId,
     subjectId,
     categoryId,
-    sectionId,
-    selectedFileType: fileType,
-    fileTypeBadge: fileType,
-    launchMode: launchModeFor(fileType),
+    sectionId: topicId,
+    topicId,
+    selectedFileType,
+    fileTypeBadge: selectedFileType,
+    launchMode: launchModeFor(selectedFileType),
     priceType: "free",
     accessState: "open",
-    visibility: resource.visibility,
-    status: resource.status,
-    canDownload: false,
-    updatedAt: resource.updatedAt,
+    visibility: item.visibility,
+    status: item.status,
+    canDownload: Boolean(primaryAsset?.metadata?.canDownload),
+    updatedAt: item.updatedAt,
   };
 }
 
-function mapStudioAssetToDetail(asset: StudioAssetResponse): LearningResourceAssetDetail {
+function mapGraphQlTaxonomyNode(
+  node: LearningResourceLibraryGraphQlNode,
+  fallback: Partial<LearningResourceTaxonomyOption> = {},
+): LearningResourceTaxonomyOption {
+  return {
+    id: node.id,
+    label: node.label || node.id,
+    slug: node.slug || undefined,
+    parentId: node.parentId || fallback.parentId,
+    subjectId: node.subjectId || fallback.subjectId,
+    categoryId: node.categoryId || fallback.categoryId,
+    topicId: fallback.topicId,
+    description: node.description || undefined,
+    sortOrder: node.sortOrder ?? fallback.sortOrder,
+    status: node.status || fallback.status,
+    metadata: {
+      kind: graphQlNodeKind(node),
+      childCount: String(node.childCount ?? 0),
+      resourceCount: String(node.resourceCount ?? 0),
+    },
+  };
+}
+
+function mapGraphQlResourceCard(
+  card: LearningResourceLibraryGraphQlCard,
+  scope: Record<string, unknown> = {},
+): LearningResourceResourceCard {
+  const subjectId = card.subjectId || stringParam(scope.subjectId) || "curriculum";
+  const categoryId = card.categoryId || stringParam(scope.categoryId || scope.levelId) || card.sectionId || card.topicId || subjectId;
+  const sectionId = card.sectionId || card.topicId || stringParam(scope.sectionId) || categoryId;
+  const topicId = card.topicId || stringParam(scope.topicId) || sectionId;
+  const selectedFileType = fileTypeFromGraphQlCard(card);
+  return {
+    id: card.id,
+    slug: card.slug || slugify(card.title || card.id),
+    title: card.title || card.id,
+    subtitle: card.subtitle || undefined,
+    thumbnailUrl: card.thumbnailUrl || undefined,
+    programSlug: subjectId,
+    subjectId,
+    gradeId: card.gradeId || stringParam(scope.gradeId),
+    categoryId,
+    sectionId,
+    topicId,
+    selectedFileType,
+    fileTypeBadge: selectedFileType,
+    launchMode: launchModeFor(selectedFileType),
+    priceType: "free",
+    accessState: "open",
+    visibility: card.visibility || undefined,
+    status: card.status || undefined,
+    canDownload: false,
+    updatedAt: card.updatedAt || card.publishedAt || undefined,
+  };
+}
+
+function mapCardToStudioResource(card: LearningResourceResourceCard): StudioResourceResponse {
+  return {
+    id: card.id,
+    title: card.title,
+    subtitle: card.subtitle,
+    thumbnailUrl: card.thumbnailUrl,
+    subjectId: card.subjectId,
+    categoryId: card.categoryId,
+    sectionId: card.sectionId,
+    fileType: card.selectedFileType,
+    type: card.selectedFileType,
+    status: card.status,
+    visibility: card.visibility,
+    updatedAt: card.updatedAt,
+  };
+}
+
+function mapContentAssetToStudioAsset(asset: ContentAssetResponse, resourceId: string): StudioAssetResponse {
+  const selectedFileType = typeof asset.metadata?.selectedFileType === "string"
+    ? normalizeStudioFileType(asset.metadata.selectedFileType)
+    : fileTypeForCanonicalAsset(asset);
+  const originalFileName = typeof asset.metadata?.originalFileName === "string" ? asset.metadata.originalFileName : asset.title;
   return {
     id: asset.id,
-    resourceId: asset.resourceId,
+    resourceId,
     title: asset.title,
-    selectedFileType: asset.selectedFileType || asset.fileType,
-    fileTypeBadge: asset.fileType || asset.selectedFileType,
-    launchMode: asset.launchMode,
-    originalFileName: asset.originalFileName,
-    detectedMimeType: asset.mimeType,
-    fileExtension: asset.extension,
+    selectedFileType,
+    fileType: selectedFileType,
+    launchMode: typeof asset.metadata?.launchMode === "string" ? asset.metadata.launchMode : launchModeFor(selectedFileType),
+    originalFileName,
+    mimeType: asset.mimeType,
+    extension: extensionFromFileName(originalFileName || asset.title || selectedFileType.toLowerCase()),
+    sizeBytes: asset.byteSize,
     storageProvider: asset.storageProvider,
     storageUrl: asset.storageUrl,
-    upstreamUrl: asset.upstreamUrl,
-    canDownload: asset.canDownload,
+    upstreamUrl: asset.storageUrl,
+    canDownload: Boolean(asset.metadata?.canDownload),
     status: asset.status,
   };
 }
 
+function taxonomyToCurriculumNode(item: LearningResourceTaxonomyOption, kind: string): CurriculumTreeNodeResponse {
+  return {
+    id: item.id,
+    label: item.label,
+    name: item.label,
+    slug: item.slug,
+    parentId: item.parentId,
+    subjectId: item.subjectId,
+    categoryId: item.categoryId,
+    topicId: item.topicId,
+    description: item.description,
+    sortOrder: item.sortOrder,
+    status: item.status,
+    kind,
+    nodeType: kind,
+    metadata: item.metadata,
+  };
+}
+
+function fileTypeForCanonicalContent(item: ContentItemResponse, asset?: ContentAssetResponse) {
+  const assetType = (asset?.assetType || "").toUpperCase();
+  const contentType = (item.contentType || "").toUpperCase();
+  const selectedFileType = typeof asset?.metadata?.selectedFileType === "string" ? asset.metadata.selectedFileType : "";
+  if (selectedFileType) return normalizeStudioFileType(selectedFileType);
+  if (assetType === "GOOGLE_SLIDE") return "PPTX";
+  if (assetType === "QUIZ_PACKAGE" || contentType === "EXERCISE") return "QUIZ";
+  if (assetType === "VIDEO") return "VIDEO";
+  if (assetType === "AUDIO") return "AUDIO";
+  if (assetType === "EXTERNAL_LINK") return "LINK";
+  return "PDF";
+}
+
+function fileTypeForCanonicalAsset(asset: ContentAssetResponse) {
+  const assetType = (asset.assetType || "").toUpperCase();
+  if (assetType === "GOOGLE_SLIDE") return "PPTX";
+  if (assetType === "QUIZ_PACKAGE") return "QUIZ";
+  if (assetType === "VIDEO") return "VIDEO";
+  if (assetType === "AUDIO") return "AUDIO";
+  if (assetType === "EXTERNAL_LINK") return "LINK";
+  return "PDF";
+}
+
+function fileTypeFromGraphQlCard(card: LearningResourceLibraryGraphQlCard) {
+  const status = (card.status || "").toUpperCase();
+  const title = (card.title || "").toUpperCase();
+  if (status.includes("QUIZ") || title.endsWith(".QUIZ")) return "QUIZ";
+  if (title.endsWith(".PPT") || title.endsWith(".PPTX")) return "PPTX";
+  if (title.endsWith(".MP4") || title.endsWith(".MOV")) return "VIDEO";
+  if (title.endsWith(".MP3") || title.endsWith(".WAV")) return "AUDIO";
+  if (title.startsWith("HTTP://") || title.startsWith("HTTPS://")) return "LINK";
+  return "PDF";
+}
+
 function sortTaxonomies(items: LearningResourceTaxonomyOption[]) {
   return [...items].sort((left, right) => (left.sortOrder ?? 0) - (right.sortOrder ?? 0) || left.label.localeCompare(right.label, "vi"));
+}
+
+function groupBy<T>(items: T[], keyFor: (item: T) => string) {
+  const groups = new Map<string, T[]>();
+  items.forEach((item) => {
+    const key = keyFor(item);
+    const group = groups.get(key) ?? [];
+    group.push(item);
+    groups.set(key, group);
+  });
+  return groups;
+}
+
+function graphQlNodeKind(node: LearningResourceLibraryGraphQlNode) {
+  return (node.kind || "").toLowerCase();
+}
+
+function stringParam(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  return String(value);
 }
 
 function normalizeStudioFileType(fileType: string) {
@@ -638,26 +1313,12 @@ function launchModeFor(fileType: string) {
   return "download_only";
 }
 
-function taxonomyKindForStudio(kind: string) {
+function curriculumTaxonomyPath(kind: string) {
   const normalized = kind.toLowerCase();
-  if (normalized === "subjects" || normalized === "subject") return "subject";
-  if (["categories", "groups", "category", "group"].includes(normalized)) return "category";
-  if (["sections", "lessons", "section", "lesson"].includes(normalized)) return "section";
-  throw new Error("Learning Resources backend currently supports subject, category, and section taxonomy only.");
-}
-
-function normalizeVisibilityForStudio(visibility?: string) {
-  if (!visibility || visibility === "public" || visibility === "published") return "open";
-  return visibility;
-}
-
-function googleSlideMetadata(input: { totalSlides?: number; metadata?: Record<string, unknown> }) {
-  const totalSlides = positiveInteger(input.totalSlides);
-  if (!totalSlides && !input.metadata) return undefined;
-  return compactObject({
-    ...(input.metadata ?? {}),
-    totalSlides,
-  });
+  if (normalized === "subjects" || normalized === "subject") return "subjects";
+  if (["levels", "level", "categories", "category", "groups", "group"].includes(normalized)) return "levels";
+  if (["topics", "topic", "sections", "section", "lessons", "lesson"].includes(normalized)) return "topics";
+  return null;
 }
 
 function positiveInteger(value?: number) {

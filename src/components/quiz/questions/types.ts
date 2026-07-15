@@ -7,4 +7,6 @@ export type QuestionComponentProps = {
   submitted?: boolean;
   reviewMode?: boolean;
   result?: AnswerResult | null;
+  editable?: boolean;
+  onQuestionChange?: (next: Question) => void;
 };

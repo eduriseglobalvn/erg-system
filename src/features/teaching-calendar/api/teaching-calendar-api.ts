@@ -1,17 +1,40 @@
-import {
-  type CenterUpCalendarEvent,
-  type CenterUpCalendarLaneSummary,
-  type CenterUpCalendarPermissions,
-  type CenterUpCalendarResolvedTone,
-  type CenterUpCalendarTone,
-  type CenterUpScheduleCatalog,
-  type CenterUpScheduleDraft,
-} from "@/components/shared/centerup-calendar-workspace";
+﻿import {
+  type ErgCalendarEvent,
+  type ErgCalendarLaneSummary,
+  type ErgCalendarPermissions,
+  type ErgCalendarResolvedTone,
+  type ErgCalendarTone,
+  type ErgScheduleCatalog,
+  type ErgScheduleDraft,
+} from "@/components/shared/erg-calendar-workspace";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPortal } from "@/lib/graphql-client";
 
 export const TEACHING_CALENDAR_WORKSPACE_STALE_TIME_MS = 5 * 60_000;
 export const TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS = 30 * 60_000;
+
+export const teachingCalendarQueryKeys = {
+  root: ["teaching-calendar"] as const,
+  portalRoot: (portal: GraphQlPortal, tenantId: string = getDefaultTenantId()) =>
+    [...teachingCalendarQueryKeys.root, portal, tenantId] as const,
+  workspace: (
+    portal: GraphQlPortal,
+    usage: string,
+    input: TeachingCalendarWorkspaceInput | MyTeachingCalendarInput | MyStudentCalendarInput,
+  ) => [...teachingCalendarQueryKeys.portalRoot(portal, input.tenantId), usage, ...workspaceInputKey(input).slice(1)] as const,
+  referenceCatalog: (portal: GraphQlPortal, tenantId: string = getDefaultTenantId()) =>
+    [...teachingCalendarQueryKeys.portalRoot(portal, tenantId), "reference-catalog"] as const,
+  batches: (portal: GraphQlPortal, input: TeachingScheduleBatchListInput) => [
+    ...teachingCalendarQueryKeys.portalRoot(portal, input.tenantId),
+    "batches",
+    input.schoolId ?? "",
+    input.status ?? "",
+    input.page ?? 0,
+    input.size ?? 20,
+  ] as const,
+  batchDetail: (portal: GraphQlPortal, tenantId: string, batchId: string) =>
+    [...teachingCalendarQueryKeys.portalRoot(portal, tenantId), "batch-detail", batchId] as const,
+};
 
 export type TeachingCalendarViewMode = "ALL" | "BY_SCHOOL" | "BY_TEACHER" | "BY_SUBJECT";
 export type TeachingScheduleStatus = "DRAFT" | "PUBLISHED" | "CANCELLED";
@@ -40,7 +63,7 @@ export type TeachingCalendarWorkspace = {
   from: string;
   generatedAt: string;
   laneSummaries: TeachingCalendarLaneSummary[];
-  permissions: CenterUpCalendarPermissions;
+  permissions: ErgCalendarPermissions;
   tenantId: string;
   to: string;
   viewMode: TeachingCalendarViewMode;
@@ -208,7 +231,7 @@ export type TeachingSchedulePreviewPayload = {
 };
 
 export type TeachingScheduleBulkPayload = {
-  batchId: string;
+  batchId: string | null;
   conflicts: TeachingScheduleConflict[];
   createdEventCount: number;
   rowResults: TeachingScheduleRowResult[];
@@ -251,6 +274,49 @@ export type TeachingScheduleBatchPayload = {
   affectedEventCount: number;
   batchId: string;
   status: TeachingScheduleStatus;
+};
+
+export type TeachingScheduleBatchListInput = {
+  page?: number;
+  schoolId?: string;
+  size?: number;
+  status?: TeachingScheduleStatus;
+  tenantId: string;
+};
+
+export type TeachingScheduleBatchSummary = {
+  applyFrom: string;
+  createdAt: string;
+  id: string;
+  repeatWeeks: number;
+  schoolId: string;
+  status: TeachingScheduleStatus;
+};
+
+export type TeachingScheduleBatchPage = {
+  hasNext: boolean;
+  hasPrevious: boolean;
+  items: TeachingScheduleBatchSummary[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+};
+
+export type TeachingScheduleBatchDetailInput = {
+  batchId: string;
+  tenantId: string;
+};
+
+export type TeachingScheduleBatchDetail = TeachingScheduleBatchSummary & {
+  academicYear?: string | null;
+  createdBy?: string | null;
+  eventCount: number;
+  note?: string | null;
+  publishedAt?: string | null;
+  publishedBy?: string | null;
+  source?: string | null;
+  tenantId: string;
 };
 
 export type CreateRoomInput = {
@@ -481,23 +547,23 @@ export async function loadLmsMyStudentCalendar(input: MyStudentCalendarInput) {
 }
 
 export async function loadTeachingCalendarSessionCatalog(portal: GraphQlPortal = "lms") {
-  if (!hasApiBase()) return emptyCenterUpScheduleCatalog();
+  if (!hasApiBase()) return emptyErgScheduleCatalog();
 
   const session = await apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current", {
     portal,
   });
 
-  return mapSessionToCenterUpScheduleCatalog(session);
+  return mapSessionToErgScheduleCatalog(session);
 }
 
 export async function loadTeachingCalendarReferenceCatalog(portal: GraphQlPortal = "lms") {
-  if (!hasApiBase()) return emptyCenterUpScheduleCatalog();
+  if (!hasApiBase()) return emptyErgScheduleCatalog();
 
   const scopedSchools = await loadScopedEducationUnitSchools(portal);
-  if (scopedSchools.length) return mapSchoolsToCenterUpScheduleCatalog(scopedSchools);
+  if (scopedSchools.length) return mapSchoolsToErgScheduleCatalog(scopedSchools);
 
   const organizationSchools = await loadOrganizationEducationUnitSchools(portal);
-  if (organizationSchools.length) return mapSchoolsToCenterUpScheduleCatalog(organizationSchools);
+  if (organizationSchools.length) return mapSchoolsToErgScheduleCatalog(organizationSchools);
 
   return loadTeachingCalendarSessionCatalog(portal);
 }
@@ -617,6 +683,54 @@ export async function cancelTeachingScheduleBatch(batchId: string, tenantId = ge
   return data.cancelTeachingScheduleBatch;
 }
 
+export async function loadTeachingScheduleBatches(input: TeachingScheduleBatchListInput) {
+  const data = await graphQlRequest<
+    { lcms: { teachingScheduleBatches: TeachingScheduleBatchPage } },
+    { input: TeachingScheduleBatchListInput }
+  >({
+    operationName: "TEACHING_SCHEDULE_BATCHES",
+    portal: "lcms",
+    query: `
+      query TEACHING_SCHEDULE_BATCHES($input: TeachingScheduleBatchListInput) {
+        lcms {
+          teachingScheduleBatches(input: $input) {
+            items { id schoolId applyFrom repeatWeeks status createdAt }
+            page size totalItems totalPages hasNext hasPrevious
+          }
+        }
+      }
+    `,
+    tenantId: input.tenantId,
+    variables: { input },
+  });
+
+  return data.lcms.teachingScheduleBatches;
+}
+
+export async function loadTeachingScheduleBatchDetail(input: TeachingScheduleBatchDetailInput) {
+  const data = await graphQlRequest<
+    { lcms: { teachingScheduleBatch: TeachingScheduleBatchDetail } },
+    { input: TeachingScheduleBatchDetailInput }
+  >({
+    operationName: "TEACHING_SCHEDULE_BATCH_DETAIL",
+    portal: "lcms",
+    query: `
+      query TEACHING_SCHEDULE_BATCH_DETAIL($input: TeachingScheduleBatchDetailInput!) {
+        lcms {
+          teachingScheduleBatch(input: $input) {
+            id tenantId schoolId academicYear applyFrom repeatWeeks status source note
+            createdBy publishedBy publishedAt createdAt eventCount
+          }
+        }
+      }
+    `,
+    tenantId: input.tenantId,
+    variables: { input },
+  });
+
+  return data.lcms.teachingScheduleBatch;
+}
+
 export async function createTeachingScheduleRoom(input: CreateRoomInput, portal: GraphQlPortal = "lcms") {
   const data = await graphQlRequest<{ createRoom: TeachingScheduleRoomOption }, { input: CreateRoomInput }>({
     operationName: "CREATE_TEACHING_SCHEDULE_ROOM",
@@ -660,7 +774,7 @@ export async function uploadTeachingScheduleExcelFile(input: TeachingScheduleExc
   });
 }
 
-export function mapTeachingCalendarEvents(events: TeachingCalendarEvent[]): CenterUpCalendarEvent[] {
+export function mapTeachingCalendarEvents(events: TeachingCalendarEvent[]): ErgCalendarEvent[] {
   return events.map((event) => {
     const mainTeachers = event.teachers.filter((teacher) => teacher.role === "MAIN");
     const teacherLabel = mainTeachers.length ? mainTeachers.map((teacher) => teacher.displayName).join(", ") : event.teachers.map((teacher) => teacher.displayName).join(", ");
@@ -674,7 +788,9 @@ export function mapTeachingCalendarEvents(events: TeachingCalendarEvent[]): Cent
       id: event.id,
       lane: event.colorGroup.kind,
       location: event.roomName ?? "Chưa có phòng",
+      note: event.note ?? undefined,
       periodCount: event.periodCount,
+      roomId: event.roomId ?? undefined,
       school: event.schoolName,
       startTime: event.startTime,
       subject: event.subjectName ?? event.title,
@@ -686,7 +802,7 @@ export function mapTeachingCalendarEvents(events: TeachingCalendarEvent[]): Cent
   });
 }
 
-export function mapTeachingCalendarCatalog(catalog?: TeachingCalendarCatalog, filterOptions?: TeachingCalendarFilterOptions): CenterUpScheduleCatalog | undefined {
+export function mapTeachingCalendarCatalog(catalog?: TeachingCalendarCatalog, filterOptions?: TeachingCalendarFilterOptions): ErgScheduleCatalog | undefined {
   if (!catalog && !filterOptions) return undefined;
   const catalogClasses = catalog?.classes ?? [];
   const catalogLevels = catalog?.levels ?? [];
@@ -713,9 +829,9 @@ export function mapTeachingCalendarCatalog(catalog?: TeachingCalendarCatalog, fi
 }
 
 export function mergeTeachingCalendarCatalog(
-  primary?: CenterUpScheduleCatalog,
-  fallback?: CenterUpScheduleCatalog,
-): CenterUpScheduleCatalog | undefined {
+  primary?: ErgScheduleCatalog,
+  fallback?: ErgScheduleCatalog,
+): ErgScheduleCatalog | undefined {
   if (!primary) return fallback;
   if (!fallback) return primary;
 
@@ -730,7 +846,7 @@ export function mergeTeachingCalendarCatalog(
   };
 }
 
-export function mapLaneSummaries(options: TeachingCalendarFilterOption[] | undefined): CenterUpCalendarLaneSummary[] | undefined {
+export function mapLaneSummaries(options: TeachingCalendarFilterOption[] | undefined): ErgCalendarLaneSummary[] | undefined {
   return options?.map((option) => ({
     color: colorKeyToBorder(option.colorKey),
     count: option.count,
@@ -739,7 +855,7 @@ export function mapLaneSummaries(options: TeachingCalendarFilterOption[] | undef
   }));
 }
 
-export function mapScheduleDraftToBulkInput(draft: CenterUpScheduleDraft, options?: { idempotencyKey?: string; tenantId?: string }): TeachingScheduleBulkInput {
+export function mapScheduleDraftToBulkInput(draft: ErgScheduleDraft, options?: { idempotencyKey?: string; tenantId?: string }): TeachingScheduleBulkInput {
   return {
     applyFrom: draft.applyFrom,
     idempotencyKey: options?.idempotencyKey ?? createClientIdempotencyKey(),
@@ -768,7 +884,7 @@ export function workspaceInputKey(input: TeachingCalendarWorkspaceInput | MyTeac
   ];
 }
 
-export function colorKeyToTone(colorKey?: string | null): CenterUpCalendarTone {
+export function colorKeyToTone(colorKey?: string | null): ErgCalendarTone {
   const normalized = colorKey?.trim().toLowerCase();
   if (normalized === "green" || normalized === "purple" || normalized === "orange" || normalized === "red" || normalized === "teal" || normalized === "pink" || normalized === "indigo") {
     return normalized;
@@ -776,7 +892,7 @@ export function colorKeyToTone(colorKey?: string | null): CenterUpCalendarTone {
   return "blue";
 }
 
-export function colorKeyToToneObject(colorKey?: string | null): CenterUpCalendarResolvedTone {
+export function colorKeyToToneObject(colorKey?: string | null): ErgCalendarResolvedTone {
   return tonePalette[colorKeyToTone(colorKey)];
 }
 
@@ -799,7 +915,7 @@ function createClientIdempotencyKey() {
   return `calendar-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function mapSessionToCenterUpScheduleCatalog(session: SessionCurrentResponseDTO): CenterUpScheduleCatalog {
+function mapSessionToErgScheduleCatalog(session: SessionCurrentResponseDTO): ErgScheduleCatalog {
   const scopeLabels = new Map((session.availableScopeOptions ?? []).map((scope) => [scope.unitId, scope.label]));
   const units = session.manageableUnits ?? [];
   const schoolUnits = units.filter(isScheduleSchoolUnit);
@@ -847,14 +963,14 @@ async function loadOrganizationEducationUnitSchools(portal: GraphQlPortal) {
   }
 }
 
-function mapSchoolsToCenterUpScheduleCatalog(schools: CenterUpScheduleCatalog["schools"]): CenterUpScheduleCatalog {
+function mapSchoolsToErgScheduleCatalog(schools: ErgScheduleCatalog["schools"]): ErgScheduleCatalog {
   return {
-    ...emptyCenterUpScheduleCatalog(),
+    ...emptyErgScheduleCatalog(),
     schools,
   };
 }
 
-function mapEducationUnitsToScheduleSchools(units: EducationUnitDTO[]): CenterUpScheduleCatalog["schools"] {
+function mapEducationUnitsToScheduleSchools(units: EducationUnitDTO[]): ErgScheduleCatalog["schools"] {
   const schoolUnits = units.filter(isScheduleEducationUnitSchool);
   const fallbackUnits = schoolUnits.length ? schoolUnits : units.filter((unit) => !isSystemLikeEducationUnit(unit));
 
@@ -864,7 +980,7 @@ function mapEducationUnitsToScheduleSchools(units: EducationUnitDTO[]): CenterUp
   }))).sort((a, b) => a.name.localeCompare(b.name, "vi"));
 }
 
-function emptyCenterUpScheduleCatalog(): CenterUpScheduleCatalog {
+function emptyErgScheduleCatalog(): ErgScheduleCatalog {
   return {
     assistantTeachers: [],
     classes: [],
@@ -916,7 +1032,7 @@ function uniqueById<T extends { id: string }>(items: T[]) {
   });
 }
 
-const tonePalette: Record<CenterUpCalendarTone, CenterUpCalendarResolvedTone> = {
+const tonePalette: Record<ErgCalendarTone, ErgCalendarResolvedTone> = {
   blue: { background: "#DCEBFF", border: "#5A94E8", text: "#174EA6" },
   green: { background: "#E0F2E7", border: "#42A96A", text: "#137333" },
   indigo: { background: "#E6EAFF", border: "#6974D8", text: "#3942A0" },

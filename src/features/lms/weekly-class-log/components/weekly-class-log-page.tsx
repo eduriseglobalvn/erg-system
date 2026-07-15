@@ -290,14 +290,11 @@ const DayRows = memo(function DayRows({
   onUpdatePeriod: (dayId: string, periodId: string, field: keyof WeeklyClassLogPeriod, value: string) => void;
   teacherName: string;
 }) {
-  const dayState = getGroupedPeriodState(day.periods);
-
   return (
     <>
       {day.periods.map((period, index) => {
         const rowState = getPeriodCompletionState(period);
         const bgColor = rowState === "complete" ? "#dcfce7" : rowState === "incomplete" ? "#fee2e2" : "white";
-        const isMorning = index < morningPeriodCount;
 
         return (
           <tr key={period.id} style={{ backgroundColor: bgColor }}>
@@ -548,13 +545,6 @@ function getPeriodCompletionState(period: WeeklyClassLogPeriod): PeriodCompletio
   const hasAnyValue = [...requiredValues, period.absent].some((value) => value.trim());
   if (!hasAnyValue) return "empty";
   return requiredValues.every((value) => value.trim()) ? "complete" : "incomplete";
-}
-
-function getGroupedPeriodState(periods: WeeklyClassLogPeriod[]): PeriodCompletionState {
-  const states = periods.map(getPeriodCompletionState);
-  if (states.some((state) => state === "incomplete")) return "empty";
-  if (states.some((state) => state === "complete")) return "complete";
-  return "empty";
 }
 
 function buildWeeklySummary(week: WeeklyClassLogWeek): WeeklyClassLogSummary {

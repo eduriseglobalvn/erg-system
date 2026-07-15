@@ -1,9 +1,24 @@
-import { useTheme } from "next-themes"
+import * as React from "react"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
+function useResolvedTheme(): "light" | "dark" {
+  const [theme, setTheme] = React.useState<"light" | "dark">(() =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  )
+  React.useEffect(() => {
+    const el = document.documentElement
+    const obs = new MutationObserver(() =>
+      setTheme(el.classList.contains("dark") ? "dark" : "light")
+    )
+    obs.observe(el, { attributes: true, attributeFilter: ["class"] })
+    return () => obs.disconnect()
+  }, [])
+  return theme
+}
+
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const theme = useResolvedTheme()
 
   return (
     <Sonner

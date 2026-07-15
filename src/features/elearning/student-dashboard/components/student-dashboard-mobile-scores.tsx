@@ -3,7 +3,7 @@ import { BarChart3 as BarChartRoundedIcon } from "lucide-react";
 import { Trophy as EmojiEventsOutlinedIcon } from "lucide-react";
 import { LineChart as QueryStatsRoundedIcon } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
+import Card from "@mui/material/Card";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 

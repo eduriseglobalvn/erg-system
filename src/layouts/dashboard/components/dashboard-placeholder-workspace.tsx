@@ -1,8 +1,8 @@
 import { ArrowLeft, CheckCircle2, ClipboardList, Layers3 } from "lucide-react";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
 
 import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/platform/i18n";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
@@ -25,8 +25,7 @@ export function DashboardPlaceholderWorkspace({
       description={activeLeaf.description}
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
-        <Button variant="outline" onClick={() => onOpenLeaf(backTarget)}>
-          <ArrowLeft className="h-4 w-4" />
+        <Button variant="outlined" startIcon={<ArrowLeft className="h-4 w-4" />} onClick={() => onOpenLeaf(backTarget)}>
           {copy.backToOps}
         </Button>
       }
@@ -45,9 +44,7 @@ export function DashboardPlaceholderWorkspace({
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   {(template?.chips ?? ["LCMS", "LMS source", "Setup"]).map((chip) => (
-                    <Badge key={chip} tone="secondary">
-                      {chip}
-                    </Badge>
+                    <Chip key={chip} label={chip} size="small" color="secondary" />
                   ))}
                 </div>
               </div>

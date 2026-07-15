@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
+﻿import { lazy, memo, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@/routes/router-compat";
 import { Box, Button, MenuItem, Select, Stack, Typography } from "@mui/material";
@@ -26,7 +26,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import CenterUpLayout, { type MenuGroup } from "@/components/portal/CenterUpLayout";
+import ErgPortalLayout, { type MenuGroup } from "@/components/portal/ErgPortalLayout";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import {
@@ -39,6 +39,7 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsTeacherHomeworkWorkspace, mapAssignmentsToRuns } from "@/features/lms/api/lms-graphql-api";
+import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
@@ -46,8 +47,11 @@ import { hasApiBase } from "@/lib/api-client";
 import { LmsMobileShell, useLmsMobileBreakpoint } from "@/features/lms/mobile";
 import { fetchUnreadNotificationCount, notificationQueryKeys } from "@/features/notifications/api/notification-api";
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
+import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/features/lms/components/lms-teacher-shell-utils";
+import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { ReportsPanel } from "@/features/lms/components/reports-panel";
 import { queryKeys } from "@/lib/query-keys";
+import { canNavigateToLmsPath, filterLmsNavigation } from "@/features/lms/navigation/lms-navigation";
 
 type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
 type LmsMobileSection = "assignHomework" | "exerciseBank" | "schedule" | "notifications";
@@ -58,8 +62,8 @@ const LearningResourceLibraryPage = lazy(() =>
   })),
 );
 const TeachingSchedulePanel = lazy(() =>
-  import("@/features/lms/components/teaching-schedule/lms-centerup-calendar-workspace").then((module) => ({
-    default: module.LmsCenterUpCalendarWorkspace,
+  import("@/features/lms/components/teaching-schedule/lms-erg-calendar-workspace").then((module) => ({
+    default: module.LmsErgCalendarWorkspace,
   })),
 );
 const WeeklyClassLogPage = lazy(() =>
@@ -238,12 +242,13 @@ function resolveMobileSection(pathname: string): LmsMobileSection {
   if (pathname === "/notifications" || pathname.startsWith("/notifications/")) return "notifications";
   return "assignHomework";
 }
-
 export function LmsTeacherShell() {
-  const { actions, account } = useAuthSession("lms");
+  const { actions, account, session } = useAuthSession("lms");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const apiBacked = hasApiBase();
+  const tenantId = session?.tenantId ?? "";
+  const notificationScope = useMemo(() => ({ accountId: account?.id, tenantId }), [account?.id, tenantId]);
   const pathname = typeof window !== "undefined" ? window.location.pathname : "/";
   const progressAssignmentId = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("assignmentId") : null;
   const activeSection = resolveSection(pathname);
@@ -253,7 +258,7 @@ export function LmsTeacherShell() {
   const [requestedClassId, setSelectedClassId] = useState("");
   const [createdRuns, setCreatedRuns] = useState<AssignmentRun[]>([]);
   const bootstrapQuery = useQuery({
-    queryKey: queryKeys.lmsTeacherShell.bootstrap(),
+    queryKey: queryKeys.lmsTeacherShell.bootstrap(tenantId, account?.id),
     queryFn: loadLmsDashboardBootstrap,
     enabled: apiBacked,
     staleTime: 5 * 60_000,
@@ -261,7 +266,7 @@ export function LmsTeacherShell() {
     refetchOnWindowFocus: false,
   });
   const notificationUnreadQuery = useQuery({
-    queryKey: notificationQueryKeys.unreadCount("lms"),
+    queryKey: notificationQueryKeys.unreadCount("lms", notificationScope),
     queryFn: () => fetchUnreadNotificationCount("lms"),
     enabled: apiBacked,
     staleTime: 60_000,
@@ -271,7 +276,7 @@ export function LmsTeacherShell() {
     refetchOnWindowFocus: false,
   });
   const homeworkWorkspaceQuery = useQuery({
-    queryKey: queryKeys.lmsTeacherShell.homeworkWorkspace(),
+    queryKey: lmsAssignmentReadQueryKeys.homeworkWorkspace(tenantId),
     queryFn: () => loadLmsTeacherHomeworkWorkspace({ page: 0, size: 50, status: "active" }),
     enabled: apiBacked && shouldLoadHomeworkWorkspace,
     staleTime: 60_000,
@@ -288,8 +293,8 @@ export function LmsTeacherShell() {
     [homeworkWorkspaceQuery.data],
   );
   const runs = useMemo(
-    () => [...createdRuns, ...(workspaceRuns.length ? workspaceRuns : assignmentRuns)],
-    [createdRuns, workspaceRuns],
+    () => resolveLmsTeacherRuns({ apiBacked, createdRuns, fallbackRuns: assignmentRuns, workspaceRuns }),
+    [apiBacked, createdRuns, workspaceRuns],
   );
   const bootstrapSelection = useMemo(() => {
     const scope = bootstrapQuery.data?.managementScope;
@@ -329,19 +334,27 @@ export function LmsTeacherShell() {
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
   const learningResourceScope = useMemo(
     () => ({
-      selectedSchoolId,
+      accountId: account?.id,
       academicYear: getCurrentAcademicYear(),
+      selectedSchoolId,
+      tenantId,
     }),
-    [selectedSchoolId],
+    [account?.id, selectedSchoolId, tenantId],
   );
   const isMobile = useLmsMobileBreakpoint();
   const unreadNotificationCount = notificationUnreadQuery.data?.unread ?? 0;
+  const grantedPermissions = bootstrapQuery.data?.permissions.grantedPermissions ?? session?.permissions ?? [];
+  const deniedPermissions = bootstrapQuery.data?.permissions.deniedPermissions ?? session?.deniedPermissions ?? [];
+  const filteredMenuGroups = useMemo(
+    () => filterLmsNavigation(LMS_MENU_GROUPS, grantedPermissions, deniedPermissions),
+    [deniedPermissions, grantedPermissions],
+  );
   const mobileDockItems = useMemo(
     () =>
-      lmsMobileDockItems.map((item) =>
-        item.id === "notifications" ? { ...item, badgeCount: unreadNotificationCount } : item,
-      ),
-    [unreadNotificationCount],
+      lmsMobileDockItems
+        .filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions))
+        .map((item) => (item.id === "notifications" ? { ...item, badgeCount: unreadNotificationCount } : item)),
+    [deniedPermissions, grantedPermissions, unreadNotificationCount],
   );
 
   useEffect(() => {
@@ -358,12 +371,15 @@ export function LmsTeacherShell() {
       const portal = typeof event.data.payload?.portal === "string" ? event.data.payload.portal.toLowerCase() : "lms";
       if (portal !== "lms") return;
 
-      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root("lms") });
+      void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root("lms", notificationScope) });
+      if (isSchedulePublishedNotification(event.data.payload)) {
+        void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lms", tenantId) });
+      }
     };
 
     navigator.serviceWorker.addEventListener("message", handleNotificationMessage);
     return () => navigator.serviceWorker.removeEventListener("message", handleNotificationMessage);
-  }, [queryClient]);
+  }, [notificationScope, queryClient, tenantId]);
 
   function selectSchool(schoolId: string) {
     const firstClass = classes.find((classroom) => classroom.schoolId === schoolId);
@@ -383,6 +399,25 @@ export function LmsTeacherShell() {
 
   function handleClassChange(e: { target: { value: string } }) {
     setSelectedClassId(e.target.value);
+  }
+
+  function handleLocalAssignmentCreated(title: string, subject: string, destination: string) {
+    if (!apiBacked) {
+      const newRun: AssignmentRun = {
+        id: `assignment-${Date.now()}`,
+        title,
+        subjectLabel: subject,
+        targetLevel: selectedClass?.className ?? "Cả lớp",
+        activeClasses: 1,
+        completionRate: 0,
+        submittedCount: 0,
+        inProgressCount: 0,
+        needsReviewCount: 0,
+        dueLabel: "Hạn nộp sau 7 ngày",
+      };
+      setCreatedRuns((current) => [newRun, ...current]);
+    }
+    navigate(destination);
   }
 
   const teacherContent = (
@@ -418,22 +453,7 @@ export function LmsTeacherShell() {
             classes={classes}
             selectedClass={selectedClass}
             onBack={() => navigate("/homework")}
-            onCreateAssignment={(title, subject) => {
-              const newRun: AssignmentRun = {
-                id: `assignment-${Date.now()}`,
-                title: title,
-                subjectLabel: subject,
-                targetLevel: selectedClass?.className ?? "Cả lớp",
-                activeClasses: 1,
-                completionRate: 0,
-                submittedCount: 0,
-                inProgressCount: 0,
-                needsReviewCount: 0,
-                dueLabel: "Hạn nộp sau 7 ngày",
-              };
-              setCreatedRuns((current) => [newRun, ...current]);
-              navigate("/homework");
-            }}
+            onCreateAssignment={(title, subject) => handleLocalAssignmentCreated(title, subject, "/homework")}
           />
         </Suspense>
       ) : pathname === "/homework/student-groups" ? (
@@ -458,22 +478,7 @@ export function LmsTeacherShell() {
         <Suspense fallback={null}>
           <ExerciseBankPage
             onBack={() => navigate("/homework")}
-            onAssign={(exerciseTitle) => {
-              const newRun: AssignmentRun = {
-                id: `assignment-${Date.now()}`,
-                title: exerciseTitle,
-                subjectLabel: "Kho bài tập",
-                targetLevel: selectedClass?.className ?? "Cả lớp",
-                activeClasses: 1,
-                completionRate: 0,
-                submittedCount: 0,
-                inProgressCount: 0,
-                needsReviewCount: 0,
-                dueLabel: "Hạn nộp sau 7 ngày",
-              };
-              setCreatedRuns((current) => [newRun, ...current]);
-              navigate("/homework");
-            }}
+            onAssign={(exerciseTitle) => handleLocalAssignmentCreated(exerciseTitle, "Kho bài tập", "/homework")}
           />
         </Suspense>
       ) : pathname === "/homework/progress" ? (
@@ -546,22 +551,7 @@ export function LmsTeacherShell() {
             classes={classes}
             selectedClass={selectedClass}
             onBack={() => navigate("/homework/assign")}
-            onCreateAssignment={(title, subject) => {
-              const newRun: AssignmentRun = {
-                id: `assignment-${Date.now()}`,
-                title,
-                subjectLabel: subject,
-                targetLevel: selectedClass?.className ?? "Cả lớp",
-                activeClasses: 1,
-                completionRate: 0,
-                submittedCount: 0,
-                inProgressCount: 0,
-                needsReviewCount: 0,
-                dueLabel: "Hạn nộp sau 7 ngày",
-              };
-              setCreatedRuns((current) => [newRun, ...current]);
-              navigate("/homework/assign");
-            }}
+            onCreateAssignment={(title, subject) => handleLocalAssignmentCreated(title, subject, "/homework/assign")}
           />
         </Suspense>
       );
@@ -574,22 +564,7 @@ export function LmsTeacherShell() {
             classes={classes}
             selectedClass={selectedClass}
             onBack={() => navigate("/homework/assign")}
-            onCreateAssignment={(title, subject) => {
-              const newRun: AssignmentRun = {
-                id: `assignment-${Date.now()}`,
-                title,
-                subjectLabel: subject,
-                targetLevel: selectedClass?.className ?? "Cả lớp",
-                activeClasses: 1,
-                completionRate: 0,
-                submittedCount: 0,
-                inProgressCount: 0,
-                needsReviewCount: 0,
-                dueLabel: "Hạn nộp sau 7 ngày",
-              };
-              setCreatedRuns((current) => [newRun, ...current]);
-              navigate("/homework/assign");
-            }}
+            onCreateAssignment={(title, subject) => handleLocalAssignmentCreated(title, subject, "/homework/assign")}
           />
         </Suspense>
       );
@@ -600,22 +575,7 @@ export function LmsTeacherShell() {
         <Suspense fallback={null}>
           <ExerciseBankPage
             onBack={() => navigate("/homework/assign")}
-            onAssign={(exerciseTitle) => {
-              const newRun: AssignmentRun = {
-                id: `assignment-${Date.now()}`,
-                title: exerciseTitle,
-                subjectLabel: "Kho bài tập",
-                targetLevel: selectedClass?.className ?? "Cả lớp",
-                activeClasses: 1,
-                completionRate: 0,
-                submittedCount: 0,
-                inProgressCount: 0,
-                needsReviewCount: 0,
-                dueLabel: "Hạn nộp sau 7 ngày",
-              };
-              setCreatedRuns((current) => [newRun, ...current]);
-              navigate("/homework/assign");
-            }}
+            onAssign={(exerciseTitle) => handleLocalAssignmentCreated(exerciseTitle, "Kho bài tập", "/homework/assign")}
           />
         </Suspense>
       );
@@ -693,7 +653,7 @@ export function LmsTeacherShell() {
     userEmail: teacherEmail,
   };
   return (
-    <CenterUpLayout
+    <ErgPortalLayout
       contentMode="flush"
       headerControls={
         <LmsHeaderSchoolControl
@@ -711,7 +671,7 @@ export function LmsTeacherShell() {
           />
         ) : null
       }
-      menuGroups={LMS_MENU_GROUPS}
+      menuGroups={filteredMenuGroups}
       notificationCount={unreadNotificationCount}
       portalInfo={lmsPortalInfo}
     >
@@ -729,7 +689,7 @@ export function LmsTeacherShell() {
           {teacherContent}
         </Box>
       </Box>
-    </CenterUpLayout>
+    </ErgPortalLayout>
   );
 }
 

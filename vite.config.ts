@@ -4,13 +4,22 @@ import fs from "node:fs";
 
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
 
 const devHttpsPfx = path.resolve(__dirname, "certs/erg-dev.pfx");
 
-export default defineConfig({
-  plugins: [
+export default defineConfig(({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  const backendUrl = env.BACKEND_URL?.trim();
+
+  if (!backendUrl && command === "serve" && mode !== "test") {
+    throw new Error("BACKEND_URL is required. Copy .env.example to .env and configure the backend URL.");
+  }
+
+  return {
+    plugins: [
     react(),
     tailwindcss(),
     VitePWA({
@@ -29,50 +38,11 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/sso\//],
         runtimeCaching: [
           {
-            urlPattern: /\/api\/(?:lms\/education-units|v1\/hoclieu\/library\/bootstrap|hoclieu\/teacher\/subjects\/[^/]+\/tree)(?:[/?#]|$)/i,
-            handler: "NetworkFirst",
-            method: "GET",
+            urlPattern: /\/api\/v1\/graphql(?:[/?#]|$)/i,
+            handler: "NetworkOnly",
+            method: "POST",
             options: {
-              cacheName: "erg-lms-bootstrap-v1",
-              networkTimeoutSeconds: 3,
-              expiration: {
-                maxEntries: 30,
-                maxAgeSeconds: 5 * 60,
-              },
-              cacheableResponse: {
-                statuses: [200],
-              },
-            },
-          },
-          {
-            urlPattern: /\/api\/(?:v1\/hoclieu\/resources|hoclieu\/teacher\/recent-opened)(?:[/?#]|$)/i,
-            handler: "StaleWhileRevalidate",
-            method: "GET",
-            options: {
-              cacheName: "erg-lms-resource-catalog-v1",
-              expiration: {
-                maxEntries: 80,
-                maxAgeSeconds: 30 * 60,
-              },
-              cacheableResponse: {
-                statuses: [200],
-              },
-            },
-          },
-          {
-            urlPattern: /\/api\/v1\/hoclieu\/library\/progress(?:[/?#]|$)/i,
-            handler: "NetworkFirst",
-            method: "GET",
-            options: {
-              cacheName: "erg-lms-progress-v1",
-              networkTimeoutSeconds: 2,
-              expiration: {
-                maxEntries: 20,
-                maxAgeSeconds: 60,
-              },
-              cacheableResponse: {
-                statuses: [200],
-              },
+              cacheName: "erg-graphql-network-v1",
             },
           },
           {
@@ -160,6 +130,11 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     testTimeout: 10_000,
+    server: {
+      deps: {
+        inline: [/@mui\//, /react-transition-group/],
+      },
+    },
   },
   server: {
     host: "0.0.0.0",
@@ -174,7 +149,7 @@ export default defineConfig({
     },
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        target: backendUrl,
         changeOrigin: true,
         configure(proxy) {
           proxy.on("proxyReq", (proxyReq) => {
@@ -196,4 +171,5 @@ export default defineConfig({
     port: 4173,
     allowedHosts: [".erg.edu.local", ".erg.edu.vn", ".org.edu.local", ".org.edu.vn"],
   },
+    };
 });

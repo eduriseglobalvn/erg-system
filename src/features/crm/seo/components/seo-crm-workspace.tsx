@@ -19,10 +19,10 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ProgressBar } from "@/components/ui/progress";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
+import TextField from "@mui/material/TextField";
 import {
   calculateSeoPnlSummary,
   costTotal,
@@ -42,6 +42,22 @@ type SeoCrmWorkspaceProps = {
   activeLeaf: DashboardLeaf;
   onOpenLeaf: (leafId: string) => void;
 };
+
+type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
+
+function toChipProps(tone: BadgeTone) {
+  if (tone === "outline") {
+    return { variant: "outlined" as const, color: "default" as const };
+  }
+  const colorMap: Record<Exclude<BadgeTone, "outline">, "primary" | "secondary" | "success" | "warning" | "error"> = {
+    primary: "primary",
+    secondary: "secondary",
+    success: "success",
+    warning: "warning",
+    danger: "error",
+  };
+  return { variant: "filled" as const, color: colorMap[tone] };
+}
 
 const pipelineStatuses: SeoLeadStatus[] = [
   "new_lead",
@@ -138,17 +154,17 @@ export function SeoCrmWorkspace({ activeLeaf, onOpenLeaf }: SeoCrmWorkspaceProps
 
 function SeoActions({ activeVariant, onOpenLeaf }: { activeVariant: DashboardLeaf["variant"]; onOpenLeaf: (leafId: string) => void }) {
   if (activeVariant === "seo-handover") {
-    return <Button onClick={() => onOpenLeaf("admin-centers")}>Sang quản lý cơ sở</Button>;
+    return <Button variant="contained" onClick={() => onOpenLeaf("admin-centers")}>Sang quản lý cơ sở</Button>;
   }
 
   if (activeVariant === "seo-pnl" || activeVariant === "seo-opportunities") {
-    return <Button onClick={() => onOpenLeaf("seo-handover")}>Xem bàn giao</Button>;
+    return <Button variant="contained" onClick={() => onOpenLeaf("seo-handover")}>Xem bàn giao</Button>;
   }
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Button variant="outline" onClick={() => onOpenLeaf("seo-pnl")}>Mở P&L</Button>
-      <Button onClick={() => onOpenLeaf("seo-schools")}>Danh sách trường</Button>
+      <Button variant="outlined" onClick={() => onOpenLeaf("seo-pnl")}>Mở P&L</Button>
+      <Button variant="contained" onClick={() => onOpenLeaf("seo-schools")}>Danh sách trường</Button>
     </div>
   );
 }
@@ -166,8 +182,8 @@ function SeoScopeSummary({ leads }: { leads: SeoSchoolLead[] }) {
         </p>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Badge tone="warning">{pendingSetupCount} chờ triển khai</Badge>
-        <Badge tone="success">{activeCount} active</Badge>
+        <Chip label={`${pendingSetupCount} chờ triển khai`} size="small" {...toChipProps("warning")} />
+        <Chip label={`${activeCount} active`} size="small" {...toChipProps("success")} />
       </div>
     </div>
   );
@@ -209,7 +225,7 @@ function SeoOverview({
                 <section key={status} className="rounded-lg border border-slate-200 bg-slate-50 p-3">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-semibold text-slate-500">{statusLabelMap[status]}</span>
-                    <Badge tone={statusToneMap[status]}>{statusLeads.length}</Badge>
+                    <Chip label={statusLeads.length} size="small" {...toChipProps(statusToneMap[status])} />
                   </div>
                   <div className="mt-3 space-y-2">
                     {statusLeads.map((lead) => (
@@ -288,7 +304,14 @@ function SeoSchoolPipeline({
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_210px]">
           <label className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-            <Input value={query} onChange={(event) => onQueryChange(event.target.value)} className="pl-9" placeholder="Tìm trường, quận, người liên hệ..." />
+            <TextField
+              size="small"
+              fullWidth
+              value={query}
+              onChange={(event) => onQueryChange(event.target.value)}
+              placeholder="Tìm trường, quận, người liên hệ..."
+              sx={{ "& .MuiInputBase-input": { pl: "1.5rem" } }}
+            />
           </label>
           <AppSelect
             value={statusFilter}
@@ -317,7 +340,7 @@ function SeoSchoolPipeline({
                   <h3 className="font-semibold text-slate-950">{lead.schoolName}</h3>
                   <p className="mt-1 text-sm text-slate-500">{lead.district}, {lead.province} · {lead.segment}</p>
                 </div>
-                <Badge tone={statusToneMap[lead.status]}>{statusLabelMap[lead.status]}</Badge>
+                <Chip label={statusLabelMap[lead.status]} size="small" {...toChipProps(statusToneMap[lead.status])} />
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <MiniValue label="Xác suất" value={`${lead.probability}%`} />
@@ -347,7 +370,7 @@ function SchoolLeadDetail({
     <DashboardSectionCard
       title={lead.schoolName}
       description="Hồ sơ SEO của trường trước khi chuyển sang vận hành LMS."
-      action={<Badge tone={statusToneMap[lead.status]}>{statusLabelMap[lead.status]}</Badge>}
+      action={<Chip label={statusLabelMap[lead.status]} size="small" {...toChipProps(statusToneMap[lead.status])} />}
     >
       <div className="grid gap-4">
         <div className="grid gap-3 md:grid-cols-2">
@@ -364,7 +387,12 @@ function SchoolLeadDetail({
             <span className="text-sm font-semibold text-slate-950">Xác suất chốt</span>
             <span className="text-sm font-semibold text-slate-950">{lead.probability}%</span>
           </div>
-          <ProgressBar value={lead.probability} className="mt-3" indicatorClassName="bg-[var(--erg-blue)]" />
+          <LinearProgress
+            variant="determinate"
+            value={Math.max(0, Math.min(100, lead.probability))}
+            className="mt-3"
+            sx={{ height: 8, borderRadius: 9999, "& .MuiLinearProgress-bar": { bgcolor: "var(--erg-blue)" } }}
+          />
         </div>
 
         <div>
@@ -375,7 +403,7 @@ function SchoolLeadDetail({
         <div>
           <h3 className="text-sm font-semibold text-slate-950">Rủi ro cần xử lý</h3>
           <div className="mt-2 flex flex-wrap gap-2">
-            {lead.risks.map((risk) => <Badge key={risk} tone="warning">{risk}</Badge>)}
+            {lead.risks.map((risk) => <Chip key={risk} label={risk} size="small" {...toChipProps("warning")} />)}
           </div>
         </div>
 
@@ -482,12 +510,14 @@ function SeoPnlWorkspace({
             <DecisionLine label="Trạng thái hiện tại" ok={lead.status !== "lost"} value={statusLabelMap[lead.status]} />
           </div>
           <Button
-            className="mt-4 w-full"
+            variant="contained"
+            fullWidth
+            className="mt-4"
+            endIcon={<ArrowRight className="size-4" />}
             disabled={summary.marginRate < 0.2 || lead.status === "lost"}
             onClick={() => onUpdateLeadStatus(lead.id, "won_pending_setup")}
           >
             Chốt và chuyển chờ triển khai
-            <ArrowRight className="size-4" />
           </Button>
         </DashboardSectionCard>
       </div>
@@ -520,10 +550,10 @@ function SeoFollowUpWorkspace({ leads, onSelectLead }: { leads: SeoSchoolLead[];
                     <p className="mt-1 text-sm text-slate-500">{lead?.schoolName ?? "Không rõ trường"} · {followUp.ownerName}</p>
                   </div>
                 </div>
-                <Badge tone="warning">{formatDate(followUp.dueAt)}</Badge>
+                <Chip label={formatDate(followUp.dueAt)} size="small" {...toChipProps("warning")} />
               </div>
               <div className="mt-4 flex justify-end">
-                <Button variant="outline" size="sm" onClick={() => lead ? onSelectLead(lead.id) : undefined}>Mở hồ sơ</Button>
+                <Button variant="outlined" size="small" onClick={() => lead ? onSelectLead(lead.id) : undefined}>Mở hồ sơ</Button>
               </div>
             </article>
           );
@@ -570,9 +600,11 @@ function SeoHandoverWorkspace({
                     <h3 className="font-semibold text-slate-950">{lead.schoolName}</h3>
                     <p className="mt-1 text-sm text-slate-500">{opportunity?.code ?? "Chưa có P&L"} · {lead.expectedClasses} lớp dự kiến</p>
                   </div>
-                  <Badge tone={lead.status === "active" ? "success" : ready ? "warning" : "outline"}>
-                    {lead.status === "active" ? "Active" : ready ? "Sẵn sàng" : "Thiếu dữ liệu"}
-                  </Badge>
+                  <Chip
+                    size="small"
+                    label={lead.status === "active" ? "Active" : ready ? "Sẵn sàng" : "Thiếu dữ liệu"}
+                    {...toChipProps(lead.status === "active" ? "success" : ready ? "warning" : "outline")}
+                  />
                 </div>
                 <div className="mt-4 grid gap-2">
                   {checklist.map((item) => (
@@ -583,8 +615,8 @@ function SeoHandoverWorkspace({
                   ))}
                 </div>
                 <div className="mt-4 flex flex-wrap justify-end gap-2">
-                  <Button variant="outline" size="sm" onClick={() => onOpenLeaf("seo-pnl")}>Xem P&L</Button>
-                  <Button size="sm" disabled={!ready || lead.status === "active"} onClick={() => onUpdateLeadStatus(lead.id, "active")}>
+                  <Button variant="outlined" size="small" onClick={() => onOpenLeaf("seo-pnl")}>Xem P&L</Button>
+                  <Button variant="contained" size="small" disabled={!ready || lead.status === "active"} onClick={() => onUpdateLeadStatus(lead.id, "active")}>
                     Duyệt active
                   </Button>
                 </div>
@@ -606,7 +638,7 @@ function SeoHandoverWorkspace({
           <HandoverPermission label="Import học sinh" />
           <HandoverPermission label="Gán học liệu và quiz" />
         </div>
-        <Button className="mt-4 w-full" onClick={() => onOpenLeaf("admin-centers")}>Mở quản lý cơ sở</Button>
+        <Button variant="contained" fullWidth sx={{ mt: 2 }} onClick={() => onOpenLeaf("admin-centers")}>Mở quản lý cơ sở</Button>
       </DashboardSectionCard>
     </div>
   );

@@ -25,10 +25,10 @@ import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
 import { TsForm } from "@/components/ui/tanstack-form";
 import {
   classroomSchools,
@@ -129,7 +129,7 @@ export function AdminOperationsWorkspace({
             <p className="text-[10px] font-bold uppercase text-slate-400">Phạm vi đang xem</p>
             <p className="truncate text-xs font-bold text-slate-800">{scopeDescription}</p>
           </div>
-          <Badge tone="secondary" className="min-h-6 px-2 py-0.5 text-[11px]">Quyền ERG</Badge>
+          <Chip label="Quyền ERG" size="small" color="secondary" className="min-h-6 text-[11px]" />
         </div>
       }
     >
@@ -152,10 +152,11 @@ function getAdminActions(activeLeaf: DashboardLeaf, onOpenLeaf: (leafId: string)
   if (activeLeaf.variant === "admin-overview") {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button variant="outline" size="sm">Xuất báo cáo</Button>
-        <Button variant="outline" size="sm" onClick={() => onOpenLeaf("admin-learning-resources")}>Quản lý học liệu</Button>
+        <Button variant="outlined" size="small">Xuất báo cáo</Button>
+        <Button variant="outlined" size="small" onClick={() => onOpenLeaf("admin-learning-resources")}>Quản lý học liệu</Button>
         <Button
-          size="sm"
+          variant="contained"
+          size="small"
           onClick={() => onOpenLeaf("admin-create-unit")}
         >
           Tạo trường/trung tâm
@@ -169,10 +170,10 @@ function getAdminActions(activeLeaf: DashboardLeaf, onOpenLeaf: (leafId: string)
   }
 
   if (activeLeaf.variant === "admin-members") {
-    return <Button size="sm">Thêm thành viên</Button>;
+    return <Button variant="contained" size="small">Thêm thành viên</Button>;
   }
 
-  return <Button variant="outline" size="sm">Xuất báo cáo</Button>;
+  return <Button variant="outlined" size="small">Xuất báo cáo</Button>;
 }
 
 function AdminOverview({
@@ -456,7 +457,7 @@ function CenterManagement({
             <LcmsMiniStat label="Hệ thống" value={systemCount} tone="slate" />
             <LcmsMiniStat label="Trung tâm" value={centerCount} tone="emerald" />
             <LcmsMiniStat label="Trường" value={schoolCount} tone="blue" />
-            <Button size="sm" onClick={onCreateUnit}>Tạo đơn vị</Button>
+            <Button variant="contained" size="small" onClick={onCreateUnit}>Tạo đơn vị</Button>
           </>
         }
       />
@@ -471,10 +472,22 @@ function CenterManagement({
         <aside className="flex min-h-0 flex-col border-b border-[#d9e2ef] bg-[#f4f7fb] xl:border-b-0 xl:border-r">
           <div className="shrink-0 border-b border-[#d9e2ef] p-3">
             <div className="grid gap-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <Input value={keyword} onChange={(event) => setKeyword(event.target.value)} placeholder="Tìm trường..." className="h-9 bg-white pl-9 text-xs shadow-none" />
-              </div>
+              <TextField
+                size="small"
+                fullWidth
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="Tìm trường..."
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Search className="h-4 w-4 text-slate-400" />
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+              />
               <AppSelect
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
@@ -587,8 +600,8 @@ function OperationalErrorState({
         </div>
         <Button
           type="button"
-          variant="outline"
-          size="sm"
+          variant="outlined"
+          size="small"
           onClick={onRetry}
           className="h-8 shrink-0 border-rose-200 bg-white px-2.5 text-xs font-bold text-rose-700 hover:bg-rose-100"
         >
@@ -666,8 +679,8 @@ function EducationUnitEditor({
         <div className="inline-flex items-center gap-1 rounded-[12px] border border-[#d9e2ef] bg-white p-1 shadow-[var(--shadow-xs)]">
           <Button
             type="button"
-            size="sm"
-            variant={activePanel === "info" ? "secondary" : "ghost"}
+            size="small"
+            variant={activePanel === "info" ? "contained" : "text"}
             onClick={() => setActivePanel("info")}
             className={cn("h-8 rounded-[9px] px-3 text-xs", activePanel === "info" ? "text-[var(--erg-blue)]" : "text-slate-500")}
           >
@@ -676,8 +689,8 @@ function EducationUnitEditor({
           {isSchool ? (
             <Button
               type="button"
-              size="sm"
-              variant={activePanel === "import" ? "secondary" : "ghost"}
+              size="small"
+              variant={activePanel === "import" ? "contained" : "text"}
               onClick={() => setActivePanel("import")}
               className={cn("h-8 rounded-[9px] px-3 text-xs", activePanel === "import" ? "text-[var(--erg-blue)]" : "text-slate-500")}
             >
@@ -687,10 +700,10 @@ function EducationUnitEditor({
         </div>
         {activePanel === "info" ? (
           <>
-            <Button type="button" variant="outline" size="sm" onClick={() => setShowAdvanced((current) => !current)} className="h-9 px-3 text-xs">
+            <Button type="button" variant="outlined" size="small" onClick={() => setShowAdvanced((current) => !current)} className="h-9 px-3 text-xs">
               {showAdvanced ? "Ẩn nâng cao" : "Nâng cao"}
             </Button>
-            <Button type="submit" size="sm" disabled={isSaving || !draft.name?.trim()} className="h-9 px-3 text-xs">
+            <Button type="submit" variant="contained" size="small" disabled={isSaving || !draft.name?.trim()} className="h-9 px-3 text-xs">
               {isSaving ? "Đang lưu..." : "Lưu"}
             </Button>
           </>
@@ -749,7 +762,7 @@ function EducationUnitEditor({
               <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_190px_190px]">
                 <label className="grid gap-1.5">
                   <span className="text-xs font-bold text-slate-500">Tên hiển thị</span>
-                  <Input className="h-10" value={draft.name ?? ""} onChange={(event) => updateDraft("name", event.target.value)} placeholder="Tên trường học/trung tâm" />
+                  <TextField size="small" fullWidth value={draft.name ?? ""} onChange={(event) => updateDraft("name", event.target.value)} placeholder="Tên trường học/trung tâm" />
                 </label>
                 <label className="grid gap-1.5">
                   <span className="text-xs font-bold text-slate-500">Loại đơn vị</span>
@@ -777,10 +790,11 @@ function EducationUnitEditor({
                 </label>
                 <label className="grid gap-1.5 xl:col-span-3">
                   <span className="text-xs font-bold text-slate-500">Mô tả giới thiệu</span>
-                  <Textarea
+                  <TextField
+                    multiline
+                    minRows={2}
                     value={draft.description ?? ""}
                     onChange={(event) => updateDraft("description", event.target.value)}
-                    rows={2}
                     className="min-h-[112px] rounded-[12px] border border-[#d7e0ec] bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-none outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] placeholder:text-slate-400"
                     placeholder="Mô tả tóm tắt vai trò và khu vực phụ trách của đơn vị..."
                   />
@@ -797,35 +811,51 @@ function EducationUnitEditor({
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
             <label className="grid gap-1.5 sm:col-span-2">
               <span className="text-xs font-bold text-slate-500">Logo URL</span>
-              <Input className="h-9" value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" />
+              <TextField size="small" fullWidth value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" />
             </label>
             <label className="grid gap-1.5 sm:col-span-2">
               <span className="text-xs font-bold text-slate-500">Địa chỉ chi tiết</span>
-              <div className="relative">
-                <MapPin className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input className="h-9 pl-9" value={draft.address ?? ""} onChange={(event) => updateDraft("address", event.target.value)} placeholder="Số nhà, tên đường, phường, quận/huyện..." />
-              </div>
+              <TextField
+                size="small"
+                fullWidth
+                value={draft.address ?? ""}
+                onChange={(event) => updateDraft("address", event.target.value)}
+                placeholder="Số nhà, tên đường, phường, quận/huyện..."
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><MapPin className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
+              />
             </label>
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Số điện thoại</span>
-              <div className="relative">
-                <PhoneIcon className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input className="h-9 pl-9" value={draft.phone ?? ""} onChange={(event) => updateDraft("phone", event.target.value)} placeholder="024xxx..." />
-              </div>
+              <TextField
+                size="small"
+                fullWidth
+                value={draft.phone ?? ""}
+                onChange={(event) => updateDraft("phone", event.target.value)}
+                placeholder="024xxx..."
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
+              />
             </label>
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Email chính</span>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input className="h-9 pl-9" value={draft.email ?? ""} onChange={(event) => updateDraft("email", event.target.value)} placeholder="contact@domain.edu.vn" />
-              </div>
+              <TextField
+                size="small"
+                fullWidth
+                value={draft.email ?? ""}
+                onChange={(event) => updateDraft("email", event.target.value)}
+                placeholder="contact@domain.edu.vn"
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Mail className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
+              />
             </label>
             <label className="grid gap-1.5">
               <span className="text-xs font-bold text-slate-500">Website URL</span>
-              <div className="relative">
-                <Globe className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-                <Input className="h-9 pl-9" value={draft.website ?? ""} onChange={(event) => updateDraft("website", event.target.value)} placeholder="https://domain.edu.vn" />
-              </div>
+              <TextField
+                size="small"
+                fullWidth
+                value={draft.website ?? ""}
+                onChange={(event) => updateDraft("website", event.target.value)}
+                placeholder="https://domain.edu.vn"
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Globe className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
+              />
             </label>
           </div>
         </div>
@@ -902,7 +932,8 @@ function UnitInsightRail({
           <div className="border-t border-[#e3dfff] p-3">
             <Button
               type="button"
-              size="sm"
+              variant="contained"
+              size="small"
               className="w-full justify-center text-white shadow-[0_14px_35px_-20px_rgba(91,92,246,0.8)]"
               style={{ backgroundColor: "#5b5cf6", borderColor: "#5b5cf6", color: "#fff" }}
               onClick={onImport}
@@ -1110,9 +1141,11 @@ function CenterRow({ center }: { center: ClassroomSchool }) {
             {center.activeClasses} lớp đang chạy · {center.activeStudents.toLocaleString("vi-VN")} học sinh
           </p>
         </div>
-        <Badge tone={center.flaggedStudents > 25 ? "warning" : "success"}>
-          {center.flaggedStudents > 25 ? "Cần rà soát" : "Vận hành ổn định"}
-        </Badge>
+        <Chip
+          size="small"
+          color={center.flaggedStudents > 25 ? "warning" : "success"}
+          label={center.flaggedStudents > 25 ? "Cần rà soát" : "Vận hành ổn định"}
+        />
       </div>
       <div className="mt-4 grid gap-3 grid-cols-3 border-t border-slate-100 pt-3">
         <FieldValue label="Hoàn thành" value={`${center.completionRate}%`} />

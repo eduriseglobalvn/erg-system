@@ -1,4 +1,5 @@
 import type { MessageKey } from "@/platform/i18n";
+import type { Question } from "@/lib/types";
 
 export type QuestionType =
   | "multiple-choice"
@@ -69,6 +70,9 @@ export type QuizEditorSlideMedia = {
   src: string;
   alt: string;
   name?: string;
+  x?: number;
+  y?: number;
+  width?: number;
 };
 
 export type QuizEditorDragDropItem = {
@@ -82,12 +86,13 @@ export type QuizEditorDragDropItem = {
 
 export type QuizEditorHotspotArea = {
   id: string;
-  shape: "rect";
+  shape: "rect" | "ellipse";
   x: number;
   y: number;
   width: number;
   height: number;
   correct: boolean;
+  visible?: boolean;
 };
 
 export type QuizEditorFeedbackBranching = "By Result" | "Next Question" | "Finish Quiz";
@@ -147,6 +152,7 @@ export type QuizEditorSlideOptions = {
   score?: string;
   attempts?: number;
   layoutPreset?: QuizEditorLayoutPreset;
+  themeColor?: string;
   answerColumns?: 1 | 2;
   animationPreset?: "none" | "appear" | "fade" | "float-in";
   elementOffsets?: Record<string, QuizEditorElementOffset>;
@@ -164,6 +170,7 @@ export type QuizEditorSlideOptions = {
     enableReset: boolean;
     beforeNewAttempt: string;
   };
+  matchingAuthoringMode?: "edit" | "practice";
   finalSlide?: QuizEditorFinalSlideOptions;
 };
 
@@ -171,6 +178,14 @@ export type QuizEditorSlide = {
   id: string;
   title: string;
   kind: SlideKind;
+  questionId?: string;
+  bankQuestionId?: string;
+  settings?: Record<string, unknown>;
+  questionSettings?: Record<string, unknown>;
+  questionSetSettings?: Record<string, unknown>;
+  settingsOverride?: Record<string, unknown>;
+  overrideSettings?: Record<string, unknown>;
+  runtimeQuestion?: Question;
   description?: string;
   media?: QuizEditorSlideMedia | null;
   textStyle?: QuizEditorTextStyle;

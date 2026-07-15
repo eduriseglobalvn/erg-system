@@ -143,15 +143,15 @@ export function toEditTargetFromNode(node: StudioNode | null | undefined): Taxon
 export function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "category") {
     return {
-      title: "Nhóm học liệu",
-      description: "Mỗi nhóm học liệu chỉ chứa danh sách bài học bên trong.",
+      title: "Level",
+      description: "Level nằm dưới môn học và dùng để gom các chủ đề theo cấp độ học.",
       icon: <Folder className="h-5 w-5" />,
     };
   }
   if (optionId === "section") {
     return {
-      title: "Bài học",
-      description: "Bài học là nơi gắn slide thuyết trình, bài tập và tài liệu trong cùng một chỗ.",
+      title: "Chủ đề",
+      description: "Chủ đề nằm trong một level và là nơi gắn slide, bài tập hoặc tài liệu.",
       icon: <GraduationCap className="h-5 w-5" />,
     };
   }

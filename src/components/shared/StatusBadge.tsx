@@ -1,6 +1,5 @@
 /**
- * CenterUp StatusBadge — EXACT pixel match
- * Extracted from CenterUp staging via Playwright
+ * ERG StatusBadge — compact operational status chip
  *
  * Variants:
  *   success: bg rgba(34,197,94,0.12) #118D57 — Hoàn thành, Đã duyệt

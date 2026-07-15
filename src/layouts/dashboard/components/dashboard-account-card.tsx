@@ -1,8 +1,4 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar";
+import Avatar from "@mui/material/Avatar";
 import {
   HelpIcon,
   MoreHorizontalIcon,
@@ -45,11 +41,14 @@ export function DashboardAccountCard() {
       </div>
 
       <div className="flex items-center gap-3 rounded-lg px-3 py-3 transition hover:bg-slate-100">
-        <Avatar className="size-11 rounded-lg">
-          <AvatarImage src={account?.avatarUrl} alt={displayName} />
-          <AvatarFallback className="rounded-lg bg-[var(--erg-blue)] text-xs font-semibold text-white">
-            {initials}
-          </AvatarFallback>
+        <Avatar
+          src={account?.avatarUrl}
+          alt={displayName}
+          variant="rounded"
+          className="size-11"
+          sx={{ width: 44, height: 44, bgcolor: "var(--erg-blue)", fontSize: "0.75rem", fontWeight: 600, color: "#fff" }}
+        >
+          {initials}
         </Avatar>
         <div className="min-w-0 flex-1">
           <div className="truncate text-[15px] font-semibold text-slate-950">{displayName}</div>

@@ -1,10 +1,7 @@
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { useState } from "react";
+import ListSubheader from "@mui/material/ListSubheader";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { useI18n, type Locale } from "@/platform/i18n";
 import { cn } from "@/utils/cn";
@@ -34,6 +31,9 @@ export function LocaleSwitcher({
   variant = "panel",
 }: LocaleSwitcherProps) {
   const { locale, setLocale, t } = useI18n();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+  const closeMenu = () => setAnchorEl(null);
 
   if (variant === "inline") {
     const activeLabel =
@@ -42,56 +42,65 @@ export function LocaleSwitcher({
     return (
       <SidebarMenu className={className}>
         <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="min-w-0 rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-[#f8fbff] data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#b8c8db]"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-slate-600">
-                  <TranslateIcon className="h-4 w-4" fontSize="inherit" />
-                </div>
-                <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
-                  <span className="truncate text-[10px] font-semibold text-slate-500">
-                    {t("locale.language")}
-                  </span>
-                  <span className="truncate font-medium text-slate-900">
-                    {activeLabel}
-                  </span>
-                </div>
-                <span className="ml-auto inline-flex flex-col text-slate-500">
-                  <ArrowUpwardIcon className="size-3" fontSize="inherit" />
-                  <ArrowDownwardIcon className="-mt-1 size-3" fontSize="inherit" />
-                </span>
-              </SidebarMenuButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              side="top"
-              sideOffset={8}
-              className="min-w-44 rounded-lg"
-            >
-              <DropdownMenuLabel className="text-xs text-slate-500">
+          <SidebarMenuButton
+            size="lg"
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+            className="min-w-0 rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-[#f8fbff] data-[state=open]:bg-white data-[state=open]:ring-1 data-[state=open]:ring-[#b8c8db]"
+          >
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-slate-600">
+              <TranslateIcon className="h-4 w-4" fontSize="inherit" />
+            </div>
+            <div className="grid min-w-0 flex-1 text-left text-sm leading-tight">
+              <span className="truncate text-[10px] font-semibold text-slate-500">
                 {t("locale.language")}
-              </DropdownMenuLabel>
-              {locales.map((item) => {
-                const active = locale === item.value;
+              </span>
+              <span className="truncate font-medium text-slate-900">
+                {activeLabel}
+              </span>
+            </div>
+            <span className="ml-auto inline-flex flex-col text-slate-500">
+              <ArrowUpwardIcon className="size-3" fontSize="inherit" />
+              <ArrowDownwardIcon className="-mt-1 size-3" fontSize="inherit" />
+            </span>
+          </SidebarMenuButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={menuOpen}
+            onClose={closeMenu}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            transformOrigin={{ vertical: "bottom", horizontal: "right" }}
+            slotProps={{ paper: { sx: { minWidth: 176, borderRadius: 2 } } }}
+          >
+            <ListSubheader sx={{ fontSize: 12, color: "text.secondary", lineHeight: 2.5 }}>
+              {t("locale.language")}
+            </ListSubheader>
+            {locales.map((item) => {
+              const active = locale === item.value;
 
-                return (
-                  <DropdownMenuItem
-                    key={item.value}
-                    onClick={() => setLocale(item.value)}
-                    className={cn(
-                      "font-semibold",
-                      active && "bg-[var(--accent-soft)] text-[var(--primary)] shadow-[inset_3px_0_0_var(--primary)]",
-                    )}
-                  >
-                    {t(item.labelKey)}
-                  </DropdownMenuItem>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+              return (
+                <MenuItem
+                  key={item.value}
+                  selected={active}
+                  onClick={() => {
+                    setLocale(item.value);
+                    closeMenu();
+                  }}
+                  sx={{
+                    fontWeight: 600,
+                    ...(active
+                      ? {
+                          bgcolor: "var(--accent-soft)",
+                          color: "var(--primary)",
+                          boxShadow: "inset 3px 0 0 var(--primary)",
+                        }
+                      : {}),
+                  }}
+                >
+                  {t(item.labelKey)}
+                </MenuItem>
+              );
+            })}
+          </Menu>
         </SidebarMenuItem>
       </SidebarMenu>
     );

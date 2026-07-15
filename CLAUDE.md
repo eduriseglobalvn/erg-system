@@ -1,7 +1,7 @@
 # ERG System - ERG EduRise Global Frontend
 
 > **Tech Stack:** React 19 + Vite 8 + TypeScript 6 + Tailwind CSS v4 + shadcn/ui + TanStack (Router, Query, Table, Form, Store)
-> **Design Inspiration:** CenterUp - SaaS ERP cho trung tâm giáo dục
+> **Design Direction:** ERG operational education SaaS
 
 ---
 
@@ -27,7 +27,7 @@
 - ❌ **Next-Themes** — Không dùng, theme bằng CSS variables
 - ❌ **react-router-dom** — Không dùng, dùng TanStack Router
 
-### Design System: CenterUp EXACT (extracted via Playwright pixel-measurement)
+### Design System: ERG operational UI tokens
 - **Primary:** #696CFF (PURPLE) — KHÔNG phải blue
 - **Typography:** Manrope Variable (body/sans), JetBrains Mono (mono) — KHÔNG dùng Public Sans
 - **Sidebar:** Dark theme (#1C252E), 280px width, 5 nhóm menu

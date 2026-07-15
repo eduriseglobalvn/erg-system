@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useForm } from "@tanstack/react-form";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRight,
   BookOpen,
@@ -15,11 +15,14 @@ import {
 } from "@/components/mui-icon-shim";
 import { queryKeys } from "@/lib/query-keys";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
+import Skeleton from "@mui/material/Skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Input, inputClassName } from "@/components/ui/input";
+import { inputClassName } from "@/components/ui/input";
 import {
   ChecklistItem,
   Field,
@@ -36,6 +39,7 @@ import {
   createLearningResourceResource,
   loadLearningResourceStudioWorkspaceData,
   uploadLearningResourceResource,
+  type CurriculumTaxonomyImpact,
   type LearningResourceResourceCard,
   type LearningResourceTaxonomyResponse,
 } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
@@ -53,9 +57,13 @@ import {
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
+import { hasApiBase } from "@/lib/api-client";
 import {
   normalizeGoogleViewerUrl,
 } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
+import { quizBankItems as fallbackQuizBankItems } from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
+import { questionBankWorkspaceQueryOptions } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type {
   LocalContentEditTarget,
   LocalContentItem,
@@ -87,13 +95,13 @@ import {
 
 const screenMeta: Record<string, { title: string; description: string; icon: ReactNode }> = {
   "admin-learning-resources": {
-    title: "Chủ đề học liệu",
-    description: "Tạo môn học, xây cây chủ đề và gắn tài liệu theo một luồng duy nhất.",
+    title: "Chương trình & Học liệu",
+    description: "Tạo môn học, level, chủ đề và gắn học liệu theo một luồng curriculum/content.",
     icon: <ListTree className="h-5 w-5" />,
   },
   "admin-learning-structure": {
     title: "Cấu trúc",
-    description: "Tổ chức môn học thành nhóm học liệu, chủ đề và unit/lesson để LMS hiển thị.",
+    description: "Tổ chức môn học thành level, chủ đề và học liệu để LMS hiển thị.",
     icon: <ListTree className="h-5 w-5" />,
   },
   "admin-learning-resource-list": {
@@ -113,6 +121,42 @@ const screenMeta: Record<string, { title: string; description: string; icon: Rea
   },
 };
 
+function CardHeader({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("flex flex-col gap-1.5 px-6 pt-5", className)}>{children}</div>;
+}
+
+function CardTitle({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("text-base font-semibold text-[var(--foreground)]", className)}>{children}</div>;
+}
+
+function CardDescription({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("text-sm text-[var(--muted-foreground)]", className)}>{children}</div>;
+}
+
+function LearningResourceAuthoringSkeleton() {
+  return (
+    <div className="flex h-full min-h-0 flex-col gap-3" aria-label="Đang tải quản lý học liệu">
+      <div className="flex h-12 items-center gap-3 rounded-lg border border-[rgba(145,158,171,0.2)] bg-white px-4">
+        <Skeleton variant="rounded" width={28} height={28} />
+        <Skeleton variant="rounded" height={32} sx={{ flex: 1, maxWidth: 420 }} />
+        <Skeleton variant="rounded" width={220} height={32} />
+      </div>
+      <div className="grid min-h-[560px] flex-1 grid-cols-[250px_minmax(0,1fr)] overflow-hidden rounded-lg border border-[rgba(145,158,171,0.2)] bg-white">
+        <div className="space-y-2 border-r border-[rgba(145,158,171,0.2)] p-3">
+          {Array.from({ length: 9 }, (_, index) => (
+            <Skeleton key={index} variant="rounded" height={30} sx={{ width: `${72 + (index % 3) * 8}%` }} />
+          ))}
+        </div>
+        <div className="grid grid-cols-3 content-start gap-4 p-5">
+          {Array.from({ length: 6 }, (_, index) => (
+            <Skeleton key={index} variant="rounded" height={132} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
   const queryClient = useQueryClient();
   const [model, setModel] = useState<LearningResourceTaxonomyResponse>(emptyModel);
@@ -128,6 +172,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const [localContentItems, setLocalContentItems] = useState<LocalContentItem[]>(mockExplorerLocalContent);
   const [editingLocalContent, setEditingLocalContent] = useState<LocalContentEditTarget>(null);
   const paceStateUpdate = usePacedStateBatch();
+  const questionBankQuery = useQuery(questionBankWorkspaceQueryOptions());
 
   const refreshData = useCallback(async (options: { force?: boolean } = {}) => {
     setLoading(true);
@@ -154,12 +199,19 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
       const normalizedSubjects = normalizeTaxonomyOptions(workspaceData.subjects);
       const nextModel = normalizedSubjects.length
         ? { ...normalizeContentModel(workspaceData.taxonomy), subjects: normalizedSubjects }
-        : mockExplorerModel;
+        : hasApiBase()
+          ? emptyModel
+          : mockExplorerModel;
       const nextResources = normalizeResources(workspaceData.resources.data);
       setModel(nextModel);
-      setResources(nextResources.length ? nextResources : mockExplorerResources);
+      setResources(nextResources.length || hasApiBase() ? nextResources : mockExplorerResources);
       return nextModel;
-    } catch {
+    } catch (error) {
+      if (hasApiBase()) {
+        setModel(emptyModel);
+        setResources([]);
+        throw error;
+      }
       setModel(mockExplorerModel);
       setResources(mockExplorerResources);
       return mockExplorerModel;
@@ -171,9 +223,11 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   useEffect(() => {
     let mounted = true;
     paceStateUpdate(() => {
-      void refreshData().finally(() => {
-        if (!mounted) return;
-      });
+      void refreshData()
+        .catch(() => undefined)
+        .finally(() => {
+          if (!mounted) return;
+        });
     });
     return () => {
       mounted = false;
@@ -181,20 +235,20 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   }, [paceStateUpdate, refreshData]);
 
   const subjects = useMemo(() => buildSubjects(model, resources), [model, resources]);
-  const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId) ?? subjects[0];
+  const resourceQuizBankItems = useMemo(
+    () => (questionBankQuery.data?.quizzes.length || hasApiBase() ? (questionBankQuery.data?.quizzes ?? []) : fallbackQuizBankItems),
+    [questionBankQuery.data?.quizzes],
+  );
+  const selectedSubject = subjects.find((subject) => subject.id === selectedSubjectId);
   const allNodes = selectedSubject ? flattenNodes(selectedSubject.tree) : [];
   const selectedNode = selectedSubject && selectedNodeId ? findNode(selectedSubject.tree, selectedNodeId) : undefined;
   const selectedPath = selectedSubject && selectedNode ? findPath(selectedSubject.tree, selectedNode.id) : [];
 
   useEffect(() => {
     paceStateUpdate(() => {
-    if (!selectedSubject && subjects[0]) {
-      setSelectedSubjectId(subjects[0].id);
+    if (selectedSubjectId && !subjects.some((subject) => subject.id === selectedSubjectId)) {
+      setSelectedSubjectId("");
       setSelectedNodeId("");
-      return;
-    }
-    if (selectedSubject && !subjects.some((subject) => subject.id === selectedSubjectId)) {
-      setSelectedSubjectId(selectedSubject.id);
     }
     });
   }, [paceStateUpdate, selectedSubject, selectedSubjectId, subjects]);
@@ -208,7 +262,6 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const currentScreen = screenKind(activeLeaf.id);
   const meta = screenMeta[activeLeaf.id] ?? screenMeta["admin-learning-resources"];
   void meta;
-  void loading;
   const selectedSubjectTarget = useMemo(
     () =>
       selectedSubject
@@ -225,8 +278,9 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   );
   const selectedNodeTarget = useMemo(() => toEditTargetFromNode(selectedNode), [selectedNode]);
   const openCreateSubjectDialog = useCallback(() => setDialogState({ mode: "subject" }), []);
-  const openCreateRootDialog = useCallback(() => setDialogState({ mode: "root" }), []);
-  const openCreateChildDialog = useCallback((option?: "section" | "lecture" | "exercise") => {
+  const openCreateRootDialog = useCallback(() => setDialogState({ mode: "level" }), []);
+  const openCreateTopicDialog = useCallback(() => setDialogState({ mode: "topic" }), []);
+  const openCreateChildDialog = useCallback((option?: "section" | "lecture" | "exercise" | "resource") => {
     setDialogState({ mode: "child", initialOption: option });
   }, []);
   const selectStructureSubject = useCallback((subjectId: string) => {
@@ -259,8 +313,21 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
   const deleteLocalContentItem = useCallback((itemId: string) => {
     setLocalContentItems((current) => current.filter((item) => item.id !== itemId));
   }, []);
+  const deleteImpactEstimate = useMemo(
+    () =>
+      estimateTaxonomyImpact({
+        target: deleteTarget,
+        subjects,
+        localContentItems,
+        resources,
+        quizBankItems: resourceQuizBankItems,
+      }),
+    [deleteTarget, localContentItems, resourceQuizBankItems, resources, subjects],
+  );
 
-  return (
+  return loading ? (
+    <LearningResourceAuthoringSkeleton />
+  ) : (
     <div className="flex h-full min-h-0 flex-col gap-3">
       {currentScreen === "subjects" ? (
         <SubjectsScreen
@@ -284,6 +351,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
           onSelectNode={setSelectedNodeId}
           onCreateSubject={openCreateSubjectDialog}
           onCreateRoot={openCreateRootDialog}
+          onCreateTopic={openCreateTopicDialog}
           onCreateChild={openCreateChildDialog}
           onEditSubject={editSelectedSubject}
           onDeleteSubject={deleteSelectedSubject}
@@ -301,6 +369,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
           onEditLocalContent={(item) => setEditingLocalContent(item)}
           onDeleteLocalContent={deleteLocalContentItem}
           onRefreshData={() => refreshData({ force: true }).then(() => undefined)}
+          quizBankItems={resourceQuizBankItems}
           resources={resources}
         />
       ) : null}
@@ -310,9 +379,11 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
       <TaxonomyCreateDialog
         key={dialogState ? `open-${dialogState.mode}-${dialogState.initialOption ?? ""}` : "closed"}
         state={dialogState}
+        subjects={subjects}
         selectedSubject={selectedSubject}
         selectedNode={selectedNode}
         selectedPath={selectedPath}
+        quizBankItems={resourceQuizBankItems}
         onClose={() => setDialogState(null)}
         onCreateLocalContent={async (items) => {
           setLocalContentItems((current) => [...items, ...current]);
@@ -327,15 +398,16 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
           await refreshData({ force: true });
           setDialogState(null);
         }}
-        onCreated={async ({ mode, kind, id }) => {
+        onCreated={async ({ mode, kind, id, subjectId }) => {
           const nextModel = await refreshData({ force: true });
           if (mode === "subject") {
             setSelectedSubjectId(id);
             setSelectedNodeId("");
             return;
           }
-          const subjectStillExists = nextModel.subjects.some((subject) => subject.id === selectedSubject?.id);
-          if (selectedSubject?.id && subjectStillExists) setSelectedSubjectId(selectedSubject.id);
+          const nextSubjectId = subjectId || selectedSubject?.id;
+          const subjectStillExists = nextModel.subjects.some((subject) => subject.id === nextSubjectId);
+          if (nextSubjectId && subjectStillExists) setSelectedSubjectId(nextSubjectId);
           setSelectedNodeId(nodeIdForCreated(kind, id));
         }}
       />
@@ -348,6 +420,7 @@ export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf:
         }}
       />
       <TaxonomyDeleteDialog
+        estimatedImpact={deleteImpactEstimate}
         target={deleteTarget}
         onClose={() => setDeleteTarget(null)}
         onDeleted={async () => {
@@ -400,10 +473,9 @@ function SubjectsScreen({
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <CardTitle>Danh sách môn học</CardTitle>
-              <CardDescription>Mỗi môn có thể có nhiều nhóm học liệu, chủ đề và unit khác nhau.</CardDescription>
+              <CardDescription>Mỗi môn có thể có nhiều level, chủ đề và học liệu khác nhau.</CardDescription>
             </div>
-            <Button onClick={onCreateSubject} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
-              <Plus className="h-4 w-4" />
+            <Button variant="contained" onClick={onCreateSubject} startIcon={<Plus className="h-4 w-4" />} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
               Tạo môn học
             </Button>
           </div>
@@ -413,7 +485,7 @@ function SubjectsScreen({
           <div className="overflow-hidden rounded-lg border border-[#e0e4ea]">
             <div className="grid grid-cols-[minmax(0,1fr)_120px_120px_120px_120px] bg-[#f7f8fa] px-4 py-3 text-[11px] font-semibold text-slate-600">
               <span>Môn học</span>
-              <span>Category</span>
+              <span>Level</span>
               <span>Tài liệu</span>
               <span>Trạng thái</span>
               <span className="text-right">Thao tác</span>
@@ -434,13 +506,13 @@ function SubjectsScreen({
                 <span className="text-sm font-semibold text-slate-700">{subject.groupCount}</span>
                 <span className="text-sm font-semibold text-slate-700">{subject.resourceCount}</span>
                 <span>
-                  <Badge tone={subject.status === "ACTIVE" || subject.status === "active" ? "success" : "outline"}>{getPublishStatusLabel(subject.status)}</Badge>
+                  <Chip label={getPublishStatusLabel(subject.status)} size="small" variant={subject.status === "ACTIVE" || subject.status === "active" ? "filled" : "outlined"} color={subject.status === "ACTIVE" || subject.status === "active" ? "success" : "default"} />
                 </span>
                 <span className="flex justify-end gap-2">
                   <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
+                    variant="outlined"
+                    size="small"
                     onClick={(event) => {
                       event.stopPropagation();
                       onEditSubject(subject);
@@ -450,8 +522,8 @@ function SubjectsScreen({
                   </Button>
                   <Button
                     type="button"
-                    variant="outline"
-                    size="sm"
+                    variant="outlined"
+                    size="small"
                     onClick={(event) => {
                       event.stopPropagation();
                       onDeleteSubject(subject);
@@ -478,17 +550,15 @@ function SubjectsScreen({
                 <div className="text-xl font-medium text-slate-950">{selectedSubject.label}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-500">{selectedSubject.description || "Môn này chưa có mô tả."}</p>
               </div>
-              <InfoRow label="Nhóm học liệu" value={`${selectedSubject.groupCount} nhóm`} />
-              <InfoRow label="Bài học" value={`${selectedSubject.lessonCount} bài`} />
+              <InfoRow label="Level" value={`${selectedSubject.groupCount} level`} />
+              <InfoRow label="Chủ đề" value={`${selectedSubject.lessonCount} chủ đề`} />
               <InfoRow label="Tài liệu" value={`${selectedSubject.resourceCount} tài liệu`} />
               <InfoRow label="Trạng thái" value={getPublishStatusLabel(selectedSubject.status)} />
               <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" onClick={() => onEditSubject(selectedSubject)}>
-                  <Pencil className="h-4 w-4" />
+                <Button variant="outlined" onClick={() => onEditSubject(selectedSubject)} startIcon={<Pencil className="h-4 w-4" />}>
                   Sửa môn
                 </Button>
-                <Button variant="destructive" onClick={() => onDeleteSubject(selectedSubject)}>
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="contained" color="error" onClick={() => onDeleteSubject(selectedSubject)} startIcon={<Trash2 className="h-4 w-4" />}>
                   Xóa
                 </Button>
               </div>
@@ -511,8 +581,7 @@ function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; r
             <CardTitle>Kho tài liệu</CardTitle>
             <CardDescription>Cập nhật thông tin, trạng thái và nơi gắn tài liệu.</CardDescription>
           </div>
-          <Button className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
-            <LinkIcon className="h-4 w-4" />
+          <Button variant="contained" startIcon={<LinkIcon className="h-4 w-4" />} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
             Gắn link tài liệu
           </Button>
         </div>
@@ -547,9 +616,8 @@ function ResourcesScreen({ subjects, resources }: { subjects: StudioSubject[]; r
                     {resource.fileTypeBadge || resource.selectedFileType} · {getPublishStatusLabel(resource.status)}
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outlined" size="small" endIcon={<ArrowUpRight className="h-4 w-4" />}>
                   Cập nhật
-                  <ArrowUpRight className="h-4 w-4" />
                 </Button>
               </div>
             ))}
@@ -603,7 +671,7 @@ function UploadScreen({
   async function handleUpload() {
     const normalizedUrl = normalizeGoogleViewerUrl(resourceUrl);
     if (!normalizedUrl || !subject || !location.categoryId) {
-      setMessage("Vui lòng chọn môn, vị trí có nhóm học liệu và dán link Google Drive/Google Slides.");
+      setMessage("Vui lòng chọn môn, level/chủ đề và dán link Google Drive/Google Slides.");
       return;
     }
     const parsedTotalSlides = parsePositiveInteger(totalSlides);
@@ -676,7 +744,7 @@ function UploadScreen({
               </AppSelect>
             </Field>
             <Field label="Tên hiển thị">
-              <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Bài giảng Unit 1" />
+              <TextField size="small" fullWidth value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Bài giảng Unit 1" />
             </Field>
             <Field label="Loại tài liệu">
               <AppSelect className={inputClassName} value={fileType} onChange={(event) => setFileType(event.target.value)}>
@@ -690,7 +758,9 @@ function UploadScreen({
             </Field>
             <div className="md:col-span-2">
               <Field label="Link Google Drive / Google Slides">
-                <Input
+                <TextField
+                  size="small"
+                  fullWidth
                   value={resourceUrl}
                   onChange={(event) => setResourceUrl(event.target.value)}
                   placeholder="Dán link share, preview hoặc embed từ Google Drive"
@@ -703,10 +773,12 @@ function UploadScreen({
             {fileType === "PPTX" ? (
               <div className="md:col-span-2">
                 <Field label="Tổng số slide">
-                  <Input
+                  <TextField
+                    size="small"
+                    fullWidth
                     value={totalSlides}
                     onChange={(event) => setTotalSlides(event.target.value.replace(/[^\d]/g, ""))}
-                    inputMode="numeric"
+                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
                     placeholder="Ví dụ: 20"
                   />
                   <p className="text-xs leading-5 text-slate-500">
@@ -717,7 +789,7 @@ function UploadScreen({
             ) : null}
             {message ? <div className="md:col-span-2 rounded-lg border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-4 py-3 text-sm font-semibold text-[var(--erg-blue)]">{message}</div> : null}
             <div className="md:col-span-2 flex justify-end">
-              <Button type="submit" disabled={saving || !resourceUrl.trim() || !subject || !location.categoryId} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
+              <Button type="submit" variant="contained" disabled={saving || !resourceUrl.trim() || !subject || !location.categoryId} className="bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]">
                 {saving ? "Đang lưu..." : "Lưu link và gắn tài liệu"}
               </Button>
             </div>
@@ -734,7 +806,7 @@ function UploadScreen({
           <InfoRow label="Môn" value={subject?.label ?? "Chưa chọn"} />
           <InfoRow label="Vị trí" value={pathLabel(subject?.label ?? "", path) || "Chưa chọn"} />
           <InfoRow label="Loại" value={node ? getNodeKindLabel(node.kind) : "Chưa chọn"} />
-          <ChecklistItem label={location.categoryId ? "Đã xác định nhóm học liệu" : "Cần chọn một nhóm học liệu"} />
+          <ChecklistItem label={location.categoryId ? "Đã xác định level" : "Cần chọn một level"} />
           <ChecklistItem label={resourceUrl.trim() ? "Đã nhập link tài liệu" : "Chưa nhập link tài liệu"} />
         </CardContent>
       </Card>
@@ -755,11 +827,103 @@ function PublishScreen({ subjects, resources }: { subjects: StudioSubject[]; res
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-4">
           <PublishStep icon={<BookOpen className="h-5 w-5" />} title="Môn học" description="Có tên, mô tả và trạng thái." />
-          <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có nhóm học liệu, chủ đề và unit/lesson." />
+          <PublishStep icon={<ListTree className="h-5 w-5" />} title="Cấu trúc" description="Có môn học, level, chủ đề và học liệu." />
           <PublishStep icon={<LinkIcon className="h-5 w-5" />} title="Tài liệu" description="Link tài liệu đã được gắn đúng vị trí." />
           <PublishStep icon={<Settings2 className="h-5 w-5" />} title="Public" description="Kiểm tra visibility trước khi lên web." />
         </CardContent>
       </Card>
     </div>
   );
+}
+
+function estimateTaxonomyImpact({
+  target,
+  subjects,
+  localContentItems,
+  resources,
+  quizBankItems,
+}: {
+  target: TaxonomyDeleteTarget | null;
+  subjects: StudioSubject[];
+  localContentItems: LocalContentItem[];
+  resources: LearningResourceResourceCard[];
+  quizBankItems: QuizBankItem[];
+}): CurriculumTaxonomyImpact | null {
+  if (!target) return null;
+
+  const subject = target.kind === "subject"
+    ? subjects.find((item) => item.id === target.id)
+    : subjects.find((item) => findNodeByOptionId(item.tree, target.id));
+  const node = target.kind === "subject" ? undefined : subject ? findNodeByOptionId(subject.tree, target.id) : undefined;
+  const nodeType = target.kind === "subject" ? "subject" : node && isLevelLikeNode(node) ? "level" : "topic";
+  const descendantOptionIds = node ? collectNodeOptionIds(node) : new Set<string>();
+  if (target.kind !== "subject") descendantOptionIds.add(target.id);
+
+  const matchingLocalContent = localContentItems.filter((item) => {
+    if (target.kind === "subject") return item.subjectId === target.id;
+    return descendantOptionIds.has(item.parentOptionId);
+  });
+  const matchingResources = resources.filter((resource) => {
+    if (target.kind === "subject") return resource.subjectId === target.id;
+    if (nodeType === "level") return resource.categoryId === target.id || Boolean(resource.sectionId && descendantOptionIds.has(resource.sectionId));
+    return resource.sectionId === target.id || resource.topicId === target.id;
+  });
+  const matchingQuizzes = quizBankItems.filter((quiz) => {
+    if (target.kind === "subject") return quiz.subjectId === target.id || quiz.subjectLabel === target.label;
+    if (nodeType === "level") return quiz.levelId === target.id || quiz.levelLabel === target.label;
+    return quiz.topicLabels.some((label) => normalizeImpactLabel(label) === normalizeImpactLabel(target.label));
+  });
+  const contentItems = matchingLocalContent.length + matchingResources.length;
+  const questions = matchingQuizzes.reduce((total, quiz) => total + (quiz.questionCount ?? quiz.questionIds.length), 0);
+  const dependencyCount = contentItems + matchingQuizzes.length + questions;
+  const isDraft = target.status === "draft" || target.status === "reviewing";
+
+  return {
+    nodeId: target.id,
+    nodeType,
+    canHardDelete: dependencyCount === 0 && isDraft,
+    canArchive: true,
+    impact: {
+      questions,
+      quizzes: matchingQuizzes.length,
+      publishedQuizVersions: matchingQuizzes.filter((quiz) => quiz.status === "ready").length,
+      contentItems,
+      assignments: 0,
+      studentAttempts: 0,
+    },
+    recommendedActions: dependencyCount === 0 && isDraft ? ["HARD_DELETE", "ARCHIVE"] : ["ARCHIVE", "REASSIGN", "MERGE"],
+    source: "estimated",
+  };
+}
+
+function findNodeByOptionId(nodes: StudioNode[], optionId: string): StudioNode | undefined {
+  for (const node of nodes) {
+    if (node.optionId === optionId) return node;
+    const child = findNodeByOptionId(node.children, optionId);
+    if (child) return child;
+  }
+  return undefined;
+}
+
+function collectNodeOptionIds(node: StudioNode): Set<string> {
+  const ids = new Set<string>();
+  const visit = (current: StudioNode) => {
+    if (current.optionId) ids.add(current.optionId);
+    current.children.forEach(visit);
+  };
+  visit(node);
+  return ids;
+}
+
+function isLevelLikeNode(node: StudioNode) {
+  return node.metadata?.taxonomyRole === "level" || node.kind === "group" || node.kind === "category" || node.kind === "bookSeries";
+}
+
+function normalizeImpactLabel(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }

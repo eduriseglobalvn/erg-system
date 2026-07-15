@@ -2,14 +2,13 @@ import type { ReactNode } from "react";
 
 import { Check, ClipboardCheck, X } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import { cn } from "@/lib/utils";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import type { AssignmentCatalogItem, AssignmentLevel, AssignmentSubject, AssignmentTopic } from "./class-students-workspace.types";
-import { formatSelectedStudentNames } from "./class-students-workspace.utils";
+import { formatSelectedStudentNames } from "./class-students-workspace.utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 export function AssignmentDialog({
@@ -145,7 +144,7 @@ export function AssignmentDialog({
                     {formatSelectedStudentNames(selectedStudentNames, copy)}
                   </div>
                 </div>
-                <Badge tone="secondary">{copy.selectedRecipientsCount(selectedCount)}</Badge>
+                <Chip label={copy.selectedRecipientsCount(selectedCount)} size="small" color="secondary" />
               </div>
             </div>
 
@@ -166,8 +165,10 @@ export function AssignmentDialog({
               <div className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
                 <label className="block">
                   <span className="text-sm font-semibold text-slate-700">{copy.dueDateLabel}</span>
-                  <Input
-                    className="mt-2"
+                  <TextField
+                    size="small"
+                    fullWidth
+                    sx={{ mt: 1 }}
                     type="datetime-local"
                     value={dueDate}
                     onChange={(event) => onDueDateChange(event.target.value)}
@@ -176,8 +177,12 @@ export function AssignmentDialog({
 
                 <label className="mt-4 block">
                   <span className="text-sm font-semibold text-slate-700">{copy.noteLabel}</span>
-                  <Textarea
-                    className="mt-2 min-h-[92px]"
+                  <TextField
+                    multiline
+                    minRows={4}
+                    size="small"
+                    fullWidth
+                    sx={{ mt: 1 }}
                     placeholder={copy.notePlaceholder}
                     value={note}
                     onChange={(event) => onNoteChange(event.target.value)}
@@ -193,10 +198,10 @@ export function AssignmentDialog({
         <footer className="flex flex-col gap-3 border-t border-[#cbd7e6] bg-[#f8fbff] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="text-sm leading-6 text-slate-500">{copy.deliveryHint(selectedCount, schoolName)}</div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button variant="outline" onClick={onClose}>
+            <Button variant="outlined" onClick={onClose}>
               {copy.cancelAction}
             </Button>
-            <Button disabled={!canDeliver} onClick={onDeliver}>
+            <Button variant="contained" disabled={!canDeliver} onClick={onDeliver}>
               {copy.deliverAction(selectedCount)}
             </Button>
           </div>
@@ -276,7 +281,11 @@ function TopicAssignmentGroup({
                   >
                     {selected ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
                   </span>
-                  <Badge tone={item.kind === "test" ? "warning" : "secondary"}>{item.kind === "test" ? copy.testType : copy.trainType}</Badge>
+                  <Chip
+                    label={item.kind === "test" ? copy.testType : copy.trainType}
+                    size="small"
+                    color={item.kind === "test" ? "warning" : "secondary"}
+                  />
                 </span>
               </span>
             </button>

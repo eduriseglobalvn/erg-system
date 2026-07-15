@@ -6,9 +6,9 @@ import {
   DashboardSegmentedControl,
   DashboardStatusBadge,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
 import {
   assignmentRuns,
   classroomClusters,
@@ -121,7 +121,7 @@ export function OverviewWorkspace({
               onChange={setClusterId}
             />
           ) : null}
-          <Button variant="outline">{copy.last30Days}</Button>
+          <Button variant="outlined">{copy.last30Days}</Button>
         </>
       }
       headerContent={<SummaryStrip items={summaryItems} />}
@@ -178,7 +178,7 @@ function TodayActionPanel({
     <DashboardSectionCard
       title={copy.todayActionsTitle}
       description={copy.todayActionsDescription}
-      action={<Button variant="outline" onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
+      action={<Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
     >
       <div className="space-y-3">
         {items.map((item) => (
@@ -217,13 +217,18 @@ function AssignmentRunPanel({ copy }: { copy: OverviewCopy }) {
                   {assignment.subjectLabel} - {assignment.targetLevel}
                 </p>
               </div>
-              <Badge tone={assignment.needsReviewCount > 12 ? "warning" : "outline"}>{assignment.dueLabel}</Badge>
+              <Chip
+                label={assignment.dueLabel}
+                size="small"
+                color={assignment.needsReviewCount > 12 ? "warning" : "default"}
+                variant={assignment.needsReviewCount > 12 ? "filled" : "outlined"}
+              />
             </div>
             <div className="mt-4 flex items-center justify-between gap-3 text-sm">
               <span className="font-medium text-slate-600">{copy.completionLabel}</span>
               <span className="font-semibold text-slate-950">{assignment.completionRate}%</span>
             </div>
-            <ProgressBar value={assignment.completionRate} className="mt-2 h-2 bg-slate-200" indicatorClassName={getProgressClass(assignment.completionRate)} />
+            <LinearProgress variant="determinate" value={assignment.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
             <div className="mt-4 grid grid-cols-3 gap-2">
               <MiniStat label={copy.submittedLabel} value={String(assignment.submittedCount)} />
               <MiniStat label={copy.inProgressLabel} value={String(assignment.inProgressCount)} />
@@ -270,7 +275,7 @@ function SchoolHealthPanel({
                   <span className="font-medium text-slate-600">{copy.averageScoreLabel}</span>
                   <span className="font-semibold text-slate-950">{school.averageScore}</span>
                 </div>
-                <ProgressBar value={school.completionRate} className="mt-2 h-2 bg-slate-200" indicatorClassName={getProgressClass(school.completionRate)} />
+                <LinearProgress variant="determinate" value={school.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
               </div>
             ) : null}
           </article>
@@ -295,7 +300,7 @@ function ClassFocusPanel({
     <DashboardSectionCard
       title={copy.classFocusTitle}
       description={copy.classFocusDescription}
-      action={<Button variant="outline" onClick={() => onOpenLeaf("class-reports")}>{copy.openClassReports}</Button>}
+      action={<Button variant="outlined" onClick={() => onOpenLeaf("class-reports")}>{copy.openClassReports}</Button>}
     >
       <div className="space-y-3">
         {snapshots.map((snapshot) => (
@@ -319,7 +324,7 @@ function ClassListPanel({
     <DashboardSectionCard
       title={copy.classListTitle}
       description={copy.classListDescription}
-      action={<Button onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
+      action={<Button variant="contained" onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
     >
       <div className="overflow-hidden rounded-lg border border-[#cbd7e6] bg-white">
         <div className="hidden grid-cols-[minmax(0,1.3fr)_120px_120px_120px_130px] gap-3 border-b border-[#cbd7e6] bg-[#eef4fb] px-4 py-3 text-[13px] font-bold text-slate-700 lg:grid">
@@ -377,7 +382,7 @@ function ClassRow({
         <span className="font-medium text-slate-600">{copy.completionLabel}</span>
         <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
       </div>
-      <ProgressBar value={snapshot.completionRate} className="mt-2 h-2 bg-slate-200" indicatorClassName={getProgressClass(snapshot.completionRate)} />
+      <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
       {!compact ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <MiniStat label={copy.classroomsStudentCount} value={String(snapshot.studentCount)} />
@@ -413,12 +418,6 @@ function CompactCell({ label, value }: { label: string; value: string }) {
       {value}
     </div>
   );
-}
-
-function getProgressClass(value: number) {
-  if (value >= 86) return "bg-emerald-500";
-  if (value >= 78) return "bg-amber-500";
-  return "bg-rose-500";
 }
 
 function getUrgencyTone(urgency: InterventionItem["urgency"]): BadgeTone {

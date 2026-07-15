@@ -7,9 +7,9 @@ import {
   DashboardSectionCard,
   DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
 import {
   classroomSchools,
   getLeaderboard,
@@ -63,7 +63,7 @@ export function ClassReportsWorkspace({
       description={copy.description}
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
-        <Button variant="outline" onClick={() => onOpenLeaf("class-students")}>
+        <Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>
           {copy.openJourney}
         </Button>
       }
@@ -176,7 +176,7 @@ function LeaderboardRow({
             {entry.className} • {entry.schoolName}
           </div>
         </div>
-        <Badge tone={rank === 1 ? "success" : "secondary"}>{entry.badge}</Badge>
+        <Chip label={entry.badge} size="small" color={rank === 1 ? "success" : "secondary"} />
       </div>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
@@ -196,19 +196,21 @@ function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: Classr
           <div className="text-sm font-semibold text-slate-950">{snapshot.className}</div>
           <div className="mt-1 text-sm text-slate-500">{snapshot.gradeLabel}</div>
         </div>
-        <Badge tone={snapshot.riskStudents >= 5 ? "warning" : "success"}>
-          {snapshot.riskStudents} {copy.supportUnit}
-        </Badge>
+        <Chip
+          label={`${snapshot.riskStudents} ${copy.supportUnit}`}
+          size="small"
+          color={snapshot.riskStudents >= 5 ? "warning" : "success"}
+        />
       </div>
       <div className="mt-4">
         <div className="flex justify-between text-sm">
           <span className="text-slate-500">{copy.completionLabel}</span>
           <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
         </div>
-        <ProgressBar
-          className="mt-2 h-2 bg-slate-100"
-          indicatorClassName={snapshot.completionRate >= 88 ? "bg-emerald-500" : "bg-amber-500"}
+        <LinearProgress
+          variant="determinate"
           value={snapshot.completionRate}
+          sx={{ mt: 2, height: 8, borderRadius: 1 }}
         />
       </div>
     </article>

@@ -15,6 +15,7 @@ test("maps LMS assignments into assignment runs", () => {
         id: "asg-1",
         academicClassId: "class-1",
         quizId: "quiz-1",
+        resources: [{ quizId: "quiz-1", quizVersionId: "version-1", quizVersionLabel: "v1", orderIndex: 0 }],
         subjectId: "math",
         dueAt: "2026-06-11T10:00:00+07:00",
         status: "active",
@@ -36,6 +37,9 @@ test("maps LMS assignments into assignment runs", () => {
   expect(runs).toHaveLength(1);
   expect(runs[0]).toMatchObject({
     id: "asg-1",
+    quizId: "quiz-1",
+    quizVersionId: "version-1",
+    quizVersionLabel: "v1",
     subjectLabel: "Math",
     targetLevel: "Lớp 6A1",
     activeClasses: 1,

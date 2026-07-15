@@ -19,10 +19,9 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { Avatar } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Skeleton } from "@/components/ui/skeleton";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import Skeleton from "@mui/material/Skeleton";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { authApi } from "@/platform/auth/api/auth-api";
 import { getCurrentAccount, saveCurrentAccount } from "@/platform/auth/api/auth-storage";
@@ -109,7 +108,7 @@ export function ProfilePage() {
       .profile()
       .then((profile) => {
         if (cancelled) return;
-        const nextAccount: TeacherAccount = { ...profile, password: "" };
+        const nextAccount: TeacherAccount = { ...profile };
         setAccount(nextAccount);
         setForm(toForm(nextAccount));
         saveCurrentAccount(nextAccount);
@@ -169,7 +168,6 @@ export function ProfilePage() {
         title: form.title,
         avatarUrl: updated.avatarUrl || form.avatarUrl,
         bio: updated.bio || form.bio,
-        password: "",
       };
       saveCurrentAccount(nextAccount);
       setAccount(nextAccount);
@@ -256,7 +254,6 @@ export function ProfilePage() {
         department: account.department,
         title: account.title,
         avatarUrl: updated.avatarUrl || account.avatarUrl || "",
-        password: "",
       };
       saveCurrentAccount(nextAccount);
       setAccount(nextAccount);
@@ -277,11 +274,8 @@ export function ProfilePage() {
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-5">
         <header className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"><div className="h-1.5 bg-[var(--erg-blue)]" /><div className="flex flex-col gap-4 px-5 py-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-3">
-            <Button asChild variant="outline" className="h-10 rounded-lg bg-white">
-              <Link to="/">
-                <ArrowLeft className="size-4" />
-                Quay lại LMS
-              </Link>
+            <Button component={Link} to="/" variant="outlined" startIcon={<ArrowLeft className="size-4" />} className="h-10 rounded-lg bg-white">
+              Quay lại LMS
             </Button>
             <div className="hidden h-10 w-px bg-slate-200 sm:block" />
             <div>
@@ -290,17 +284,20 @@ export function ProfilePage() {
             </div>
           </div>
           <Button
+            variant="contained"
             onClick={() => void primaryAction()}
             disabled={primaryDisabled}
+            startIcon={
+              activeTab === "security" ? (
+                isSavingPassword ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />
+              ) : isSavingProfile ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Save className="size-4" />
+              )
+            }
             className="h-10 rounded-md bg-[var(--erg-blue)] px-4 text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
           >
-            {activeTab === "security" ? (
-              isSavingPassword ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />
-            ) : isSavingProfile ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Save className="size-4" />
-            )}
             {activeTab === "security" ? "Đổi mật khẩu" : "Lưu hồ sơ"}
           </Button>
           </div>
@@ -308,8 +305,8 @@ export function ProfilePage() {
 
         {isLoading ? (
           <div className="grid gap-2 rounded-lg border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-5 py-3" aria-hidden="true">
-            <Skeleton className="h-4 w-64 bg-[var(--erg-blue-light)]" />
-            <Skeleton className="h-3 w-40 bg-[var(--erg-blue-light)]" />
+            <Skeleton variant="rounded" className="h-4 w-64" />
+            <Skeleton variant="rounded" className="h-3 w-40" />
           </div>
         ) : null}
 
@@ -318,13 +315,13 @@ export function ProfilePage() {
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
               <div className="flex items-start gap-4">
                 <div className="relative shrink-0">
-                  <Avatar className="size-20 overflow-hidden rounded-lg border-4 border-white bg-[var(--erg-blue-light)] shadow-sm">
+                  <div className="size-20 overflow-hidden rounded-lg border-4 border-white bg-[var(--erg-blue-light)] shadow-sm">
                     {avatarUrl ? (
                       <img src={avatarUrl} alt={form.fullName || "Avatar"} className="h-full w-full object-cover" />
                     ) : (
                       <div className="grid h-full w-full place-items-center text-lg font-semibold text-[var(--erg-blue)]">{initials}</div>
                     )}
-                  </Avatar>
+                  </div>
                   <button
                     aria-label="Upload avatar"
                     className="absolute -bottom-2 -right-2 grid size-10 place-items-center rounded-lg border-4 border-slate-50 bg-white text-[var(--erg-blue)] shadow-sm transition hover:bg-[var(--erg-blue-light)] disabled:cursor-not-allowed disabled:opacity-70"
@@ -427,8 +424,7 @@ function ProfileFormPanel({ account, form, isSaving, notice, onSave, onUpdate }:
         title="Hồ sơ hiển thị trong LMS"
         description="Thông tin này dùng cho lời chào, phân quyền, danh sách thành viên và các luồng quản trị."
         action={
-          <Button onClick={() => void onSave()} disabled={!account || isSaving} className="h-10 rounded-lg bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
-            {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+          <Button variant="contained" onClick={() => void onSave()} disabled={!account || isSaving} startIcon={isSaving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />} className="h-10 rounded-lg bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
             Lưu hồ sơ
           </Button>
         }
@@ -494,8 +490,7 @@ function SecurityPanel({
           title="Đổi mật khẩu đăng nhập"
           description="Mật khẩu mới được gửi thẳng tới BE và chỉ cho phép đổi mật khẩu của chính tài khoản đang đăng nhập."
           action={
-            <Button onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} className="h-10 rounded-md bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
-              {isSaving ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />}
+            <Button variant="contained" onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} startIcon={isSaving ? <Loader2 className="size-4 animate-spin" /> : <KeyRound className="size-4" />} className="h-10 rounded-md bg-[var(--erg-blue)] px-4 text-white hover:bg-[var(--erg-blue-hover)]">
               Đổi mật khẩu
             </Button>
           }
@@ -627,13 +622,18 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
   };
 
   return (
-    <Dialog open={Boolean(crop)} onOpenChange={(open) => (!open ? onClose() : undefined)}>
-      <DialogContent className="max-w-[760px] gap-0 overflow-hidden rounded-lg p-0" showCloseButton={!isUploading}>
+    <Dialog
+      open={Boolean(crop)}
+      onClose={() => onClose()}
+      maxWidth={false}
+      slotProps={{ paper: { sx: { maxWidth: 760, borderRadius: 2, overflow: "hidden" } } }}
+    >
+      <div>
         <div className="h-1.5 bg-[var(--erg-blue)]" />
-        <DialogHeader className="border-b border-slate-200 px-6 py-5">
-          <DialogTitle className="text-xl font-semibold">Căn chỉnh ảnh đại diện</DialogTitle>
-          <DialogDescription>Kéo ảnh để đặt khuôn mặt vào giữa khung, điều chỉnh zoom rồi lưu lên R2.</DialogDescription>
-        </DialogHeader>
+        <div className="border-b border-slate-200 px-6 py-5">
+          <h2 className="text-xl font-semibold text-[var(--foreground)]">Căn chỉnh ảnh đại diện</h2>
+          <p className="text-sm leading-5 text-[var(--muted-foreground)]">Kéo ảnh để đặt khuôn mặt vào giữa khung, điều chỉnh zoom rồi lưu lên R2.</p>
+        </div>
 
         <div className="grid gap-6 p-6 lg:grid-cols-[360px_minmax(0,1fr)]">
           <div className="flex flex-col items-center gap-4">
@@ -730,11 +730,10 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
                 onChange={(event) => updateZoom(Number(event.target.value))}
               />
               <div className="mt-4 flex gap-2">
-                <Button type="button" variant="outline" className="h-10 rounded-lg" onClick={() => updateZoom(1)} disabled={isUploading}>
+                <Button type="button" variant="outlined" className="h-10 rounded-lg" onClick={() => updateZoom(1)} disabled={isUploading}>
                   Reset
                 </Button>
-                <Button type="button" variant="outline" className="h-10 rounded-lg" onClick={onPickAnother} disabled={isUploading}>
-                  <Upload className="size-4" />
+                <Button type="button" variant="outlined" className="h-10 rounded-lg" startIcon={<Upload className="size-4" />} onClick={onPickAnother} disabled={isUploading}>
                   Chọn ảnh khác
                 </Button>
               </div>
@@ -746,16 +745,15 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
           </div>
         </div>
 
-        <DialogFooter className="border-t border-slate-200 bg-slate-50 px-6 py-4">
-          <Button type="button" variant="outline" className="rounded-lg" onClick={onClose} disabled={isUploading}>
+        <div className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <Button type="button" variant="outlined" className="rounded-lg" onClick={onClose} disabled={isUploading}>
             Hủy
           </Button>
-          <Button type="button" className="rounded-md bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
-            {isUploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />}
+          <Button type="button" variant="contained" startIcon={isUploading ? <Loader2 className="size-4 animate-spin" /> : <Upload className="size-4" />} className="rounded-md bg-[var(--erg-blue)] text-white hover:bg-[var(--erg-blue-hover)]" onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
             Lưu avatar
           </Button>
-        </DialogFooter>
-      </DialogContent>
+        </div>
+      </div>
     </Dialog>
   );
 }

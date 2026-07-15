@@ -1,25 +1,22 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent, type ReactNode } from "react";
 
-import AddRoundedIcon from "@mui/icons-material/AddRounded";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
-
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import {
-  buildPreviewTextStyle,
-  buildPreviewTitleStyle,
-} from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render-utils";
+  buildQuizTextStyle,
+  resolveSlideTextStyle,
+} from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
+import { buildPreviewTitleStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render-utils";
 import { useI18n } from "@/platform/i18n";
 import { createInitialAnswer } from "@/lib/quiz";
 import type { AnswerPayload, Question } from "@/lib/types";
 import type {
   QuizEditorChoice,
-  QuizEditorDragDropItem,
   QuizEditorFeedbackRow,
-  QuizEditorHotspotArea,
   QuizEditorSlide,
+  QuizEditorSlideMedia,
+  QuizEditorTextStyleTarget,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { cn } from "@/utils/cn";
 
@@ -32,17 +29,18 @@ type LearnerQuestionAuthoringPreviewProps = {
   readOnly?: boolean;
   onUpdateTitle: (value: string) => void;
   onUpdateInstructions: (items: string[]) => void;
-  onUpdateChoices?: (items: QuizEditorChoice[]) => void;
-  onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
-  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
   onUpdateFeedbackRows?: (rows: QuizEditorFeedbackRow[]) => void;
-  onPickMedia?: () => void;
+  onUpdateRuntimeQuestion?: (question: Question) => void;
+  onUpdateSlideMedia?: (media: QuizEditorSlideMedia) => void;
+  onTextTargetFocus?: (target: QuizEditorTextStyleTarget) => void;
 };
 
 const previewTheme = {
   themeId: defaultQuizTheme.id,
   theme: defaultQuizTheme.theme,
 };
+
+const ergLogoUrl = "https://media.erg.edu.vn/logo/erg.png";
 
 const hotspotPlaceholderImage =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%23eff6ff'/%3E%3Cstop offset='1' stop-color='%23dbeafe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='675' fill='url(%23g)'/%3E%3Ccircle cx='880' cy='250' r='130' fill='%23bfdbfe'/%3E%3Crect x='210' y='200' width='520' height='270' rx='32' fill='%23ffffff' stroke='%2393c5fd' stroke-width='8'/%3E%3Cpath d='M300 410l120-120 98 90 92-72 90 102z' fill='%2393c5fd'/%3E%3Ccircle cx='360' cy='275' r='36' fill='%23f97316'/%3E%3C/svg%3E";
@@ -54,14 +52,13 @@ export function LearnerQuestionAuthoringPreview({
   readOnly = false,
   onUpdateTitle,
   onUpdateInstructions,
-  onUpdateChoices,
-  onUpdateDragDropItems,
-  onUpdateHotspotAreas,
   onUpdateFeedbackRows,
-  onPickMedia,
+  onUpdateRuntimeQuestion,
+  onUpdateSlideMedia,
+  onTextTargetFocus,
 }: LearnerQuestionAuthoringPreviewProps) {
   const { t } = useI18n();
-  const learnerQuestion = useMemo(() => buildLearnerQuestion(slide, t), [slide, t]);
+  const learnerQuestion = useMemo(() => buildPreviewQuestion(slide, t), [slide, t]);
   const answerKey = learnerQuestion
     ? `${learnerQuestion.id}:${learnerQuestion.kind}:${previewMode}:${slide.choices?.length ?? 0}:${slide.dragDropItems?.length ?? 0}`
     : "empty";
@@ -79,6 +76,8 @@ export function LearnerQuestionAuthoringPreview({
         themeId={themeId}
         readOnly={readOnly}
         onUpdateTitle={onUpdateTitle}
+        onUpdateSlideMedia={onUpdateSlideMedia}
+        onTextTargetFocus={onTextTargetFocus}
       >
         <LearnerResultScreen slide={slide} />
       </LearnerPreviewShell>
@@ -92,6 +91,8 @@ export function LearnerQuestionAuthoringPreview({
         themeId={themeId}
         readOnly={readOnly}
         onUpdateTitle={onUpdateTitle}
+        onUpdateSlideMedia={onUpdateSlideMedia}
+        onTextTargetFocus={onTextTargetFocus}
       >
         {slide.kind === "info-slide" && slide.infoPage ? (
           <LearnerInformationLandingScreen slide={slide} />
@@ -113,7 +114,6 @@ export function LearnerQuestionAuthoringPreview({
   const feedback = getFeedbackText(slide, previewMode);
   const submitted = previewMode !== "question";
   const directEditing = !readOnly && previewMode === "question";
-  const answerTextStyle = buildPreviewTextStyle(slide, "answer", 22);
 
   return (
     <LearnerPreviewShell
@@ -121,16 +121,27 @@ export function LearnerQuestionAuthoringPreview({
       themeId={themeId}
       readOnly={readOnly}
       onUpdateTitle={onUpdateTitle}
+      onUpdateSlideMedia={onUpdateSlideMedia}
+      onTextTargetFocus={onTextTargetFocus}
     >
-      <div className="classic-editor__learner-question-body">
+      <div
+        className="classic-editor__learner-question-body"
+        onFocusCapture={(event) => {
+          if (readOnly) return;
+          const target = event.target;
+          if (!(target instanceof HTMLElement)) return;
+          onTextTargetFocus?.(target.closest(".classic-editor__learner-title-band") ? "question" : "answer");
+        }}
+      >
         {directEditing ? (
-          <LearnerDirectQuestionEditor
-            slide={slide}
-            answerTextStyle={answerTextStyle}
-            onUpdateChoices={onUpdateChoices}
-            onUpdateDragDropItems={onUpdateDragDropItems}
-            onUpdateHotspotAreas={onUpdateHotspotAreas}
-            onPickMedia={onPickMedia}
+          <QuestionRenderer
+            question={learnerQuestion}
+            value={draftAnswer}
+            onChange={(answer) => setDraftAnswerState({ key: answerKey, answer })}
+            submitted={false}
+            reviewMode={false}
+            editable
+            onQuestionChange={(nextQuestion) => onUpdateRuntimeQuestion?.({ ...nextQuestion, title: slide.title })}
           />
         ) : (
           <QuestionRenderer
@@ -166,17 +177,39 @@ export function LearnerQuestionAuthoringPreview({
   );
 }
 
+function buildPreviewQuestion(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+): Question | null {
+  if (slide.runtimeQuestion) {
+    return {
+      ...slide.runtimeQuestion,
+      title: slide.title,
+      instructions: slide.description ?? slide.runtimeQuestion.instructions,
+      contentImage: slide.media
+        ? undefined
+        : slide.runtimeQuestion.contentImage,
+    };
+  }
+
+  return buildLearnerQuestion(slide, t);
+}
+
 function LearnerPreviewShell({
   slide,
   themeId,
   readOnly,
   onUpdateTitle,
+  onUpdateSlideMedia,
+  onTextTargetFocus,
   children,
 }: {
   slide: QuizEditorSlide;
   themeId?: string;
   readOnly: boolean;
   onUpdateTitle: (value: string) => void;
+  onUpdateSlideMedia?: (media: QuizEditorSlideMedia) => void;
+  onTextTargetFocus?: (target: QuizEditorTextStyleTarget) => void;
   children: ReactNode;
 }) {
   const { t } = useI18n();
@@ -184,10 +217,14 @@ function LearnerPreviewShell({
     themeId: themeId ?? previewTheme.themeId,
     theme: themeId ? null : previewTheme.theme,
   };
-  const titleTextStyle = buildPreviewTitleStyle(slide, 34);
+  const titleTextStyle = buildAuthoringTitleStyle(slide);
+  const questionThemeStyle = {
+    ...buildQuestionThemeStyle(slide.options?.themeColor),
+    ...buildAuthoringTextVariables(slide),
+  } as CSSProperties;
 
   return (
-    <QuizThemeSurface quiz={previewQuizTheme} className="classic-editor__learner-surface">
+    <QuizThemeSurface quiz={previewQuizTheme} className="classic-editor__learner-surface" style={questionThemeStyle}>
       <section className="classic-editor__learner-player">
         <div className="classic-editor__learner-player-top">
           <span>ERG E-LEARNING</span>
@@ -205,12 +242,24 @@ function LearnerPreviewShell({
                 className="classic-editor__learner-title-input"
                 style={titleTextStyle}
                 onCommit={onUpdateTitle}
+                onFocusTarget={() => onTextTargetFocus?.("question")}
                 aria-label={t("common.questionTitle")}
               />
             )}
           </div>
 
-          <div className="classic-editor__learner-content">{children}</div>
+          <span className="classic-editor__learner-shape classic-editor__learner-shape--mountain" aria-hidden="true" />
+          <img className="classic-editor__learner-logo" src={ergLogoUrl} alt="" aria-hidden="true" />
+          <div className={cn("classic-editor__learner-content", slide.media && slide.kind !== "hotspot" && "has-floating-media")}>
+            {slide.media && slide.kind !== "hotspot" ? (
+              <DraggableSlideMedia
+                media={slide.media}
+                readOnly={readOnly}
+                onChange={(media) => onUpdateSlideMedia?.(media)}
+              />
+            ) : null}
+            {children}
+          </div>
         </div>
 
         <div className="classic-editor__learner-footer">
@@ -224,6 +273,154 @@ function LearnerPreviewShell({
       </section>
     </QuizThemeSurface>
   );
+}
+
+function buildQuestionThemeStyle(color?: string): CSSProperties | undefined {
+  if (!color) return undefined;
+
+  return {
+    ["--quiz-header-bg" as string]: color,
+    ["--quiz-header-text" as string]: "#ffffff",
+    ["--quiz-accent-start" as string]: color,
+    ["--quiz-accent-end" as string]: color,
+    ["--quiz-option-selected-bg" as string]: `${color}14`,
+    ["--quiz-sidebar-active-bg" as string]: color,
+    ["--quiz-sidebar-active-text" as string]: "#ffffff",
+    ["--classic-slide-accent-gradient" as string]: color,
+    ["--classic-slide-accent-soft" as string]: color,
+    ["--classic-slide-accent-strong" as string]: color,
+  };
+}
+
+function buildAuthoringTitleStyle(slide: QuizEditorSlide): CSSProperties {
+  const questionStyle = buildQuizTextStyle(resolveSlideTextStyle(slide, "question"));
+  return {
+    ...buildPreviewTitleStyle(slide, 34),
+    ...questionStyle,
+    color: "#ffffff",
+    caretColor: "#ffffff",
+    fontWeight: resolveSlideTextStyle(slide, "question").bold ? 900 : 760,
+    letterSpacing: "0",
+    textShadow: "0 2px 0 rgba(0, 0, 0, 0.1)",
+    textAlign: "left",
+  };
+}
+
+function buildAuthoringTextVariables(slide: QuizEditorSlide): CSSProperties {
+  const answer = resolveSlideTextStyle(slide, "answer");
+  const answerStyle = buildQuizTextStyle(answer);
+  const answerSize = Math.max(18, Number.parseFloat(String(answerStyle.fontSize)) || answer.fontSize);
+
+  return {
+    ["--quiz-author-answer-font" as string]: answerStyle.fontFamily,
+    ["--quiz-author-answer-size" as string]: `${answerSize}px`,
+    ["--quiz-author-answer-weight" as string]: String(answerStyle.fontWeight),
+    ["--quiz-author-answer-style" as string]: String(answerStyle.fontStyle),
+    ["--quiz-author-answer-decoration" as string]: String(answerStyle.textDecoration),
+    ["--quiz-readable-size" as string]: `${answerSize}px`,
+    ["--quiz-readable-size-lg" as string]: `${answerSize + 2}px`,
+  };
+}
+
+function DraggableSlideMedia({
+  media,
+  readOnly,
+  onChange,
+}: {
+  media: QuizEditorSlideMedia;
+  readOnly: boolean;
+  onChange: (media: QuizEditorSlideMedia) => void;
+}) {
+  const frameRef = useRef<HTMLDivElement | null>(null);
+  const position = {
+    x: clampUnit(media.x ?? 0.74),
+    y: clampUnit(media.y ?? 0.48),
+    width: Math.min(0.5, Math.max(0.2, media.width ?? 0.34)),
+  };
+
+  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (readOnly) return;
+    if ((event.target as HTMLElement).closest("[data-media-resize]")) return;
+    const parent = frameRef.current?.parentElement;
+    if (!parent) return;
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const rect = parent.getBoundingClientRect();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const start = position;
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      const nextX = clampUnit(start.x + (moveEvent.clientX - startX) / rect.width);
+      const nextY = clampUnit(start.y + (moveEvent.clientY - startY) / rect.height);
+      onChange({ ...media, x: nextX, y: nextY, width: start.width });
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
+  }
+
+  function handleResizePointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    if (readOnly) return;
+    const parent = frameRef.current?.parentElement;
+    if (!parent) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const rect = parent.getBoundingClientRect();
+    const startX = event.clientX;
+    const startWidth = position.width;
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      const nextWidth = Math.min(0.5, Math.max(0.2, startWidth + (moveEvent.clientX - startX) / rect.width));
+      onChange({ ...media, x: position.x, y: position.y, width: nextWidth });
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
+  }
+
+  return (
+    <div
+      ref={frameRef}
+      className={cn("classic-editor__learner-floating-media", !readOnly && "is-draggable")}
+      style={{
+        left: `${position.x * 100}%`,
+        top: `${position.y * 100}%`,
+        width: `${position.width * 100}%`,
+      }}
+      onPointerDown={handlePointerDown}
+      role={readOnly ? undefined : "button"}
+      tabIndex={readOnly ? undefined : 0}
+      aria-label="Kéo để đổi vị trí ảnh"
+    >
+      <img src={media.src} alt={media.alt} draggable={false} />
+      {!readOnly ? <span>Kéo ảnh</span> : null}
+      {!readOnly ? (
+        <button
+          type="button"
+          data-media-resize
+          className="classic-editor__learner-floating-media-resize"
+          onPointerDown={handleResizePointerDown}
+          aria-label="Kéo để đổi kích thước ảnh"
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function clampUnit(value: number) {
+  return Math.min(0.92, Math.max(0.08, value));
 }
 
 function LearnerInstructionScreen({
@@ -375,496 +572,6 @@ function LearnerResultScreen({ slide }: { slide: QuizEditorSlide }) {
   );
 }
 
-function LearnerDirectQuestionEditor({
-  slide,
-  answerTextStyle,
-  onUpdateChoices,
-  onUpdateDragDropItems,
-  onUpdateHotspotAreas,
-  onPickMedia,
-}: {
-  slide: QuizEditorSlide;
-  answerTextStyle?: CSSProperties;
-  onUpdateChoices?: (items: QuizEditorChoice[]) => void;
-  onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
-  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
-  onPickMedia?: () => void;
-}) {
-  const { t } = useI18n();
-
-  if (slide.kind === "hotspot") {
-    return (
-      <LearnerDirectHotspotEditor
-        slide={slide}
-        onUpdateHotspotAreas={onUpdateHotspotAreas}
-        onPickMedia={onPickMedia}
-      />
-    );
-  }
-
-  if (slide.kind === "drag-and-drop" || slide.kind === "matching") {
-    return (
-      <LearnerDirectMatchEditor
-        slide={slide}
-        answerTextStyle={answerTextStyle}
-        onUpdateDragDropItems={onUpdateDragDropItems}
-      />
-    );
-  }
-
-  if (isChoiceAuthoringSlide(slide.kind)) {
-    return (
-      <LearnerDirectChoiceEditor
-        slide={slide}
-        answerTextStyle={answerTextStyle}
-        onUpdateChoices={onUpdateChoices}
-      />
-    );
-  }
-
-  return (
-    <div className="classic-editor__learner-direct-empty">
-      <strong>{t("quiz.learnerViewEditor")}</strong>
-      <span>{t("quiz.directEditHint")}</span>
-    </div>
-  );
-}
-
-function LearnerDirectChoiceEditor({
-  slide,
-  answerTextStyle,
-  onUpdateChoices,
-}: {
-  slide: QuizEditorSlide;
-  answerTextStyle?: CSSProperties;
-  onUpdateChoices?: (items: QuizEditorChoice[]) => void;
-}) {
-  const { t } = useI18n();
-  const choices = slide.choices?.length
-    ? slide.choices
-    : [
-        { id: createDraftId("choice"), label: `${t("common.option")} 1`, correct: true },
-        { id: createDraftId("choice"), label: `${t("common.option")} 2`, correct: false },
-      ];
-  const isSingleCorrect = slide.kind === "multiple-choice" || slide.kind === "true-false";
-
-  function updateChoice(choiceId: string, patch: Partial<QuizEditorChoice>) {
-    onUpdateChoices?.(choices.map((choice) => (choice.id === choiceId ? { ...choice, ...patch } : choice)));
-  }
-
-  function toggleCorrect(choiceId: string) {
-    onUpdateChoices?.(
-      choices.map((choice) => {
-        if (isSingleCorrect) {
-          return { ...choice, correct: choice.id === choiceId };
-        }
-
-        return choice.id === choiceId ? { ...choice, correct: !choice.correct } : choice;
-      }),
-    );
-  }
-
-  function removeChoice(choiceId: string) {
-    onUpdateChoices?.(choices.filter((choice) => choice.id !== choiceId));
-  }
-
-  function addChoice() {
-    onUpdateChoices?.([
-      ...choices,
-      {
-        id: createDraftId("choice"),
-        label: `${t("common.option")} ${choices.length + 1}`,
-        correct: false,
-      },
-    ]);
-  }
-
-  return (
-    <div className="classic-editor__learner-direct-list">
-      {choices.map((choice, index) => (
-        <div key={choice.id} className={cn("classic-editor__learner-direct-choice", choice.correct && "is-correct")}>
-          <button
-            type="button"
-            className={cn(
-              "classic-editor__learner-direct-marker",
-              isSingleCorrect ? "is-radio" : "is-checkbox",
-              choice.correct && "is-active",
-            )}
-            onClick={() => toggleCorrect(choice.id)}
-            aria-label={t("common.correct")}
-          >
-            {choice.correct ? "✓" : ""}
-          </button>
-          {choice.media?.src ? (
-            <img
-              className="classic-editor__learner-inline-image"
-              src={choice.media.src}
-              alt={choice.media.alt || choice.label}
-            />
-          ) : null}
-          <BufferedTextarea
-            value={choice.label}
-            rows={1}
-            className="classic-editor__learner-direct-textarea"
-            style={answerTextStyle}
-            onCommit={(value) => updateChoice(choice.id, { label: value })}
-            mediaTarget={{ kind: "choice", id: choice.id }}
-            aria-label={`${t("common.option")} ${index + 1}`}
-          />
-          <Tooltip title={t("common.remove")} arrow placement="left">
-            <IconButton
-              type="button"
-              size="small"
-              className="classic-editor__learner-direct-remove"
-              onClick={() => removeChoice(choice.id)}
-              aria-label={t("common.remove")}
-            >
-              <CloseRoundedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </div>
-      ))}
-      <Button
-        type="button"
-        className="classic-editor__learner-direct-add"
-        onClick={addChoice}
-        startIcon={<AddRoundedIcon />}
-        variant="text"
-      >
-        {t("common.option")}
-      </Button>
-    </div>
-  );
-}
-
-function LearnerDirectHotspotEditor({
-  slide,
-  onUpdateHotspotAreas,
-  onPickMedia,
-}: {
-  slide: QuizEditorSlide;
-  onUpdateHotspotAreas?: (items: QuizEditorHotspotArea[]) => void;
-  onPickMedia?: () => void;
-}) {
-  const { t } = useI18n();
-  const image = slide.media;
-  const imageFrameRef = useRef<HTMLDivElement | null>(null);
-  const [dragDraft, setDragDraft] = useState<{
-    pointerId: number;
-    start: { x: number; y: number };
-    current: { x: number; y: number };
-  } | null>(null);
-  const correctArea = slide.hotspotAreas?.find((area) => area.correct) ?? null;
-  const previewArea = dragDraft ? createAreaFromPoints(dragDraft.start, dragDraft.current, correctArea?.id) : correctArea;
-
-  function readPoint(event: ReactPointerEvent<HTMLDivElement>) {
-    const target = imageFrameRef.current;
-    if (!target) return null;
-
-    const rect = target.getBoundingClientRect();
-    return {
-      x: clampUnit((event.clientX - rect.left) / rect.width),
-      y: clampUnit((event.clientY - rect.top) / rect.height),
-    };
-  }
-
-  function commitArea(nextArea: QuizEditorHotspotArea) {
-    onUpdateHotspotAreas?.([
-      {
-        ...nextArea,
-        id: correctArea?.id ?? nextArea.id,
-        shape: "rect",
-        correct: true,
-      },
-    ]);
-  }
-
-  function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!image?.src || !onUpdateHotspotAreas || event.button !== 0) return;
-    const point = readPoint(event);
-    if (!point) return;
-
-    event.currentTarget.setPointerCapture(event.pointerId);
-    setDragDraft({ pointerId: event.pointerId, start: point, current: point });
-  }
-
-  function handlePointerMove(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!dragDraft || dragDraft.pointerId !== event.pointerId) return;
-    const point = readPoint(event);
-    if (!point) return;
-
-    setDragDraft({ ...dragDraft, current: point });
-  }
-
-  function handlePointerUp(event: ReactPointerEvent<HTMLDivElement>) {
-    if (!dragDraft || dragDraft.pointerId !== event.pointerId) return;
-    const point = readPoint(event) ?? dragDraft.current;
-    const dragDistance = Math.hypot(point.x - dragDraft.start.x, point.y - dragDraft.start.y);
-    const nextArea =
-      dragDistance < 0.015
-        ? createCenteredHotspotArea(point, correctArea?.id)
-        : createAreaFromPoints(dragDraft.start, point, correctArea?.id);
-
-    commitArea(nextArea);
-    setDragDraft(null);
-  }
-
-  function clearArea() {
-    onUpdateHotspotAreas?.([]);
-  }
-
-  if (!image?.src) {
-    return (
-      <div className="classic-editor__learner-hotspot-empty">
-        <div className="classic-editor__learner-hotspot-empty-icon" aria-hidden="true">
-          <AddRoundedIcon />
-        </div>
-        <strong>{t("quiz.hotspot")}</strong>
-        <span>Thêm ảnh để tạo Click Map, sau đó bấm hoặc kéo trên ảnh để đặt vùng đáp án đúng.</span>
-        <Button type="button" variant="contained" onClick={onPickMedia} startIcon={<AddRoundedIcon />}>
-          {t("quiz.addImage")}
-        </Button>
-      </div>
-    );
-  }
-
-  return (
-    <div className="classic-editor__learner-hotspot-editor">
-      <div className="classic-editor__learner-hotspot-toolbar">
-        <div>
-          <strong>{t("quiz.hotspot")}</strong>
-          <span>Bấm để đặt nhanh, hoặc kéo để vẽ vùng đúng như bản đồ đáp án.</span>
-        </div>
-        <div className="classic-editor__learner-hotspot-actions">
-          <Button type="button" size="small" variant="outlined" onClick={onPickMedia}>
-            {t("quiz.replaceImage")}
-          </Button>
-          <Button type="button" size="small" variant="text" color="error" onClick={clearArea} disabled={!correctArea}>
-            {t("common.remove")}
-          </Button>
-        </div>
-      </div>
-
-      <div className="classic-editor__learner-hotspot-stage">
-        <div
-          ref={imageFrameRef}
-          className={cn("classic-editor__learner-hotspot-image-frame", onUpdateHotspotAreas && "is-editable")}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={() => setDragDraft(null)}
-        >
-          <img src={image.src} alt={image.alt || slide.title} draggable={false} />
-          {previewArea ? <HotspotAreaOverlay area={previewArea} isDraft={Boolean(dragDraft)} /> : null}
-        </div>
-      </div>
-
-      <div className="classic-editor__learner-hotspot-meta" aria-live="polite">
-        {correctArea ? (
-          <>
-            <span>X {Math.round(correctArea.x * 100)}%</span>
-            <span>Y {Math.round(correctArea.y * 100)}%</span>
-            <span>W {Math.round(correctArea.width * 100)}%</span>
-            <span>H {Math.round(correctArea.height * 100)}%</span>
-          </>
-        ) : (
-          <span>{t("player.clickImagePrompt")}</span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function HotspotAreaOverlay({ area, isDraft }: { area: QuizEditorHotspotArea; isDraft: boolean }) {
-  return (
-    <div
-      className={cn("classic-editor__learner-hotspot-area", isDraft && "is-draft")}
-      style={{
-        left: `${area.x * 100}%`,
-        top: `${area.y * 100}%`,
-        width: `${area.width * 100}%`,
-        height: `${area.height * 100}%`,
-      }}
-    >
-      <span>Đúng</span>
-      <i className="is-top-left" />
-      <i className="is-top-right" />
-      <i className="is-bottom-left" />
-      <i className="is-bottom-right" />
-    </div>
-  );
-}
-
-function createCenteredHotspotArea(point: { x: number; y: number }, id = createDraftId("hotspot")): QuizEditorHotspotArea {
-  const width = 0.18;
-  const height = 0.16;
-
-  return {
-    id,
-    shape: "rect",
-    x: Math.min(clampUnit(point.x - width / 2), 1 - width),
-    y: Math.min(clampUnit(point.y - height / 2), 1 - height),
-    width,
-    height,
-    correct: true,
-  };
-}
-
-function createAreaFromPoints(
-  start: { x: number; y: number },
-  end: { x: number; y: number },
-  id = createDraftId("hotspot"),
-): QuizEditorHotspotArea {
-  const minX = Math.min(start.x, end.x);
-  const minY = Math.min(start.y, end.y);
-  const maxX = Math.max(start.x, end.x);
-  const maxY = Math.max(start.y, end.y);
-  const width = Math.max(maxX - minX, 0.04);
-  const height = Math.max(maxY - minY, 0.04);
-
-  return {
-    id,
-    shape: "rect",
-    x: clampUnit(minX),
-    y: clampUnit(minY),
-    width: Math.min(width, 1 - clampUnit(minX)),
-    height: Math.min(height, 1 - clampUnit(minY)),
-    correct: true,
-  };
-}
-
-function LearnerDirectMatchEditor({
-  slide,
-  answerTextStyle,
-  onUpdateDragDropItems,
-}: {
-  slide: QuizEditorSlide;
-  answerTextStyle?: CSSProperties;
-  onUpdateDragDropItems?: (items: QuizEditorDragDropItem[]) => void;
-}) {
-  const { t } = useI18n();
-  const items = slide.dragDropItems?.length
-    ? slide.dragDropItems
-    : [
-        { id: createDraftId("item"), label: t("common.option"), emoji: "•", target: t("common.dropTarget") },
-      ];
-
-  function updateItem(itemId: string, patch: Partial<QuizEditorDragDropItem>) {
-    onUpdateDragDropItems?.(items.map((item) => (item.id === itemId ? { ...item, ...patch } : item)));
-  }
-
-  function removeItem(itemId: string) {
-    onUpdateDragDropItems?.(items.filter((item) => item.id !== itemId));
-  }
-
-  function addItem() {
-    onUpdateDragDropItems?.([
-      ...items,
-      {
-        id: createDraftId("item"),
-        label: `${t("common.option")} ${items.length + 1}`,
-        emoji: "•",
-        target: t("common.dropTarget"),
-      },
-    ]);
-  }
-
-  return (
-    <Box className="classic-editor__learner-direct-match">
-      <Box className="classic-editor__learner-direct-match-head">
-        <Typography component="span" variant="caption">
-          {t("common.dragItem")}
-        </Typography>
-        <Typography component="span" variant="caption" aria-hidden="true">
-          =
-        </Typography>
-        <Typography component="span" variant="caption">
-          {t("common.dropTarget")}
-        </Typography>
-      </Box>
-      {items.map((item) => (
-        <Box key={item.id} className="classic-editor__learner-direct-match-row">
-          <Box className="classic-editor__learner-direct-drag-card">
-            <Typography component="span" variant="caption" className="classic-editor__learner-direct-field-label">
-              {t("common.dragItem")}
-            </Typography>
-            {item.media?.src ? (
-              <Box className="classic-editor__learner-inline-media-frame">
-                <img
-                  className="classic-editor__learner-inline-image"
-                  src={item.media.src}
-                  alt={item.media.alt || item.label}
-                />
-              </Box>
-            ) : null}
-            <BufferedInput
-              value={item.emoji}
-              maxLength={3}
-              onCommit={(value) => updateItem(item.id, { emoji: value })}
-              aria-label="Icon"
-            />
-            <BufferedTextarea
-              value={item.label}
-              rows={1}
-              className="classic-editor__learner-direct-textarea"
-              style={answerTextStyle}
-              onCommit={(value) => updateItem(item.id, { label: value })}
-              mediaTarget={{ kind: "drag-item", id: item.id, field: "label" }}
-              aria-label={t("common.dragItem")}
-            />
-          </Box>
-          <Typography className="classic-editor__learner-direct-equals" component="span" aria-hidden="true">
-            =
-          </Typography>
-          <Box className="classic-editor__learner-direct-target-card">
-            <Typography component="span" variant="caption" className="classic-editor__learner-direct-field-label">
-              {t("common.dropTarget")}
-            </Typography>
-            {item.targetMedia?.src ? (
-              <Box className="classic-editor__learner-inline-media-frame">
-                <img
-                  className="classic-editor__learner-inline-image"
-                  src={item.targetMedia.src}
-                  alt={item.targetMedia.alt || item.target}
-                />
-              </Box>
-            ) : null}
-            <BufferedTextarea
-              className="classic-editor__learner-direct-target classic-editor__learner-direct-textarea"
-              value={item.target}
-              rows={1}
-              style={answerTextStyle}
-              onCommit={(value) => updateItem(item.id, { target: value })}
-              mediaTarget={{ kind: "drag-item", id: item.id, field: "target" }}
-              aria-label={t("common.dropTarget")}
-            />
-          </Box>
-          <Tooltip title={t("common.remove")} arrow placement="left">
-            <IconButton
-              type="button"
-              size="small"
-              className="classic-editor__learner-direct-remove"
-              onClick={() => removeItem(item.id)}
-              aria-label={t("common.remove")}
-            >
-              <CloseRoundedIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-      ))}
-      <Button
-        type="button"
-        className="classic-editor__learner-direct-add"
-        onClick={addItem}
-        startIcon={<AddRoundedIcon />}
-        variant="text"
-      >
-        {t("common.dragItem")}
-      </Button>
-    </Box>
-  );
-}
-
 type BufferedTextProps = {
   value: string;
   onCommit: (value: string) => void;
@@ -872,41 +579,15 @@ type BufferedTextProps = {
   style?: CSSProperties;
   rows?: number;
   maxLength?: number;
+  placeholder?: string;
   mediaTarget?: {
     kind: "choice" | "drag-item";
     id: string;
     field?: "label" | "target";
   };
+  onFocusTarget?: () => void;
   "aria-label"?: string;
 };
-
-function BufferedInput({
-  value,
-  onCommit,
-  className,
-  style,
-  maxLength,
-  mediaTarget,
-  "aria-label": ariaLabel,
-}: BufferedTextProps) {
-  const { draft, handleBlur, handleChange, handleFocus } = useBufferedText(value, onCommit);
-
-  return (
-    <input
-      className={className}
-      value={draft}
-      style={style}
-      maxLength={maxLength}
-      data-media-target-kind={mediaTarget?.kind}
-      data-media-target-id={mediaTarget?.id}
-      data-media-target-field={mediaTarget?.field}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      onChange={(event) => handleChange(event.target.value)}
-      aria-label={ariaLabel}
-    />
-  );
-}
 
 function BufferedTextarea({
   value,
@@ -914,7 +595,9 @@ function BufferedTextarea({
   className,
   style,
   rows,
+  placeholder,
   mediaTarget,
+  onFocusTarget,
   "aria-label": ariaLabel,
 }: BufferedTextProps) {
   const { draft, handleBlur, handleChange, handleFocus } = useBufferedText(value, onCommit);
@@ -930,7 +613,11 @@ function BufferedTextarea({
       data-media-target-kind={mediaTarget?.kind}
       data-media-target-id={mediaTarget?.id}
       data-media-target-field={mediaTarget?.field}
-      onFocus={handleFocus}
+      placeholder={placeholder}
+      onFocus={() => {
+        onFocusTarget?.();
+        handleFocus();
+      }}
       onBlur={handleBlur}
       onChange={(event) => handleChange(event.target.value)}
       aria-label={ariaLabel}
@@ -1011,10 +698,7 @@ function buildLearnerQuestion(
   const feedback = buildFeedback(slide, t);
   const points = extractCorrectScore(slide);
   const contentImage = slide.media
-    ? {
-        url: slide.media.src,
-        alt: slide.media.alt,
-      }
+    ? undefined
     : undefined;
   const base = {
     id: slide.id,
@@ -1039,12 +723,18 @@ function buildLearnerQuestion(
         kind: "multiple_response",
         choices: normalizeChoices(slide.choices, t),
       };
-    case "drag-and-drop":
     case "matching":
       return {
         ...base,
         kind: "matching",
         matching: buildMatchingPairs(slide, t),
+      };
+    case "drag-and-drop":
+      return {
+        ...base,
+        kind: "drag_drop",
+        dropTargets: buildDragDropTargets(slide),
+        dragDropItems: buildDragDropItems(slide, t),
       };
     case "sequence":
       return {
@@ -1056,22 +746,48 @@ function buildLearnerQuestion(
         })),
       };
     case "fill-in-the-blanks":
+      return {
+        ...base,
+        kind: "fill_blank",
+        textBlanks: buildTextBlanks(slide, t),
+      };
     case "select-from-lists":
+      return {
+        ...base,
+        kind: "select_from_lists",
+        inlineBlanks: buildInlineBlanks(slide, t),
+      };
     case "drag-the-words":
+      return {
+        ...base,
+        kind: "drag_words",
+        wordBank: buildWordBank(slide, t),
+        wordSlots: buildWordSlots(slide, t),
+      };
     case "short-answer":
+      return {
+        ...base,
+        kind: "short_answer",
+        textBlanks: buildTextBlanks(slide, t),
+      };
     case "numeric":
+      return {
+        ...base,
+        kind: "numeric",
+        numericAnswer: buildNumericAnswer(slide),
+      };
     case "essay":
+      return {
+        ...base,
+        kind: "essay",
+        essayRubric: buildEssayRubric(slide, t),
+      };
     case "likert-scale":
       return {
         ...base,
-        kind: "inline_choice",
-        inlineBlanks: normalizeChoices(slide.choices, t).map((choice, index) => ({
-          id: choice.id,
-          statement: choice.label || `${t("common.option")} ${index + 1}`,
-          options: ["yes", "no"],
-          correctOptionId: choice.correct ? "yes" : "no",
-          selectPosition: "before",
-        })),
+        kind: "likert_scale",
+        likertRows: buildLikertRows(slide, t),
+        likertScale: buildLikertScale(),
       };
     case "hotspot":
       return {
@@ -1119,6 +835,99 @@ function normalizeChoices(
   }));
 }
 
+function buildTextBlanks(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  return normalizeChoices(slide.choices, t)
+    .filter((choice) => slide.kind !== "short-answer" || choice.correct)
+    .map((choice, index) => ({
+      id: choice.id || `${slide.id}-blank-${index + 1}`,
+      label: slide.kind === "fill-in-the-blanks" ? `Blank ${index + 1}` : "Answer",
+      placeholder: "......",
+      correctAnswers: [choice.label || `${t("common.option")} ${index + 1}`],
+    }));
+}
+
+function buildInlineBlanks(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  return normalizeChoices(slide.choices, t).map((choice, index) => ({
+    id: choice.id,
+    statement: choice.label || `${t("common.option")} ${index + 1}`,
+    options: ["yes", "no"],
+    correctOptionId: choice.correct ? "yes" : "no",
+    selectPosition: "after" as const,
+  }));
+}
+
+function buildWordBank(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const choices = normalizeChoices(slide.choices, t);
+  return choices.map((choice, index) => ({
+    id: choice.id || `${slide.id}-word-${index + 1}`,
+    label: choice.label || `${t("common.option")} ${index + 1}`,
+  }));
+}
+
+function buildWordSlots(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const bank = buildWordBank(slide, t);
+  const source = bank.length ? bank : [{ id: `${slide.id}-word-1`, label: t("common.option") }];
+
+  return source.slice(0, Math.max(1, Math.min(2, source.length))).map((word, index) => ({
+    id: `${slide.id}-slot-${index + 1}`,
+    label: index === 0 ? "Fill the blank with" : "then choose",
+    correctWordId: word.id,
+  }));
+}
+
+function buildNumericAnswer(slide: QuizEditorSlide) {
+  const rawValue = slide.choices?.find((choice) => choice.correct)?.label ?? slide.choices?.[0]?.label ?? "0";
+  const parsedValue = Number.parseFloat(rawValue.replace(/[^\d.-]/g, ""));
+
+  return {
+    correctValue: Number.isFinite(parsedValue) ? parsedValue : 0,
+    tolerance: 0,
+    unit: "",
+  };
+}
+
+function buildEssayRubric(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const choices = normalizeChoices(slide.choices, t);
+  return choices.map((choice, index) => ({
+    id: choice.id || `${slide.id}-rubric-${index + 1}`,
+    label: choice.label || `${t("common.option")} ${index + 1}`,
+    points: index === 0 ? Math.max(1, extractCorrectScore(slide)) : 1,
+  }));
+}
+
+function buildLikertRows(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  return normalizeChoices(slide.choices, t).map((choice, index) => ({
+    id: choice.id || `${slide.id}-likert-row-${index + 1}`,
+    label: choice.label || `${t("common.option")} ${index + 1}`,
+  }));
+}
+
+function buildLikertScale() {
+  return [
+    { id: "scale-1", label: "Low", value: 1 },
+    { id: "scale-2", label: "Medium", value: 2 },
+    { id: "scale-3", label: "High", value: 3 },
+  ];
+}
+
 function buildMatchingPairs(
   slide: QuizEditorSlide,
   t: ReturnType<typeof useI18n>["t"],
@@ -1126,8 +935,20 @@ function buildMatchingPairs(
   if (slide.dragDropItems?.length) {
     return slide.dragDropItems.map((item, index) => ({
       id: item.id || `match-${index + 1}`,
-      prompt: `${item.emoji ? `${item.emoji} ` : ""}${item.label}`,
-      response: item.target || t("common.dropTarget"),
+      prompt: item.target || t("common.dropTarget"),
+      response: item.label || t("common.dragItem"),
+      promptImage: item.targetMedia?.src
+        ? {
+            url: item.targetMedia.src,
+            alt: item.targetMedia.alt || item.target,
+          }
+        : undefined,
+      responseImage: item.media?.src
+        ? {
+            url: item.media.src,
+            alt: item.media.alt || item.label,
+          }
+        : undefined,
     }));
   }
 
@@ -1136,6 +957,53 @@ function buildMatchingPairs(
     prompt: choice.label,
     response: choice.correct ? t("common.correct") : t("common.incorrect"),
   }));
+}
+
+function buildDragDropTargets(slide: QuizEditorSlide) {
+  const targetLabels = Array.from(
+    new Set((slide.dragDropItems ?? []).map((item) => normalizeTargetLabel(item.target))),
+  );
+  const source = targetLabels.length ? targetLabels : ["Vùng thả 1"];
+
+  return source.map((label, index) => ({
+    id: createDragDropTargetId(label, index),
+    label,
+  }));
+}
+
+function buildDragDropItems(
+  slide: QuizEditorSlide,
+  t: ReturnType<typeof useI18n>["t"],
+) {
+  const targets = buildDragDropTargets(slide);
+  const targetIdByLabel = new Map(targets.map((target) => [target.label, target.id]));
+  const source = slide.dragDropItems?.length
+    ? slide.dragDropItems
+    : [{ id: "drag-item-1", label: t("common.dragItem"), emoji: "", target: targets[0]?.label ?? "Vùng thả 1" }];
+
+  return source.map((item, index) => {
+    const targetLabel = normalizeTargetLabel(item.target);
+    return {
+      id: item.id || `drag-item-${index + 1}`,
+      label: item.label || `${t("common.dragItem")} ${index + 1}`,
+      correctTargetId: targetIdByLabel.get(targetLabel) ?? targets[0]?.id ?? "drop-target-1",
+    };
+  });
+}
+
+function normalizeTargetLabel(target: string | undefined) {
+  return target?.trim() || "Vùng thả 1";
+}
+
+function createDragDropTargetId(label: string, index: number) {
+  const slug = label
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  return `drop-target-${slug || index + 1}`;
 }
 
 function buildFeedback(slide: QuizEditorSlide, t: ReturnType<typeof useI18n>["t"]) {
@@ -1243,30 +1111,6 @@ function updateFeedbackText(
 
 function isInstructionLikeSlide(kind: QuizEditorSlide["kind"]) {
   return kind === "instruction-slide" || kind === "intro-slide" || kind === "info-slide" || kind === "user-info";
-}
-
-function isChoiceAuthoringSlide(kind: QuizEditorSlide["kind"]) {
-  return (
-    kind === "multiple-choice" ||
-    kind === "multiple-response" ||
-    kind === "true-false" ||
-    kind === "sequence" ||
-    kind === "fill-in-the-blanks" ||
-    kind === "select-from-lists" ||
-    kind === "drag-the-words" ||
-    kind === "short-answer" ||
-    kind === "numeric" ||
-    kind === "essay" ||
-    kind === "likert-scale"
-  );
-}
-
-function createDraftId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
-}
-
-function clampUnit(value: number) {
-  return Math.min(Math.max(value, 0), 1);
 }
 
 function extractCorrectScore(slide: QuizEditorSlide) {

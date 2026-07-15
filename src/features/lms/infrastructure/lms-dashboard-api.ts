@@ -6,6 +6,7 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import type { DashboardUserPermissions, ManagementScope } from "@/types/scope-types";
 
 type EducationUnitType = "system" | "school" | "center";
@@ -86,8 +87,8 @@ type SessionCurrentResponseDTO = {
 };
 
 const SESSION_BOOTSTRAP_CACHE_MS = 60_000;
-let currentSessionBootstrapCache: { data: SessionCurrentResponseDTO; expiresAt: number } | null = null;
-let currentSessionBootstrapRequest: Promise<SessionCurrentResponseDTO> | null = null;
+let currentSessionBootstrapCache: { data: SessionCurrentResponseDTO; expiresAt: number; scopeKey: string } | null = null;
+let currentSessionBootstrapRequest: { promise: Promise<SessionCurrentResponseDTO>; scopeKey: string } | null = null;
 
 export type LmsDashboardBootstrap = {
   classes: ClassroomSnapshot[];
@@ -122,27 +123,43 @@ export async function loadCurrentSessionBootstrap() {
   }
 
   const now = Date.now();
-  if (currentSessionBootstrapCache && currentSessionBootstrapCache.expiresAt > now) {
+  const scopeKey = sessionBootstrapScopeKey();
+  if (currentSessionBootstrapCache?.scopeKey === scopeKey && currentSessionBootstrapCache.expiresAt > now) {
     return currentSessionBootstrapCache.data;
   }
 
-  if (currentSessionBootstrapRequest) {
-    return currentSessionBootstrapRequest;
+  if (currentSessionBootstrapRequest?.scopeKey === scopeKey) {
+    return currentSessionBootstrapRequest.promise;
   }
 
-  currentSessionBootstrapRequest = apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current")
+  const request = apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current")
     .then((data) => {
       currentSessionBootstrapCache = {
         data,
         expiresAt: Date.now() + SESSION_BOOTSTRAP_CACHE_MS,
+        scopeKey,
       };
       return data;
     })
     .finally(() => {
-      currentSessionBootstrapRequest = null;
+      if (currentSessionBootstrapRequest?.scopeKey === scopeKey) {
+        currentSessionBootstrapRequest = null;
+      }
     });
 
-  return currentSessionBootstrapRequest;
+  currentSessionBootstrapRequest = { promise: request, scopeKey };
+  return request;
+}
+
+function sessionBootstrapScopeKey() {
+  const portal = resolveCurrentPortal();
+  const session = readStoredAuthSession(portal) as { accountId?: string; accessToken?: string; portal?: string } | null;
+  return [portal, session?.portal ?? "unknown", session?.accountId ?? "anonymous", tokenFingerprint(session?.accessToken)].join(":");
+}
+
+function tokenFingerprint(token?: string) {
+  if (!token) return "no-token";
+  return token.slice(-12);
 }
 
 export async function listManageableUnits() {
@@ -154,29 +171,21 @@ export async function listManageableUnits() {
   return session ? normalizeManageableUnits(session) : [];
 }
 
-export async function listEducationUnits(params: Record<string, string | number | undefined> = {}) {
+export async function listEducationUnits(
+  params: Record<string, string | number | undefined> = {},
+): Promise<ListResponse<LmsEducationUnitDTO>> {
   if (!hasApiBase()) {
     const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
     return { items, source: "mock", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
   }
 
-  try {
-    const session = await loadCurrentSessionBootstrap();
-    if (!session) {
-      const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
-      return { items, source: "mock", sourceError: "Session bootstrap is empty.", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
-    }
-
-    const items = filterEducationUnits(normalizeManageableUnits(session), params);
-    return { items, source: "api", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
-  } catch (error) {
-    const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
-    const sourceError = error instanceof Error ? error.message : "Cannot load education units from API.";
-
-    console.warn("[LMS] Falling back to mock education units.", error);
-
-    return { items, source: "mock", sourceError, total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
+  const session = await loadCurrentSessionBootstrap();
+  if (!session) {
+    throw new Error("Session bootstrap is empty.");
   }
+
+  const items = filterEducationUnits(normalizeManageableUnits(session), params);
+  return { items, source: "api", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
 }
 
 function filterEducationUnits(units: LmsEducationUnitDTO[], params: Record<string, string | number | undefined>) {
@@ -194,7 +203,7 @@ export async function loadLmsDashboardBootstrap(): Promise<LmsDashboardBootstrap
   if (!hasApiBase()) return mockBootstrap();
 
   const session = await loadCurrentSessionBootstrap();
-  if (!session) return mockBootstrap();
+  if (!session) throw new Error("Session bootstrap is empty.");
 
   const educationUnits = uniqueUnits(normalizeManageableUnits(session));
   const systemUnits = educationUnits.filter(isSystemUnit);
@@ -209,6 +218,9 @@ export async function loadLmsDashboardBootstrap(): Promise<LmsDashboardBootstrap
     permissions: {
       canAccessGlobalErg: hasSystemScope(session, systemUnits),
       assignedCenterIds: schoolUnits.map((unit) => unit.id),
+      roles: [...session.permissions.roles],
+      grantedPermissions: [...session.permissions.grantedPermissions],
+      deniedPermissions: [...session.permissions.deniedPermissions],
     },
     schools,
     systemUnits,
@@ -266,6 +278,9 @@ function mockBootstrap(): LmsDashboardBootstrap {
     permissions: {
       canAccessGlobalErg: true,
       assignedCenterIds: classroomSchools.map((school) => school.id),
+      roles: ["teacher", "lms_teacher_standard"],
+      grantedPermissions: ["lms.*", "account.self.*"],
+      deniedPermissions: [],
     },
     schools: classroomSchools,
     systemUnits: [
@@ -322,7 +337,7 @@ function normalizeManageableClasses(
 }
 
 function isSystemUnit(unit: LmsEducationUnitDTO) {
-  return unit.type === "system" || unit.code === "ERG-SYSTEM" || unit.code === "HOCLIEU-STUDIO";
+  return unit.type === "system" || unit.code === "ERG-SYSTEM" || unit.code === "CONTENT-STUDIO";
 }
 
 function hasSystemScope(scope: SessionCurrentResponseDTO | undefined, systemUnits: LmsEducationUnitDTO[] = []) {
@@ -436,8 +451,8 @@ function normalizeUnitType(value: string | undefined): EducationUnitType | strin
 function getKnownUnitCode(id: string, name: string, type: string | undefined) {
   const normalizedName = name.toLowerCase();
   if (id === "system" || (type === "system" && normalizedName.includes("hệ thống erg"))) return "ERG-SYSTEM";
-  if (id === "ctr_hoclieu_001" || normalizedName.includes("học liệu studio") || normalizedName.includes("hoclieu studio")) {
-    return "HOCLIEU-STUDIO";
+  if (id === "ctr_content_001" || normalizedName.includes("content studio")) {
+    return "CONTENT-STUDIO";
   }
   return undefined;
 }

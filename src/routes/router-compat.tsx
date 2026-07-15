@@ -26,13 +26,14 @@ type LinkProps = Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href"> & {
 export { Outlet };
 
 export function useLocation(): LocationLike {
-  return useRouterState({
-    select: (state) => ({
-      hash: state.location.hash,
-      pathname: state.location.pathname,
-      search: state.location.searchStr,
-    }),
+  const locationKey = useRouterState({
+    select: (state) => `${state.location.pathname}\u0000${state.location.searchStr}\u0000${state.location.hash}`,
   });
+
+  return React.useMemo(() => {
+    const [pathname = "/", search = "", hash = ""] = locationKey.split("\u0000");
+    return { hash, pathname, search };
+  }, [locationKey]);
 }
 
 export function useNavigate() {

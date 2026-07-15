@@ -21,9 +21,9 @@ import {
   ShieldAlert
 } from "@/components/mui-icon-shim";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import Avatar from "@mui/material/Avatar";
+import Chip from "@mui/material/Chip";
+import Skeleton from "@mui/material/Skeleton";
 import type {
   AccessManagedUser,
   AccessModule,
@@ -93,11 +93,14 @@ export function MemberRow({ active, user, onClick }: { active: boolean; user: Ac
       )}
       onClick={onClick}
     >
-      <Avatar className="size-10 rounded-lg shadow-sm border border-slate-100 shrink-0">
-        <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-        <AvatarFallback className="rounded-lg bg-blue-50 text-xs font-bold text-[var(--erg-blue)] shadow-inner">
-          {initials(user.fullName || user.email)}
-        </AvatarFallback>
+      <Avatar
+        src={user.avatarUrl}
+        alt={user.fullName}
+        variant="rounded"
+        className="size-10 shadow-sm border border-slate-100 shrink-0"
+        sx={{ bgcolor: "#eff6ff", color: "var(--erg-blue)", fontSize: 12, fontWeight: 700 }}
+      >
+        {initials(user.fullName || user.email)}
       </Avatar>
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
@@ -152,16 +155,19 @@ export function MemberDetailHeader({
     <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex min-w-0 items-start gap-4">
-          <Avatar className="size-14 rounded-xl shadow border border-slate-100 shrink-0">
-            <AvatarImage src={user.avatarUrl} alt={user.fullName} />
-            <AvatarFallback className="rounded-xl bg-blue-50 text-base font-bold text-[var(--erg-blue)]">
-              {initials(user.fullName || user.email)}
-            </AvatarFallback>
+          <Avatar
+            src={user.avatarUrl}
+            alt={user.fullName}
+            variant="rounded"
+            className="size-14 shadow border border-slate-100 shrink-0"
+            sx={{ bgcolor: "#eff6ff", color: "var(--erg-blue)", fontSize: 16, fontWeight: 700 }}
+          >
+            {initials(user.fullName || user.email)}
           </Avatar>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="truncate text-base font-bold text-slate-800">{user.fullName || user.email}</h3>
-              {superAdmin && <Badge className="rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-100 text-[10px] font-bold">Super Admin</Badge>}
+              {superAdmin && <Chip label="Super Admin" size="small" className="rounded-lg bg-amber-100 text-amber-800 text-[10px] font-bold" />}
               <span className={cn("rounded-lg border px-2.5 py-0.5 text-[10px] font-bold shadow-inner", statusColor)}>
                 {statusLabel(user.status)}
               </span>
@@ -737,9 +743,7 @@ function PolicyRow({
         <p className="truncate text-xs font-bold text-slate-800">{role?.name ?? policy.roleGroup}</p>
         <div className="mt-2 flex flex-wrap gap-1">
           {policy.modules.map((moduleId) => (
-            <Badge key={moduleId} variant="outline" className="rounded bg-white text-[9px] font-bold py-0.5 border-slate-200">
-              {modules.find((module) => module.id === moduleId)?.name ?? moduleId}
-            </Badge>
+            <Chip key={moduleId} variant="outlined" size="small" label={modules.find((module) => module.id === moduleId)?.name ?? moduleId} className="rounded bg-white text-[9px] font-bold py-0.5 border-slate-200" />
           ))}
         </div>
       </div>

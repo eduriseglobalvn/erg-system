@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, Maximize2, ZoomIn, ZoomOut } from "lucide-react";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import Skeleton from "@mui/material/Skeleton";
 import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 import type {
   LearningResourceResource,
@@ -427,12 +427,12 @@ export function PdfFullScreenPreview({ resource, onClose }: { resource: Learning
         <div className="h-[calc(100vh-48px)] overflow-y-auto bg-[#f8fbff] px-4 py-6">
           {renderState === "loading" ? (
             <div className="mx-auto mb-6 grid max-w-[980px] gap-4 rounded-lg border border-[#cbd7e6] bg-white p-5 shadow-sm" aria-hidden="true">
-              <Skeleton className="h-5 w-48" />
-              <Skeleton className="h-[520px] w-full rounded-lg" />
+              <Skeleton variant="rectangular" sx={{ height: 20, width: 192, borderRadius: "6px" }} />
+              <Skeleton variant="rectangular" sx={{ height: 520, width: "100%", borderRadius: "8px" }} />
               <div className="grid gap-3 sm:grid-cols-3">
-                <Skeleton className="h-3" />
-                <Skeleton className="h-3" />
-                <Skeleton className="h-3" />
+                <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
+                <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
+                <Skeleton variant="rectangular" sx={{ height: 12, borderRadius: "6px" }} />
               </div>
             </div>
           ) : null}

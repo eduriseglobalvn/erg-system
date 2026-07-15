@@ -1,7 +1,7 @@
 import { useState, memo, type ReactNode } from "react";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import { LmsSelect } from "@/components/ui/lms-select";
 import { cn } from "@/lib/utils";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
@@ -63,11 +63,16 @@ export function AttendancePanel({
           </div>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--primary)]" />
-            <Input
+            <TextField
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Tìm học sinh"
-              className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-[var(--card)]"
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiInputBase-root": { height: 40, bgcolor: "white", borderRadius: "8px" },
+                "& .MuiInputBase-input": { pl: "36px", fontSize: "14px", fontWeight: 600 },
+              }}
             />
           </div>
           <LmsSelect className="h-9 min-w-[150px] text-[13px]">
@@ -83,8 +88,11 @@ export function AttendancePanel({
             <option>Sáng</option>
             <option>Chiều</option>
           </LmsSelect>
-          <Button variant="outline">Xuất dữ liệu</Button>
-          <Button className="h-10 rounded-[10px] px-3 text-[14px] font-bold bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white border-0">
+          <Button variant="outlined">Xuất dữ liệu</Button>
+          <Button
+            variant="contained"
+            sx={{ height: 40, borderRadius: "10px", px: 1.5, fontSize: "14px", fontWeight: 700 }}
+          >
             Lưu điểm danh
           </Button>
         </div>

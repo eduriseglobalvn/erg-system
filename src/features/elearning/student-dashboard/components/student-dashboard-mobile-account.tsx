@@ -1,9 +1,9 @@
 import { User as AccountCircleOutlinedIcon } from "lucide-react";
 import { LogIn as LoginOutlinedIcon } from "lucide-react";
 import { LogOut as LogoutOutlinedIcon } from "lucide-react";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import type { ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
@@ -74,12 +74,20 @@ export function StudentDashboardMobileAccount({
           </div>
 
           <div className="mt-4 grid gap-3">
-            <Button className="h-11 rounded-lg bg-[#696CFF] text-white hover:bg-[#585BE0]" onClick={onSignIn}>
-              <LoginOutlinedIcon size={16} />
+            <Button
+              variant="contained"
+              startIcon={<LoginOutlinedIcon size={16} />}
+              className="h-11 rounded-lg bg-[#696CFF] text-white hover:bg-[#585BE0]"
+              onClick={onSignIn}
+            >
               {copy.signIn}
             </Button>
-            <Button variant="outline" className="h-11 rounded-lg border-slate-200 bg-white text-slate-700" onClick={onSignOut}>
-              <LogoutOutlinedIcon size={16} />
+            <Button
+              variant="outlined"
+              startIcon={<LogoutOutlinedIcon size={16} />}
+              className="h-11 rounded-lg border-slate-200 bg-white text-slate-700"
+              onClick={onSignOut}
+            >
               {copy.signOut}
             </Button>
           </div>

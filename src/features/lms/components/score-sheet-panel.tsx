@@ -1,6 +1,6 @@
-import { useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Button, Chip, Menu, MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
-import { Add, Check, Download, FilterList, Lock, Search } from "@mui/icons-material";
+import { Add, Check, FilterList, Lock, Search } from "@mui/icons-material";
 import { toast } from "sonner";
 
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
@@ -28,15 +28,6 @@ type ScoreAttempt = {
 export type Classification = "A" | "B" | "C" | "D" | "E";
 type ClassificationSort = "asc" | "desc" | null;
 export type StudentState = "active" | "disabled";
-
-type ClassificationLog = {
-  id: string;
-  at: string;
-  by: string;
-  from: Classification;
-  to: Classification;
-  comment: string;
-};
 
 type ScoreSheetPanelProps = {
   selectedClass?: ClassroomSnapshot;
@@ -150,7 +141,7 @@ export function ScoreSheetPanel({ selectedClass, selectedSchoolName, students }:
 
   function saveClassificationChange() {
     if (!pendingClassification || !classificationComment.trim()) return;
-    const { student, from, to } = pendingClassification;
+    const { student, to } = pendingClassification;
     setManualClassifications((current) => ({ ...current, [student.id]: to }));
     setPendingClassification(null);
     setClassificationComment("");
@@ -667,7 +658,7 @@ function ClassificationChangeDialog({
           <Typography sx={{ fontSize: 13, color: "#6b7280", mt: 0.5 }}>{pending.student.name}</Typography>
         </div>
         <div style={{ padding: 16 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <Chip label={pending.from} sx={getClassificationChipSx(pending.from)} />
             <Typography sx={{ color: "#6b7280" }}>→</Typography>
             <Chip label={pending.to} sx={getClassificationChipSx(pending.to)} />

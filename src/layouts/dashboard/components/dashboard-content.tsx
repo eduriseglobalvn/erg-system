@@ -10,18 +10,20 @@ import { DashboardPlaceholderWorkspace } from "@/layouts/dashboard/components/da
 import { QuizEditorWorkspace } from "@/layouts/dashboard/components/quiz-editor-workspace";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { QuestionBankWorkspace } from "@/features/lcms/quiz/question-bank";
+import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { SeoCrmWorkspace } from "@/features/crm/seo";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
 
 export function DashboardContent({
   activeLeaf,
-  canAccessGlobalErg,
   contentScope,
   deniedSchoolName,
   managementScope,
   onOpenLeaf,
+  onOpenQuiz,
   pendingQuestionImports,
+  quizEditorQuizId,
   selectedClassId,
   selectedSchoolId,
   onQuestionImportsHandled,
@@ -33,11 +35,13 @@ export function DashboardContent({
   deniedSchoolName?: string;
   managementScope: ManagementScope;
   onOpenLeaf: (leafId: string) => void;
+  onOpenQuiz?: (quizId: string) => void;
   pendingQuestionImports: QuestionBankQuestion[];
+  quizEditorQuizId?: string | null;
   selectedClassId: string;
   selectedSchoolId: string;
   onQuestionImportsHandled: () => void;
-  onCreateQuizFromBank: (questions: QuestionBankQuestion[]) => void;
+  onCreateQuizFromBank: (questions: QuestionBankQuestion[], options?: CreateQuizFromBankOptions) => void;
 }) {
   if (deniedSchoolName) {
     return <AccessDeniedWorkspace deniedSchoolName={deniedSchoolName} />;
@@ -62,6 +66,7 @@ export function DashboardContent({
       <Box sx={{ bgcolor: "background.default", flex: 1, height: "100%", minHeight: 0, minWidth: 0, overflow: "hidden", pl: 0.5 }}>
         <QuizEditorWorkspace
           activeLeaf={activeLeaf}
+          quizId={quizEditorQuizId}
           pendingImportedQuestions={pendingQuestionImports}
           onImportedQuestionsHandled={onQuestionImportsHandled}
         />
@@ -97,9 +102,9 @@ export function DashboardContent({
     return (
       <QuestionBankWorkspace
         activeLeaf={activeLeaf}
-        canManageGlobalContent={canAccessGlobalErg}
         contentScope={contentScope}
         onCreateQuiz={onCreateQuizFromBank}
+        onOpenQuiz={onOpenQuiz}
       />
     );
   }

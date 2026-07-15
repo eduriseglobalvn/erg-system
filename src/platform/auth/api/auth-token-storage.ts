@@ -1,15 +1,14 @@
-import {
-  getPersistedJsonValue,
-  removePersistedJsonValue,
-  setPersistedJsonValue,
-} from "@/stores/persisted-store";
+import { getPersistedJsonValue, removePersistedJsonValue } from "@/stores/persisted-store";
 
 export type StoredAuthSession = {
   accessToken?: string;
   loggedInAt?: string;
   refreshToken?: string;
+  tenantId?: string;
   expiresAt?: string;
   permissions?: string[];
+  deniedPermissions?: string[];
+  roles?: string[];
   portal?: "admin" | "crm" | "lcms" | "lms" | "elearning";
   portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
 };
@@ -23,7 +22,6 @@ export const TEACHER_LOCAL_SESSION_KEY = "erg-learning.session";
 export const TEACHER_TEMP_SESSION_KEY = "erg-learning.session.temp";
 export const STUDENT_LOCAL_SESSION_KEY = "erg-learning.student-session";
 export const STUDENT_TEMP_SESSION_KEY = "erg-learning.student-session.temp";
-const MERGED_TEACHER_PORTALS = ["lms", "lcms"] as const;
 export const AUTH_SESSION_FALLBACK_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
 let teacherSessionSnapshot: StoredAuthIdentity | null = null;
@@ -81,18 +79,17 @@ export function readStoredAuthSession(portal?: StoredAuthSession["portal"]): Sto
 
   const teacherSessions = [
     teacherSessionSnapshot,
-    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
+    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
+    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
+    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    getPersistedJsonValue<StoredAuthSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
+    legacyPersistentSession<StoredAuthSession>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
   ].filter(hasStoredAuthCredential);
 
   const studentSessions = [
-    getPersistedJsonValue<StoredAuthSession | null>(STUDENT_LOCAL_SESSION_KEY, null),
     parseJson<StoredAuthSession | null>(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY), null),
   ].filter(hasStoredAuthCredential);
 
@@ -175,18 +172,7 @@ function sessionMatchesPortal(session: StoredAuthSession, portal: Exclude<NonNul
   const portals = session.portals ?? [];
   if (portals.includes("*") || portals.includes(portal)) return true;
 
-  return isMergedTeacherPortal(portal) && hasMergedTeacherPortalAccess(session);
-}
-
-function hasMergedTeacherPortalAccess(session: StoredAuthSession) {
-  if (session.portal && isMergedTeacherPortal(session.portal)) return true;
-
-  const portals = session.portals ?? [];
-  return portals.some(isMergedTeacherPortal);
-}
-
-function isMergedTeacherPortal(portal: StoredAuthSession["portal"] | "*"): portal is (typeof MERGED_TEACHER_PORTALS)[number] {
-  return MERGED_TEACHER_PORTALS.includes(portal as (typeof MERGED_TEACHER_PORTALS)[number]);
+  return false;
 }
 
 function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredAuthIdentity | null {
@@ -195,13 +181,13 @@ function readRawStoredAuthSession(portal?: StoredAuthSession["portal"]): StoredA
   const targetPortal = portal ?? resolveCurrentPortal();
   const candidates = [
     teacherSessionSnapshot,
-    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
+    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
+    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
+    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    getPersistedJsonValue<StoredAuthIdentity | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
+    legacyPersistentSession<StoredAuthIdentity>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms")),
     parseJson<StoredAuthIdentity | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
   ].filter((session): session is StoredAuthIdentity => Boolean(session?.accountId));
 
@@ -220,14 +206,13 @@ function writeRawStoredAuthSession(session: StoredAuthIdentity) {
   const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
   const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
 
-  if (session.rememberMe) {
-    setPersistedJsonValue(localKey, session);
-    window.sessionStorage.removeItem(tempKey);
-    return;
-  }
-
   window.sessionStorage.setItem(tempKey, JSON.stringify(session));
   removePersistedJsonValue(localKey);
+}
+
+function legacyPersistentSession<T>(key: string): T | null {
+  if (import.meta.env.VITE_AUTH_MODE === "oidc-bff") return null;
+  return getPersistedJsonValue<T | null>(key, null);
 }
 
 function readSessionExpiry(session: StoredAuthSession) {

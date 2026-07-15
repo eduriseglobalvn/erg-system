@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { BookOpenCheck, Clock3, Copy, Eye, FileQuestion, Filter, ListChecks, Plus, Search, Send } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Button from "@mui/material/Button";
+import Chip, { type ChipProps } from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
@@ -169,6 +169,29 @@ const difficultyTones: Record<ExerciseDifficulty, "secondary" | "warning" | "dan
   hard: "danger",
 };
 
+type BadgeTone = "success" | "warning" | "danger" | "secondary" | "primary" | "default" | "info" | "outline";
+
+function chipPropsForTone(tone: BadgeTone): Pick<ChipProps, "color" | "variant"> {
+  switch (tone) {
+    case "success":
+      return { color: "success" };
+    case "warning":
+      return { color: "warning" };
+    case "danger":
+      return { color: "error" };
+    case "secondary":
+      return { color: "secondary" };
+    case "info":
+      return { color: "info" };
+    case "outline":
+      return { variant: "outlined" };
+    case "primary":
+    case "default":
+    default:
+      return { color: "primary" };
+  }
+}
+
 function uniqueValues(key: "subject" | "level") {
   return Array.from(new Set(exercises.map((exercise) => exercise[key]))).sort();
 }
@@ -280,7 +303,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                     <h2 className="line-clamp-2 text-base font-extrabold leading-6 text-slate-950">{exercise.title}</h2>
                     <p className="mt-1 text-sm font-bold text-slate-500">{exercise.subject} · {exercise.level}</p>
                   </div>
-                  <Badge tone={statusTones[exercise.status]} className="shrink-0 tracking-normal normal-case">{statusLabels[exercise.status]}</Badge>
+                  <Chip label={statusLabels[exercise.status]} size="small" {...chipPropsForTone(statusTones[exercise.status])} sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{typeLabels[exercise.type]}</span>
@@ -369,13 +392,11 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
             <ExerciseBankStat icon={Filter} label="Đang hiện" value={String(totals.visible)} />
           </div>
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={onBack}>Về trang bài tập</Button>
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]">
-              <Copy className="h-3.5 w-3.5" />
+            <Button variant="outlined" sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onBack}>Về trang bài tập</Button>
+            <Button variant="outlined" startIcon={<Copy className="h-3.5 w-3.5" />} sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }}>
               Nhân bản
             </Button>
-            <Button className="h-9 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] hover:bg-[var(--erg-blue-hover)]">
-              <Plus className="h-3.5 w-3.5" />
+            <Button startIcon={<Plus className="h-3.5 w-3.5" />} variant="contained" sx={{ height: 36, borderRadius: "8px", px: 2, fontSize: "14px", bgcolor: "var(--erg-blue)", "&:hover": { bgcolor: "var(--erg-blue-hover)" } }}>
               Tạo bài mới
             </Button>
           </div>
@@ -386,11 +407,12 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
         <div className="grid gap-2 xl:grid-cols-[minmax(260px,1.4fr)_repeat(4,minmax(130px,0.65fr))_auto]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
+            <TextField
+              size="small"
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
-              className="h-10 rounded-lg border border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold text-slate-900 shadow-none focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               placeholder="Tìm tên bài, môn, cấp độ hoặc tag"
+              sx={{ "& .MuiInputBase-root": { height: 40, bgcolor: "white", borderRadius: "8px" }, "& .MuiInputBase-input": { pl: "36px", fontSize: "14px", fontWeight: 600 } }}
             />
           </div>
           <FilterSelect value={subjectFilter} onChange={setSubjectFilter} label="Tất cả môn" values={uniqueValues("subject")} />
@@ -409,7 +431,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
             values={["quiz", "practice", "project", "exam"]}
             labels={typeLabels}
           />
-          <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={clearFilters}>
+          <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={clearFilters}>
             Xóa lọc
           </Button>
         </div>
@@ -441,7 +463,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
         <div className="flex min-h-0 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
           <div className="flex shrink-0 items-center justify-between border-b border-[#dbe4f0] px-4 py-3">
             <h2 className="text-sm font-semibold text-slate-900">Danh sách bài tập</h2>
-            <Badge tone="secondary" className="tracking-normal normal-case">{filteredExercises.length} kết quả</Badge>
+            <Chip label={`${filteredExercises.length} kết quả`} size="small" {...chipPropsForTone("secondary")} sx={{ textTransform: "none", letterSpacing: "normal" }} />
           </div>
           <div className="min-h-0 flex-1 overflow-auto">
             <table className="erg-data-table min-w-[1040px] w-full border-collapse text-left text-[14px]">
@@ -484,7 +506,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-600">{typeLabels[exercise.type]}</td>
                       <td className="px-4 py-3">
-                        <Badge tone={difficultyTones[exercise.difficulty]} className="tracking-normal normal-case">{difficultyLabels[exercise.difficulty]}</Badge>
+                        <Chip label={difficultyLabels[exercise.difficulty]} size="small" {...chipPropsForTone(difficultyTones[exercise.difficulty])} sx={{ textTransform: "none", letterSpacing: "normal" }} />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-1.5 font-medium text-slate-700">
@@ -494,7 +516,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                         <div className="text-[13px] font-semibold text-slate-500">{exercise.questionCount} câu/nhiệm vụ</div>
                       </td>
                       <td className="px-4 py-3">
-                        <Badge tone={statusTones[exercise.status]} className="tracking-normal normal-case">{statusLabels[exercise.status]}</Badge>
+                        <Chip label={statusLabels[exercise.status]} size="small" {...chipPropsForTone(statusTones[exercise.status])} sx={{ textTransform: "none", letterSpacing: "normal" }} />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex justify-end gap-1.5">
@@ -541,7 +563,7 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
                     Cập nhật {new Date(selectedExercise.updatedAt).toLocaleDateString("vi-VN")}
                   </p>
                 </div>
-                <Badge tone={statusTones[selectedExercise.status]} className="shrink-0 tracking-normal normal-case">{statusLabels[selectedExercise.status]}</Badge>
+                <Chip label={statusLabels[selectedExercise.status]} size="small" {...chipPropsForTone(statusTones[selectedExercise.status])} sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-[13px]">
@@ -564,20 +586,22 @@ export function ExerciseBankPage({ onBack, onAssign }: { onBack: () => void; onA
               <h3 className="mb-2 text-[13px] font-bold text-slate-600">Tag nội dung</h3>
               <div className="flex flex-wrap gap-2">
                 {selectedExercise.tags.map((tag) => (
-                  <Badge key={tag} tone="outline" className="tracking-normal normal-case">
-                    {tag}
-                  </Badge>
+                  <Chip key={tag} label={tag} size="small" {...chipPropsForTone("outline")} sx={{ textTransform: "none", letterSpacing: "normal" }} />
                 ))}
               </div>
             </div>
           </div>
           <div className="shrink-0 space-y-2 border-t border-[#dbe4f0] p-4">
-            <Button className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)]" onClick={() => onAssign(selectedExercise.title)}>
-              <Send className="h-4 w-4" />
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<Send className="h-4 w-4" />}
+              sx={{ bgcolor: "var(--erg-blue)", "&:hover": { bgcolor: "var(--erg-blue-hover)" } }}
+              onClick={() => onAssign(selectedExercise.title)}
+            >
               Giao bài tập này
             </Button>
-            <Button variant="outline" className="w-full">
-              <Eye className="h-4 w-4" />
+            <Button variant="outlined" fullWidth startIcon={<Eye className="h-4 w-4" />}>
               Xem chi tiết
             </Button>
           </div>

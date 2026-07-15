@@ -7,7 +7,6 @@ import {
   Chip,
   Divider,
   IconButton,
-  List,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -31,6 +30,7 @@ import {
   markAllNotificationsRead,
   markNotificationRead,
   notificationQueryKeys,
+  resolveNotificationQueryScope,
   type LmsNotificationType,
   type NotificationFeedItem,
 } from "@/features/notifications/api/notification-api";
@@ -44,14 +44,15 @@ export function LmsNotificationCenter() {
   const shownToastRef = useRef<string | null>(null);
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
 
   const notificationsQuery = useQuery({
-    queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 5),
+    queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 5, notificationScope),
     queryFn: () => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 5 }),
     staleTime: 30_000,
   });
   const unreadCountQuery = useQuery({
-    queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL),
+    queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL, notificationScope),
     queryFn: () => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL),
     staleTime: 30_000,
   });
@@ -84,7 +85,7 @@ export function LmsNotificationCenter() {
   }, [newestSystemNotification?.id]);
 
   function invalidateNotificationQueries() {
-    void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL) });
+    void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL, notificationScope) });
   }
 
   function markAllAsRead() {
@@ -454,8 +455,9 @@ function showSystemToast(notification: NotificationFeedItem, onOpenDetail: (noti
             </Box>
             <Box sx={{ minWidth: 0, flex: 1 }}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 0.5 }}>
-                <Badge
+                <Chip
                   label="Hệ thống"
+                  size="small"
                   sx={{
                     fontSize: 11,
                     fontWeight: 600,

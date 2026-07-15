@@ -1,4 +1,4 @@
-import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
+import { apiRequest, getBackOfficePortal, hasApiBase } from "@/lib/api-client";
 import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-types";
 
 /**
@@ -10,8 +10,7 @@ export async function getCenters(): Promise<ClassroomSchool[]> {
     const data = await apiRequest<ClassroomSchool[]>("/api/v1/centers", { portal: getBackOfficePortal() });
     return data;
   } catch (error) {
-    console.error("[CentersAPI] Failed to fetch centers:", error);
-    // Return empty list on failure to prevent UI crashes
+    if (hasApiBase()) throw error;
     return [];
   }
 }

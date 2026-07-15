@@ -90,9 +90,15 @@ export const questionBankSubjects: QuestionBankSubject[] = [
     })),
     categories: ic3Categories,
   },
-  createLegacySubject("mathematics", "Toán học", ["Phân số", "Hình học", "Thống kê"]),
-  createLegacySubject("english", "Tiếng Anh", ["Reading", "Grammar", "Vocabulary"]),
-  createLegacySubject("science", "Khoa học", ["Sinh học", "Vật lý", "Trái đất"]),
+  createLeveledSubject("python", "Python", [
+    { id: "python-foundation", label: "Foundation", topics: ["Biến và kiểu dữ liệu", "Điều kiện", "Vòng lặp", "Hàm cơ bản", "Ôn tập Python foundation"] },
+    { id: "python-intermediate", label: "Intermediate", topics: ["List và dictionary", "Xử lý chuỗi", "Đọc ghi file", "Debug và test", "Mini project"] },
+  ]),
+  createLeveledSubject("mos", "MOS", [
+    { id: "mos-word", label: "Word Associate", topics: ["Định dạng văn bản", "Bảng và hình ảnh", "Tham chiếu và mail merge", "Ôn tập Word"] },
+    { id: "mos-excel", label: "Excel Associate", topics: ["Công thức cơ bản", "Bảng dữ liệu", "Biểu đồ", "Ôn tập Excel"] },
+    { id: "mos-powerpoint", label: "PowerPoint Associate", topics: ["Bố cục slide", "Transition và animation", "Trình chiếu", "Ôn tập PowerPoint"] },
+  ]),
 ];
 
 const ic3QuestionBlueprints: Array<{
@@ -261,16 +267,18 @@ const ic3Questions: QuestionBankQuestion[] = ic3QuestionBlueprints.map((item, in
 
 export const questionBankQuestions: QuestionBankQuestion[] = [
   ...ic3Questions,
-  createLegacyQuestion("qb-math-001", "mathematics", "Phân số", "Lan ăn 3/8 chiếc bánh và Minh ăn 1/4 chiếc bánh. Tổng cộng hai bạn đã ăn bao nhiêu chiếc bánh?", "Cộng hai phân số khác mẫu số cơ bản.", "core", 82, globalScope),
-  createLegacyQuestion("qb-math-002", "mathematics", "Hình học", "Một hình chữ nhật có chiều dài 12 cm và chiều rộng 7 cm. Chu vi của hình là bao nhiêu?", "Tính chu vi hình chữ nhật.", "stretch", 76, alphaScope),
-  createLegacyQuestion("qb-eng-001", "english", "Reading", "Mai walks to school every day because it is near her house. Why does Mai walk to school?", "Xác định thông tin trực tiếp trong câu đọc hiểu ngắn.", "core", 88, alphaScope),
-  createLegacyQuestion("qb-sci-001", "science", "Sinh học", "Bộ phận nào của cây có vai trò hút nước và muối khoáng từ đất?", "Nhận biết chức năng cơ bản của rễ cây.", "core", 91, eastScope),
+  createLegacyQuestion("qb-python-001", "python", "Biến và kiểu dữ liệu", "Kiểu dữ liệu nào phù hợp để lưu giá trị đúng/sai trong Python?", "Nhận biết bool trong Python.", "core", 82, globalScope),
+  createLegacyQuestion("qb-python-002", "python", "Điều kiện", "Câu lệnh nào dùng để kiểm tra điều kiện trong Python?", "Nhận biết câu lệnh if.", "core", 76, alphaScope),
+  createLegacyQuestion("qb-python-003", "python", "List và dictionary", "Những cấu trúc nào có thể lưu nhiều giá trị trong Python?", "Phân biệt list và dictionary.", "stretch", 88, alphaScope),
+  createLegacyQuestion("qb-mos-001", "mos", "Định dạng văn bản", "Trong Microsoft Word, công cụ nào dùng để áp dụng nhanh bộ định dạng tiêu đề?", "Sử dụng Styles trong Word.", "core", 91, eastScope),
+  createLegacyQuestion("qb-mos-002", "mos", "Công thức cơ bản", "Trong Excel, công thức nào tính tổng vùng A1 đến A5?", "Sử dụng hàm SUM.", "core", 84, globalScope),
+  createLegacyQuestion("qb-mos-003", "mos", "Bố cục slide", "Trong PowerPoint, Slide Master giúp làm gì?", "Quản lý bố cục và định dạng chung.", "stretch", 79, eastScope),
 ];
 
 export const quizBankItems: QuizBankItem[] = [
   createQuizBankItem({
     id: "quiz-ic3-l1-foundation-train",
-    title: "IC3 GS6 L1 - Train nền tảng máy tính",
+    title: "IC3 GS6 L1 - Luyện tập nền tảng máy tính",
     kind: "train",
     levelId: "ic3-l1",
     questionIds: ["qb-ic3-001", "qb-ic3-002", "qb-ic3-003", "qb-ic3-004"],
@@ -281,7 +289,7 @@ export const quizBankItems: QuizBankItem[] = [
   }),
   createQuizBankItem({
     id: "quiz-ic3-l2-excel-test",
-    title: "IC3 GS6 L2 - Test Excel nhập môn",
+    title: "IC3 GS6 L2 - Kiểm tra Excel nhập môn",
     kind: "test",
     levelId: "ic3-l2",
     questionIds: ["qb-ic3-006", "qb-ic3-007"],
@@ -292,7 +300,7 @@ export const quizBankItems: QuizBankItem[] = [
   }),
   createQuizBankItem({
     id: "quiz-ic3-l3-security-train",
-    title: "IC3 GS6 L3 - Train bảo mật tài khoản",
+    title: "IC3 GS6 L3 - Luyện tập bảo mật tài khoản",
     kind: "train",
     levelId: "ic3-l3",
     questionIds: ["qb-ic3-009", "qb-ic3-010", "qb-ic3-011"],
@@ -303,13 +311,46 @@ export const quizBankItems: QuizBankItem[] = [
   }),
   createQuizBankItem({
     id: "quiz-ic3-l3-mock-test",
-    title: "IC3 GS6 L3 - Test mô phỏng cuối level",
+    title: "IC3 GS6 L3 - Kiểm tra mô phỏng cuối level",
     kind: "test",
     levelId: "ic3-l3",
     questionIds: ["qb-ic3-009", "qb-ic3-010", "qb-ic3-011", "qb-ic3-012"],
     durationLabel: "30 phút",
     sourceMode: "manual",
     status: "reviewing",
+    scope: globalScope,
+  }),
+  createQuizBankItem({
+    id: "quiz-python-foundation-train",
+    title: "Python Foundation - Luyện tập biến và điều kiện",
+    kind: "train",
+    levelId: "python-foundation",
+    questionIds: ["qb-python-001", "qb-python-002"],
+    durationLabel: "15 phút",
+    sourceMode: "auto-random",
+    status: "ready",
+    scope: globalScope,
+  }),
+  createQuizBankItem({
+    id: "quiz-python-intermediate-test",
+    title: "Python Intermediate - Kiểm tra cấu trúc dữ liệu",
+    kind: "test",
+    levelId: "python-intermediate",
+    questionIds: ["qb-python-003"],
+    durationLabel: "10 phút",
+    sourceMode: "manual",
+    status: "ready",
+    scope: alphaScope,
+  }),
+  createQuizBankItem({
+    id: "quiz-mos-office-readiness",
+    title: "MOS Office - Kiểm tra sẵn sàng chứng chỉ",
+    kind: "test",
+    levelId: "mos-excel",
+    questionIds: ["qb-mos-001", "qb-mos-002", "qb-mos-003"],
+    durationLabel: "20 phút",
+    sourceMode: "manual",
+    status: "ready",
     scope: globalScope,
   }),
 ];
@@ -332,24 +373,31 @@ export function getQuestionBankCategoryCount(subjectId: QuestionBankSubjectId, c
   ).length;
 }
 
-function createLegacySubject(
+function createLeveledSubject(
   id: Exclude<QuestionBankSubjectId, "ic3-gs6">,
   label: string,
-  topicLabels: string[],
+  levels: Array<{ id: string; label: string; topics: string[] }>,
 ): QuestionBankSubject {
-  const levelId = `${id}-other`;
+  const categories: QuestionBankCategory[] = levels.flatMap((level) =>
+    level.topics.map((topic, index) => ({
+      id: `${level.id}-topic-${index + 1}`,
+      label: topic,
+      levelId: level.id,
+    })),
+  );
 
   return {
     id,
     label,
-    description: "Nguồn câu hỏi dùng chung chưa gắn lộ trình nhiều level.",
-    companyScopeLabel: "Dùng chung toàn công ty",
-    levels: [{ id: levelId, label: "Khác", description: "Chưa phân level", categoryIds: topicLabels.map((_, index) => `${id}-topic-${index + 1}`) }],
-    categories: topicLabels.map((topic, index) => ({
-      id: `${id}-topic-${index + 1}`,
-      label: topic,
-      levelId,
+    description: `${label} question bank`,
+    companyScopeLabel: "Dung chung toan cong ty",
+    levels: levels.map((level) => ({
+      id: level.id,
+      label: level.label,
+      description: level.label,
+      categoryIds: categories.filter((category) => category.levelId === level.id).map((category) => category.id),
     })),
+    categories,
   };
 }
 
@@ -365,7 +413,7 @@ function createLegacyQuestion(
 ): QuestionBankQuestion {
   const subject = getQuestionBankSubject(subjectId);
   const category = subject.categories.find((item) => item.label === categoryLabel) ?? subject.categories[0];
-  const level = subject.levels[0];
+  const level = subject.levels.find((item) => item.id === category.levelId) ?? subject.levels[0];
 
   return {
     id,
@@ -414,10 +462,12 @@ function createQuizBankItem({
   scope: ContentScope;
 }): QuizBankItem {
   const questions = questionIds
-    .map((questionId) => ic3Questions.find((question) => question.id === questionId))
+    .map((questionId) => questionBankQuestions.find((question) => question.id === questionId))
     .filter((question): question is QuestionBankQuestion => Boolean(question));
   const topicLabels = Array.from(new Set(questions.map((question) => question.categoryLabel)));
-  const level = getQuestionBankLevel("ic3-gs6", levelId);
+  const categoryId = questions[0]?.categoryId;
+  const subject = getQuestionBankSubject(questions[0]?.subjectId ?? "ic3-gs6");
+  const level = getQuestionBankLevel(subject.id, levelId);
 
   return {
     id,
@@ -425,10 +475,11 @@ function createQuizBankItem({
     title,
     kind,
     status,
-    subjectId: "ic3-gs6",
-    subjectLabel: "IC3 GS6",
+    subjectId: subject.id,
+    subjectLabel: subject.label,
     levelId,
     levelLabel: level.label,
+    categoryId,
     topicLabels,
     questionIds,
     questionCount: questionIds.length,

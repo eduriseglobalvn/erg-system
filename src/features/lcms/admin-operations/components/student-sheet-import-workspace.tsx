@@ -2,9 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { RefreshCw, Trash2, FileSpreadsheet } from "@/components/mui-icon-shim";
 
 import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import TextField from "@mui/material/TextField";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
@@ -312,7 +312,9 @@ export function StudentSheetImportWorkspace({
                 </span>
                 <p className="mt-1 text-xs text-slate-400">Sheet cần bật quyền xem bằng liên kết.</p>
                 <div className="mt-3 flex flex-col gap-2.5 sm:flex-row">
-                  <Input
+                  <TextField
+                    size="small"
+                    fullWidth
                     value={sheetUrl}
                     onChange={(event) => setSheetUrl(event.target.value)}
                     onKeyDown={(event) => {
@@ -322,10 +324,11 @@ export function StudentSheetImportWorkspace({
                       }
                     }}
                     placeholder="https://docs.google.com/spreadsheets/d/..."
-                    className="h-10 flex-1 rounded-[10px] border-slate-200 text-xs focus:border-[var(--erg-blue)]"
+                    className="flex-1"
                   />
-                  <Button 
-                    onClick={() => void loadSheet(sheetUrl)} 
+                  <Button
+                    variant="contained"
+                    onClick={() => void loadSheet(sheetUrl)}
                     disabled={isLoading}
                     className="h-10 shrink-0 rounded-[10px] px-5 text-xs font-bold"
                   >
@@ -343,7 +346,7 @@ export function StudentSheetImportWorkspace({
                     {lockedCenter ? "Import được thực hiện trong phạm vi trường này." : "Tài khoản được gắn vào trường/lớp đã chọn."}
                   </p>
                 </div>
-                <Badge tone="secondary">{lockedCenter ? "Đúng phạm vi trường" : "BE realtime"}</Badge>
+                <Chip size="small" color="secondary" label={lockedCenter ? "Đúng phạm vi trường" : "BE realtime"} />
               </div>
               <div className={cn("mt-4 grid gap-3", lockedCenter ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "sm:grid-cols-2")}>
                 {lockedCenter ? (
@@ -397,7 +400,7 @@ export function StudentSheetImportWorkspace({
                   <h3 className="text-sm font-bold text-slate-800">Khoảng dữ liệu</h3>
                   <p className="mt-0.5 text-xs text-slate-400">Chọn tab và vùng ô cần đọc.</p>
                 </div>
-                <Badge tone="outline">{selectedSheetLabel}</Badge>
+                <Chip size="small" variant="outlined" label={selectedSheetLabel} />
               </div>
 
               <div className="grid gap-3 sm:grid-cols-[minmax(200px,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
@@ -422,11 +425,11 @@ export function StudentSheetImportWorkspace({
                 </label>
                 <label className="block">
                   <span className="text-xs font-bold text-slate-500">Tọa độ bắt đầu</span>
-                  <Input className="mt-2 h-10 rounded-[10px] uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
+                  <TextField size="small" fullWidth className="mt-2 rounded-[10px] uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
                 </label>
                 <label className="block">
                   <span className="text-xs font-bold text-slate-500">Tọa độ kết thúc</span>
-                  <Input className="mt-2 h-10 rounded-[10px] uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z100" />
+                  <TextField size="small" fullWidth className="mt-2 rounded-[10px] uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z100" />
                 </label>
               </div>
 
@@ -483,8 +486,7 @@ export function StudentSheetImportWorkspace({
           description="Cho phép chỉnh sửa trực tiếp thông tin lỗi của học sinh trước khi gửi dữ liệu lên máy chủ."
           action={
             excludedCount > 0 ? (
-              <Button variant="outline" size="sm" onClick={restoreAllStudents} className="text-xs h-8">
-                <RefreshCw className="h-3.5 w-3.5 mr-1" />
+              <Button variant="outlined" size="small" onClick={restoreAllStudents} className="text-xs h-8" startIcon={<RefreshCw className="h-3.5 w-3.5" />}>
                 Khôi phục {excludedCount} dòng đã bỏ
               </Button>
             ) : null
@@ -585,10 +587,10 @@ export function StudentSheetImportWorkspace({
                           </span>
                         </td>
                         <td className="py-2.5 px-4 text-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => excludeStudent(student.id)} 
+                          <Button
+                            variant="text"
+                            size="small"
+                            onClick={() => excludeStudent(student.id)}
                             className="h-8 text-xs text-slate-400 hover:text-rose-600 transition"
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -630,11 +632,11 @@ export function StudentSheetImportWorkspace({
             <div className="grid grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-xs font-bold text-slate-500">Cột Tên đăng nhập</span>
-                <Input className="mt-2 uppercase h-9 rounded-lg" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
+                <TextField size="small" fullWidth className="mt-2 uppercase" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
               </label>
               <label className="block">
                 <span className="text-xs font-bold text-slate-500">Cột Mật khẩu</span>
-                <Input className="mt-2 uppercase h-9 rounded-lg" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
+                <TextField size="small" fullWidth className="mt-2 uppercase" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
               </label>
             </div>
 
@@ -666,9 +668,10 @@ export function StudentSheetImportWorkspace({
               </div>
             )}
 
-            <Button 
-              className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)] text-xs font-bold h-10 rounded-xl shadow-sm transition" 
-              onClick={() => void submitAccounts()} 
+            <Button
+              variant="contained"
+              className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)] text-xs font-bold h-10 rounded-xl shadow-sm transition"
+              onClick={() => void submitAccounts()}
               disabled={!visibleStudents.length || !centerId || isSubmitting}
             >
               {isSubmitting ? "Đang truyền dữ liệu..." : `Khởi tạo ${visibleStudents.length} tài khoản`}

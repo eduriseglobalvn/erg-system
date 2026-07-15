@@ -167,25 +167,17 @@ export async function loadStudentDashboardData(): Promise<StudentDashboardApiDat
     };
   }
 
-  try {
-    const response = await graphQlRequest<ElearningStudentDashboardResponse, { input: { tenantId: string } }>({
-      operationName: "ElearningStudentDashboard",
-      portal: "elearning",
-      query: ElearningStudentDashboardDocument,
-      variables: {
-        input: {
-          tenantId: getDefaultTenantId(),
-        },
+  const response = await graphQlRequest<ElearningStudentDashboardResponse, { input: { tenantId: string } }>({
+    operationName: "ElearningStudentDashboard",
+    portal: "elearning",
+    query: ElearningStudentDashboardDocument,
+    variables: {
+      input: {
+        tenantId: getDefaultTenantId(),
       },
-    });
-    return mapStudentDashboard(response.elearning.studentDashboard, session);
-  } catch {
-    return {
-      assignments: studentAssignments,
-      profile: mergeProfileSession(studentDashboardProfile, session, studentAssignments.length),
-      teacherAnnouncements: studentTeacherAnnouncements,
-    };
-  }
+    },
+  });
+  return mapStudentDashboard(response.elearning.studentDashboard, session);
 }
 
 function mapStudentDashboard(
@@ -197,13 +189,13 @@ function mapStudentDashboard(
   const announcements = (dashboard.announcements ?? []).filter(hasId).map((announcement) => mapAnnouncement(announcement, dashboard));
 
   return {
-    assignments: assignments.length ? assignments : studentAssignments,
+    assignments,
     profile: mergeProfileSession(
-      mapProfile(dashboard, assignments.length || studentAssignments.length, submittedCount),
+      mapProfile(dashboard, assignments.length, submittedCount),
       session,
-      assignments.length || studentAssignments.length,
+      assignments.length,
     ),
-    teacherAnnouncements: announcements.length ? announcements : studentTeacherAnnouncements,
+    teacherAnnouncements: announcements,
   };
 }
 
@@ -237,7 +229,9 @@ function mapProfile(
   const scoreSummary = summary?.scoreSummary;
   const attemptedCount = scoreSummary?.attemptedAssignmentCount ?? assignmentCount;
   const passedCount = scoreSummary?.passedAttemptCount ?? submittedCount;
-  const weeklyGoalProgress = attemptedCount ? Math.round((passedCount / Math.max(attemptedCount, 1)) * 100) : studentDashboardProfile.weeklyGoalProgress;
+  const weeklyGoalProgress = attemptedCount ? Math.round((passedCount / Math.max(attemptedCount, 1)) * 100) : 0;
+  const activeAssignmentCount = summary?.activeAssignmentCount ?? 0;
+  const enrolledCourseCount = summary?.enrolledCourseCount ?? 0;
 
   return {
     ...studentDashboardProfile,
@@ -247,8 +241,8 @@ function mapProfile(
     schoolName: profile?.schoolId || studentDashboardProfile.schoolName,
     averageScore: Math.round(scoreSummary?.averagePercent ?? studentDashboardProfile.averageScore),
     completedAssignments: scoreSummary?.completedAttemptCount ?? submittedCount,
-    totalAssignments: assignmentCount || summary?.activeAssignmentCount || studentDashboardProfile.totalAssignments,
-    motivationPoints: Math.max(studentDashboardProfile.motivationPoints, (summary?.enrolledCourseCount ?? 0) * 10 + (passedCount ?? 0) * 15),
+    totalAssignments: assignmentCount || activeAssignmentCount,
+    motivationPoints: Math.max(0, enrolledCourseCount * 10 + (passedCount ?? 0) * 15),
     weeklyGoalProgress: Math.max(0, Math.min(100, weeklyGoalProgress)),
   };
 }

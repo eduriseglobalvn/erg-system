@@ -9,6 +9,8 @@ import {
   type NotificationDeviceRegistrationInput,
   type NotificationPermissionState,
 } from "@/features/notifications/api/notification-api";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 type NotificationState = "unsupported" | "blocked" | "default" | "enabled" | "unconfigured";
 
@@ -341,11 +343,20 @@ function deviceIdentityMatches(input: NotificationDeviceRegistrationInput, store
   );
 }
 
+
+export function getPwaNotificationDeviceStorageKey() {
+  const tenantId = getDefaultTenantId();
+  const session = readStoredAuthSession(NOTIFICATION_PORTAL) as { accountId?: string | null } | null;
+  const accountId = session?.accountId?.trim();
+  if (!accountId) return DEVICE_STORAGE_KEY;
+  return `${DEVICE_STORAGE_KEY}:${tenantId}:${accountId}`;
+}
+
 function readStoredDeviceRegistration(): StoredPwaNotificationDevice | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const value = window.localStorage.getItem(DEVICE_STORAGE_KEY);
+    const value = window.localStorage.getItem(getPwaNotificationDeviceStorageKey());
     if (!value) return null;
     return JSON.parse(value) as StoredPwaNotificationDevice;
   } catch {
@@ -357,7 +368,7 @@ function writeStoredDeviceRegistration(value: StoredPwaNotificationDevice) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(DEVICE_STORAGE_KEY, JSON.stringify(value));
+    window.localStorage.setItem(getPwaNotificationDeviceStorageKey(), JSON.stringify(value));
   } catch {
     // Storage is best-effort; the backend registration remains the source of truth.
   }
@@ -367,6 +378,7 @@ function clearStoredDeviceRegistration() {
   if (typeof window === "undefined") return;
 
   try {
+    window.localStorage.removeItem(getPwaNotificationDeviceStorageKey());
     window.localStorage.removeItem(DEVICE_STORAGE_KEY);
   } catch {
     // Best-effort cleanup only.

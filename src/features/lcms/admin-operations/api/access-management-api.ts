@@ -1,5 +1,6 @@
 import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
+import { LMS_ROLE_GROUP_TEMPLATES } from "@/platform/auth/permissions/lms-permission-catalog";
 
 export type AccessScopeType = "system" | "center" | "school";
 
@@ -8,6 +9,7 @@ export type AccessPolicySummary = {
   modules: string[];
   roleGroups: string[];
   highestScope: AccessScopeType | "none";
+  warnings?: string[];
 };
 
 export type AccessManagedUser = {
@@ -247,8 +249,34 @@ function listAccessManagedUsersRest(params: {
   return apiRequest<AccessManagementUserList>(`/api/lms/access-management/users?${search.toString()}`, { portal: getBackOfficePortal() });
 }
 
-export function getAccessManagementOptions() {
-  return apiRequest<AccessManagementOptions>("/api/lms/access-management/options", { portal: getBackOfficePortal() });
+export async function getAccessManagementOptions() {
+  const options = await apiRequest<AccessManagementOptions>("/api/lms/access-management/options", {
+    portal: getBackOfficePortal(),
+  });
+  return validateAccessManagementOptions(options);
+}
+
+export function validateAccessManagementOptions(options: AccessManagementOptions) {
+  if (!options.modules.some((module) => module.id.trim().toLowerCase() === "lms")) {
+    throw new Error("Access management catalog is missing module: lms");
+  }
+
+  const roleGroups = new Map(options.roleGroups.map((roleGroup) => [roleGroup.id, roleGroup]));
+  for (const [roleGroupId, template] of Object.entries(LMS_ROLE_GROUP_TEMPLATES)) {
+    const roleGroup = roleGroups.get(roleGroupId);
+    if (!roleGroup) {
+      throw new Error(`Access management catalog is missing role group: ${roleGroupId}`);
+    }
+
+    const permissions = new Set(roleGroup.permissions.map((permission) => permission.trim().toLowerCase()));
+    for (const permission of template.permissions) {
+      if (!permissions.has(permission)) {
+        throw new Error(`Access management role group ${roleGroupId} is missing permission: ${permission}`);
+      }
+    }
+  }
+
+  return options;
 }
 
 export function listAccessScopes(params: {
@@ -268,7 +296,8 @@ export function listAccessScopes(params: {
 
 function mapAccessWorkspaceUser(user: AccessWorkspaceUserDTO, effectivePermissionsIncluded: boolean): AccessManagedUser {
   const effectivePermissions = effectivePermissionsIncluded ? user.effectivePermissions ?? [] : [];
-  const roles = deriveRoles(effectivePermissions, user.roleCount ?? 0);
+  const metadataIncomplete = (user.roleCount ?? 0) > 0 || (user.scopeCount ?? 0) > 0;
+  const roles: string[] = [];
 
   return {
     id: user.userId,
@@ -278,24 +307,14 @@ function mapAccessWorkspaceUser(user: AccessWorkspaceUserDTO, effectivePermissio
     roles,
     isProfileCompleted: Boolean(user.fullName?.trim() && user.email?.trim() && ((user.roleCount ?? 0) > 0 || (user.scopeCount ?? 0) > 0)),
     accessSummary: {
-      highestScope: deriveHighestScope(effectivePermissions, user.scopeCount ?? 0),
+      highestScope: "none",
       modules: deriveModules(effectivePermissions),
       roleGroups: roles,
       scopeCount: user.scopeCount ?? 0,
+      warnings: metadataIncomplete ? ["ACCESS_METADATA_INCOMPLETE"] : undefined,
     },
     createdAt: "",
   };
-}
-
-function deriveHighestScope(permissions: AccessWorkspacePermissionDTO[], scopeCount: number): AccessPolicySummary["highestScope"] {
-  const haystack = permissions.map((permission) => `${permission.permission ?? ""} ${permission.source ?? ""}`.toLowerCase()).join(" ");
-  if (haystack.includes("system") || haystack.includes("*")) return "system";
-  if (haystack.includes("center")) return "center";
-  if (haystack.includes("school")) return "school";
-  if (scopeCount >= 3) return "system";
-  if (scopeCount === 2) return "center";
-  if (scopeCount === 1) return "school";
-  return "none";
 }
 
 function deriveModules(permissions: AccessWorkspacePermissionDTO[]) {
@@ -305,21 +324,6 @@ function deriveModules(permissions: AccessWorkspacePermissionDTO[]) {
     if (moduleName && moduleName !== "*") modules.add(moduleName);
   });
   return Array.from(modules);
-}
-
-function deriveRoles(permissions: AccessWorkspacePermissionDTO[], roleCount: number) {
-  const roles = new Set<string>();
-  permissions.forEach((permission) => {
-    const haystack = `${permission.permission ?? ""} ${permission.source ?? ""}`.toLowerCase();
-    if (haystack.includes("super")) roles.add("super_admin");
-    if (haystack.includes("center_admin")) roles.add("center_admin");
-    if (haystack.includes("school_admin")) roles.add("school_admin");
-    if (haystack.includes("teacher")) roles.add("teacher");
-    if (haystack.includes("media_manager")) roles.add("media_manager");
-    if (haystack.includes("admin") && !haystack.includes("super")) roles.add("admin");
-  });
-  if (!roles.size && roleCount > 0) roles.add("access_member");
-  return Array.from(roles);
 }
 
 export function getUserAccess(userId: string) {

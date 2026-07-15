@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Megaphone as CampaignOutlinedIcon } from "lucide-react";
 import { Pin as PushPinOutlinedIcon } from "lucide-react";
 
-import { Card } from "@/components/ui/card";
+import Card from "@mui/material/Card";
 import { cn } from "@/lib/utils";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";

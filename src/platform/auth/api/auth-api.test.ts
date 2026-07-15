@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import { saveServerAuthSession } from "./auth-storage";
 import { authApi, normalizeAuthSession, shouldRetrySharedAuthLogin, type AuthSessionResponseDTO } from "./auth-api";
 import { ApiClientError } from "@/lib/api-client";
-import { TEACHER_LOCAL_SESSION_KEY, clearTeacherSessionSnapshot, getStoredAccessToken, portalSessionKey, readStoredAuthSession } from "./auth-token-storage";
+import { TEACHER_LOCAL_SESSION_KEY, TEACHER_TEMP_SESSION_KEY, clearTeacherSessionSnapshot, getStoredAccessToken, portalSessionKey, readStoredAuthSession } from "./auth-token-storage";
 
 const storage = new Map<string, string>();
 
@@ -31,7 +31,7 @@ afterEach(() => {
   delete globalThis.window;
 });
 
-test("backend login sends CRM portal in request body and X-Portal header", async () => {
+test("backend login sends portal in the body without a browser-controlled tenant header", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   const fetchMock = vi.fn(async () =>
     new Response(
@@ -50,7 +50,7 @@ test("backend login sends CRM portal in request body and X-Portal header", async
   vi.stubGlobal("fetch", fetchMock);
 
   await authApi.login({
-    email: "crm@erg.edu.vn",
+    identifier: "crm@erg.edu.vn",
     password: "password123",
     rememberMe: true,
     portal: "crm",
@@ -59,9 +59,9 @@ test("backend login sends CRM portal in request body and X-Portal header", async
   const [, init] = fetchMock.mock.calls[0] ?? [];
   const headers = (init as RequestInit).headers as Headers;
   expect(headers.get("Content-Type")).toBe("application/json");
-  expect(headers.get("X-Tenant-ID")).toBe("erg");
+  expect(headers.get("X-Tenant-ID")).toBeNull();
   expect(headers.get("X-Request-ID")).toBeTruthy();
-  expect(headers.get("X-Portal")).toBe("crm");
+  expect(headers.get("X-Portal")).toBeNull();
   expect((init as RequestInit).referrerPolicy).toBe("no-referrer");
   expect(JSON.parse(String((init as RequestInit).body))).toMatchObject({
     deviceFingerprint: expect.any(String),
@@ -71,7 +71,7 @@ test("backend login sends CRM portal in request body and X-Portal header", async
   });
 });
 
-test("backend login sends LCMS portal when logging in from lcms host", async () => {
+test("backend login sends LCMS portal in its authenticated request body", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   const fetchMock = vi.fn(async () =>
     new Response(
@@ -88,7 +88,7 @@ test("backend login sends LCMS portal when logging in from lcms host", async () 
   vi.stubGlobal("fetch", fetchMock);
 
   await authApi.login({
-    email: "admin@erg.edu.vn",
+    identifier: "admin@erg.edu.vn",
     password: "Admin@2025",
     rememberMe: true,
     portal: "lcms",
@@ -96,7 +96,7 @@ test("backend login sends LCMS portal when logging in from lcms host", async () 
 
   const [, init] = fetchMock.mock.calls[0] ?? [];
   const headers = (init as RequestInit).headers as Headers;
-  expect(headers.get("X-Portal")).toBe("lcms");
+  expect(headers.get("X-Portal")).toBeNull();
   expect(JSON.parse(String((init as RequestInit).body))).toMatchObject({
     portal: "lcms",
   });
@@ -123,7 +123,7 @@ test("keeps the configured spring API base when the CRM portal runs on its own h
   vi.stubGlobal("fetch", fetchMock);
 
   await authApi.login({
-    email: "admin@erg.edu.vn",
+    identifier: "admin@erg.edu.vn",
     password: "Admin@2025",
     rememberMe: true,
     portal: "crm",
@@ -133,7 +133,7 @@ test("keeps the configured spring API base when the CRM portal runs on its own h
   expect(url).toBe("http://localhost:8080/api/v1/auth/login");
 });
 
-test("persists snake_case access tokens from backend login responses", async () => {
+test("keeps snake_case access tokens in browser-session storage only", async () => {
   const account = saveServerAuthSession(
     await normalizeLoginResponse({
       user: {
@@ -151,7 +151,8 @@ test("persists snake_case access tokens from backend login responses", async () 
 
   expect(account.email).toBe("teacher@erg.edu.vn");
   expect(getStoredAccessToken("lms")).toBe("jwt-token");
-  expect(JSON.parse(storage.get(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms")) ?? "{}")).toMatchObject({
+  expect(storage.has(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"))).toBe(false);
+  expect(JSON.parse(storage.get(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")) ?? "{}")).toMatchObject({
     accessToken: "jwt-token",
     refreshToken: "refresh-token",
     portal: "lms",
@@ -221,7 +222,7 @@ test("uses a stored LMS session for learning resource requests", async () => {
   expect(getStoredAccessToken("lms")).toBe("shared-lms-token");
 });
 
-test("uses a stored LMS session for LCMS requests", async () => {
+test("does not reuse an LMS-only entitlement for LCMS requests", async () => {
   saveServerAuthSession(
     normalizeLoginResponse({
       user: {
@@ -236,12 +237,8 @@ test("uses a stored LMS session for LCMS requests", async () => {
     "lms",
   );
 
-  expect(readStoredAuthSession("lcms")).toMatchObject({
-    accessToken: "shared-lms-token",
-    portal: "lms",
-    portals: ["lms"],
-  });
-  expect(getStoredAccessToken("lcms")).toBe("shared-lms-token");
+  expect(readStoredAuthSession("lcms")).toBeNull();
+  expect(getStoredAccessToken("lcms")).toBeUndefined();
 });
 
 test("rejects stored teacher sessions without an access token", () => {
@@ -317,6 +314,73 @@ test("retries shared auth login only for missing bearer login middleware errors"
   expect(shouldRetrySharedAuthLogin(new ApiClientError("missing Authorization header", "HTTP_401", 401))).toBe(true);
   expect(shouldRetrySharedAuthLogin(new ApiClientError("invalid credentials", "HTTP_401", 401))).toBe(false);
   expect(shouldRetrySharedAuthLogin(new ApiClientError("missing Authorization header", "HTTP_403", 403))).toBe(false);
+});
+
+test("preserves granted and denied permissions from the authentication session", () => {
+  const session = normalizeAuthSession({
+    account: {
+      id: "teacher-1",
+      fullName: "Teacher One",
+      email: "teacher@erg.edu.vn",
+      role: "teacher",
+      provider: "password",
+      department: "ERG",
+      title: "Giáo viên",
+      features: [],
+      createdAt: "2026-07-14T00:00:00Z",
+      lastLoginAt: null,
+    },
+    permissions: ["lms.grade.*"],
+    deniedPermissions: ["lms.grade.finalize"],
+    roles: ["teacher", "lms_teacher_standard"],
+    portals: ["lms"],
+  });
+
+  expect(session.permissions).toEqual(["lms.grade.*"]);
+  expect(session.deniedPermissions).toEqual(["lms.grade.finalize"]);
+  expect(session.roles).toEqual(["teacher", "lms_teacher_standard"]);
+});
+
+test("preserves explicit first-login lifecycle returned by login", () => {
+  const session = normalizeAuthSession({
+    user: {
+      id: "teacher-onboarding",
+      email: "teacher.onboarding@erg.edu.vn",
+      fullName: "Teacher Onboarding",
+      isProfileCompleted: false,
+      lifecycle: {
+        status: "FIRST_LOGIN_RESTRICTED",
+        isProfileCompleted: false,
+        recoveryEmailMasked: null,
+        recoveryEmailVerified: false,
+        mustChangePassword: true,
+        nextSteps: ["COMPLETE_PROFILE", "VERIFY_RECOVERY_EMAIL", "CHANGE_PASSWORD"],
+      },
+    },
+    accessToken: "restricted-token",
+    portals: ["lms"],
+  });
+
+  expect(session.account.lifecycle).toMatchObject({
+    status: "FIRST_LOGIN_RESTRICTED",
+    mustChangePassword: true,
+    nextSteps: ["COMPLETE_PROFILE", "VERIFY_RECOVERY_EMAIL", "CHANGE_PASSWORD"],
+  });
+});
+
+test("does not assume profile completion when backend omits lifecycle fields", () => {
+  const session = normalizeAuthSession({
+    user: {
+      id: "teacher-unknown",
+      email: "teacher.unknown@erg.edu.vn",
+      fullName: "Teacher Unknown",
+    },
+    accessToken: "token",
+    portals: ["lms"],
+  });
+
+  expect(session.account.isProfileCompleted).toBeUndefined();
+  expect(session.account.lifecycle).toBeUndefined();
 });
 
 function normalizeLoginResponse(response: Parameters<typeof normalizeAuthSession>[0]): AuthSessionResponseDTO {

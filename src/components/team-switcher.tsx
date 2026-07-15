@@ -1,16 +1,11 @@
-"use client";
+"use client"
 
 import * as React from "react";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import Divider from "@mui/material/Divider";
+import ListSubheader from "@mui/material/ListSubheader";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -48,6 +43,9 @@ export function TeamSwitcher({
   const { isMobile } = useSidebar();
   const { t } = useI18n();
   const [fallbackActiveTeam, setFallbackActiveTeam] = React.useState(teams[0]);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const menuOpen = Boolean(anchorEl);
+  const closeMenu = () => setAnchorEl(null);
   const activeTeam = teams.find((team) => team.id === activeTeamId) ?? fallbackActiveTeam ?? teams[0];
 
   if (!activeTeam) {
@@ -57,68 +55,70 @@ export function TeamSwitcher({
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="border-[#cbd7e6] bg-white/80 shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-white data-[state=open]:border-[#b8c8db] data-[state=open]:bg-white data-[state=open]:text-[var(--primary)] data-[state=open]:shadow-[var(--shadow-xs)]"
+        <SidebarMenuButton
+          size="lg"
+          onClick={(event) => setAnchorEl(event.currentTarget)}
+          className="border-[#cbd7e6] bg-white/80 shadow-[var(--shadow-xs)] hover:border-[#b8c8db] hover:bg-white data-[state=open]:border-[#b8c8db] data-[state=open]:bg-white data-[state=open]:text-[var(--primary)] data-[state=open]:shadow-[var(--shadow-xs)]"
+        >
+          <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--primary)] text-white shadow-[var(--shadow-xs)]">
+            {activeTeam.logo}
+          </div>
+          <div className="grid flex-1 text-left text-sm leading-tight">
+            <span className="truncate font-semibold text-[var(--foreground)]">{activeTeam.name}</span>
+            <span className="truncate text-xs font-medium text-[var(--muted-foreground)]">{activeTeam.plan}</span>
+          </div>
+          <span className="ml-auto inline-flex flex-col">
+            <ArrowUpwardIcon className="size-3" fontSize="inherit" />
+            <ArrowDownwardIcon className="-mt-1 size-3" fontSize="inherit" />
+          </span>
+        </SidebarMenuButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={menuOpen}
+          onClose={closeMenu}
+          anchorOrigin={{ vertical: isMobile ? "bottom" : "top", horizontal: "left" }}
+          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          slotProps={{ paper: { sx: { minWidth: 224, borderRadius: 2 } } }}
+        >
+          <ListSubheader sx={{ fontSize: 12, fontWeight: 600, color: "text.secondary", lineHeight: 2.5 }}>
+            {menuLabel ?? t("common.teams")}
+          </ListSubheader>
+          {teams.map((team, index) => (
+            <MenuItem
+              key={team.name}
+              onClick={() => {
+                setFallbackActiveTeam(team);
+                onSelectTeam?.(team);
+                closeMenu();
+              }}
+              sx={{ gap: 1, p: 1 }}
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-[var(--primary)] text-white shadow-[var(--shadow-xs)]">
-                {activeTeam.logo}
+              <div className="flex size-6 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-[var(--primary)]">
+                {team.logo}
               </div>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-[var(--foreground)]">{activeTeam.name}</span>
-                <span className="truncate text-xs font-medium text-[var(--muted-foreground)]">{activeTeam.plan}</span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-semibold">{team.name}</div>
+                {team.disabled ? (
+                  <div className="text-xs text-rose-500">403 access denied</div>
+                ) : null}
               </div>
-              <span className="ml-auto inline-flex flex-col">
-                <ArrowUpwardIcon className="size-3" fontSize="inherit" />
-                <ArrowDownwardIcon className="-mt-1 size-3" fontSize="inherit" />
-              </span>
-            </SidebarMenuButton>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            align="start"
-            side={isMobile ? "bottom" : "right"}
-            sideOffset={4}
-          >
-            <DropdownMenuLabel className="text-xs font-semibold text-[var(--muted-foreground)]">
-              {menuLabel ?? t("common.teams")}
-            </DropdownMenuLabel>
-            {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => {
-                  setFallbackActiveTeam(team);
-                  onSelectTeam?.(team);
-                }}
-                className="gap-2 p-2"
-              >
+              {index < 9 ? (
+                <span className="ml-auto text-xs tracking-widest text-[var(--muted-foreground)]">{`Ctrl+${index + 1}`}</span>
+              ) : null}
+            </MenuItem>
+          ))}
+          {showAddItem ? (
+            <>
+              <Divider />
+              <MenuItem onClick={closeMenu} sx={{ gap: 1, p: 1 }}>
                 <div className="flex size-6 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-[var(--primary)]">
-                  {team.logo}
+                  <AddIcon className="size-4" fontSize="inherit" />
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate font-semibold">{team.name}</div>
-                  {team.disabled ? (
-                    <div className="text-xs text-rose-500">403 access denied</div>
-                  ) : null}
-                </div>
-                {index < 9 ? <DropdownMenuShortcut>{`Ctrl+${index + 1}`}</DropdownMenuShortcut> : null}
-              </DropdownMenuItem>
-            ))}
-            {showAddItem ? (
-              <>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className="gap-2 p-2">
-                  <div className="flex size-6 items-center justify-center rounded-md border border-[#cbd7e6] bg-[#f8fbff] text-[var(--primary)]">
-                    <AddIcon className="size-4" fontSize="inherit" />
-                  </div>
-                  <div className="font-semibold text-[var(--muted-foreground)]">{addLabel ?? t("common.addTeam")}</div>
-                </DropdownMenuItem>
-              </>
-            ) : null}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                <div className="font-semibold text-[var(--muted-foreground)]">{addLabel ?? t("common.addTeam")}</div>
+              </MenuItem>
+            </>
+          ) : null}
+        </Menu>
       </SidebarMenuItem>
     </SidebarMenu>
   );

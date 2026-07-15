@@ -2,7 +2,7 @@ import { useMemo, useState, type KeyboardEvent } from "react";
 import { ChevronDown, Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
 import { AppSelect } from "@/components/ui/app-select";
-import { Input } from "@/components/ui/input";
+import TextField from "@mui/material/TextField";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score-sheet-panel";
 import { cn } from "@/lib/utils";
@@ -103,11 +103,17 @@ export function MobileScoreSheetPanel({
         <div className="mt-3 grid grid-cols-[minmax(0,1fr)_112px] gap-2">
           <label className="relative block min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
+            <TextField
               value={searchQuery}
               onChange={(event) => onSearchQueryChange(event.target.value)}
               placeholder="Tìm học sinh"
-              className="h-11 rounded-[14px] border-[#d9e2ef] bg-white pl-9 text-[15px] font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiInputBase-root": { height: 44, bgcolor: "white", borderRadius: "14px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d9e2ef" },
+                "& .MuiInputBase-input": { pl: "36px", fontSize: "15px", fontWeight: 600 },
+              }}
             />
           </label>
           <label className="flex h-11 min-w-0 items-center gap-1 rounded-[14px] border border-[#d9e2ef] bg-white px-2 text-[12px] font-semibold text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">

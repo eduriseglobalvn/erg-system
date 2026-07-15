@@ -1,5 +1,5 @@
 /**
- * CenterUp DashboardCard — EXACT pixel match
+ * ERG DashboardCard — compact operational panel
  *   - Border: 1px solid rgba(145,158,171,0.12)
  *   - Radius: 8px
  *   - Padding: 20px 24px

@@ -40,6 +40,50 @@ describe("localQuizAttemptStore bookmarks", () => {
     expect(restored?.bookmarkedQuestionIds).toEqual(["question-2"]);
   });
 
+  test("keeps local attempt sessions separated by tenant portal and account", async () => {
+    const studentA = await localQuizAttemptStore.createSession({
+      accountId: "student-a",
+      assignmentId: "assignment-1",
+      attemptId: "attempt-a",
+      packageHash: "hash-1",
+      portal: "elearning",
+      quizId: "quiz-1",
+      quizVersion: "v1",
+      submitIdempotencyKey: "submit-a",
+      tenantId: "tenant-a",
+    });
+    const studentB = await localQuizAttemptStore.createSession({
+      accountId: "student-b",
+      assignmentId: "assignment-1",
+      attemptId: "attempt-b",
+      packageHash: "hash-1",
+      portal: "elearning",
+      quizId: "quiz-1",
+      quizVersion: "v1",
+      submitIdempotencyKey: "submit-b",
+      tenantId: "tenant-a",
+    });
+
+    await localQuizAttemptStore.saveAnswer(studentA, "question-1", { choiceId: "a" });
+    await localQuizAttemptStore.saveAnswer(studentB, "question-1", { choiceId: "b" });
+
+    const restoredA = await localQuizAttemptStore.getSession("assignment-1", "quiz-1", {
+      accountId: "student-a",
+      portal: "elearning",
+      tenantId: "tenant-a",
+    });
+    const restoredB = await localQuizAttemptStore.getSession("assignment-1", "quiz-1", {
+      accountId: "student-b",
+      portal: "elearning",
+      tenantId: "tenant-a",
+    });
+
+    expect(restoredA?.attemptId).toBe("attempt-a");
+    expect(restoredA?.answers["question-1"]).toEqual({ choiceId: "a" });
+    expect(restoredB?.attemptId).toBe("attempt-b");
+    expect(restoredB?.answers["question-1"]).toEqual({ choiceId: "b" });
+  });
+
   test("defaults legacy stored sessions to an empty bookmark list", async () => {
     const legacySession = {
       version: 1,

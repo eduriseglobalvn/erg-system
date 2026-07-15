@@ -14,6 +14,7 @@ import {
 } from "@/components/mui-icon-shim";
 
 import { LearningResourceExplorerTreeRow, WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
+import { TaxonomyIcon, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { StudioNode, StudioNodeKind } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
 export const ExplorerTreeRow = memo(function ExplorerTreeRow({
@@ -58,6 +59,10 @@ export const ExplorerTreeRow = memo(function ExplorerTreeRow({
 
 export function getNodeIcon(node: StudioNode, expanded?: boolean) {
   const displayKind = node.metadata?.displayKind;
+  const taxonomyRole = getNodeTaxonomyRole(node);
+  if (taxonomyRole) {
+    return <TaxonomyIcon iconId={node.metadata?.iconId} iconColor={node.metadata?.iconColor} role={taxonomyRole} open={expanded} />;
+  }
   if (displayKind === "lecture") {
     return <Presentation className="h-4 w-4" />;
   }
@@ -115,15 +120,33 @@ export function getNodeIcon(node: StudioNode, expanded?: boolean) {
   return <HelpCircle className="h-4 w-4" />;
 }
 
+export function getNodeTileIcon(node: StudioNode, expanded?: boolean) {
+  const taxonomyRole = getNodeTaxonomyRole(node);
+  if (taxonomyRole) {
+    return <TaxonomyIcon iconId={node.metadata?.iconId} iconColor={node.metadata?.iconColor} role={taxonomyRole} open={expanded} size="lg" />;
+  }
+  return getNodeIcon(node, expanded);
+}
+
+function getNodeTaxonomyRole(node: StudioNode): TaxonomyRole | null {
+  if (node.metadata?.taxonomyRole === "level" || node.kind === "group" || node.kind === "category" || node.kind === "bookSeries") {
+    return "level";
+  }
+  if (node.metadata?.taxonomyRole === "topic" || node.kind === "lesson" || node.kind === "section" || node.kind === "topic") {
+    return "topic";
+  }
+  return null;
+}
+
 export function getNodeKindLabel(kind: StudioNodeKind) {
   const labels: Record<StudioNodeKind, string> = {
-    group: "Nhóm học liệu",
-    lesson: "Bài học",
+    group: "Level",
+    lesson: "Chủ đề",
     bookSeries: "Bộ sách / Chương trình",
-    category: "Nhóm học liệu",
+    category: "Level",
     folder: "Nhóm hệ thống",
-    section: "Bài học",
-    topic: "Chủ đề / Bài học",
+    section: "Chủ đề",
+    topic: "Chủ đề",
   };
   return labels[kind] ?? kind;
 }

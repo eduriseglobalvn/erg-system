@@ -27,8 +27,8 @@ skills:
     use: "@tanstack/router-core#router-core/ssr"
   - when: "Full type inference philosophy (never cast, never annotate inferred values), Register module declaration, from narrowing on hooks and Link, strict:false for shared components, getRouteApi for code-split typed access, addChildren with object syntax for TS perf, LinkProps and ValidateLinkOptions type utilities, as const satisfies pattern."
     use: "@tanstack/router-core#router-core/type-safety"
-  - when: "CenterUp-inspired UI design for ERG System. shadcn/ui + Radix + Tailwind v4. Data tables, sidebar, forms, badges, cards. NOT for landing pages or marketing sites. ERP SaaS UI only."
-    use: "@/agents/skills/centerup-ui-design"
+  - when: "ERG MUI Design System for ERG System. MUI-first operational UI with MUI Material, MUI Icons, MUI System/sx, dense enterprise tables, dialogs, drawers, forms, badges, and cards. NOT for landing pages or marketing sites. ERP SaaS UI only."
+    use: "@/agents/skills/erg-system-ui"
 <!-- intent-skills:end -->
 
 # Working Rules
@@ -37,7 +37,7 @@ skills:
 
 Follow this structure for all frontend work:
 
-```
+```text
 src/
 ├── app/              # Route tree + page components (type-safe TanStack Router)
 │   ├── route-tree.ts
@@ -48,7 +48,8 @@ src/
 │       ├── crm/
 │       └── elearning/
 ├── components/
-│   ├── ui/           # shadcn/ui components (CenterUp-styled)
+│   ├── erg-mui/      # ERG MUI wrappers and adapters for new operational UI
+│   ├── ui/           # Legacy shadcn/Radix compatibility only
 │   ├── portal/       # Sidebar, Header, SidebarLayout
 │   └── shared/       # Shared business components
 ├── features/         # Feature modules (business logic)
@@ -67,27 +68,43 @@ src/
 
 ## Non-Negotiable Rules
 
-1. ✅ Dùng TanStack Router (type-safe), KHÔNG if/else chain routing
-2. ✅ Dùng shadcn/ui, KHÔNG dùng MUI, KHÔNG dashboard-kit
-3. ✅ Dùng lucide-react icons, KHÔNG @mui/icons-material
-4. ✅ Theme qua CSS variables, KHÔNG next-themes
-5. ✅ Shell components < 200 dòng, tách sub-components
-6. ✅ Pages mỏng - chỉ compose feature components
-7. ✅ Business logic trong features/, KHÔNG trong pages
-8. ✅ Skeleton screens (không spinner) cho loading
-9. ✅ TanStack Query persist cho offline
-10. ✅ Code-split mỗi route cho performance
+1. Use TanStack Router (type-safe), no if/else chain routing.
+2. Use the ERG MUI Design System: MUI Material + ERG wrappers, no dashboard-kit for new surfaces.
+3. Use MUI Icons with path imports, and do not add lucide-react to new code.
+4. Style new operational UI through MUI System/sx and MUI theme tokens.
+5. Shell components stay under 200 lines; split sub-components.
+6. Pages stay thin and only compose feature components.
+7. Business logic belongs in `features/`, not pages.
+8. Use skeleton screens, not blocking spinners, for loading.
+9. Keep TanStack Query persist for offline-ready core features.
+10. Code-split each route for performance.
 
-## CenterUp Design Tokens (EXACT — extracted via Playwright)
+## Legacy UI Rule
 
-- Primary: #696CFF (PURPLE) — KHÔNG phải blue
-- Sidebar: #1C252E (dark), 280px
-- Font: Manrope Variable (body), JetBrains Mono (code)
-- Border: rgba(145, 158, 171, 0.2) dashed
-- Border radius: 8px (base)
-- Table cell: 6px 16px, font 14px
-- Header: 64px, border-bottom
-- Status badges: success=green(#22C55E), warning=gold(#FFAB00), danger=red(#FF5630), info=cyan(#00B8D9)
+- shadcn/ui, Radix, lucide-react, and Tailwind utility classes are legacy-only for old code paths.
+- New operational/admin UI must use `src/components/erg-mui`, MUI Material path imports, MUI Icons path imports, and MUI System/sx.
+- TanStack Router, TanStack Query, route code splitting, skeleton loading, and offline query persistence remain required.
+
+## Locked UI: Matching Question
+
+The current matching question UI is approved and locked. Do not edit the matching question card layout, puzzle connectors, drag/drop visual effects, active drag color, source placeholder color, or practice/editor matching layout unless the user explicitly asks for matching changes or confirms permission.
+
+Protected areas include:
+
+- `src/components/quiz/questions/matching-question.tsx`
+- Matching puzzle styles in `src/styles/globals.css`
+- Matching/practice overrides in `src/features/lcms/quiz/quiz-editor/styles/classic-editor.css`
+
+## ERG MUI Design Tokens
+
+- Primary: use `primary` in `src/themes/erg-enterprise-tokens.ts`.
+- Sidebar: 280px.
+- Font: Manrope Variable for body, JetBrains Mono for code.
+- Border, surface, status, radius, and shadow come from ERG MUI theme tokens.
+- Border radius: 8px base, controlled through MUI theme/wrappers.
+- Table cell: dense enterprise rhythm, font 14px.
+- Header: 64px, border-bottom.
+- Status badges: use MUI palette success/warning/error/info.
 
 ## Performance Budget
 
@@ -99,6 +116,6 @@ src/
 ## PWA Strategy
 
 - vite-plugin-pwa with IndexedDB + TanStack Query persist
-- Offline-first cho core features (attendance, scores, homework)
-- Connection quality detection (3G/4G/WiFi)
-- Adaptive loading (giảm ảnh trên 3G)
+- Offline-first for core features: attendance, scores, homework
+- Connection quality detection: 3G/4G/WiFi
+- Adaptive loading: reduce images on 3G

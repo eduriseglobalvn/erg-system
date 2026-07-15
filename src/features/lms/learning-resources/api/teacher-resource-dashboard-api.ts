@@ -1,14 +1,23 @@
 import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
-import { listLearningResourceSubjects, type LearningResourceTaxonomyOption } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import {
+  listLearningResourceResources,
+  listLearningResourceSubjects,
+  loadLearningResourceTaxonomies,
+  type LearningResourceResourceCard,
+  type LearningResourceTaxonomyOption,
+} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import { listManageableUnits, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type {
   LearningResourceManagedSchool,
+  LearningResourceTeacherDashboardNode,
   LearningResourceTeacherDashboardSubject,
   LearningResourceTeacherProgressDetail,
+  LearningResourceTeacherProgressSummary,
   LearningResourceTeacherRecentLecture,
   LearningResourceTeacherSubjectTree,
 } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
-import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { hasApiBase } from "@/lib/api-client";
+import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 
 const subjectProgressCache = new Map<string, Promise<LearningResourceTeacherProgressDetail>>();
 const subjectTreeCache = new Map<string, Promise<LearningResourceTeacherSubjectTree>>();
@@ -29,6 +38,10 @@ const fallbackSubjectDescriptions: Record<string, string> = {
   mos: "Lộ trình bài dạy, file thực hành và bài kiểm tra MOS.",
 };
 
+function getTeacherDashboardCacheScope() {
+  const tenantId = import.meta.env.VITE_TENANT_ID?.trim() || "erg";
+  return [tenantId, "lms", getStoredAccessToken("lms") ?? "anonymous"].join(":");
+}
 function fallbackManagedSchools(): LearningResourceManagedSchool[] {
   return classroomSchools.map((school) => ({
     id: school.id,
@@ -42,9 +55,7 @@ export function buildManagedSchoolsFromUnits(units: LmsEducationUnitDTO[] | null
     ? units.filter((unit) => unit?.id && unit?.name && unit.type !== "system" && unit.code !== "ERG-SYSTEM" && unit.code !== "HOCLIEU-STUDIO")
     : [];
 
-  if (!normalizedUnits.length) {
-    return fallbackManagedSchools();
-  }
+  if (!normalizedUnits.length) return [];
 
   return normalizedUnits.map((unit) => ({
     id: unit.id,
@@ -61,7 +72,8 @@ export async function listLearningResourceManagedSchools() {
   try {
     const unitsResult = await listManageableUnits();
     return buildManagedSchoolsFromUnits(unitsResult);
-  } catch {
+  } catch (error) {
+    if (hasApiBase()) throw error;
     return fallbackManagedSchools();
   }
 }
@@ -89,22 +101,13 @@ export async function listLearningResourceTeacherSubjects(input: { schoolId: str
 }
 
 export function loadLearningResourceTeacherSubjectTree(input: { subjectId: string; schoolId: string; academicYear: string; parentId?: string }) {
-  const cacheKey = [input.subjectId, input.parentId ?? "root", input.schoolId, input.academicYear].join("::");
+  const cacheKey = [getTeacherDashboardCacheScope(), input.subjectId, input.parentId ?? "root", input.schoolId, input.academicYear].join("::");
   const inFlight = subjectTreeCache.get(cacheKey);
   if (inFlight) {
     return inFlight;
   }
 
-  const search = new URLSearchParams();
-  search.set("schoolId", input.schoolId);
-  search.set("academicYear", input.academicYear);
-  if (input.parentId) {
-    search.set("parentId", input.parentId);
-  }
-
-  const request = withTeacherDashboardTimeout(
-    apiRequest<LearningResourceTeacherSubjectTree>(`/api/hoclieu/teacher/subjects/${encodeURIComponent(input.subjectId)}/tree?${search.toString()}`),
-  ).finally(() => {
+  const request = withTeacherDashboardTimeout(buildTeacherSubjectTree(input)).finally(() => {
     subjectTreeCache.delete(cacheKey);
   });
 
@@ -113,34 +116,172 @@ export function loadLearningResourceTeacherSubjectTree(input: { subjectId: strin
 }
 
 export function listLearningResourceRecentOpened(input: { schoolId: string; academicYear: string; limit?: number }) {
-  const search = new URLSearchParams();
-  search.set("schoolId", input.schoolId);
-  search.set("academicYear", input.academicYear);
-  search.set("limit", String(input.limit ?? 8));
-  return withTeacherDashboardTimeout(apiRequest<LearningResourceTeacherRecentLecture[]>(`/api/hoclieu/teacher/recent-opened?${search.toString()}`));
+  return withTeacherDashboardTimeout(buildRecentOpened(input));
 }
 
 export function loadLearningResourceTeacherProgress(input: { subjectId: string; schoolId: string; academicYear: string; nodeId?: string }) {
-  const cacheKey = [input.subjectId, input.nodeId ?? "root", input.schoolId, input.academicYear].join("::");
+  const cacheKey = [getTeacherDashboardCacheScope(), input.subjectId, input.nodeId ?? "root", input.schoolId, input.academicYear].join("::");
   const inFlight = subjectProgressCache.get(cacheKey);
   if (inFlight) {
     return inFlight;
   }
 
-  const search = new URLSearchParams();
-  search.set("subjectId", input.subjectId);
-  search.set("schoolId", input.schoolId);
-  search.set("academicYear", input.academicYear);
-  if (input.nodeId) {
-    search.set("nodeId", input.nodeId);
-  }
-
-  const request = withTeacherDashboardTimeout(apiRequest<LearningResourceTeacherProgressDetail>(`/api/hoclieu/teacher/progress?${search.toString()}`)).finally(() => {
+  const request = withTeacherDashboardTimeout(buildTeacherProgress(input)).finally(() => {
     subjectProgressCache.delete(cacheKey);
   });
 
   subjectProgressCache.set(cacheKey, request);
   return request;
+}
+
+async function buildTeacherSubjectTree(input: { subjectId: string; schoolId: string; academicYear: string; parentId?: string }): Promise<LearningResourceTeacherSubjectTree> {
+  const [taxonomy, resourceList] = await Promise.all([
+    loadLearningResourceTaxonomies(),
+    listLearningResourceResources({ subjectId: input.subjectId, limit: 100 }),
+  ]);
+  const subject = taxonomy.subjects.find((item) => item.id === input.subjectId);
+  const resources = resourceList.data.filter((resource) => resource.subjectId === input.subjectId);
+  const children = input.parentId
+    ? childNodesForParent(input.parentId, taxonomy.categories, taxonomy.topics, resources, subject)
+    : taxonomy.categories
+        .filter((category) => category.subjectId === input.subjectId || category.parentId === input.subjectId)
+        .map((category) => taxonomyNodeToTeacherNode(category, "group", "category", subject, countResources(resources, category.id)));
+
+  return {
+    subjectId: input.subjectId,
+    subjectLabel: subject?.label || input.subjectId,
+    schoolId: input.schoolId,
+    academicYear: input.academicYear,
+    parentId: input.parentId,
+    breadcrumbs: [
+      {
+        id: input.subjectId,
+        label: subject?.label || input.subjectId,
+        kind: "folder",
+      },
+    ],
+    children,
+    progress: progressSummary(children.length),
+  };
+}
+
+function childNodesForParent(
+  parentId: string,
+  categories: LearningResourceTaxonomyOption[],
+  topics: LearningResourceTaxonomyOption[],
+  resources: LearningResourceResourceCard[],
+  subject?: LearningResourceTaxonomyOption,
+) {
+  const topicChildren = topics
+    .filter((topic) => topic.categoryId === parentId || topic.parentId === parentId)
+    .map((topic) => taxonomyNodeToTeacherNode(topic, "lesson", "topic", subject, countResources(resources, topic.id)));
+  if (topicChildren.length) return topicChildren;
+
+  const resourceChildren = resources
+    .filter((resource) => resource.topicId === parentId || resource.sectionId === parentId || resource.categoryId === parentId)
+    .map((resource) => resourceToTeacherNode(resource, subject));
+  if (resourceChildren.length) return resourceChildren;
+
+  return categories
+    .filter((category) => category.parentId === parentId)
+    .map((category) => taxonomyNodeToTeacherNode(category, "group", "category", subject, countResources(resources, category.id)));
+}
+
+async function buildRecentOpened(input: { schoolId: string; academicYear: string; limit?: number }): Promise<LearningResourceTeacherRecentLecture[]> {
+  const [subjects, resourceList] = await Promise.all([listLearningResourceSubjects(), listLearningResourceResources({ limit: input.limit ?? 8 })]);
+  const subjectById = new Map(subjects.map((subject) => [subject.id, subject]));
+  return resourceList.data
+    .slice(0, input.limit ?? 8)
+    .map((resource): LearningResourceTeacherRecentLecture => {
+      const subject = subjectById.get(resource.subjectId);
+      return {
+        id: `recent-${resource.id}`,
+        subjectId: resource.subjectId,
+        subjectLabel: subject?.label || resource.subjectId,
+        nodeId: resource.topicId || resource.sectionId || resource.categoryId,
+        nodeLabel: resource.title,
+        nodeKind: "resource",
+        resourceId: resource.id,
+        resourceTitle: resource.title,
+        resourceType: resource.selectedFileType,
+        openedAt: resource.updatedAt || new Date(0).toISOString(),
+      };
+    });
+}
+
+async function buildTeacherProgress(input: { subjectId: string; schoolId: string; academicYear: string; nodeId?: string }): Promise<LearningResourceTeacherProgressDetail> {
+  const resourceList = await listLearningResourceResources({ subjectId: input.subjectId, limit: 100 });
+  const resources = resourceList.data.filter((resource) => {
+    if (!input.nodeId) return resource.subjectId === input.subjectId;
+    return resource.categoryId === input.nodeId || resource.sectionId === input.nodeId || resource.topicId === input.nodeId;
+  });
+  return {
+    subjectId: input.subjectId,
+    nodeId: input.nodeId,
+    schoolId: input.schoolId,
+    academicYear: input.academicYear,
+    summary: progressSummary(resources.length),
+    items: resources.map((resource) => ({
+      id: resource.id,
+      label: resource.title,
+      kind: "resource",
+      status: "pending",
+      progressRate: 0,
+    })),
+  };
+}
+
+function taxonomyNodeToTeacherNode(
+  node: LearningResourceTaxonomyOption,
+  kind: "group" | "lesson",
+  sourceKind: "category" | "topic",
+  subject: LearningResourceTaxonomyOption | undefined,
+  totalCount: number,
+): LearningResourceTeacherDashboardNode {
+  return {
+    id: node.id,
+    label: node.label,
+    kind,
+    sourceKind,
+    parentId: node.parentId,
+    subjectId: subject?.id || node.subjectId,
+    subjectLabel: subject?.label,
+    description: node.description,
+    hasChildren: totalCount > 0,
+    progress: progressSummary(totalCount),
+    updatedAt: undefined,
+  };
+}
+
+function resourceToTeacherNode(resource: LearningResourceResourceCard, subject?: LearningResourceTaxonomyOption): LearningResourceTeacherDashboardNode {
+  return {
+    id: resource.id,
+    label: resource.title,
+    kind: "resource",
+    parentId: resource.topicId || resource.sectionId || resource.categoryId,
+    subjectId: resource.subjectId,
+    subjectLabel: subject?.label,
+    resourceId: resource.id,
+    resourceType: resource.selectedFileType,
+    thumbnailUrl: resource.thumbnailUrl,
+    fileTypeBadge: resource.fileTypeBadge || resource.selectedFileType,
+    hasChildren: false,
+    progress: progressSummary(1),
+    updatedAt: resource.updatedAt,
+  };
+}
+
+function countResources(resources: LearningResourceResourceCard[], nodeId: string) {
+  return resources.filter((resource) => resource.categoryId === nodeId || resource.sectionId === nodeId || resource.topicId === nodeId).length;
+}
+
+function progressSummary(totalCount: number): LearningResourceTeacherProgressSummary {
+  return {
+    progressRate: 0,
+    taughtCount: 0,
+    totalCount,
+    pendingCount: totalCount,
+  };
 }
 
 export function getCurrentAcademicYear(now = new Date()) {

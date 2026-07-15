@@ -171,8 +171,8 @@ export const LEARNING_RESOURCE_CATEGORIES: LearningResourceCategory[] = [
   { id: "mos", label: "MOS", parentId: "chung-chi-tin-hoc", icon: "certificate" },
 ];
 
-const MOCK_GOOGLE_PDF_EMBED_URL = "/mock/hoclieu/global-success-preview.b64";
-const MOCK_SLIDES_EMBED_URL = "/mock/hoclieu/slide-preview.html";
+const MOCK_GOOGLE_PDF_EMBED_URL = "/mock/learning-resources/global-success-preview.b64";
+const MOCK_SLIDES_EMBED_URL = "/mock/learning-resources/slide-preview.html";
 
 const commonLectureUnits: LearningResourceViewerUnit[] = [
   {

@@ -1,6 +1,6 @@
 /**
- * CenterUp DataTable — MUI + TanStack Table v8
- * EXACT CenterUp style:
+ * ERG DataTable — MUI + TanStack Table v8
+ * Legacy operational style:
  *   - Header: 14px/600 #637381, bg white, padding 6px 16px
  *   - Cell: 14px/400 #1C252E, padding 6px 16px
  *   - Border: 1px dashed rgba(145,158,171,0.2)

@@ -1,9 +1,9 @@
 import { MessageSquare as ForumOutlinedIcon } from "lucide-react";
 import { CheckCircle2 as TaskAltOutlinedIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ProgressBar } from "@/components/ui/progress";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import LinearProgress from "@mui/material/LinearProgress";
 import type {
   StudentDashboardAssignment,
   StudentDashboardProfile,
@@ -74,13 +74,14 @@ export function StudentDashboardMobileOverview({
 
           <div className="mt-4 flex gap-3">
             <Button
+              variant="contained"
               className="h-10 flex-1 rounded-lg bg-[#696CFF] text-[14px] font-semibold text-white shadow-sm hover:bg-[#585BE0]"
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {primaryAction}
             </Button>
             <Button
-              variant="outline"
+              variant="outlined"
               className="h-10 rounded-lg border-slate-200 bg-white px-4 text-[14px] font-medium text-slate-700"
               onClick={() => onPageChange("assignments")}
             >
@@ -107,8 +108,9 @@ export function StudentDashboardMobileOverview({
           ) : null}
 
           <Button
-            variant="outline"
-            className="mt-4 h-10 w-full rounded-lg border-slate-200 bg-white text-[14px] font-medium text-slate-700"
+            variant="outlined"
+            fullWidth
+            className="mt-4 h-10 rounded-lg border-slate-200 bg-white text-[14px] font-medium text-slate-700"
             onClick={() => onPageChange("announcements")}
           >
             Thông báo giáo viên
@@ -152,10 +154,18 @@ export function StudentDashboardMobileOverview({
                     <span>Progress</span>
                     <span>{assignment.progressRate}%</span>
                   </div>
-                  <ProgressBar
+                  <LinearProgress
+                    variant="determinate"
                     value={assignment.progressRate}
-                    className="mt-2 h-2 bg-slate-100"
-                    indicatorClassName={assignment.status === "overdue" ? "bg-[#FF5630]" : "bg-[#696CFF]"}
+                    className="mt-2"
+                    sx={{
+                      height: 8,
+                      borderRadius: 1,
+                      bgcolor: "rgb(241 245 249)",
+                      "& .MuiLinearProgress-bar": {
+                        bgcolor: assignment.status === "overdue" ? "#FF5630" : "#696CFF",
+                      },
+                    }}
                   />
                   <p className="mt-3 text-[14px] leading-6 text-slate-600">{assignment.focusNote}</p>
                 </div>

@@ -100,15 +100,6 @@ function FeedbackRow({
           </div>
         </label>
 
-        <label className="classic-editor__feedback-field is-score">
-          <span>{t("common.score")}</span>
-          <input
-            type="number"
-            min={0}
-            value={row.score}
-            onChange={(event) => onChange(row.id, { score: Number(event.target.value) })}
-          />
-        </label>
       </div>
     </section>
   );

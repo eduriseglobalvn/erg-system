@@ -1,3 +1,5 @@
+import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+
 export type ContentDialogNodeKind = "group" | "lesson" | "folder";
 export type ContentDialogCreateMode = "subject" | "root" | "child";
 export type ContentDialogStructureKind = "category" | "section";
@@ -15,6 +17,10 @@ export type ExerciseLibraryItem = {
   difficulty: "Cơ bản" | "Vận dụng" | "Nâng cao";
   questionCount: number;
   durationMinutes: number;
+  sourceQuizId?: string;
+  sourceLabel?: string;
+  quizKind?: "train" | "test";
+  scopeLabel?: string;
 };
 
 export type ExerciseFilterContext = {
@@ -46,16 +52,9 @@ export function normalizeGoogleSlidesUrl(input: string) {
     const isGoogleSlides = url.hostname.includes("docs.google.com") && url.pathname.includes("/presentation/");
     if (!isGoogleSlides) return trimmed;
 
-    const pathname = url.pathname.replace(/\/$/, "");
-    if (pathname.endsWith("/embed")) {
-      return `${url.origin}${pathname}`;
-    }
-
-    if (pathname.endsWith("/pub")) {
-      return `${url.origin}${pathname}?start=false&loop=false&delayms=3000`;
-    }
-
-    return `${url.origin}${pathname}/embed?start=false&loop=false&delayms=3000`;
+    const presentationId = url.pathname.match(/\/presentation\/d\/([^/]+)/)?.[1];
+    if (!presentationId) return trimmed;
+    return `${url.origin}/presentation/d/${presentationId}/embed?start=false&loop=false&delayms=3000`;
   } catch {
     return trimmed;
   }
@@ -102,17 +101,76 @@ export function normalizeGoogleViewerUrl(input: string) {
   }
 }
 
-export function filterMockExercises(items: ExerciseLibraryItem[], context: ExerciseFilterContext) {
+export function mapQuizBankItemsToExercises(items: QuizBankItem[]): ExerciseLibraryItem[] {
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title,
+    subjectId: item.subjectId,
+    subjectLabel: item.subjectLabel,
+    topicLabel: item.topicLabels.join(", "),
+    sectionLabel: item.levelLabel,
+    difficulty: item.kind === "test" ? "Vận dụng" : "Cơ bản",
+    questionCount: item.questionCount,
+    durationMinutes: parseDurationMinutes(item.durationLabel),
+    sourceQuizId: item.id,
+    sourceLabel: "Quiz bank",
+    quizKind: item.kind,
+    scopeLabel: item.scopeLabel,
+  }));
+}
+
+export function resolveExerciseLibraryItems(
+  quizBankItems: QuizBankItem[],
+  fallbackItems: ExerciseLibraryItem[],
+  apiBacked: boolean,
+): ExerciseLibraryItem[] {
+  const mappedItems = mapQuizBankItemsToExercises(quizBankItems);
+  if (mappedItems.length) return mappedItems;
+  return apiBacked ? [] : fallbackItems;
+}
+
+export function filterExerciseLibraryItems(items: ExerciseLibraryItem[], context: ExerciseFilterContext) {
   const keyword = context.query.trim().toLowerCase();
   const subjectLabel = context.subjectLabel?.trim().toLowerCase();
   const topicKeyword = context.topicLabel?.trim().toLowerCase();
   const sectionKeyword = context.sectionLabel?.trim().toLowerCase();
 
   return items.filter((item) => {
-    if (context.subjectId && item.subjectId !== context.subjectId && subjectLabel !== item.subjectLabel.toLowerCase()) return false;
-    if (topicKeyword && !`${item.topicLabel ?? ""} ${item.title}`.toLowerCase().includes(topicKeyword)) return false;
-    if (sectionKeyword && !`${item.sectionLabel ?? ""} ${item.title}`.toLowerCase().includes(sectionKeyword)) return false;
+    if (
+      context.subjectId &&
+      item.subjectId !== context.subjectId &&
+      normalizeForExerciseMatch(subjectLabel ?? "") !== normalizeForExerciseMatch(item.subjectLabel)
+    ) {
+      return false;
+    }
+    if (topicKeyword && !matchesExerciseText(`${item.topicLabel ?? ""} ${item.title}`, topicKeyword)) return false;
+    if (sectionKeyword && !matchesExerciseText(`${item.sectionLabel ?? ""} ${item.title}`, sectionKeyword)) return false;
     if (!keyword) return true;
     return `${item.title} ${item.topicLabel ?? ""} ${item.sectionLabel ?? ""} ${item.difficulty}`.toLowerCase().includes(keyword);
   });
+}
+
+export function filterMockExercises(items: ExerciseLibraryItem[], context: ExerciseFilterContext) {
+  return filterExerciseLibraryItems(items, context);
+}
+
+function parseDurationMinutes(value: string) {
+  const match = value.match(/\d+/);
+  return match ? Number(match[0]) : 15;
+}
+
+function matchesExerciseText(haystack: string, rawNeedle: string) {
+  const normalizedHaystack = normalizeForExerciseMatch(haystack);
+  const normalizedNeedle = normalizeForExerciseMatch(rawNeedle);
+  if (!normalizedNeedle) return true;
+  return normalizedHaystack.includes(normalizedNeedle) || normalizedNeedle.includes(normalizedHaystack);
+}
+
+function normalizeForExerciseMatch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }

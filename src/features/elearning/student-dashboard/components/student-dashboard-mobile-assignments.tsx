@@ -1,9 +1,9 @@
 import { ClipboardCheck as AssignmentTurnedInOutlinedIcon } from "lucide-react";
 import { ChevronRight as ChevronRightRoundedIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ProgressBar } from "@/components/ui/progress";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import LinearProgress from "@mui/material/LinearProgress";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
@@ -78,10 +78,18 @@ export function StudentDashboardMobileAssignments({
                   <span>{copy.progressLabel}</span>
                   <span>{assignment.progressRate}%</span>
                 </div>
-                <ProgressBar
+                <LinearProgress
+                  variant="determinate"
                   value={assignment.progressRate}
-                  className="mt-2 h-2 bg-slate-100"
-                  indicatorClassName={assignment.status === "overdue" ? "bg-[#FF5630]" : "bg-[#696CFF]"}
+                  className="mt-2"
+                  sx={{
+                    height: 8,
+                    borderRadius: 1,
+                    bgcolor: "rgb(241 245 249)",
+                    "& .MuiLinearProgress-bar": {
+                      bgcolor: assignment.status === "overdue" ? "#FF5630" : "#696CFF",
+                    },
+                  }}
                 />
               </div>
 
@@ -95,11 +103,12 @@ export function StudentDashboardMobileAssignments({
                   </div>
                 </div>
                 <Button
+                  variant="contained"
+                  endIcon={<ChevronRightRoundedIcon size={16} />}
                   className="h-11 rounded-lg bg-[#696CFF] px-4 text-white shadow-sm hover:bg-[#585BE0]"
                   onClick={() => onOpenAssignment(assignment.id)}
                 >
                   {copy.assignmentAction(assignment.status)}
-                  <ChevronRightRoundedIcon size={16} />
                 </Button>
               </div>
             </Card>

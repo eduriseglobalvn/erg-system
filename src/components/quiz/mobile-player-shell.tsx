@@ -1,12 +1,14 @@
-import type { CSSProperties, ReactNode } from "react";
-import { Bookmark, ChevronLeft, ChevronRight, List, X } from "lucide-react";
+import { useState, type CSSProperties, type ReactNode } from "react";
+import { ChevronLeft, ChevronRight, Flag, List, X } from "lucide-react";
+import Drawer from "@mui/material/Drawer";
 
-import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { QuestionNavigator } from "@/components/quiz/question-navigator";
 import type { Question, Quiz, QuizResultDisplay } from "@/lib/types";
 
 type MobilePlayerShellProps = {
   allQuestionsAnswered: boolean;
   answeredCount: number;
+  answeredQuestionIds: string[];
   attemptCompleted: boolean;
   bookmarkCount: number;
   bookmarkedQuestionIds: string[];
@@ -16,6 +18,9 @@ type MobilePlayerShellProps = {
   isFirstQuestion: boolean;
   isLastQuestion: boolean;
   isTestingMode: boolean;
+  isTrainingMode: boolean;
+  currentAnswerComplete: boolean;
+  currentQuestionSubmitted: boolean;
   playerCardStyle: CSSProperties;
   canvasStyle: CSSProperties;
   headerStyle: CSSProperties;
@@ -37,6 +42,7 @@ type MobilePlayerShellProps = {
   onRequestSubmit: () => void;
   onReview: () => void;
   onStart: () => void;
+  onSubmitCurrentQuestion: () => void;
   onToggleBookmark: () => void;
   body: ReactNode;
   resultBody?: ReactNode;
@@ -45,6 +51,7 @@ type MobilePlayerShellProps = {
 export function MobilePlayerShell({
   allQuestionsAnswered,
   answeredCount,
+  answeredQuestionIds,
   attemptCompleted,
   bookmarkCount,
   bookmarkedQuestionIds,
@@ -53,6 +60,9 @@ export function MobilePlayerShell({
   isFirstQuestion,
   isLastQuestion,
   isTestingMode,
+  isTrainingMode,
+  currentAnswerComplete,
+  currentQuestionSubmitted,
   playerCardStyle,
   modeBadgeStyle,
   question,
@@ -70,6 +80,7 @@ export function MobilePlayerShell({
   onRequestSubmit,
   onReview,
   onStart,
+  onSubmitCurrentQuestion,
   onToggleBookmark,
   body,
   resultBody,
@@ -90,21 +101,21 @@ export function MobilePlayerShell({
           <div className="px-4 py-5">
             <div className="rounded-lg border border-slate-200 bg-white px-4 py-5 shadow-sm">
               <div className="inline-flex rounded-md px-3 py-1 text-[11px] font-semibold" style={modeBadgeStyle}>
-                {quiz.settings.mode === "training" ? "Practice mode" : "Test mode"}
+                {quiz.settings.mode === "training" ? "Chế độ luyện tập" : "Chế độ kiểm tra"}
               </div>
               <p className="mt-4 text-sm leading-6 text-slate-600">
                 Bài làm trên mobile hiển thị theo dạng tối giản để dễ thao tác trên Android.
               </p>
               <div className="mt-5 grid grid-cols-2 gap-3 text-center">
-                <IntroStat label="Questions" value={String(questions.length)} />
-                <IntroStat label="Mode" value={quiz.settings.mode} />
+                <IntroStat label="Số câu" value={String(questions.length)} />
+                <IntroStat label="Chế độ" value={quiz.settings.mode === "training" ? "Luyện tập" : "Kiểm tra"} />
               </div>
               <button
                 type="button"
                 className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
                 onClick={onStart}
               >
-                Start quiz
+                Bắt đầu làm bài
               </button>
             </div>
           </div>
@@ -122,18 +133,19 @@ export function MobilePlayerShell({
         <div className="sticky top-0 z-30 border-b border-slate-200 bg-white">
           <div className="relative mx-auto flex min-h-10 max-w-md items-center justify-center px-4 py-2">
             <div className="text-sm font-semibold text-slate-700">
-              {attemptCompleted && !reviewingSubmittedAttempt ? quiz.title : `Question ${currentIndex + 1} of ${questions.length}`}
+              {attemptCompleted && !reviewingSubmittedAttempt ? quiz.title : `Câu ${currentIndex + 1} / ${questions.length}`}
             </div>
             <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3 text-slate-400">
               <button
                 type="button"
-                aria-label={isBookmarked ? "Remove bookmark" : "Add bookmark"}
+                aria-label={isBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
                 className="grid h-7 w-7 place-items-center"
                 onClick={onToggleBookmark}
               >
-                <Bookmark className={`h-4 w-4 ${isBookmarked ? "fill-current text-[var(--erg-blue)]" : ""}`} />
+                <Flag className={`h-4 w-4 ${isBookmarked ? "fill-current text-[#FF5630]" : ""}`} />
               </button>
               <QuestionSheet
+                answeredQuestionIds={answeredQuestionIds}
                 bookmarkCount={bookmarkCount}
                 bookmarkedQuestionIds={bookmarkedQuestionIds}
                 currentIndex={currentIndex}
@@ -150,12 +162,12 @@ export function MobilePlayerShell({
           ) : (
             <div className="space-y-4">
               <div className="space-y-2">
-                <p className="text-[18px] leading-8 text-slate-700">{question.title}</p>
+                <p className="quiz-player-question-title text-[22px] leading-8 text-slate-800">{question.title}</p>
                 {question.instructions ? (
                   <p className="text-sm leading-6 text-slate-500">{question.instructions}</p>
                 ) : null}
                 <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-400">
-                  <span>{answeredCount}/{questions.length} answered</span>
+                  <span>{answeredCount}/{questions.length} đã trả lời</span>
                   {timerVisible ? <span>{formatTimer(remainingSeconds)}</span> : null}
                 </div>
               </div>
@@ -175,6 +187,16 @@ export function MobilePlayerShell({
                 {resultDisplay.reviewButtonLabel}
               </button>
             ) : (
+              isTrainingMode ? (
+                <button
+                  type="button"
+                  className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={submitting || currentQuestionSubmitted || !currentAnswerComplete}
+                  onClick={onSubmitCurrentQuestion}
+                >
+                  {currentQuestionSubmitted ? "Đã nộp" : submitting ? "Đang nộp" : "Nộp bài"}
+                </button>
+              ) : (
               <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>
                 <button
                   type="button"
@@ -183,7 +205,7 @@ export function MobilePlayerShell({
                   onClick={onPrev}
                 >
                   <ChevronLeft className="h-4 w-4" />
-                  Prev
+                  Trước
                 </button>
                 <button
                   type="button"
@@ -191,7 +213,7 @@ export function MobilePlayerShell({
                   disabled={isLastQuestion || submitting}
                   onClick={onNext}
                 >
-                  Next
+                  Sau
                   <ChevronRight className="h-4 w-4" />
                 </button>
                 {showSubmitAction ? (
@@ -201,10 +223,11 @@ export function MobilePlayerShell({
                     disabled={submitting}
                     onClick={onRequestSubmit}
                   >
-                    {submitting ? "Submitting" : submitFailed ? "Retry" : "Submit"}
+                    {submitting ? "Đang nộp" : submitFailed ? "Thử lại" : "Nộp bài"}
                   </button>
                 ) : null}
               </div>
+              )
             )}
           </div>
         </div>
@@ -214,77 +237,71 @@ export function MobilePlayerShell({
 }
 
 function QuestionSheet({
+  answeredQuestionIds,
   bookmarkCount,
   bookmarkedQuestionIds,
   currentIndex,
   questions,
   onJumpToQuestion,
 }: {
+  answeredQuestionIds: string[];
   bookmarkCount: number;
   bookmarkedQuestionIds: string[];
   currentIndex: number;
   questions: Question[];
   onJumpToQuestion: (index: number) => void;
 }) {
+  const [open, setOpen] = useState(false);
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <button
-          type="button"
-          aria-label="Open question list"
-          className="grid h-7 w-7 place-items-center text-[var(--erg-blue)] transition"
-        >
-          <List className="h-4 w-4" />
-        </button>
-      </SheetTrigger>
-      <SheetContent
-        side="top"
-        className="h-[100svh] max-h-[100svh] w-screen max-w-none border-b-0 bg-[#f7f8fb] p-0"
-        showCloseButton={false}
+    <>
+      <button
+        type="button"
+        aria-label="Mở mục lục câu hỏi"
+        className="grid h-7 w-7 place-items-center text-[var(--erg-blue)] transition"
+        onClick={() => setOpen(true)}
       >
-        <SheetHeader className="relative border-b border-slate-200 bg-white px-4 py-3">
-          <SheetClose asChild>
-            <button
-              type="button"
-              aria-label="Close question list"
-              className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          </SheetClose>
-          <SheetTitle className="text-center text-base font-semibold text-slate-900">Questions</SheetTitle>
-          <div className="text-center text-xs font-semibold text-slate-500">{bookmarkCount} bookmarked</div>
-          <SheetClose asChild>
-            <button
-              type="button"
-              aria-label="Close question list"
-              className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </SheetClose>
-        </SheetHeader>
-        <div className="grid gap-0 bg-white">
-          {questions.map((item, index) => (
-            <SheetClose key={item.id} asChild>
-              <button
-                type="button"
-                className={`flex items-start gap-3 border-b px-4 py-4 text-left ${index === currentIndex ? "bg-[var(--erg-blue-light)]" : "bg-white"}`}
-                onClick={() => onJumpToQuestion(index)}
-              >
-                <span className="w-5 flex-none pt-0.5 text-sm font-semibold text-slate-500">
-                  {index + 1}.
-                </span>
-                <span className="min-w-0 flex-1 text-sm leading-6 text-slate-600">{item.title}</span>
-                {bookmarkedQuestionIds.includes(item.id) ? (
-                  <Bookmark className="mt-1 h-4 w-4 flex-none fill-current text-[var(--quiz-accent-start)]" />
-                ) : null}
-              </button>
-            </SheetClose>
-          ))}
+        <List className="h-4 w-4" />
+      </button>
+      <Drawer
+        anchor="top"
+        open={open}
+        onClose={() => setOpen(false)}
+        slotProps={{ paper: { sx: { height: "100svh", maxHeight: "100svh", width: "100vw", maxWidth: "none", backgroundColor: "#f7f8fb" } } }}
+      >
+        <div className="relative border-b border-slate-200 bg-white px-4 py-3">
+          <button
+            type="button"
+            aria-label="Đóng mục lục câu hỏi"
+            className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
+            onClick={() => setOpen(false)}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <div className="text-center text-base font-semibold text-slate-900">Mục lục</div>
+          <div className="text-center text-xs font-semibold text-slate-500">{bookmarkCount} câu đã đánh dấu</div>
+          <button
+            type="button"
+            aria-label="Đóng mục lục câu hỏi"
+            className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
+            onClick={() => setOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-      </SheetContent>
-    </Sheet>
+        <QuestionNavigator
+          answeredQuestionIds={answeredQuestionIds}
+          className="min-h-[calc(100svh-68px)] rounded-none border-0 shadow-none"
+          currentIndex={currentIndex}
+          flaggedQuestionIds={bookmarkedQuestionIds}
+          onJumpToQuestion={(index) => {
+            onJumpToQuestion(index);
+            setOpen(false);
+          }}
+          questions={questions}
+          started
+        />
+      </Drawer>
+    </>
   );
 }
 

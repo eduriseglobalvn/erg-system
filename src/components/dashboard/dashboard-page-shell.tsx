@@ -1,16 +1,18 @@
 import type { ReactNode } from "react";
 
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import Card from "@mui/material/Card";
+import Chip from "@mui/material/Chip";
 import { cn } from "@/lib/utils";
 
 type DashboardPageShellProps = {
   badge?: string;
   title: string;
-  description: string;
-  breadcrumbs: string[];
+  description?: string;
+  breadcrumbs?: string[];
   actions?: ReactNode;
   headerContent?: ReactNode;
+  hideHeader?: boolean;
+  contentClassName?: string;
   children: ReactNode;
 };
 
@@ -66,36 +68,44 @@ export function DashboardPageShell({
   breadcrumbs,
   actions,
   headerContent,
+  hideHeader = false,
+  contentClassName,
   children,
 }: DashboardPageShellProps) {
   return (
     <div className="h-full overflow-y-auto bg-[var(--background)]">
-      <div className="mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6">
-        <section className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
-          <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-            <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-slate-500">
-                {breadcrumbs.map((item, index) => (
-                  <div key={`${item}-${index}`} className="flex items-center gap-2">
-                    {index > 0 ? <span className="text-slate-300">/</span> : null}
-                    <span>{item}</span>
+      <div className={cn("mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6", contentClassName)}>
+        {!hideHeader ? (
+          <section className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                {breadcrumbs?.length ? (
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-slate-500">
+                    {breadcrumbs.map((item, index) => (
+                      <div key={`${item}-${index}`} className="flex items-center gap-2">
+                        {index > 0 ? <span className="text-slate-300">/</span> : null}
+                        <span>{item}</span>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : null}
+                <div className={cn("flex flex-wrap items-center gap-3", breadcrumbs?.length ? "mt-3" : "")}>
+                  {badge ? <Chip label={badge} size="small" color="secondary" /> : null}
+                  <h1 className="text-lg font-semibold tracking-normal text-[var(--foreground)] sm:text-xl">
+                    {title}
+                  </h1>
+                </div>
+                {description ? (
+                  <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--muted-foreground)]">
+                    {description}
+                  </p>
+                ) : null}
               </div>
-              <div className="mt-3 flex flex-wrap items-center gap-3">
-                {badge ? <Badge tone="secondary">{badge}</Badge> : null}
-                <h1 className="text-lg font-semibold tracking-normal text-[var(--foreground)] sm:text-xl">
-                  {title}
-                </h1>
-              </div>
-              <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--muted-foreground)]">
-                {description}
-              </p>
+              {actions ? <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div> : null}
             </div>
-            {actions ? <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div> : null}
-          </div>
-          {headerContent ? <div className="mt-4 border-t border-slate-100 pt-4">{headerContent}</div> : null}
-        </section>
+            {headerContent ? <div className="mt-4 border-t border-slate-100 pt-4">{headerContent}</div> : null}
+          </section>
+        ) : null}
         {children}
       </div>
     </div>
@@ -113,7 +123,10 @@ export function DashboardMetricCard({
   const toneClass = toneClassMap[tone];
 
   return (
-    <Card className="overflow-hidden border-[#d9e2ef] bg-white p-0 shadow-[var(--shadow-xs)]">
+    <Card
+      variant="outlined"
+      sx={{ overflow: "hidden", borderColor: "#d9e2ef", bgcolor: "#fff", boxShadow: "var(--shadow-xs)", borderRadius: 2 }}
+    >
         <div className="flex items-start justify-between gap-4 p-4">
         <div className="min-w-0">
           <div className="text-xs font-semibold tracking-normal text-[var(--muted-foreground)]">{label}</div>
@@ -150,7 +163,11 @@ export function DashboardSectionCard({
   children,
 }: DashboardSectionCardProps) {
   return (
-    <Card className={cn("border-[#d9e2ef] bg-white p-0 shadow-[var(--shadow-xs)]", className)}>
+    <Card
+      variant="outlined"
+      className={className}
+      sx={{ borderColor: "#d9e2ef", bgcolor: "#fff", boxShadow: "var(--shadow-xs)", borderRadius: 2 }}
+    >
       <div className="flex flex-col gap-4 p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
@@ -175,7 +192,7 @@ export function DashboardSegmentedControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="inline-flex flex-wrap items-center gap-1 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-1 shadow-[var(--shadow-xs)]">
+    <div className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(145,158,171,0.22)] bg-white px-1.5 py-1 shadow-none">
       {options.map((option) => {
         const active = option.value === value;
 
@@ -185,10 +202,10 @@ export function DashboardSegmentedControl({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "rounded-md px-3 py-1.5 text-[13px] font-semibold transition",
+              "relative min-h-8 whitespace-nowrap rounded-md px-3 text-sm font-semibold leading-none transition after:absolute after:inset-x-3 after:bottom-0.5 after:h-0.5 after:rounded-full after:transition",
               active
-                ? "bg-white text-[var(--primary)] shadow-[var(--shadow-xs)] ring-1 ring-[#b8c8db]"
-                : "text-[var(--muted-foreground)] hover:bg-white hover:text-[var(--foreground)]",
+                ? "bg-transparent text-[#696CFF] after:bg-[#696CFF]"
+                : "bg-transparent text-[#637381] after:bg-transparent hover:text-[#1C252E]",
             )}
           >
             {option.label}
@@ -199,12 +216,28 @@ export function DashboardSegmentedControl({
   );
 }
 
+type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
+
+function toChipProps(tone: BadgeTone) {
+  if (tone === "outline") {
+    return { variant: "outlined" as const, color: "default" as const };
+  }
+  const colorMap: Record<Exclude<BadgeTone, "outline">, "primary" | "secondary" | "success" | "warning" | "error"> = {
+    primary: "primary",
+    secondary: "secondary",
+    success: "success",
+    warning: "warning",
+    danger: "error",
+  };
+  return { variant: "filled" as const, color: colorMap[tone] };
+}
+
 export function DashboardStatusBadge({
   label,
   tone,
 }: {
   label: string;
-  tone: "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
+  tone: BadgeTone;
 }) {
-  return <Badge tone={tone}>{label}</Badge>;
+  return <Chip label={label} size="small" {...toChipProps(tone)} />;
 }

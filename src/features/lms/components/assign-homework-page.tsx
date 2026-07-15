@@ -1,18 +1,32 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { Calendar, RefreshCw, Search } from "lucide-react";
 
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { AssignHomeworkFooter } from "@/features/lms/components/assign-homework-footer";
 import { allGroupSourcesFilterValue, assignmentGroups } from "@/features/lms/components/assign-homework-groups";
-import { getClassStudents, getMockBirthDate, getMockStudentLevel, StudentLevelBadge } from "@/features/lms/components/assign-homework-student-utils";
+import {
+  getClassStudents,
+  getMockBirthDate,
+  getMockStudentLevel,
+  mapLmsStudentGroupsToAssignHomeworkGroups,
+  resolveAssignHomeworkClassStudents,
+  resolveAssignHomeworkGradeStudentIds,
+  resolveAssignHomeworkGroups,
+  StudentLevelBadge,
+  type AssignHomeworkGroupOption,
+} from "@/features/lms/components/assign-homework-student-utils";
 
 import { classroomStudents, defaultClassId } from "@/features/lms/classroom/api/mock-classroom-data";
 import { assignmentSubjects } from "@/features/lms/classroom/components/class-students-workspace.constants";
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import { lmsAssignmentReadQueryKeys, useCreateLmsAssignmentMutation, useLmsStudentGroupsQuery } from "@/features/lms/api/lms-assignment-command-query";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
+import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
-import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
+import LmsCheckbox from "@mui/material/Checkbox";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 
 
@@ -26,6 +40,7 @@ interface AssignHomeworkPageProps {
 export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAssignment }: AssignHomeworkPageProps) {
   const [step, setStep] = useState(1);
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
+  const apiBacked = hasApiBase();
   const [title, setTitle] = useState("a");
   const subject = "Tiếng Anh";
   const [startDate, setStartDate] = useState("03/06/2026 14:40:35");
@@ -41,7 +56,6 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   const [previewGradeClassId, setPreviewGradeClassId] = useState<string | null>(null);
   const [gradeStudentSearch, setGradeStudentSearch] = useState("");
   const [selectedGradeStudentIdsByClass, setSelectedGradeStudentIdsByClass] = useState<Record<string, string[]>>({});
-  const groupSourceOptions = Array.from(new Set(assignmentGroups.map((group) => group.source)));
   const [selectedGroupSource, setSelectedGroupSource] = useState(allGroupSourcesFilterValue);
   const [selectedAssignmentGroupIds, setSelectedAssignmentGroupIds] = useState<Set<string>>(new Set());
   const [previewAssignmentGroupId, setPreviewAssignmentGroupId] = useState<string | null>(null);
@@ -49,7 +63,22 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   const [selectedGroupStudentIdsByGroup, setSelectedGroupStudentIdsByGroup] = useState<Record<string, string[]>>({});
   
   const assignmentClass = classes.find((classroom) => classroom.id === assignmentClassId) ?? selectedClass ?? classes[0];
-  const getStudentsForClass = (classId?: string, className?: string) => {
+  const studentGroupsQuery = useLmsStudentGroupsQuery(undefined, assignmentClass?.id, {
+    enabled: apiBacked && targetType === "group" && Boolean(assignmentClass?.id),
+  });
+  const apiAssignmentGroups = useMemo(
+    () => (studentGroupsQuery.data ? mapLmsStudentGroupsToAssignHomeworkGroups(studentGroupsQuery.data.groups) : undefined),
+    [studentGroupsQuery.data],
+  );
+  const activeAssignmentGroups = useMemo(
+    () => resolveAssignHomeworkGroups(apiAssignmentGroups, assignmentGroups, apiBacked),
+    [apiAssignmentGroups, apiBacked],
+  );
+  const groupSourceOptions = useMemo(
+    () => Array.from(new Set(activeAssignmentGroups.map((group) => group.source))),
+    [activeAssignmentGroups],
+  );
+  const getFallbackStudentsForClass = (classId?: string, className?: string) => {
     const directStudents = getClassStudents(classId);
     if (directStudents.length > 0) return directStudents;
 
@@ -60,10 +89,86 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
 
     return matchedStudents.length > 0 ? matchedStudents : getClassStudents(defaultClassId);
   };
-  const students = getStudentsForClass(assignmentClass?.id, assignmentClass?.className);
+  const classWorkspaceQuery = useQuery({
+    queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
+      classId: assignmentClass?.id,
+      schoolId: assignmentClass?.schoolId,
+      usage: "assign-homework",
+    }),
+    queryFn: () =>
+      loadLmsClassWorkspace({
+        assignmentPage: 0,
+        assignmentSize: 50,
+        assignmentStatus: "active",
+        classId: assignmentClass?.id ?? assignmentClassId,
+        page: 0,
+        schoolId: assignmentClass?.schoolId,
+        size: 200,
+        studentStatus: "active",
+      }),
+    enabled: apiBacked && targetType !== "grade" && Boolean(assignmentClass?.id ?? assignmentClassId),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+  const workspaceStudents = useMemo(
+    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, assignmentClass) : undefined),
+    [assignmentClass, classWorkspaceQuery.data],
+  );
+  const students = useMemo(
+    () =>
+      resolveAssignHomeworkClassStudents(
+        workspaceStudents,
+        getFallbackStudentsForClass(assignmentClass?.id, assignmentClass?.className),
+        apiBacked,
+      ),
+    [apiBacked, assignmentClass?.className, assignmentClass?.id, workspaceStudents],
+  );
   const gradeClasses = classes.filter((classroom) => classroom.gradeLabel === selectedGradeLabel);
+  const gradeClassWorkspaceQueries = useQueries({
+    queries: gradeClasses.map((classroom) => ({
+      gcTime: 5 * 60_000,
+      queryFn: () =>
+        loadLmsClassWorkspace({
+          assignmentPage: 0,
+          assignmentSize: 20,
+          assignmentStatus: "active",
+          classId: classroom.id,
+          page: 0,
+          schoolId: classroom.schoolId,
+          size: 200,
+          studentStatus: "active",
+        }),
+      queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
+        classId: classroom.id,
+        schoolId: classroom.schoolId,
+        usage: "assign-homework-grade",
+      }),
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+      enabled: apiBacked && targetType === "grade" && Boolean(classroom.id),
+    })),
+  });
+  const gradeStudentsByClass = new Map(
+    gradeClasses.map((classroom, index) => {
+      const workspace = gradeClassWorkspaceQueries[index]?.data;
+      const workspaceClassStudents = workspace ? mapClassWorkspaceToStudents(workspace, classroom) : undefined;
+      return [
+        classroom.id,
+        resolveAssignHomeworkClassStudents(
+          workspaceClassStudents,
+          getFallbackStudentsForClass(classroom.id, classroom.className),
+          apiBacked,
+        ),
+      ] as const;
+    }),
+  );
+  const getGradeStudentsForClassId = (classId?: string | null) => (classId ? gradeStudentsByClass.get(classId) ?? [] : []);
+  const gradeStudentIdsByClass = Object.fromEntries(
+    gradeClasses.map((classroom) => [classroom.id, getGradeStudentsForClassId(classroom.id).map((student) => student.id)]),
+  );
   const previewGradeClass = gradeClasses.find((classroom) => classroom.id === previewGradeClassId) ?? null;
-  const previewGradeClassStudents = getClassStudents(previewGradeClass?.id);
+  const previewGradeClassStudents = getGradeStudentsForClassId(previewGradeClass?.id);
   const selectedPopupStudentIds = new Set(previewGradeClassId ? selectedGradeStudentIdsByClass[previewGradeClassId] ?? [] : []);
   const filteredPreviewGradeClassStudents = previewGradeClassStudents.filter((student) =>
     student.name.toLowerCase().includes(gradeStudentSearch.trim().toLowerCase()),
@@ -72,11 +177,11 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   const allPreviewStudentsSelected =
     filteredPreviewGradeClassStudents.length > 0 &&
     filteredPreviewGradeClassStudents.every((student) => selectedPopupStudentIds.has(student.id));
-  const filteredAssignmentGroups = assignmentGroups.filter(
+  const filteredAssignmentGroups = activeAssignmentGroups.filter(
     (group) => selectedGroupSource === allGroupSourcesFilterValue || group.source === selectedGroupSource,
   );
-  const previewAssignmentGroup = assignmentGroups.find((group) => group.id === previewAssignmentGroupId) ?? null;
-  const previewAssignmentGroupStudents = classroomStudents.filter((student) => previewAssignmentGroup?.studentIds.includes(student.id));
+  const previewAssignmentGroup = activeAssignmentGroups.find((group) => group.id === previewAssignmentGroupId) ?? null;
+  const previewAssignmentGroupStudents = (apiBacked ? students : classroomStudents).filter((student) => previewAssignmentGroup?.studentIds.includes(student.id));
   const selectedGroupPopupStudentIds = new Set(previewAssignmentGroupId ? selectedGroupStudentIdsByGroup[previewAssignmentGroupId] ?? [] : []);
   const filteredPreviewAssignmentGroupStudents = previewAssignmentGroupStudents.filter((student) =>
     student.name.toLowerCase().includes(groupStudentSearch.trim().toLowerCase()),
@@ -87,8 +192,25 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   const allGroupPopupStudentsSelected =
     filteredPreviewAssignmentGroupStudents.length > 0 &&
     filteredPreviewAssignmentGroupStudents.every((student) => selectedGroupPopupStudentIds.has(student.id));
+
+  useEffect(() => {
+    if (selectedGroupSource !== allGroupSourcesFilterValue && !groupSourceOptions.includes(selectedGroupSource)) {
+      setSelectedGroupSource(allGroupSourcesFilterValue);
+    }
+    const validGroupIds = new Set(activeAssignmentGroups.map((group) => group.id));
+    setSelectedAssignmentGroupIds((current) => {
+      const next = new Set(Array.from(current).filter((groupId) => validGroupIds.has(groupId)));
+      return next.size === current.size ? current : next;
+    });
+  }, [activeAssignmentGroups, groupSourceOptions, selectedGroupSource]);
+
   const [selectedStudentIds, setSelectedStudentIds] = useState<Set<string>>(
-    () => new Set(getStudentsForClass(selectedClass?.id ?? defaultClassId, selectedClass?.className).map((student) => student.id)),
+    () =>
+      new Set(
+        apiBacked
+          ? []
+          : getFallbackStudentsForClass(selectedClass?.id ?? defaultClassId, selectedClass?.className).map((student) => student.id),
+      ),
   );
   const [searchQuery, setSearchQuery] = useState("");
   
@@ -100,10 +222,16 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   });
   const [resourceSearch, setResourceSearch] = useState("");
   const [mobileValidationError, setMobileValidationError] = useState("");
+  const createAssignmentMutation = useCreateLmsAssignmentMutation();
 
   const filteredStudents = students.filter(s => 
     s.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
   );
+
+  useEffect(() => {
+    if (!apiBacked) return;
+    setSelectedStudentIds(new Set(students.map((student) => student.id)));
+  }, [apiBacked, assignmentClass?.id, students]);
 
   const allSelected = filteredStudents.length > 0 && filteredStudents.every(s => selectedStudentIds.has(s.id));
   
@@ -142,7 +270,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   };
 
   const openGradeClassPreview = (classId: string) => {
-    const classStudents = getClassStudents(classId);
+    const classStudents = getGradeStudentsForClassId(classId);
     setPreviewGradeClassId(classId);
     setGradeStudentSearch("");
     setSelectedGradeStudentIdsByClass((current) => ({
@@ -205,7 +333,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
   };
 
   const openAssignmentGroupPreview = (groupId: string) => {
-    const group = assignmentGroups.find((item) => item.id === groupId);
+    const group = activeAssignmentGroups.find((item) => item.id === groupId);
     setPreviewAssignmentGroupId(groupId);
     setGroupStudentSearch("");
     setSelectedGroupStudentIdsByGroup((current) => ({
@@ -297,8 +425,57 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
     });
   };
 
-  const handleFinish = () => {
-    onCreateAssignment(title, selectedSubject?.label ?? subject);
+  const handleFinish = async () => {
+    if (!title.trim()) {
+      setMobileValidationError("Vui lÃ²ng nháº­p tÃªn bÃ i táº­p.");
+      return;
+    }
+    if (selectedResourceIds.size === 0) {
+      setMobileValidationError("Vui lÃ²ng chá»n Ã­t nháº¥t má»™t bÃ i táº­p.");
+      return;
+    }
+
+    if (!apiBacked) {
+      onCreateAssignment(title, selectedSubject?.label ?? subject);
+      return;
+    }
+    try {
+      const recipient = buildAssignmentRecipientInput({
+        assignmentClassId: assignmentClass?.id,
+        selectedAssignmentGroupIds,
+        selectedGradeClassIds,
+        gradeStudentIdsByClass,
+        selectedGradeStudentIdsByClass,
+        selectedGroupStudentIdsByGroup,
+        selectedStudentIds,
+        assignmentGroups: activeAssignmentGroups,
+        targetType,
+      });
+      if (recipient.recipientMode === "students" && (recipient.studentIds?.length ?? 0) === 0) {
+        setMobileValidationError("Vui lÃ²ng chá»n Ã­t nháº¥t má»™t há»c sinh hoáº·c nhÃ³m/lá»›p há»£p lá»‡.");
+        return;
+      }
+      await createAssignmentMutation.mutateAsync({
+        attemptLimit,
+        dueAt: parseAssignDateTime(endDate),
+        idempotencyKey: createAssignmentIdempotencyKey({
+          dueAt: endDate,
+          quizIds: Array.from(selectedResourceIds),
+          startAt: startDate,
+          title,
+        }),
+        maxDurationMinutes,
+        quizIds: Array.from(selectedResourceIds),
+        startAt: parseAssignDateTime(startDate),
+        teacherNote: selectedSubject?.label ?? subject,
+        title,
+        ...recipient,
+      });
+      setMobileValidationError("");
+      onCreateAssignment(title, selectedSubject?.label ?? subject);
+    } catch (error) {
+      setMobileValidationError(error instanceof Error ? error.message : "KhÃ´ng thá»ƒ giao bÃ i. Vui lÃ²ng thá»­ láº¡i.");
+    }
   };
 
   if (isMobile) {
@@ -449,7 +626,13 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                       onChange={(event) => {
                         setAssignmentClassId(event.target.value);
                         const nextClass = classes.find((classroom) => classroom.id === event.target.value);
-                        setSelectedStudentIds(new Set(getStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id)));
+                        setSelectedStudentIds(
+                          new Set(
+                            apiBacked
+                              ? []
+                              : getFallbackStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id),
+                          ),
+                        );
                         setSearchQuery("");
                       }}
                       className="h-10 w-[122px] rounded-[13px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
@@ -529,6 +712,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                       onOpenPreview={openGradeClassPreview}
                       onToggleClass={toggleGradeClass}
                       selectedClassIds={selectedGradeClassIds}
+                      studentIdsByClass={gradeStudentIdsByClass}
                       selectedStudentIdsByClass={selectedGradeStudentIdsByClass}
                     />
                   </div>
@@ -857,7 +1041,14 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                           value={assignmentClass?.id ?? ""}
                           onChange={(event) => {
                             setAssignmentClassId(event.target.value);
-                            setSelectedStudentIds(new Set(getClassStudents(event.target.value).map((student) => student.id)));
+                            const nextClass = classes.find((classroom) => classroom.id === event.target.value);
+                            setSelectedStudentIds(
+                              new Set(
+                                apiBacked
+                                  ? []
+                                  : getFallbackStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id),
+                              ),
+                            );
                             setSearchQuery("");
                           }}
                           className="h-9 w-full rounded-lg border border-[#cbd7e6] bg-white px-3 pr-9 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
@@ -1102,6 +1293,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                     onOpenPreview={openGradeClassPreview}
                     onToggleClass={toggleGradeClass}
                     selectedClassIds={selectedGradeClassIds}
+                    studentIdsByClass={gradeStudentIdsByClass}
                     selectedStudentIdsByClass={selectedGradeStudentIdsByClass}
                   />
                   <table className="erg-data-table hidden w-full border-collapse text-sm md:table">
@@ -1121,7 +1313,7 @@ export function AssignHomeworkPage({ classes, selectedClass, onBack, onCreateAss
                     <tbody>
                       {gradeClasses.map((classroom, index) => {
                         const isChecked = selectedGradeClassIds.has(classroom.id);
-                        const classStudents = getClassStudents(classroom.id);
+                        const classStudents = getGradeStudentsForClassId(classroom.id);
                         const selectedStudentCount = selectedGradeStudentIdsByClass[classroom.id]?.length ?? classStudents.length;
                         return (
                           <tr
@@ -1364,10 +1556,11 @@ function AssignmentCheckbox({ checked, onChange, label }: { checked: boolean; on
       onClick={(event) => event.stopPropagation()}
     >
       <LmsCheckbox
-        aria-label={label}
         checked={checked}
-        className="checked:border-[#696CFF] checked:bg-[#696CFF] data-[checked=true]:border-[#696CFF] data-[checked=true]:bg-[#696CFF] data-[indeterminate=true]:border-[#696CFF] data-[indeterminate=true]:bg-[#696CFF] hover:border-[#696CFF] focus-visible:ring-[#696CFF]/20"
-        onCheckedChange={() => onChange()}
+        onChange={() => onChange()}
+        size="small"
+        slotProps={{ input: { "aria-label": label } }}
+        sx={{ p: 0, color: "#696CFF", "&.Mui-checked": { color: "#696CFF" }, "&.MuiCheckbox-indeterminate": { color: "#696CFF" } }}
       />
     </span>
   );
@@ -1456,7 +1649,7 @@ function StudentSelectionTable({
   );
 }
 
-type AssignmentGroupItem = (typeof assignmentGroups)[number];
+type AssignmentGroupItem = AssignHomeworkGroupOption;
 
 function MobileAssignProgress({
   selectedCount,
@@ -1596,20 +1789,23 @@ function MobileGradeClassList({
   onOpenPreview,
   onToggleClass,
   selectedClassIds,
+  studentIdsByClass,
   selectedStudentIdsByClass,
 }: {
   classes: ClassroomSnapshot[];
   onOpenPreview: (classId: string) => void;
   onToggleClass: (classId: string) => void;
   selectedClassIds: Set<string>;
+  studentIdsByClass: Record<string, string[]>;
   selectedStudentIdsByClass: Record<string, string[]>;
 }) {
   return (
     <div className="grid gap-3 bg-[#f3f6fb] p-3 md:hidden">
       {classes.map((classroom) => {
         const checked = selectedClassIds.has(classroom.id);
-        const students = getClassStudents(classroom.id);
-        const selectedCount = selectedStudentIdsByClass[classroom.id]?.length ?? students.length;
+        const studentIds = studentIdsByClass[classroom.id] ?? [];
+        const students = studentIds;
+        const selectedCount = selectedStudentIdsByClass[classroom.id]?.length ?? studentIds.length;
         return (
           <article key={classroom.id} className={cn("rounded-[16px] border p-3 shadow-[0_10px_26px_rgba(96,165,250,0.08)]", checked ? "border-[#b8d6fa] bg-[#eff7ff]" : "border-white bg-white")}>
             <div className="flex items-start gap-3">
@@ -1670,4 +1866,110 @@ function MobileAssignmentResourceList({
       })}
     </div>
   );
+}
+
+type AssignmentRecipientInput = {
+  recipientMode: "class" | "group" | "students";
+  classId?: string | null;
+  groupId?: string | null;
+  studentIds?: string[];
+};
+
+function buildAssignmentRecipientInput({
+  assignmentClassId,
+  assignmentGroups,
+  gradeStudentIdsByClass,
+  selectedAssignmentGroupIds,
+  selectedGradeClassIds,
+  selectedGradeStudentIdsByClass,
+  selectedGroupStudentIdsByGroup,
+  selectedStudentIds,
+  targetType,
+}: {
+  assignmentClassId?: string;
+  assignmentGroups: AssignHomeworkGroupOption[];
+  gradeStudentIdsByClass: Record<string, string[]>;
+  selectedAssignmentGroupIds: Set<string>;
+  selectedGradeClassIds: Set<string>;
+  selectedGradeStudentIdsByClass: Record<string, string[]>;
+  selectedGroupStudentIdsByGroup: Record<string, string[]>;
+  selectedStudentIds: Set<string>;
+  targetType: "grade" | "class" | "group";
+}): AssignmentRecipientInput {
+  if (targetType === "class") {
+    return selectedStudentIds.size > 0
+      ? {
+          classId: assignmentClassId,
+          recipientMode: "students",
+          studentIds: Array.from(selectedStudentIds),
+        }
+      : {
+          classId: assignmentClassId,
+          recipientMode: "class",
+        };
+  }
+
+  if (targetType === "group") {
+    const groupIds = Array.from(selectedAssignmentGroupIds);
+    const explicitStudentIds = uniqueValues(groupIds.flatMap((groupId) => selectedGroupStudentIdsByGroup[groupId] ?? []));
+    if (groupIds.length === 1 && explicitStudentIds.length === 0) {
+      return {
+        groupId: groupIds[0],
+        recipientMode: "group",
+      };
+    }
+    const allGroupStudentIds = explicitStudentIds.length
+      ? explicitStudentIds
+      : uniqueValues(groupIds.flatMap((groupId) => assignmentGroups.find((group) => group.id === groupId)?.studentIds ?? []));
+    return {
+      recipientMode: "students",
+      studentIds: allGroupStudentIds,
+    };
+  }
+
+  const selectedGradeStudentIds = uniqueValues(
+    resolveAssignHomeworkGradeStudentIds(
+      selectedGradeClassIds,
+      selectedGradeStudentIdsByClass,
+      gradeStudentIdsByClass,
+    ),
+  );
+  return {
+    recipientMode: "students",
+    studentIds: selectedGradeStudentIds,
+  };
+}
+
+function parseAssignDateTime(value: string) {
+  const trimmed = value.trim();
+  const match = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/.exec(trimmed);
+  if (!match) {
+    const fallback = new Date(trimmed);
+    return Number.isNaN(fallback.getTime()) ? null : fallback.toISOString();
+  }
+  const [, day, month, year, hour = "0", minute = "0", second = "0"] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
+
+function createAssignmentIdempotencyKey({
+  dueAt,
+  quizIds,
+  startAt,
+  title,
+}: {
+  dueAt: string;
+  quizIds: string[];
+  startAt: string;
+  title: string;
+}) {
+  return `assign:${slugPart(title)}:${quizIds.slice().sort().join(",")}:${startAt}:${dueAt}`;
+}
+
+function slugPart(value: string) {
+  return value.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "untitled";
+}
+
+function uniqueValues(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
 }

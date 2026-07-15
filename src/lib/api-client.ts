@@ -11,6 +11,7 @@ import {
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
 export const AUTH_SESSION_REPLACED_EVENT = "erg-auth-session-replaced";
 export const AUTH_SESSION_INVALID_EVENT = "erg-auth-session-invalid";
+export const AUTH_REAUTH_REQUIRED_EVENT = "erg-auth-reauth-required";
 
 type ApiErrorBody = {
   code?: string;
@@ -35,6 +36,7 @@ export type ApiRequestOptions = RequestInit & {
 const DEFAULT_API_TIMEOUT_MS = 15_000;
 const inFlightGetRequests = new Map<string, Promise<unknown>>();
 const inFlightRefreshRequests = new Map<string, Promise<string | null>>();
+let csrfTokenPromise: Promise<{ headerName: string; token: string }> | null = null;
 
 export class ApiClientError extends Error {
   code: string;
@@ -52,6 +54,10 @@ export function hasApiBase() {
   return Boolean(getApiBase());
 }
 
+export function isBffAuthEnabled() {
+  return import.meta.env.VITE_AUTH_MODE === "oidc-bff";
+}
+
 export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Promise<T> {
   const apiBase = getApiBase();
   if (!apiBase) {
@@ -61,12 +67,11 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   const portal = init?.portal ?? portalFromPath(path);
   const token = await getRequestAccessToken(portal, path, init);
 
-  if (!token && requiresAuth(path)) {
-    const error = new ApiClientError("Authentication session is missing or expired.", "UNAUTHORIZED", 401);
-    if (!init?.skipAuthSessionEvent) {
-      window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT, { detail: error }));
-    }
-    throw error;
+  if (!token && requiresAuth(path) && !isBffAuthEnabled()) {
+    // Thiếu token cho một request nền KHÔNG có nghĩa là phiên đã chết — chỉ throw
+    // để query đó fail cục bộ. Việc logout do refreshStoredAuthSessionOnce lo khi
+    // refresh token thực sự bị backend từ chối.
+    throw new ApiClientError("Authentication session is missing or expired.", "UNAUTHORIZED", 401);
   }
 
   const headers = new Headers(init?.headers);
@@ -74,9 +79,11 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   if (!headers.has("Content-Type") && init?.body !== undefined && !isFormDataBody) {
     headers.set("Content-Type", "application/json");
   }
-  if (!headers.has("X-Tenant-ID")) {
-    headers.set("X-Tenant-ID", import.meta.env.VITE_TENANT_ID?.trim() || "erg");
-  }
+  // X-Tenant-ID / X-Portal: backend không còn đọc từ client để authz (A1)
+  // - tenantId lấy từ session đã đăng nhập
+  // - portal suy ra từ URL path
+  // FE không cần gửi 2 header này nữa; gửi vào cũng bị bỏ qua (không lỗi)
+  // GraphQL: nếu gửi X-Tenant-ID sai tenant → 403, nên bỏ gửi hoặc đảm bảo khớp session
   if (!headers.has("X-Request-ID")) {
     headers.set("X-Request-ID", createRequestId());
   }
@@ -84,14 +91,19 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  if (portal && !headers.has("X-Portal")) {
-    headers.set("X-Portal", portal);
+  if (isBffAuthEnabled() && isCommandMethod(init?.method) && path !== "/api/v1/auth/csrf") {
+    const csrf = await getCsrfToken();
+    if (!headers.has(csrf.headerName)) headers.set(csrf.headerName, csrf.token);
   }
+  // X-Portal: backend suy ra từ URL path, không cần gửi nữa
+  // if (portal && !headers.has("X-Portal")) {
+  //   headers.set("X-Portal", portal);
+  // }
 
   const url = `${apiBase}${path}`;
   const method = (init?.method ?? "GET").toUpperCase();
   const canDedupeGet = method === "GET" && init?.body === undefined;
-  const dedupeKey = canDedupeGet ? `${url}|${headers.get("Authorization") ?? "anonymous"}` : "";
+  const dedupeKey = canDedupeGet ? buildGetDedupeKey(url, headers, init, portal) : "";
 
   if (dedupeKey) {
     const inFlight = inFlightGetRequests.get(dedupeKey);
@@ -111,6 +123,24 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   return request;
 }
 
+const RESPONSE_VARIANT_HEADERS = ["accept", "accept-language", "if-modified-since", "if-none-match", "range"] as const;
+
+function buildGetDedupeKey(
+  url: string,
+  headers: Headers,
+  init: ApiRequestOptions | undefined,
+  portal: StoredAuthSession["portal"] | undefined,
+) {
+  const variantHeaders = RESPONSE_VARIANT_HEADERS.map((name) => `${name}:${headers.get(name) ?? ""}`).join("|");
+  return [
+    url,
+    `portal:${portal ?? "unknown"}`,
+    `auth:${headers.get("Authorization") ?? "anonymous"}`,
+    `cache:${init?.cache ?? "no-store"}`,
+    variantHeaders,
+  ].join("|");
+}
+
 async function executeApiRequest<T>(
   url: string,
   headers: Headers,
@@ -118,6 +148,9 @@ async function executeApiRequest<T>(
   context: { path: string; portal?: StoredAuthSession["portal"] },
 ): Promise<T> {
   const response = await fetchApi(url, headers, init);
+  if (response.status === 304) {
+    return undefined as T;
+  }
 
   const body = await readJson<ApiEnvelope<T> | T>(response);
   const errorBody = getErrorBody(body);
@@ -133,6 +166,10 @@ async function executeApiRequest<T>(
         const retryHeaders = new Headers(headers);
         retryHeaders.set("Authorization", `Bearer ${nextToken}`);
         const retryResponse = await fetchApi(url, retryHeaders, { ...init, skipAuthRefresh: true });
+        if (retryResponse.status === 304) {
+          return undefined as T;
+        }
+
         const retryBody = await readJson<ApiEnvelope<T> | T>(retryResponse);
         const retryErrorBody = getErrorBody(retryBody);
 
@@ -148,10 +185,9 @@ async function executeApiRequest<T>(
         const retryMessage = retryErrorBody?.message ?? getEnvelopeMessage(retryBody) ?? `Request failed: ${retryResponse.status}`;
         const retryError = new ApiClientError(retryMessage, retryCode, retryResponse.status);
 
-        if (isUnauthorizedSessionError(retryResponse.status, retryCode, retryMessage) && !init?.skipAuthSessionEvent) {
-          invalidateStoredAuthSession(retryError);
-        }
-
+        // Retry vẫn 401 KHÔNG tự logout: nếu phiên thực sự chết thì refresh đã bị
+        // backend từ chối (xử lý trong refreshStoredAuthSessionOnce). 401 lẻ tẻ ở đây
+        // chỉ là request thiếu quyền → để query fail cục bộ, giữ nguyên phiên.
         throw retryError;
       }
 
@@ -161,11 +197,14 @@ async function executeApiRequest<T>(
     if (code === AUTH_SESSION_REPLACED && !init?.skipAuthSessionEvent) {
       window.dispatchEvent(new CustomEvent(AUTH_SESSION_REPLACED_EVENT, { detail: error }));
     }
-
-    if (isUnauthorizedSessionError(response.status, code, message) && !init?.skipAuthSessionEvent) {
-      invalidateStoredAuthSession(error);
+    if (isBffAuthEnabled() && error.status === 401 && !init?.skipAuthSessionEvent) {
+      window.dispatchEvent(new CustomEvent(AUTH_REAUTH_REQUIRED_EVENT, { detail: error }));
     }
 
+    // 401 ở đây KHÔNG tự logout. Nếu access token hết hạn, shouldRefreshAfterResponse
+    // đã kích hoạt luồng refresh phía trên; refresh chết thì refreshStoredAuthSessionOnce
+    // mới invalidate phiên. 401 do endpoint thiếu quyền / lỗi backend chỉ throw cục bộ,
+    // tránh việc một query nền đá người dùng ra khỏi toàn bộ portal.
     throw error;
   }
 
@@ -200,7 +239,7 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
     return await fetch(url, {
       ...fetchInit,
       headers,
-      cache: "no-store",
+      cache: init?.cache ?? "no-store",
       credentials: init?.credentials ?? "include",
       referrerPolicy: init?.referrerPolicy ?? "no-referrer",
       signal: timeoutController?.signal ?? sourceSignal,
@@ -418,8 +457,7 @@ function readDeviceId() {
 
 function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
   const normalized = path.toLowerCase();
-  if (normalized.includes("/api/v1/admin/hoclieu")) return "lcms";
-  if (normalized.includes("/api/v1/hoclieu")) return "lms";
+  if (normalized.includes("/api/curriculum") || normalized.includes("/api/content")) return "lcms";
   if (
     normalized.includes("/api/v1/users/me") ||
     normalized.includes("/api/users/me")
@@ -438,7 +476,6 @@ function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
   if (normalized.includes("/api/v1/")) return "lms";
   if (normalized.includes("/api/lms")) return "lms";
   if (normalized.includes("/api/elearning")) return "elearning";
-  if (normalized.includes("/api/hoclieu")) return "lms";
   return undefined;
 }
 
@@ -463,14 +500,8 @@ function requiresAuth(path: string) {
 
 function isPublicApiPath(path: string) {
   return (
-    path === "/api/auth/login" ||
-    path === "/api/v1/auth/google/login" ||
     path === "/api/v1/auth/login" ||
-    path === "/api/v1/auth/refresh" ||
-    path === "/api/v1/auth/register" ||
-    path === "/api/lms/auth/login" ||
-    path === "/api/lms/auth/register" ||
-    path.startsWith("/api/lms/auth/providers/")
+    path === "/api/v1/auth/refresh"
   );
 }
 
@@ -480,4 +511,28 @@ function createRequestId() {
   }
 
   return `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+function isCommandMethod(method?: string) {
+  return !["GET", "HEAD", "OPTIONS", "TRACE"].includes((method ?? "GET").toUpperCase());
+}
+
+async function getCsrfToken() {
+  if (csrfTokenPromise) return csrfTokenPromise;
+  csrfTokenPromise = (async () => {
+    const response = await fetch(`${getApiBase()}/api/v1/auth/csrf`, {
+      credentials: "include",
+      headers: { "X-Request-ID": createRequestId() },
+    });
+    if (!response.ok) {
+      throw new ApiClientError("Cannot initialize CSRF protection.", "CSRF_INITIALIZATION_FAILED", response.status);
+    }
+    return response.json() as Promise<{ headerName: string; token: string }>;
+  })();
+  try {
+    return await csrfTokenPromise;
+  } catch (error) {
+    csrfTokenPromise = null;
+    throw error;
+  }
 }

@@ -1,34 +1,44 @@
+import { getDefaultTenantId } from "@/lib/graphql-client";
+
 export const queryKeys = {
   account: {
-    loginSessions: () => ["account", "login-sessions"] as const,
+    loginSessions: (tenantId: string, accountId: string | undefined) => ["account", "login-sessions", tenantId, accountId ?? "anonymous"] as const,
   },
   adminOperations: {
-    educationUnits: (keyword?: string, typeFilter?: string) =>
+    educationUnits: (keyword?: string, typeFilter?: string, tenantId: string = getDefaultTenantId()) =>
       keyword === undefined && typeFilter === undefined
-        ? (["admin-operations", "education-units"] as const)
-        : (["admin-operations", "education-units", keyword, typeFilter] as const),
-    learningResourcesV2: () => ["admin-operations", "learning-resources-v2"] as const,
-    learningResourcesWorkspace: (limit: number) => ["admin-operations", "learning-resources-v2", "workspace", limit] as const,
+        ? (["admin-operations", "education-units", tenantId] as const)
+        : (["admin-operations", "education-units", tenantId, keyword, typeFilter] as const),
+    learningResourcesV2: (tenantId: string = getDefaultTenantId()) => ["admin-operations", "learning-resources-v2", tenantId] as const,
+    learningResourcesWorkspace: (limit: number, tenantId: string = getDefaultTenantId()) =>
+      ["admin-operations", "learning-resources-v2", tenantId, "workspace", limit] as const,
     userAccess: {
-      detailAccess: (selectedUserId: string | null) => ["admin-operations", "user-access", "detail", selectedUserId, "access"] as const,
-      detailUser: (selectedUserId: string | null) => ["admin-operations", "user-access", "detail", selectedUserId, "user"] as const,
-      options: () => ["admin-operations", "user-access", "options"] as const,
-      preview: (policies: unknown) => ["admin-operations", "user-access", "preview", policies] as const,
-      scopes: (scopeType: string, query: string) => ["admin-operations", "user-access", "scopes", scopeType, query] as const,
-      users: (query: string, status: string) => ["admin-operations", "user-access", "users", query, status] as const,
+      detailAccess: (selectedUserId: string | null, tenantId: string = getDefaultTenantId()) =>
+        ["admin-operations", "user-access", tenantId, "detail", selectedUserId, "access"] as const,
+      detailUser: (selectedUserId: string | null, tenantId: string = getDefaultTenantId()) =>
+        ["admin-operations", "user-access", tenantId, "detail", selectedUserId, "user"] as const,
+      options: (tenantId: string = getDefaultTenantId()) => ["admin-operations", "user-access", tenantId, "options"] as const,
+      provision: (tenantId: string = getDefaultTenantId()) => ["admin-operations", "user-access", tenantId, "provision"] as const,
+      preview: (policies: unknown, tenantId: string = getDefaultTenantId()) =>
+        ["admin-operations", "user-access", tenantId, "preview", policies] as const,
+      scopes: (scopeType: string, query: string, tenantId: string = getDefaultTenantId()) =>
+        ["admin-operations", "user-access", tenantId, "scopes", scopeType, query] as const,
+      users: (query: string, status: string, tenantId: string = getDefaultTenantId()) =>
+        ["admin-operations", "user-access", tenantId, "users", query, status] as const,
     },
   },
   dashboard: {
-    bootstrap: () => ["dashboard", "bootstrap"] as const,
+    bootstrap: (portal: string, tenantId: string, accountId: string | undefined) =>
+      ["dashboard", "bootstrap", portal, tenantId, accountId ?? "anonymous"] as const,
   },
   lmsTeacherShell: {
-    bootstrap: () => ["dashboard", "bootstrap"] as const,
-    homeworkWorkspace: () => ["lms-teacher-shell", "teacher-homework-workspace"] as const,
+    bootstrap: (tenantId: string, accountId: string | undefined) => queryKeys.dashboard.bootstrap("lms", tenantId, accountId),
+    homeworkWorkspace: (tenantId: string) => ["lms-teacher-shell", "teacher-homework-workspace", tenantId] as const,
   },
   questionBank: {
-    workspace: () => ["question-bank", "workspace"] as const,
+    workspace: (tenantId: string = getDefaultTenantId()) => ["question-bank", "workspace", tenantId] as const,
   },
   studentDashboard: {
-    workspace: (accountId: string | undefined) => ["student-dashboard", accountId ?? "anonymous"] as const,
+    workspace: (accountId: string | undefined, tenantId: string) => ["student-dashboard", tenantId, accountId ?? "anonymous"] as const,
   },
 };

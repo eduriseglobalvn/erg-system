@@ -16,7 +16,6 @@ type PortalMobileLoginShellCopy = {
 
 export function PortalMobileLoginShell({
   children,
-  copy,
 }: {
   children: ReactNode;
   copy: PortalMobileLoginShellCopy;

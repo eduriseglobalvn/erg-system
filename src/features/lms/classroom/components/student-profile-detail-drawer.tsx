@@ -1,7 +1,7 @@
 import { LockKeyhole, UserRound, X } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { Button } from "@/components/ui/button";
+import Button from "@mui/material/Button";
 import type { ClassroomStudent, StudentStatus } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
@@ -153,7 +153,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
 
         <div className="flex items-center justify-between gap-2 border-t border-[#cbd7e6] bg-[#f8fbff] p-3">
           <span className="text-[13px] font-semibold text-slate-600">{student.name} - {student.className}</span>
-          <Button type="button" onClick={onClose} className="h-9 rounded-md px-3 text-[14px]">
+          <Button type="button" variant="contained" onClick={onClose} sx={{ height: 36, px: 1.5, fontSize: 14 }}>
             Lưu thông tin
           </Button>
         </div>

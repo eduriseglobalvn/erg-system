@@ -9,10 +9,9 @@ import {
 import { Building2, Eye, EyeOff, LockKeyhole, Mail, UserRound } from "lucide-react";
 import { useForm } from "@tanstack/react-form";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import Button from "@mui/material/Button";
+import InputBase from "@mui/material/InputBase";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
-import { GoogleSignInButton } from "@/platform/auth/components/google-sign-in-button";
 import { PortalMobileLoginForm } from "@/platform/auth/components/portal-mobile-login-form";
 import type { AuthMode, LoginFormState, RegisterFormState } from "@/platform/auth/types/auth-types";
 import { useI18n } from "@/platform/i18n";
@@ -66,7 +65,7 @@ export function AuthFormPanel({
   mobileVariant?: boolean;
 }) {
   const { t } = useI18n();
-  const effectiveMode = allowRegister ? mode : "login";
+  const effectiveMode: AuthMode = "login";
   const passwordInputRef = useRef<HTMLInputElement>(null);
   const loginTanstackForm = useForm({
     defaultValues: loginForm,
@@ -114,7 +113,7 @@ export function AuthFormPanel({
 
   return (
     <section className="w-full">
-      {allowRegister ? (
+      {false && allowRegister ? (
         <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl border border-white/55 bg-white/35 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.55)] backdrop-blur-xl">
           <SegmentButton active={effectiveMode === "login"} onClick={() => onModeChange("login")}>
             {t("auth.login")}
@@ -132,14 +131,12 @@ export function AuthFormPanel({
             subtitle={loginSubtitle ?? t("auth.loginSubtitle")}
           />
 
-          {allowGoogle ? (
+          {false && allowGoogle ? (
             <div className="mt-6">
-              <GoogleSignInButton
-                label={t("auth.loginWithGoogle")}
-                onCredential={(idToken) => onProviderLogin("google", idToken)}
-                onError={(message) => {
-                  console.warn(message);
-                }}
+              <button
+                type="button"
+                hidden
+                onClick={() => undefined}
               />
               <div className="mt-5 flex items-center gap-3 text-xs font-semibold text-slate-500/80">
                 <span className="h-px flex-1 bg-white/60" />
@@ -238,6 +235,8 @@ export function AuthFormPanel({
             <loginTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button
+                  variant="contained"
+                  fullWidth
                   className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
@@ -249,7 +248,7 @@ export function AuthFormPanel({
             </loginTanstackForm.Subscribe>
           </TsForm>
 
-          {allowRegister ? (
+          {false && allowRegister ? (
             <p className="mt-5 text-center text-sm text-slate-600">
               {t("auth.noAccount")}
               <button
@@ -382,6 +381,8 @@ export function AuthFormPanel({
             <registerTanstackForm.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button
+                  variant="contained"
+                  fullWidth
                   className="h-11 w-full rounded-xl bg-[#696CFF] text-sm font-extrabold text-white shadow-[0_16px_34px_rgba(105,108,255,0.30)] hover:bg-[#585BE0]"
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
@@ -480,12 +481,13 @@ const GlassField = forwardRef<HTMLInputElement, {
           )}
         >
           {icon}
-          <Input
-            aria-invalid={error ? "true" : undefined}
+          <InputBase
+            fullWidth
+            error={Boolean(error)}
             autoComplete={autoComplete}
-            className="h-10 border-0 bg-transparent px-0 shadow-none focus:border-0 focus:ring-0"
+            className="h-10"
             placeholder={placeholder}
-            ref={ref}
+            inputRef={ref}
             type={type}
             value={value}
             onBlur={onBlur}

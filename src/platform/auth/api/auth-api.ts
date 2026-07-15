@@ -1,23 +1,18 @@
 import { ApiClientError, apiRequest } from "@/lib/api-client";
+import { getApiBase } from "@/lib/platform";
 import type { AccountRole, AuthProvider, TeacherAccount } from "@/platform/auth/types/auth-types";
+import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 
 const AUTH_V1_BASE = "/api/v1/auth";
 
 export type LoginRequestDTO = {
-  email: string;
+  identifier: string;
   password: string;
   rememberMe: boolean;
   portal?: "admin" | "crm" | "lcms" | "lms" | "elearning";
   deviceId?: string;
   deviceName?: string;
   deviceFingerprint?: string;
-};
-
-export type RegisterRequestDTO = {
-  fullName: string;
-  email: string;
-  password: string;
-  department: string;
 };
 
 export type UpdateProfileRequestDTO = {
@@ -34,9 +29,7 @@ export type UpdatePasswordRequestDTO = {
   nextPassword: string;
 };
 
-export type AuthAccountResponseDTO = Omit<TeacherAccount, "password"> & {
-  password?: never;
-};
+export type AuthAccountResponseDTO = TeacherAccount;
 
 export type AuthSessionResponseDTO = {
   account: AuthAccountResponseDTO;
@@ -44,7 +37,10 @@ export type AuthSessionResponseDTO = {
   refreshToken?: string;
   expiresAt?: string;
   permissions?: string[];
+  deniedPermissions?: string[];
+  roles?: string[];
   portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
+  tenantId?: string;
 };
 
 type BackendProfileResponseDTO = {
@@ -58,6 +54,7 @@ type BackendProfileResponseDTO = {
   bio?: string;
   isProfileCompleted?: boolean;
   is_profile_completed?: boolean;
+  lifecycle?: TeacherAccountLifecycle;
   jobTitle?: string;
   job_title?: string;
   provider?: string;
@@ -86,7 +83,11 @@ type BackendAuthSessionResponseDTO = {
   expiresIn?: number;
   expires_in?: number;
   permissions?: string[];
+  deniedPermissions?: string[];
+  roles?: string[];
   portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
+  tenantId?: string;
+  tenant_id?: string;
 };
 
 type BackendTokenContainerDTO = {
@@ -108,18 +109,51 @@ export const authApi = {
     return normalizeAuthSession(result);
   },
 
-  async register(input: RegisterRequestDTO) {
-    const result = await apiRequest<BackendAuthSessionResponseDTO>("/api/lms/auth/register", {
-      method: "POST",
-      body: JSON.stringify(input),
-    });
-    return normalizeAuthSession(result);
-  },
-
   logout() {
     return apiRequest<void>(`${AUTH_V1_BASE}/logout`, {
       method: "POST",
     });
+  },
+
+  logoutAll() {
+    return apiRequest<{ revokedSessions: number }>(`${AUTH_V1_BASE}/logout-all`, { method: "POST" });
+  },
+
+  async bffSession(): Promise<AuthSessionResponseDTO> {
+    const session = await apiRequest<BackendBffSessionDTO>(`${AUTH_V1_BASE}/session`);
+    const email = session.profile?.email ?? session.userId;
+    return {
+      account: {
+        id: session.userId,
+        fullName: session.profile?.fullName ?? email,
+        email,
+        phone: "",
+        avatarUrl: "",
+        bio: "",
+        role: mapRole(session.roles),
+        provider: "password",
+        department: session.accountType ?? "ERG",
+        title: session.accessLevel === "admin" ? "Quản trị viên" : "Người dùng ERG",
+        features: [],
+        lifecycle: session.lifecycle,
+        isProfileCompleted: session.lifecycle?.isProfileCompleted,
+        status: "ACTIVE",
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      },
+      permissions: session.permissions ?? [],
+      deniedPermissions: session.deniedPermissions ?? [],
+      roles: session.roles ?? [],
+      portals: session.portals ?? [],
+    };
+  },
+
+  startOidcLogin(portal: LoginRequestDTO["portal"], returnTo?: string) {
+    const apiBase = getApiBase();
+    if (!apiBase) throw new Error("API base URL is not configured.");
+    const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/";
+    const query = new URLSearchParams({ portal: portal ?? "lms", returnTo: safeReturnTo });
+    window.location.assign(`${apiBase}${AUTH_V1_BASE}/login?${query.toString()}`);
   },
 
   async profile() {
@@ -165,26 +199,19 @@ export const authApi = {
     return authApi.profile();
   },
 
-  async loginWithProvider(provider: Extract<AuthProvider, "google">, rememberMe: boolean, idToken: string, portal: "admin" | "crm" | "lcms" | "lms" = "lms") {
-    void provider;
-    const claims = decodeJwtPayload(idToken);
-    const result = await apiRequest<BackendAuthSessionResponseDTO>(`${AUTH_V1_BASE}/google/login`, {
-      portal,
-      method: "POST",
-      body: JSON.stringify({
-        ...getLoginDeviceMetadata(),
-        avatarUrl: typeof claims?.picture === "string" ? claims.picture : undefined,
-        email: typeof claims?.email === "string" ? claims.email : "",
-        emailVerified: typeof claims?.email_verified === "boolean" ? claims.email_verified : undefined,
-        fullName: typeof claims?.name === "string" ? claims.name : undefined,
-        googleSub: typeof claims?.sub === "string" ? claims.sub : "",
-        idToken,
-        rememberMe,
-        portal,
-      }),
-    });
-    return normalizeAuthSession(result);
-  },
+};
+
+type BackendBffSessionDTO = {
+  userId: string;
+  tenantId: string;
+  roles?: string[];
+  permissions?: string[];
+  deniedPermissions?: string[];
+  portals?: AuthSessionResponseDTO["portals"];
+  accountType?: string;
+  accessLevel?: string;
+  profile?: { email?: string; fullName?: string };
+  lifecycle?: TeacherAccountLifecycle;
 };
 
 export function shouldRetrySharedAuthLogin(error: unknown) {
@@ -212,7 +239,10 @@ export function normalizeAuthSession(result: BackendAuthSessionResponseDTO): Aut
     refreshToken: readRefreshToken(result),
     expiresAt: readExpiresAt(result) ?? expiresInToDate(expiresIn),
     permissions: result.permissions,
+    deniedPermissions: result.deniedPermissions,
+    roles: result.roles,
     portals: result.portals,
+    tenantId: result.tenantId ?? result.tenant_id,
   };
 }
 
@@ -260,7 +290,8 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
     department: profile?.accountType ?? profile?.account_type ?? "ERG",
     title: profile?.jobTitle ?? profile?.job_title ?? (mapRole(profile?.roles) === "admin" ? "Quản trị viên" : "Giáo viên"),
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
-    isProfileCompleted: profile?.isProfileCompleted ?? profile?.is_profile_completed ?? true,
+    lifecycle: profile.lifecycle,
+    isProfileCompleted: profile.lifecycle?.isProfileCompleted ?? profile.isProfileCompleted ?? profile.is_profile_completed,
     status: profile?.status ?? "ACTIVE",
     createdAt: profile?.createdAt ?? profile?.created_at ?? new Date().toISOString(),
     lastLoginAt: new Date().toISOString(),
@@ -297,29 +328,6 @@ function mapProvider(provider?: string): AuthProvider {
 function expiresInToDate(expiresIn?: number) {
   if (!expiresIn) return undefined;
   return new Date(Date.now() + expiresIn * 1000).toISOString();
-}
-
-function decodeJwtPayload(token: string) {
-  const payload = token.split(".")[1];
-  if (!payload) return null;
-
-  try {
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    const decoded =
-      typeof window !== "undefined" && typeof window.atob === "function"
-        ? window.atob(padded)
-        : globalThis.atob(padded);
-    return JSON.parse(decoded) as {
-      email?: unknown;
-      email_verified?: unknown;
-      name?: unknown;
-      picture?: unknown;
-      sub?: unknown;
-    };
-  } catch {
-    return null;
-  }
 }
 
 const DEVICE_ID_STORAGE_KEY = "erg-device-id";

@@ -1,9 +1,12 @@
 import { type ReactNode } from "react";
 import { CheckCircle2, Search } from "@/components/mui-icon-shim";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Input, inputClassName } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
+import { inputClassName } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 export function StatusSelectField({
@@ -50,7 +53,7 @@ export function ContentTextFields({
   return (
     <>
       <Field label={titleLabel}>
-        <Input value={titleValue} onChange={(event) => onTitleChange(event.target.value)} placeholder={titlePlaceholder} autoFocus={autoFocus} />
+        <TextField size="small" fullWidth value={titleValue} onChange={(event) => onTitleChange(event.target.value)} placeholder={titlePlaceholder} autoFocus={autoFocus} />
       </Field>
       <Field label={descriptionLabel}>
         <textarea
@@ -79,7 +82,7 @@ export function ContentLinkField({
 }) {
   return (
     <Field label={label}>
-      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
+      <TextField size="small" fullWidth value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} />
       {hint ? <p className="text-xs leading-5 text-slate-500">{hint}</p> : null}
     </Field>
   );
@@ -87,10 +90,22 @@ export function ContentLinkField({
 
 export function SearchInput({ value, onChange, placeholder }: { value: string; onChange: (value: string) => void; placeholder: string }) {
   return (
-    <div className="relative">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-      <Input value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} className="pl-9" />
-    </div>
+    <TextField
+      size="small"
+      fullWidth
+      value={value}
+      onChange={(event) => onChange(event.target.value)}
+      placeholder={placeholder}
+      slotProps={{
+        input: {
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search className="h-4 w-4 text-slate-400" />
+            </InputAdornment>
+          ),
+        },
+      }}
+    />
   );
 }
 

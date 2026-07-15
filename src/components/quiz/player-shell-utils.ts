@@ -1,32 +1,57 @@
 import {
   createRuntimeKey,
+  type LocalQuizAttemptScope,
   localQuizAttemptStore,
   startAttempt,
 } from "@/features/lcms/quiz/quiz-runtime";
 import { normalizeAnswerForSubmission } from "@/lib/quiz";
+import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime";
 import type { AnswerPayload, Question, QuizPackage } from "@/lib/types";
 
-export async function createFreshLocalSession(assignmentId: string, quizPackage: QuizPackage) {
+export async function createFreshLocalSession(
+  assignmentId: string,
+  quizPackage: QuizPackage,
+  scope?: LocalQuizAttemptScope,
+) {
   const localAttemptId = createRuntimeKey("attempt");
   const startKey = createRuntimeKey("start");
   const submitKey = createRuntimeKey("submit");
-  const startedAttempt = await startAttempt({
+
+  return localQuizAttemptStore.createSession({
+    accountId: scope?.accountId,
     assignmentId,
-    idempotencyKey: startKey,
-    localAttemptId,
+    attemptId: localAttemptId,
+    packageHash: quizPackage.contentHash,
+    portal: scope?.portal,
+    quizId: quizPackage.quizId,
+    quizVersion: quizPackage.quizVersion,
+    shuffleSeed: `${quizPackage.contentHash}:${quizPackage.quizVersion}:${localAttemptId}`,
+    startIdempotencyKey: startKey,
+    submitIdempotencyKey: submitKey,
+    tenantId: scope?.tenantId,
+  });
+}
+
+export async function ensureServerAttempt(
+  session: Awaited<ReturnType<typeof createFreshLocalSession>>,
+  quizPackage: QuizPackage,
+  portal: QuizRuntimePortal,
+) {
+  if (session.serverStarted) {
+    return session;
+  }
+
+  const startedAttempt = await startAttempt({
+    assignmentId: session.assignmentId,
+    idempotencyKey: session.startIdempotencyKey ?? createRuntimeKey("start"),
+    localAttemptId: session.attemptId,
     packageHash: quizPackage.contentHash,
     packageId: quizPackage.id,
+    portal,
     quizId: quizPackage.quizId,
   });
 
-  return localQuizAttemptStore.createSession({
-    assignmentId,
-    attemptId: startedAttempt.attemptId,
-    packageHash: quizPackage.contentHash,
-    quizId: quizPackage.quizId,
-    quizVersion: quizPackage.quizVersion,
-    submitIdempotencyKey: submitKey,
-  });
+  return localQuizAttemptStore.markServerStarted(session, startedAttempt.attemptId);
 }
 
 export function buildNormalizedAnswers(questions: Question[], drafts: Record<string, AnswerPayload>) {

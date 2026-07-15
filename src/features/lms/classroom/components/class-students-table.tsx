@@ -1,16 +1,16 @@
 import { useRef } from "react";
 
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress";
-import { Checkbox as LmsCheckbox } from "@/components/ui/checkbox";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
+import Checkbox from "@mui/material/Checkbox";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { useVirtualList } from "@/hooks/use-virtual-list";
 import { cn } from "@/lib/utils";
 import { TABLE_HEADER_HEIGHT, TABLE_ROW_HEIGHT, TABLE_VISIBLE_ROWS } from "./class-students-workspace.constants";
 import type { StudentCopy } from "./class-students-workspace.copy";
-import { getProgressColor, getStatusTone } from "./class-students-workspace.utils";
+import { getStatusTone } from "./class-students-workspace.utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 export function SelectControl({
@@ -64,13 +64,13 @@ export function SelectionBar({
         <span className="ml-1">{copy.visibleSummary(visibleCount)}</span>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" onClick={onAssign} disabled={selectedCount === 0}>
+        <Button size="small" variant="contained" onClick={onAssign} disabled={selectedCount === 0}>
           {copy.openAssignDialog(selectedCount)}
         </Button>
-        <Button size="sm" variant="outline" onClick={onToggleAll} disabled={visibleCount === 0}>
+        <Button size="small" variant="outlined" onClick={onToggleAll} disabled={visibleCount === 0}>
           {allVisibleSelected ? copy.unselectVisible : copy.selectVisible}
         </Button>
-        <Button size="sm" variant="ghost" onClick={onClear} disabled={selectedCount === 0}>
+        <Button size="small" variant="text" onClick={onClear} disabled={selectedCount === 0}>
           {copy.clearSelection}
         </Button>
       </div>
@@ -198,10 +198,12 @@ function StudentTableRow({
   return (
     <tr className={cn("transition", active ? "bg-[#ebf3fc]" : "hover:bg-[#f8fbff]")}> 
       <td className="px-4 py-3 align-middle">
-        <LmsCheckbox
-          aria-label={copy.selectStudent(student.name)}
+        <Checkbox
+          size="small"
+          sx={{ p: 0 }}
+          slotProps={{ input: { "aria-label": copy.selectStudent(student.name) } }}
           checked={checked}
-          onCheckedChange={onToggle}
+          onChange={onToggle}
         />
       </td>
       <td className="px-4 py-3">
@@ -228,20 +230,20 @@ function StudentTableRow({
           <span>{copy.progressLabel}</span>
           <span>{student.progressRate}%</span>
         </div>
-        <ProgressBar
+        <LinearProgress
+          variant="determinate"
           value={student.progressRate}
-          className="h-2 bg-slate-100"
-          indicatorClassName={getProgressColor(student.progressRate)}
+          sx={{ height: 8, borderRadius: 1, bgcolor: "grey.100" }}
         />
       </td>
       <td className="px-4 py-3 font-semibold text-slate-950">
         {student.averageScore} <span className="text-[13px] font-semibold text-slate-500">{copy.scoreUnit}</span>
       </td>
       <td className="px-4 py-3">
-        <Badge tone={getStatusTone(student.status)}>{copy.status[student.status]}</Badge>
+        <Chip label={copy.status[student.status]} size="small" color={getStatusTone(student.status)} />
       </td>
       <td className="px-4 py-3">
-        <Button size="sm" variant="outline" onClick={onFocus}>
+        <Button size="small" variant="outlined" onClick={onFocus}>
           {copy.viewDetail}
         </Button>
       </td>
@@ -267,11 +269,12 @@ function StudentMobileCard({
   return (
     <article className={cn("rounded-lg border bg-white p-4", active ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cbd7e6]")}>
       <div className="flex items-start gap-3">
-        <LmsCheckbox
+        <Checkbox
+          size="small"
           aria-label={copy.selectStudent(student.name)}
           checked={checked}
-          className="mt-3"
-          onCheckedChange={onToggle}
+          sx={{ mt: 0.5, p: 0.5 }}
+          onChange={onToggle}
         />
         <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
           {student.avatarSeed}
@@ -284,7 +287,7 @@ function StudentMobileCard({
             {student.className} • {student.lastActivity}
           </div>
         </div>
-        <Badge tone={getStatusTone(student.status)}>{copy.status[student.status]}</Badge>
+        <Chip label={copy.status[student.status]} size="small" color={getStatusTone(student.status)} />
       </div>
       <div className="mt-4 rounded-lg bg-[#f8fbff] p-3">
         <div className="text-sm font-semibold text-slate-950">{student.currentAssignment}</div>
@@ -293,13 +296,13 @@ function StudentMobileCard({
           <span>{copy.progressLabel}</span>
           <span>{student.progressRate}%</span>
         </div>
-        <ProgressBar value={student.progressRate} className="mt-2 h-2 bg-slate-100" indicatorClassName={getProgressColor(student.progressRate)} />
+        <LinearProgress variant="determinate" value={student.progressRate} sx={{ mt: 1, height: 8, borderRadius: 1 }} />
       </div>
       <div className="mt-3 flex items-center justify-between gap-3">
         <span className="text-sm font-semibold text-slate-950">
           {student.averageScore} {copy.scoreUnit}
         </span>
-        <Button size="sm" variant="outline" onClick={onFocus}>
+        <Button size="small" variant="outlined" onClick={onFocus}>
           {copy.viewDetail}
         </Button>
       </div>

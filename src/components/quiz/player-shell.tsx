@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bookmark, Search } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { Flag } from "lucide-react";
 
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import {
@@ -8,29 +9,41 @@ import {
   QuestionFeedbackPanel,
   SubmitConfirmDialog,
 } from "@/components/quiz/player-shell-parts";
+import { QuestionNavigator } from "@/components/quiz/question-navigator";
 import {
   areAnswerPayloadsEqual,
   buildNormalizedAnswers,
   createFreshLocalSession,
+  ensureServerAttempt,
   formatTimer,
   questionLabel,
 } from "@/components/quiz/player-shell-utils";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
+import { QuizWelcomeScreen, type QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
-import { Skeleton } from "@/components/ui/skeleton";
+import Skeleton from "@mui/material/Skeleton";
 import {
   buildClientSubmitPayload,
   createEmptyAttempt,
-  getQuizPackage,
+  createRuntimeKey,
   gradeFinalAttemptLocally,
   localQuizAttemptStore,
+  prepareQuizPackageForAttempt,
   submitFinalAttempt,
+  useSaveAttemptAnswerMutation,
+  useSaveAttemptDraftMutation,
+  useSyncAttemptMutation,
+  useQuizPackageQuery,
 } from "@/features/lcms/quiz/quiz-runtime";
-import { createInitialAnswer, getAllQuestions, isAnswerComplete } from "@/lib/quiz";
+import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
+import { createInitialAnswer, getAllQuestions, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/lib/quiz";
+import { sampleQuiz } from "@/lib/sample-quiz";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime";
-import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage, QuizResultDisplay } from "@/lib/types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime";
+import type { AnswerPayload, AnswerRecord, Attempt, Question, Quiz, QuizPackage, QuizResultDisplay } from "@/lib/types";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 
 type LoadState =
   | { status: "loading" }
@@ -43,55 +56,79 @@ type LoadState =
     }
   | { status: "error"; message: string };
 
-type SidebarTab = "outline" | "notes";
 type SubmitDialogMode = "all-answered" | "confirm";
 
 const navButtonClass =
-  "inline-flex min-h-10 min-w-[92px] items-center justify-center rounded-md border border-transparent px-4 text-sm font-semibold text-white shadow-sm transition disabled:cursor-not-allowed disabled:opacity-40";
+  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-4 text-xs font-extrabold text-white shadow-[0_12px_26px_rgba(0,0,136,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(0,0,136,0.22)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
 const secondaryButtonClass =
-  "inline-flex min-h-10 min-w-[92px] items-center justify-center rounded-md border px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-40";
-const playerViewportClass = "lg:h-[min(900px,calc(100vh-8rem))]";
+  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
+const playerViewportClass = "lg:h-[calc(100vh-3.75rem)]";
 
 const defaultResultDisplay: QuizResultDisplay = {
   passMessage: "Chúc mừng, bạn đã đạt!",
-  failMessage: "Rất tiếc bạn đã không đạt!",
-  reviewButtonLabel: "REVIEW QUIZ",
-  thankYouMessage: "Thank you!",
+  failMessage: "Rất tiếc, bạn chưa đạt.",
+  reviewButtonLabel: "XEM LẠI BÀI",
+  thankYouMessage: "Cảm ơn bạn đã hoàn thành bài làm.",
   showReviewButton: true,
-  submitAllPrompt: "All questions have been answered. Would you like to submit your answers?",
-  confirmSubmitPrompt: "Are you sure you're ready to submit your answers and finish the quiz?",
-  submitAllLabel: "SUBMIT ALL",
-  returnToQuizLabel: "RETURN TO QUIZ",
-  confirmYesLabel: "YES",
-  confirmNoLabel: "NO",
+  submitAllPrompt: "Bạn đã trả lời hết câu hỏi. Bạn muốn nộp bài ngay không?",
+  confirmSubmitPrompt: "Bạn chắc chắn muốn nộp bài và kết thúc lượt làm này chứ?",
+  submitAllLabel: "NỘP BÀI",
+  returnToQuizLabel: "QUAY LẠI BÀI",
+  confirmYesLabel: "ĐỒNG Ý",
+  confirmNoLabel: "HỦY",
 };
 
 export function PlayerShell({
   assignmentId,
-  quizId = "avs-demo",
+  quizId = sampleQuiz.id,
+  runtimePortal = "elearning",
+  welcomeMeta,
 }: {
   assignmentId?: string;
   quizId?: string;
+  runtimePortal?: QuizRuntimePortal;
+  welcomeMeta?: QuizWelcomeMeta;
 }) {
   const resolvedAssignmentId = assignmentId ?? quizId;
   const isMobile = useIsMobile();
+  const queryClient = useQueryClient();
+  const attemptScope = useMemo(() => {
+    const viewer = getCurrentElearningViewerSession();
+    return {
+      accountId: viewer?.id,
+      portal: runtimePortal,
+      tenantId: getDefaultTenantId(),
+    };
+  }, [runtimePortal]);
   const [loadState, setLoadState] = useState<LoadState>({ status: "loading" });
-  const [loadRequestId, setLoadRequestId] = useState(0);
+  const quizPackageQuery = useQuizPackageQuery(quizId, runtimePortal);
   const [started, setStarted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState<Record<string, AnswerPayload>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [sidebarTab, setSidebarTab] = useState<SidebarTab>("outline");
   const [sidebarQuery, setSidebarQuery] = useState("");
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
   const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [recentTrainingSubmitQuestionId, setRecentTrainingSubmitQuestionId] = useState<string | null>(null);
+  const questionBodyRef = useRef<HTMLDivElement | null>(null);
+  const lastReconnectSyncSignatureRef = useRef<string | null>(null);
   const paceStateUpdate = usePacedStateBatch();
+  const { mutateAsync: saveAttemptAnswerAsync } = useSaveAttemptAnswerMutation();
+  const { mutateAsync: saveAttemptDraftAsync } = useSaveAttemptDraftMutation();
+  const { mutateAsync: syncAttemptAsync } = useSyncAttemptMutation();
 
   useEffect(() => {
     let cancelled = false;
+
+    if (quizPackageQuery.isPending) {
+      setLoadState({ status: "loading" });
+      return () => {
+        cancelled = true;
+      };
+    }
 
     paceStateUpdate(() => {
       if (cancelled) {
@@ -104,18 +141,22 @@ export function PlayerShell({
       setDrafts({});
       setSubmitting(false);
       setSubmitError(null);
-      setSidebarTab("outline");
       setSidebarQuery("");
       setSubmitDialogMode(null);
       setReviewingSubmittedAttempt(false);
       setSessionStartedAt(null);
       setRemainingSeconds(null);
+      setRecentTrainingSubmitQuestionId(null);
     });
 
     async function load() {
       try {
-        const quizPackage = await getQuizPackage(quizId);
-        const storedSession = await localQuizAttemptStore.getSession(resolvedAssignmentId, quizId);
+        const queryResult = quizPackageQuery.data;
+        if (!queryResult) {
+          throw quizPackageQuery.error ?? new Error("Quiz package is not available.");
+        }
+        const quizPackage = queryResult;
+        const storedSession = await localQuizAttemptStore.getSession(resolvedAssignmentId, quizId, attemptScope);
         const reusableSession =
           storedSession &&
           storedSession.packageHash === quizPackage.contentHash &&
@@ -123,11 +164,15 @@ export function PlayerShell({
             ? storedSession
             : null;
 
-        const session = reusableSession ?? (await createFreshLocalSession(resolvedAssignmentId, quizPackage));
+        const session = reusableSession ?? (await createFreshLocalSession(resolvedAssignmentId, quizPackage, attemptScope));
+        const playablePackage = prepareQuizPackageForAttempt(
+          quizPackage,
+          session.shuffleSeed ?? session.attemptId,
+        );
         const attempt =
           session.status === "submitted"
-            ? gradeFinalAttemptLocally(quizPackage, session.attemptId, session.answers)
-            : createEmptyAttempt(quizPackage, session.attemptId);
+            ? gradeFinalAttemptLocally(playablePackage, session.attemptId, session.answers)
+            : createEmptyAttempt(playablePackage, session.attemptId);
 
         if (cancelled) {
           return;
@@ -136,11 +181,13 @@ export function PlayerShell({
         setDrafts(session.answers);
         setStarted(session.status === "submitted");
         setReviewingSubmittedAttempt(false);
-        setSessionStartedAt(Date.parse(session.startedAt));
+        setSessionStartedAt(
+          session.serverStarted || session.status === "submitted" ? Date.parse(session.startedAt) : null,
+        );
         setLoadState({
           status: "ready",
           attempt,
-          quizPackage,
+          quizPackage: playablePackage,
           restored: Boolean(reusableSession && Object.keys(reusableSession.answers).length > 0),
           session,
         });
@@ -151,7 +198,7 @@ export function PlayerShell({
 
         setLoadState({
           status: "error",
-          message: error instanceof Error ? error.message : "Unable to load quiz.",
+          message: error instanceof Error ? error.message : "Không thể tải bài làm.",
         });
       }
     }
@@ -161,7 +208,15 @@ export function PlayerShell({
     return () => {
       cancelled = true;
     };
-  }, [loadRequestId, paceStateUpdate, quizId, resolvedAssignmentId]);
+  }, [
+    attemptScope,
+    paceStateUpdate,
+    quizId,
+    quizPackageQuery.data,
+    quizPackageQuery.error,
+    quizPackageQuery.isPending,
+    resolvedAssignmentId,
+  ]);
 
   const quizPackage = loadState.status === "ready" ? loadState.quizPackage : null;
   const session = loadState.status === "ready" ? loadState.session : null;
@@ -170,20 +225,12 @@ export function PlayerShell({
   const questions = useMemo(() => (quiz ? getAllQuestions(quiz) : []), [quiz]);
   const currentQuestion = questions[currentIndex];
 
-  const filteredQuestions = useMemo(() => {
-    const normalized = sidebarQuery.trim().toLowerCase();
-    if (!normalized) {
-      return questions;
-    }
-
-    return questions.filter((question, index) => `${index + 1}. ${question.title}`.toLowerCase().includes(normalized));
-  }, [questions, sidebarQuery]);
-
   const activeQuiz = quiz;
   const activeAttempt = attempt;
   const activePackage = quizPackage;
   const activeSession = session;
   const activeQuestion = currentQuestion ?? null;
+  const submitFailed = activeSession?.status === "submit_failed";
   const isTrainingMode = activeQuiz?.settings.mode === "training";
   const isTestingMode = activeQuiz?.settings.mode === "testing";
   const attemptCompleted = Boolean(activeAttempt && activeAttempt.submittedCount === questions.length && questions.length > 0);
@@ -192,6 +239,7 @@ export function PlayerShell({
   const submitted = Boolean(currentRecord);
   const storedAnswer = activeQuestion ? currentRecord?.input ?? drafts[activeQuestion.id] : undefined;
   const draftAnswer = activeQuestion ? storedAnswer ?? createInitialAnswer(activeQuestion) : {};
+  const currentAnswerComplete = activeQuestion ? isAnswerComplete(activeQuestion, drafts[activeQuestion.id]) : false;
   const allQuestionsAnswered = questions.every((question) =>
     isAnswerComplete(question, drafts[question.id]),
   );
@@ -207,15 +255,16 @@ export function PlayerShell({
     currentAttempt: Attempt | null,
   ) => {
     const submittedAt = new Date().toISOString();
+    const serverSession = await ensureServerAttempt(readySession, readyPackage, runtimePortal);
     const answers = buildNormalizedAnswers(questions, drafts);
     const submittingSession = await localQuizAttemptStore.markSubmitting({
-      ...readySession,
+      ...serverSession,
       answers,
     });
 
     setLoadState({
       status: "ready",
-      attempt: currentAttempt ?? createEmptyAttempt(readyPackage, readySession.attemptId),
+      attempt: currentAttempt ? { ...currentAttempt, id: serverSession.attemptId } : createEmptyAttempt(readyPackage, serverSession.attemptId),
       quizPackage: readyPackage,
       restored: false,
       session: submittingSession,
@@ -223,17 +272,18 @@ export function PlayerShell({
 
     const payload = buildClientSubmitPayload({
       answers,
-      attemptId: readySession.attemptId,
+      attemptId: serverSession.attemptId,
       clientEvents: submittingSession.clientEvents,
       quizPackage: readyPackage,
-      startedAt: readySession.startedAt,
+      startedAt: serverSession.startedAt,
       submittedAt,
     });
 
     const nextAttempt = await submitFinalAttempt({
-      attemptId: readySession.attemptId,
-      idempotencyKey: readySession.submitIdempotencyKey,
+      attemptId: serverSession.attemptId,
+      idempotencyKey: serverSession.submitIdempotencyKey,
       payload,
+      portal: runtimePortal,
       quiz: readyPackage.quiz,
       quizPackage: readyPackage,
     });
@@ -254,9 +304,170 @@ export function PlayerShell({
       restored: false,
       session: submittedSession,
     });
+    const tenantId = getDefaultTenantId();
+    void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.assignmentReport(serverSession.assignmentId, tenantId) });
+    void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.reportTenantRoot(tenantId) });
     setReviewingSubmittedAttempt(false);
     setCurrentIndex(0);
-  }, [drafts, questions]);
+  }, [drafts, queryClient, questions, runtimePortal]);
+
+  const beginAttempt = useCallback(async (nextIndex?: number) => {
+    if (!activePackage || !activeSession || !activeAttempt) {
+      return;
+    }
+
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const startedSession = await ensureServerAttempt(activeSession, activePackage, runtimePortal);
+      setLoadState({
+        status: "ready",
+        attempt: { ...activeAttempt, id: startedSession.attemptId },
+        quizPackage: activePackage,
+        restored: false,
+        session: startedSession,
+      });
+      setStarted(true);
+      setSessionStartedAt(Date.parse(startedSession.startedAt));
+      if (!isTestingMode) {
+        setRemainingSeconds(null);
+      }
+      if (typeof nextIndex === "number") {
+        setCurrentIndex(nextIndex);
+      }
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Không thể bắt đầu lượt làm. Vui lòng thử lại.");
+    } finally {
+      setSubmitting(false);
+    }
+  }, [activeAttempt, activePackage, activeSession, isTestingMode, runtimePortal]);
+
+  const submitCurrentTrainingQuestion = useCallback(async () => {
+    if (
+      !activePackage ||
+      !activeSession ||
+      !activeAttempt ||
+      !activeQuestion ||
+      !activeQuiz ||
+      !isTrainingMode ||
+      submitting ||
+      attemptCompleted ||
+      activeAttempt.answers[activeQuestion.id]
+    ) {
+      return;
+    }
+
+    const currentDraft = drafts[activeQuestion.id] ?? createInitialAnswer(activeQuestion);
+    if (!isAnswerComplete(activeQuestion, currentDraft)) {
+      return;
+    }
+
+    const normalizedAnswer = normalizeAnswerForSubmission(activeQuestion, currentDraft);
+    const result = scoreQuestion(activeQuestion, normalizedAnswer);
+    const nextAttempt = applyTrainingQuestionResult({
+      answer: normalizedAnswer,
+      attempt: activeAttempt,
+      question: activeQuestion,
+      questions,
+      result,
+      quiz: activeQuiz,
+    });
+    const now = new Date().toISOString();
+    const nextSession: LocalQuizAttemptSession = {
+      ...activeSession,
+      answers: {
+        ...activeSession.answers,
+        [activeQuestion.id]: normalizedAnswer,
+      },
+      clientEvents: [
+        ...activeSession.clientEvents,
+        {
+          id: createRuntimeKey("evt"),
+          type: "answer_graded",
+          createdAt: now,
+          questionId: activeQuestion.id,
+        },
+      ],
+      status: activeSession.status === "submit_failed" ? "in_progress" : activeSession.status,
+      updatedAt: now,
+    };
+
+    setDrafts(nextSession.answers);
+    setSubmitError(null);
+    setLoadState({
+      status: "ready",
+      attempt: nextAttempt,
+      quizPackage: activePackage,
+      restored: false,
+      session: nextSession,
+    });
+    setRecentTrainingSubmitQuestionId(activeQuestion.id);
+    await localQuizAttemptStore.saveSession(nextSession);
+    try {
+      await saveAttemptAnswerAsync({
+        attemptId: nextSession.attemptId,
+        payload: {
+          answer: normalizedAnswer,
+          answeredAt: now,
+          clientResult: result,
+        },
+        portal: runtimePortal,
+        questionId: activeQuestion.id,
+      });
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ câu trả lời lên máy chủ.");
+    }
+  }, [
+    activeAttempt,
+    activePackage,
+    activeQuestion,
+    activeQuiz,
+    activeSession,
+    attemptCompleted,
+    drafts,
+    isTrainingMode,
+    questions,
+    runtimePortal,
+    saveAttemptAnswerAsync,
+    submitting,
+  ]);
+
+  const finalizeAttempt = useCallback(async () => {
+    if (!activePackage || !activeSession) {
+      return;
+    }
+
+    setSubmitDialogMode(null);
+    setSubmitting(true);
+    try {
+      await submitReadyAttempt(activePackage, activeSession, activeAttempt);
+    } catch (error) {
+      const latestSession =
+        (await localQuizAttemptStore.getSession(activeSession.assignmentId, activeSession.quizId, attemptScope)) ?? activeSession;
+      const failedSession = await localQuizAttemptStore.markSubmitFailed(
+        latestSession,
+        error instanceof Error ? error.message : "Nộp bài không thành công.",
+      );
+      setSubmitError(error instanceof Error ? error.message : "Nộp bài không thành công. Vui lòng thử lại.");
+      setLoadState({
+        status: "ready",
+        attempt: activeAttempt ? { ...activeAttempt, id: latestSession.attemptId } : createEmptyAttempt(activePackage, latestSession.attemptId),
+        quizPackage: activePackage,
+        restored: false,
+        session: failedSession,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [activeAttempt, activePackage, activeSession, attemptScope, submitReadyAttempt]);
+
+  const requestSubmit = useCallback(() => {
+    if (isTestingMode && !allQuestionsAnswered && !submitFailed) {
+      return;
+    }
+
+    setSubmitDialogMode(allQuestionsAnswered ? "all-answered" : "confirm");
+  }, [allQuestionsAnswered, isTestingMode, submitFailed]);
 
   useEffect(() => {
     if (!started || !isTestingMode || attemptCompleted || sessionStartedAt !== null) {
@@ -286,6 +497,98 @@ export function PlayerShell({
   }, [started, isTestingMode, attemptCompleted, deadlineAt]);
 
   useEffect(() => {
+    if (!started || !activeSession?.serverStarted || !activePackage || attemptCompleted) {
+      return;
+    }
+
+    const sessionSnapshot = activeSession;
+    const packageSnapshot = activePackage;
+    const answersSnapshot = { ...drafts };
+    const syncTimerId = window.setTimeout(() => {
+      void saveAttemptDraftAsync({
+        attemptId: sessionSnapshot.attemptId,
+        payload: {
+          answers: answersSnapshot,
+          packageHash: packageSnapshot.contentHash,
+          quizVersion: packageSnapshot.quizVersion,
+          events: sessionSnapshot.clientEvents,
+          client: {
+            mode: packageSnapshot.quiz.settings.mode,
+            source: "quiz-player",
+            updatedAt: sessionSnapshot.updatedAt,
+          },
+        },
+        portal: runtimePortal,
+      }).catch((error) => {
+        setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ nháp lên máy chủ.");
+      });
+    }, 1500);
+
+    return () => {
+      window.clearTimeout(syncTimerId);
+    };
+  }, [
+    activePackage,
+    activeSession,
+    attemptCompleted,
+    drafts,
+    runtimePortal,
+    saveAttemptDraftAsync,
+    started,
+  ]);
+
+  useEffect(() => {
+    if (!started || !activeSession?.serverStarted || !activePackage || attemptCompleted) {
+      return;
+    }
+
+    const handleOnline = () => {
+      const lastEvent = activeSession.clientEvents.at(-1);
+      const eventSignature = `${activeSession.attemptId}:${activeSession.clientEvents.length}:${String(
+        isEventRecord(lastEvent) ? lastEvent.id : "",
+      )}`;
+      if (lastReconnectSyncSignatureRef.current === eventSignature) {
+        return;
+      }
+      lastReconnectSyncSignatureRef.current = eventSignature;
+
+      void syncAttemptAsync({
+        attemptId: activeSession.attemptId,
+        payload: {
+          packageHash: activePackage.contentHash,
+          quizVersion: activePackage.quizVersion,
+          attempt: {
+            answers: activeSession.answers,
+            status: activeSession.status,
+            updatedAt: activeSession.updatedAt,
+          },
+          events: activeSession.clientEvents,
+          client: {
+            mode: activePackage.quiz.settings.mode,
+            source: "quiz-player-reconnect",
+            updatedAt: activeSession.updatedAt,
+          },
+        },
+        portal: runtimePortal,
+      }).catch((error) => {
+        setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ lại bài làm sau khi có mạng.");
+      });
+    };
+
+    window.addEventListener("online", handleOnline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [
+    activePackage,
+    activeSession,
+    attemptCompleted,
+    runtimePortal,
+    started,
+    syncAttemptAsync,
+  ]);
+
+  useEffect(() => {
     if (!started || !isTestingMode || attemptCompleted || remainingSeconds !== 0 || submitting || !activePackage || !activeSession) {
       return;
     }
@@ -295,14 +598,16 @@ export function PlayerShell({
       try {
         await submitReadyAttempt(activePackage, activeSession, activeAttempt);
       } catch (error) {
+        const latestSession =
+          (await localQuizAttemptStore.getSession(activeSession.assignmentId, activeSession.quizId, attemptScope)) ?? activeSession;
         const failedSession = await localQuizAttemptStore.markSubmitFailed(
-          activeSession,
-          error instanceof Error ? error.message : "Submit failed.",
+          latestSession,
+          error instanceof Error ? error.message : "Nộp bài không thành công.",
         );
-        setSubmitError(error instanceof Error ? error.message : "Submit failed. Please retry.");
+        setSubmitError(error instanceof Error ? error.message : "Nộp bài không thành công. Vui lòng thử lại.");
         setLoadState({
           status: "ready",
-          attempt: activeAttempt ?? createEmptyAttempt(activePackage, activeSession.attemptId),
+          attempt: activeAttempt ? { ...activeAttempt, id: latestSession.attemptId } : createEmptyAttempt(activePackage, latestSession.attemptId),
           quizPackage: activePackage,
           restored: false,
           session: failedSession,
@@ -311,21 +616,148 @@ export function PlayerShell({
         setSubmitting(false);
       }
     })();
-  }, [started, isTestingMode, attemptCompleted, remainingSeconds, submitting, activePackage, activeSession, activeAttempt, submitReadyAttempt]);
+  }, [started, isTestingMode, attemptCompleted, remainingSeconds, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt]);
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.defaultPrevented || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
+      if (isEditableKeyboardTarget(event.target, event.key)) {
+        return;
+      }
+
+      if (submitDialogMode) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          void finalizeAttempt();
+        }
+        return;
+      }
+
+      if (!started) {
+        if (event.key === "Enter" && loadState.status === "ready") {
+          event.preventDefault();
+          void beginAttempt();
+        }
+        return;
+      }
+
+      if (attemptCompleted || reviewingSubmittedAttempt || submitting) {
+        return;
+      }
+
+      if (isTestingMode) {
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          setCurrentIndex((value) => Math.max(0, value - 1));
+          return;
+        }
+
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          setCurrentIndex((value) => Math.min(questions.length - 1, value + 1));
+          return;
+        }
+
+        if (event.key === "Enter" && (allQuestionsAnswered || submitFailed)) {
+          event.preventDefault();
+          requestSubmit();
+        }
+        return;
+      }
+
+      if (isTrainingMode && event.key === "Enter") {
+        event.preventDefault();
+        void submitCurrentTrainingQuestion();
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    allQuestionsAnswered,
+    attemptCompleted,
+    beginAttempt,
+    finalizeAttempt,
+    isTestingMode,
+    isTrainingMode,
+    loadState.status,
+    questions.length,
+    requestSubmit,
+    reviewingSubmittedAttempt,
+    started,
+    submitCurrentTrainingQuestion,
+    submitDialogMode,
+    submitFailed,
+    submitting,
+  ]);
+
+  useEffect(() => {
+    if (!started) {
+      return;
+    }
+
+    questionBodyRef.current?.scrollTo({ top: 0 });
+  }, [currentIndex, started]);
+
+  useEffect(() => {
+    if (recentTrainingSubmitQuestionId && activeQuestion && recentTrainingSubmitQuestionId !== activeQuestion.id) {
+      paceStateUpdate(() => setRecentTrainingSubmitQuestionId(null));
+    }
+  }, [activeQuestion, paceStateUpdate, recentTrainingSubmitQuestionId]);
+
+  useEffect(() => {
+    if (
+      !started ||
+      !isTrainingMode ||
+      !activeQuestion ||
+      !lastResult ||
+      recentTrainingSubmitQuestionId !== activeQuestion.id ||
+      attemptCompleted
+    ) {
+      return;
+    }
+
+    const nextQuestionTimerId = window.setTimeout(() => {
+      if (!isLastQuestion) {
+        questionBodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+        setCurrentIndex((value) => Math.min(questions.length - 1, value + 1));
+        window.requestAnimationFrame(() => {
+          questionBodyRef.current?.scrollTo({ top: 0, behavior: "auto" });
+        });
+      }
+      setRecentTrainingSubmitQuestionId(null);
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(nextQuestionTimerId);
+    };
+  }, [
+    activeQuestion,
+    attemptCompleted,
+    isLastQuestion,
+    isTrainingMode,
+    lastResult,
+    questions.length,
+    recentTrainingSubmitQuestionId,
+    started,
+  ]);
 
   if (loadState.status === "loading") {
     return (
       <div className="grid gap-5 rounded-lg border border-slate-200 bg-white p-8 shadow-sm">
         <div className="flex items-center justify-between gap-4">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-28 rounded-lg" />
+          <Skeleton variant="rounded" className="h-8 w-48" />
+          <Skeleton variant="rounded" className="h-10 w-28 rounded-lg" />
         </div>
-        <Skeleton className="h-72 w-full rounded-lg" />
+        <Skeleton variant="rounded" className="h-72 w-full rounded-lg" />
         <div className="grid gap-3 md:grid-cols-4">
-          <Skeleton className="h-12 rounded-lg" />
-          <Skeleton className="h-12 rounded-lg" />
-          <Skeleton className="h-12 rounded-lg" />
-          <Skeleton className="h-12 rounded-lg" />
+          <Skeleton variant="rounded" className="h-12 rounded-lg" />
+          <Skeleton variant="rounded" className="h-12 rounded-lg" />
+          <Skeleton variant="rounded" className="h-12 rounded-lg" />
+          <Skeleton variant="rounded" className="h-12 rounded-lg" />
         </div>
       </div>
     );
@@ -334,13 +766,13 @@ export function PlayerShell({
   if (loadState.status === "error" || !activeQuiz || !activeAttempt || !activePackage || !activeSession || !activeQuestion) {
     return (
       <div className="grid gap-4 rounded-lg border border-red-100 bg-white p-8 text-red-600 shadow-sm">
-        <p>{loadState.status === "error" ? loadState.message : "Quiz unavailable."}</p>
+        <p>{loadState.status === "error" ? loadState.message : "Không thể mở bài làm."}</p>
         <button
           type="button"
           className="w-fit rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white"
-          onClick={() => setLoadRequestId((value) => value + 1)}
+          onClick={() => void quizPackageQuery.refetch()}
         >
-          Retry
+          Thử lại
         </button>
       </div>
     );
@@ -354,9 +786,11 @@ export function PlayerShell({
   const resultDisplay: QuizResultDisplay = { ...defaultResultDisplay, ...(readyQuiz.result ?? {}) };
   const answeredCount = questions.filter((question) => isAnswerComplete(question, drafts[question.id])).length;
   const restoredDraft = loadState.status === "ready" && loadState.restored;
-  const submitFailed = readySession.status === "submit_failed";
   const bookmarkedQuestionIds = readySession.bookmarkedQuestionIds;
   const isCurrentQuestionBookmarked = bookmarkedQuestionIds.includes(readyQuestion.id);
+  const answeredQuestionIds = questions
+    .filter((question) => isAnswerComplete(question, drafts[question.id]))
+    .map((question) => question.id);
 
   const playerCardStyle = {
     backgroundColor: "var(--quiz-player-bg)",
@@ -371,60 +805,34 @@ export function PlayerShell({
     color: "var(--quiz-header-text)",
   };
   const accentButtonStyle = {
-    backgroundColor: "var(--quiz-accent-start)",
+    backgroundColor: "#000088",
+    boxShadow: "0 10px 24px rgba(0,0,136,0.18)",
   };
   const secondaryButtonStyle = {
-    borderColor: "var(--quiz-canvas-border)",
-    backgroundColor: "var(--quiz-player-bg)",
-    color: "var(--quiz-option-text)",
+    borderColor: "rgba(0,0,136,0.18)",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    color: "#000088",
   };
   const modeBadgeStyle = isTrainingMode
     ? {
-        backgroundColor: "#ecfdf3",
-        color: "#047857",
+        backgroundColor: "rgba(0,0,136,0.08)",
+        color: "#000088",
       }
     : {
-        backgroundColor: "#ebf3fc",
-        color: "var(--erg-blue)",
+        backgroundColor: "rgba(232,40,40,0.10)",
+        color: "#b91c1c",
       };
-  const sidebarActiveStyle = {
-    background: "var(--quiz-sidebar-active-bg)",
-    color: "var(--quiz-sidebar-active-text)",
-  };
-  const sidebarInputStyle = {
-    backgroundColor: "var(--quiz-input-bg)",
-    borderColor: "var(--quiz-canvas-border)",
-  };
   const testingTimerTone =
     remainingSeconds !== null && remainingSeconds <= 60
       ? "bg-rose-50 text-rose-600 ring-1 ring-rose-200"
       : "bg-slate-100 text-slate-700";
 
   async function handleFinalizeAttempt() {
-    setSubmitDialogMode(null);
-    setSubmitting(true);
-    try {
-      await submitReadyAttempt(readyPackage, readySession, readyAttempt);
-    } catch (error) {
-      const failedSession = await localQuizAttemptStore.markSubmitFailed(
-        readySession,
-        error instanceof Error ? error.message : "Submit failed.",
-      );
-      setSubmitError(error instanceof Error ? error.message : "Submit failed. Please retry.");
-      setLoadState({
-        status: "ready",
-        attempt: readyAttempt,
-        quizPackage: readyPackage,
-        restored: false,
-        session: failedSession,
-      });
-    } finally {
-      setSubmitting(false);
-    }
+    await finalizeAttempt();
   }
 
   function handleRequestSubmit() {
-    setSubmitDialogMode(allQuestionsAnswered ? "all-answered" : "confirm");
+    requestSubmit();
   }
 
   function handleReviewQuiz() {
@@ -448,6 +856,7 @@ export function PlayerShell({
       clientEvents: [
         ...readySession.clientEvents,
         {
+          id: createRuntimeKey("evt"),
           type: "answer_changed",
           createdAt: now,
           questionId: readyQuestion.id,
@@ -482,32 +891,30 @@ export function PlayerShell({
 
   function handleJumpToQuestion(index: number) {
     if (!started) {
-      setStarted(true);
-      if (!isTestingMode) {
-        setRemainingSeconds(null);
-      }
+      void beginAttempt(index);
+      return;
     }
     setCurrentIndex(index);
   }
 
   function handleStartQuiz() {
-    setStarted(true);
-    if (!isTestingMode) {
-      setRemainingSeconds(null);
-    }
+    void beginAttempt();
   }
 
   const footerMessage = reviewingAttempt
     ? "Đang xem lại kết quả. Màu xanh là đáp án đúng, màu đỏ/cam là câu trả lời cần sửa."
     : submitFailed
-      ? "Submit failed. Your answers are still saved on this device. Retry with the same request key."
+      ? "Nộp bài chưa thành công. Câu trả lời vẫn được lưu trên thiết bị này, bạn có thể thử lại."
       : allQuestionsAnswered
         ? "Tất cả câu hỏi đã có câu trả lời. Bạn có thể nộp bài."
-        : "Dùng Quay lại / Tiếp theo để rà soát bài trước khi nộp.";
+        : isTrainingMode
+          ? "Chọn đáp án rồi bấm Nộp bài cho từng câu. Có thể dùng mục lục để chuyển câu."
+          : "Dùng Quay lại / Tiếp theo để rà soát bài trước khi nộp.";
 
   const questionBody = (
     <>
       <QuestionRenderer
+        key={readyQuestion.id}
         question={readyQuestion}
         value={draftAnswer}
         onChange={handleDraftChange}
@@ -515,8 +922,6 @@ export function PlayerShell({
         reviewMode={submitted}
         result={lastResult}
       />
-
-      {lastResult ? <QuestionFeedbackPanel result={lastResult} /> : null}
 
       {submitted && readyQuestion.kind === "hotspot" ? <AnswerKeyCard question={readyQuestion} /> : null}
 
@@ -526,128 +931,37 @@ export function PlayerShell({
         </div>
       ) : null}
 
-      {!isMobile ? (
-        <div className="pointer-events-none absolute bottom-4 right-6 text-xl font-semibold opacity-30 sm:text-2xl" style={{ color: "var(--quiz-option-text)" }}>
-          ERG E-LEARNING
-        </div>
-      ) : null}
     </>
   );
 
   function renderSidebar() {
     return (
-      <aside
-        className={`flex min-h-[380px] min-w-0 flex-col overflow-hidden rounded-lg border shadow-sm ${playerViewportClass}`}
+      <QuestionNavigator
+        answeredQuestionIds={answeredQuestionIds}
+        className={playerViewportClass}
+        currentIndex={currentIndex}
+        flaggedQuestionIds={bookmarkedQuestionIds}
+        introSubtitle={readyQuiz.subtitle}
+        onIntroClick={() => setStarted(false)}
+        onJumpToQuestion={handleJumpToQuestion}
+        onQueryChange={setSidebarQuery}
+        query={sidebarQuery}
+        questions={questions}
+        showIntro={!started}
+        started={started}
         style={playerCardStyle}
-      >
-        <div className="flex gap-1 bg-slate-100 px-2 pt-3">
-          {(["outline", "notes"] as const).map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className={`flex-1 rounded-t-xl px-3 py-2 text-xs font-semibold  ${
-                sidebarTab === tab ? "shadow-sm" : "text-slate-700"
-              }`}
-              style={sidebarTab === tab ? sidebarActiveStyle : undefined}
-              onClick={() => setSidebarTab(tab)}
-            >
-              {tab === "outline" ? "MỤC LỤC" : "GHI CHÚ"}
-            </button>
-          ))}
-        </div>
-
-        {sidebarTab === "outline" ? (
-          <>
-            <div className="bg-slate-100 px-3 py-3">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                <input
-                  type="search"
-                  value={sidebarQuery}
-                  onChange={(event) => setSidebarQuery(event.target.value)}
-                  placeholder="Tìm kiếm"
-                  className="min-h-9 w-full border px-3 pr-10 text-sm text-slate-600 outline-none"
-                  style={sidebarInputStyle}
-                />
-              </div>
-            </div>
-
-            <div className="flex flex-1 flex-col gap-2 overflow-auto bg-slate-100 px-3 pb-4">
-              {!started ? (
-                <button
-                  type="button"
-                  className="flex items-start gap-3 rounded-lg bg-slate-100 p-2 text-left"
-                  onClick={() => setStarted(false)}
-                >
-                  <span className="h-11 w-[86px] flex-none rounded-sm border border-[#d7e0ec] bg-white" />
-                  <span className="flex min-w-0 flex-1 flex-col gap-1">
-                    <strong className="line-clamp-2 text-xs font-medium text-slate-600">1. Trang giới thiệu</strong>
-                    <small className="text-[11px] text-slate-400">{readyQuiz.subtitle}</small>
-                  </span>
-                </button>
-              ) : null}
-
-              {filteredQuestions.map((question) => {
-                const index = questions.findIndex((item) => item.id === question.id);
-                const active = started && currentIndex === index;
-                const answered = isAnswerComplete(question, drafts[question.id]);
-                const bookmarked = bookmarkedQuestionIds.includes(question.id);
-
-                return (
-                  <button
-                    key={question.id}
-                    type="button"
-                    className={`flex items-start gap-3 rounded border p-2 text-left transition ${
-                      active ? "border-transparent shadow-sm" : "border-slate-200 bg-white hover:border-slate-300"
-                    }`}
-                    style={active ? sidebarActiveStyle : undefined}
-                    onClick={() => handleJumpToQuestion(index)}
-                  >
-                    <span
-                      className={`inline-flex h-11 w-[86px] flex-none items-center justify-center rounded-sm text-sm font-semibold ${
-                        active ? "bg-white/14 text-white" : "bg-[#ebf3fc]"
-                      }`}
-                      style={!active ? { color: "var(--quiz-accent-start)" } : undefined}
-                    >
-                      {answered ? "✓" : index + 1}
-                    </span>
-                    <span className="flex min-w-0 flex-1 flex-col gap-1">
-                      <span className="flex items-start justify-between gap-2">
-                        <strong className={`line-clamp-3 text-xs font-medium ${active ? "text-white" : "text-slate-600"}`}>
-                          {`${index + 1}. ${question.title}`}
-                        </strong>
-                        {bookmarked ? <Bookmark className={`mt-0.5 h-3.5 w-3.5 flex-none ${active ? "fill-current text-white" : "fill-current text-[var(--quiz-accent-start)]"}`} /> : null}
-                      </span>
-                      <small className={`text-[11px] ${active ? "text-white/75" : "text-slate-400"}`}>
-                        {questionLabel(question)}
-                      </small>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        ) : (
-          <div className="grid gap-3 p-4 text-sm leading-6 text-slate-500">
-            <h3 className="text-lg font-semibold text-slate-800">Ghi chú cho giáo viên</h3>
-            <p>
-              Khu này có thể hiển thị ghi chú hướng dẫn, script giảng dạy, đáp án mẫu hoặc checklist để giống cách
-              iSpring chia Outline và Notes.
-            </p>
-            <p>Ở bản clone sản phẩm thật, mình khuyến nghị cho phép authoring dashboard soạn note theo từng slide.</p>
-          </div>
-        )}
-      </aside>
+      />
     );
   }
 
   if (!started) {
     if (isMobile) {
       return (
-        <QuizThemeSurface quiz={readyQuiz}>
+        <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell">
           <MobilePlayerShell
             allQuestionsAnswered={allQuestionsAnswered}
             answeredCount={answeredCount}
+            answeredQuestionIds={answeredQuestionIds}
             attemptCompleted={attemptCompleted}
             bookmarkCount={bookmarkedQuestionIds.length}
             bookmarkedQuestionIds={bookmarkedQuestionIds}
@@ -657,6 +971,9 @@ export function PlayerShell({
             isFirstQuestion={isFirstQuestion}
             isLastQuestion={isLastQuestion}
             isTestingMode={isTestingMode}
+            isTrainingMode={isTrainingMode}
+            currentAnswerComplete={currentAnswerComplete}
+            currentQuestionSubmitted={submitted}
             playerCardStyle={playerCardStyle}
             canvasStyle={canvasStyle}
             headerStyle={headerStyle}
@@ -678,6 +995,7 @@ export function PlayerShell({
             onRequestSubmit={handleRequestSubmit}
             onReview={handleReviewQuiz}
             onStart={handleStartQuiz}
+            onSubmitCurrentQuestion={() => void submitCurrentTrainingQuestion()}
             onToggleBookmark={() => void handleToggleBookmark()}
             body={questionBody}
             resultBody={<FinalResultScreen attempt={readyAttempt} resultDisplay={resultDisplay} onReview={handleReviewQuiz} />}
@@ -687,89 +1005,23 @@ export function PlayerShell({
     }
 
     return (
-      <QuizThemeSurface quiz={readyQuiz} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
-        <section
-          className={`flex flex-col rounded-lg border p-3 shadow-sm ${playerViewportClass}`}
-          style={playerCardStyle}
-        >
-          <div className="flex min-h-9 items-center justify-between px-3 pb-3 text-sm text-slate-500">
-            <span>Tài nguyên</span>
-          </div>
-
-          <div className="min-h-0 flex-1 overflow-hidden border" style={canvasStyle}>
-            <div className="grid h-full overflow-auto gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(340px,1fr)_minmax(280px,0.9fr)]">
-              <div className="flex flex-col justify-center gap-4">
-                <p className="text-sm font-semibold" style={{ color: "var(--quiz-accent-start)" }}>
-                  {readyQuiz.subtitle}
-                </p>
-                <h1
-                  className="max-w-[720px] text-xl font-semibold leading-tight sm:text-2xl"
-                  style={{ color: "var(--quiz-accent-end)" }}
-                >
-                  {readyQuiz.title}
-                </h1>
-                <p className="text-sm font-medium" style={{ color: "var(--quiz-option-text)" }}>
-                  Bấm &quot;Bắt đầu&quot; để bắt đầu làm bài.
-                </p>
-                {restoredDraft ? (
-                  <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-800">
-                    Local draft restored: {answeredCount}/{questions.length} answered. Continue to keep working from this device.
-                  </div>
-                ) : null}
-                <div className="flex flex-wrap gap-3 pt-2">
-                  <span className="inline-flex items-center rounded-md px-3 py-1 text-xs font-semibold" style={modeBadgeStyle}>
-                    {isTrainingMode ? "Chế độ luyện tập" : "Chế độ kiểm tra"}
-                  </span>
-                  {isTrainingMode ? (
-                    <span className="inline-flex items-center rounded-md bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
-                      Work locally, then submit once at the end
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center rounded-md bg-white/80 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
-                      Làm hết bài rồi mới nộp và chấm điểm
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div
-                className="relative overflow-hidden rounded-lg"
-                style={{ backgroundColor: "var(--quiz-accent-start)" }}
-              >
-                <div className="absolute left-6 top-6 flex flex-col gap-2 rounded-lg border border-slate-200 bg-white/92 p-5 shadow-sm">
-                  <span className="text-xs font-semibold" style={{ color: "var(--quiz-accent-start)" }}>
-                    {isTrainingMode ? "LUYỆN TẬP" : "KIỂM TRA"}
-                  </span>
-                  <strong className="text-xl font-semibold leading-tight" style={{ color: "var(--quiz-accent-end)" }}>
-                    {isTrainingMode ? "Học theo bước" : "Làm bài đánh giá"}
-                  </strong>
-                  <span className="text-sm font-medium text-slate-600">Version {readyQuiz.version}</span>
-                </div>
-                <div className="absolute inset-x-8 bottom-8 h-px bg-white/30" />
-                <div className="absolute bottom-12 left-8 right-8 grid gap-2 text-sm font-medium text-white/80">
-                  <span>{questions.length} câu hỏi</span>
-                  <span>{isTestingMode ? "Chấm điểm sau khi nộp" : "Luyện tập theo từng bước"}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex min-h-14 items-center justify-between gap-3 px-3 pt-4">
-            <span className="text-sm font-medium text-slate-500">
-              {isTrainingMode ? "Practice: answers stay local until final submit" : "Kiểm tra: nộp bài ở cuối cùng"}
-            </span>
-            <div className="ml-auto flex gap-2">
-              <button
-                className={navButtonClass}
-                style={accentButtonStyle}
-                type="button"
-                onClick={handleStartQuiz}
-              >
-                {restoredDraft ? "CONTINUE DRAFT" : "BẮT ĐẦU"}
-              </button>
-            </div>
-          </div>
-        </section>
+      <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell grid gap-3 lg:grid-cols-[minmax(0,1fr)_192px]">
+        <QuizWelcomeScreen
+          accentButtonStyle={accentButtonStyle}
+          answeredCount={answeredCount}
+          canvasStyle={canvasStyle}
+          isTestingMode={isTestingMode}
+          isTrainingMode={isTrainingMode}
+          modeBadgeStyle={modeBadgeStyle}
+          navButtonClass={navButtonClass}
+          onStart={handleStartQuiz}
+          playerCardStyle={playerCardStyle}
+          playerViewportClass={playerViewportClass}
+          questions={questions}
+          quiz={readyQuiz}
+          restoredDraft={restoredDraft}
+          welcomeMeta={welcomeMeta}
+        />
 
         {renderSidebar()}
       </QuizThemeSurface>
@@ -778,10 +1030,11 @@ export function PlayerShell({
 
   if (isMobile) {
     return (
-      <QuizThemeSurface quiz={readyQuiz}>
+      <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell">
         <MobilePlayerShell
           allQuestionsAnswered={allQuestionsAnswered}
           answeredCount={answeredCount}
+          answeredQuestionIds={answeredQuestionIds}
           attemptCompleted={attemptCompleted}
           bookmarkCount={bookmarkedQuestionIds.length}
           bookmarkedQuestionIds={bookmarkedQuestionIds}
@@ -791,6 +1044,9 @@ export function PlayerShell({
           isFirstQuestion={isFirstQuestion}
           isLastQuestion={isLastQuestion}
           isTestingMode={isTestingMode}
+          isTrainingMode={isTrainingMode}
+          currentAnswerComplete={currentAnswerComplete}
+          currentQuestionSubmitted={submitted}
           playerCardStyle={playerCardStyle}
           canvasStyle={canvasStyle}
           headerStyle={headerStyle}
@@ -812,6 +1068,7 @@ export function PlayerShell({
           onRequestSubmit={handleRequestSubmit}
           onReview={handleReviewQuiz}
           onStart={handleStartQuiz}
+          onSubmitCurrentQuestion={() => void submitCurrentTrainingQuestion()}
           onToggleBookmark={() => void handleToggleBookmark()}
           body={questionBody}
           resultBody={<FinalResultScreen attempt={readyAttempt} resultDisplay={resultDisplay} onReview={handleReviewQuiz} />}
@@ -830,12 +1087,12 @@ export function PlayerShell({
   }
 
   return (
-    <QuizThemeSurface quiz={readyQuiz} className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_260px]">
+    <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell grid gap-3 lg:grid-cols-[minmax(0,1fr)_192px]">
       <section
-        className={`flex min-w-0 flex-col rounded-lg border p-3 shadow-sm ${playerViewportClass}`}
+        className={`flex min-w-0 flex-col rounded-[18px] border border-[rgba(145,158,171,0.16)] bg-white p-1.5 shadow-[0_18px_45px_rgba(28,37,46,0.08)] sm:p-2 ${playerViewportClass}`}
         style={playerCardStyle}
       >
-        <div className="flex min-h-9 items-center justify-between gap-3 px-3 pb-3 text-sm text-slate-500">
+        <div className="flex min-h-8 items-center justify-between gap-2 px-1 pb-1.5 text-xs text-slate-500 sm:px-2">
           <div className="flex flex-wrap items-center gap-2">
             <span>Tài nguyên</span>
             <span className="text-slate-300">|</span>
@@ -848,19 +1105,19 @@ export function PlayerShell({
           <div className="flex items-center gap-2">
             <button
               type="button"
-              aria-label={isCurrentQuestionBookmarked ? "Remove bookmark" : "Add bookmark"}
-              className={`grid h-9 w-9 place-items-center rounded-md border transition ${
-                isCurrentQuestionBookmarked ? "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]" : "border-slate-200 bg-white text-slate-400"
+              aria-label={isCurrentQuestionBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
+              className={`grid h-8 w-8 place-items-center rounded-lg border transition ${
+                isCurrentQuestionBookmarked ? "border-[rgba(255,86,48,0.2)] bg-[rgba(255,86,48,0.12)] text-[#FF5630]" : "border-slate-200 bg-white text-slate-400"
               }`}
               onClick={() => void handleToggleBookmark()}
             >
-              <Bookmark className={`h-4 w-4 ${isCurrentQuestionBookmarked ? "fill-current" : ""}`} />
+              <Flag className={`h-4 w-4 ${isCurrentQuestionBookmarked ? "fill-current" : ""}`} />
             </button>
-            <span className="rounded-md px-3 py-1 text-xs font-semibold" style={modeBadgeStyle}>
-              {readyQuiz.settings.mode}
+            <span className="rounded-lg px-2.5 py-1 text-xs font-semibold" style={modeBadgeStyle}>
+              {isTrainingMode ? "Luyện tập" : "Kiểm tra"}
             </span>
             {isTestingMode && remainingSeconds !== null ? (
-              <span className={`rounded-md px-3 py-1 text-xs font-semibold ${testingTimerTone}`}>
+              <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${testingTimerTone}`}>
                 {formatTimer(remainingSeconds)}
               </span>
             ) : null}
@@ -868,16 +1125,42 @@ export function PlayerShell({
         </div>
 
         <div
-          className="relative min-h-[560px] min-w-0 flex-1 overflow-hidden rounded-lg border lg:flex lg:min-h-0 lg:flex-col"
-          style={canvasStyle}
+          className="relative min-h-[560px] min-w-0 flex-1 overflow-hidden rounded-[22px] border-[4px] bg-white p-3 shadow-[0_20px_48px_rgba(8,120,148,0.10)] sm:p-4 lg:flex lg:min-h-0 lg:flex-col"
+          style={{
+            ...canvasStyle,
+            backgroundColor: "#ffffff",
+            borderColor: "#000088",
+          }}
         >
-          <div className="mx-3 mt-3 rounded-lg px-4 py-4 sm:mx-6 sm:mt-6 sm:px-5" style={headerStyle}>
-            <h2 className="text-xl font-semibold leading-snug sm:text-2xl lg:text-[28px]">
+          <div aria-hidden="true" className="pointer-events-none absolute -top-2 left-[28%] h-3 w-[34%] skew-x-[-28deg] bg-[#e82828]" />
+          <div aria-hidden="true" className="pointer-events-none absolute -bottom-2 left-[30%] h-3 w-[34%] skew-x-[28deg] bg-[#e82828]" />
+          <div aria-hidden="true" className="pointer-events-none absolute -right-24 top-[30%] h-72 w-72 rounded-full border-[34px] border-[#f7d8df] opacity-70" />
+          <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-[#eef0ff] opacity-70" />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute -bottom-10 right-16 h-56 w-56 rotate-45 rounded-[34px] bg-gradient-to-b from-[#dfe3ff] to-transparent opacity-80"
+          />
+          <div className="pointer-events-none absolute bottom-6 right-10 z-0 opacity-35">
+            <img
+              src="https://media.erg.edu.vn/logo/erg.png"
+              alt=""
+              className="h-auto w-[88px] object-contain"
+              aria-hidden="true"
+            />
+          </div>
+
+          <div className="relative z-10 -mx-3 mt-0 border border-[#3d43a8] bg-[#000088] px-5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] sm:-mx-4 sm:px-6">
+            <div className="hidden">
+              <span>{`Câu ${currentIndex + 1} / ${questions.length}`}</span>
+              <span className="text-[#c6ced8]">|</span>
+              <span>{questionLabel(readyQuestion)}</span>
+            </div>
+            <h2 className="quiz-player-question-title leading-snug text-white" style={{ fontSize: "var(--quiz-question-title-size)" }}>
               {attemptCompleted && !reviewingSubmittedAttempt ? resultDisplay[readyAttempt.passed ? "passMessage" : "failMessage"] : readyQuestion.title}
             </h2>
           </div>
 
-          <div className="relative min-h-[460px] overflow-auto px-4 pb-12 pt-5 sm:px-8 lg:min-h-0 lg:flex-1">
+          <div ref={questionBodyRef} className="quiz-player-question-body relative z-10 min-h-[460px] overflow-auto px-4 pb-36 pt-5 sm:px-7 sm:pr-32 sm:pt-6 lg:min-h-0 lg:flex-1">
             {attemptCompleted && !reviewingSubmittedAttempt ? (
               <FinalResultScreen
                 attempt={readyAttempt}
@@ -890,20 +1173,26 @@ export function PlayerShell({
               <>{questionBody}</>
             )}
           </div>
+
+          {lastResult && !(attemptCompleted && !reviewingSubmittedAttempt) ? (
+            <div className="pointer-events-none absolute inset-x-4 bottom-5 z-30 flex justify-center px-3 sm:inset-x-8">
+              <QuestionFeedbackPanel result={lastResult} floating />
+            </div>
+          ) : null}
         </div>
 
-        <div className="flex min-h-14 flex-col gap-3 px-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-h-10 flex-col gap-2 px-1 pt-3 sm:flex-row sm:items-center sm:justify-between sm:px-2">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
-            <span className="rounded-md px-3 py-1 text-xs font-semibold" style={modeBadgeStyle}>
+            <span className="rounded-lg px-2.5 py-1 text-xs font-semibold" style={modeBadgeStyle}>
               {isTrainingMode ? "Học theo từng câu" : "Chế độ kiểm tra"}
             </span>
-            <span className="text-sm font-medium text-slate-600">
+            <span className="line-clamp-1 text-xs font-medium text-slate-600">
               {footerMessage}
             </span>
           </div>
 
           {attemptCompleted && !reviewingSubmittedAttempt ? (
-            <div className="ml-auto flex flex-wrap gap-2">
+            <div className="ml-auto flex flex-wrap items-center gap-2 rounded-full border border-[rgba(0,0,136,0.10)] bg-white/70 p-1 shadow-[0_12px_28px_rgba(0,0,136,0.08)] backdrop-blur-xl">
               {resultDisplay.showReviewButton ? (
                 <button className={navButtonClass} style={accentButtonStyle} type="button" onClick={handleReviewQuiz}>
                   {resultDisplay.reviewButtonLabel}
@@ -911,7 +1200,19 @@ export function PlayerShell({
               ) : null}
             </div>
           ) : (
-            <div className="ml-auto flex flex-wrap gap-2">
+            <div className="ml-auto flex flex-wrap items-center gap-2 rounded-full border border-[rgba(0,0,136,0.10)] bg-white/70 p-1 shadow-[0_12px_28px_rgba(0,0,136,0.08)] backdrop-blur-xl">
+              {isTrainingMode ? (
+                <button
+                  className={`${navButtonClass} min-w-[132px]`}
+                  style={accentButtonStyle}
+                  type="button"
+                  disabled={submitting || submitted || !currentAnswerComplete}
+                  onClick={() => void submitCurrentTrainingQuestion()}
+                >
+                  {submitted ? "ĐÃ NỘP" : submitting ? "ĐANG NỘP..." : "NỘP BÀI"}
+                </button>
+              ) : (
+                <>
               <button
                 className={secondaryButtonClass}
                 style={secondaryButtonStyle}
@@ -938,9 +1239,11 @@ export function PlayerShell({
                   disabled={submitting}
                   onClick={handleRequestSubmit}
                 >
-                  {submitting ? "ĐANG NỘP..." : submitFailed ? "RETRY SUBMIT" : "NỘP BÀI"}
+                  {submitting ? "ĐANG NỘP..." : submitFailed ? "THỬ NỘP LẠI" : "NỘP BÀI"}
                 </button>
               ) : null}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -959,4 +1262,65 @@ export function PlayerShell({
       ) : null}
     </QuizThemeSurface>
   );
+}
+
+function applyTrainingQuestionResult({
+  answer,
+  attempt,
+  question,
+  questions,
+  quiz,
+  result,
+}: {
+  answer: AnswerPayload;
+  attempt: Attempt;
+  question: Question;
+  questions: Question[];
+  quiz: Quiz;
+  result: AnswerRecord["result"];
+}): Attempt {
+  const answers: Record<string, AnswerRecord> = {
+    ...attempt.answers,
+    [question.id]: {
+      questionId: question.id,
+      input: answer,
+      result,
+    },
+  };
+  const submittedCount = Object.keys(answers).length;
+  const totalScore = Object.values(answers).reduce((sum, record) => sum + record.result.awardedPoints, 0);
+  const maxScore = questions.reduce((sum, item) => sum + item.points, 0);
+  const percent = maxScore > 0 ? Math.floor((totalScore / maxScore) * 100) : 0;
+
+  return {
+    ...attempt,
+    answers,
+    maxScore,
+    passed: percent >= quiz.settings.passPercent,
+    percent,
+    submittedCount,
+    totalQuestions: questions.length,
+    totalScore,
+  };
+}
+
+function isEditableKeyboardTarget(target: EventTarget | null, key?: string) {
+  if (!(target instanceof HTMLElement)) {
+    return false;
+  }
+
+  if (target.isContentEditable) {
+    return true;
+  }
+
+  const tagName = target.tagName.toLowerCase();
+  if (key === "Enter" && tagName === "input" && target.closest(".quiz-answer-region")) {
+    return false;
+  }
+
+  return tagName === "input" || tagName === "textarea" || tagName === "select";
+}
+
+function isEventRecord(value: unknown): value is { id?: unknown } {
+  return Boolean(value && typeof value === "object");
 }

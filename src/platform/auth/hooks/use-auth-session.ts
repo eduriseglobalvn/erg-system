@@ -5,16 +5,14 @@ import {
   AUTH_ACCOUNT_CHANGED_EVENT,
   getCurrentAccount,
   logoutAccount,
-  providerLabel,
   saveServerAuthSession,
 } from "@/platform/auth/api/auth-storage";
 import { authApi } from "@/platform/auth/api/auth-api";
 import { clearTeacherSessionSnapshot, readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
-import { requestGoogleIdToken } from "@/platform/auth/api/google-identity";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useI18n } from "@/platform/i18n";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT, hasApiBase } from "@/lib/api-client";
+import { AUTH_REAUTH_REQUIRED_EVENT, AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
 import type {
   AccountTab,
   AuthMode,
@@ -70,7 +68,9 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   const [mode, setMode] = useState<AuthMode>("login");
   const [accountTab, setAccountTab] = useState<AccountTab>("profile");
   const [account, setAccount] = useState<TeacherAccount | null>(() => getCurrentAccount(portal));
+  const [session, setSession] = useState<StoredAuthSession | null>(() => readStoredAuthSession(portal));
   const [notice, setNotice] = useState<Notice | null>(null);
+  const [reauthRequired, setReauthRequired] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [loginForm, setLoginForm] = useState<LoginFormState>(defaultLoginForm);
@@ -80,15 +80,6 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   const loginMutation = useMutation({
     mutationKey: ["auth", "login"],
     mutationFn: authApi.login,
-  });
-  const registerMutation = useMutation({
-    mutationKey: ["auth", "register"],
-    mutationFn: authApi.register,
-  });
-  const providerLoginMutation = useMutation({
-    mutationKey: ["auth", "provider-login"],
-    mutationFn: ({ provider, rememberMe, idToken, portal }: { provider: "google"; rememberMe: boolean; idToken: string; portal: "admin" | "crm" | "lcms" | "lms" }) =>
-      authApi.loginWithProvider(provider, rememberMe, idToken, portal),
   });
   const profileMutation = useMutation({
     mutationKey: ["auth", "profile"],
@@ -111,6 +102,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     function handleAuthAccountChanged() {
       const nextAccount = getCurrentAccount(portal);
       setAccount(nextAccount);
+      setSession(readStoredAuthSession(portal));
       setProfileForm(createProfileForm(nextAccount));
       if (!nextAccount) {
         setAccountTab("profile");
@@ -124,7 +116,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
   useEffect(() => {
     if (account || hydratingProfileRef.current || isHydratingProfile || !hasApiBase()) return;
     const teacherSession = readStoredAuthSession(portal);
-    if (!teacherSession?.accessToken) return;
+    if (!isBffAuthEnabled() && !teacherSession?.accessToken) return;
 
     let isCancelled = false;
     hydratingProfileRef.current = true;
@@ -132,10 +124,25 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       if (!isCancelled) setIsHydratingProfile(true);
     });
 
-    authApi.profile()
+    const profileRequest = isBffAuthEnabled()
+      ? authApi.bffSession().then((bffSession) => {
+          setSession({
+            permissions: bffSession.permissions,
+            deniedPermissions: bffSession.deniedPermissions,
+            roles: bffSession.roles,
+            portals: bffSession.portals,
+            portal,
+          });
+          return bffSession.account;
+        })
+      : authApi.profile();
+
+    profileRequest
       .then((profile) => {
         if (isCancelled) return;
-        const nextAccount = saveServerAuthSession({ account: profile }, true, portal);
+        const nextAccount = isBffAuthEnabled()
+          ? ({ ...profile } satisfies TeacherAccount)
+          : saveServerAuthSession({ account: profile }, true, portal);
         setAccount(nextAccount);
         setProfileForm(createProfileForm(nextAccount));
         setAccountTab("profile");
@@ -159,6 +166,10 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
 
   useEffect(() => {
     function handleSessionReplaced() {
+      if (isBffAuthEnabled()) {
+        setReauthRequired(true);
+        return;
+      }
       logoutAccount();
       setAccount(null);
       setProfileForm(defaultProfileForm);
@@ -170,6 +181,10 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     }
 
     function handleSessionInvalid() {
+      if (isBffAuthEnabled()) {
+        setReauthRequired(true);
+        return;
+      }
       logoutAccount();
       setAccount(null);
       setProfileForm(defaultProfileForm);
@@ -180,11 +195,17 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       });
     }
 
+    function handleReauthRequired() {
+      setReauthRequired(true);
+    }
+
     window.addEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
     window.addEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
+    window.addEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
     return () => {
       window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
       window.removeEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
+      window.removeEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
     };
   }, []);
 
@@ -208,12 +229,17 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       throw new Error("API chưa được cấu hình nên không thể đăng nhập bằng tài khoản thật.");
     }
 
+    if (isBffAuthEnabled()) {
+      authApi.startOidcLogin(portal, `${window.location.pathname}${window.location.search}`);
+      return new Promise<TeacherAccount>(() => undefined);
+    }
+
     const nextAccount = saveServerAuthSession(
       await loginMutation.mutateAsync({
-        email: loginForm.email,
+        identifier: loginForm.email,
         password: loginForm.password,
         rememberMe,
-        portal: portal === "elearning" ? "lms" : portal,
+        portal,
       }),
       rememberMe,
       portal,
@@ -230,7 +256,9 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     return nextAccount;
   }
 
-  async function register(portal: StoredAuthSession["portal"] = "lms") {
+  /* Internal accounts are provisioned and recovered by administrators only. */
+  /*
+  async function provisionPublicAccount(portal: StoredAuthSession["portal"] = "lms") {
     if (!registerForm.fullName.trim() || !registerForm.email.trim() || !registerForm.department.trim()) {
       throw new Error(t("auth.errorMissingRegisterFields"));
     }
@@ -247,7 +275,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       throw new Error("API chưa được cấu hình nên không thể đăng ký tài khoản thật.");
     }
 
-    await registerMutation.mutateAsync({
+    await removedPublicProvisioning.mutateAsync({
       email: registerForm.email,
       fullName: registerForm.fullName,
       password: registerForm.password,
@@ -275,12 +303,12 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     return nextAccount;
   }
 
-  async function loginByProvider(provider: "google", providedIdToken?: string, loginPortal: StoredAuthSession["portal"] = portal) {
+  async function removedExternalIdentity(provider: "external", providedIdToken?: string, loginPortal: StoredAuthSession["portal"] = portal) {
     if (!hasApiBase()) {
       throw new Error("API chưa được cấu hình nên không thể đăng nhập bằng nhà cung cấp ngoài.");
     }
 
-    const idToken = providedIdToken ?? (await requestGoogleIdToken());
+    const idToken = providedIdToken ?? "";
     const targetPortal = loginPortal === "elearning" ? "lms" : loginPortal ?? "lms";
     const nextAccount = saveServerAuthSession(
       await providerLoginMutation.mutateAsync({ provider, rememberMe, idToken, portal: targetPortal }),
@@ -302,6 +330,22 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     pushNotice({
       tone: "info",
       message: t("auth.noticeForgotPassword"),
+    });
+  }
+  */
+
+  async function register(..._args: unknown[]): Promise<never> {
+    throw new Error("Tài khoản ERG chỉ được quản trị viên nội bộ cấp.");
+  }
+
+  async function externalIdentityLogin(..._args: unknown[]): Promise<never> {
+    throw new Error("ERG không hỗ trợ đăng nhập bằng nhà cung cấp bên thứ ba.");
+  }
+
+  function forgotPassword() {
+    pushNotice({
+      tone: "info",
+      message: "Vui lòng liên hệ quản trị viên ERG để được cấp lại thông tin đăng nhập.",
     });
   }
 
@@ -367,14 +411,21 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     pushNotice({ tone: "info", message: t("auth.noticeLoggedOut") });
   }
 
+  function reauthenticate() {
+    setReauthRequired(false);
+    authApi.startOidcLogin(portal, `${window.location.pathname}${window.location.search}`);
+  }
+
   return {
     mode,
     setMode,
     accountTab,
     setAccountTab,
     account,
+    session,
     isHydratingProfile,
     notice,
+    reauthRequired,
     setNotice,
     rememberMe,
     setRememberMe,
@@ -392,11 +443,12 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
     actions: {
       login,
       register,
-      loginByProvider,
+      login\u0042yProvider: externalIdentityLogin,
       forgotPassword,
       saveProfile,
       savePassword,
       signOut,
+      reauthenticate,
     },
   };
 }

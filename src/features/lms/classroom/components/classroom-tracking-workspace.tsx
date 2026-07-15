@@ -5,9 +5,9 @@ import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ProgressBar } from "@/components/ui/progress";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import LinearProgress from "@mui/material/LinearProgress";
 import {
   assignmentRuns,
   classroomSchools,
@@ -17,7 +17,7 @@ import {
 import type { AssignmentRun, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
 export function ClassroomTrackingWorkspace({
@@ -72,7 +72,7 @@ export function ClassroomTrackingWorkspace({
               ...subjectOptions.map((subject) => ({ value: subject, label: subject })),
             ]}
           />
-          <Button variant="outline" onClick={() => onOpenLeaf("class-students")}>
+          <Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>
             {copy.openStudents}
           </Button>
         </>
@@ -139,7 +139,7 @@ export function ClassroomTrackingWorkspace({
             title={copy.scheduleTitle}
             description={copy.scheduleDescription}
             action={
-              <Button size="sm" variant="outline" onClick={() => onOpenLeaf("class-students")}>
+              <Button size="small" variant="outlined" onClick={() => onOpenLeaf("class-students")}>
                 {copy.openAssignmentCenter}
               </Button>
             }
@@ -241,7 +241,7 @@ function ClassroomCard({
                 {snapshot.gradeLabel} • {snapshot.homeroomTeacher}
               </p>
             </div>
-            <Badge tone={attention.tone}>{attention.label}</Badge>
+            <Chip label={attention.label} size="small" color={attention.tone} />
           </div>
 
           <div className="mt-4 grid grid-cols-3 gap-2">
@@ -255,10 +255,10 @@ function ClassroomCard({
               <span className="font-medium text-slate-600">{copy.completionLabel}</span>
               <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
             </div>
-            <ProgressBar
+            <LinearProgress
+              variant="determinate"
               value={snapshot.completionRate}
-              className="mt-2 h-2 bg-slate-100"
-              indicatorClassName={attention.progressClassName}
+              sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.100" }}
             />
           </div>
         </div>
@@ -269,10 +269,10 @@ function ClassroomCard({
           {copy.lastSubmissionLabel}: <span className="font-medium text-slate-700">{snapshot.lastSubmissionAt}</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button size="sm" variant="outline" onClick={onOpenStudents}>
+          <Button size="small" variant="outlined" onClick={onOpenStudents}>
             {copy.studentsAction}
           </Button>
-          <Button size="sm" onClick={onAssign}>
+          <Button size="small" variant="contained" onClick={onAssign}>
             {copy.assignAction}
           </Button>
         </div>
@@ -313,7 +313,7 @@ function SelectedClassPanel({
               {snapshot.gradeLabel} • {copy.teacherLabel}: {snapshot.homeroomTeacher}
             </div>
           </div>
-          <Badge tone={attention.tone}>{attention.label}</Badge>
+          <Chip label={attention.label} size="small" color={attention.tone} />
         </div>
 
         <div className="mt-5 grid gap-3">
@@ -330,14 +330,14 @@ function SelectedClassPanel({
             <span className="font-medium text-slate-600">{copy.completionLabel}</span>
             <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
           </div>
-          <ProgressBar value={snapshot.completionRate} className="mt-2 h-2 bg-white" indicatorClassName={attention.progressClassName} />
+          <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "background.paper" }} />
         </div>
 
         <div className="mt-5 grid gap-2 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-          <Button variant="outline" onClick={onOpenStudents}>
+          <Button variant="outlined" onClick={onOpenStudents}>
             {copy.studentsAction}
           </Button>
-          <Button onClick={onAssign}>{copy.assignAction}</Button>
+          <Button variant="contained" onClick={onAssign}>{copy.assignAction}</Button>
         </div>
       </div>
     </DashboardSectionCard>
@@ -366,9 +366,9 @@ function AssignmentCard({ assignment, copy }: { assignment: AssignmentRun; copy:
             {assignment.subjectLabel} • {assignment.targetLevel}
           </p>
         </div>
-        <Badge tone="outline">{assignment.completionRate}%</Badge>
+        <Chip label={`${assignment.completionRate}%`} size="small" variant="outlined" />
       </div>
-      <ProgressBar value={assignment.completionRate} className="mt-4 h-2 bg-slate-100" indicatorClassName="bg-[var(--erg-blue)]" />
+      <LinearProgress variant="determinate" value={assignment.completionRate} sx={{ mt: 2, height: 8, borderRadius: 1, bgcolor: "grey.100" }} />
       <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] font-semibold text-slate-600">
         <span>
           <strong className="text-slate-950">{assignment.submittedCount}</strong> {copy.submittedLabel}

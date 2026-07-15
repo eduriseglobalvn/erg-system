@@ -1,10 +1,12 @@
 import { afterEach, expect, test, vi } from "vitest";
 
 import { graphQlRequest } from "@/lib/graphql-client";
-import { TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
+import { clearTeacherSessionSnapshot, TEACHER_LOCAL_SESSION_KEY, portalSessionKey } from "@/platform/auth/api/auth-token-storage";
 
 afterEach(() => {
+  clearTeacherSessionSnapshot();
   window.localStorage.clear();
+  window.sessionStorage.clear();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });

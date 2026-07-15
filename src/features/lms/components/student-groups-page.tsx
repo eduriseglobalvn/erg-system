@@ -1,11 +1,22 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useQueries } from "@tanstack/react-query";
 import { Layers, Plus, Search, Users, UsersRound } from "lucide-react";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import Checkbox from "@mui/material/Checkbox";
+import Button from "@mui/material/Button";
+import { Table, TableBody, TableCell, TableRow, TableHead } from "@mui/material";
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import {
+  useCreateLmsStudentGroupMutation,
+  useDeleteLmsStudentGroupMutation,
+  lmsAssignmentReadQueryKeys,
+  useLmsStudentGroupsQuery,
+  useUpdateLmsStudentGroupMutation,
+} from "@/features/lms/api/lms-assignment-command-query";
+import type { LmsStudentGroup, LmsStudentGroupInput } from "@/features/lms/api/lms-assignment-command-api";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
+import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
 
@@ -15,6 +26,7 @@ type StudentGroup = {
   note: string;
   color: string;
   studentIds: string[];
+  serverBacked?: boolean;
 };
 
 const allClassesFilterValue = "all-classes";
@@ -39,6 +51,23 @@ const groupColorOptions = [
   { label: "Than", value: "#334155" },
 ];
 
+const initialStudentGroups = (): StudentGroup[] => [
+  {
+    id: "g-1",
+    name: "Nhóm A (Khá)",
+    note: "Nhóm học sinh làm thêm bài nâng cao sau buổi học.",
+    color: groupColorOptions[0].value,
+    studentIds: classroomStudents.filter((student) => student.status === "ahead").slice(0, 6).map((student) => student.id),
+  },
+  {
+    id: "g-2",
+    name: "Nhóm B (Cần hỗ trợ)",
+    note: "Nhóm cần giao bài ngắn theo checkpoint và theo dõi tiến độ sát hơn.",
+    color: groupColorOptions[2].value,
+    studentIds: classroomStudents.filter((student) => student.status === "support").slice(0, 6).map((student) => student.id),
+  },
+];
+
 export function StudentGroupsPage({
   classes,
   selectedClass,
@@ -50,38 +79,85 @@ export function StudentGroupsPage({
   selectedSchoolName: string;
   onBack: () => void;
 }) {
-  const [groups, setGroups] = useState<StudentGroup[]>([
-    {
-      id: "g-1",
-      name: "Nhóm A (Khá)",
-      note: "Nhóm học sinh làm thêm bài nâng cao sau buổi học.",
-      color: groupColorOptions[0].value,
-      studentIds: classroomStudents.filter((student) => student.status === "ahead").slice(0, 6).map((student) => student.id),
-    },
-    {
-      id: "g-2",
-      name: "Nhóm B (Cần hỗ trợ)",
-      note: "Nhóm cần giao bài ngắn theo checkpoint và theo dõi tiến độ sát hơn.",
-      color: groupColorOptions[2].value,
-      studentIds: classroomStudents.filter((student) => student.status === "support").slice(0, 6).map((student) => student.id),
-    },
-  ]);
+  const apiBacked = hasApiBase();
+  const [groups, setGroups] = useState<StudentGroup[]>(() => (apiBacked ? [] : initialStudentGroups()));
   const [selectedGroupId, setSelectedGroupId] = useState("g-1");
   const [newGroupName, setNewGroupName] = useState("");
   const [studentSearch, setStudentSearch] = useState("");
   const [classFilter, setClassFilter] = useState(selectedClass?.id ?? allClassesFilterValue);
+  const studentGroupsQuery = useLmsStudentGroupsQuery(undefined, undefined, { enabled: apiBacked });
+  const studentRosterClasses = useMemo(
+    () => {
+      if (!apiBacked) return [];
+      return classFilter === allClassesFilterValue
+        ? classes
+        : classes.filter((classroom) => classroom.id === classFilter);
+    },
+    [apiBacked, classFilter, classes],
+  );
+  const studentRosterQueries = useQueries({
+    queries: studentRosterClasses.map((classroom) => ({
+      enabled: apiBacked && Boolean(classroom.id),
+      gcTime: 5 * 60_000,
+      queryFn: () =>
+        loadLmsClassWorkspace({
+          assignmentPage: 0,
+          assignmentSize: 20,
+          assignmentStatus: "active",
+          classId: classroom.id,
+          page: 0,
+          schoolId: classroom.schoolId,
+          size: 200,
+          studentStatus: "active",
+        }),
+      queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
+        classId: classroom.id,
+        schoolId: classroom.schoolId,
+        usage: "student-groups-roster",
+      }),
+      refetchOnWindowFocus: false,
+      staleTime: 60_000,
+    })),
+  });
+  const createGroupMutation = useCreateLmsStudentGroupMutation();
+  const updateGroupMutation = useUpdateLmsStudentGroupMutation();
+  const deleteGroupMutation = useDeleteLmsStudentGroupMutation();
+  const groupMutationPending =
+    createGroupMutation.isPending || updateGroupMutation.isPending || deleteGroupMutation.isPending;
+
+  useEffect(() => {
+    if (!apiBacked || !studentGroupsQuery.data) return;
+
+    setGroups((current) => {
+      const nextGroups = studentGroupsQuery.data.groups.map((group, index) =>
+        toUiStudentGroup(group, current.find((item) => item.id === group.id), index),
+      );
+      setSelectedGroupId((currentId) => {
+        if (nextGroups.some((group) => group.id === currentId)) return currentId;
+        return nextGroups[0]?.id ?? "";
+      });
+      return nextGroups;
+    });
+  }, [apiBacked, studentGroupsQuery.data]);
 
   const currentGroup = groups.find((group) => group.id === selectedGroupId) ?? groups[0];
+  const studentRoster = useMemo(() => {
+    if (!apiBacked) return classroomStudents;
+    return studentRosterClasses.flatMap((classroom, index) => {
+      const workspace = studentRosterQueries[index]?.data;
+      return workspace ? mapClassWorkspaceToStudents(workspace, classroom) : [];
+    });
+  }, [apiBacked, studentRosterClasses, studentRosterQueries]);
   const groupStudents = useMemo(
-    () => classroomStudents.filter((student) => currentGroup?.studentIds.includes(student.id)),
-    [currentGroup],
+    () => studentRoster.filter((student) => currentGroup?.studentIds.includes(student.id)),
+    [currentGroup, studentRoster],
   );
   const selectedClassCount = useMemo(
     () => new Set(groupStudents.map((student) => student.classId)).size,
     [groupStudents],
   );
   const normalizedSearch = studentSearch.trim().toLowerCase();
-  const visibleStudents = classroomStudents.filter((student) => {
+  const visibleStudents = studentRoster.filter((student) => {
     const matchesClass = classFilter === allClassesFilterValue || student.classId === classFilter;
     const matchesSearch =
       !normalizedSearch ||
@@ -103,17 +179,27 @@ export function StudentGroupsPage({
     visibleStudents.some((student) => currentGroup?.studentIds.includes(student.id)) && !allVisibleStudentsSelected;
   const allGroupStudentsSelected = groupStudents.length > 0;
 
-  function createGroup() {
+  async function createGroup() {
     const name = newGroupName.trim();
     if (!name) return;
 
-    const nextGroup = {
+    const nextGroup: StudentGroup = {
       id: `g-${Date.now()}`,
       name,
       note: "",
       color: groupColorOptions[groups.length % groupColorOptions.length].value,
       studentIds: [],
     };
+    if (apiBacked) {
+      try {
+        const result = await createGroupMutation.mutateAsync(toStudentGroupPayload(nextGroup, selectedClass?.id));
+        nextGroup.id = result.groupId;
+        nextGroup.serverBacked = true;
+      } catch (error) {
+        notifyStudentGroupSyncError(error);
+        return;
+      }
+    }
     setGroups((current) => [...current, nextGroup]);
     setSelectedGroupId(nextGroup.id);
     setNewGroupName("");
@@ -124,16 +210,64 @@ export function StudentGroupsPage({
     setGroups((current) => current.map((group) => (group.id === currentGroup.id ? updater(group) : group)));
   }
 
-  function deleteGroup() {
+  async function persistGroup(group: StudentGroup) {
+    if (!apiBacked) return group;
+
+    if (!group.serverBacked) {
+      const result = await createGroupMutation.mutateAsync(toStudentGroupPayload(group, selectedClass?.id));
+      const persistedGroup = { ...group, id: result.groupId, serverBacked: true };
+      setGroups((current) => current.map((item) => (item.id === group.id ? persistedGroup : item)));
+      setSelectedGroupId((currentId) => (currentId === group.id ? persistedGroup.id : currentId));
+      return persistedGroup;
+    }
+
+    await updateGroupMutation.mutateAsync({
+      groupId: group.id,
+      payload: toStudentGroupPayload(group, selectedClass?.id),
+    });
+    return group;
+  }
+
+  async function commitGroup(updater: (group: StudentGroup) => StudentGroup) {
+    if (!currentGroup) return;
+    const nextGroup = updater(currentGroup);
+    setGroups((current) => current.map((group) => (group.id === currentGroup.id ? nextGroup : group)));
+    try {
+      await persistGroup(nextGroup);
+    } catch (error) {
+      notifyStudentGroupSyncError(error);
+    }
+  }
+
+  async function commitCurrentGroup() {
+    if (!currentGroup) return;
+    try {
+      await persistGroup(currentGroup);
+    } catch (error) {
+      notifyStudentGroupSyncError(error);
+    }
+  }
+
+  async function deleteGroup() {
     if (!currentGroup || groups.length <= 1) return;
+    const deletedGroup = currentGroup;
 
     const nextGroups = groups.filter((group) => group.id !== currentGroup.id);
     setGroups(nextGroups);
     setSelectedGroupId(nextGroups[0]?.id ?? "");
+    if (apiBacked && deletedGroup.serverBacked) {
+      try {
+        await deleteGroupMutation.mutateAsync(deletedGroup.id);
+      } catch (error) {
+        setGroups((current) => [deletedGroup, ...current]);
+        setSelectedGroupId(deletedGroup.id);
+        notifyStudentGroupSyncError(error);
+      }
+    }
   }
 
   function addStudent(studentId: string) {
-    updateGroup((group) =>
+    void commitGroup((group) =>
       group.studentIds.includes(studentId)
         ? group
         : { ...group, studentIds: [...group.studentIds, studentId] },
@@ -141,7 +275,7 @@ export function StudentGroupsPage({
   }
 
   function removeStudent(studentId: string) {
-    updateGroup((group) => ({ ...group, studentIds: group.studentIds.filter((id) => id !== studentId) }));
+    void commitGroup((group) => ({ ...group, studentIds: group.studentIds.filter((id) => id !== studentId) }));
   }
 
   function setStudentSelected(studentId: string, selected: boolean) {
@@ -155,7 +289,7 @@ export function StudentGroupsPage({
 
   function setVisibleStudentsSelected(selected: boolean) {
     const visibleStudentIds = visibleStudents.map((student) => student.id);
-    updateGroup((group) => {
+    void commitGroup((group) => {
       if (selected) {
         return { ...group, studentIds: Array.from(new Set([...group.studentIds, ...visibleStudentIds])) };
       }
@@ -165,7 +299,7 @@ export function StudentGroupsPage({
   }
 
   function clearGroupStudents() {
-    updateGroup((group) => ({ ...group, studentIds: [] }));
+    void commitGroup((group) => ({ ...group, studentIds: [] }));
   }
 
   return (
@@ -187,8 +321,8 @@ export function StudentGroupsPage({
             <StudentGroupStat icon={Layers} label="Nguồn lớp" value={`${selectedClassCount} lớp`} />
           </div>
           <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={onBack}>Về danh sách bài tập</Button>
-            <Button className="h-9 rounded-lg bg-[var(--erg-blue)] px-4 text-[14px] hover:bg-[var(--erg-blue-hover)]" onClick={createGroup}>Tạo nhóm</Button>
+            <Button variant="outlined" onClick={onBack} sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }}>Về danh sách bài tập</Button>
+            <Button variant="contained" onClick={createGroup} disabled={groupMutationPending} sx={{ height: 36, borderRadius: "8px", px: 2, fontSize: "14px", bgcolor: "var(--erg-blue)", "&:hover": { bgcolor: "var(--erg-blue-hover)" } }}>Tạo nhóm</Button>
           </div>
         </div>
       </div>
@@ -244,13 +378,14 @@ export function StudentGroupsPage({
                 value={newGroupName}
                 onChange={(event) => setNewGroupName(event.target.value)}
                 onKeyDown={(event) => {
-                  if (event.key === "Enter") createGroup();
+                  if (event.key === "Enter") void createGroup();
                 }}
                 className="w-full rounded-lg border border-[#d7e0ec] bg-white px-3 py-2 text-[14px] font-semibold text-slate-900 focus:border-[var(--erg-blue)] focus:outline-none focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               />
               <button
                 type="button"
                 onClick={createGroup}
+                disabled={groupMutationPending}
                 className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-[var(--erg-blue)] py-2 text-[13px] font-bold text-white transition-colors hover:bg-[var(--erg-blue-hover)]"
               >
                 <Plus className="h-3.5 w-3.5" /> Tạo nhóm
@@ -269,21 +404,23 @@ export function StudentGroupsPage({
                     type="text"
                     value={currentGroup.name}
                     onChange={(event) => updateGroup((group) => ({ ...group, name: event.target.value }))}
+                    onBlur={() => void commitCurrentGroup()}
                     className="w-full max-w-sm border-b border-transparent pb-1 text-lg font-semibold text-slate-900 focus:border-[#cbd7e6] focus:outline-none"
                   />
                 </div>
-                <Button variant="outline" className="h-9 rounded-lg px-3 text-[14px]" onClick={deleteGroup} disabled={groups.length <= 1}>Xóa nhóm</Button>
+                <Button variant="outlined" onClick={deleteGroup} disabled={groups.length <= 1 || groupMutationPending} sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }}>Xóa nhóm</Button>
               </div>
 
               <GroupColorPicker
                 value={currentGroup.color}
-                onChange={(color) => updateGroup((group) => ({ ...group, color }))}
+                onChange={(color) => void commitGroup((group) => ({ ...group, color }))}
               />
 
               <label className="mb-1.5 block text-[13px] font-semibold text-slate-600">Ghi chú</label>
               <textarea
                 value={currentGroup.note}
                 onChange={(event) => updateGroup((group) => ({ ...group, note: event.target.value }))}
+                onBlur={() => void commitCurrentGroup()}
                 placeholder="Mục tiêu nhóm, lịch ôn tập, ghi chú khi giao bài..."
                 className="mb-3 min-h-16 resize-none rounded-lg border border-[#d7e0ec] bg-white px-3 py-2 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
               />
@@ -417,6 +554,34 @@ function GroupColorPicker({ value, onChange }: { value: string; onChange: (color
   );
 }
 
+function toStudentGroupPayload(group: StudentGroup, selectedClassId?: string): LmsStudentGroupInput {
+  return {
+    classId: selectedClassId ?? null,
+    color: group.color,
+    name: group.name,
+    note: group.note,
+    studentIds: group.studentIds,
+  };
+}
+
+function toUiStudentGroup(group: LmsStudentGroup, existing: StudentGroup | undefined, index: number): StudentGroup {
+  return {
+    color: group.color ?? existing?.color ?? groupColorOptions[index % groupColorOptions.length].value,
+    id: group.id,
+    name: group.name,
+    note: group.note ?? existing?.note ?? "",
+    serverBacked: true,
+    studentIds: group.studentIds,
+  };
+}
+
+function notifyStudentGroupSyncError(error: unknown) {
+  const message = error instanceof Error ? error.message : "Không thể đồng bộ nhóm học sinh với máy chủ.";
+  if (typeof window !== "undefined") {
+    window.alert(message);
+  }
+}
+
 function StudentGroupStat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2.5 py-1.5">
@@ -453,22 +618,25 @@ function StudentSelectionTable({
   return (
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
       <div className="min-h-0 flex-1 overflow-auto">
-        <Table>
-          <TableHeader className="sticky top-0 z-10 bg-[#eef4fb]">
+        <Table size="small">
+          <TableHead className="sticky top-0 z-10 bg-[#eef4fb]">
             <TableRow className="hover:bg-[#eef4fb]">
-              <TableHead className="w-11 px-3">
+              <TableCell className="w-11 px-3">
                 <Checkbox
-                  aria-label={headerCheckbox.ariaLabel}
-                  checked={headerCheckbox.checked}
-                  onCheckedChange={headerCheckbox.onCheckedChange}
+                  slotProps={{ input: { "aria-label": headerCheckbox.ariaLabel } }}
+                  checked={headerCheckbox.checked === true}
+                  indeterminate={headerCheckbox.checked === "indeterminate"}
+                  onChange={(event) => headerCheckbox.onCheckedChange(event.target.checked)}
+                  size="small"
+                  sx={{ p: 0 }}
                 />
-              </TableHead>
-              <TableHead className="min-w-[220px] text-[13px] font-semibold text-slate-600">Học sinh</TableHead>
-              <TableHead className="min-w-[120px] text-[13px] font-semibold text-slate-600">Lớp</TableHead>
-              <TableHead className="min-w-[110px] text-[13px] font-semibold text-slate-600">Khối</TableHead>
-              <TableHead className="min-w-[150px] text-[13px] font-semibold text-slate-600">Trạng thái</TableHead>
+              </TableCell>
+              <TableCell className="min-w-[220px] text-[13px] font-semibold text-slate-600">Học sinh</TableCell>
+              <TableCell className="min-w-[120px] text-[13px] font-semibold text-slate-600">Lớp</TableCell>
+              <TableCell className="min-w-[110px] text-[13px] font-semibold text-slate-600">Khối</TableCell>
+              <TableCell className="min-w-[150px] text-[13px] font-semibold text-slate-600">Trạng thái</TableCell>
             </TableRow>
-          </TableHeader>
+          </TableHead>
           <TableBody>
             {students.length > 0 ? (
               students.map((student) => {
@@ -477,9 +645,11 @@ function StudentSelectionTable({
                   <TableRow key={student.id} data-state={checked ? "selected" : undefined}>
                     <TableCell className="px-3">
                       <Checkbox
-                        aria-label={`${checked ? "Bỏ chọn" : "Chọn"} ${student.name}`}
+                        slotProps={{ input: { "aria-label": `${checked ? "Bỏ chọn" : "Chọn"} ${student.name}` } }}
                         checked={checked}
-                        onCheckedChange={(value) => onCheckedChange(student, Boolean(value))}
+                        onChange={(event) => onCheckedChange(student, event.target.checked)}
+                        size="small"
+                        sx={{ p: 0 }}
                       />
                     </TableCell>
                     <TableCell className="min-w-[220px]">
