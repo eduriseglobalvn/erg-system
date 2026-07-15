@@ -65,4 +65,8 @@ describe("legacy UI policy", () => {
 
     expect(runPolicy(fixture)).toContain("Legacy UI policy passed");
   });
+
+  it("keeps shared dashboard layouts free of legacy UI", () => {
+    expect(runPolicy(resolve("src/layouts"))).toContain("Legacy UI policy passed");
+  });
 });

@@ -1,6 +1,12 @@
-import { ArrowLeft, CheckCircle2, ClipboardList, Layers3 } from "lucide-react";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ChecklistRoundedIcon from "@mui/icons-material/ChecklistRounded";
+import LayersRoundedIcon from "@mui/icons-material/LayersRounded";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import { useI18n } from "@/platform/i18n";
@@ -25,47 +31,47 @@ export function DashboardPlaceholderWorkspace({
       description={activeLeaf.description}
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
-        <Button variant="outlined" startIcon={<ArrowLeft className="h-4 w-4" />} onClick={() => onOpenLeaf(backTarget)}>
+        <Button variant="outlined" startIcon={<ArrowBackRoundedIcon />} onClick={() => onOpenLeaf(backTarget)}>
           {copy.backToOps}
         </Button>
       }
     >
       <DashboardSectionCard title={template?.title ?? copy.title} description={template?.description ?? copy.description}>
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <div className="rounded-xl border border-dashed border-[#b8c8db] bg-[#f8fbff] p-5">
-            <div className="flex items-start gap-3">
-              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-[#d9e2ef] bg-white text-[var(--erg-blue)]">
-                <Layers3 className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <h3 className="text-base font-semibold text-slate-950">{template?.headline ?? copy.title}</h3>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+        <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" } }}>
+          <Box sx={{ bgcolor: "background.default", border: "1px dashed", borderColor: "divider", borderRadius: 2, p: 2.5 }}>
+            <Stack alignItems="flex-start" direction="row" spacing={1.5}>
+              <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, color: "primary.main", display: "flex", flexShrink: 0, height: 44, justifyContent: "center", width: 44 }}>
+                <LayersRoundedIcon sx={{ fontSize: 20 }} />
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontWeight: 750 }} variant="subtitle1">{template?.headline ?? copy.title}</Typography>
+                <Typography color="text.secondary" sx={{ lineHeight: 1.7, mt: 1, maxWidth: 760 }} variant="body2">
                   {template?.body ?? copy.description}
-                </p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                </Typography>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}>
                   {(template?.chips ?? ["LCMS", "LMS source", "Setup"]).map((chip) => (
                     <Chip key={chip} label={chip} size="small" color="secondary" />
                   ))}
-                </div>
-              </div>
-            </div>
-          </div>
+                </Box>
+              </Box>
+            </Stack>
+          </Box>
 
-          <div className="rounded-xl border border-[#d9e2ef] bg-white p-5">
-            <div className="flex items-center gap-2 text-sm font-bold text-slate-950">
-              <ClipboardList className="h-4 w-4 text-[var(--erg-blue)]" />
+          <Box sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2.5 }}>
+            <Stack alignItems="center" direction="row" spacing={1} sx={{ color: "text.primary", fontSize: 14, fontWeight: 800 }}>
+              <ChecklistRoundedIcon color="primary" sx={{ fontSize: 18 }} />
               Checklist
-            </div>
-            <div className="mt-4 space-y-3">
+            </Stack>
+            <Stack spacing={1.5} sx={{ mt: 2 }}>
               {(template?.checklist ?? copy.checklist).map((item) => (
-                <div key={item} className="flex gap-2 text-sm leading-5 text-slate-600">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-                  <span>{item}</span>
-                </div>
+                <Stack direction="row" key={item} spacing={1}>
+                  <CheckCircleRoundedIcon color="success" sx={{ flexShrink: 0, fontSize: 17, mt: 0.25 }} />
+                  <Typography color="text.secondary" variant="body2">{item}</Typography>
+                </Stack>
               ))}
-            </div>
-          </div>
-        </div>
+            </Stack>
+          </Box>
+        </Box>
       </DashboardSectionCard>
     </DashboardPageShell>
   );

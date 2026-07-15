@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { CreateEducationUnitDialog } from "@/features/lcms/admin-operations";
 import { DashboardContextBar } from "@/layouts/dashboard/components/dashboard-context-bar";
 import { buildDashboardSections, type DashboardScopeMode } from "@/layouts/dashboard/config/dashboard-navigation";
@@ -312,7 +311,17 @@ export function DashboardShell() {
   );
 
   return (
-    <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-[#f4f8fd] text-slate-950">
+    <Box
+      sx={{
+        bgcolor: "background.default",
+        color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
+        height: "100dvh",
+        maxHeight: "100dvh",
+        overflow: "hidden",
+      }}
+    >
       <DashboardContextBar
       canAccessGlobalErg={currentUserPermissions.canAccessGlobalErg}
       activePortal={activePortal}
@@ -328,31 +337,59 @@ export function DashboardShell() {
         selectedClassId={selectedClassId}
         selectedSchoolId={selectedSchoolId}
       />
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen} className="h-full">
-          <SidebarTrigger
-            aria-label={t("sidebar.expandMenu")}
-            className="fixed left-3 top-3 z-50 border border-slate-200 bg-white text-slate-700 shadow-sm md:hidden"
-          />
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <IconButton
+          aria-label={t("sidebar.expandMenu")}
+          onClick={() => setSidebarOpen(true)}
+          sx={{
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            display: { xs: "inline-flex", md: "none" },
+            left: 12,
+            position: "fixed",
+            top: 12,
+            zIndex: (theme) => theme.zIndex.drawer + 2,
+          }}
+        >
+          <MenuRoundedIcon />
+        </IconButton>
+
+        <Box sx={{ display: { xs: "none", md: "block" }, height: "100%" }}>
           <AppSidebar
             activeLeafId={activeLeaf.id}
             dashboardSections={dashboardSections}
             onSelectLeaf={openLeaf}
           />
-          <SidebarInset className="min-h-0 flex-1 overflow-hidden">
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden">
-                {dashboardContent}
-              </div>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </div>
+        </Box>
+
+        <Drawer
+          onClose={() => setSidebarOpen(false)}
+          open={sidebarOpen}
+          slotProps={{ paper: { sx: { width: 280 } } }}
+          sx={{ display: { xs: "block", md: "none" } }}
+        >
+          <Box sx={{ height: "100%" }}>
+            <AppSidebar
+              activeLeafId={activeLeaf.id}
+              dashboardSections={dashboardSections}
+              onSelectLeaf={(leafId) => {
+                openLeaf(leafId);
+                setSidebarOpen(false);
+              }}
+            />
+          </Box>
+        </Drawer>
+
+        <Box component="main" sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          {dashboardContent}
+        </Box>
+      </Box>
       <CreateEducationUnitDialog
         open={createEducationUnitOpen}
         onOpenChange={setCreateEducationUnitOpen}
         onCreated={handleEducationUnitCreated}
       />
-    </div>
+    </Box>
   );
 }
