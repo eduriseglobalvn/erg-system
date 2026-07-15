@@ -1,17 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { RefreshCw, Trash2, FileSpreadsheet } from "@/components/mui-icon-shim";
+import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type ReactNode } from "react";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import TableViewOutlinedIcon from "@mui/icons-material/TableViewOutlined";
 
 import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import Avatar from "@mui/material/Avatar";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
-import { AppSelect } from "@/components/ui/app-select";
-import { cn } from "@/lib/utils";
 
 type GvizCell = {
   v?: string | number | boolean | null;
@@ -294,8 +306,8 @@ export function StudentSheetImportWorkspace({
   }, [centerId, classId, visibleStudents]);
 
   return (
-    <div className={cn("grid gap-4", compact ? "xl:grid-cols-1" : "xl:grid-cols-[minmax(0,1fr)_340px]")}>
-      <div className="space-y-4">
+    <Box sx={{ display: "grid", gridTemplateColumns: compact ? "1fr" : { xs: "1fr", xl: "minmax(0, 1fr) 340px" }, gap: 2 }}>
+      <Stack spacing={2}>
         <DashboardSectionCard
           title={lockedCenter ? "Import danh sách lớp" : "Nhập học sinh từ Google Sheet"}
           description={
@@ -304,14 +316,14 @@ export function StudentSheetImportWorkspace({
               : "Dán link, chọn đơn vị đích, xem trước dữ liệu rồi tạo tài khoản LMS."
           }
         >
-          <div className="mt-2 space-y-4">
-            <div className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <label className="block">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <FileSpreadsheet className="h-4 w-4 text-emerald-600" /> Đường dẫn Google Sheet
-                </span>
-                <p className="mt-1 text-xs text-slate-400">Sheet cần bật quyền xem bằng liên kết.</p>
-                <div className="mt-3 flex flex-col gap-2.5 sm:flex-row">
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
+              <Box component="label" sx={{ display: "block" }}>
+                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                  <TableViewOutlinedIcon sx={{ color: "success.main", fontSize: 18 }} /> Đường dẫn Google Sheet
+                </Stack>
+                <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 12 }}>Sheet cần bật quyền xem bằng liên kết.</Typography>
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={1.25} sx={{ mt: 1.5 }}>
                   <TextField
                     size="small"
                     fullWidth
@@ -324,41 +336,39 @@ export function StudentSheetImportWorkspace({
                       }
                     }}
                     placeholder="https://docs.google.com/spreadsheets/d/..."
-                    className="flex-1"
+                    sx={{ flex: 1 }}
                   />
                   <Button
                     variant="contained"
                     onClick={() => void loadSheet(sheetUrl)}
                     disabled={isLoading}
-                    className="h-10 shrink-0 rounded-[10px] px-5 text-xs font-bold"
+                    sx={{ minHeight: 40, flexShrink: 0, borderRadius: 1.25, px: 2.5, fontSize: 12, fontWeight: 700, textTransform: "none" }}
                   >
                     {isLoading ? "Đang xử lý..." : "Đồng bộ dữ liệu"}
                   </Button>
-                </div>
-              </label>
-            </div>
+                </Stack>
+              </Box>
+            </Paper>
 
-            <div className="rounded-xl border border-[#d9e2ef] bg-[#f8fbff] p-4">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#d9e2ef] pb-3">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800">{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</h3>
-                  <p className="mt-0.5 text-xs text-slate-500">
+            <Paper variant="outlined" sx={{ borderRadius: 1.5, bgcolor: "action.hover", p: 2 }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1.5} sx={{ borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
+                <Box>
+                  <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</Typography>
+                  <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>
                     {lockedCenter ? "Import được thực hiện trong phạm vi trường này." : "Tài khoản được gắn vào trường/lớp đã chọn."}
-                  </p>
-                </div>
+                  </Typography>
+                </Box>
                 <Chip size="small" color="secondary" label={lockedCenter ? "Đúng phạm vi trường" : "BE realtime"} />
-              </div>
-              <div className={cn("mt-4 grid gap-3", lockedCenter ? "sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "sm:grid-cols-2")}>
+              </Stack>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 2 }}>
                 {lockedCenter ? (
-                  <div className="rounded-[10px] border border-slate-200/80 bg-white px-3 py-2.5">
-                    <span className="block text-xs font-bold text-slate-500">Trường</span>
-                    <span className="mt-1 block truncate text-sm font-bold text-slate-800">{lockedCenter.name}</span>
-                  </div>
+                  <Paper variant="outlined" sx={{ borderRadius: 1.25, px: 1.5, py: 1.25 }}>
+                    <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700 }}>Trường</Typography>
+                    <Typography noWrap sx={{ mt: 0.5, color: "text.primary", fontSize: 14, fontWeight: 700 }}>{lockedCenter.name}</Typography>
+                  </Paper>
                 ) : (
-                  <label className="block">
-                    <span className="text-xs font-bold text-slate-500">Trường / Trung tâm</span>
-                    <AppSelect
-                      className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                  <ImportField label="Trường / Trung tâm">
+                    <TextField select fullWidth size="small"
                       value={targetCenterId}
                       onChange={(event) => {
                         setTargetCenterId(event.target.value);
@@ -366,48 +376,44 @@ export function StudentSheetImportWorkspace({
                       }}
                       disabled={managementScope.level !== "global" && centers.length <= 1}
                     >
-                      <option value="">Chọn cơ sở thụ hưởng</option>
+                      <MenuItem value="">Chọn cơ sở thụ hưởng</MenuItem>
                       {centerOptions.map((center) => (
-                        <option key={center.id} value={center.id}>
+                        <MenuItem key={center.id} value={center.id}>
                           {center.name}
-                        </option>
+                        </MenuItem>
                       ))}
-                    </AppSelect>
-                  </label>
+                    </TextField>
+                  </ImportField>
                 )}
-                <label className="block">
-                  <span className="text-xs font-bold text-slate-500">Lớp học đích</span>
-                  <AppSelect
-                    className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+                <ImportField label="Lớp học đích">
+                  <TextField select fullWidth size="small"
                     value={targetClassId}
                     onChange={(event) => setTargetClassId(event.target.value)}
                     disabled={managementScope.level === "class"}
                   >
-                    <option value="">Tự động nhận theo cột Lớp trong Sheet</option>
+                    <MenuItem value="">Tự động nhận theo cột Lớp trong Sheet</MenuItem>
                     {targetClasses.map((classroom) => (
-                      <option key={classroom.id} value={classroom.id}>
+                      <MenuItem key={classroom.id} value={classroom.id}>
                         {classroom.className}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </AppSelect>
-                </label>
-              </div>
-            </div>
+                  </TextField>
+                </ImportField>
+              </Box>
+            </Paper>
 
-            <div className="space-y-4 rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
-                <div>
-                  <h3 className="text-sm font-bold text-slate-800">Khoảng dữ liệu</h3>
-                  <p className="mt-0.5 text-xs text-slate-400">Chọn tab và vùng ô cần đọc.</p>
-                </div>
+            <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1.5} sx={{ borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
+                <Box>
+                  <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>Khoảng dữ liệu</Typography>
+                  <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>Chọn tab và vùng ô cần đọc.</Typography>
+                </Box>
                 <Chip size="small" variant="outlined" label={selectedSheetLabel} />
-              </div>
+              </Stack>
 
-              <div className="grid gap-3 sm:grid-cols-[minmax(200px,1.5fr)_minmax(0,1fr)_minmax(0,1fr)]">
-                <label className="block">
-                  <span className="text-xs font-bold text-slate-500">Tab Sheet cần đọc</span>
-                  <AppSelect
-                    className="mt-2 h-10 w-full rounded-[10px] border border-slate-200/80 bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "minmax(200px, 1.5fr) repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 2 }}>
+                <ImportField label="Tab Sheet cần đọc">
+                  <TextField select fullWidth size="small"
                     value={selectedSheetName}
                     onChange={(event) => {
                       const nextSheetName = event.target.value;
@@ -415,69 +421,61 @@ export function StudentSheetImportWorkspace({
                       void loadSheet(sheetUrl, nextSheetName);
                     }}
                   >
-                    <option value="">Chọn theo mặc định (Tab đầu)</option>
+                    <MenuItem value="">Chọn theo mặc định (Tab đầu)</MenuItem>
                     {sheetTabs.map((tab) => (
-                      <option key={tab.name} value={tab.name}>
+                      <MenuItem key={tab.name} value={tab.name}>
                         {tab.name}
-                      </option>
+                      </MenuItem>
                     ))}
-                  </AppSelect>
-                </label>
-                <label className="block">
-                  <span className="text-xs font-bold text-slate-500">Tọa độ bắt đầu</span>
-                  <TextField size="small" fullWidth className="mt-2 rounded-[10px] uppercase" value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" />
-                </label>
-                <label className="block">
-                  <span className="text-xs font-bold text-slate-500">Tọa độ kết thúc</span>
-                  <TextField size="small" fullWidth className="mt-2 rounded-[10px] uppercase" value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z100" />
-                </label>
-              </div>
+                  </TextField>
+                </ImportField>
+                <ImportField label="Tọa độ bắt đầu"><TextField size="small" fullWidth value={rangeStart} onChange={(event) => setRangeStart(event.target.value.toUpperCase())} placeholder="A1" sx={{ "& input": { textTransform: "uppercase" } }} /></ImportField>
+                <ImportField label="Tọa độ kết thúc"><TextField size="small" fullWidth value={rangeEnd} onChange={(event) => setRangeEnd(event.target.value.toUpperCase())} placeholder="Z100" sx={{ "& input": { textTransform: "uppercase" } }} /></ImportField>
+              </Box>
 
               {sheetTabs.length > 0 && (
-                <div className="pt-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Chuyển đổi nhanh các tab lớp</span>
-                  <div className="flex flex-wrap gap-1.5">
+                <Box sx={{ pt: 2 }}>
+                  <Typography sx={{ mb: 1, color: "text.secondary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Chuyển đổi nhanh các tab lớp</Typography>
+                  <Stack direction="row" flexWrap="wrap" gap={0.75}>
                     {sheetTabs.slice(0, 10).map((tab) => (
-                      <button
+                      <Button
                         key={tab.name}
                         type="button"
+                        variant={selectedSheetName === tab.name ? "contained" : "outlined"}
                         onClick={() => {
                           setSelectedSheetName(tab.name);
                           void loadSheet(sheetUrl, tab.name);
                         }}
-                        className={cn(
-                          "rounded-lg border px-3 py-1.5 text-xs font-semibold tracking-tight transition duration-150",
-                          selectedSheetName === tab.name
-                            ? "border-slate-800 bg-slate-800 text-white shadow-sm"
-                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
-                        )}
+                        sx={{ minHeight: 30, borderRadius: 1, px: 1.5, py: 0.75, fontSize: 12, fontWeight: 600, textTransform: "none" }}
                       >
                         {tab.name}
-                      </button>
+                      </Button>
                     ))}
                     {sheetTabs.length > 10 && (
-                      <span className="text-xs font-semibold text-slate-400 bg-white border border-slate-200/60 rounded-lg px-2.5 py-1.5">
+                      <Chip variant="outlined" size="small" label={
+                        <>
                         +{sheetTabs.length - 10} tab khác
-                      </span>
+                        </>
+                      } sx={{ fontSize: 12, fontWeight: 600 }} />
                     )}
-                  </div>
-                </div>
+                  </Stack>
+                </Box>
               )}
-            </div>
+            </Paper>
 
             {errorMessage ? (
-              <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-700 leading-relaxed">
+              <Box sx={{ border: 1, borderColor: "error.light", borderRadius: 1.5, bgcolor: "error.50", color: "error.dark", px: 2, py: 1.5, fontSize: 12, fontWeight: 600, lineHeight: 1.6 }}>
                 {errorMessage}
-              </div>
+              </Box>
             ) : null}
 
             {/* Metrics cards */}
-            <div className="grid gap-3 sm:grid-cols-3">
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" }, gap: 1.5 }}>
               <DashboardMetricCard label="Tổng học sinh nhận diện" value={String(visibleStudents.length)} detail={summaryText} tone="blue" />
               <DashboardMetricCard label="Dòng hợp lệ" value={String(validCount)} detail="Đầy đủ thông tin định danh" tone="emerald" />
               <DashboardMetricCard label="Cần rà soát lại" value={String(warningCount)} detail="Thiếu thông tin hoặc định dạng lỗi" tone="amber" />
-            </div>
-          </div>
+            </Box>
+          </Stack>
         </DashboardSectionCard>
 
         {/* Preview Table Card */}
@@ -486,200 +484,229 @@ export function StudentSheetImportWorkspace({
           description="Cho phép chỉnh sửa trực tiếp thông tin lỗi của học sinh trước khi gửi dữ liệu lên máy chủ."
           action={
             excludedCount > 0 ? (
-              <Button variant="outlined" size="small" onClick={restoreAllStudents} className="text-xs h-8" startIcon={<RefreshCw className="h-3.5 w-3.5" />}>
+              <Button variant="outlined" size="small" onClick={restoreAllStudents} sx={{ minHeight: 32, fontSize: 12, textTransform: "none" }} startIcon={<RefreshIcon sx={{ fontSize: 16 }} />}>
                 Khôi phục {excludedCount} dòng đã bỏ
               </Button>
             ) : null
           }
         >
-          <div className="mt-4 border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm">
-            <div className="overflow-x-auto max-h-[580px] scrollbar-thin">
-              <table className="w-full text-left border-collapse min-w-[1200px]">
-                <thead>
-                  <tr className="bg-slate-50/80 sticky top-0 border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    <th className="py-3 px-4 w-16 text-center">STT</th>
-                    <th className="py-3 px-4 w-72">Họ & Tên học sinh</th>
-                    <th className="py-3 px-3 w-32">Lớp</th>
-                    <th className="py-3 px-3 w-40">Ngày sinh</th>
-                    <th className="py-3 px-3 w-40">Số điện thoại</th>
-                    <th className="py-3 px-3 w-48">Tên tài khoản (Gen)</th>
-                    <th className="py-3 px-3 w-32">Mật khẩu</th>
-                    <th className="py-3 px-4 w-36 text-center">Trạng thái</th>
-                    <th className="py-3 px-4 w-24 text-center">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs font-semibold text-slate-700">
+          <TableContainer component={Paper} variant="outlined" sx={{ mt: 2, maxHeight: 580, borderRadius: 1.5 }}>
+              <Table stickyHeader size="small" sx={{ minWidth: 1200 }}>
+                <TableHead>
+                  <TableRow sx={{ "& th": { bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" } }}>
+                    <TableCell align="center" sx={{ width: 64 }}>STT</TableCell>
+                    <TableCell sx={{ width: 288 }}>Họ & Tên học sinh</TableCell>
+                    <TableCell sx={{ width: 128 }}>Lớp</TableCell>
+                    <TableCell sx={{ width: 160 }}>Ngày sinh</TableCell>
+                    <TableCell sx={{ width: 160 }}>Số điện thoại</TableCell>
+                    <TableCell sx={{ width: 192 }}>Tên tài khoản (Gen)</TableCell>
+                    <TableCell sx={{ width: 128 }}>Mật khẩu</TableCell>
+                    <TableCell align="center" sx={{ width: 144 }}>Trạng thái</TableCell>
+                    <TableCell align="center" sx={{ width: 96 }}>Thao tác</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
                   {visibleStudents.map((student) => {
                     const isValid = student.status === "valid";
                     return (
-                      <tr 
+                      <TableRow
                         key={student.id} 
-                        className={cn(
-                          "hover:bg-slate-50/40 transition duration-150",
-                          !isValid && "bg-amber-50/15"
-                        )}
+                        hover
+                        sx={{ bgcolor: isValid ? "background.paper" : "warning.50", "& td": { py: 1.25, fontSize: 12 } }}
                       >
-                        <td className="py-2.5 px-4 text-center">
-                          <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-[10px] font-bold text-slate-500">
+                        <TableCell align="center">
+                          <Box component="span" sx={{ display: "inline-flex", width: 24, height: 24, alignItems: "center", justifyContent: "center", borderRadius: 0.75, bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 700 }}>
                             {student.rowNumber || student.sourceIndex}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-4">
-                          <div className="flex items-center gap-3">
-                            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[10px] font-bold text-blue-600">
+                          </Box>
+                        </TableCell>
+                        <TableCell>
+                          <Stack direction="row" alignItems="center" spacing={1.5}>
+                            <Avatar variant="rounded" sx={{ width: 32, height: 32, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 10, fontWeight: 700 }}>
                               {getInitials(student.fullName)}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <input 
+                            </Avatar>
+                            <Box sx={{ minWidth: 0, flex: 1 }}>
+                              <EditableCell
                                 value={student.fullName} 
                                 onChange={(e) => updateStudent(student.id, "fullName", e.target.value)}
-                                className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-bold text-slate-800"
+                                bold
                               />
-                              <div className="text-[10px] text-slate-400 mt-0.5 truncate">{student.schoolName || "Cơ sở chưa phân loại"}</div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <input 
+                              <Typography noWrap sx={{ mt: 0.25, color: "text.secondary", fontSize: 10 }}>{student.schoolName || "Cơ sở chưa phân loại"}</Typography>
+                            </Box>
+                          </Stack>
+                        </TableCell>
+                        <TableCell>
+                          <EditableCell
                             value={student.className} 
                             onChange={(e) => updateStudent(student.id, "className", e.target.value)}
-                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-bold"
+                            bold
                           />
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <input 
+                        </TableCell>
+                        <TableCell>
+                          <EditableCell
                             value={student.birthday} 
                             onChange={(e) => updateStudent(student.id, "birthday", e.target.value)}
-                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs text-slate-600"
                             placeholder="DD/MM/YYYY"
                           />
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <input 
+                        </TableCell>
+                        <TableCell>
+                          <EditableCell
                             value={student.phone} 
                             onChange={(e) => updateStudent(student.id, "phone", e.target.value)}
-                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs text-slate-600"
                             placeholder="Chưa cập nhật SĐT"
                           />
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <input 
+                        </TableCell>
+                        <TableCell>
+                          <EditableCell
                             value={student.generatedUsername} 
                             onChange={(e) => updateStudent(student.id, "generatedUsername", e.target.value)}
-                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-mono text-slate-500"
+                            mono
                           />
-                        </td>
-                        <td className="py-2.5 px-3">
-                          <input 
+                        </TableCell>
+                        <TableCell>
+                          <EditableCell
                             value={student.generatedPassword} 
                             onChange={(e) => updateStudent(student.id, "generatedPassword", e.target.value)}
-                            className="w-full bg-transparent border-0 border-b border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-0 p-0 text-xs font-mono text-slate-500"
+                            mono
                           />
-                        </td>
-                        <td className="py-2.5 px-4 text-center">
-                          <span className={cn(
-                            "rounded-full border px-2.5 py-0.5 text-[10px] font-bold inline-block",
-                            isValid 
-                              ? "bg-emerald-50 text-emerald-600 border-emerald-200/60" 
-                              : "bg-amber-50 text-amber-600 border-amber-200/60"
-                          )}>
-                            {student.note}
-                          </span>
-                        </td>
-                        <td className="py-2.5 px-4 text-center">
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip size="small" variant="outlined" color={isValid ? "success" : "warning"} label={student.note} sx={{ height: 22, fontSize: 10, fontWeight: 700 }} />
+                        </TableCell>
+                        <TableCell align="center">
                           <Button
+                            aria-label={`Bỏ dòng ${student.rowNumber || student.sourceIndex}`}
                             variant="text"
                             size="small"
+                            color="error"
                             onClick={() => excludeStudent(student.id)}
-                            className="h-8 text-xs text-slate-400 hover:text-rose-600 transition"
+                            sx={{ minWidth: 32, minHeight: 32 }}
                           >
-                            <Trash2 className="h-3.5 w-3.5" />
+                            <DeleteOutlineIcon sx={{ fontSize: 16 }} />
                           </Button>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   })}
 
                   {result && visibleStudents.length === 0 && (
-                    <tr>
-                      <td colSpan={9} className="py-8 text-center text-slate-400 font-semibold">
+                    <TableRow>
+                      <TableCell colSpan={9} align="center" sx={{ py: 4, color: "text.secondary", fontWeight: 600 }}>
                         Không còn học sinh nào phù hợp trong khoảng lựa chọn.
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
 
                   {!result && !isLoading && (
-                    <tr>
-                      <td colSpan={9} className="py-12 text-center text-slate-400 font-bold">
+                    <TableRow>
+                      <TableCell colSpan={9} align="center" sx={{ py: 6, color: "text.secondary", fontWeight: 700 }}>
                         Vui lòng nhập đường dẫn Google Sheet phía trên để tải và cấu hình dữ liệu.
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+          </TableContainer>
         </DashboardSectionCard>
-      </div>
+      </Stack>
 
       {/* Right Sidebar Control */}
-      <div className={cn("space-y-4", compact && "xl:grid xl:grid-cols-[minmax(0,1fr)_320px] xl:items-start xl:gap-4 xl:space-y-0")}>
+      <Box sx={compact ? { display: { xl: "grid" }, gridTemplateColumns: { xl: "minmax(0, 1fr) 320px" }, alignItems: { xl: "start" }, gap: 2 } : undefined}>
         <DashboardSectionCard 
           title="Đồng bộ về Sheet" 
           description="Cấu hình trả kết quả tài khoản đã khởi tạo về tệp Google Sheet gốc."
         >
-          <div className="space-y-5 mt-2">
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-xs font-bold text-slate-500">Cột Tên đăng nhập</span>
-                <TextField size="small" fullWidth className="mt-2 uppercase" value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} />
-              </label>
-              <label className="block">
-                <span className="text-xs font-bold text-slate-500">Cột Mật khẩu</span>
-                <TextField size="small" fullWidth className="mt-2 uppercase" value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} />
-              </label>
-            </div>
+          <Stack spacing={2.5} sx={{ mt: 1 }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1.5 }}>
+              <ImportField label="Cột Tên đăng nhập"><TextField size="small" fullWidth value={usernameColumn} onChange={(event) => setUsernameColumn(event.target.value.toUpperCase())} sx={{ "& input": { textTransform: "uppercase" } }} /></ImportField>
+              <ImportField label="Cột Mật khẩu"><TextField size="small" fullWidth value={passwordColumn} onChange={(event) => setPasswordColumn(event.target.value.toUpperCase())} sx={{ "& input": { textTransform: "uppercase" } }} /></ImportField>
+            </Box>
 
-            <div className="space-y-2.5 text-xs border-t border-slate-100 pt-3">
+            <Stack spacing={1.25} sx={{ borderTop: 1, borderColor: "divider", pt: 1.5 }}>
               <RuleLine label="Đầu vào Tab" value={selectedSheetLabel} />
               <RuleLine label="Định danh Auth" value="Khởi tạo thật, chống trùng lặp" />
               <RuleLine label="Mật khẩu mặc định" value="123456" />
               <RuleLine label="Cột ghi nhận kết quả" value={`${usernameColumn || "AA"} / ${passwordColumn || "AB"}`} />
               <RuleLine label="Quyền hạn ghi tệp" value="OAuth 2.0 / Service Account" />
-            </div>
+            </Stack>
 
             {submitResult && (
-              <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-xs text-emerald-800 leading-relaxed shadow-sm">
-                <p className="font-bold">
+              <Paper variant="outlined" sx={{ borderColor: "success.light", borderRadius: 1.5, bgcolor: "success.50", color: "success.dark", px: 2, py: 1.75 }}>
+                <Typography sx={{ fontSize: 12, fontWeight: 700, lineHeight: 1.6 }}>
                   Hoàn tất: BE đã khởi tạo {submitResult.created} tài khoản, bỏ qua {submitResult.skipped}, trùng lặp {submitResult.duplicates}.
-                </p>
+                </Typography>
                 {submitResult.credentials.length > 0 && (
-                  <div className="rounded-lg bg-white/70 p-2.5 mt-2 font-mono">
-                    <p className="font-bold text-slate-800 mb-1 text-[10px] uppercase tracking-wider">Tài khoản mẫu mới tạo</p>
-                    <div className="grid gap-1 text-[10px] text-slate-600">
+                  <Box sx={{ borderRadius: 1, bgcolor: "background.paper", p: 1.25, mt: 1, fontFamily: "JetBrains Mono, monospace" }}>
+                    <Typography sx={{ mb: 0.5, color: "text.primary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Tài khoản mẫu mới tạo</Typography>
+                    <Stack spacing={0.5} sx={{ color: "text.secondary", fontSize: 10 }}>
                       {submitResult.credentials.slice(0, 5).map((item) => (
-                        <span key={item.rowId}>
+                        <Box component="span" key={item.rowId}>
                           Dòng {item.rowNumber}: {item.username} / {item.password}
-                        </span>
+                        </Box>
                       ))}
-                    </div>
-                  </div>
+                    </Stack>
+                  </Box>
                 )}
-              </div>
+              </Paper>
             )}
 
             <Button
               variant="contained"
-              className="w-full bg-[var(--erg-blue)] hover:bg-[var(--erg-blue-hover)] text-xs font-bold h-10 rounded-xl shadow-sm transition"
+              fullWidth
+              sx={{ minHeight: 40, borderRadius: 1.5, fontSize: 12, fontWeight: 700, textTransform: "none" }}
               onClick={() => void submitAccounts()}
               disabled={!visibleStudents.length || !centerId || isSubmitting}
             >
               {isSubmitting ? "Đang truyền dữ liệu..." : `Khởi tạo ${visibleStudents.length} tài khoản`}
             </Button>
-          </div>
+          </Stack>
         </DashboardSectionCard>
-      </div>
-    </div>
+      </Box>
+    </Box>
+  );
+}
+
+function ImportField({ children, label }: { children: ReactNode; label: string }) {
+  return (
+    <Box component="label" sx={{ display: "grid", gap: 1, color: "text.secondary", fontSize: 12, fontWeight: 700 }}>
+      {label}
+      {children}
+    </Box>
+  );
+}
+
+function EditableCell({
+  bold = false,
+  mono = false,
+  onChange,
+  placeholder,
+  value,
+}: {
+  bold?: boolean;
+  mono?: boolean;
+  onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  value: string;
+}) {
+  return (
+    <TextField
+      fullWidth
+      variant="standard"
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      slotProps={{ input: { disableUnderline: true } }}
+      sx={{
+        "& .MuiInputBase-root": {
+          borderBottom: 1,
+          borderColor: "transparent",
+          fontFamily: mono ? "JetBrains Mono, monospace" : "inherit",
+          fontSize: 12,
+          fontWeight: bold ? 700 : 500,
+          "&:hover": { borderColor: "divider" },
+          "&.Mui-focused": { borderColor: "primary.main" },
+        },
+      }}
+    />
   );
 }
 
@@ -988,9 +1015,9 @@ function parseBirthdayForApi(value: string) {
 
 function RuleLine({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-start justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2 text-xs">
-      <span className="font-semibold text-slate-700">{label}</span>
-      <span className="text-right text-slate-500 font-bold">{value}</span>
-    </div>
+    <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2} sx={{ borderRadius: 1, bgcolor: "action.hover", px: 1.5, py: 1 }}>
+      <Typography sx={{ color: "text.primary", fontSize: 12, fontWeight: 600 }}>{label}</Typography>
+      <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, textAlign: "right" }}>{value}</Typography>
+    </Stack>
   );
 }
