@@ -1,9 +1,15 @@
 import { useState, type ReactNode } from "react";
-import Notifications from "@mui/icons-material/Notifications";
-import { Download, LogOut, ShieldCheck, Smartphone, UserRound } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
+import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
+import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { LmsBottomDock, type LmsMobileDockItem } from "./lms-bottom-dock";
 import { LmsMobileTopBar } from "./lms-mobile-top-bar";
 import { LmsPwaSetupSheet } from "./lms-pwa-setup-sheet";
@@ -15,45 +21,16 @@ import { usePwaNotifications } from "../hooks/use-pwa-notifications";
 import { useServiceWorkerUpdate } from "../hooks/use-service-worker-update";
 
 export function LmsMobileShell<TSection extends string>({
-  activeLabel,
-  activeSection,
-  children,
-  classes,
-  dockItems,
-  notificationCenter,
-  schoolName,
-  schools,
-  selectedClassId,
-  selectedClassName,
-  selectedSchoolId,
-  teacherEmail,
-  teacherName,
-  unreadNotificationCount,
-  onClassChange,
-  onOpenNotifications,
-  onNavigate,
-  onSchoolChange,
-  onSignOut,
+  activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
+  selectedClassId, selectedClassName, selectedSchoolId, teacherEmail, teacherName, unreadNotificationCount,
+  onClassChange, onOpenNotifications, onNavigate, onSchoolChange, onSignOut,
 }: {
-  activeLabel: string;
-  activeSection: TSection;
-  children: ReactNode;
-  classes: LmsMobileClassOption[];
-  dockItems: Array<LmsMobileDockItem<TSection>>;
-  notificationCenter?: ReactNode;
-  schoolName: string;
-  schools: LmsMobileSchoolOption[];
-  selectedClassId: string;
-  selectedClassName: string;
-  selectedSchoolId: string;
-  teacherEmail: string;
-  teacherName: string;
-  unreadNotificationCount?: number;
-  onClassChange: (classId: string) => void;
-  onOpenNotifications?: () => void;
-  onNavigate: (path: string) => void;
-  onSchoolChange: (schoolId: string) => void;
-  onSignOut: () => void;
+  activeLabel: string; activeSection: TSection; children: ReactNode; classes: LmsMobileClassOption[];
+  dockItems: Array<LmsMobileDockItem<TSection>>; notificationCenter?: ReactNode; schoolName: string;
+  schools: LmsMobileSchoolOption[]; selectedClassId: string; selectedClassName: string; selectedSchoolId: string;
+  teacherEmail: string; teacherName: string; unreadNotificationCount?: number;
+  onClassChange: (classId: string) => void; onOpenNotifications?: () => void; onNavigate: (path: string) => void;
+  onSchoolChange: (schoolId: string) => void; onSignOut: () => void;
 }) {
   const online = useOnlineStatus();
   const installPrompt = useInstallPrompt();
@@ -70,119 +47,50 @@ export function LmsMobileShell<TSection extends string>({
   }
 
   return (
-    <div className="flex min-h-[100dvh] min-w-0 flex-1 flex-col overflow-hidden bg-[#f3f6fb] text-[var(--foreground)] xl:hidden">
+    <Box sx={{ bgcolor: "background.default", color: "text.primary", display: { xs: "flex", xl: "none" }, flex: 1, flexDirection: "column", minHeight: "100dvh", minWidth: 0, overflow: "hidden" }}>
       <LmsMobileTopBar
-        activeLabel={activeLabel}
-        canInstall={installPrompt.canInstall}
-        className={selectedClassName}
-        installed={installPrompt.installed}
-        notificationCenter={notificationCenter}
-        online={online}
-        schoolName={schoolName}
-        teacherName={teacherName}
-        unreadNotificationCount={unreadNotificationCount}
-        updateAvailable={serviceWorkerUpdate.updateAvailable}
-        onAccountOpen={() => setAccountOpen(true)}
-        onInstall={() => setPwaOpen(true)}
-        onOpenNotifications={onOpenNotifications}
-        onScopeOpen={() => setScopeOpen(true)}
-        onUpdate={serviceWorkerUpdate.applyUpdate}
+        activeLabel={activeLabel} canInstall={installPrompt.canInstall} selectedClassName={selectedClassName}
+        installed={installPrompt.installed} notificationCenter={notificationCenter} online={online}
+        schoolName={schoolName} teacherName={teacherName} unreadNotificationCount={unreadNotificationCount}
+        updateAvailable={serviceWorkerUpdate.updateAvailable} onAccountOpen={() => setAccountOpen(true)}
+        onInstall={() => setPwaOpen(true)} onOpenNotifications={onOpenNotifications}
+        onScopeOpen={() => setScopeOpen(true)} onUpdate={serviceWorkerUpdate.applyUpdate}
       />
 
       {shouldOfferInstall ? (
-        <div className="bg-[#eaf4ff] px-3 py-2">
-          <button
-            type="button"
-            className="flex w-full items-center gap-3 rounded-[16px] border border-[#c7ddf7] bg-white px-3 py-2 text-left shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-            onClick={() => setPwaOpen(true)}
-          >
-            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-[var(--primary)] text-white">
-              <Smartphone className="h-5 w-5" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate text-sm font-extrabold text-slate-950">Them LMS vao man hinh chinh</span>
-              <span className="block truncate text-xs font-semibold text-slate-500">Mo nhanh nhu app, co icon va loi tat rieng.</span>
-            </span>
-            <Download className="h-5 w-5 shrink-0 text-[var(--primary)]" />
-          </button>
-        </div>
+        <Box sx={{ bgcolor: "info.light", px: 1.5, py: 1 }}>
+          <ButtonBase onClick={() => setPwaOpen(true)} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", gap: 1.5, minHeight: 56, px: 1.5, py: 1, textAlign: "left", width: "100%" }}>
+            <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 1.5, color: "primary.contrastText", display: "flex", flexShrink: 0, height: 40, justifyContent: "center", width: 40 }}><PhoneAndroidRoundedIcon /></Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
+            <DownloadRoundedIcon color="primary" />
+          </ButtonBase>
+        </Box>
       ) : null}
 
-      {!online ? (
-        <div className="border-b border-amber-200 bg-amber-50 px-4 py-2 text-xs font-bold text-amber-800">
-          Dang offline. Giao bai, lich lam viec va thong bao can ket noi mang de cap nhat an toan.
-        </div>
-      ) : null}
+      {!online ? <Alert severity="warning" sx={{ borderRadius: 0, fontSize: 12, fontWeight: 700, py: 0 }}>Đang offline. Giao bài, lịch làm việc và thông báo cần kết nối mạng để cập nhật an toàn.</Alert> : null}
 
-      <main
-        className={cn(
-          "min-h-0 flex-1 overflow-y-auto overscroll-contain pb-[calc(104px+env(safe-area-inset-bottom,0px))]",
-        )}
-      >
-        {children}
-      </main>
-
+      <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
       <LmsBottomDock activeSection={activeSection} items={dockItems} onNavigate={navigate} />
+      <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
-      <LmsScopeSheet
-        classes={classes}
-        open={scopeOpen}
-        schools={schools}
-        selectedClassId={selectedClassId}
-        selectedSchoolId={selectedSchoolId}
-        onClassChange={onClassChange}
-        onOpenChange={setScopeOpen}
-        onSchoolChange={onSchoolChange}
-      />
-
-      <MobileBottomSheet
-        open={accountOpen}
-        title={teacherName}
-        description={teacherEmail}
-        onOpenChange={setAccountOpen}
-      >
-        <div className="grid gap-2">
-          <button
-            type="button"
-            className="flex min-h-12 items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white px-3 text-left text-[var(--foreground)] transition hover:bg-[var(--surface-hover)]"
-            onClick={() => navigate("/account")}
-          >
-            <UserRound className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-extrabold">Quan ly tai khoan</span>
-          </button>
-          <button
-            type="button"
-            className="flex min-h-12 items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white px-3 text-left text-[var(--foreground)] transition hover:bg-[var(--surface-hover)]"
-            onClick={() => navigate("/account/login-logs")}
-          >
-            <ShieldCheck className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-extrabold">Lich su dang nhap</span>
-          </button>
-          {onOpenNotifications ? (
-            <button
-              type="button"
-              className="flex min-h-12 items-center gap-3 rounded-[12px] border border-[var(--border)] bg-white px-3 text-left text-[var(--foreground)] transition hover:bg-[var(--surface-hover)]"
-              onClick={() => {
-                setAccountOpen(false);
-                onOpenNotifications();
-              }}
-            >
-              <Notifications className="h-5 w-5 shrink-0" />
-              <span className="text-sm font-extrabold">Mo thong bao</span>
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className="flex min-h-12 items-center gap-3 rounded-[12px] border border-rose-100 bg-rose-50 px-3 text-left text-rose-700 transition hover:bg-rose-100"
-            onClick={onSignOut}
-          >
-            <LogOut className="h-5 w-5 shrink-0" />
-            <span className="text-sm font-extrabold">Dang xuat</span>
-          </button>
-        </div>
+      <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
+        <Stack spacing={1}>
+          <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate("/account")} />
+          <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate("/account/login-logs")} />
+          {onOpenNotifications ? <AccountActionButton icon={<NotificationsNoneRoundedIcon />} label="Mở thông báo" onClick={() => { setAccountOpen(false); onOpenNotifications(); }} /> : null}
+          <AccountActionButton danger icon={<LogoutRoundedIcon />} label="Đăng xuất" onClick={onSignOut} />
+        </Stack>
       </MobileBottomSheet>
 
-      <LmsPwaSetupSheet installPrompt={installPrompt} notifications={notifications} open={pwaOpen} onOpenChange={setPwaOpen} />
-    </div>
+      <LmsPwaSetupSheet installPrompt={installPrompt} notifications={notifications} onOpenChange={setPwaOpen} open={pwaOpen} />
+    </Box>
+  );
+}
+
+function AccountActionButton({ danger = false, icon, label, onClick }: { danger?: boolean; icon: ReactNode; label: string; onClick: () => void }) {
+  return (
+    <ButtonBase onClick={onClick} sx={{ border: "1px solid", borderColor: danger ? "error.light" : "divider", borderRadius: 1.5, color: danger ? "error.main" : "text.primary", display: "flex", gap: 1.5, justifyContent: "flex-start", minHeight: 48, px: 1.5, textAlign: "left", width: "100%", "&:hover": { bgcolor: danger ? "error.light" : "action.hover" }, "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 20 } }}>
+      {icon}<Typography sx={{ fontSize: 14, fontWeight: 800 }}>{label}</Typography>
+    </ButtonBase>
   );
 }

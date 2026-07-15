@@ -1,14 +1,22 @@
-import { AlertCircle, BellRing, CheckCircle2, Download, MoreVertical, Share, Smartphone } from "lucide-react";
-
-import { cn } from "@/lib/utils";
-
+import type { ComponentType, ReactNode } from "react";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
+import IosShareRoundedIcon from "@mui/icons-material/IosShareRounded";
+import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
+import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
+import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import type { SvgIconProps } from "@mui/material/SvgIcon";
+import Typography from "@mui/material/Typography";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 
 type InstallPromptState = {
-  canInstall: boolean;
-  installed: boolean;
-  isIos: boolean;
-  isManualInstall: boolean;
+  canInstall: boolean; installed: boolean; isIos: boolean; isManualInstall: boolean;
   platform: "android" | "ios" | "desktop" | "unknown";
   promptInstall: () => Promise<"accepted" | "dismissed" | "unavailable">;
 };
@@ -20,158 +28,67 @@ type NotificationSetupState = {
   state: "unsupported" | "blocked" | "default" | "enabled" | "unconfigured";
 };
 
-export function LmsPwaSetupSheet({
-  installPrompt,
-  notifications,
-  open,
-  onOpenChange,
-}: {
-  installPrompt: InstallPromptState;
-  notifications: NotificationSetupState;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+type MuiIcon = ComponentType<SvgIconProps>;
+
+export function LmsPwaSetupSheet({ installPrompt, notifications, open, onOpenChange }: {
+  installPrompt: InstallPromptState; notifications: NotificationSetupState; open: boolean; onOpenChange: (open: boolean) => void;
 }) {
   const installReady = installPrompt.canInstall && !installPrompt.installed;
   const androidInstall = installPrompt.platform === "android";
   const manualInstall = installPrompt.isManualInstall;
 
   return (
-    <MobileBottomSheet open={open} title="Cai LMS tren dien thoai" description="Mo nhanh nhu app va nhan thong bao lop hoc." onOpenChange={onOpenChange}>
-      <div className="grid gap-3">
-        <section className="rounded-[16px] border border-[#dbeafe] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="flex items-start gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[#eef6ff] text-[var(--primary)]">
-              <Smartphone className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-extrabold text-slate-950">Them vao man hinh chinh</div>
-              <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                LMS se mo bang cua so rieng, co icon ERG va cac loi tat nhanh cho Bai tap, Diem danh, Bang diem, Lich day.
-              </p>
-            </div>
-          </div>
-
-          {installPrompt.installed ? (
-            <StatusLine tone="success" icon={CheckCircle2} label="Da cai tren thiet bi nay." />
-          ) : installReady ? (
-            <div className="mt-4 grid gap-2">
-              <button
-                type="button"
-                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] bg-[var(--primary)] px-4 text-sm font-extrabold text-white shadow-[0_10px_22px_rgba(15,108,189,0.22)]"
-                onClick={() => void installPrompt.promptInstall()}
-              >
-                <Download className="h-5 w-5" />
-                Them vao man hinh chinh
-              </button>
-              {androidInstall ? (
-                <div className="grid gap-2">
-                  <InstructionStep icon={Download} text="Bam nut tren de cai nhanh bang Chrome." />
-                  <InstructionStep icon={MoreVertical} text="Neu khong hien bang cai dat, mo menu ba cham cua Chrome." />
-                  <InstructionStep icon={Smartphone} text="Chon Install app hoac Add to Home screen." />
-                </div>
-              ) : null}
-            </div>
+    <MobileBottomSheet description="Mở nhanh như ứng dụng và nhận thông báo lớp học." onOpenChange={onOpenChange} open={open} title="Cài LMS trên điện thoại">
+      <Stack spacing={1.5}>
+        <SetupCard description="LMS mở bằng cửa sổ riêng, có biểu tượng ERG và lối tắt cho Bài tập, Điểm danh, Bảng điểm, Lịch dạy." icon={PhoneAndroidRoundedIcon} title="Thêm vào màn hình chính">
+          {installPrompt.installed ? <StatusLine label="Đã cài trên thiết bị này." tone="success" /> : installReady ? (
+            <Stack spacing={1} sx={{ mt: 2 }}>
+              <Button fullWidth onClick={() => void installPrompt.promptInstall()} startIcon={<DownloadRoundedIcon />} sx={{ minHeight: 48 }}>Thêm vào màn hình chính</Button>
+              {androidInstall ? <><InstructionStep icon={DownloadRoundedIcon} text="Bấm nút trên để cài nhanh bằng Chrome." /><InstructionStep icon={MoreVertRoundedIcon} text="Nếu không hiện bảng cài đặt, mở menu ba chấm của Chrome." /><InstructionStep icon={PhoneAndroidRoundedIcon} text="Chọn Install app hoặc Add to Home screen." /></> : null}
+            </Stack>
           ) : manualInstall ? (
-            <div className="mt-4 grid gap-2">
-              <InstructionStep icon={Share} text="Bam nut Share cua Safari." />
-              <InstructionStep icon={Download} text="Chon Add to Home Screen." />
-              <InstructionStep icon={CheckCircle2} text="Bam Add de tao icon ERG LMS." />
-            </div>
+            <Stack spacing={1} sx={{ mt: 2 }}><InstructionStep icon={IosShareRoundedIcon} text="Bấm nút Share của Safari." /><InstructionStep icon={DownloadRoundedIcon} text="Chọn Add to Home Screen." /><InstructionStep icon={CheckCircleRoundedIcon} text="Bấm Add để tạo biểu tượng ERG LMS." /></Stack>
           ) : androidInstall ? (
-            <div className="mt-4 grid gap-2">
-              <InstructionStep icon={MoreVertical} text="Mo Chrome menu ba cham o goc tren." />
-              <InstructionStep icon={Download} text="Chon Install app hoac Add to Home screen." />
-              <InstructionStep icon={CheckCircle2} text="Xac nhan Install de tao icon ERG LMS." />
-            </div>
-          ) : (
-            <StatusLine tone="warning" icon={AlertCircle} label="Trinh duyet se hien nut cai khi PWA du dieu kien va chua duoc cai." />
-          )}
-        </section>
+            <Stack spacing={1} sx={{ mt: 2 }}><InstructionStep icon={MoreVertRoundedIcon} text="Mở Chrome menu ba chấm ở góc trên." /><InstructionStep icon={DownloadRoundedIcon} text="Chọn Install app hoặc Add to Home screen." /><InstructionStep icon={CheckCircleRoundedIcon} text="Xác nhận Install để tạo biểu tượng ERG LMS." /></Stack>
+          ) : <StatusLine label="Trình duyệt sẽ hiện nút cài khi PWA đủ điều kiện và chưa được cài." tone="warning" />}
+        </SetupCard>
 
-        <section className="rounded-[16px] border border-[#e5edf7] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-          <div className="flex items-start gap-3">
-            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[#ecfdf5] text-emerald-700">
-              <BellRing className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="text-sm font-extrabold text-slate-950">Thong bao nen</div>
-              <p className="mt-1 text-xs font-semibold leading-5 text-slate-600">
-                Cho phep nhan thong bao lich day, bai tap va dong bo ngay ca khi LMS khong mo tren man hinh.
-              </p>
-            </div>
-          </div>
-
+        <SetupCard description="Cho phép nhận thông báo lịch dạy, bài tập và đồng bộ ngay cả khi LMS không mở trên màn hình." icon={NotificationsActiveRoundedIcon} title="Thông báo nền">
           <NotificationStatus notifications={notifications} />
-        </section>
+        </SetupCard>
 
-        <section className="rounded-[16px] border border-[#e5edf7] bg-[#fbfdff] p-4">
-          <div className="flex items-start gap-3 text-xs font-semibold leading-5 text-slate-600">
-            <MoreVertical className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-            <p>
-              Tren Chrome Android, cac loi tat trong manifest se nam trong menu khi nhan giu icon ERG LMS. Tren iPhone, iOS chi cho them app icon thu
-              cong tu Safari.
-            </p>
-          </div>
-        </section>
-      </div>
+        <Paper sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
+          <Stack alignItems="flex-start" direction="row" spacing={1.5}><MoreVertRoundedIcon sx={{ color: "text.secondary", fontSize: 18, mt: 0.25 }} /><Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7 }}>Trên Chrome Android, các lối tắt nằm trong menu khi nhấn giữ biểu tượng ERG LMS. Trên iPhone, iOS chỉ cho thêm biểu tượng thủ công từ Safari.</Typography></Stack>
+        </Paper>
+      </Stack>
     </MobileBottomSheet>
   );
 }
 
+function SetupCard({ children, description, icon: Icon, title }: { children: ReactNode; description: string; icon: MuiIcon; title: string }) {
+  return (
+    <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
+      <Stack alignItems="flex-start" direction="row" spacing={1.5}>
+        <Box sx={{ alignItems: "center", bgcolor: "primary.light", borderRadius: 1.75, color: "primary.dark", display: "flex", flexShrink: 0, height: 44, justifyContent: "center", width: 44 }}><Icon sx={{ fontSize: 21 }} /></Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}><Typography sx={{ fontSize: 14, fontWeight: 800 }}>{title}</Typography><Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7, mt: 0.5 }}>{description}</Typography></Box>
+      </Stack>
+      {children}
+    </Paper>
+  );
+}
+
 function NotificationStatus({ notifications }: { notifications: NotificationSetupState }) {
-  if (notifications.state === "enabled") {
-    return <StatusLine tone="success" icon={CheckCircle2} label="Da bat thong bao tren thiet bi nay." />;
-  }
-
-  if (notifications.state === "blocked") {
-    return <StatusLine tone="danger" icon={AlertCircle} label="Trinh duyet dang chan thong bao. Hay mo Settings cua site de cap quyen lai." />;
-  }
-
-  if (notifications.state === "unsupported") {
-    return <StatusLine tone="warning" icon={AlertCircle} label="Trinh duyet nay chua ho tro Web Push cho PWA." />;
-  }
-
-  if (notifications.state === "unconfigured") {
-    return <StatusLine tone="warning" icon={AlertCircle} label="Can cau hinh VITE_WEB_PUSH_PUBLIC_KEY va backend push subscription." />;
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        disabled={notifications.busy}
-        className="mt-4 flex min-h-12 w-full items-center justify-center gap-2 rounded-[12px] border border-[#b8d6fa] bg-[#eef6ff] px-4 text-sm font-extrabold text-[var(--primary)] disabled:opacity-60"
-        onClick={() => void notifications.enableNotifications()}
-      >
-        <BellRing className="h-5 w-5" />
-        {notifications.busy ? "Dang bat thong bao..." : "Bat thong bao"}
-      </button>
-      {notifications.error ? <p className="mt-2 text-xs font-semibold leading-5 text-rose-700">{notifications.error}</p> : null}
-    </>
-  );
+  if (notifications.state === "enabled") return <StatusLine label="Đã bật thông báo trên thiết bị này." tone="success" />;
+  if (notifications.state === "blocked") return <StatusLine label="Trình duyệt đang chặn thông báo. Hãy mở Settings của site để cấp quyền lại." tone="error" />;
+  if (notifications.state === "unsupported") return <StatusLine label="Trình duyệt này chưa hỗ trợ Web Push cho PWA." tone="warning" />;
+  if (notifications.state === "unconfigured") return <StatusLine label="Cần cấu hình VITE_WEB_PUSH_PUBLIC_KEY và backend push subscription." tone="warning" />;
+  return <Box sx={{ mt: 2 }}><Button disabled={notifications.busy} fullWidth onClick={() => void notifications.enableNotifications()} startIcon={<NotificationsActiveRoundedIcon />} variant="outlined" sx={{ minHeight: 48 }}>{notifications.busy ? "Đang bật thông báo..." : "Bật thông báo"}</Button>{notifications.error ? <Typography color="error" sx={{ fontSize: 12, fontWeight: 600, mt: 1 }}>{notifications.error}</Typography> : null}</Box>;
 }
 
-function InstructionStep({ icon: Icon, text }: { icon: typeof Share; text: string }) {
-  return (
-    <div className="flex min-h-11 items-center gap-3 rounded-[12px] border border-[#e5edf7] bg-[#f8fbff] px-3 text-sm font-bold text-slate-700">
-      <Icon className="h-4 w-4 shrink-0 text-[var(--primary)]" />
-      <span>{text}</span>
-    </div>
-  );
+function InstructionStep({ icon: Icon, text }: { icon: MuiIcon; text: string }) {
+  return <Stack alignItems="center" direction="row" spacing={1.5} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 1.5, minHeight: 44, px: 1.5 }}><Icon color="primary" sx={{ flexShrink: 0, fontSize: 18 }} /><Typography sx={{ fontSize: 13, fontWeight: 700 }}>{text}</Typography></Stack>;
 }
 
-function StatusLine({ icon: Icon, label, tone }: { icon: typeof CheckCircle2; label: string; tone: "success" | "warning" | "danger" }) {
-  return (
-    <div
-      className={cn(
-        "mt-4 flex min-h-11 items-center gap-2 rounded-[12px] border px-3 text-xs font-extrabold leading-5",
-        tone === "success" && "border-emerald-200 bg-emerald-50 text-emerald-800",
-        tone === "warning" && "border-amber-200 bg-amber-50 text-amber-800",
-        tone === "danger" && "border-rose-200 bg-rose-50 text-rose-800",
-      )}
-    >
-      <Icon className="h-4 w-4 shrink-0" />
-      <span>{label}</span>
-    </div>
-  );
+function StatusLine({ label, tone }: { label: string; tone: "success" | "warning" | "error" }) {
+  return <Alert icon={tone === "success" ? <CheckCircleRoundedIcon /> : <ErrorOutlineRoundedIcon />} severity={tone} sx={{ fontSize: 12, fontWeight: 750, mt: 2 }}>{label}</Alert>;
 }
