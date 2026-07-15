@@ -1,35 +1,36 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ElementType, type ReactNode } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  BarChart3,
-  BookOpenCheck,
-  Building2,
-  CalendarDays,
-  CheckCircle,
-  ClipboardCheck,
-  FileText,
-  Globe,
-  Layers,
-  LibraryBig,
-  Mail,
-  MapPin,
-  Phone as PhoneIcon,
-  Search,
-  AlertTriangle,
-  RefreshCw,
-  UsersRound,
-  type LucideIcon,
-} from "@/components/mui-icon-shim";
+import AlertTriangle from "@mui/icons-material/WarningAmberOutlined";
+import BarChart3 from "@mui/icons-material/BarChartOutlined";
+import BookOpenCheck from "@mui/icons-material/LibraryBooksOutlined";
+import Building2 from "@mui/icons-material/BusinessOutlined";
+import CalendarDays from "@mui/icons-material/CalendarMonthOutlined";
+import CheckCircle from "@mui/icons-material/CheckCircleOutline";
+import ClipboardCheck from "@mui/icons-material/FactCheckOutlined";
+import FileText from "@mui/icons-material/DescriptionOutlined";
+import Globe from "@mui/icons-material/PublicOutlined";
+import Layers from "@mui/icons-material/LayersOutlined";
+import LibraryBig from "@mui/icons-material/LocalLibraryOutlined";
+import Mail from "@mui/icons-material/MailOutline";
+import MapPin from "@mui/icons-material/LocationOnOutlined";
+import PhoneIcon from "@mui/icons-material/PhoneOutlined";
+import RefreshCw from "@mui/icons-material/Refresh";
+import Search from "@mui/icons-material/Search";
+import UsersRound from "@mui/icons-material/GroupsOutlined";
 import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import InputAdornment from "@mui/material/InputAdornment";
+import MenuItem from "@mui/material/MenuItem";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
-import { TsForm } from "@/components/ui/tanstack-form";
+import Typography from "@mui/material/Typography";
 import {
   classroomSchools,
   classroomSnapshots,
@@ -242,7 +243,7 @@ function AdminOverview({
     },
   ] satisfies Array<{
     detail: string;
-    icon: LucideIcon;
+    icon: ElementType;
     leafId: string;
     lcmsSource: string;
     lmsArea: string;
@@ -304,7 +305,7 @@ function LmsCoverageRow({
 }: {
   item: {
     detail: string;
-    icon: LucideIcon;
+    icon: ElementType;
     leafId: string;
     lcmsSource: string;
     lmsArea: string;
@@ -613,6 +614,25 @@ function OperationalErrorState({
   );
 }
 
+function EditorField({ children, label, wide = false }: { children: ReactNode; label: string; wide?: boolean }) {
+  return (
+    <Box
+      component="label"
+      sx={{
+        display: "grid",
+        gridColumn: wide ? { sm: "1 / -1" } : undefined,
+        gap: 0.75,
+        color: "text.secondary",
+        fontSize: 12,
+        fontWeight: 700,
+      }}
+    >
+      {label}
+      {children}
+    </Box>
+  );
+}
+
 function EducationUnitEditor({
   centers,
   classes,
@@ -663,26 +683,26 @@ function EducationUnitEditor({
   }
 
   const header = (
-    <div className="flex flex-col gap-3 border-b border-[#edf1f7] bg-[#fbfdff] p-4 lg:flex-row lg:items-center lg:justify-between">
-      <div className="flex min-w-0 items-center gap-3">
+    <Stack direction={{ xs: "column", lg: "row" }} alignItems={{ xs: "stretch", lg: "center" }} justifyContent="space-between" gap={1.5} sx={{ borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", p: 2 }}>
+      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ minWidth: 0 }}>
         <UnitAvatar unit={draft} />
-        <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
-            <h3 className="truncate text-base font-bold text-slate-950">{draft.name || "Cơ sở giáo dục"}</h3>
+        <Box sx={{ minWidth: 0 }}>
+          <Stack direction="row" alignItems="center" flexWrap="wrap" gap={1}>
+            <Typography noWrap sx={{ color: "text.primary", fontSize: 16, fontWeight: 700 }}>{draft.name || "Cơ sở giáo dục"}</Typography>
             <UnitTypeBadge type={draft.type} />
-          </div>
-          <p className="mt-0.5 truncate text-xs font-semibold text-slate-500">{detailHint}</p>
-          <p className="mt-0.5 truncate text-[11px] font-semibold text-slate-400">{draft.code || "Chưa có mã định danh"}</p>
-        </div>
-      </div>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 lg:justify-end">
-        <div className="inline-flex items-center gap-1 rounded-[12px] border border-[#d9e2ef] bg-white p-1 shadow-[var(--shadow-xs)]">
+          </Stack>
+          <Typography noWrap sx={{ mt: 0.25, color: "text.secondary", fontSize: 12, fontWeight: 600 }}>{detailHint}</Typography>
+          <Typography noWrap sx={{ mt: 0.25, color: "text.disabled", fontSize: 11, fontWeight: 600 }}>{draft.code || "Chưa có mã định danh"}</Typography>
+        </Box>
+      </Stack>
+      <Stack direction="row" alignItems="center" justifyContent={{ lg: "flex-end" }} flexWrap="wrap" gap={1} sx={{ flexShrink: 0 }}>
+        <Paper variant="outlined" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, borderRadius: 1.5, p: 0.5 }}>
           <Button
             type="button"
             size="small"
             variant={activePanel === "info" ? "contained" : "text"}
             onClick={() => setActivePanel("info")}
-            className={cn("h-8 rounded-[9px] px-3 text-xs", activePanel === "info" ? "text-[var(--erg-blue)]" : "text-slate-500")}
+            sx={{ minHeight: 32, borderRadius: 1, px: 1.5, fontSize: 12, textTransform: "none" }}
           >
             Thông tin
           </Button>
@@ -692,31 +712,31 @@ function EducationUnitEditor({
               size="small"
               variant={activePanel === "import" ? "contained" : "text"}
               onClick={() => setActivePanel("import")}
-              className={cn("h-8 rounded-[9px] px-3 text-xs", activePanel === "import" ? "text-[var(--erg-blue)]" : "text-slate-500")}
+              sx={{ minHeight: 32, borderRadius: 1, px: 1.5, fontSize: 12, textTransform: "none" }}
             >
               Import danh sách lớp
             </Button>
           ) : null}
-        </div>
+        </Paper>
         {activePanel === "info" ? (
           <>
-            <Button type="button" variant="outlined" size="small" onClick={() => setShowAdvanced((current) => !current)} className="h-9 px-3 text-xs">
+            <Button type="button" variant="outlined" size="small" onClick={() => setShowAdvanced((current) => !current)} sx={{ minHeight: 36, px: 1.5, fontSize: 12, textTransform: "none" }}>
               {showAdvanced ? "Ẩn nâng cao" : "Nâng cao"}
             </Button>
-            <Button type="submit" variant="contained" size="small" disabled={isSaving || !draft.name?.trim()} className="h-9 px-3 text-xs">
+            <Button type="submit" variant="contained" size="small" disabled={isSaving || !draft.name?.trim()} sx={{ minHeight: 36, px: 1.5, fontSize: 12, textTransform: "none" }}>
               {isSaving ? "Đang lưu..." : "Lưu"}
             </Button>
           </>
         ) : null}
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 
   if (activePanel === "import" && isSchool) {
     return (
-      <div className="flex h-full flex-col">
+      <Box sx={{ display: "flex", height: "100%", flexDirection: "column" }}>
         {header}
-        <div className="flex-1 overflow-y-auto bg-[#f7f9fc] p-4">
+        <Box sx={{ flex: 1, overflowY: "auto", bgcolor: "background.default", p: 2 }}>
           <StudentSheetImportWorkspace
             centers={centers}
             classes={classes}
@@ -724,171 +744,107 @@ function EducationUnitEditor({
             lockedCenter={{ id: unit.id, name: unit.name }}
             managementScope={managementScope}
           />
-        </div>
-      </div>
+        </Box>
+      </Box>
     );
   }
 
   return (
-    <TsForm
+    <Box
+      component="form"
       onSubmit={(event) => {
         event.preventDefault();
         event.stopPropagation();
         void form.handleSubmit();
       }}
-      className="flex flex-col h-full"
+      sx={{ display: "flex", height: "100%", flexDirection: "column" }}
     >
       {header}
 
-      <div className="flex-1 overflow-y-auto bg-[#f7f9fc] p-4">
-        <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_340px]">
-          <div className="space-y-4">
+      <Box sx={{ flex: 1, overflowY: "auto", bgcolor: "background.default", p: 2 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", "2xl": "minmax(0, 1fr) 340px" }, gap: 2 }}>
+          <Stack spacing={2}>
             {successMessage ? (
-              <div className="flex items-center gap-2 rounded-[14px] border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
-                <CheckCircle className="h-4 w-4" /> {successMessage}
-              </div>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ border: 1, borderColor: "success.light", borderRadius: 1.5, bgcolor: "success.50", color: "success.dark", px: 1.5, py: 1, fontSize: 12, fontWeight: 600 }}>
+                <CheckCircle sx={{ fontSize: 16 }} /> {successMessage}
+              </Stack>
             ) : null}
 
-            <div className="rounded-[18px] border border-[#dfe7f2] bg-white p-4 shadow-[0_18px_50px_-44px_rgba(15,23,42,0.6)]">
-              <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-normal text-slate-700">
-                  <span className="grid h-8 w-8 place-items-center rounded-[10px] border border-[#d6e8ff] bg-[#f4f9ff] text-[var(--erg-blue)]">
-                    <Building2 className="h-4 w-4" />
-                  </span>
+            <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, boxShadow: "0 8px 24px -22px rgba(15, 23, 42, 0.6)" }}>
+              <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={1.5} sx={{ borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
+                <Stack direction="row" alignItems="center" spacing={1} sx={{ color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                  <Box sx={{ display: "grid", width: 32, height: 32, placeItems: "center", border: 1, borderColor: "primary.light", borderRadius: 1, bgcolor: "primary.50", color: "primary.main" }}>
+                    <Building2 sx={{ fontSize: 16 }} />
+                  </Box>
                   Thông tin cơ bản
-                </div>
+                </Stack>
                 <LcmsStatusChip tone={draft.status === "active" ? "emerald" : "amber"}>{draft.status === "active" ? "Đang hoạt động" : "Cần kiểm tra"}</LcmsStatusChip>
-              </div>
-              <div className="mt-4 grid gap-3 xl:grid-cols-[minmax(0,1fr)_190px_190px]">
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-bold text-slate-500">Tên hiển thị</span>
+              </Stack>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1fr) 190px 190px" }, gap: 1.5, mt: 2 }}>
+                <EditorField label="Tên hiển thị">
                   <TextField size="small" fullWidth value={draft.name ?? ""} onChange={(event) => updateDraft("name", event.target.value)} placeholder="Tên trường học/trung tâm" />
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-bold text-slate-500">Loại đơn vị</span>
-                  <AppSelect
+                </EditorField>
+                <EditorField label="Loại đơn vị">
+                  <TextField select size="small"
                     value={draft.type ?? "school"}
                     onChange={(event) => updateDraft("type", event.target.value)}
-                    className="h-10 rounded-[10px] border border-[#d7e0ec] bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                   >
-                    <option value="system">Hệ thống</option>
-                    <option value="center">Trung tâm</option>
-                    <option value="school">Trường học</option>
-                  </AppSelect>
-                </label>
-                <label className="grid gap-1.5">
-                  <span className="text-xs font-bold text-slate-500">Trạng thái</span>
-                  <AppSelect
+                    <MenuItem value="system">Hệ thống</MenuItem><MenuItem value="center">Trung tâm</MenuItem><MenuItem value="school">Trường học</MenuItem>
+                  </TextField>
+                </EditorField>
+                <EditorField label="Trạng thái">
+                  <TextField select size="small"
                     value={draft.status ?? "active"}
                     onChange={(event) => updateDraft("status", event.target.value)}
-                    className="h-10 rounded-[10px] border border-[#d7e0ec] bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                   >
-                    <option value="active">Đang hoạt động</option>
-                    <option value="archived">Lưu trữ</option>
-                    <option value="inactive">Tạm dừng</option>
-                  </AppSelect>
-                </label>
-                <label className="grid gap-1.5 xl:col-span-3">
-                  <span className="text-xs font-bold text-slate-500">Mô tả giới thiệu</span>
+                    <MenuItem value="active">Đang hoạt động</MenuItem><MenuItem value="archived">Lưu trữ</MenuItem><MenuItem value="inactive">Tạm dừng</MenuItem>
+                  </TextField>
+                </EditorField>
+                <EditorField label="Mô tả giới thiệu" wide>
                   <TextField
                     multiline
                     minRows={2}
                     value={draft.description ?? ""}
                     onChange={(event) => updateDraft("description", event.target.value)}
-                    className="min-h-[112px] rounded-[12px] border border-[#d7e0ec] bg-white px-3 py-2 text-sm font-medium text-slate-800 shadow-none outline-none transition focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] placeholder:text-slate-400"
                     placeholder="Mô tả tóm tắt vai trò và khu vực phụ trách của đơn vị..."
                   />
-                </label>
-              </div>
-            </div>
+                </EditorField>
+              </Box>
+            </Paper>
 
         {showAdvanced ? (
           <>
-        <div className="rounded-xl border border-slate-200/80 p-3">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-2 text-xs font-bold uppercase tracking-wider text-slate-700">
-            <Mail className="h-4 w-4 text-[var(--erg-blue)]" /> Thông tin liên hệ
-          </div>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <label className="grid gap-1.5 sm:col-span-2">
-              <span className="text-xs font-bold text-slate-500">Logo URL</span>
-              <TextField size="small" fullWidth value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" />
-            </label>
-            <label className="grid gap-1.5 sm:col-span-2">
-              <span className="text-xs font-bold text-slate-500">Địa chỉ chi tiết</span>
-              <TextField
-                size="small"
-                fullWidth
-                value={draft.address ?? ""}
-                onChange={(event) => updateDraft("address", event.target.value)}
-                placeholder="Số nhà, tên đường, phường, quận/huyện..."
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><MapPin className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
-              />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold text-slate-500">Số điện thoại</span>
-              <TextField
-                size="small"
-                fullWidth
-                value={draft.phone ?? ""}
-                onChange={(event) => updateDraft("phone", event.target.value)}
-                placeholder="024xxx..."
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
-              />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold text-slate-500">Email chính</span>
-              <TextField
-                size="small"
-                fullWidth
-                value={draft.email ?? ""}
-                onChange={(event) => updateDraft("email", event.target.value)}
-                placeholder="contact@domain.edu.vn"
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Mail className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
-              />
-            </label>
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold text-slate-500">Website URL</span>
-              <TextField
-                size="small"
-                fullWidth
-                value={draft.website ?? ""}
-                onChange={(event) => updateDraft("website", event.target.value)}
-                placeholder="https://domain.edu.vn"
-                slotProps={{ input: { startAdornment: <InputAdornment position="start"><Globe className="h-3.5 w-3.5 text-slate-400" /></InputAdornment> } }}
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200/80 p-3">
-          <div className="flex items-center gap-2 border-b border-slate-100 pb-2 text-xs font-bold uppercase tracking-wider text-slate-700">
-            <Layers className="h-4 w-4 text-[var(--erg-blue)]" /> Cấu hình liên kết
-          </div>
-          <div className="mt-3 grid gap-3">
-            <label className="grid gap-1.5">
-              <span className="text-xs font-bold text-slate-500">Thu thuộc Trung tâm quản lý</span>
-              <AppSelect
-                value={draft.parentId ?? ""}
-                onChange={(event) => updateDraft("parentId", event.target.value)}
-                disabled={draft.type !== "school"}
-                className="h-9 rounded-md border border-[#d7e0ec] bg-white px-3 text-xs font-bold text-slate-700 outline-none focus:border-[#b8d6fa] focus:ring-2 focus:ring-[var(--erg-blue-ring)] disabled:bg-slate-50 disabled:text-slate-400"
-              >
-                <option value="">Không liên kết trung tâm nào</option>
-                {centerOptions.map((center) => (
-                  <option key={center.id} value={center.id}>
-                    {center.name}
-                  </option>
-                ))}
-              </AppSelect>
-              {draft.type !== "school" ? <span className="text-[10px] font-semibold text-slate-400">Chỉ cơ sở loại "Trường học" mới cấu hình thuộc Trung tâm.</span> : null}
-            </label>
-          </div>
-        </div>
+            <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 1.5 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                <Mail sx={{ color: "primary.main", fontSize: 16 }} /> Thông tin liên hệ
+              </Stack>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 1.5 }}>
+                <EditorField label="Logo URL" wide><TextField size="small" fullWidth value={draft.avatarUrl ?? ""} onChange={(event) => updateDraft("avatarUrl", event.target.value)} placeholder="https://domain.com/logo.png" /></EditorField>
+                <EditorField label="Địa chỉ chi tiết" wide><TextField size="small" fullWidth value={draft.address ?? ""} onChange={(event) => updateDraft("address", event.target.value)} placeholder="Số nhà, tên đường, phường, quận/huyện..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><MapPin sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Số điện thoại"><TextField size="small" fullWidth value={draft.phone ?? ""} onChange={(event) => updateDraft("phone", event.target.value)} placeholder="024xxx..." slotProps={{ input: { startAdornment: <InputAdornment position="start"><PhoneIcon sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Email chính"><TextField size="small" fullWidth value={draft.email ?? ""} onChange={(event) => updateDraft("email", event.target.value)} placeholder="contact@domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Mail sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+                <EditorField label="Website URL"><TextField size="small" fullWidth value={draft.website ?? ""} onChange={(event) => updateDraft("website", event.target.value)} placeholder="https://domain.edu.vn" slotProps={{ input: { startAdornment: <InputAdornment position="start"><Globe sx={{ color: "text.secondary", fontSize: 16 }} /></InputAdornment> } }} /></EditorField>
+              </Box>
+            </Paper>
+            <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 1.5 }}>
+              <Stack direction="row" alignItems="center" spacing={1} sx={{ borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                <Layers sx={{ color: "primary.main", fontSize: 16 }} /> Cấu hình liên kết
+              </Stack>
+              <Box sx={{ mt: 1.5 }}>
+                <EditorField label="Thu thuộc Trung tâm quản lý">
+                  <TextField select size="small" fullWidth value={draft.parentId ?? ""} onChange={(event) => updateDraft("parentId", event.target.value)} disabled={draft.type !== "school"}>
+                    <MenuItem value="">Không liên kết trung tâm nào</MenuItem>
+                    {centerOptions.map((center) => <MenuItem key={center.id} value={center.id}>{center.name}</MenuItem>)}
+                  </TextField>
+                  {draft.type !== "school" ? <Typography sx={{ color: "text.secondary", fontSize: 10, fontWeight: 600 }}>Chỉ cơ sở loại "Trường học" mới cấu hình thuộc Trung tâm.</Typography> : null}
+                </EditorField>
+              </Box>
+            </Paper>
           </>
         ) : null}
 
             <ClassPreviewPanel classes={unitClasses} isSchool={isSchool} />
-          </div>
+          </Stack>
 
           <UnitInsightRail
             isSchool={isSchool}
@@ -897,9 +853,9 @@ function EducationUnitEditor({
             unitClasses={unitClasses.length}
             studentTotal={studentTotal}
           />
-        </div>
-      </div>
-    </TsForm>
+        </Box>
+      </Box>
+    </Box>
   );
 }
 
