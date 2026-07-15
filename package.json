@@ -9,6 +9,8 @@
     "build": "tsc -b && vite build",
     "build:vercel": "vite build",
     "test": "vitest run",
+    "audit:legacy-ui": "node scripts/check-legacy-ui.mjs",
+    "audit:ui": "node scripts/playwright-ui-audit.mjs",
     "typecheck": "tsc -b",
     "lint": "eslint .",
     "preview": "vite preview"
