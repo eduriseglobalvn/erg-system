@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Search } from "lucide-react";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import SearchIcon from "@mui/icons-material/Search";
 
 import {
   DashboardPageShell,
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import InputAdornment from "@mui/material/InputAdornment";
+import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import {
   assignmentRuns,
   classroomSnapshots,
@@ -289,7 +294,7 @@ export function ClassStudentsWorkspace({
         </Button>
       }
     >
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <Box component="section" sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "minmax(0,1fr)", xl: "minmax(0,1fr) 360px" } }}>
         <DashboardSectionCard
           title={copy.listTitle}
           description={copy.listDescription(visibleStudents.length, supportCount)}
@@ -299,18 +304,17 @@ export function ClassStudentsWorkspace({
             </Button>
           }
         >
-          <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_150px_150px_150px]">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
+          <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "minmax(0,1fr)", lg: "minmax(220px,1fr) 150px 150px 150px" } }}>
+            <Box sx={{ position: "relative" }}>
               <TextField
                 size="small"
                 fullWidth
-                sx={{ "& .MuiInputBase-input": { pl: "1.75rem" } }}
+                slotProps={{ input: { startAdornment: <InputAdornment position="start"><SearchIcon color="primary" fontSize="small" /></InputAdornment> } }}
                 onChange={(event) => setSearchValue(event.target.value)}
                 placeholder={copy.searchPlaceholder}
                 value={searchValue}
               />
-            </div>
+            </Box>
             <SelectControl
               ariaLabel={copy.subjectFilter}
               options={[
@@ -345,7 +349,7 @@ export function ClassStudentsWorkspace({
               value={progressFilter}
               onChange={(value) => setProgressFilter(value as ProgressFilter)}
             />
-          </div>
+          </Box>
 
           <SelectionBar
             allVisibleSelected={allVisibleSelected}
@@ -367,33 +371,33 @@ export function ClassStudentsWorkspace({
           />
         </DashboardSectionCard>
 
-        <aside className="space-y-4 xl:sticky xl:top-5 xl:self-start">
+        <Stack component="aside" spacing={2} sx={{ position: { xl: "sticky" }, top: { xl: 20 }, alignSelf: { xl: "start" } }}>
           {focusedStudent ? <StudentDetailCard copy={copy} student={focusedStudent} /> : null}
 
           <DashboardSectionCard title={copy.recentTitle} description={copy.recentDescription}>
-            <div className="space-y-3">
+            <Stack spacing={1.5}>
               {(recentBatches.length ? recentBatches : getInitialBatches(copy)).map((batch) => (
-                <div key={batch.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-emerald-50 text-emerald-700">
-                      <CheckCircle2 className="h-4 w-4" />
-                    </span>
-                    <div className="min-w-0">
-                      <div className="line-clamp-2 text-sm font-semibold text-slate-950">{batch.assignmentTitle}</div>
-                      <div className="mt-1 text-sm text-slate-500">
+                <Box key={batch.id} sx={{ border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper", p: 2 }}>
+                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+                    <Box sx={{ display: "grid", width: 36, height: 36, flexShrink: 0, placeItems: "center", borderRadius: 1, bgcolor: "success.50", color: "success.main" }}>
+                      <CheckCircleIcon sx={{ fontSize: 16 }} />
+                    </Box>
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ display: "-webkit-box", overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2, fontSize: 14, fontWeight: 600 }}>{batch.assignmentTitle}</Typography>
+                      <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 14 }}>
                         {batch.className} • {batch.recipients} {copy.studentUnit(batch.recipients)}
-                      </div>
-                      <div className="mt-2 text-[13px] font-semibold text-slate-600">
+                      </Typography>
+                      <Typography sx={{ mt: 1, color: "text.secondary", fontSize: 13, fontWeight: 600 }}>
                         {copy.dueDateLabel}: {formatDueDate(batch.dueDate)}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </Box>
               ))}
-            </div>
+            </Stack>
           </DashboardSectionCard>
-        </aside>
-      </section>
+        </Stack>
+      </Box>
 
       <AssignmentDialog
         assignments={selectedAssignments}

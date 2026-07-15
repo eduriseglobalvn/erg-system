@@ -1,8 +1,10 @@
+import Chip from "@mui/material/Chip";
+
+import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-api";
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-api";
+
 /* eslint-disable react-refresh/only-export-components */
-import { cn } from "@/lib/utils";
 
 export function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);
@@ -72,18 +74,19 @@ export function getMockStudentLevel(status: ClassroomStudent["status"]) {
 }
 
 export function StudentLevelBadge({ level }: { level: string }) {
+  const palette =
+    level === "Khá"
+      ? { borderColor: "info.light", bgcolor: "info.50", color: "info.dark" }
+      : level === "Cần hỗ trợ"
+        ? { borderColor: "warning.light", bgcolor: "warning.50", color: "warning.dark" }
+        : { borderColor: "divider", bgcolor: "grey.50", color: "text.secondary" };
+
   return (
-    <span
-      className={cn(
-        "inline-flex rounded-lg border px-2.5 py-1 text-[13px] font-bold",
-        level === "Khá"
-          ? "border-[#B8EDF7] bg-[#E6F9FD] text-[#007A91]"
-          : level === "Cần hỗ trợ"
-            ? "border-amber-200 bg-amber-50 text-amber-700"
-            : "border-slate-200 bg-slate-50 text-slate-700",
-      )}
-    >
-      {level}
-    </span>
+    <Chip
+      label={level}
+      size="small"
+      variant="outlined"
+      sx={{ ...palette, borderRadius: 1, fontSize: 13, fontWeight: 700 }}
+    />
   );
 }
