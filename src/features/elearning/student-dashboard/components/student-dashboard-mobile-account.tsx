@@ -78,7 +78,7 @@ export function StudentDashboardMobileAccount({
             <Button
               variant="contained"
               startIcon={<LoginOutlinedIcon sx={{ fontSize: 16 }} />}
-              sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","backgroundColor":"#696CFF","color":"#fff","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
+              sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","backgroundColor":"#696CFF","color":"#fff","&:hover":{"@media (hover: hover)":{"backgroundColor":"#585BE0"}}}}
               onClick={onSignIn}
             >
               {copy.signIn}

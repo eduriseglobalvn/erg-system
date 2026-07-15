@@ -106,7 +106,7 @@ export function StudentDashboardMobileAssignments({
                 <Button
                   variant="contained"
                   endIcon={<ChevronRightRoundedIcon sx={{ fontSize: 16 }} />}
-                  sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","backgroundColor":"#696CFF","paddingInline":"calc(0.25rem * 4)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
+                  sx={{"height":"calc(0.25rem * 11)","borderRadius":"0.5rem","backgroundColor":"#696CFF","paddingInline":"calc(0.25rem * 4)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media (hover: hover)":{"backgroundColor":"#585BE0"}}}}
                   onClick={() => onOpenAssignment(assignment.id)}
                 >
                   {copy.assignmentAction(assignment.status)}

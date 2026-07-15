@@ -49,7 +49,7 @@ export function BrandWordmark() {
         <Box component="span" sx={{"color":"#696CFF"}}>ER</Box>
         <Box component="span" sx={{"color":"#FF5630"}}>G</Box>
       </Box>
-      <Box component="div" sx={{"display":"none","minWidth":"calc(0.25rem * 0)","@media ((min-width: 40rem))":{"display":"block"}}}>
+      <Box component="div" sx={{"display":"none","minWidth":"calc(0.25rem * 0)","@media (min-width: 40rem)":{"display":"block"}}}>
         <Box component="div" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"1rem","lineHeight":"1","fontWeight":"600","color":"#696CFF"}}>EDURISE GLOBAL</Box>
         <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"11px","fontWeight":"500","color":"oklch(70.4% 0.04 256.788)"}}>Learn today, lead tomorrow</Box>
       </Box>
@@ -106,7 +106,7 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
 
   return (
     <Box component="article" sx={{ borderBottom: "1px solid", borderColor: "#f1f5f9", p: 2, "&:last-of-type": { borderBottom: 0 } }}>
-      <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 3)","@media ((min-width: 48rem))":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
+      <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 3)","@media (min-width: 48rem)":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
         <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
           <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
             <StatusPill status={assignment.status} label={assignment.statusLabel} />
@@ -117,7 +117,7 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
           <Box component="h2" sx={{"marginTop":"calc(0.25rem * 2)","fontSize":"1.125rem","lineHeight":"1.375","fontWeight":"600","color":"#696CFF"}}>{assignment.title}</Box>
         </Box>
 
-        <Box component="div" sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media ((min-width: 48rem))":{"width":"148px","textAlign":"right"}}}>
+        <Box component="div" sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media (min-width: 48rem)":{"width":"148px","textAlign":"right"}}}>
           <Box component="div" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>{copy.bestScoreLabel}</Box>
           <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"1.25rem","lineHeight":"calc(1.75 / 1.25)","fontWeight":"600","color":"#696CFF"}}>
             {bestAttempt ? copy.scoreBadge(bestAttempt.score, bestAttempt.maxScore) : copy.pendingScore}
@@ -130,7 +130,7 @@ export function AssignmentScoreCard({ assignment, copy }: { assignment: StudentD
           <span>{copy.recentResultsTitle}</span>
           <span>{recentAttempts.length}/{Math.min(assignment.attempts.length, 3)}</span>
         </Box>
-        <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","display":"grid","gap":"calc(0.25rem * 2)","@media ((min-width: 40rem))":{"gridTemplateColumns":"repeat(3, minmax(0, 1fr))"}}}>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","display":"grid","gap":"calc(0.25rem * 2)","@media (min-width: 40rem)":{"gridTemplateColumns":"repeat(3, minmax(0, 1fr))"}}}>
           {recentAttempts.map((attempt) => (
             <AttemptResultRow key={attempt.id} attempt={attempt} copy={copy} />
           ))}
@@ -171,7 +171,7 @@ export function AssignmentCard({
   return (
     <Card sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: statusMeta.cardBorder, borderRadius: 1, boxShadow: "none" }}>
       <Box sx={{ p: compact ? 1.5 : 2 }}>
-        <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","@media ((min-width: 64rem))":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
+        <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","@media (min-width: 64rem)":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
           <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
             <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
               <StatusPill status={assignment.status} label={assignment.statusLabel} />

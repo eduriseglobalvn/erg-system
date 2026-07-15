@@ -76,7 +76,7 @@ export function StudentDashboardMobileOverview({
           <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"flex","gap":"calc(0.25rem * 3)"}}>
             <Button
               variant="contained"
-              sx={{"height":"calc(0.25rem * 10)","flex":"1","borderRadius":"0.5rem","backgroundColor":"#696CFF","fontSize":"14px","fontWeight":"600","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#585BE0"}}}}
+              sx={{"height":"calc(0.25rem * 10)","flex":"1","borderRadius":"0.5rem","backgroundColor":"#696CFF","fontSize":"14px","fontWeight":"600","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media (hover: hover)":{"backgroundColor":"#585BE0"}}}}
               onClick={() => onOpenAssignment(priorityAssignment.id)}
             >
               {primaryAction}
@@ -188,7 +188,7 @@ export function StudentDashboardMobileOverview({
               <Box component="button"
                 key={post.id}
                 type="button"
-                sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fafbff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)","textAlign":"left","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"#fff"}}}}
+                sx={{"width":"100%","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fafbff","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 4)","textAlign":"left","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media (hover: hover)":{"backgroundColor":"#fff"}}}}
                 onClick={() => onPageChange("discussion")}
               >
                 <Box component="div" sx={{"display":"flex","flexWrap":"wrap","alignItems":"center","gap":"calc(0.25rem * 2)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>

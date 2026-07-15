@@ -265,14 +265,14 @@ export function ProfilePage() {
   const primaryDisabled = activeTab === "security" ? !canChangePassword || isSavingPassword : !account || isSavingProfile;
 
   return (
-    <Box component="main" sx={{"minHeight":"100vh","backgroundColor":"#f7f8fa","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 5)","color":"oklch(12.9% 0.042 264.695)","@media ((min-width: 64rem))":{"paddingInline":"calc(0.25rem * 8)"}}}>
+    <Box component="main" sx={{"minHeight":"100vh","backgroundColor":"#f7f8fa","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 5)","color":"oklch(12.9% 0.042 264.695)","@media (min-width: 64rem)":{"paddingInline":"calc(0.25rem * 8)"}}}>
       <Box component="div" sx={{"marginInline":"auto","display":"flex","width":"100%","maxWidth":"80rem","flexDirection":"column","gap":"calc(0.25rem * 5)"}}>
-        <Box component="header" sx={{"overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}><Box component="div" sx={{"height":"calc(0.25rem * 1.5)","backgroundColor":"var(--erg-blue)"}} /><Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 4)","@media ((min-width: 64rem))":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
+        <Box component="header" sx={{"overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}><Box component="div" sx={{"height":"calc(0.25rem * 1.5)","backgroundColor":"var(--erg-blue)"}} /><Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 4)","@media (min-width: 64rem)":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
           <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)"}}>
             <Button component={Link} to="/" variant="outlined" startIcon={<ArrowLeft sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.5rem","backgroundColor":"#fff"}}>
               Quay lại LMS
             </Button>
-            <Box component="div" sx={{"display":"none","height":"calc(0.25rem * 10)","width":"1px","backgroundColor":"oklch(92.9% 0.013 255.508)","@media ((min-width: 40rem))":{"display":"block"}}} />
+            <Box component="div" sx={{"display":"none","height":"calc(0.25rem * 10)","width":"1px","backgroundColor":"oklch(92.9% 0.013 255.508)","@media (min-width: 40rem)":{"display":"block"}}} />
             <div>
               <Box component="p" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"var(--erg-red)"}}>ERG account</Box>
               <Box component="h1" sx={{"fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>Hồ sơ và bảo mật</Box>
@@ -291,7 +291,7 @@ export function ProfilePage() {
                 <Save sx={{ fontSize: 16 }} />
               )
             }
-            sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media ((hover: hover))":{"backgroundColor":"var(--erg-blue-hover)"}}}}
+            sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-hover)"}}}}
           >
             {activeTab === "security" ? "Đổi mật khẩu" : "Lưu hồ sơ"}
           </Button>
@@ -306,7 +306,7 @@ export function ProfilePage() {
         ) : null}
 
         <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { lg: "340px minmax(0,1fr)" } }}>
-          <Box component="aside" sx={{"height":"fit-content","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"#e0e4ea","backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 64rem))":{"position":"sticky","top":"calc(0.25rem * 5)"}}}>
+          <Box component="aside" sx={{"height":"fit-content","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"#e0e4ea","backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media (min-width: 64rem)":{"position":"sticky","top":"calc(0.25rem * 5)"}}}>
             <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","padding":"calc(0.25rem * 5)"}}>
               <Box component="div" sx={{"display":"flex","alignItems":"flex-start","gap":"calc(0.25rem * 4)"}}>
                 <Box component="div" sx={{"position":"relative","flexShrink":"0"}}>
@@ -319,7 +319,7 @@ export function ProfilePage() {
                   </Box>
                   <Box component="button"
                     aria-label="Upload avatar"
-                    sx={{"position":"absolute","bottom":"calc(0.25rem * -2)","right":"calc(0.25rem * -2)","display":"grid","width":"calc(0.25rem * 10)","height":"calc(0.25rem * 10)","placeItems":"center","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"4px","borderColor":"oklch(98.4% 0.003 247.858)","backgroundColor":"#fff","color":"var(--erg-blue)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"var(--erg-blue-light)"}},"&:disabled":{"cursor":"not-allowed","opacity":"70%"}}}
+                    sx={{"position":"absolute","bottom":"calc(0.25rem * -2)","right":"calc(0.25rem * -2)","display":"grid","width":"calc(0.25rem * 10)","height":"calc(0.25rem * 10)","placeItems":"center","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"4px","borderColor":"oklch(98.4% 0.003 247.858)","backgroundColor":"#fff","color":"var(--erg-blue)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-light)"}},"&:disabled":{"cursor":"not-allowed","opacity":"70%"}}}
                     type="button"
                     disabled={!account || isUploadingAvatar}
                     onClick={() => avatarInputRef.current?.click()}
@@ -412,14 +412,14 @@ function ProfileFormPanel({ account, form, isSaving, notice, onSave, onUpdate }:
   onUpdate: (field: keyof ProfileFormState, value: string) => void;
 }) {
   return (
-    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 64rem))":{"padding":"calc(0.25rem * 6)"}}}>
+    <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media (min-width: 64rem)":{"padding":"calc(0.25rem * 6)"}}}>
       <SectionHeader
         icon={<UserRound sx={{ fontSize: 20 }} />}
         eyebrow="Thông tin cá nhân"
         title="Hồ sơ hiển thị trong LMS"
         description="Thông tin này dùng cho lời chào, phân quyền, danh sách thành viên và các luồng quản trị."
         action={
-          <Button variant="contained" onClick={() => void onSave()} disabled={!account || isSaving} startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <Save sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.5rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","&:hover":{"@media ((hover: hover))":{"backgroundColor":"var(--erg-blue-hover)"}}}}>
+          <Button variant="contained" onClick={() => void onSave()} disabled={!account || isSaving} startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <Save sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.5rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-hover)"}}}}>
             Lưu hồ sơ
           </Button>
         }
@@ -427,7 +427,7 @@ function ProfileFormPanel({ account, form, isSaving, notice, onSave, onUpdate }:
 
       <NoticeBox notice={notice} />
 
-      <Box component="div" sx={{"marginTop":"calc(0.25rem * 6)","display":"grid","gap":"calc(0.25rem * 4)","@media ((min-width: 48rem))":{"gridTemplateColumns":"repeat(2, minmax(0, 1fr))"}}}>
+      <Box component="div" sx={{"marginTop":"calc(0.25rem * 6)","display":"grid","gap":"calc(0.25rem * 4)","@media (min-width: 48rem)":{"gridTemplateColumns":"repeat(2, minmax(0, 1fr))"}}}>
         <Field icon={<UserRound sx={{ fontSize: 16 }} />} label="Họ và tên">
           <TextField fullWidth size="small" value={form.fullName} onChange={(event) => onUpdate("fullName", event.target.value)} placeholder="Nhập họ và tên" />
         </Field>
@@ -478,14 +478,14 @@ function SecurityPanel({
 
   return (
     <Box component="div" sx={{"display":"grid","gap":"calc(0.25rem * 5)"}}>
-      <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 64rem))":{"padding":"calc(0.25rem * 6)"}}}>
+      <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media (min-width: 64rem)":{"padding":"calc(0.25rem * 6)"}}}>
         <SectionHeader
           icon={<ShieldCheck sx={{ fontSize: 20 }} />}
           eyebrow="Bảo mật tài khoản"
           title="Đổi mật khẩu đăng nhập"
           description="Mật khẩu mới được gửi thẳng tới BE và chỉ cho phép đổi mật khẩu của chính tài khoản đang đăng nhập."
           action={
-            <Button variant="contained" onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","&:hover":{"@media ((hover: hover))":{"backgroundColor":"var(--erg-blue-hover)"}}}}>
+            <Button variant="contained" onClick={() => void onChangePassword()} disabled={!canChangePassword || isSaving} startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-hover)"}}}}>
               Đổi mật khẩu
             </Button>
           }
@@ -499,7 +499,7 @@ function SecurityPanel({
           </Box>
         ) : null}
 
-        <Box component="div" sx={{"marginTop":"calc(0.25rem * 6)","display":"grid","gap":"calc(0.25rem * 4)","@media ((min-width: 48rem))":{"gridTemplateColumns":"repeat(2, minmax(0, 1fr))"}}}>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 6)","display":"grid","gap":"calc(0.25rem * 4)","@media (min-width: 48rem)":{"gridTemplateColumns":"repeat(2, minmax(0, 1fr))"}}}>
           <Field icon={<LockKeyhole sx={{ fontSize: 16 }} />} label="Mật khẩu hiện tại" fullWidth>
             <PasswordInput
               disabled={!canChangePassword}
@@ -535,14 +535,14 @@ function SecurityPanel({
         </Box>
       </Box>
 
-      <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media ((min-width: 64rem))":{"padding":"calc(0.25rem * 6)"}}}>
+      <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 5)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media (min-width: 64rem)":{"padding":"calc(0.25rem * 6)"}}}>
         <SectionHeader
           icon={<CheckCircle2 sx={{ fontSize: 20 }} />}
           eyebrow="Phiên đăng nhập"
           title="Thông tin xác thực hiện tại"
           description="Khu vực này giúp người dùng hiểu tài khoản đang đăng nhập bằng phương thức nào."
         />
-        <Box component="div" sx={{"marginTop":"calc(0.25rem * 5)","display":"grid","gap":"calc(0.25rem * 3)","@media ((min-width: 48rem))":{"gridTemplateColumns":"repeat(3, minmax(0, 1fr))"}}}>
+        <Box component="div" sx={{"marginTop":"calc(0.25rem * 5)","display":"grid","gap":"calc(0.25rem * 3)","@media (min-width: 48rem)":{"gridTemplateColumns":"repeat(3, minmax(0, 1fr))"}}}>
           <InfoTile label="Provider" value={account?.provider ?? "Không rõ"} />
           <InfoTile label="Trạng thái" value={account?.status ?? "Không rõ"} />
           <InfoTile label="Onboarding" value={account?.isProfileCompleted ? "Đã hoàn tất" : "Cần bổ sung"} />
@@ -744,7 +744,7 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
           <Button type="button" variant="outlined" sx={{"borderRadius":"0.5rem"}} onClick={onClose} disabled={isUploading}>
             Hủy
           </Button>
-          <Button type="button" variant="contained" startIcon={isUploading ? <CircularProgress color="inherit" size={16} /> : <Upload sx={{ fontSize: 16 }} />} sx={{"borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","color":"#fff","&:hover":{"@media ((hover: hover))":{"backgroundColor":"var(--erg-blue-hover)"}}}} onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
+          <Button type="button" variant="contained" startIcon={isUploading ? <CircularProgress color="inherit" size={16} /> : <Upload sx={{ fontSize: 16 }} />} sx={{"borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","color":"#fff","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-hover)"}}}} onClick={() => void onUpload()} disabled={!crop?.image || isUploading}>
             Lưu avatar
           </Button>
         </Box>
@@ -754,7 +754,7 @@ export function AvatarCropDialog({ crop, isUploading, onChange, onClose, onPickA
 }
 function SectionHeader({ action, description, eyebrow, icon, title }: { action?: ReactNode; description: string; eyebrow: string; icon: ReactNode; title: string }) {
   return (
-    <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","paddingBottom":"calc(0.25rem * 5)","@media ((min-width: 48rem))":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
+    <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","paddingBottom":"calc(0.25rem * 5)","@media (min-width: 48rem)":{"flexDirection":"row","alignItems":"flex-start","justifyContent":"space-between"}}}>
       <Box component="div" sx={{"display":"flex","gap":"calc(0.25rem * 3)"}}>
         <Box component="div" sx={{"display":"grid","width":"calc(0.25rem * 11)","height":"calc(0.25rem * 11)","flexShrink":"0","placeItems":"center","borderRadius":"0.5rem","backgroundColor":"var(--erg-blue-light)","color":"var(--erg-blue)"}}>{icon}</Box>
         <div>
@@ -794,7 +794,7 @@ function PasswordInput({ disabled, onChange, onToggle, placeholder, show, type, 
       <TextField fullWidth size="small" disabled={disabled} type={type} value={value} onChange={(event) => onChange(event.target.value)} placeholder={placeholder} sx={{ "& .MuiInputBase-input": { pr: 6 } }} />
       <IconButton
         aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-        sx={{"position":"absolute","right":"calc(0.25rem * 2)","top":"calc(1 / 2 * 100%)","display":"grid","width":"calc(0.25rem * 8)","height":"calc(0.25rem * 8)","translate":"0 calc(calc(1 / 2 * 100%) * -1)","placeItems":"center","borderRadius":"0.5rem","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media ((hover: hover))":{"backgroundColor":"oklch(96.8% 0.007 247.896)","color":"oklch(20.8% 0.042 265.755)"}}}}
+        sx={{"position":"absolute","right":"calc(0.25rem * 2)","top":"calc(1 / 2 * 100%)","display":"grid","width":"calc(0.25rem * 8)","height":"calc(0.25rem * 8)","translate":"0 calc(calc(1 / 2 * 100%) * -1)","placeItems":"center","borderRadius":"0.5rem","color":"oklch(55.4% 0.046 257.417)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media (hover: hover)":{"backgroundColor":"oklch(96.8% 0.007 247.896)","color":"oklch(20.8% 0.042 265.755)"}}}}
         size="small"
         onClick={onToggle}
       >

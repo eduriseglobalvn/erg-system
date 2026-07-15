@@ -45,10 +45,10 @@ export function StudentBrandHeader({
 
   return (
     <Box component="header" sx={{"position":"sticky","top":"calc(0.25rem * 0)","zIndex":"30","borderBottomStyle":"solid","borderBottomWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff"}}>
-      <Box component="div" sx={{"marginInline":"auto","display":"flex","maxWidth":"1480px","flexDirection":"column","gap":"calc(0.25rem * 3)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media ((min-width: 64rem))":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
+      <Box component="div" sx={{"marginInline":"auto","display":"flex","maxWidth":"1480px","flexDirection":"column","gap":"calc(0.25rem * 3)","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 3)","@media (min-width: 64rem)":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
         <Box component="div" sx={{"display":"flex","minWidth":"calc(0.25rem * 0)","alignItems":"center","justifyContent":"space-between","gap":"calc(0.25rem * 4)"}}>
           <BrandWordmark />
-          <Box component="div" sx={{"@media ((min-width: 64rem))":{"display":"none"}}}>
+          <Box component="div" sx={{"@media (min-width: 64rem)":{"display":"none"}}}>
             <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}>
               <NotificationMenu
                 copy={copy}
@@ -75,7 +75,7 @@ export function StudentBrandHeader({
           </Box>
         </Box>
 
-        <Box component="nav" sx={{"display":"flex","gap":"calc(0.25rem * 1)","overflowX":"auto","paddingBottom":"calc(0.25rem * 1)","@media ((min-width: 64rem))":{"paddingBottom":"calc(0.25rem * 0)"}}}>
+        <Box component="nav" sx={{"display":"flex","gap":"calc(0.25rem * 1)","overflowX":"auto","paddingBottom":"calc(0.25rem * 1)","@media (min-width: 64rem)":{"paddingBottom":"calc(0.25rem * 0)"}}}>
           {copy.navItems.map((item) => (
             <Box component="button"
               key={item.key}
@@ -94,7 +94,7 @@ export function StudentBrandHeader({
           ))}
         </Box>
 
-        <Box component="div" sx={{"display":"none","@media ((min-width: 64rem))":{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}}>
+        <Box component="div" sx={{"display":"none","@media (min-width: 64rem)":{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 2)"}}}>
           <NotificationMenu
             copy={copy}
             menuOpen={notificationMenuOpen}
