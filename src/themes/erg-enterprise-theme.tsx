@@ -39,7 +39,7 @@ export const ergEnterpriseTheme = createTheme({
     },
   },
   shape: {
-    borderRadius: t.radius.md,
+    borderRadius: t.radius.sm,
   },
   typography: {
     fontFamily: t.font.body,
@@ -68,6 +68,27 @@ export const ergEnterpriseTheme = createTheme({
         "strong, b": {
           fontWeight: 750,
         },
+        "@media (prefers-reduced-motion: reduce)": {
+          "*, *::before, *::after": {
+            animationDuration: "0.01ms !important",
+            animationIterationCount: "1 !important",
+            scrollBehavior: "auto !important",
+            transitionDuration: "0.01ms !important",
+          },
+        },
+      },
+    },
+    MuiButtonBase: {
+      defaultProps: {
+        disableRipple: false,
+      },
+      styleOverrides: {
+        root: {
+          transition: "background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease",
+          "&.Mui-focusVisible": {
+            boxShadow: t.shadow.focus,
+          },
+        },
       },
     },
     MuiButton: {
@@ -84,18 +105,18 @@ export const ergEnterpriseTheme = createTheme({
           paddingInline: 18,
           textTransform: "none",
           "&.MuiButton-containedPrimary": {
-            background: `linear-gradient(135deg, ${t.color.primary}, #1677D2)`,
-            boxShadow: "0 8px 18px rgba(15, 108, 189, 0.18)",
+            backgroundColor: t.color.primary,
+            boxShadow: t.shadow.xs,
             "&:hover": {
-              background: `linear-gradient(135deg, ${t.color.primaryHover}, ${t.color.primary})`,
-              boxShadow: "0 12px 26px rgba(15, 108, 189, 0.24)",
+              backgroundColor: t.color.primaryHover,
+              boxShadow: t.shadow.sm,
             },
           },
           "&.MuiButton-containedError": {
-            background: `linear-gradient(135deg, ${t.color.brandRed}, #E5483B)`,
-            boxShadow: "0 8px 18px rgba(217, 45, 32, 0.18)",
+            backgroundColor: t.color.brandRed,
+            boxShadow: t.shadow.xs,
             "&:hover": {
-              background: `linear-gradient(135deg, ${t.color.brandRedHover}, ${t.color.brandRed})`,
+              backgroundColor: t.color.brandRedHover,
             },
           },
         },
@@ -244,6 +265,43 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: t.color.surface,
+          backgroundImage: "none",
+          borderColor: t.color.border,
+          boxShadow: t.shadow.sm,
+        },
+      },
+    },
+    MuiMenu: {
+      defaultProps: {
+        elevation: 0,
+      },
+      styleOverrides: {
+        paper: {
+          border: `1px solid ${t.color.border}`,
+          borderRadius: t.radius.md,
+          boxShadow: t.shadow.sm,
+          marginTop: 6,
+        },
+        list: {
+          paddingBlock: 6,
+        },
+      },
+    },
+    MuiTabs: {
+      styleOverrides: {
+        root: {
+          minHeight: t.size.controlMd,
+        },
+        indicator: {
+          borderRadius: t.radius.xs,
+          height: 2,
+        },
+      },
+    },
     MuiTableCell: {
       styleOverrides: {
         root: {
@@ -284,6 +342,19 @@ export const ergEnterpriseTheme = createTheme({
         root: {
           borderRadius: t.radius.sm,
           backgroundColor: "rgba(15, 23, 42, 0.08)",
+        },
+      },
+    },
+    MuiSnackbar: {
+      styleOverrides: {
+        root: {
+          "& .MuiSnackbarContent-root": {
+            backgroundColor: t.color.text,
+            borderRadius: t.radius.md,
+            boxShadow: t.shadow.sm,
+            color: t.color.surface,
+            fontWeight: 650,
+          },
         },
       },
     },
