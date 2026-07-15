@@ -1,8 +1,11 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import type { ReactNode } from "react";
+
 import { ChoiceOption, EditableChoiceOption } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import type { Choice, Question } from "@/lib/types";
-import type { ReactNode } from "react";
 
 export function SingleChoiceQuestion({
   question,
@@ -46,7 +49,7 @@ export function SingleChoiceQuestion({
   if (editable && onQuestionChange) {
     return (
       <QuestionChoiceLayout question={question}>
-        <div className="flex flex-col gap-4 sm:gap-5">
+        <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
           {choices.map((choice) => (
             <EditableChoiceOption
               key={choice.id}
@@ -58,21 +61,22 @@ export function SingleChoiceQuestion({
               onRemove={choices.length > 2 ? () => removeChoice(choice.id) : undefined}
             />
           ))}
-          <button
-            type="button"
-            className="quiz-runtime-edit-add inline-flex min-h-10 w-fit items-center rounded-xl border border-[rgba(0,0,136,0.14)] bg-white px-5 text-sm font-extrabold text-[#000088] shadow-sm transition hover:bg-[#eef3ff]"
+          <Button
+            className="quiz-runtime-edit-add"
+            variant="outlined"
             onClick={addChoice}
+            sx={{ alignSelf: "flex-start", bgcolor: "common.white", borderColor: "rgba(0,0,136,0.14)", borderRadius: 1.5, color: "#000088", fontSize: 14, fontWeight: 800, minHeight: 40, px: 2.5, "&:hover": { bgcolor: "#eef3ff", borderColor: "rgba(0,0,136,0.22)" } }}
           >
             Add option
-          </button>
-        </div>
+          </Button>
+        </Box>
       </QuestionChoiceLayout>
     );
   }
 
   return (
     <QuestionChoiceLayout question={question}>
-      <div className="flex flex-col gap-4 sm:gap-5">
+      <Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 2, sm: 2.5 } }}>
         {choices.map((choice) => {
           const selected = selectedId === choice.id;
           const showCorrect = reviewMode && choice.correct;
@@ -94,7 +98,7 @@ export function SingleChoiceQuestion({
             </ChoiceOption>
           );
         })}
-      </div>
+      </Box>
     </QuestionChoiceLayout>
   );
 }
@@ -107,10 +111,10 @@ function QuestionChoiceLayout({
   question: Question;
 }) {
   return (
-    <div className={`quiz-answer-region quiz-choice-region grid gap-5 ${question.contentImage ? "lg:grid-cols-[minmax(0,0.95fr)_minmax(360px,0.75fr)] lg:items-start" : ""}`}>
+    <Box className="quiz-answer-region quiz-choice-region" sx={{ alignItems: { lg: question.contentImage ? "flex-start" : undefined }, display: "grid", gap: 2.5, gridTemplateColumns: { lg: question.contentImage ? "minmax(0,0.95fr) minmax(360px,0.75fr)" : "1fr" } }}>
       {children}
-      {question.contentImage ? <QuestionContentImage question={question} className="lg:sticky lg:top-0" /> : null}
-    </div>
+      {question.contentImage ? <Box sx={{ position: { lg: "sticky" }, top: { lg: 0 } }}><QuestionContentImage question={question} /></Box> : null}
+    </Box>
   );
 }
 
