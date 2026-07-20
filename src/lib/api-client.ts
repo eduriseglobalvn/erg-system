@@ -21,12 +21,16 @@ export const AUTHORIZATION_CHANGED_EVENT = "erg-auth-authorization-changed";
 type ApiErrorBody = {
   code?: string;
   message?: string;
+  [key: string]: unknown;
 };
 
 type ApiEnvelope<T> = {
   data?: T;
   error?: ApiErrorBody | string;
+  errors?: ApiErrorBody | string;
   message?: string;
+  request_id?: string;
+  statusCode?: number;
   success?: boolean;
 };
 
@@ -47,12 +51,16 @@ let csrfTokenPromise: Promise<{ headerName: string; token: string }> | null = nu
 export class ApiClientError extends Error {
   code: string;
   status: number;
+  details?: unknown;
+  requestId?: string;
 
-  constructor(message: string, code: string, status: number) {
+  constructor(message: string, code: string, status: number, details?: unknown, requestId?: string) {
     super(message);
     this.name = "ApiClientError";
     this.code = code;
     this.status = status;
+    this.details = details;
+    this.requestId = requestId;
   }
 }
 
@@ -164,7 +172,7 @@ async function executeApiRequest<T>(
   if (!response.ok || errorBody) {
     const code = errorBody?.code ?? `HTTP_${response.status}`;
     const message = errorBody?.message ?? getEnvelopeMessage(body) ?? `Request failed: ${response.status}`;
-    const error = new ApiClientError(message, code, response.status);
+    const error = new ApiClientError(message, code, response.status, errorBody?.details, errorBody?.requestId);
 
     if (shouldRefreshAfterResponse(error, context.path, init)) {
       const nextToken = await refreshStoredAuthSession(context.portal);
@@ -189,7 +197,7 @@ async function executeApiRequest<T>(
 
         const retryCode = retryErrorBody?.code ?? `HTTP_${retryResponse.status}`;
         const retryMessage = retryErrorBody?.message ?? getEnvelopeMessage(retryBody) ?? `Request failed: ${retryResponse.status}`;
-        const retryError = new ApiClientError(retryMessage, retryCode, retryResponse.status);
+        const retryError = new ApiClientError(retryMessage, retryCode, retryResponse.status, retryErrorBody?.details, retryErrorBody?.requestId);
 
         // Retry vẫn 401 KHÔNG tự logout: nếu phiên thực sự chết thì refresh đã bị
         // backend từ chối (xử lý trong refreshStoredAuthSessionOnce). 401 lẻ tẻ ở đây
@@ -231,6 +239,9 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
   const timeoutMs = init?.timeoutMs ?? DEFAULT_API_TIMEOUT_MS;
   const timeoutController = timeoutMs > 0 && typeof AbortController !== "undefined" ? new AbortController() : null;
   const sourceSignal = init?.signal;
+  if (sourceSignal?.aborted) {
+    throw sourceSignal.reason;
+  }
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   if (timeoutController && sourceSignal) {
@@ -257,6 +268,9 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
       signal: timeoutController?.signal ?? sourceSignal,
     });
   } catch (error) {
+    if (sourceSignal?.aborted) {
+      throw sourceSignal.reason;
+    }
     if (timeoutController?.signal.aborted && timeoutController.signal.reason instanceof Error && timeoutController.signal.reason.message === "API_REQUEST_TIMEOUT") {
       throw new ApiClientError(`API request timed out after ${timeoutMs}ms.`, "REQUEST_TIMEOUT", 408);
     }
@@ -295,7 +309,10 @@ async function readJson<T>(response: Response): Promise<T> {
 }
 
 function isApiEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
-  return Boolean(value && typeof value === "object" && ("data" in value || "error" in value || "success" in value));
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as { errors?: unknown };
+  return "data" in value || "error" in value || "success" in value || "statusCode" in value || "request_id" in value
+    || ("errors" in value && !Array.isArray(candidate.errors));
 }
 
 function getErrorBody(value: unknown) {
@@ -304,7 +321,15 @@ function getErrorBody(value: unknown) {
   }
 
   if (value.error) {
-    return typeof value.error === "string" ? { code: value.error, message: value.message } : value.error;
+    return typeof value.error === "string"
+      ? { code: value.error, message: value.message, details: value.error, requestId: value.request_id }
+      : { code: value.error.code, message: value.error.message ?? value.message, details: value.error, requestId: value.request_id };
+  }
+
+  if (value.errors && !Array.isArray(value.errors)) {
+    return typeof value.errors === "string"
+      ? { code: value.errors, message: value.message, details: value.errors, requestId: value.request_id }
+      : { code: value.errors.code, message: value.message, details: value.errors, requestId: value.request_id };
   }
 
   if (value.success === false) {

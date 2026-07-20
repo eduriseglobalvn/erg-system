@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 
-import { apiRequest, AUTH_SESSION_INVALID_EVENT } from "@/lib/api-client";
+import { apiRequest, ApiClientError, AUTH_SESSION_INVALID_EVENT } from "@/lib/api-client";
 import {
   clearTeacherSessionSnapshot,
   TEACHER_LOCAL_SESSION_KEY,
@@ -408,4 +408,35 @@ test("BFF commands obtain and send a CSRF token without a browser bearer token",
   const [, commandInit] = fetchMock.mock.calls[1] ?? [];
   expect(new Headers((commandInit as RequestInit).headers).get("X-XSRF-TOKEN")).toBe("csrf-1");
   expect((commandInit as RequestInit).credentials).toBe("include");
+});
+
+test("preserves structured backend error envelope metadata", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+    statusCode: 422,
+    message: "Validation failed",
+    data: null,
+    errors: { code: "VALIDATION_FAILED", fields: { email: "invalid" } },
+    request_id: "req-contract-1",
+  }), { status: 422, headers: { "Content-Type": "application/json" } })));
+
+  const error = await apiRequest("/api/v1/auth/login", { method: "POST", auth: "public" }).catch((value) => value);
+
+  expect(error).toBeInstanceOf(ApiClientError);
+  expect(error).toMatchObject({
+    code: "VALIDATION_FAILED",
+    status: 422,
+    requestId: "req-contract-1",
+    details: { fields: { email: "invalid" } },
+  });
+});
+
+test("rethrows an external abort reason without converting it to a network error", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const reason = new Error("user cancelled");
+  vi.stubGlobal("fetch", vi.fn(async () => { throw reason; }));
+  const controller = new AbortController();
+  controller.abort(reason);
+
+  await expect(apiRequest("/api/v1/auth/login", { signal: controller.signal, auth: "public" })).rejects.toBe(reason);
 });
