@@ -233,7 +233,7 @@ git commit -m "build: gate OpenAPI breaking changes"
 
 - [ ] **Bước 1: Khởi động backend bằng test profile trong session riêng**
 
-Run: `.\mvnw.cmd -Dspring-boot.run.profiles=test spring-boot:run`
+Run: `.\mvnw.cmd "-Dspring-boot.run.profiles=test" spring-boot:run`
 
 Expected: ứng dụng lắng nghe tại `http://localhost:1606` và `/v3/api-docs` trả HTTP 200.
 
