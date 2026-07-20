@@ -7,11 +7,16 @@ import {
   updateStoredAuthSessionTokens,
   type StoredAuthSession,
 } from "@/platform/auth/api/auth-token-storage";
+import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
 export const AUTH_SESSION_REPLACED_EVENT = "erg-auth-session-replaced";
 export const AUTH_SESSION_INVALID_EVENT = "erg-auth-session-invalid";
 export const AUTH_REAUTH_REQUIRED_EVENT = "erg-auth-reauth-required";
+export const ACCOUNT_DISABLED = "ACCOUNT_DISABLED";
+export const ACCOUNT_DISABLED_EVENT = "erg-auth-account-disabled";
+export const AUTHZ_VERSION_CHANGED = "AUTHZ_VERSION_CHANGED";
+export const AUTHORIZATION_CHANGED_EVENT = "erg-auth-authorization-changed";
 
 type ApiErrorBody = {
   code?: string;
@@ -26,6 +31,7 @@ type ApiEnvelope<T> = {
 };
 
 export type ApiRequestOptions = RequestInit & {
+  auth?: "public" | "required";
   portal?: StoredAuthSession["portal"];
   skipAuthSessionEvent?: boolean;
   skipAuthRefresh?: boolean;
@@ -67,7 +73,7 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   const portal = init?.portal ?? portalFromPath(path);
   const token = await getRequestAccessToken(portal, path, init);
 
-  if (!token && requiresAuth(path) && !isBffAuthEnabled()) {
+  if (!token && requiresAuth(path, init) && !isBffAuthEnabled()) {
     // Thiếu token cho một request nền KHÔNG có nghĩa là phiên đã chết — chỉ throw
     // để query đó fail cục bộ. Việc logout do refreshStoredAuthSessionOnce lo khi
     // refresh token thực sự bị backend từ chối.
@@ -197,6 +203,12 @@ async function executeApiRequest<T>(
     if (code === AUTH_SESSION_REPLACED && !init?.skipAuthSessionEvent) {
       window.dispatchEvent(new CustomEvent(AUTH_SESSION_REPLACED_EVENT, { detail: error }));
     }
+    if (code === ACCOUNT_DISABLED && !init?.skipAuthSessionEvent) {
+      invalidateStoredAuthSession(error, ACCOUNT_DISABLED_EVENT);
+    }
+    if (code === AUTHZ_VERSION_CHANGED && !init?.skipAuthSessionEvent) {
+      invalidateStoredAuthSession(error, AUTHORIZATION_CHANGED_EVENT);
+    }
     if (isBffAuthEnabled() && error.status === 401 && !init?.skipAuthSessionEvent) {
       window.dispatchEvent(new CustomEvent(AUTH_REAUTH_REQUIRED_EVENT, { detail: error }));
     }
@@ -324,7 +336,7 @@ function isUnauthorizedSessionError(status: number, code: string, message: strin
 
 async function getRequestAccessToken(portal: StoredAuthSession["portal"] | undefined, path: string, init?: ApiRequestOptions) {
   const token = getStoredAccessToken(portal);
-  if (token || !requiresAuth(path) || init?.skipAuthRefresh) {
+  if (token || !requiresAuth(path, init) || init?.skipAuthRefresh) {
     return token;
   }
 
@@ -338,7 +350,8 @@ async function getRequestAccessToken(portal: StoredAuthSession["portal"] | undef
 
 function shouldRefreshAfterResponse(error: ApiClientError, path: string, init?: ApiRequestOptions) {
   if (init?.skipAuthRefresh) return false;
-  if (!requiresAuth(path)) return false;
+  if (!requiresAuth(path, init)) return false;
+  if ([AUTH_SESSION_REPLACED, ACCOUNT_DISABLED, AUTHZ_VERSION_CHANGED].includes(error.code)) return false;
   return isUnauthorizedSessionError(error.status, error.code, error.message);
 }
 
@@ -374,7 +387,7 @@ async function refreshStoredAuthSessionOnce(session: NonNullable<ReturnType<type
       method: "POST",
       body: JSON.stringify({
         refreshToken: session.refreshToken,
-        deviceId: readDeviceId(),
+        deviceId: getOrCreateBrowserDeviceId(),
       }),
       skipAuthRefresh: true,
     });
@@ -431,28 +444,14 @@ function unwrapRefreshTokenResponse(body: ApiEnvelope<RefreshTokenResponse> | Re
   return body;
 }
 
-function invalidateStoredAuthSession(error: ApiClientError) {
+function invalidateStoredAuthSession(error: ApiClientError, eventName = AUTH_SESSION_INVALID_EVENT) {
   clearStoredAuthSessions();
-  window.dispatchEvent(new CustomEvent(AUTH_SESSION_INVALID_EVENT, { detail: error }));
+  window.dispatchEvent(new CustomEvent(eventName, { detail: error }));
 }
 
 function expiresInToDate(expiresIn?: number) {
   if (!expiresIn || !Number.isFinite(expiresIn)) return undefined;
   return new Date(Date.now() + expiresIn * 1000).toISOString();
-}
-
-function readDeviceId() {
-  if (typeof window === "undefined") return undefined;
-  try {
-    const storageKey = "erg-auth-device-id";
-    const existing = window.localStorage.getItem(storageKey);
-    if (existing) return existing;
-    const next = createRequestId();
-    window.localStorage.setItem(storageKey, next);
-    return next;
-  } catch {
-    return undefined;
-  }
 }
 
 function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
@@ -488,7 +487,8 @@ export function getBackOfficePortal(): StoredAuthSession["portal"] {
   return currentBackOfficePortal();
 }
 
-function requiresAuth(path: string) {
+function requiresAuth(path: string, init?: ApiRequestOptions) {
+  if (init?.auth) return init.auth === "required";
   const normalized = path.toLowerCase().split("?")[0] ?? "";
 
   if (isPublicApiPath(normalized)) {
