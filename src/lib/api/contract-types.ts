@@ -1,6 +1,7 @@
 import type { paths } from "@/lib/api/generated/erg-openapi";
 
 export type ContractPath = keyof paths;
+export type ContractRequestPath = ContractPath | `${ContractPath}?${string}`;
 export type ContractMethod<P extends ContractPath> = {
   [M in keyof paths[P]]: M extends "get" | "post" | "put" | "patch" | "delete"
     ? paths[P][M] extends never | undefined ? never : M

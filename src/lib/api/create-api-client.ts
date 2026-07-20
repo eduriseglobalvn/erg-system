@@ -2,7 +2,7 @@ import {
   apiRequest,
   type ApiRequestOptions,
 } from "@/lib/api-client";
-import type { ContractMethod, ContractPath, ApiResponseData } from "@/lib/api/contract-types";
+import type { ContractMethod, ContractPath, ContractRequestPath } from "@/lib/api/contract-types";
 
 type ClientConfig = Pick<ApiRequestOptions, "portal" | "auth">;
 
@@ -10,11 +10,11 @@ export function createApiClient(config: ClientConfig) {
   const stableConfig = { ...config };
 
   return {
-    request<P extends ContractPath, M extends ContractMethod<P>>(
-      path: P,
-      init: Omit<ApiRequestOptions, "portal" | "auth"> & { method: Uppercase<M> },
-    ): Promise<ApiResponseData<P, M>> {
-      return apiRequest<ApiResponseData<P, M>>(path, {
+    request<T = unknown, P extends ContractPath = ContractPath, M extends ContractMethod<P> = "get">(
+      path: P | `${P}?${string}`,
+      init: Omit<ApiRequestOptions, "portal" | "auth"> & { method?: string } = {},
+    ): Promise<T> {
+      return apiRequest<T>(path as ContractRequestPath, {
         ...init,
         portal: stableConfig.portal,
         auth: stableConfig.auth,
