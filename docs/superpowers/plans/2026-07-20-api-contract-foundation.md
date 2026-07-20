@@ -6,7 +6,7 @@
 
 **Kiến trúc:** Backend sinh và chuẩn hóa một snapshot OpenAPI đã commit; `oasdiff` so sánh base/revision và fail khi có breaking change. Frontend pin snapshot/checksum, dùng `openapi-typescript` sinh type theo path/method, giữ DTO sinh tự động phía sau feature mapper và tiếp tục dùng transport hiện có qua domain client có portal/auth policy tường minh.
 
-**Tech stack:** Spring Boot 4, Springdoc OpenAPI 3, Node.js test runner, oasdiff 1.17.0, Bun, TypeScript 6, openapi-typescript 7, Vitest, TanStack Query 5.
+**Tech stack:** Spring Boot 4, Springdoc OpenAPI 3, Node.js test runner, oasdiff Docker v1.15.1, Bun, TypeScript 6, openapi-typescript 7, Vitest, TanStack Query 5.
 
 ---
 
@@ -171,7 +171,7 @@ test("requires explicit base and revision contracts", () => {
 test("builds a pinned Docker oasdiff breaking command", () => {
   const invocation = buildOasdiffInvocation("C:/repo/base.json", "C:/repo/revision.json");
   assert.equal(invocation.command, "docker");
-  assert.ok(invocation.args.includes("tufin/oasdiff:1.17.0"));
+  assert.ok(invocation.args.includes("tufin/oasdiff:v1.15.1"));
   assert.ok(invocation.args.includes("breaking"));
   assert.ok(invocation.args.includes("--fail-on"));
   assert.ok(invocation.args.includes("WARN"));
@@ -189,7 +189,7 @@ Expected: FAIL do module chưa tồn tại.
 `check-openapi-breaking.cjs` phải export `parseArgs` và `buildOasdiffInvocation`, chuẩn hóa path Windows thành mount `/work`, rồi chỉ gọi `spawnSync` trong `main()` khi file được chạy trực tiếp. Lệnh thực tế:
 
 ```text
-docker run --rm -v <common-directory>:/work tufin/oasdiff:1.17.0 breaking --fail-on WARN --format text /work/<base> /work/<revision>
+docker run --rm -v D:/ERG/erg-spring:/work tufin/oasdiff:v1.15.1 breaking --fail-on WARN --format text /work/tmp/erg-openapi-base.json /work/contracts/openapi/erg-openapi.json
 ```
 
 Nếu Docker/oasdiff trả exit code khác 0, wrapper phải giữ nguyên exit code để CI thất bại.
