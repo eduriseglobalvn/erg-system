@@ -7,7 +7,6 @@ const migratedSources = [
   "assign-homework-footer.tsx",
   "assign-homework-student-utils.tsx",
   "student-attendance-context-menu.tsx",
-  "homework-floating-menu.tsx",
   "assign-date-time-picker.tsx",
 ];
 

@@ -8,9 +8,10 @@ import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import HowToRegRoundedIcon from "@mui/icons-material/HowToRegRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SettingsRoundedIcon from "@mui/icons-material/SettingsRounded";
+import { ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH } from "@/app/portal-route-registry";
 
 const defaultDescription =
-  "Trang LCMS đang được đồng bộ theo shell ERG Portal. Nội dung chi tiết sẽ được nối vào workspace tương ứng.";
+  "Không gian Admin được tổ chức theo các nhóm vận hành, nội dung và phân quyền.";
 
 function item(input: MenuItem): MenuItem {
   return input;
@@ -47,6 +48,7 @@ export function flattenMenuItems(groups: MenuGroup[]) {
   return output;
 }
 
+/** Compatibility menu definition. Admin presentation is composed in admin-content-menu.ts. */
 export const LCMS_MENU_GROUPS: MenuGroup[] = [
   {
     label: "",
@@ -56,7 +58,7 @@ export const LCMS_MENU_GROUPS: MenuGroup[] = [
         label: "Trang chủ",
         icon: <DashboardRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/",
-        description: "Theo dõi nhanh dữ liệu hệ thống, lớp học, học viên và các việc LCMS cần xử lý.",
+        description: "Theo dõi nhanh dữ liệu hệ thống, lớp học, học viên và các việc quản trị cần xử lý.",
         section: "Tổng quan",
         variant: "admin-overview",
       }),
@@ -118,10 +120,10 @@ export const LCMS_MENU_GROUPS: MenuGroup[] = [
       }),
       item({
         id: "admin-learning-resources",
-        label: "Quản lý học liệu",
+        label: "Tài nguyên",
         icon: <FolderRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/resources",
-        description: "Tạo taxonomy, upload tài liệu, chỉnh metadata và publish học liệu sang LMS.",
+        description: "Tra cứu, mở và quản lý tài nguyên học tập dùng chung cho các lớp học.",
         variant: "admin-internal-docs",
       }),
     ],
@@ -135,9 +137,15 @@ export const LCMS_MENU_GROUPS: MenuGroup[] = [
         children: [
           {
             id: "employee-accounts",
-            label: "Tài khoản & phân quyền",
+            label: "Tài khoản nhân sự",
             path: "/employees",
-            description: "Quản lý tài khoản nhân sự, trạng thái active/deactive và quyền truy cập với từng phân hệ.",
+            description: "Quản lý hồ sơ, tài khoản, trạng thái và nhóm quyền của nhân sự.",
+          },
+          {
+            id: "employee-access-logs",
+            label: "Nhật ký truy cập",
+            path: "/employees/access-logs",
+            description: "Theo dõi đăng nhập, phiên thiết bị và cảnh báo bảo mật của nhân sự.",
           },
         ],
       }),
@@ -147,18 +155,11 @@ export const LCMS_MENU_GROUPS: MenuGroup[] = [
     label: "Hệ thống",
     items: [
       item({
-        label: "Thiết lập",
+        label: "Quyền & nhóm quyền",
         icon: <SettingsRoundedIcon sx={{ fontSize: 24 }} />,
         children: [
-          { label: "Gói sử dụng", path: "/setting/setting-center-feature" },
-          { label: "Phân quyền", path: "/setting/setting-center-role" },
-          { label: "Khuyến mãi", path: "/setting/promotions/price-discount-programs" },
-          { label: "Công việc", path: "/setting/setting-center-task/task-status" },
-          { label: "Khách hàng", path: "/setting/setting-center-customer/customer-status" },
-          { label: "Phòng học", path: "/setting/setting-class-room" },
-          { label: "Sự kiện", path: "/setting/setting-calendar-event" },
-          { label: "Điểm thành phần", path: "/setting/setting-criteria-score" },
-          { label: "Thu chi", path: "/setting/setting-income-expense" },
+          { label: "Quyền hệ thống", path: "/settings/permissions" },
+          { label: "Nhóm quyền", path: "/settings/roles" },
         ],
       }),
       item({
@@ -168,6 +169,8 @@ export const LCMS_MENU_GROUPS: MenuGroup[] = [
           { label: "Tổng đài", path: "/integration/setting-call-center" },
           { label: "Tài khoản Zalo", path: "/integration/setting-zalo-account" },
           { label: "API key", path: "/integration/setting-center-api-key" },
+          { label: "Learning Standards", path: ADMIN_LEARNING_STANDARDS_PATH, description: "SCORM, LTI 1.3 và xAPI theo tenant; trạng thái do backend xác nhận." },
+          { label: "Enterprise Connectors", path: ADMIN_ENTERPRISE_CONNECTORS_PATH, description: "Kết nối SIS, HRIS, SCIM; dry-run, sync và deprovision có version guard." },
         ],
       }),
     ],

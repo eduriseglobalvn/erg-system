@@ -1,0 +1,54 @@
+name: Frontend repository drift
+
+on:
+  pull_request:
+    paths:
+      - "scripts/check-frontend-repository-drift.mjs"
+      - "scripts/check-frontend-repository-drift.test.mjs"
+      - "scripts/frontend-repository-ownership.json"
+      - "package.json"
+      - ".github/workflows/repository-drift.yml"
+  push:
+    branches: [main]
+    paths:
+      - "scripts/check-frontend-repository-drift.mjs"
+      - "scripts/check-frontend-repository-drift.test.mjs"
+      - "scripts/frontend-repository-ownership.json"
+      - "package.json"
+      - ".github/workflows/repository-drift.yml"
+  schedule:
+    - cron: "23 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout operational frontend
+        uses: actions/checkout@v4
+        with:
+          path: repos/erg-system
+
+      - name: Checkout secondary frontend
+        uses: actions/checkout@v4
+        with:
+          repository: eduriseglobalvn/elearning
+          path: repos/elearning
+          token: ${{ secrets.CROSS_REPO_READ_TOKEN || github.token }}
+
+      - name: Checkout public CMS frontend
+        uses: actions/checkout@v4
+        with:
+          repository: eduriseglobalvn/erg
+          path: repos/erg
+          token: ${{ secrets.CROSS_REPO_READ_TOKEN || github.token }}
+
+      - name: Verify canonical ownership and frozen legacy scopes
+        working-directory: repos/erg-system
+        env:
+          ERG_ROOT: ${{ github.workspace }}/repos
+        run: node scripts/check-frontend-repository-drift.mjs

@@ -47,7 +47,7 @@ export function MobileBottomSheet({
       }}
     >
       <Box sx={{ bgcolor: "text.disabled", borderRadius: 4, height: 6, mt: 1.5, mx: "auto", opacity: 0.45, width: 48 }} />
-      <Stack alignItems="flex-start" direction="row" justifyContent="space-between" spacing={1.5} sx={{ minHeight: 64, px: 2, py: 1.5 }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between", minHeight: 64, px: 2, py: 1.5 }}>
         <Box sx={{ minWidth: 0 }}>
           <Typography id={titleId} noWrap sx={{ fontSize: 15, fontWeight: 800 }}>{title}</Typography>
           {description ? <Typography color="text.secondary" id={descriptionId} sx={{ fontSize: 12, fontWeight: 600, mt: 0.5 }}>{description}</Typography> : null}

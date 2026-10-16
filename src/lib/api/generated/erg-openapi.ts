@@ -45,7 +45,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["createContentItem"];
+        readonly post: operations["createContentItem_1"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -100,726 +100,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/crawler/active-pipelines": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_32"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/ai-quota": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_16"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/auto-crawl": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_10"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/blacklist": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["blacklist_1"];
-        readonly put?: never;
-        readonly post: operations["createBlacklist_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/blacklist/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteBlacklist"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["updateBlacklist"];
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/configs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["configs_2"];
-        readonly put?: never;
-        readonly post: operations["createConfig_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/configs/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteConfig_2"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["updateConfig_2"];
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/configs/test-batch": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createConfig_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/crawl": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_13"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/crawl/{jobId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["jobStatus_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/crawl/{jobId}/stream": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["stream"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/cron-presets": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_20"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/dedup-stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_21"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/history": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_31"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/history/{jobId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["jobStatus_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/pipeline-status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_27"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/quality-stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_33"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/quick-add": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["legacyRss"];
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["legacyRssDelete_1"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["legacyRssUpdate_1"];
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/create-selective": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/peek/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["legacyRss_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/preview": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/sync/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_4"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/rss/trigger": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_7"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/scheduler-status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_26"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/sitemap/discover": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_24"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/sitemap/parse": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_4"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/smart-detect": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_11"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/smart-selector/analyze": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_7"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_30"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/stream": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["stream_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/crawler/url/run": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_12"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/levels/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["hardDeleteLevel"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["updateLevel"];
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/levels/{id}/archive": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["archiveLevel"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/levels/{id}/impact": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["levelImpact"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/levels/{levelId}/topics": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createTopic"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/subjects": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createSubject"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/subjects/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["hardDeleteSubject"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["updateSubject"];
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/subjects/{id}/archive": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["archiveSubject"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/subjects/{id}/impact": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["subjectImpact"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/subjects/{subjectId}/levels": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createLevel"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/topics/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["hardDeleteTopic"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["updateTopic"];
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/topics/{id}/archive": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["archiveTopic"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/curriculum/topics/{id}/impact": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["topicImpact"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/curriculum/topics/{topicId}/content-items": {
         readonly parameters: {
             readonly query?: never;
@@ -846,7 +126,7 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["removePlacement"];
+        readonly delete: operations["removePlacement_1"];
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -868,150 +148,6 @@ export interface paths {
         readonly patch: operations["reorderPlacements"];
         readonly trace?: never;
     };
-    readonly "/api/curriculum/tree": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["tree"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/categories": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["categories_1"];
-        readonly put?: never;
-        readonly post: operations["create_13"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/categories/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_8"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_10"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/categories/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["category_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/levels": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["create_14"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/levels/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_9"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_11"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/levels/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["level"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/units": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["create_15"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/admin/elearning/units/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_10"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_12"];
-        readonly trace?: never;
-    };
     readonly "/api/v1/admin/notifications/broadcast": {
         readonly parameters: {
             readonly query?: never;
@@ -1021,7 +157,23 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["send_2"];
+        readonly post: operations["send_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/admin/notifications/outbox/replay-dead": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["replayDeadLetters"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -1053,7 +205,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["send_1"];
+        readonly post: operations["send"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -1252,30 +404,14 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/ai-content/generate": {
+    readonly "/api/v1/audit/events": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["generate_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/history": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_35"];
+        readonly get: operations["events"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1284,174 +420,14 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/ai-content/keys": {
+    readonly "/api/v1/audit/export": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createKey"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/keys/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteKey"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/keys/{id}/{action}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["keyAction"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/keys/dashboard": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_37"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/keys/my": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_36"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/provider-health": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_34"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/refine": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["generate"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/status/{jobId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["status_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/ai-content/templates": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_38"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/audit/logs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["auditLogs"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/audit/logs/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["auditLog"];
+        readonly get: operations["export"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1556,166 +532,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/blacklist": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["blacklist_2"];
-        readonly put?: never;
-        readonly post: operations["createBlacklist_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/blacklist/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteBlacklist_2"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/accounts": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["accounts"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/accounts/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteAccount"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/conversations": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["conversations"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/conversations/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["conversation"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/conversations/{id}/send": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["send"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/conversations/{id}/wizard": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["wizard"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/link": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["link"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/bot/link/{code}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["linkCode"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/calendar": {
         readonly parameters: {
             readonly query?: never;
@@ -1725,7 +541,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_11"];
+        readonly post: operations["create_4"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -1899,7 +715,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["workspace"];
+        readonly get: operations["workspace_1"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -1924,39 +740,7 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/courses": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_4"];
-        readonly put?: never;
-        readonly post: operations["create_10"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/courses/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_6"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_8"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/courses/{id}/lessons/reorder": {
+    readonly "/api/v1/content/{resourceKind}/{resourceId}/lifecycle": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -1965,30 +749,30 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["reorder_1"];
+        readonly post: operations["transition"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/courses/{id}/schema": {
+    readonly "/api/v1/content/assets": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["schema"];
+        readonly get?: never;
         readonly put?: never;
-        readonly post?: never;
+        readonly post: operations["createContentAsset_1"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/courses/{id}/theme": {
+    readonly "/api/v1/content/assets/{contentAssetId}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2001,58 +785,10 @@ export interface paths {
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["update_7"];
+        readonly patch: operations["updateContentAsset_1"];
         readonly trace?: never;
     };
-    readonly "/api/v1/courses/subdomain/{subdomain}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["bySubdomain"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/active-pipelines": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_14"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/ai-quota": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_29"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/auto-crawl": {
+    readonly "/api/v1/content/items": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2061,30 +797,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["job_9"];
+        readonly post: operations["createContentItem"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/blacklist": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["blacklist"];
-        readonly put?: never;
-        readonly post: operations["createBlacklist"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/blacklist/{id}": {
+    readonly "/api/v1/content/items/{contentItemId}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2094,29 +814,61 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["deleteBlacklist_1"];
+        readonly delete: operations["deleteContentItem_1"];
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["updateBlacklist_1"];
+        readonly patch: operations["updateContentItem_1"];
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/configs": {
+    readonly "/api/v1/content/items/{contentItemId}/assets": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["configs_1"];
+        readonly get?: never;
         readonly put?: never;
-        readonly post: operations["createConfig_2"];
+        readonly post: operations["attachContentAsset_1"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/configs/{id}": {
+    readonly "/api/v1/content/lectures/google-slides": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createGoogleSlidesLecture_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/crm/follow-ups": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createFollowUp"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/crm/follow-ups/{followUpId}/completion": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2126,13 +878,13 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["deleteConfig_1"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["updateConfig_1"];
+        readonly patch: operations["updateFollowUpCompletion"];
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/configs/test-batch": {
+    readonly "/api/v1/crm/handovers": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2141,14 +893,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["createConfig_4"];
+        readonly post: operations["createHandover"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/crawl": {
+    readonly "/api/v1/crm/handovers/{handoverId}/approve": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2157,174 +909,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["job_2"];
+        readonly post: operations["approveHandover"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/crawl/{jobId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["jobStatus"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/crawl/{jobId}/stream": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["stream_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/cron-presets": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_28"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/dedup-stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_23"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/history": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_22"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/history/{jobId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["jobStatus_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/pipeline-status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_19"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/quality-stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_18"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/quick-add": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_5"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/rss": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["legacyRss_1"];
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_6"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/rss/{id}": {
+    readonly "/api/v1/crm/leads/{leadId}/status": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2334,13 +926,13 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["legacyRssDelete"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["legacyRssUpdate"];
+        readonly patch: operations["updateLeadStatus"];
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/rss/create-selective": {
+    readonly "/api/v1/crm/opportunities": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2349,203 +941,27 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["legacyRssCreate"];
+        readonly post: operations["createOpportunity"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/crawler/rss/peek/{id}": {
+    readonly "/api/v1/crm/opportunities/{opportunityId}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["legacyRss_2"];
+        readonly get?: never;
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/rss/preview": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_8"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/rss/sync/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_9"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/rss/trigger": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["legacyRssCreate_5"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/scheduler-status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_15"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/sitemap/discover": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_17"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/sitemap/parse": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/smart-detect": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/smart-selector/analyze": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_8"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_25"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/stream": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["stream_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/crawler/url/run": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["job_6"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
+        readonly patch: operations["updateOpportunity"];
         readonly trace?: never;
     };
     readonly "/api/v1/crm/seo/{seoId}/performance": {
@@ -2580,46 +996,270 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/documents": {
+    readonly "/api/v1/crm/workspace": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["list_3"];
+        readonly get: operations["workspace"];
         readonly put?: never;
-        readonly post: operations["upload"];
+        readonly post?: never;
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/documents/{id}": {
+    readonly "/api/v1/curriculum/levels/{id}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["get"];
+        readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["delete_5"];
+        readonly delete: operations["hardDeleteLevel"];
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["update_6"];
+        readonly patch: operations["updateLevel"];
         readonly trace?: never;
     };
-    readonly "/api/v1/documents/{id}/file": {
+    readonly "/api/v1/curriculum/levels/{id}/archive": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["file"];
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["archiveLevel"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/levels/{id}/impact": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["levelImpact"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/levels/{levelId}/topics": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createTopic"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/subjects": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createSubject_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/subjects/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete: operations["hardDeleteSubject"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["updateSubject_2"];
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/subjects/{id}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["archiveSubject_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/subjects/{id}/impact": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["subjectImpact"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/subjects/{subjectId}/levels": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createLevel"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{id}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete: operations["hardDeleteTopic"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["updateTopic"];
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{id}/archive": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["archiveTopic"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{id}/impact": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["topicImpact"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{topicId}/content-items": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["placeContentItem_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{topicId}/content-items/{placementId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete: operations["removePlacement"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/topics/{topicId}/content-items/reorder": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["reorderPlacements_1"];
+        readonly trace?: never;
+    };
+    readonly "/api/v1/curriculum/tree": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["tree"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -2644,46 +1284,30 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/categories": {
+    readonly "/api/v1/enterprise-connectors": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["categories_2"];
+        readonly get: operations["connectors"];
         readonly put?: never;
-        readonly post: operations["create_17"];
+        readonly post: operations["register_1"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/categories/{id}": {
+    readonly "/api/v1/enterprise-connectors/{connectorId}": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_11"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_13"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/elearning/categories/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["category_2"];
+        readonly get: operations["connectorById"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -2692,7 +1316,7 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/levels": {
+    readonly "/api/v1/enterprise-connectors/{connectorId}/deprovision": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2701,14 +1325,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_12"];
+        readonly post: operations["deprovision"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/levels/{id}": {
+    readonly "/api/v1/enterprise-connectors/{connectorId}/dry-run": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2717,30 +1341,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_12"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["update_14"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/elearning/levels/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["level_1"];
-        readonly put?: never;
-        readonly post?: never;
+        readonly post: operations["dryRun"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/units": {
+    readonly "/api/v1/enterprise-connectors/{connectorId}/runs/{runId}/retry": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2749,14 +1357,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_16"];
+        readonly post: operations["retry"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/elearning/units/{id}": {
+    readonly "/api/v1/enterprise-connectors/{connectorId}/sync": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2765,11 +1373,11 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_7"];
+        readonly post: operations["sync"];
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["update_9"];
+        readonly patch?: never;
         readonly trace?: never;
     };
     readonly "/api/v1/health": {
@@ -2788,7 +1396,7 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/insight/behavior": {
+    readonly "/api/v1/lcms/enrollments": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2797,46 +1405,14 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["insightWrite_1"];
+        readonly post: operations["enroll"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/insight/export": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/firebase/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_6"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/firebase/sync": {
+    readonly "/api/v1/lcms/enrollments/bulk": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -2845,183 +1421,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["insightWrite"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/identify": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["insightWrite_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/insights": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/overview": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_5"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/posts/summary": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_4"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/session/{id}/finish": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["finishSession"];
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/session/begin": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["insightWrite_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/sessions/{sessionId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightSession_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/top-content": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_7"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/traffic-sources": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightRead_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/insight/user-journey/{sessionId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["insightSession"];
-        readonly put?: never;
-        readonly post?: never;
+        readonly post: operations["bulkEnroll"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3060,6 +1460,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/lcms/media/upload/quiz-media/{tenantId}/{prefix}/{filename}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["uploadLocal"];
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/lcms/questions": {
         readonly parameters: {
             readonly query?: never;
@@ -3069,7 +1485,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_9"];
+        readonly post: operations["create_3"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3084,9 +1500,73 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get?: never;
-        readonly put: operations["update_4"];
+        readonly put: operations["update"];
         readonly post?: never;
-        readonly delete: operations["delete_3"];
+        readonly delete: operations["delete"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/quiz-packages/{packageId}/download": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["download_1"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/quiz-packages/{packageId}/manifest": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["manifest"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/quiz-packages/{packageId}/revoke": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["revoke"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/quiz-packages/updates": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["updates"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3117,7 +1597,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_8"];
+        readonly post: operations["create_2"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3134,7 +1614,7 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["delete_14"];
+        readonly delete: operations["delete_2"];
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3261,7 +1741,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_7"];
+        readonly post: operations["create_1"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3332,6 +1812,38 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/lcms/schools/{schoolId}/classes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createClass"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/schools/{schoolId}/classes/{classId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["updateClass"];
+        readonly post?: never;
+        readonly delete: operations["archiveClass"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["updateClass_1"];
+        readonly trace?: never;
+    };
     readonly "/api/v1/lcms/schools/{schoolId}/grades": {
         readonly parameters: {
             readonly query?: never;
@@ -3389,7 +1901,439 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["restore_1"];
+        readonly post: operations["restore"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/schools/{schoolId}/students": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createStudent"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/schools/{schoolId}/students/{studentId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["updateStudent"];
+        readonly post?: never;
+        readonly delete: operations["archiveStudent"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["updateStudent_1"];
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/schools/{schoolId}/students/bulk": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["importStudents"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/schools/{schoolId}/students/import": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["importStudents_1"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/subjects": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["subjectsReadNotPublished"];
+        readonly put?: never;
+        readonly post: operations["createSubject"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/lcms/subjects/{subjectId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put: operations["updateSubject"];
+        readonly post?: never;
+        readonly delete: operations["archiveSubject"];
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch: operations["updateSubject_1"];
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/attainments": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["recordAttainment"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/certificates": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["issueCertificate"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/certificates/{certificateId}/revoke": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["revokeCertificate"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/certificates/verify/{verificationId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["verifyCertificate"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/competencies": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["competencies"];
+        readonly put?: never;
+        readonly post: operations["createCompetency"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/competencies/{competencyId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["competency"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/learners/{learnerId}/attainments": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["attainments"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/learners/{learnerId}/certificates": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["certificates"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/learners/{learnerId}/completions": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["completions"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/paths": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["paths"];
+        readonly put?: never;
+        readonly post: operations["createPath"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/paths/{pathId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["path"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/paths/{pathId}/completion": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["evaluateCompletion"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/paths/{pathId}/nodes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["addNode"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-outcomes/paths/{pathId}/publish": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["publishPath"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/lti/registrations": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["createLtiRegistration"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/lti/registrations/{registrationId}/launch": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["launchLti"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/packages": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["packages"];
+        readonly put?: never;
+        readonly post: operations["createPackage"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/packages/{packageId}": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["packageById"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/packages/{packageId}/launch": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["launchPackage"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/packages/{packageId}/validate": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["validatePackage"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/learning-standards/xapi/statements": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        readonly post: operations["ingestXapi"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3405,7 +2349,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["create_6"];
+        readonly post: operations["create"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -3422,10 +2366,10 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["delete_4"];
+        readonly delete: operations["delete_1"];
         readonly options?: never;
         readonly head?: never;
-        readonly patch: operations["update_5"];
+        readonly patch: operations["update_1"];
         readonly trace?: never;
     };
     readonly "/api/v1/lms/assignments/{assignmentId}/progress": {
@@ -3435,7 +2379,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["assignmentProgress"];
+        readonly get: operations["assignmentProgress_1"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -3716,102 +2660,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/menus/structure": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["menu"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/migration/cache-key-registry": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["cacheKeys"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/migration/cutover-runbook": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["cutover"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/migration/data-parity-matrix": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["dataParity"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/migration/load-test/report": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["loadReport"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/migration/native-image-assessment": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["nativeAssessment"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/notification-devices": {
         readonly parameters: {
             readonly query?: never;
@@ -3838,7 +2686,7 @@ export interface paths {
         readonly get?: never;
         readonly put?: never;
         readonly post?: never;
-        readonly delete: operations["revoke"];
+        readonly delete: operations["revoke_1"];
         readonly options?: never;
         readonly head?: never;
         readonly patch?: never;
@@ -3883,7 +2731,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["list_9"];
+        readonly get: operations["list"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -3899,7 +2747,7 @@ export interface paths {
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["get_1"];
+        readonly get: operations["get"];
         readonly put?: never;
         readonly post?: never;
         readonly delete: operations["archive_1"];
@@ -3972,150 +2820,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/operations/configs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["configs"];
-        readonly put?: never;
-        readonly post: operations["createConfig"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/configs/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["updateConfig"];
-        readonly post?: never;
-        readonly delete: operations["deleteConfig"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/firewall/block": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["firewallMutation_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/firewall/check/{ip}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["firewallCheck"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/firewall/list": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["operationsRead_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/firewall/unblock": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["firewallMutation"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/logs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["operationsRead"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/operations/system-status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["operationsRead_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/pages/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["page"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/permission-groups": {
         readonly parameters: {
             readonly query?: never;
@@ -4180,294 +2884,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/platform/runtime-wiring": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["runtimeWiring"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/platform/shared-libraries": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["sharedLibraries"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/platform/tenancy": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["tenancy"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_2"];
-        readonly put?: never;
-        readonly post: operations["create_4"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_1"];
-        readonly put: operations["update_3"];
-        readonly post?: never;
-        readonly delete: operations["delete_2"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/{id}/permanent": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["permanentDelete"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/{id}/promote": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["promote"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/{id}/restore": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["restore"];
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/categories": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["categories"];
-        readonly put?: never;
-        readonly post: operations["createCategory"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/categories/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["category"];
-        readonly put: operations["updateCategory"];
-        readonly post?: never;
-        readonly delete: operations["deleteCategory"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/hidden": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_8"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/images": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteImage_1"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/images/id/{filename}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteImage"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/images/upload": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["uploadImage"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/preview": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["create_5"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/preview/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["preview_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/slug/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["bySlug"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/posts/trash": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_7"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/profiles": {
         readonly parameters: {
             readonly query?: never;
@@ -4516,54 +2932,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/public-disclosure": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["disclosures"];
-        readonly put?: never;
-        readonly post: operations["createDisclosure"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/public-disclosure/": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["disclosures_1"];
-        readonly put?: never;
-        readonly post: operations["createDisclosure_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/public-disclosure/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["disclosure"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["deleteDisclosure"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/api/v1/ready": {
         readonly parameters: {
             readonly query?: never;
@@ -4572,166 +2940,6 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get: operations["ready"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/admin/candidates": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["candidates"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/admin/candidates/{id}/status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_3"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/apply": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["create_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list"];
-        readonly put?: never;
-        readonly post: operations["create"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["updateJob"];
-        readonly post?: never;
-        readonly delete: operations["delete_1"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs/{id}/status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_4"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs/{id}/toggle-hot": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_1"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs/{id}/toggle-urgent": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/jobs/{slug}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_10"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/recruitment/tracking/{code}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_9"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -4756,6 +2964,22 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/reports/jobs/{jobId}/download": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get: operations["download"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/reports/jobs/assignment-progress": {
         readonly parameters: {
             readonly query?: never;
@@ -4772,174 +2996,14 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/api/v1/reviews": {
+    readonly "/api/v1/reports/jobs/assignments/{assignmentId}/progress": {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly get: operations["list_1"];
-        readonly put?: never;
-        readonly post: operations["create_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/approve": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_6"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/feature": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_7"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/helpful": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["reviewAction_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/reject": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_5"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/reply": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["reviewAction"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/{reviewId}/status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch: operations["mark_2"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/admin": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_6"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/admin/all": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["list_5"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/batch/status": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["create_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/reviews/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_8"];
+        readonly get: operations["assignmentProgress"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -4978,710 +3042,6 @@ export interface paths {
         readonly options?: never;
         readonly head?: never;
         readonly patch: operations["updateRole_1"];
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["feeds"];
-        readonly put?: never;
-        readonly post: operations["createFeed"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["feed"];
-        readonly put: operations["updateFeed"];
-        readonly post?: never;
-        readonly delete: operations["deleteFeed"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/{id}/refresh": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["refreshFeed"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/create-selective": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createFeed_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/peek": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["feeds_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/preview": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createFeed_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/rss/feeds/trigger": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["createFeed_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/404": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_6"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/404-logs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["lists_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/analyze-draft": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_7"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/analyze/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_6"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/apply-autolinks/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["update"];
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/check-duplicate": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_11"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/config/{key}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail"];
-        readonly put: operations["update_1"];
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/dashboard": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_13"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/dashboard/batch-analyze": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_3"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/generate-alt-texts": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/gsc/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_7"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/gsc/auth/callback": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_9"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/gsc/auth/url": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_11"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/gsc/sync": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads"];
-        readonly put?: never;
-        readonly post: operations["creates_5"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/gsc/top-posts": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_4"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/health": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_10"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/history/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_5"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keyword-research": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_12"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keyword-suggestions": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_8"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keywords": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["lists_1"];
-        readonly put?: never;
-        readonly post: operations["creates_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keywords/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete: operations["delete_13"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keywords/autocomplete": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keywords/suggest": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/keywords/trending": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_6"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/performance": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_5"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/performance/queries": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_7"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/posts/{postId}/robots": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["postOperation"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/redirects": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["lists"];
-        readonly put?: never;
-        readonly post: operations["creates"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/redirects/{id}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put: operations["update_2"];
-        readonly post?: never;
-        readonly delete: operations["delete"];
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/schema/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_2"];
-        readonly put?: never;
-        readonly post: operations["postOperation_2"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/schema/{postId}/validate": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["postOperation_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/submission/logs": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/submission/submit": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_4"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/suggest-meta": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_8"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/suggest-titles": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["creates_10"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/top-posts": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["reads_9"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/seo/trends/{postId}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["detail_4"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
         readonly trace?: never;
     };
     readonly "/api/v1/session/current": {
@@ -5724,214 +3084,6 @@ export interface paths {
             readonly cookie?: never;
         };
         readonly get: operations["currentBootstrap"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/discover": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["trendingJob"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/discovery-feed": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/feeds": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_8"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/healthz": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/history": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/news": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_9"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/ready": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_4"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/refresh": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get?: never;
-        readonly put?: never;
-        readonly post: operations["trendingJob_1"];
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/snapshots": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_6"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/sources": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_7"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/stats": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_3"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/topics": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["trendingReads_5"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/api/v1/trending/topics/{topic}": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["topic"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -6420,86 +3572,6 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
-    readonly "/robots.txt": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["robots"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/sitemap_index.xml": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["sitemap_1"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/sitemap-{sub}.xml": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["sitemap"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/sitemap.xml": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["sitemap_2"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
-    readonly "/sitemap/data": {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly get: operations["sitemapData"];
-        readonly put?: never;
-        readonly post?: never;
-        readonly delete?: never;
-        readonly options?: never;
-        readonly head?: never;
-        readonly patch?: never;
-        readonly trace?: never;
-    };
     readonly "/webhooks/discord": {
         readonly parameters: {
             readonly query?: never;
@@ -6509,7 +3581,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["webhook_1"];
+        readonly post: operations["discord"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -6525,7 +3597,7 @@ export interface paths {
         };
         readonly get?: never;
         readonly put?: never;
-        readonly post: operations["webhook"];
+        readonly post: operations["telegram"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -6557,6 +3629,13 @@ export interface components {
             readonly scopeId: string;
             readonly scopeType: string;
         };
+        readonly AccessScopeResponse: {
+            readonly currentClassId?: string;
+            readonly currentEducationUnitId?: string;
+            readonly managedClassIds?: readonly string[];
+            readonly managedEducationUnitIds?: readonly string[];
+            readonly tenantId?: string;
+        };
         readonly AccountLifecycleResponse: {
             readonly isProfileCompleted?: boolean;
             readonly mustChangePassword?: boolean;
@@ -6580,6 +3659,15 @@ export interface components {
             };
             readonly target_user_id?: string;
             readonly user_id?: string;
+        };
+        readonly AddPathNodeRequest: {
+            readonly contentKind: string;
+            readonly contentRefId: string;
+            /** Format: int64 */
+            readonly expectedPathVersion: number;
+            readonly required?: boolean;
+            /** Format: int32 */
+            readonly sortOrder: number;
         };
         readonly AdminAssignPermissionsRequest: {
             readonly expires_at?: string;
@@ -6708,8 +3796,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseAssignmentProgressReportResponse: {
+            readonly data?: components["schemas"]["AssignmentProgressReportResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseAssignmentProgressResponse: {
             readonly data?: components["schemas"]["AssignmentProgressResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseAttainmentResponse: {
+            readonly data?: components["schemas"]["AttainmentResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6752,6 +3862,17 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseAuditPage: {
+            readonly data?: components["schemas"]["AuditPage"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseAuthResponse: {
             readonly data?: components["schemas"]["AuthResponse"];
             readonly errors?: unknown;
@@ -6763,8 +3884,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseBulkEnrollmentResponse: {
+            readonly data?: components["schemas"]["BulkEnrollmentResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseBulkOperationResponse: {
             readonly data?: components["schemas"]["BulkOperationResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseBulkStudentImportResponse: {
+            readonly data?: components["schemas"]["BulkStudentImportResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6884,6 +4027,39 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseCertificateResponse: {
+            readonly data?: components["schemas"]["CertificateResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseClassesBySchoolResponse: {
+            readonly data?: components["schemas"]["ClassesBySchoolResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseClassResponse: {
+            readonly data?: components["schemas"]["ClassResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseCommandResult: {
             readonly data?: components["schemas"]["CommandResult"];
             readonly errors?: unknown;
@@ -6895,8 +4071,8 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseContentAsset: {
-            readonly data?: components["schemas"]["ContentAsset"];
+        readonly ApiResponseCompetencyResponse: {
+            readonly data?: components["schemas"]["CompetencyResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6906,8 +4082,8 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseContentItem: {
-            readonly data?: components["schemas"]["ContentItem"];
+        readonly ApiResponseCompletionResponse: {
+            readonly data?: components["schemas"]["CompletionResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -6917,8 +4093,41 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseContentItemAsset: {
-            readonly data?: components["schemas"]["ContentItemAsset"];
+        readonly ApiResponseConnectorResponse: {
+            readonly data?: components["schemas"]["ConnectorResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseContentAssetResponse: {
+            readonly data?: components["schemas"]["ContentAssetResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseContentItemAssetResponse: {
+            readonly data?: components["schemas"]["ContentItemAssetResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseContentItemResponse: {
+            readonly data?: components["schemas"]["ContentItemResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7049,6 +4258,28 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseDeadLetterReplayResponse: {
+            readonly data?: components["schemas"]["DeadLetterReplayResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseDeletedResponse: {
+            readonly data?: components["schemas"]["DeletedResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseDeleteQuestionResponse: {
             readonly data?: components["schemas"]["DeleteQuestionResponse"];
             readonly errors?: unknown;
@@ -7062,6 +4293,17 @@ export interface components {
         };
         readonly ApiResponseDeleteQuizResponse: {
             readonly data?: components["schemas"]["DeleteQuizResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseDeprovisionResponse: {
+            readonly data?: components["schemas"]["DeprovisionResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7137,8 +4379,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseEnrollmentResponse: {
+            readonly data?: components["schemas"]["EnrollmentResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseFeatureConfigResponse: {
             readonly data?: components["schemas"]["FeatureConfigResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseFollowUpResponse: {
+            readonly data?: components["schemas"]["FollowUpResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7192,8 +4456,96 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseHandoverResponse: {
+            readonly data?: components["schemas"]["HandoverResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseIpSecurityStatusResponse: {
             readonly data?: components["schemas"]["IpSecurityStatusResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLcmsQuizBundleResponse: {
+            readonly data?: components["schemas"]["LcmsQuizBundleResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLcmsQuizPackageManifest: {
+            readonly data?: components["schemas"]["LcmsQuizPackageManifest"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLcmsQuizPackageUpdateFeedResponse: {
+            readonly data?: components["schemas"]["LcmsQuizPackageUpdateFeedResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLeadResponse: {
+            readonly data?: components["schemas"]["LeadResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLearningPathResponse: {
+            readonly data?: components["schemas"]["LearningPathResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLifecycleResponse: {
+            readonly data?: components["schemas"]["LifecycleResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListAttainmentResponse: {
+            readonly data?: readonly components["schemas"]["AttainmentResponse"][];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7214,6 +4566,72 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseListCalendarRoomOptionResponse: {
+            readonly data?: readonly components["schemas"]["CalendarRoomOptionResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListCertificateResponse: {
+            readonly data?: readonly components["schemas"]["CertificateResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListCompetencyResponse: {
+            readonly data?: readonly components["schemas"]["CompetencyResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListCompletionResponse: {
+            readonly data?: readonly components["schemas"]["CompletionResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListConnectorResponse: {
+            readonly data?: readonly components["schemas"]["ConnectorResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseListLearningPathResponse: {
+            readonly data?: readonly components["schemas"]["LearningPathResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseListLoginAttemptResponse: {
             readonly data?: readonly components["schemas"]["LoginAttemptResponse"][];
             readonly errors?: unknown;
@@ -7225,10 +4643,8 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseListMapStringObject: {
-            readonly data?: readonly {
-                readonly [key: string]: unknown;
-            }[];
+        readonly ApiResponseListNotificationPreferenceResponse: {
+            readonly data?: readonly components["schemas"]["NotificationPreferenceResponse"][];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7238,8 +4654,8 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseListNotificationPreferenceResponse: {
-            readonly data?: readonly components["schemas"]["NotificationPreferenceResponse"][];
+        readonly ApiResponseListPackageResponse: {
+            readonly data?: readonly components["schemas"]["PackageResponse"][];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7293,8 +4709,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseListTopicContentItem: {
-            readonly data?: readonly components["schemas"]["TopicContentItem"][];
+        readonly ApiResponseListTopicContentItemResponse: {
+            readonly data?: readonly components["schemas"]["TopicContentItemResponse"][];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLtiLaunchResponse: {
+            readonly data?: components["schemas"]["LtiLaunchResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseLtiRegistrationResponse: {
+            readonly data?: components["schemas"]["LtiRegistrationResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7398,8 +4836,30 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseOpportunityResponse: {
+            readonly data?: components["schemas"]["OpportunityResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseOutboxRunResponse: {
             readonly data?: components["schemas"]["OutboxRunResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponsePackageResponse: {
+            readonly data?: components["schemas"]["PackageResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7422,6 +4882,28 @@ export interface components {
         };
         readonly ApiResponsePasswordChangeResponse: {
             readonly data?: components["schemas"]["PasswordChangeResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponsePathDetailResponse: {
+            readonly data?: components["schemas"]["PathDetailResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponsePathNodeResponse: {
+            readonly data?: components["schemas"]["PathNodeResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7543,6 +5025,17 @@ export interface components {
         };
         readonly ApiResponseReportJobResponse: {
             readonly data?: components["schemas"]["ReportJobResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseRevokeResponse: {
+            readonly data?: components["schemas"]["RevokeResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7695,8 +5188,52 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseStudentResponse: {
+            readonly data?: components["schemas"]["StudentResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
         readonly ApiResponseStudentScoreListResponse: {
             readonly data?: components["schemas"]["StudentScoreListResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseSubjectResponse: {
+            readonly data?: components["schemas"]["SubjectResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseSyncPreviewResponse: {
+            readonly data?: components["schemas"]["SyncPreviewResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseSyncRunResponse: {
+            readonly data?: components["schemas"]["SyncRunResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7717,8 +5254,8 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
-        readonly ApiResponseTopicContentItem: {
-            readonly data?: components["schemas"]["TopicContentItem"];
+        readonly ApiResponseTopicContentItemResponse: {
+            readonly data?: components["schemas"]["TopicContentItemResponse"];
             readonly errors?: unknown;
             readonly message?: string;
             readonly path?: string;
@@ -7805,12 +5342,54 @@ export interface components {
             /** Format: date-time */
             readonly timestamp?: string;
         };
+        readonly ApiResponseWorkspaceResponse: {
+            readonly data?: components["schemas"]["WorkspaceResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApiResponseXapiStatementResponse: {
+            readonly data?: components["schemas"]["XapiStatementResponse"];
+            readonly errors?: unknown;
+            readonly message?: string;
+            readonly path?: string;
+            readonly request_id?: string;
+            /** Format: int32 */
+            readonly statusCode?: number;
+            /** Format: date-time */
+            readonly timestamp?: string;
+        };
+        readonly ApproveHandoverRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+        };
         readonly ArchiveResponse: {
             readonly archived?: boolean;
         };
         readonly AssignmentProgressJobRequest: {
             readonly assignmentId: string;
+            readonly classId?: string;
+            readonly format?: string;
             readonly idempotencyKey?: string;
+            readonly status?: string;
+            /** Format: date-time */
+            readonly submittedFrom?: string;
+            /** Format: date-time */
+            readonly submittedTo?: string;
+            readonly timezone?: string;
+        };
+        readonly AssignmentProgressReportResponse: {
+            readonly filter?: components["schemas"]["ReportFilter"];
+            /** Format: date-time */
+            readonly generatedAt?: string;
+            readonly kpis?: readonly components["schemas"]["KpiDefinition"][];
+            readonly report?: components["schemas"]["AssignmentReportResponse"];
+            readonly sourceModel?: string;
         };
         readonly AssignmentProgressResponse: {
             /** Format: int32 */
@@ -7821,6 +5400,29 @@ export interface components {
             readonly notStarted?: number;
             /** Format: int32 */
             readonly submitted?: number;
+        };
+        readonly AssignmentReportResponse: {
+            readonly assignmentId?: string;
+            /** Format: double */
+            readonly averagePercent?: number;
+            readonly hasNext?: boolean;
+            /** Format: int32 */
+            readonly inProgressCount?: number;
+            /** Format: int32 */
+            readonly needsReviewCount?: number;
+            /** Format: int32 */
+            readonly notStartedCount?: number;
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            readonly students?: readonly components["schemas"]["StudentProgressRow"][];
+            /** Format: int32 */
+            readonly submittedCount?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
+            /** Format: int32 */
+            readonly totalRecipients?: number;
         };
         readonly AssignmentResourceResponse: {
             readonly quizId?: string;
@@ -7834,6 +5436,7 @@ export interface components {
             /** Format: date-time */
             readonly dueAt?: string;
             readonly id?: string;
+            readonly offlineAllowed?: boolean;
             readonly quizId?: string;
             readonly recipientMode?: string;
             readonly status?: string;
@@ -7859,6 +5462,22 @@ export interface components {
             /** Format: int32 */
             readonly sortOrder?: number;
         };
+        readonly AttainmentResponse: {
+            /** Format: date-time */
+            readonly achievedAt?: string;
+            readonly classId?: string;
+            readonly competencyId?: string;
+            readonly evidenceRef?: string;
+            readonly id?: string;
+            readonly learnerId?: string;
+            readonly learningPathId?: string;
+            /** Format: int32 */
+            readonly progressPercent?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly status?: string;
+            readonly tenantId?: string;
+        };
         readonly AttemptAnswer: {
             readonly answer?: unknown;
             /** Format: date-time */
@@ -7877,8 +5496,35 @@ export interface components {
             readonly events?: readonly {
                 readonly [key: string]: unknown;
             }[];
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
             readonly packageHash?: string;
             readonly quizVersion?: string;
+        };
+        readonly AttemptPolicySnapshotResponse: {
+            readonly assignmentId?: string;
+            /** Format: int32 */
+            readonly attemptLimit?: number;
+            /** Format: date-time */
+            readonly deadlineAt?: string;
+            /** Format: int32 */
+            readonly durationMinutes?: number;
+            readonly gradingMode?: string;
+            readonly offlineAllowed?: boolean;
+            readonly packageHash?: string;
+            readonly packageId?: string;
+            /** Format: int32 */
+            readonly questionCount?: number;
+            readonly quizId?: string;
+            readonly quizVersion?: string;
+            readonly quizVersionId?: string;
+            /** Format: date-time */
+            readonly serverTimeAtStart?: string;
+            /** Format: date-time */
+            readonly startedAt?: string;
+            readonly teacherId?: string;
         };
         readonly AttemptResponse: {
             readonly answers?: {
@@ -7893,6 +5539,7 @@ export interface components {
             readonly passed?: boolean;
             /** Format: double */
             readonly percent?: number;
+            readonly policySnapshot?: components["schemas"]["AttemptPolicySnapshotResponse"];
             readonly quizId?: string;
             /** Format: double */
             readonly score?: number;
@@ -7924,6 +5571,10 @@ export interface components {
             readonly events?: readonly {
                 readonly [key: string]: unknown;
             }[];
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
             readonly packageHash: string;
             readonly quizVersion?: string;
         };
@@ -7931,6 +5582,41 @@ export interface components {
             readonly conflicts?: readonly string[];
             readonly serverAttempt?: components["schemas"]["AttemptResponse"];
             readonly status?: string;
+        };
+        readonly AuditEntry: {
+            readonly action?: string;
+            readonly actorId?: string;
+            readonly causationId?: string;
+            readonly correlationId?: string;
+            readonly details?: {
+                readonly [key: string]: unknown;
+            };
+            readonly eventHash?: string;
+            readonly id?: string;
+            /** Format: date-time */
+            readonly occurredAt?: string;
+            /** @enum {string} */
+            readonly outcome?: "SUCCESS" | "FAILURE" | "DENIED" | "PARTIAL";
+            readonly requestId?: string;
+            readonly resourceId?: string;
+            readonly resourceType?: string;
+            /** Format: date-time */
+            readonly retentionUntil?: string;
+            readonly scopeId?: string;
+            readonly scopeType?: string;
+            readonly tenantId?: string;
+        };
+        readonly AuditPage: {
+            readonly hasNext?: boolean;
+            readonly items?: readonly components["schemas"]["AuditEntry"][];
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            /** Format: int64 */
+            readonly totalElements?: number;
+            /** Format: int32 */
+            readonly totalPages?: number;
         };
         readonly AuthResponse: {
             readonly accessLevel?: string;
@@ -7952,6 +5638,19 @@ export interface components {
         readonly BulkDeleteRequest: {
             readonly user_ids: readonly string[];
         };
+        readonly BulkEnrollmentResponse: {
+            /** Format: int32 */
+            readonly enrolled?: number;
+            readonly idempotencyKey?: string;
+            readonly items?: readonly components["schemas"]["EnrollmentResponse"][];
+            /** Format: int32 */
+            readonly replayed?: number;
+            /** Format: int32 */
+            readonly requested?: number;
+        };
+        readonly BulkEnrollRequest: {
+            readonly items: readonly components["schemas"]["EnrollmentItem"][];
+        };
         readonly BulkOperationResponse: {
             /** Format: int64 */
             readonly modified_count?: number;
@@ -7959,6 +5658,19 @@ export interface components {
         readonly BulkStatusRequest: {
             readonly status: string;
             readonly user_ids: readonly string[];
+        };
+        readonly BulkStudentImportRequest: {
+            readonly items: readonly components["schemas"]["CreateStudentRequest"][];
+        };
+        readonly BulkStudentImportResponse: {
+            /** Format: int32 */
+            readonly created?: number;
+            readonly idempotencyKey?: string;
+            readonly items?: readonly components["schemas"]["StudentResponse"][];
+            /** Format: int32 */
+            readonly replayed?: number;
+            /** Format: int32 */
+            readonly requested?: number;
         };
         readonly CalendarBatchDetailResponse: {
             readonly academicYear?: string;
@@ -8227,9 +5939,55 @@ export interface components {
             readonly to?: string;
             readonly viewMode?: string;
         };
+        readonly CertificateResponse: {
+            readonly certificateNumber?: string;
+            readonly evidenceRef?: string;
+            /** Format: date-time */
+            readonly expiresAt?: string;
+            readonly id?: string;
+            /** Format: date-time */
+            readonly issuedAt?: string;
+            readonly learnerId?: string;
+            readonly learningPathId?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly revocationReason?: string;
+            /** Format: date-time */
+            readonly revokedAt?: string;
+            readonly revokedBy?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            readonly verificationId?: string;
+        };
         readonly ChangePasswordRequest: {
             readonly new_password: string;
             readonly old_password: string;
+        };
+        readonly ClassesBySchoolResponse: {
+            readonly items?: readonly components["schemas"]["ClassItem"][];
+            readonly schoolId?: string;
+            readonly scope?: components["schemas"]["AccessScopeResponse"];
+        };
+        readonly ClassItem: {
+            readonly academicYear?: string;
+            readonly grade?: string;
+            readonly id?: string;
+            readonly name?: string;
+            readonly schoolId?: string;
+        };
+        readonly ClassResponse: {
+            readonly academicYear?: string;
+            readonly grade?: string;
+            readonly homeroomTeacherId?: string;
+            readonly id?: string;
+            readonly name?: string;
+            readonly schoolId?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            /** Format: int64 */
+            readonly version?: number;
         };
         readonly CommandResult: {
             readonly id?: string;
@@ -8237,7 +5995,59 @@ export interface components {
             /** Format: int64 */
             readonly version?: number;
         };
-        readonly ContentAsset: {
+        readonly CompetencyResponse: {
+            readonly code?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly description?: string;
+            readonly educationUnitId?: string;
+            readonly id?: string;
+            readonly name?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly status?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly CompletionResponse: {
+            /** Format: int32 */
+            readonly completedNodeCount?: number;
+            /** Format: date-time */
+            readonly evaluatedAt?: string;
+            readonly evidenceRef?: string;
+            readonly id?: string;
+            readonly learnerId?: string;
+            readonly learningPathId?: string;
+            /** Format: int32 */
+            readonly progressPercent?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            /** Format: int32 */
+            readonly requiredNodeCount?: number;
+            readonly status?: string;
+            readonly tenantId?: string;
+        };
+        readonly ConnectorResponse: {
+            readonly adapterKey?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly displayName?: string;
+            readonly endpoint?: string;
+            readonly id?: string;
+            readonly mappingHash?: string;
+            readonly mappingVersion?: string;
+            readonly providerKey?: string;
+            readonly providerKind?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly secretRef?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly ContentAssetResponse: {
             readonly assetType?: string;
             /** Format: int64 */
             readonly byteSize?: number;
@@ -8260,23 +6070,7 @@ export interface components {
             readonly updatedAt?: string;
             readonly updatedBy?: string;
         };
-        readonly ContentItem: {
-            readonly contentType?: string;
-            /** Format: date-time */
-            readonly createdAt?: string;
-            readonly createdBy?: string;
-            readonly description?: string;
-            readonly id?: string;
-            readonly ownerId?: string;
-            readonly status?: string;
-            readonly tenantId?: string;
-            readonly title?: string;
-            /** Format: date-time */
-            readonly updatedAt?: string;
-            readonly updatedBy?: string;
-            readonly visibility?: string;
-        };
-        readonly ContentItemAsset: {
+        readonly ContentItemAssetResponse: {
             readonly assetRole?: string;
             readonly contentAssetId?: string;
             readonly contentItemId?: string;
@@ -8293,9 +6087,36 @@ export interface components {
             /** Format: date-time */
             readonly updatedAt?: string;
         };
+        readonly ContentItemResponse: {
+            readonly contentType?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly createdBy?: string;
+            readonly description?: string;
+            readonly id?: string;
+            readonly ownerId?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            readonly title?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly updatedBy?: string;
+            readonly visibility?: string;
+        };
         readonly ContentScope: {
             readonly schoolId?: string;
             readonly type?: string;
+        };
+        readonly CostLine: {
+            readonly category: string;
+            readonly description: string;
+            /** Format: int32 */
+            readonly durationMonths?: number;
+            readonly id: string;
+            /** Format: int32 */
+            readonly quantity?: number;
+            readonly requiredForHandover?: boolean;
+            readonly unitCost?: number;
         };
         readonly CreateAcademicYearRequest: {
             readonly activate?: boolean;
@@ -8315,6 +6136,7 @@ export interface components {
             readonly groupId?: string;
             /** Format: int32 */
             readonly maxDurationMinutes?: number;
+            readonly offlineAllowed?: boolean;
             readonly quizIds?: readonly string[];
             readonly recipientMode?: string;
             /** Format: date-time */
@@ -8328,6 +6150,19 @@ export interface components {
             /** Format: int32 */
             readonly recipientCount?: number;
             readonly resources?: readonly components["schemas"]["AssignmentResourceResponse"][];
+        };
+        readonly CreateClassRequest: {
+            readonly academicYear?: string;
+            readonly grade?: string;
+            readonly homeroomTeacherId?: string;
+            readonly name: string;
+            readonly status?: string;
+        };
+        readonly CreateCompetencyRequest: {
+            readonly code: string;
+            readonly description?: string;
+            readonly educationUnitId?: string;
+            readonly name: string;
         };
         readonly CreateContentAssetRequest: {
             readonly assetType?: string;
@@ -8363,6 +6198,14 @@ export interface components {
             readonly recoveryEmail?: string;
             readonly roleGroupIds: readonly string[];
         };
+        readonly CreateFollowUpRequest: {
+            /** Format: date */
+            readonly dueAt: string;
+            readonly leadId: string;
+            readonly opportunityId?: string;
+            readonly title: string;
+            readonly type: string;
+        };
         readonly CreateGoogleSlidesLectureRequest: {
             readonly googleSlidesUrl?: string;
             readonly status?: string;
@@ -8376,6 +6219,45 @@ export interface components {
             /** Format: int32 */
             readonly sortOrder: number;
             readonly status?: string;
+        };
+        readonly CreateHandoverRequest: {
+            readonly checklist: readonly components["schemas"]["HandoverChecklistItem"][];
+            readonly leadId: string;
+            readonly opportunityId: string;
+        };
+        readonly CreateLearningPathRequest: {
+            readonly classId?: string;
+            readonly description?: string;
+            readonly educationUnitId?: string;
+            readonly title: string;
+        };
+        readonly CreateLtiRegistrationRequest: {
+            readonly allowedTargetHost: string;
+            readonly clientId: string;
+            readonly deploymentId: string;
+            readonly issuer: string;
+            readonly publicKeyPem: string;
+        };
+        readonly CreateOpportunityRequest: {
+            readonly academicYear: string;
+            readonly code: string;
+            readonly contractTerm: string;
+            readonly costLines: readonly components["schemas"]["CostLine"][];
+            readonly leadId: string;
+            readonly revenueLines: readonly components["schemas"]["RevenueLine"][];
+            readonly stage: string;
+            readonly startMonth: string;
+        };
+        readonly CreatePackageRequest: {
+            readonly artifactKey: string;
+            readonly artifactSha256: string;
+            /** Format: int64 */
+            readonly byteSize: number;
+            readonly launchPath: string;
+            readonly manifestSha256: string;
+            readonly packageVersion: string;
+            readonly standard: string;
+            readonly title: string;
         };
         readonly CreateProfileRequest: {
             readonly address?: string;
@@ -8433,6 +6315,34 @@ export interface components {
             readonly name: string;
             readonly principalName?: string;
             readonly schoolType: string;
+            readonly status?: string;
+        };
+        readonly CreateStudentRequest: {
+            readonly academicClassId?: string;
+            readonly address?: string;
+            /** Format: date-time */
+            readonly birthday?: string;
+            /** Format: email */
+            readonly email?: string;
+            /** Format: date-time */
+            readonly enrollmentDate?: string;
+            readonly fullName: string;
+            readonly gender?: string;
+            readonly note?: string;
+            /** Format: email */
+            readonly parentEmail?: string;
+            readonly parentName?: string;
+            readonly parentPhone?: string;
+            readonly parentRelationship?: string;
+            readonly phone?: string;
+            readonly status?: string;
+            readonly studentCode: string;
+            readonly username?: string;
+        };
+        readonly CreateSubjectRequest: {
+            readonly code: string;
+            readonly name: string;
+            readonly schoolId?: string;
             readonly status?: string;
         };
         readonly CredentialDeliveryRequest: {
@@ -8570,6 +6480,13 @@ export interface components {
         readonly CurriculumTreeResponse: {
             readonly subjects?: readonly components["schemas"]["CurriculumSubjectTree"][];
         };
+        readonly DeadLetterReplayResponse: {
+            /** Format: int32 */
+            readonly requeued?: number;
+        };
+        readonly DeletedResponse: {
+            readonly deleted?: boolean;
+        };
         readonly DeleteQuestionResponse: {
             readonly archived?: boolean;
             readonly questionId?: string;
@@ -8584,6 +6501,27 @@ export interface components {
             readonly schoolIds?: readonly string[];
             readonly teacherUserId?: string;
             readonly tenantId?: string;
+        };
+        readonly DeprovisionRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly externalIds: readonly string[];
+            readonly reason: string;
+        };
+        readonly DeprovisionResponse: {
+            readonly connectorId?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: int32 */
+            readonly deprovisioned?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            /** Format: int32 */
+            readonly requested?: number;
+            readonly runId?: string;
+            /** Format: int32 */
+            readonly skipped?: number;
+            readonly status?: string;
         };
         readonly DeviceClientRequest: {
             readonly browserName?: string;
@@ -8600,18 +6538,12 @@ export interface components {
             readonly platform?: string;
             readonly portal?: string;
         };
-        readonly EducationUnitListResponse: {
-            readonly educationUnits?: readonly components["schemas"]["EducationUnitResponse"][];
-        };
-        readonly EducationUnitResponse: {
-            readonly description?: string;
+        readonly EducationUnitItem: {
             readonly id?: string;
-            readonly logo_url?: string;
             readonly name?: string;
-            readonly parent_id?: string;
-            readonly slug?: string;
-            readonly status?: string;
-            readonly type?: string;
+        };
+        readonly EducationUnitListResponse: {
+            readonly items?: readonly components["schemas"]["EducationUnitItem"][];
         };
         readonly EffectivePermissionsResponse: {
             readonly denied_permissions?: readonly string[];
@@ -8695,6 +6627,37 @@ export interface components {
             readonly userId?: string;
             readonly workLocation?: string;
         };
+        readonly EnrollmentItem: {
+            readonly academicYear?: string;
+            readonly classId: string;
+            readonly studentId: string;
+        };
+        readonly EnrollmentResponse: {
+            readonly academicYear?: string;
+            readonly classId?: string;
+            readonly id?: string;
+            readonly replayed?: boolean;
+            readonly schoolId?: string;
+            readonly status?: string;
+            readonly studentId?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
+        readonly EnrollStudentRequest: {
+            readonly academicYear?: string;
+            readonly classId: string;
+            readonly studentId: string;
+        };
+        readonly EvaluateCompletionRequest: {
+            readonly completedContentRefIds: readonly string[];
+            readonly evidenceRef: string;
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly learnerId: string;
+        };
         readonly FeatureAccessResponse: {
             readonly dashboardWidgets?: readonly string[];
             readonly quickActions?: readonly string[];
@@ -8709,6 +6672,18 @@ export interface components {
             readonly roles?: readonly string[];
             readonly user_id?: string;
         };
+        readonly FollowUpResponse: {
+            readonly done?: boolean;
+            /** Format: date */
+            readonly dueAt?: string;
+            readonly id?: string;
+            readonly leadId?: string;
+            readonly ownerName?: string;
+            readonly title?: string;
+            readonly type?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
         readonly ForkResponse: {
             readonly baseVersionLabel?: string;
             /** Format: int64 */
@@ -8716,10 +6691,10 @@ export interface components {
             readonly draftId?: string;
         };
         readonly GoogleSlidesLectureResponse: {
-            readonly assetLink?: components["schemas"]["ContentItemAsset"];
-            readonly contentAsset?: components["schemas"]["ContentAsset"];
-            readonly contentItem?: components["schemas"]["ContentItem"];
-            readonly placement?: components["schemas"]["TopicContentItem"];
+            readonly assetLink?: components["schemas"]["ContentItemAssetResponse"];
+            readonly contentAsset?: components["schemas"]["ContentAssetResponse"];
+            readonly contentItem?: components["schemas"]["ContentItemResponse"];
+            readonly placement?: components["schemas"]["TopicContentItemResponse"];
         };
         readonly GradeResponse: {
             readonly academicYearId?: string;
@@ -8738,6 +6713,23 @@ export interface components {
             /** Format: int32 */
             readonly existing?: number;
             readonly grades?: readonly components["schemas"]["GradeResponse"][];
+        };
+        readonly HandoverChecklistItem: {
+            readonly done?: boolean;
+            readonly id: string;
+            readonly label: string;
+        };
+        readonly HandoverResponse: {
+            readonly checklist?: readonly components["schemas"]["HandoverChecklistItem"][];
+            readonly id?: string;
+            readonly leadId?: string;
+            readonly opportunityId?: string;
+            /** Format: date-time */
+            readonly requestedAt?: string;
+            readonly requestedBy?: string;
+            readonly status?: string;
+            /** Format: int64 */
+            readonly version?: number;
         };
         readonly HeartbeatDeviceRequest: {
             readonly deviceRegistrationId?: string;
@@ -8761,6 +6753,162 @@ export interface components {
             readonly threshold?: number;
             /** Format: int64 */
             readonly windowSeconds?: number;
+        };
+        readonly IssueCertificateRequest: {
+            readonly certificateNumber: string;
+            readonly evidenceRef: string;
+            /** Format: date-time */
+            readonly expiresAt?: string;
+            readonly learnerId: string;
+            readonly learningPathId: string;
+        };
+        readonly KpiDefinition: {
+            readonly definition?: string;
+            readonly key?: string;
+            readonly label?: string;
+            readonly sourceModel?: string;
+        };
+        readonly LcmsQuizBundleResponse: {
+            readonly assetsManifest?: {
+                readonly [key: string]: unknown;
+            };
+            /** Format: int32 */
+            readonly bundleFormatVersion?: number;
+            readonly downloadUrl?: string;
+            readonly etag?: string;
+            /** Format: date-time */
+            readonly expiresAt?: string;
+            readonly generatedAt?: string;
+            readonly gradingMode?: string;
+            readonly minRuntimeVersion?: string;
+            readonly offlineGradable?: boolean;
+            readonly package?: {
+                readonly [key: string]: unknown;
+            };
+            readonly packageFormat?: string;
+            readonly packageId?: string;
+            readonly portableReady?: boolean;
+            readonly quizId?: string;
+            readonly quizVersionId?: string;
+            readonly releaseChannel?: string;
+            /** Format: int32 */
+            readonly schemaVersion?: number;
+            readonly signatureAlgorithm?: string;
+            readonly signatureBlock?: components["schemas"]["SignatureBlock"];
+            /** Format: int64 */
+            readonly sizeBytes?: number;
+            readonly tenantId?: string;
+            readonly versionLabel?: string;
+            /** Format: int32 */
+            readonly versionNumber?: number;
+        };
+        readonly LcmsQuizBundleRevokeRequest: {
+            readonly reason: string;
+        };
+        readonly LcmsQuizPackageManifest: {
+            readonly artifactType?: string;
+            readonly contentHash?: string;
+            readonly downloadUrl?: string;
+            readonly etag?: string;
+            readonly expiresAt?: string;
+            readonly generatedAt?: string;
+            readonly gradingMode?: string;
+            readonly manifestVersion?: string;
+            readonly minRuntimeVersion?: string;
+            readonly offlineGradable?: boolean;
+            readonly packageFormat?: string;
+            readonly packageId?: string;
+            readonly portableReady?: boolean;
+            readonly publicKeyId?: string;
+            readonly quizId?: string;
+            readonly quizVersionId?: string;
+            readonly releaseChannel?: string;
+            /** Format: int32 */
+            readonly schemaVersion?: number;
+            readonly signature?: string;
+            readonly signatureAlgorithm?: string;
+            /** Format: int64 */
+            readonly sizeBytes?: number;
+            readonly tenantId?: string;
+            readonly versionLabel?: string;
+            /** Format: int32 */
+            readonly versionNumber?: number;
+        };
+        readonly LcmsQuizPackageUpdateFeedResponse: {
+            readonly available?: readonly components["schemas"]["LcmsQuizPackageManifest"][];
+            /** Format: int32 */
+            readonly currentVersionNumber?: number;
+            readonly etag?: string;
+            readonly feedVersion?: string;
+            readonly generatedAt?: string;
+            readonly latest?: components["schemas"]["LcmsQuizPackageManifest"];
+            readonly quizId?: string;
+            readonly releaseChannel?: string;
+            readonly runtimeVersion?: string;
+            readonly tenantId?: string;
+        };
+        readonly LeadResponse: {
+            readonly contactName?: string;
+            readonly contactRole?: string;
+            readonly district?: string;
+            /** Format: int32 */
+            readonly expectedClasses?: number;
+            /** Format: int32 */
+            readonly expectedStudents?: number;
+            readonly id?: string;
+            /** Format: date-time */
+            readonly lastTouchAt?: string;
+            /** Format: date */
+            readonly nextFollowUpAt?: string;
+            readonly notes?: string;
+            readonly ownerName?: string;
+            readonly phone?: string;
+            /** Format: int32 */
+            readonly probability?: number;
+            readonly province?: string;
+            readonly risks?: readonly string[];
+            readonly schoolId?: string;
+            readonly schoolName?: string;
+            readonly segment?: string;
+            readonly source?: string;
+            readonly status?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
+        readonly LearningPathResponse: {
+            readonly classId?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly description?: string;
+            readonly educationUnitId?: string;
+            readonly id?: string;
+            /** Format: int32 */
+            readonly nodeCount?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly status?: string;
+            readonly tenantId?: string;
+            readonly title?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        readonly LifecycleResponse: {
+            readonly actorId?: string;
+            /** @enum {string} */
+            readonly previousState?: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "ARCHIVED";
+            readonly reason?: string;
+            readonly replayed?: boolean;
+            readonly resourceId?: string;
+            /** @enum {string} */
+            readonly resourceKind?: "CURRICULUM_SUBJECT" | "CURRICULUM_LEVEL" | "CURRICULUM_TOPIC" | "CONTENT_ITEM" | "QUESTION" | "QUIZ";
+            readonly sourceVersionId?: string;
+            /** @enum {string} */
+            readonly state?: "DRAFT" | "IN_REVIEW" | "APPROVED" | "PUBLISHED" | "ARCHIVED";
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly transitionedAt?: string;
+            /** Format: int64 */
+            readonly version?: number;
         };
         readonly LoginAttemptResponse: {
             readonly attemptedEmail?: string;
@@ -8787,6 +6935,33 @@ export interface components {
             readonly password: string;
             readonly portal?: string;
             readonly rememberMe?: boolean;
+        };
+        readonly LtiLaunchRequest: {
+            readonly nonce: string;
+            readonly signedToken: string;
+        };
+        readonly LtiLaunchResponse: {
+            /** Format: date-time */
+            readonly acceptedAt?: string;
+            readonly registrationId?: string;
+            readonly status?: string;
+            readonly subject?: string;
+            readonly targetLinkUri?: string;
+        };
+        readonly LtiRegistrationResponse: {
+            readonly allowedTargetHost?: string;
+            readonly clientId?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly deploymentId?: string;
+            readonly id?: string;
+            readonly issuer?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly status?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
         };
         readonly MarkReadResponse: {
             readonly read?: boolean;
@@ -8880,6 +7055,20 @@ export interface components {
             readonly id?: string;
             readonly isProfileCompleted?: boolean;
         };
+        readonly OpportunityResponse: {
+            readonly academicYear?: string;
+            readonly code?: string;
+            readonly contractTerm?: string;
+            readonly costLines?: readonly components["schemas"]["CostLine"][];
+            readonly id?: string;
+            readonly leadId?: string;
+            readonly ownerName?: string;
+            readonly revenueLines?: readonly components["schemas"]["RevenueLine"][];
+            readonly stage?: string;
+            readonly startMonth?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
         readonly OutboxRunResponse: {
             /** Format: int32 */
             readonly dead?: number;
@@ -8891,6 +7080,28 @@ export interface components {
             readonly retried?: number;
             /** Format: int32 */
             readonly sent?: number;
+        };
+        readonly PackageResponse: {
+            readonly artifactKey?: string;
+            readonly artifactSha256?: string;
+            /** Format: int64 */
+            readonly byteSize?: number;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly id?: string;
+            readonly launchPath?: string;
+            readonly manifestIdentifier?: string;
+            readonly manifestSha256?: string;
+            readonly packageVersion?: string;
+            readonly quarantineReason?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly standard?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            readonly title?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
         };
         readonly PageResponseNotificationItemResponse: {
             readonly hasNext?: boolean;
@@ -8909,6 +7120,22 @@ export interface components {
             readonly lifecycle?: components["schemas"]["AccountLifecycleResponse"];
             /** Format: int32 */
             readonly revokedSessions?: number;
+        };
+        readonly PathDetailResponse: {
+            readonly nodes?: readonly components["schemas"]["PathNodeResponse"][];
+            readonly path?: components["schemas"]["LearningPathResponse"];
+        };
+        readonly PathNodeResponse: {
+            readonly contentKind?: string;
+            readonly contentRefId?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly id?: string;
+            readonly pathId?: string;
+            readonly required?: boolean;
+            /** Format: int32 */
+            readonly sortOrder?: number;
+            readonly tenantId?: string;
         };
         readonly PermissionBindingResponse: {
             readonly description?: string;
@@ -9021,6 +7248,10 @@ export interface components {
             readonly primaryEmail?: string;
             readonly status?: string;
         };
+        readonly PublishLearningPathRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+        };
         readonly PublishRequest: {
             /** Format: int64 */
             readonly docVersion?: number;
@@ -9083,6 +7314,15 @@ export interface components {
             /** Format: int32 */
             readonly version?: number;
         };
+        readonly RecordAttainmentRequest: {
+            readonly classId?: string;
+            readonly competencyId: string;
+            readonly evidenceRef: string;
+            readonly learnerId: string;
+            readonly learningPathId?: string;
+            /** Format: int32 */
+            readonly progressPercent?: number;
+        };
         readonly RecoveryEmailChallengeRequest: {
             /** Format: email */
             readonly recoveryEmail: string;
@@ -9106,6 +7346,19 @@ export interface components {
             readonly deviceId?: string;
             readonly refreshToken: string;
         };
+        readonly RegisterConnectorRequest: {
+            readonly adapterKey: string;
+            readonly displayName: string;
+            readonly endpoint?: string;
+            readonly fieldMapping: {
+                readonly [key: string]: string;
+            };
+            readonly mappingVersion: string;
+            readonly providerKey: string;
+            /** @enum {string} */
+            readonly providerKind: "SIS" | "HRIS" | "SCIM";
+            readonly secretRef: string;
+        };
         readonly RegisterDeviceRequest: {
             readonly client?: components["schemas"]["DeviceClientRequest"];
             readonly endpoint?: string;
@@ -9126,6 +7379,8 @@ export interface components {
             /** Format: int64 */
             readonly docVersion?: number;
             readonly groups?: readonly components["schemas"]["ReorderGroup"][];
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
         };
         readonly ReorderTopicContentItemRequest: {
             readonly placementId?: string;
@@ -9135,13 +7390,30 @@ export interface components {
         readonly ReorderTopicContentItemsRequest: {
             readonly placements?: readonly components["schemas"]["ReorderTopicContentItemRequest"][];
         };
+        readonly ReportFilter: {
+            readonly classId?: string;
+            /** Format: int32 */
+            readonly page?: number;
+            /** Format: int32 */
+            readonly size?: number;
+            readonly status?: string;
+            /** Format: date-time */
+            readonly submittedFrom?: string;
+            /** Format: date-time */
+            readonly submittedTo?: string;
+            readonly timezone?: string;
+        };
         readonly ReportJobResponse: {
             readonly aggregateId?: string;
             /** Format: date-time */
             readonly completedAt?: string;
             /** Format: date-time */
             readonly createdAt?: string;
+            readonly downloadPath?: string;
             readonly error?: string;
+            /** Format: date-time */
+            readonly expiresAt?: string;
+            readonly format?: string;
             readonly id?: string;
             /** Format: int32 */
             readonly progress?: number;
@@ -9151,8 +7423,36 @@ export interface components {
             };
             readonly status?: string;
         };
+        readonly RetryRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+        };
+        readonly RevenueLine: {
+            /** Format: int32 */
+            readonly classCount?: number;
+            readonly discountRate?: number;
+            /** Format: int32 */
+            readonly durationMonths?: number;
+            readonly id: string;
+            readonly packageName: string;
+            readonly pricePerStudent?: number;
+            readonly program: string;
+            /** Format: int32 */
+            readonly studentsPerClass?: number;
+        };
+        readonly RevokeCertificateRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly reason: string;
+        };
         readonly RevokeEmployeeSessionRequest: {
             readonly sessionId: string;
+        };
+        readonly RevokeResponse: {
+            readonly etag?: string;
+            readonly packageId?: string;
+            /** Format: date-time */
+            readonly revokedAt?: string;
         };
         readonly RevokeScopedRoleRequest: {
             readonly reason?: string;
@@ -9178,6 +7478,11 @@ export interface components {
             /** Format: int32 */
             readonly userCount?: number;
         };
+        readonly RunRequest: {
+            readonly cursor?: string;
+            /** Format: int64 */
+            readonly expectedVersion: number;
+        };
         readonly SaveAnswerRequest: {
             readonly answer?: unknown;
             /** Format: date-time */
@@ -9185,10 +7490,16 @@ export interface components {
             readonly clientResult?: {
                 readonly [key: string]: unknown;
             };
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
         };
         readonly SaveDraftRequest: {
             /** Format: int64 */
             readonly docVersion?: number;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
             readonly playerTemplate?: {
                 readonly [key: string]: unknown;
             };
@@ -9360,7 +7671,9 @@ export interface components {
             readonly manageableUnits?: readonly components["schemas"]["SessionBootstrapUnit"][];
             readonly permissions?: components["schemas"]["SessionBootstrapPermissions"];
             readonly portals?: readonly string[];
+            readonly tenantId?: string;
             readonly user?: components["schemas"]["SessionBootstrapUser"];
+            readonly workspaces?: readonly string[];
         };
         readonly SessionBootstrapScope: {
             readonly classId?: string;
@@ -9423,11 +7736,19 @@ export interface components {
             readonly sessionId?: string;
             readonly userAgent?: string;
         };
+        readonly SignatureBlock: {
+            readonly algorithm?: string;
+            readonly contentHash?: string;
+            readonly publicKeyId?: string;
+            readonly signature?: string;
+        };
         readonly SlideUpsertRequest: {
             readonly afterSlideId?: string;
             /** Format: int64 */
             readonly docVersion?: number;
             readonly groupId?: string;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
             readonly slide?: {
                 readonly [key: string]: unknown;
             };
@@ -9471,6 +7792,49 @@ export interface components {
             /** Format: int32 */
             readonly studentCount?: number;
         };
+        readonly StudentProgressRow: {
+            /** Format: int32 */
+            readonly answeredCount?: number;
+            readonly passed?: boolean;
+            /** Format: double */
+            readonly percentComplete?: number;
+            /** Format: double */
+            readonly score?: number;
+            readonly status?: string;
+            readonly studentName?: string;
+            readonly studentUserId?: string;
+            readonly submittedAt?: string;
+            /** Format: int32 */
+            readonly totalQuestions?: number;
+        };
+        readonly StudentResponse: {
+            readonly academicClassId?: string;
+            readonly address?: string;
+            readonly authUserId?: string;
+            /** Format: date-time */
+            readonly birthday?: string;
+            readonly email?: string;
+            /** Format: date-time */
+            readonly enrollmentDate?: string;
+            readonly fullName?: string;
+            readonly gender?: string;
+            readonly id?: string;
+            readonly note?: string;
+            readonly parentEmail?: string;
+            readonly parentName?: string;
+            readonly parentPhone?: string;
+            readonly parentRelationship?: string;
+            readonly phone?: string;
+            readonly schoolId?: string;
+            readonly status?: string;
+            readonly studentCode?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly username?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
         readonly StudentScoreItem: {
             readonly assignment?: components["schemas"]["AssignmentResponse"];
             /** Format: double */
@@ -9489,6 +7853,18 @@ export interface components {
             /** Format: int32 */
             readonly totalPages?: number;
         };
+        readonly SubjectResponse: {
+            readonly code?: string;
+            readonly id?: string;
+            readonly name?: string;
+            readonly schoolId?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
         readonly SubmitAttemptRequest: {
             readonly answers?: {
                 readonly [key: string]: unknown;
@@ -9499,10 +7875,53 @@ export interface components {
             readonly clientResult?: {
                 readonly [key: string]: unknown;
             };
+            readonly idempotencyKey?: string;
             readonly packageHash?: string;
             readonly quizVersion?: string;
             /** Format: date-time */
             readonly submittedAt?: string;
+        };
+        readonly SyncPreviewResponse: {
+            /** Format: int32 */
+            readonly additions?: number;
+            readonly connectorId?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly mode?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            /** Format: int32 */
+            readonly removals?: number;
+            readonly runId?: string;
+            readonly sampleExternalIds?: readonly string[];
+            readonly status?: string;
+            /** Format: int32 */
+            readonly total?: number;
+            /** Format: int32 */
+            readonly updates?: number;
+        };
+        readonly SyncRunResponse: {
+            readonly connectorId?: string;
+            /** Format: int32 */
+            readonly created?: number;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            readonly errorCode?: string;
+            /** Format: int32 */
+            readonly failed?: number;
+            readonly mode?: string;
+            /** Format: int32 */
+            readonly processed?: number;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            /** Format: int32 */
+            readonly retryCount?: number;
+            readonly runId?: string;
+            readonly status?: string;
+            /** Format: int32 */
+            readonly updated?: number;
+            /** Format: date-time */
+            readonly updatedAt?: string;
         };
         readonly TokenResponse: {
             readonly accessToken?: string;
@@ -9511,7 +7930,7 @@ export interface components {
             readonly refreshToken?: string;
             readonly tokenType?: string;
         };
-        readonly TopicContentItem: {
+        readonly TopicContentItemResponse: {
             readonly contentItemId?: string;
             readonly contentRole?: string;
             /** Format: date-time */
@@ -9525,6 +7944,15 @@ export interface components {
             readonly topicId?: string;
             /** Format: date-time */
             readonly updatedAt?: string;
+        };
+        readonly TransitionRequest: {
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey: string;
+            readonly operationId?: string;
+            readonly reason?: string;
+            readonly sourceVersionId?: string;
+            readonly targetState: string;
         };
         readonly UnreadCountResponse: {
             /** Format: int64 */
@@ -9542,21 +7970,35 @@ export interface components {
             readonly dueAt?: string;
             /** Format: int32 */
             readonly maxDurationMinutes?: number;
+            readonly offlineAllowed?: boolean;
             /** Format: date-time */
             readonly startAt?: string;
             readonly status?: string;
             readonly teacherNote?: string;
             readonly title?: string;
         };
+        readonly UpdateClassRequest: {
+            readonly academicYear?: string;
+            readonly grade?: string;
+            readonly homeroomTeacherId?: string;
+            readonly name?: string;
+            readonly status?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
         readonly UpdateContentAssetRequest: {
             readonly assetType?: string;
             /** Format: int64 */
             readonly byteSize?: number;
             readonly checksumSha256?: string;
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey?: string;
             readonly metadata?: {
                 readonly [key: string]: unknown;
             };
             readonly mimeType?: string;
+            readonly operationId?: string;
             readonly status?: string;
             readonly storageKey?: string;
             readonly storageProvider?: string;
@@ -9566,27 +8008,44 @@ export interface components {
         readonly UpdateContentItemRequest: {
             readonly contentType?: string;
             readonly description?: string;
+            /** Format: int64 */
+            readonly expectedVersion?: number;
+            readonly idempotencyKey?: string;
+            readonly operationId?: string;
             readonly status?: string;
             readonly title?: string;
             readonly visibility?: string;
-        };
-        readonly UpdateDocumentRequest: {
-            readonly content?: string;
-            readonly metadata?: {
-                readonly [key: string]: unknown;
-            };
-            readonly name?: string;
         };
         readonly UpdateEmployeeRequest: {
             readonly fullName?: string;
             readonly phone?: string;
             readonly profile?: components["schemas"]["EmployeeProfileRequest"];
         };
+        readonly UpdateFollowUpCompletionRequest: {
+            readonly done?: boolean;
+            /** Format: int64 */
+            readonly expectedVersion: number;
+        };
         readonly UpdateGradeRequest: {
             readonly label?: string;
             /** Format: int32 */
             readonly sortOrder?: number;
             readonly status?: string;
+        };
+        readonly UpdateLeadStatusRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly status: string;
+        };
+        readonly UpdateOpportunityRequest: {
+            readonly academicYear: string;
+            readonly contractTerm: string;
+            readonly costLines: readonly components["schemas"]["CostLine"][];
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly revenueLines: readonly components["schemas"]["RevenueLine"][];
+            readonly stage: string;
+            readonly startMonth: string;
         };
         readonly UpdatePreferencesRequest: {
             readonly portal: string;
@@ -9635,12 +8094,36 @@ export interface components {
             /** Format: int64 */
             readonly version: number;
         };
-        readonly UploadDocumentRequest: {
-            readonly content: string;
-            readonly metadata?: {
-                readonly [key: string]: unknown;
-            };
-            readonly name: string;
+        readonly UpdateStudentRequest: {
+            readonly academicClassId?: string;
+            readonly address?: string;
+            /** Format: date-time */
+            readonly birthday?: string;
+            /** Format: email */
+            readonly email?: string;
+            /** Format: date-time */
+            readonly enrollmentDate?: string;
+            readonly fullName?: string;
+            readonly gender?: string;
+            readonly note?: string;
+            /** Format: email */
+            readonly parentEmail?: string;
+            readonly parentName?: string;
+            readonly parentPhone?: string;
+            readonly parentRelationship?: string;
+            readonly phone?: string;
+            readonly status?: string;
+            readonly studentCode?: string;
+            readonly username?: string;
+            /** Format: int64 */
+            readonly version?: number;
+        };
+        readonly UpdateSubjectRequest: {
+            readonly code?: string;
+            readonly name?: string;
+            readonly status?: string;
+            /** Format: int64 */
+            readonly version?: number;
         };
         readonly UserCreatedResponse: {
             readonly deliveryStatus?: string;
@@ -9702,6 +8185,11 @@ export interface components {
             readonly tenantId?: string;
             readonly updatedAt?: string;
         };
+        readonly ValidatePackageRequest: {
+            /** Format: int64 */
+            readonly expectedVersion: number;
+            readonly manifestXml: string;
+        };
         readonly ValidationErrorResponse: {
             readonly code?: string;
             readonly message?: string;
@@ -9714,6 +8202,36 @@ export interface components {
         readonly VersionRequest: {
             /** Format: int64 */
             readonly version: number;
+        };
+        readonly WorkspaceResponse: {
+            readonly followUps?: readonly components["schemas"]["FollowUpResponse"][];
+            readonly handovers?: readonly components["schemas"]["HandoverResponse"][];
+            readonly leads?: readonly components["schemas"]["LeadResponse"][];
+            readonly opportunities?: readonly components["schemas"]["OpportunityResponse"][];
+        };
+        readonly XapiStatementRequest: {
+            readonly actorId: string;
+            readonly objectId: string;
+            readonly occurredAt?: string;
+            readonly payloadSha256: string;
+            readonly statementId: string;
+            readonly verb: string;
+        };
+        readonly XapiStatementResponse: {
+            readonly actorHash?: string;
+            readonly id?: string;
+            readonly objectId?: string;
+            /** Format: date-time */
+            readonly occurredAt?: string;
+            readonly payloadSha256?: string;
+            /** Format: date-time */
+            readonly receivedAt?: string;
+            /** Format: int64 */
+            readonly recordVersion?: number;
+            readonly statementId?: string;
+            readonly status?: string;
+            readonly tenantId?: string;
+            readonly verb?: string;
         };
     };
     responses: never;
@@ -9743,7 +8261,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseContentAsset"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentAssetResponse"];
                 };
             };
         };
@@ -9751,7 +8269,9 @@ export interface operations {
     readonly updateContentAsset: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly contentAssetId: string;
             };
@@ -9769,12 +8289,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseContentAsset"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentAssetResponse"];
                 };
             };
         };
     };
-    readonly createContentItem: {
+    readonly createContentItem_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -9793,7 +8313,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseContentItem"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemResponse"];
                 };
             };
         };
@@ -9815,7 +8335,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringBoolean"];
+                    readonly "*/*": components["schemas"]["ApiResponseDeletedResponse"];
                 };
             };
         };
@@ -9823,7 +8343,9 @@ export interface operations {
     readonly updateContentItem: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly contentItemId: string;
             };
@@ -9841,7 +8363,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseContentItem"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemResponse"];
                 };
             };
         };
@@ -9867,7 +8389,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseContentItemAsset"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemAssetResponse"];
                 };
             };
         };
@@ -9896,1264 +8418,6 @@ export interface operations {
             };
         };
     };
-    readonly reads_32: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_16: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly blacklist_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createBlacklist_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteBlacklist: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateBlacklist: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly configs_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createConfig_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteConfig_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateConfig_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createConfig_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_13: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly jobStatus_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly stream: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "text/event-stream": string;
-                };
-            };
-        };
-    };
-    readonly reads_20: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_21: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_31: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly jobStatus_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_27: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_33: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRss: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssDelete_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssUpdate_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRss_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_26: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_24: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_11: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_30: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly stream_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "text/event-stream": string;
-                };
-            };
-        };
-    };
-    readonly job_12: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly hardDeleteLevel: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
-                };
-            };
-        };
-    };
-    readonly updateLevel: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
-                };
-            };
-        };
-    };
-    readonly archiveLevel: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
-                };
-            };
-        };
-    };
-    readonly levelImpact: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
-                };
-            };
-        };
-    };
-    readonly createTopic: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly levelId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
-                };
-            };
-        };
-    };
-    readonly createSubject: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
-                };
-            };
-        };
-    };
-    readonly hardDeleteSubject: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
-                };
-            };
-        };
-    };
-    readonly updateSubject: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
-                };
-            };
-        };
-    };
-    readonly archiveSubject: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
-                };
-            };
-        };
-    };
-    readonly subjectImpact: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
-                };
-            };
-        };
-    };
-    readonly createLevel: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly subjectId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
-                };
-            };
-        };
-    };
-    readonly hardDeleteTopic: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
-                };
-            };
-        };
-    };
-    readonly updateTopic: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
-                };
-            };
-        };
-    };
-    readonly archiveTopic: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
-                };
-            };
-        };
-    };
-    readonly topicImpact: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
-                };
-            };
-        };
-    };
     readonly placeContentItem: {
         readonly parameters: {
             readonly query?: never;
@@ -11175,12 +8439,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseTopicContentItem"];
+                    readonly "*/*": components["schemas"]["ApiResponseTopicContentItemResponse"];
                 };
             };
         };
     };
-    readonly removePlacement: {
+    readonly removePlacement_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -11198,7 +8462,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
+                    readonly "*/*": components["schemas"]["ApiResponseDeletedResponse"];
                 };
             };
         };
@@ -11224,326 +8488,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListTopicContentItem"];
+                    readonly "*/*": components["schemas"]["ApiResponseListTopicContentItemResponse"];
                 };
             };
         };
     };
-    readonly tree: {
-        readonly parameters: {
-            readonly query?: {
-                readonly status?: string;
-            };
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTreeResponse"];
-                };
-            };
-        };
-    };
-    readonly categories_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_13: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly category_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_14: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_11: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly level: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_15: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_12: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly send_2: {
+    readonly send_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -11563,6 +8513,28 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseAdminSendResponse"];
+                };
+            };
+        };
+    };
+    readonly replayDeadLetters: {
+        readonly parameters: {
+            readonly query?: {
+                readonly limit?: number;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseDeadLetterReplayResponse"];
                 };
             };
         };
@@ -11587,7 +8559,7 @@ export interface operations {
             };
         };
     };
-    readonly send_1: {
+    readonly send: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -11956,35 +8928,18 @@ export interface operations {
             };
         };
     };
-    readonly generate_1: {
+    readonly events: {
         readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+            readonly query?: {
+                readonly actorId?: string;
+                readonly from?: string;
+                readonly outcome?: string;
+                readonly page?: number;
+                readonly resourceId?: string;
+                readonly resourceType?: string;
+                readonly size?: number;
+                readonly to?: string;
             };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_35: {
-        readonly parameters: {
-            readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
@@ -11997,85 +8952,24 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseAuditPage"];
                 };
             };
         };
     };
-    readonly createKey: {
+    readonly export: {
         readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+            readonly query?: {
+                readonly actorId?: string;
+                readonly format?: string;
+                readonly from?: string;
+                readonly outcome?: string;
+                readonly page?: number;
+                readonly resourceId?: string;
+                readonly resourceType?: string;
+                readonly size?: number;
+                readonly to?: string;
             };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteKey: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly keyAction: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly action: string;
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_37: {
-        readonly parameters: {
-            readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
@@ -12088,157 +8982,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_36: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_34: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly generate: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly status_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_38: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly auditLogs: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly auditLog: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": Record<string, never>;
                 };
             };
         };
@@ -12375,257 +9119,7 @@ export interface operations {
             };
         };
     };
-    readonly blacklist_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createBlacklist_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteBlacklist_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly accounts: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteAccount: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly conversations: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly conversation: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly send: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly wizard: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly link: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly linkCode: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly code: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_11: {
+    readonly create_4: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -12914,7 +9408,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseListCalendarRoomOptionResponse"];
                 };
             };
         };
@@ -12967,7 +9461,7 @@ export interface operations {
             };
         };
     };
-    readonly workspace: {
+    readonly workspace_1: {
         readonly parameters: {
             readonly query: {
                 readonly classIds?: readonly string[];
@@ -13018,14 +9512,21 @@ export interface operations {
             };
         };
     };
-    readonly list_4: {
+    readonly transition: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
-            readonly path?: never;
+            readonly path: {
+                readonly resourceId: string;
+                readonly resourceKind: string;
+            };
             readonly cookie?: never;
         };
-        readonly requestBody?: never;
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["TransitionRequest"];
+            };
+        };
         readonly responses: {
             /** @description OK */
             readonly 200: {
@@ -13033,12 +9534,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseLifecycleResponse"];
                 };
             };
         };
     };
-    readonly create_10: {
+    readonly createContentAsset_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -13047,9 +9548,7 @@ export interface operations {
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["CreateContentAssetRequest"];
             };
         };
         readonly responses: {
@@ -13059,69 +9558,25 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentAssetResponse"];
                 };
             };
         };
     };
-    readonly detail_3: {
+    readonly updateContentAsset_1: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly contentAssetId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["UpdateContentAssetRequest"];
             };
         };
         readonly responses: {
@@ -13131,25 +9586,71 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentAssetResponse"];
                 };
             };
         };
     };
-    readonly reorder_1: {
+    readonly createContentItem: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateContentItemRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemResponse"];
+                };
+            };
+        };
+    };
+    readonly deleteContentItem_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly id: string;
+                readonly contentItemId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseDeletedResponse"];
+                };
+            };
+        };
+    };
+    readonly updateContentItem_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly contentItemId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["UpdateContentItemRequest"];
             };
         };
         readonly responses: {
@@ -13159,47 +9660,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemResponse"];
                 };
             };
         };
     };
-    readonly schema: {
+    readonly attachContentAsset_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly contentItemId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["AttachContentAssetRequest"];
             };
         };
         readonly responses: {
@@ -13209,85 +9686,21 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseContentItemAssetResponse"];
                 };
             };
         };
     };
-    readonly bySubdomain: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly subdomain: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_14: {
+    readonly createGoogleSlidesLecture_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_29: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["CreateGoogleSlidesLectureRequest"];
             };
         };
         readonly responses: {
@@ -13297,43 +9710,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseGoogleSlidesLectureResponse"];
                 };
             };
         };
     };
-    readonly blacklist: {
+    readonly createFollowUp: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
             };
-        };
-    };
-    readonly createBlacklist: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["CreateFollowUpRequest"];
             };
         };
         readonly responses: {
@@ -13343,47 +9736,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseFollowUpResponse"];
                 };
             };
         };
     };
-    readonly deleteBlacklist_1: {
+    readonly updateFollowUpCompletion: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateBlacklist_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly followUpId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["UpdateFollowUpCompletionRequest"];
             };
         };
         readonly responses: {
@@ -13393,43 +9762,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseFollowUpResponse"];
                 };
             };
         };
     };
-    readonly configs_1: {
+    readonly createHandover: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
             };
-        };
-    };
-    readonly createConfig_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["CreateHandoverRequest"];
             };
         };
         readonly responses: {
@@ -13439,47 +9788,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseHandoverResponse"];
                 };
             };
         };
     };
-    readonly deleteConfig_1: {
+    readonly approveHandover: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateConfig_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly handoverId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["ApproveHandoverRequest"];
             };
         };
         readonly responses: {
@@ -13489,337 +9814,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseHandoverResponse"];
                 };
             };
         };
     };
-    readonly createConfig_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly jobStatus: {
+    readonly updateLeadStatus: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly stream_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "text/event-stream": string;
-                };
-            };
-        };
-    };
-    readonly reads_28: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_23: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_22: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly jobStatus_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly jobId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_19: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_18: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRss_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssDelete: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssUpdate: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly leadId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["UpdateLeadStatusRequest"];
             };
         };
         readonly responses: {
@@ -13829,23 +9840,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseLeadResponse"];
                 };
             };
         };
     };
-    readonly legacyRssCreate: {
+    readonly createOpportunity: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["CreateOpportunityRequest"];
             };
         };
         readonly responses: {
@@ -13855,43 +9866,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseOpportunityResponse"];
                 };
             };
         };
     };
-    readonly legacyRss_2: {
+    readonly updateOpportunity: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
+            readonly path: {
+                readonly opportunityId: string;
             };
-        };
-    };
-    readonly legacyRssCreate_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["UpdateOpportunityRequest"];
             };
         };
         readonly responses: {
@@ -13901,243 +9892,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly legacyRssCreate_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_15: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_17: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly job_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_25: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly stream_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "text/event-stream": string;
-                };
-            };
-        };
-    };
-    readonly job_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseOpportunityResponse"];
                 };
             };
         };
@@ -14191,7 +9946,7 @@ export interface operations {
             };
         };
     };
-    readonly list_3: {
+    readonly workspace: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -14206,36 +9961,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseWorkspaceResponse"];
                 };
             };
         };
     };
-    readonly upload: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": components["schemas"]["UploadDocumentRequest"];
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly get: {
+    readonly hardDeleteLevel: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -14252,34 +9983,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
                 };
             };
         };
     };
-    readonly delete_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_6: {
+    readonly updateLevel: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -14290,7 +9999,7 @@ export interface operations {
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": components["schemas"]["UpdateDocumentRequest"];
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
             };
         };
         readonly responses: {
@@ -14300,12 +10009,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
                 };
             };
         };
     };
-    readonly file: {
+    readonly archiveLevel: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -14322,7 +10031,386 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
+                };
+            };
+        };
+    };
+    readonly levelImpact: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
+                };
+            };
+        };
+    };
+    readonly createTopic: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly levelId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
+                };
+            };
+        };
+    };
+    readonly createSubject_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly hardDeleteSubject: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
+                };
+            };
+        };
+    };
+    readonly updateSubject_2: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly archiveSubject_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly subjectImpact: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
+                };
+            };
+        };
+    };
+    readonly createLevel: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly subjectId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumLevelResponse"];
+                };
+            };
+        };
+    };
+    readonly hardDeleteTopic: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumHardDeleteResponse"];
+                };
+            };
+        };
+    };
+    readonly updateTopic: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CurriculumNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
+                };
+            };
+        };
+    };
+    readonly archiveTopic: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTopicResponse"];
+                };
+            };
+        };
+    };
+    readonly topicImpact: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly id: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumImpactResponse"];
+                };
+            };
+        };
+    };
+    readonly placeContentItem_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly topicId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["PlaceContentItemRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseTopicContentItemResponse"];
+                };
+            };
+        };
+    };
+    readonly removePlacement: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly placementId: string;
+                readonly topicId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseDeletedResponse"];
+                };
+            };
+        };
+    };
+    readonly reorderPlacements_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly topicId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ReorderTopicContentItemsRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListTopicContentItemResponse"];
+                };
+            };
+        };
+    };
+    readonly tree: {
+        readonly parameters: {
+            readonly query?: {
+                readonly status?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCurriculumTreeResponse"];
                 };
             };
         };
@@ -14347,7 +10435,7 @@ export interface operations {
             };
         };
     };
-    readonly categories_2: {
+    readonly connectors: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -14362,23 +10450,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseListConnectorResponse"];
                 };
             };
         };
     };
-    readonly create_17: {
+    readonly register_1: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["RegisterConnectorRequest"];
             };
         };
         readonly responses: {
@@ -14388,17 +10476,17 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseConnectorResponse"];
                 };
             };
         };
     };
-    readonly delete_11: {
+    readonly connectorById: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path: {
-                readonly id: string;
+                readonly connectorId: string;
             };
             readonly cookie?: never;
         };
@@ -14410,25 +10498,25 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseConnectorResponse"];
                 };
             };
         };
     };
-    readonly update_13: {
+    readonly deprovision: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
-                readonly id: string;
+                readonly connectorId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["DeprovisionRequest"];
             };
         };
         readonly responses: {
@@ -14438,95 +10526,25 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseDeprovisionResponse"];
                 };
             };
         };
     };
-    readonly category_2: {
+    readonly dryRun: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_12: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_12: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_14: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly connectorId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["RunRequest"];
             };
         };
         readonly responses: {
@@ -14536,95 +10554,26 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseSyncPreviewResponse"];
                 };
             };
         };
     };
-    readonly level_1: {
+    readonly retry: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_16: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
+                readonly connectorId: string;
+                readonly runId: string;
             };
             readonly cookie?: never;
         };
         readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["RetryRequest"];
             };
         };
         readonly responses: {
@@ -14634,7 +10583,35 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseSyncRunResponse"];
+                };
+            };
+        };
+    };
+    readonly sync: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly connectorId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["RunRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSyncRunResponse"];
                 };
             };
         };
@@ -14659,18 +10636,18 @@ export interface operations {
             };
         };
     };
-    readonly insightWrite_1: {
+    readonly enroll: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["EnrollStudentRequest"];
             };
         };
         readonly responses: {
@@ -14680,63 +10657,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseEnrollmentResponse"];
                 };
             };
         };
     };
-    readonly insightRead: {
+    readonly bulkEnroll: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
             };
-        };
-    };
-    readonly insightRead_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightWrite: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": components["schemas"]["BulkEnrollRequest"];
             };
         };
         readonly responses: {
@@ -14746,251 +10683,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightWrite_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly finishSession: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightWrite_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightSession_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly sessionId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightRead_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly insightSession: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly sessionId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseBulkEnrollmentResponse"];
                 };
             };
         };
@@ -15045,7 +10738,35 @@ export interface operations {
             };
         };
     };
-    readonly create_9: {
+    readonly uploadLocal: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly "Content-Type": string;
+            };
+            readonly path: {
+                readonly filename: string;
+                readonly prefix: string;
+                readonly tenantId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": string;
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    readonly create_3: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15069,7 +10790,7 @@ export interface operations {
             };
         };
     };
-    readonly update_4: {
+    readonly update: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15095,7 +10816,7 @@ export interface operations {
             };
         };
     };
-    readonly delete_3: {
+    readonly delete: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15117,6 +10838,99 @@ export interface operations {
             };
         };
     };
+    readonly download_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    readonly manifest: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLcmsQuizPackageManifest"];
+                };
+            };
+        };
+    };
+    readonly revoke: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["LcmsQuizBundleRevokeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseRevokeResponse"];
+                };
+            };
+        };
+    };
+    readonly updates: {
+        readonly parameters: {
+            readonly query: {
+                readonly channel?: string;
+                readonly currentVersion?: number;
+                readonly quizId: string;
+                readonly runtimeVersion?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLcmsQuizPackageUpdateFeedResponse"];
+                };
+            };
+        };
+    };
     readonly exportVersion: {
         readonly parameters: {
             readonly query?: never;
@@ -15134,12 +10948,12 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseLcmsQuizBundleResponse"];
                 };
             };
         };
     };
-    readonly create_8: {
+    readonly create_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: {
@@ -15165,7 +10979,7 @@ export interface operations {
             };
         };
     };
-    readonly delete_14: {
+    readonly delete_2: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15204,7 +11018,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseLcmsQuizBundleResponse"];
                 };
             };
         };
@@ -15212,7 +11026,9 @@ export interface operations {
     readonly saveDraft: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly quizId: string;
             };
@@ -15238,7 +11054,9 @@ export interface operations {
     readonly patchDraft: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly quizId: string;
             };
@@ -15292,7 +11110,9 @@ export interface operations {
     readonly reorder: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly quizId: string;
             };
@@ -15318,7 +11138,9 @@ export interface operations {
     readonly upsertSlide: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly quizId: string;
             };
@@ -15386,7 +11208,7 @@ export interface operations {
             };
         };
     };
-    readonly create_7: {
+    readonly create_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15564,6 +11386,111 @@ export interface operations {
             };
         };
     };
+    readonly createClass: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateClassRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseClassResponse"];
+                };
+            };
+        };
+    };
+    readonly updateClass: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly classId: string;
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateClassRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseClassResponse"];
+                };
+            };
+        };
+    };
+    readonly archiveClass: {
+        readonly parameters: {
+            readonly query?: {
+                readonly version?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly classId: string;
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseClassResponse"];
+                };
+            };
+        };
+    };
+    readonly updateClass_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly classId: string;
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateClassRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseClassResponse"];
+                };
+            };
+        };
+    };
     readonly createGrade: {
         readonly parameters: {
             readonly query?: never;
@@ -15639,7 +11566,7 @@ export interface operations {
             };
         };
     };
-    readonly restore_1: {
+    readonly restore: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15661,7 +11588,880 @@ export interface operations {
             };
         };
     };
-    readonly create_6: {
+    readonly createStudent: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateStudentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseStudentResponse"];
+                };
+            };
+        };
+    };
+    readonly updateStudent: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly schoolId: string;
+                readonly studentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateStudentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseStudentResponse"];
+                };
+            };
+        };
+    };
+    readonly archiveStudent: {
+        readonly parameters: {
+            readonly query?: {
+                readonly version?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly schoolId: string;
+                readonly studentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseStudentResponse"];
+                };
+            };
+        };
+    };
+    readonly updateStudent_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly schoolId: string;
+                readonly studentId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateStudentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseStudentResponse"];
+                };
+            };
+        };
+    };
+    readonly importStudents: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["BulkStudentImportRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseBulkStudentImportResponse"];
+                };
+            };
+        };
+    };
+    readonly importStudents_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly schoolId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["BulkStudentImportRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseBulkStudentImportResponse"];
+                };
+            };
+        };
+    };
+    readonly subjectsReadNotPublished: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    readonly createSubject: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateSubjectRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Created */
+            readonly 201: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly updateSubject: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly subjectId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateSubjectRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly archiveSubject: {
+        readonly parameters: {
+            readonly query?: {
+                readonly version?: number;
+            };
+            readonly header?: never;
+            readonly path: {
+                readonly subjectId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly updateSubject_1: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly subjectId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["UpdateSubjectRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseSubjectResponse"];
+                };
+            };
+        };
+    };
+    readonly recordAttainment: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["RecordAttainmentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseAttainmentResponse"];
+                };
+            };
+        };
+    };
+    readonly issueCertificate: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["IssueCertificateRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCertificateResponse"];
+                };
+            };
+        };
+    };
+    readonly revokeCertificate: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly certificateId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["RevokeCertificateRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCertificateResponse"];
+                };
+            };
+        };
+    };
+    readonly verifyCertificate: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly verificationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCertificateResponse"];
+                };
+            };
+        };
+    };
+    readonly competencies: {
+        readonly parameters: {
+            readonly query?: {
+                readonly educationUnitId?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListCompetencyResponse"];
+                };
+            };
+        };
+    };
+    readonly createCompetency: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateCompetencyRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCompetencyResponse"];
+                };
+            };
+        };
+    };
+    readonly competency: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly competencyId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCompetencyResponse"];
+                };
+            };
+        };
+    };
+    readonly attainments: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly learnerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListAttainmentResponse"];
+                };
+            };
+        };
+    };
+    readonly certificates: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly learnerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListCertificateResponse"];
+                };
+            };
+        };
+    };
+    readonly completions: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly learnerId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListCompletionResponse"];
+                };
+            };
+        };
+    };
+    readonly paths: {
+        readonly parameters: {
+            readonly query?: {
+                readonly classId?: string;
+                readonly educationUnitId?: string;
+                readonly status?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListLearningPathResponse"];
+                };
+            };
+        };
+    };
+    readonly createPath: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateLearningPathRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLearningPathResponse"];
+                };
+            };
+        };
+    };
+    readonly path: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly pathId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePathDetailResponse"];
+                };
+            };
+        };
+    };
+    readonly evaluateCompletion: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly pathId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["EvaluateCompletionRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseCompletionResponse"];
+                };
+            };
+        };
+    };
+    readonly addNode: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly pathId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["AddPathNodeRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePathNodeResponse"];
+                };
+            };
+        };
+    };
+    readonly publishPath: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly pathId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["PublishLearningPathRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLearningPathResponse"];
+                };
+            };
+        };
+    };
+    readonly createLtiRegistration: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreateLtiRegistrationRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLtiRegistrationResponse"];
+                };
+            };
+        };
+    };
+    readonly launchLti: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly registrationId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["LtiLaunchRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseLtiLaunchResponse"];
+                };
+            };
+        };
+    };
+    readonly packages: {
+        readonly parameters: {
+            readonly query?: {
+                readonly status?: string;
+            };
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseListPackageResponse"];
+                };
+            };
+        };
+    };
+    readonly createPackage: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CreatePackageRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePackageResponse"];
+                };
+            };
+        };
+    };
+    readonly packageById: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePackageResponse"];
+                };
+            };
+        };
+    };
+    readonly launchPackage: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePackageResponse"];
+                };
+            };
+        };
+    };
+    readonly validatePackage: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path: {
+                readonly packageId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ValidatePackageRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponsePackageResponse"];
+                };
+            };
+        };
+    };
+    readonly ingestXapi: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["XapiStatementRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": components["schemas"]["ApiResponseXapiStatementResponse"];
+                };
+            };
+        };
+    };
+    readonly create: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: {
@@ -15687,7 +12487,7 @@ export interface operations {
             };
         };
     };
-    readonly delete_4: {
+    readonly delete_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15709,7 +12509,7 @@ export interface operations {
             };
         };
     };
-    readonly update_5: {
+    readonly update_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15735,7 +12535,7 @@ export interface operations {
             };
         };
     };
-    readonly assignmentProgress: {
+    readonly assignmentProgress_1: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
@@ -15812,7 +12612,9 @@ export interface operations {
     readonly saveAnswers: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly attemptId: string;
             };
@@ -15838,7 +12640,9 @@ export interface operations {
     readonly saveAnswer: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly attemptId: string;
                 readonly questionId: string;
@@ -15865,7 +12669,9 @@ export interface operations {
     readonly saveDraft_1: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly attemptId: string;
             };
@@ -15891,7 +12697,9 @@ export interface operations {
     readonly submitAttempt: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly attemptId: string;
             };
@@ -15917,7 +12725,9 @@ export interface operations {
     readonly syncAttempt: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path: {
                 readonly attemptId: string;
             };
@@ -15957,7 +12767,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseClassesBySchoolResponse"];
                 };
             };
         };
@@ -15977,7 +12787,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseEducationUnitListResponse"];
                 };
             };
         };
@@ -16186,132 +12996,6 @@ export interface operations {
             };
         };
     };
-    readonly menu: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly cacheKeys: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly cutover: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly dataParity: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly loadReport: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly nativeAssessment: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
     readonly register: {
         readonly parameters: {
             readonly query?: never;
@@ -16336,7 +13020,7 @@ export interface operations {
             };
         };
     };
-    readonly revoke: {
+    readonly revoke_1: {
         readonly parameters: {
             readonly query?: {
                 readonly portal?: string;
@@ -16408,7 +13092,7 @@ export interface operations {
             };
         };
     };
-    readonly list_9: {
+    readonly list: {
         readonly parameters: {
             readonly query?: {
                 readonly page?: number;
@@ -16433,7 +13117,7 @@ export interface operations {
             };
         };
     };
-    readonly get_1: {
+    readonly get: {
         readonly parameters: {
             readonly query?: {
                 readonly portal?: string;
@@ -16595,258 +13279,6 @@ export interface operations {
             };
         };
     };
-    readonly configs: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createConfig: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateConfig: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteConfig: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly firewallMutation_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly firewallCheck: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly ip: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly operationsRead_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly firewallMutation: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly operationsRead: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly operationsRead_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly page: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
     readonly listPermissionGroups: {
         readonly parameters: {
             readonly query?: never;
@@ -16933,552 +13365,6 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponsePermissionPageResponse"];
-                };
-            };
-        };
-    };
-    readonly runtimeWiring: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly sharedLibraries: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly tenancy: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly permanentDelete: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly promote: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly restore: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly categories: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createCategory: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly category: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateCategory: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteCategory: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteImage_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteImage: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly filename: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly uploadImage: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly preview_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly bySlug: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
                 };
             };
         };
@@ -17597,445 +13483,11 @@ export interface operations {
             };
         };
     };
-    readonly disclosures: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createDisclosure: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly disclosures_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createDisclosure_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly disclosure: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteDisclosure: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
     readonly ready: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
             readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly candidates: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateJob: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly slug: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly code: string;
-            };
             readonly cookie?: never;
         };
         readonly requestBody?: never;
@@ -18073,10 +13525,34 @@ export interface operations {
             };
         };
     };
-    readonly enqueue: {
+    readonly download: {
         readonly parameters: {
             readonly query?: never;
             readonly header?: never;
+            readonly path: {
+                readonly jobId: string;
+            };
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description OK */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "*/*": Record<string, never>;
+                };
+            };
+        };
+    };
+    readonly enqueue: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: {
+                readonly "X-Idempotency-Key"?: string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
@@ -18097,11 +13573,21 @@ export interface operations {
             };
         };
     };
-    readonly list_1: {
+    readonly assignmentProgress: {
         readonly parameters: {
-            readonly query?: never;
+            readonly query?: {
+                readonly classId?: string;
+                readonly page?: number;
+                readonly size?: number;
+                readonly status?: string;
+                readonly submittedFrom?: string;
+                readonly submittedTo?: string;
+                readonly timezone?: string;
+            };
             readonly header?: never;
-            readonly path?: never;
+            readonly path: {
+                readonly assignmentId: string;
+            };
             readonly cookie?: never;
         };
         readonly requestBody?: never;
@@ -18112,287 +13598,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reviewAction_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reviewAction: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly mark_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly reviewId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly list_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly create_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseAssignmentProgressReportResponse"];
                 };
             };
         };
@@ -18537,1240 +13743,6 @@ export interface operations {
             };
         };
     };
-    readonly feeds: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createFeed: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly feed: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly updateFeed: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly deleteFeed: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly refreshFeed: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createFeed_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly feeds_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createFeed_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly createFeed_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly lists_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_11: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly key: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly key: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_13: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_11: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_12: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly lists_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete_13: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly postOperation: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly lists: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseListMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly update_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly delete: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly id: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly postOperation_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly postOperation_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly creates_10: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly reads_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly detail_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly postId: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
     readonly currentBootstrap_1: {
         readonly parameters: {
             readonly query?: never;
@@ -19827,280 +13799,6 @@ export interface operations {
                 };
                 content: {
                     readonly "*/*": components["schemas"]["ApiResponseSessionBootstrapResponse"];
-                };
-            };
-        };
-    };
-    readonly trendingJob: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_8: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_9: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_4: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingJob_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
-            readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
-            };
-        };
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_6: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_7: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_3: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly trendingReads_5: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly topic: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly topic: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
                 };
             };
         };
@@ -20881,120 +14579,19 @@ export interface operations {
             };
         };
     };
-    readonly robots: {
+    readonly discord: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header: {
+                readonly "X-Signature-Ed25519": string;
+                readonly "X-Signature-Timestamp": string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "text/plain": string;
-                };
-            };
-        };
-    };
-    readonly sitemap_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "application/xml": string;
-                };
-            };
-        };
-    };
-    readonly sitemap: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path: {
-                readonly sub: string;
-            };
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "application/xml": string;
-                };
-            };
-        };
-    };
-    readonly sitemap_2: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "application/xml": string;
-                };
-            };
-        };
-    };
-    readonly sitemapData: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: never;
-        readonly responses: {
-            /** @description OK */
-            readonly 200: {
-                headers: {
-                    readonly [name: string]: unknown;
-                };
-                content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
-                };
-            };
-        };
-    };
-    readonly webhook_1: {
-        readonly parameters: {
-            readonly query?: never;
-            readonly header?: never;
-            readonly path?: never;
-            readonly cookie?: never;
-        };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": string;
             };
         };
         readonly responses: {
@@ -21004,23 +14601,23 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };
     };
-    readonly webhook: {
+    readonly telegram: {
         readonly parameters: {
             readonly query?: never;
-            readonly header?: never;
+            readonly header: {
+                readonly "X-Telegram-Bot-Api-Secret-Token": string;
+            };
             readonly path?: never;
             readonly cookie?: never;
         };
-        readonly requestBody?: {
+        readonly requestBody: {
             readonly content: {
-                readonly "application/json": {
-                    readonly [key: string]: unknown;
-                };
+                readonly "application/json": string;
             };
         };
         readonly responses: {
@@ -21030,7 +14627,7 @@ export interface operations {
                     readonly [name: string]: unknown;
                 };
                 content: {
-                    readonly "*/*": components["schemas"]["ApiResponseMapStringObject"];
+                    readonly "*/*": components["schemas"]["ApiResponseVoid"];
                 };
             };
         };

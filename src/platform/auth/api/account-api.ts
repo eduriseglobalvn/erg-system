@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 
 export type LoginSessionLog = {
   sessionId: string;
@@ -16,7 +17,10 @@ export type LoginSessionLog = {
   lastSeenAt?: string;
 };
 
-export async function listMyLoginSessions() {
-  const response = await apiRequest<{ items: LoginSessionLog[] }>("/api/v1/users/me/sessions", { portal: "lms" });
+export async function listMyLoginSessions(signal?: AbortSignal) {
+  const response = await apiRequest<{ items: LoginSessionLog[] }>(API_ENDPOINTS.account.sessions, {
+    portal: "lms",
+    ...(signal ? { signal } : {}),
+  });
   return response.items;
 }

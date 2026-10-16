@@ -58,7 +58,7 @@ export function DashboardScopeSelector(props: ScopeSelectorProps) {
   const canSelectClass = activePortal === "lms" && !isGlobalScope && classes.length > 0;
 
   return (
-    <Stack alignItems="center" direction="row" spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+    <Stack direction="row" spacing={2} sx={{ alignItems: "center", flex: 1, minWidth: 0 }}>
       <ButtonBase
         aria-label="Chọn phạm vi quản lý"
         onClick={(event) => setScopeAnchor(event.currentTarget)}
@@ -66,7 +66,7 @@ export function DashboardScopeSelector(props: ScopeSelectorProps) {
       >
         <ScopeAvatar kind={isGlobalScope ? "system" : "school"} label={scopeTitle} />
         <Box sx={{ minWidth: 0, pr: 0.5 }}>
-          <Stack alignItems="center" direction="row" spacing={0.5}>
+          <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
             <Typography noWrap sx={{ fontSize: 14, fontWeight: 750 }}>{scopeTitle}</Typography>
             <ExpandMoreRoundedIcon sx={{ color: "text.secondary", fontSize: 17 }} />
           </Stack>
@@ -98,7 +98,7 @@ export function DashboardScopeSelector(props: ScopeSelectorProps) {
         <Divider flexItem orientation="vertical" />
         <ButtonBase aria-label="Chọn lớp học" onClick={(event) => setClassAnchor(event.currentTarget)} sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, gap: 1, minHeight: 38, px: 1.25, textAlign: "left", "&:hover": { bgcolor: "action.hover", borderColor: "primary.main" } }}>
           <Avatar variant="rounded" sx={{ bgcolor: ergEnterpriseTokens.color.primarySofter, color: "primary.main", height: 26, width: 26 }}><GridViewRoundedIcon sx={{ fontSize: 16 }} /></Avatar>
-          <Box><Stack alignItems="center" direction="row" spacing={0.25}><Typography sx={{ fontSize: 13, fontWeight: 750 }}>{selectedClass?.className || "Chọn lớp học"}</Typography><ExpandMoreRoundedIcon sx={{ color: "text.secondary", fontSize: 15 }} /></Stack>{selectedClass ? <Typography color="text.secondary" sx={{ fontSize: 11 }}>{selectedClass.studentCount} học sinh</Typography> : null}</Box>
+          <Box><Stack direction="row" spacing={0.25} sx={{ alignItems: "center" }}><Typography sx={{ fontSize: 13, fontWeight: 750 }}>{selectedClass?.className || "Chọn lớp học"}</Typography><ExpandMoreRoundedIcon sx={{ color: "text.secondary", fontSize: 15 }} /></Stack>{selectedClass ? <Typography color="text.secondary" sx={{ fontSize: 11 }}>{selectedClass.studentCount} học sinh</Typography> : null}</Box>
         </ButtonBase>
         <Menu anchorEl={classAnchor} onClose={() => setClassAnchor(null)} open={Boolean(classAnchor)} slotProps={{ paper: { sx: { p: 1, width: 256 } } }}>
           <ListSubheader disableSticky sx={{ bgcolor: "transparent", fontSize: 11, fontWeight: 750, lineHeight: "32px" }}>Lớp học đang quản lý</ListSubheader>

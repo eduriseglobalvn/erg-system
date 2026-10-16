@@ -50,7 +50,7 @@ describe("createQuizFromBankQuestions", () => {
     await createQuizFromBankQuestions([question], deps);
 
     expect(deps.setPendingQuestionImports).toHaveBeenCalledWith([question]);
-    expect(deps.navigate).toHaveBeenCalledWith("/quiz-editor");
+    expect(deps.navigate).toHaveBeenCalledWith("/admin/content/quiz-editor");
     expect(deps.createQuiz).not.toHaveBeenCalled();
     expect(deps.saveDraft).not.toHaveBeenCalled();
   });
@@ -91,7 +91,7 @@ describe("createQuizFromBankQuestions", () => {
         ],
       }),
     );
-    expect(deps.navigate).toHaveBeenCalledWith("/quiz-editor?quizId=quiz-a");
+    expect(deps.navigate).toHaveBeenCalledWith("/admin/content/quiz-editor?quizId=quiz-a");
     expect(deps.setPendingQuestionImports).not.toHaveBeenCalled();
     expect(deps.toastSuccess).toHaveBeenCalled();
   });

@@ -1,0 +1,75 @@
+query ElearningStudentDiscussionFeed($input: StudentDiscussionFeedInput) {
+  elearning {
+    discussionFeed(input: $input) {
+      page
+      size
+      totalItems
+      hasNext
+      items {
+        id
+        authorId
+        authorName
+        authorInitials
+        academicClassId
+        className
+        title
+        content
+        createdAt
+        attachmentIds
+        assignmentId
+        viewerReaction
+        reactions { reaction count }
+        comments {
+          id
+          parentId
+          authorId
+          authorName
+          authorInitials
+          content
+          createdAt
+          attachmentIds
+          viewerReaction
+          reactions { reaction count }
+          replies {
+            id
+            parentId
+            authorId
+            authorName
+            authorInitials
+            content
+            createdAt
+            attachmentIds
+            viewerReaction
+            reactions { reaction count }
+          }
+        }
+      }
+    }
+  }
+}
+
+mutation ElearningCreateStudentDiscussion($input: CreateStudentDiscussionInput!) {
+  createStudentDiscussion(input: $input) {
+    id authorId authorName authorInitials academicClassId className title content createdAt attachmentIds assignmentId viewerReaction
+    reactions { reaction count }
+    comments { id }
+  }
+}
+
+mutation ElearningReplyStudentDiscussion($input: ReplyStudentDiscussionInput!) {
+  replyStudentDiscussion(input: $input) {
+    id parentId authorId authorName authorInitials content createdAt attachmentIds viewerReaction
+    reactions { reaction count }
+    replies { id }
+  }
+}
+
+mutation ElearningSetStudentDiscussionReaction($input: SetStudentDiscussionReactionInput!) {
+  setStudentDiscussionReaction(input: $input) {
+    targetType targetId viewerReaction reactions { reaction count }
+  }
+}
+
+mutation ElearningMarkStudentAnnouncementRead($input: MarkStudentAnnouncementReadInput!) {
+  markStudentAnnouncementRead(input: $input) { announcementId read readAt }
+}

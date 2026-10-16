@@ -29,6 +29,7 @@ export type StudentDiscussionNotification = DiscussionScrollTarget & {
 export type DashboardCopy = {
   navItems: Array<{ key: StudentPageKey; label: string; icon: ReactNode }>;
   heroEyebrow: string;
+  learnerFallbackName: string;
   heroTitle: (name: string) => string;
   heroDescription: (taskTitle: string) => string;
   primaryAction: string;

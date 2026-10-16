@@ -62,6 +62,7 @@ function sessionBootstrapForUser(id: string) {
 
 describe("LMS dashboard API", () => {
   beforeEach(() => {
+    vi.unstubAllEnvs();
     mocks.apiRequest.mockReset();
     mocks.hasApiBase.mockReset();
     mocks.readStoredAuthSession.mockReset();
@@ -69,8 +70,9 @@ describe("LMS dashboard API", () => {
     mocks.resolveCurrentPortal.mockReturnValue("lms");
   });
 
-  test("uses mock bootstrap only when no API base is configured", async () => {
+  test("uses mock bootstrap only when the explicit dev fixture flag is enabled", async () => {
     mocks.hasApiBase.mockReturnValue(false);
+    vi.stubEnv("VITE_ENABLE_RUNTIME_FIXTURES", "true");
     const { listEducationUnits, loadLmsDashboardBootstrap } = await loadModule();
 
     const units = await listEducationUnits({ limit: 2 });
@@ -139,5 +141,17 @@ describe("LMS dashboard API", () => {
     expect(first?.user.id).toBe("teacher-1");
     expect(second?.user.id).toBe("teacher-2");
     expect(mocks.apiRequest).toHaveBeenCalledTimes(2);
+  });
+
+  test("forwards caller cancellation without sharing the cancellable bootstrap request", async () => {
+    mocks.hasApiBase.mockReturnValue(true);
+    mocks.readStoredAuthSession.mockReturnValue({ accountId: "teacher-1", accessToken: "token-a", portal: "lms" });
+    mocks.apiRequest.mockResolvedValue(sessionBootstrap());
+    const signal = new AbortController().signal;
+    const { loadLmsDashboardBootstrap } = await loadModule();
+
+    await loadLmsDashboardBootstrap(signal);
+
+    expect(mocks.apiRequest).toHaveBeenCalledWith("/api/v1/sessions/current", { signal });
   });
 });

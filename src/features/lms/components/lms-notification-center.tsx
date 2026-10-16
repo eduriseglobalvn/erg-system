@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Badge,
@@ -14,14 +14,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import {
-  Business,
-  Campaign,
-  MarkEmailRead,
-  Notifications,
-  NotificationsNone,
-  Settings,
-} from "@mui/icons-material";
+import Business from "@mui/icons-material/Business";
+import Campaign from "@mui/icons-material/Campaign";
+import MarkEmailRead from "@mui/icons-material/MarkEmailRead";
+import Notifications from "@mui/icons-material/Notifications";
+import NotificationsNone from "@mui/icons-material/NotificationsNone";
+import Settings from "@mui/icons-material/Settings";
 import { toast } from "sonner";
 
 import {
@@ -34,7 +32,9 @@ import {
   type LmsNotificationType,
   type NotificationFeedItem,
 } from "@/features/notifications/api/notification-api";
-import { useNavigate } from "@/routes/router-compat";
+import { useNavigate } from "@tanstack/react-router";
+import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 
 const LMS_NOTIFICATION_PORTAL = "lms";
 
@@ -45,16 +45,22 @@ export function LmsNotificationCenter() {
   const [tab, setTab] = useState<"all" | "unread">("all");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
+  const openNotificationDetail = useCallback((notification: NotificationFeedItem) => {
+    setAnchorEl(null);
+    void navigate({ href: `${teacherPath("/notifications")}/${notification.id}` });
+  }, [navigate]);
 
   const notificationsQuery = useQuery({
     queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 5, notificationScope),
-    queryFn: () => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 5 }),
-    staleTime: 30_000,
+    queryFn: ({ signal }) => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 5 }, signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
   });
   const unreadCountQuery = useQuery({
     queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL, notificationScope),
-    queryFn: () => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL),
-    staleTime: 30_000,
+    queryFn: ({ signal }) => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL, signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
   });
   const markReadMutation = useMutation({
     mutationFn: (notificationId: string) => markNotificationRead(notificationId, LMS_NOTIFICATION_PORTAL),
@@ -65,7 +71,7 @@ export function LmsNotificationCenter() {
     onSuccess: invalidateNotificationQueries,
   });
 
-  const notifications = notificationsQuery.data?.items ?? [];
+  const notifications = useMemo(() => notificationsQuery.data?.items ?? [], [notificationsQuery.data?.items]);
   const latestNotifications = useMemo(() => notifications.slice(0, 3), [notifications]);
   const unreadCount = unreadCountQuery.data?.unread ?? notifications.filter((item) => item.unread).length;
   const newestSystemNotification = useMemo(
@@ -82,7 +88,7 @@ export function LmsNotificationCenter() {
     }, 900);
 
     return () => window.clearTimeout(timeoutId);
-  }, [newestSystemNotification?.id]);
+  }, [newestSystemNotification, openNotificationDetail]);
 
   function invalidateNotificationQueries() {
     void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL, notificationScope) });
@@ -97,11 +103,6 @@ export function LmsNotificationCenter() {
       markReadMutation.mutate(notification.id);
     }
     openNotificationDetail(notification);
-  }
-
-  function openNotificationDetail(notification: NotificationFeedItem) {
-    setAnchorEl(null);
-    navigate(`/notifications/${notification.id}`);
   }
 
   function handleOpen(event: React.MouseEvent<HTMLElement>) {
@@ -223,7 +224,7 @@ export function LmsNotificationCenter() {
                   <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Quan trọng</Typography>
                   <Button
                     size="small"
-                    onClick={() => navigate("/notifications")}
+                    onClick={() => void navigate({ href: teacherPath("/notifications") })}
                     sx={{ fontSize: 12, fontWeight: 600, color: "primary.main", textTransform: "none", p: 0 }}
                   >
                     Xem tất cả
@@ -270,7 +271,7 @@ export function LmsNotificationCenter() {
         <Box sx={{ px: 3, py: 1.5 }}>
           <Button
             fullWidth
-            onClick={() => navigate("/notifications")}
+            onClick={() => void navigate({ href: teacherPath("/notifications") })}
             sx={{
               fontSize: 13,
               fontWeight: 700,

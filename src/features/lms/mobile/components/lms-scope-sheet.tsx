@@ -39,7 +39,7 @@ export function LmsScopeSheet({
       title="Phạm vi giảng dạy"
     >
       <Stack spacing={2}>
-        <Stack alignItems="center" direction="row" spacing={1} sx={{ color: "text.secondary" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary" }}>
           <BusinessRoundedIcon sx={{ fontSize: 18 }} />
           <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Trường</Typography>
         </Stack>
@@ -55,7 +55,7 @@ export function LmsScopeSheet({
           </Select>
         </FormControl>
 
-        <Stack alignItems="center" direction="row" spacing={1} sx={{ color: "text.secondary", pt: 0.5 }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary", pt: 0.5 }}>
           <SchoolRoundedIcon sx={{ fontSize: 18 }} />
           <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Lớp đang dạy</Typography>
         </Stack>

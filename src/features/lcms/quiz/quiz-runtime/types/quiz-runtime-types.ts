@@ -23,6 +23,11 @@ export type LocalQuizAttemptSession = {
   shuffleSeed?: string;
   startIdempotencyKey?: string;
   submitIdempotencyKey: string;
+  /** Server-authoritative attempt timestamps/policy. */
+  serverStartedAt?: string;
+  serverTimeAtStart?: string;
+  deadlineAt?: string;
+  serverClockOffsetMs?: number;
 };
 
 export type StartAttemptInput = {
@@ -37,6 +42,21 @@ export type StartAttemptInput = {
 
 export type StartAttemptResult = {
   attemptId: string;
+  startedAt?: string;
+  policySnapshot?: {
+    assignmentId?: string;
+    quizId?: string;
+    attemptId?: string;
+    packageId?: string;
+    packageHash?: string;
+    quizVersion?: string;
+    offlineAllowed?: boolean;
+    deadlineAt?: string;
+    expiresAt?: string;
+    startedAt?: string;
+    serverTimeAtStart?: string;
+    durationMinutes?: number;
+  };
 };
 
 export type FinalSubmitPayload = {
@@ -87,6 +107,7 @@ export type RuntimeServerAttemptSnapshot = {
   startedAt?: string;
   submittedAt?: string;
   updatedAt?: string;
+  policySnapshot?: StartAttemptResult["policySnapshot"];
 };
 
 export type SaveAttemptDraftInput = {
@@ -126,6 +147,10 @@ export type SyncAttemptInput = {
   attemptId: string;
   payload: SyncAttemptPayload;
   portal?: QuizRuntimePortal;
+  operationId?: string;
+  idempotencyKey?: string;
+  expectedVersion?: number;
+  throwOnConflict?: boolean;
 };
 
 export type SyncAttemptResult = {

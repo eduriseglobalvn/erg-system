@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Lock } from "lucide-react";
 
-import { Navigate, useLocation } from "@/routes/router-compat";
+import { Navigate, useLocation } from "@tanstack/react-router";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -203,7 +203,7 @@ function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void })
 export function LearningResourceLoginPage() {
   const location = useLocation();
   const [account, setAccount] = useState(() => getCurrentAccount());
-  const redirectPath = new URLSearchParams(location.search).get("redirect") || "/kho-hoc-lieu/1";
+  const redirectPath = new URLSearchParams(location.searchStr).get("redirect") || "/kho-hoc-lieu/1";
   const safeRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//") ? redirectPath : "/kho-hoc-lieu/1";
 
   useEffect(() => {
@@ -216,7 +216,7 @@ export function LearningResourceLoginPage() {
   }, []);
 
   if (account) {
-    return <Navigate to={safeRedirectPath} replace />;
+    return <Navigate replace to={safeRedirectPath} />;
   }
 
   return <LibraryAccessGate onAuthenticated={() => setAccount(getCurrentAccount())} />;

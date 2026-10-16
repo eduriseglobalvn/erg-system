@@ -49,12 +49,12 @@ export const ergEnterpriseTheme = createTheme({
     h4: { fontSize: 20, fontWeight: 750, lineHeight: 1.35, letterSpacing: 0 },
     h5: { fontSize: 18, fontWeight: 750, lineHeight: 1.4, letterSpacing: 0 },
     h6: { fontSize: 16, fontWeight: 750, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle1: { fontSize: 15, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle2: { fontSize: 14, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    body1: { fontSize: 15, fontWeight: 500, lineHeight: 1.55, letterSpacing: 0 },
-    body2: { fontSize: 14, fontWeight: 500, lineHeight: 1.5, letterSpacing: 0 },
+    subtitle1: { fontSize: 14, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
+    subtitle2: { fontSize: 13, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
+    body1: { fontSize: 14, fontWeight: 500, lineHeight: 1.55, letterSpacing: 0 },
+    body2: { fontSize: 13, fontWeight: 500, lineHeight: 1.5, letterSpacing: 0 },
     caption: { fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
-    button: { fontSize: 14, fontWeight: 750, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
+    button: { fontSize: 13, fontWeight: 750, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
   },
   components: {
     MuiCssBaseline: {

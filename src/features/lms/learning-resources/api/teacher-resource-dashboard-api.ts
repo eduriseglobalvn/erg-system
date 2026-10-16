@@ -16,8 +16,9 @@ import type {
   LearningResourceTeacherRecentLecture,
   LearningResourceTeacherSubjectTree,
 } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
-import { hasApiBase } from "@/lib/api-client";
-import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 
 const subjectProgressCache = new Map<string, Promise<LearningResourceTeacherProgressDetail>>();
 const subjectTreeCache = new Map<string, Promise<LearningResourceTeacherSubjectTree>>();
@@ -39,8 +40,10 @@ const fallbackSubjectDescriptions: Record<string, string> = {
 };
 
 function getTeacherDashboardCacheScope() {
-  const tenantId = import.meta.env.VITE_TENANT_ID?.trim() || "erg";
-  return [tenantId, "lms", getStoredAccessToken("lms") ?? "anonymous"].join(":");
+  const session = readStoredAuthSession("lms");
+  const account = getCurrentAccount("lms");
+  const tenantId = session?.tenantId?.trim() || import.meta.env.VITE_TENANT_ID?.trim() || "erg";
+  return [tenantId, "lms", account?.id?.trim() || "anonymous"].join(":");
 }
 function fallbackManagedSchools(): LearningResourceManagedSchool[] {
   return classroomSchools.map((school) => ({
@@ -65,7 +68,7 @@ export function buildManagedSchoolsFromUnits(units: LmsEducationUnitDTO[] | null
 }
 
 export async function listLearningResourceManagedSchools() {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return fallbackManagedSchools();
   }
 
@@ -73,14 +76,14 @@ export async function listLearningResourceManagedSchools() {
     const unitsResult = await listManageableUnits();
     return buildManagedSchoolsFromUnits(unitsResult);
   } catch (error) {
-    if (hasApiBase()) throw error;
-    return fallbackManagedSchools();
+    if (runtimeFixturesEnabled()) return fallbackManagedSchools();
+    throw error;
   }
 }
 
 export async function listLearningResourceTeacherSubjects(input: { schoolId: string; academicYear: string }) {
   void input;
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return Object.entries(fallbackSubjectDescriptions).map(
       ([id, description]): LearningResourceTeacherDashboardSubject => ({
         id,

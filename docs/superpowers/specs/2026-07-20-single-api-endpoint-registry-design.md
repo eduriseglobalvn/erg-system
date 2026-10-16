@@ -1,5 +1,7 @@
 # Thiết kế một registry endpoint REST và cache dữ liệu thống nhất cho ERG
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 ## Mục tiêu
 
 Toàn bộ endpoint REST mà `erg-system` gọi tới `erg-spring` được định nghĩa tại đúng một file `src/lib/api/api-endpoints.ts`. Không còn chuỗi `"/api/..."` hoặc template literal `` `/api/...` `` nằm rải rác trong API module, component, transport hoặc auth code. Khi BE đổi endpoint, FE có một vị trí rõ ràng để cập nhật và TypeScript/OpenAPI phát hiện các chỗ không còn tương thích.

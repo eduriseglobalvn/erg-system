@@ -33,15 +33,15 @@ export function AssignHomeworkFooter({
         boxShadow: "0 -2px 10px rgba(15,23,42,0.04)",
       }}
     >
-      <Stack direction="row" alignItems="center" spacing={1.5} sx={{ display: { xs: "none", md: "flex" }, flexShrink: 0 }}>
-        <Stack direction="row" alignItems="center" spacing={1.25}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", display: { xs: "none", md: "flex" }, flexShrink: 0 }}>
+        <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <StepNumber active={step === 1} completed={step > 1}>1</StepNumber>
           <Typography sx={{ color: step === 1 ? "primary.main" : "success.main", fontSize: 15, fontWeight: 700 }}>
             Thiết lập bài tập
           </Typography>
         </Stack>
         <Box sx={{ width: 32, height: 1, bgcolor: "divider" }} />
-        <Stack direction="row" alignItems="center" spacing={1.25}>
+        <Stack direction="row" spacing={1.25} sx={{ alignItems: "center" }}>
           <StepNumber active={step === 2}>2</StepNumber>
           <Typography sx={{ color: step === 2 ? "primary.main" : "text.secondary", fontSize: 15, fontWeight: 700 }}>
             Chọn tài nguyên

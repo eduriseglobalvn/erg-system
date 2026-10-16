@@ -16,6 +16,7 @@ import type {
   LearningResourceFileType,
   LearningResourceResource,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
+import { LearningStandardPlayerPanel } from "@/features/elearning/content-player/learning-standard-player-panel";
 import { displayText } from "@/features/lms/learning-resources/components/learning-resource-library-utils";
 
 function getFormatBadgeClass(fileType: LearningResourceFileType) {
@@ -231,8 +232,9 @@ export function ResourceViewerModal({ resource, onClose }: { resource: LearningR
           </div>
         </div>
         <div className="p-5">
-          {resource.launchMode === "video_player" || resource.launchMode === "audio_player" ? <MediaPreview resource={resource} /> : null}
-          {["quiz_runtime", "download_only", "external", "html5_embed"].includes(resource.launchMode) ? (
+          {resource.standardPackageId ? <LearningStandardPlayerPanel packageId={resource.standardPackageId} title={displayText(resource.viewer.title)} /> : null}
+          {!resource.standardPackageId && (resource.launchMode === "video_player" || resource.launchMode === "audio_player") ? <MediaPreview resource={resource} /> : null}
+          {!resource.standardPackageId && ["quiz_runtime", "download_only", "external", "html5_embed"].includes(resource.launchMode) ? (
             <FallbackPreview resource={resource} />
           ) : null}
         </div>

@@ -38,6 +38,9 @@ import { createInitialCalendarRange } from "@/features/teaching-calendar/compone
 import { TeachingCalendarEventActions } from "@/features/teaching-calendar/components/teaching-calendar-event-actions";
 import { DeleteTeacherScheduleDialog } from "@/features/teaching-calendar/components/delete-teacher-schedule-dialog";
 import { TeachingScheduleBatchPanel } from "@/features/teaching-calendar/components/teaching-schedule-batch-panel";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 
 const lcmsCalendarLanes = ["Lịch theo trường", "Lịch theo giáo viên"];
@@ -75,11 +78,16 @@ export default function LcmsGoogleCalendarWorkspace({
   activeItem: ErgMenuItem | null;
 }) {
   const queryClient = useQueryClient();
-  const { session } = useAuthSession("lcms");
-  const tenantId = session?.tenantId ?? "";
+  const { session: lcmsSession } = useAuthSession("lcms");
+  // Legacy login stores the shared admin session under lms even when the
+  // current route is /admin. Keep the calendar capability fallback aligned
+  // with PortalAuthGate until the BFF session is hydrated for lcms.
+  const session = lcmsSession ?? readStoredAuthSession("lms");
+  const tenantId = session?.tenantId?.trim() || getDefaultTenantId();
   const [initialRange] = useState(() => createInitialCalendarRange("month"));
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [visibleRange, setVisibleRange] = useState<ErgCalendarVisibleRange>(() => ({
-    activeLane: "Táº¥t cáº£",
+    activeLane: "Tất cả",
     from: initialRange.from,
     mode: "month",
     selectedScopeId: "",
@@ -105,7 +113,7 @@ export default function LcmsGoogleCalendarWorkspace({
   const workspaceQuery = useQuery({
     enabled: Boolean(tenantId),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
-    queryFn: () => loadLcmsTeachingCalendarWorkspace(workspaceInput),
+    queryFn: ({ signal }) => loadLcmsTeachingCalendarWorkspace(workspaceInput, signal),
     queryKey: workspaceQueryKey,
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -117,7 +125,7 @@ export default function LcmsGoogleCalendarWorkspace({
   const referenceCatalogQuery = useQuery({
     enabled: Boolean(tenantId),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
-    queryFn: () => loadTeachingCalendarReferenceCatalog("lcms"),
+    queryFn: ({ signal }) => loadTeachingCalendarReferenceCatalog("lcms", signal),
     queryKey: teachingCalendarQueryKeys.referenceCatalog("lcms", tenantId),
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -148,17 +156,34 @@ export default function LcmsGoogleCalendarWorkspace({
   }, [scheduleCatalog]);
 
   const calendarCatalog = scheduleCatalog ?? stableScheduleCatalog ?? emptyScheduleCatalog;
-  const canCreateSchedule = workspaceQuery.data?.permissions?.canCreate === true;
+  const canCreateFromSession = ["lms.schedule.create", "lms.admin"].some((permission) => evaluatePermission({
+    permission,
+    grantedPermissions: session?.permissions,
+    deniedPermissions: session?.deniedPermissions,
+  }));
+  const canCreateSchedule = workspaceQuery.data?.permissions?.canCreate ?? canCreateFromSession;
+  const invalidateWorkspace = () => queryClient.invalidateQueries({
+    queryKey: teachingCalendarQueryKeys.workspaceRoot("lcms", tenantId, "workspace"),
+  });
+  const invalidateBatch = (batchId: string) => Promise.all(
+    teachingCalendarQueryKeys.batchMutationTargets("lcms", tenantId, batchId).map((queryKey) =>
+      queryClient.invalidateQueries({ queryKey })
+    ),
+  );
   const createScheduleMutation = useMutation({
     mutationFn: (draft: ErgScheduleDraft) => createTeachingSchedule(mapScheduleDraftToBulkInput(draft, { tenantId }), "lcms"),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    onSuccess: (payload) => {
+      if (payload.batchId) void invalidateBatch(payload.batchId);
+      else void Promise.all([
+        invalidateWorkspace(),
+        queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.batchesRoot("lcms", tenantId) }),
+      ]);
     },
   });
   const createRoomMutation = useMutation({
     mutationFn: (input: { roomName: string; schoolId: string }) => createTeachingScheduleRoom({ ...input, tenantId }, "lcms"),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.referenceCatalog("lcms", tenantId) });
     },
   });
   const previewScheduleMutation = useMutation({
@@ -166,28 +191,28 @@ export default function LcmsGoogleCalendarWorkspace({
   });
   const publishScheduleMutation = useMutation({
     mutationFn: (batchId: string) => publishTeachingScheduleBatch(batchId, tenantId),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+    onSuccess: (_payload, batchId) => {
+      void invalidateBatch(batchId);
     },
   });
   const updateEventMutation = useMutation({
     mutationFn: ({ event, update }: { event: ErgCalendarEvent; update: { note?: string; roomId?: string; roomName?: string } }) =>
       updateTeachingScheduleEvent({ eventId: event.id, tenantId, ...update }, "lcms"),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+      void invalidateWorkspace();
     },
   });
   const deleteEventMutation = useMutation({
     mutationFn: (event: ErgCalendarEvent) => deleteTeachingScheduleEvent({ eventId: event.id, tenantId }, "lcms"),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+      void invalidateWorkspace();
     },
   });
   const deleteTeacherScheduleMutation = useMutation({
     mutationFn: (input: { dateFrom?: string; dateTo?: string; schoolIds?: string[]; teacherUserId: string }) =>
       deleteTeacherSchedule({ ...input, tenantId }, "lcms"),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+      void invalidateWorkspace();
     },
   });
   const handleVisibleRangeChange = useCallback((nextRange: ErgCalendarVisibleRange) => {
@@ -205,7 +230,12 @@ export default function LcmsGoogleCalendarWorkspace({
 
   return (
     <Stack spacing={2}>
-      <TeachingScheduleBatchPanel permissions={workspaceQuery.data?.permissions} tenantId={tenantId} />
+      <TeachingScheduleBatchPanel
+        canCreate={canCreateSchedule}
+        onCreate={() => setCreateDialogOpen(true)}
+        permissions={workspaceQuery.data?.permissions}
+        tenantId={tenantId}
+      />
       {workspaceQuery.data?.permissions?.canDelete ? (
         <DeleteTeacherScheduleDialog
           onDelete={(input) => deleteTeacherScheduleMutation.mutateAsync(input)}
@@ -223,13 +253,15 @@ export default function LcmsGoogleCalendarWorkspace({
       errorMessage={workspaceQuery.error instanceof Error ? workspaceQuery.error.message : referenceCatalogQuery.error instanceof Error ? referenceCatalogQuery.error.message : undefined}
       initialDate={initialRange.initialDate}
       initialMode="month"
-      isLoading={!tenantId || workspaceQuery.isPending || referenceCatalogQuery.isPending || createScheduleMutation.isPending || previewScheduleMutation.isPending || publishScheduleMutation.isPending}
+      createDialogOpen={createDialogOpen}
+      isLoading={workspaceQuery.isPending || referenceCatalogQuery.isPending || createScheduleMutation.isPending || previewScheduleMutation.isPending || publishScheduleMutation.isPending}
       lanes={lcmsCalendarLanes}
       monthCountLabel="lịch dạy"
       monthCountOverride={workspaceQuery.data?.events.length}
       onCreateSchedule={async (draft) => {
         return createScheduleMutation.mutateAsync(draft);
       }}
+      onCreateDialogOpenChange={setCreateDialogOpen}
       onCreateRoom={(input) => createRoomMutation.mutateAsync(input)}
       onPublishScheduleBatch={async (batchId) => {
         await publishScheduleMutation.mutateAsync(batchId);
@@ -336,9 +368,23 @@ function buildEntitySummaries(
   resolveLabel: (event: ErgCalendarEvent) => string,
   resolveTone: (label: string) => ErgCalendarResolvedTone,
 ) {
-  return options.filter((option, index, source) => option.label && source.findIndex((item) => item.id === option.id) === index).map((option) => ({
+  // Build counts once instead of scanning the full event list for every
+  // catalog item. Calendar catalogs can contain hundreds of entities while
+  // the visible range can contain thousands of events.
+  const eventCounts = new Map<string, number>();
+  for (const event of events) {
+    const label = resolveLabel(event);
+    eventCounts.set(label, (eventCounts.get(label) ?? 0) + 1);
+  }
+
+  const seenIds = new Set<string>();
+  return options.filter((option) => {
+    if (!option.label || seenIds.has(option.id)) return false;
+    seenIds.add(option.id);
+    return true;
+  }).map((option) => ({
     color: resolveTone(option.label).border,
-    count: events.filter((event) => resolveLabel(event) === option.label).length,
+    count: eventCounts.get(option.label) ?? 0,
     id: option.id,
     label: option.label,
   }));

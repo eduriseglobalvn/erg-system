@@ -4,15 +4,16 @@ import {
   LCMS_PORTAL_HOSTS,
   LMS_PORTAL_HOSTS,
 } from "@/config/portal-urls";
+import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 
 const LOGIN_PATH = "/login";
-const LOCALHOSTS = new Set(["localhost", "127.0.0.1"]);
+const LOCALHOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
 const ALLOWED_PORTAL_HOSTS = new Set([
   ...CRM_PORTAL_HOSTS,
   ...ELEARNING_PORTAL_HOSTS,
   ...LCMS_PORTAL_HOSTS,
   ...LMS_PORTAL_HOSTS,
-].map((host) => host.toLowerCase()));
+].map((host) => normalizeHost(host)));
 
 export function normalizeSsoReturnTo(rawReturnTo: string) {
   let url: URL;
@@ -23,53 +24,50 @@ export function normalizeSsoReturnTo(rawReturnTo: string) {
     return null;
   }
 
-  if (!isAllowedSsoReturnUrl(url)) {
+  if (!isAllowedSsoReturnUrl(url) || url.username || url.password || !isHttpProtocol(url.protocol)) {
     return null;
   }
 
   const nestedRedirect = getNestedLoginRedirect(url);
-  if (nestedRedirect) {
-    return nestedRedirect;
-  }
+  if (nestedRedirect) return nestedRedirect;
 
-  return url.toString();
+  const safePath = sanitizeLocalRedirect(`${url.pathname}${url.search}${url.hash}`);
+  if (!safePath) return null;
+  return `${url.origin}${safePath}`;
 }
 
 export function isAllowedSsoReturnHost(hostname: string) {
-  let normalized = hostname.trim().toLowerCase();
-  normalized = normalized.replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
-  return LOCALHOSTS.has(normalized) || [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
+  const normalized = normalizeHost(hostname);
+  if (LOCALHOSTS.has(normalized)) return true;
+  return [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
 }
 
 function isAllowedSsoReturnUrl(url: URL) {
-  const hostname = url.hostname.toLowerCase().replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
-  const host = url.host.toLowerCase().replace("org.edu.local", "erg.edu.local").replace("org.edu.vn", "erg.edu.vn");
-  if (LOCALHOSTS.has(hostname)) return true;
-  return ALLOWED_PORTAL_HOSTS.has(host);
+  const normalizedHost = normalizeHost(url.host);
+  return LOCALHOSTS.has(url.hostname.toLowerCase()) || ALLOWED_PORTAL_HOSTS.has(normalizedHost);
 }
 
 function getNestedLoginRedirect(url: URL) {
-  if (normalizePathname(url.pathname) !== LOGIN_PATH) {
-    return null;
-  }
+  if (normalizePathname(url.pathname) !== LOGIN_PATH) return null;
 
-  const redirect = normalizeLocalRedirect(url.searchParams.get("redirect"));
-  if (!redirect) {
-    return null;
-  }
-
-  return new URL(redirect, url.origin).toString();
+  const redirect = sanitizeLocalRedirect(url.searchParams.get("redirect"));
+  return redirect ? `${url.origin}${redirect}` : null;
 }
 
 function normalizePathname(pathname: string) {
-  const normalized = pathname.replace(/\/+$/, "");
-  return normalized || "/";
+  const withoutTrailingSlash = pathname.replace(/\/+$/, "");
+  return withoutTrailingSlash || "/";
 }
 
-function normalizeLocalRedirect(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//")) {
-    return null;
-  }
+function normalizeHost(hostname: string) {
+  return hostname
+    .trim()
+    .toLowerCase()
+    .replace(/^www\./, "")
+    .replace("org.edu.local", "erg.edu.local")
+    .replace("org.edu.vn", "erg.edu.vn");
+}
 
-  return value;
+function isHttpProtocol(protocol: string) {
+  return protocol === "http:" || protocol === "https:";
 }

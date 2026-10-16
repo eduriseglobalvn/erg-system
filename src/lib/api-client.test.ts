@@ -1,6 +1,6 @@
 import { afterEach, expect, test, vi } from "vitest";
 
-import { apiRequest, ApiClientError, AUTH_SESSION_INVALID_EVENT } from "@/lib/api-client";
+import { apiRequest, ApiClientError, AUTH_SESSION_INVALID_EVENT, getApiResponseRequestId } from "@/lib/api-client";
 import {
   clearTeacherSessionSnapshot,
   TEACHER_LOCAL_SESSION_KEY,
@@ -61,7 +61,7 @@ test("uses LCMS portal auth for canonical curriculum commands while omitting cli
   const fetchMock = vi.fn(async () => new Response(JSON.stringify({ data: { id: "subject-1" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
   vi.stubGlobal("fetch", fetchMock);
 
-  await apiRequest("/api/curriculum/subjects", {
+  await apiRequest("/api/v1/curriculum/subjects", {
     method: "POST",
     body: JSON.stringify({ name: "IC3" }),
   });
@@ -122,6 +122,22 @@ test("uses current back-office auth for shared admin endpoints on LCMS host with
   const headers = (init as RequestInit).headers as Headers;
   expect(headers.get("Authorization")).toBe("Bearer lcms-token");
   expect(headers.get("X-Portal")).toBeNull();
+});
+
+test("returns authenticated binary downloads without passing responseType to fetch", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  window.localStorage.setItem(
+    portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"),
+    JSON.stringify({ accountId: "teacher-1", accessToken: "lms-token", loggedInAt: new Date().toISOString(), portal: "lms", portals: ["lms"], rememberMe: true }),
+  );
+  const fetchMock = vi.fn(async () => new Response("action,actor\nUPDATE,ac…56\n", { status: 200, headers: { "Content-Type": "text/csv" } }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const result = await apiRequest<Blob>("/api/v1/reports/jobs/job-1/download", { portal: "lms", responseType: "blob" });
+  expect(result).toBeInstanceOf(Blob);
+  const [, init] = fetchMock.mock.calls[0] ?? [];
+  expect(init).not.toHaveProperty("responseType");
+  expect(await result.text()).toContain("UPDATE");
 });
 
 test("uses CRM auth for shared admin endpoints on CRM host without client portal headers", async () => {
@@ -187,6 +203,9 @@ test("refreshes an expired access token before calling a protected Spring API", 
 
   expect(fetchMock).toHaveBeenCalledTimes(2);
   const [, refreshInit] = fetchMock.mock.calls[0] ?? [];
+  const refreshHeaders = (refreshInit as RequestInit).headers as Headers;
+  expect(refreshHeaders.get("X-Tenant-ID")).toBeNull();
+  expect(refreshHeaders.get("X-Portal")).toBeNull();
   expect(JSON.parse(String((refreshInit as RequestInit).body))).toMatchObject({
     refreshToken: "refresh-token",
   });
@@ -385,6 +404,24 @@ test("does not dedupe concurrent GET requests with different browser cache modes
   expect(defaultResult.source).toBe("default");
 });
 
+test("does not dedupe GET requests with different response envelope modes", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(new Response(JSON.stringify({ data: { source: "unwrapped" } }), { status: 200, headers: { "Content-Type": "application/json" } }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({ data: { source: "raw" } }), { status: 200, headers: { "Content-Type": "application/json" } }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const [unwrapped, raw] = await Promise.all([
+    apiRequest<{ source: string }>("/api/v1/users/me", { auth: "public", unwrapEnvelope: true }),
+    apiRequest<{ data: { source: string } }>("/api/v1/users/me", { auth: "public", unwrapEnvelope: false }),
+  ]);
+
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(unwrapped.source).toBe("unwrapped");
+  expect(raw.data.source).toBe("raw");
+});
+
 test("BFF commands obtain and send a CSRF token without a browser bearer token", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   vi.stubEnv("VITE_AUTH_MODE", "oidc-bff");
@@ -429,6 +466,18 @@ test("preserves structured backend error envelope metadata", async () => {
     requestId: "req-contract-1",
     details: { fields: { email: "invalid" } },
   });
+});
+
+test("retains request ID metadata on a successful unwrapped response", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({
+    data: { users: [] },
+    request_id: "req-success-1",
+  }), { status: 200, headers: { "Content-Type": "application/json" } })));
+
+  const result = await apiRequest<{ users: unknown[] }>("/api/v1/auth/login", { auth: "public" });
+
+  expect(getApiResponseRequestId(result)).toBe("req-success-1");
 });
 
 test("rethrows an external abort reason without converting it to a network error", async () => {

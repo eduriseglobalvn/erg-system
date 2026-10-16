@@ -7,6 +7,7 @@ export {
   prepareQuizPackageForAttempt,
   saveAttemptAnswer,
   saveAttemptDraft,
+  replayOfflineQuizAttemptQueue,
   startAttempt,
   syncAttempt,
   submitFinalAttempt,
@@ -27,6 +28,17 @@ export {
   localQuizAttemptStore,
   type LocalQuizAttemptScope,
 } from "@/features/lcms/quiz/quiz-runtime/api/local-quiz-attempt-store";
+export {
+  getOfflineQuizSnapshot,
+  offlineQuizSnapshotStore,
+  saveApprovedOfflineQuizSnapshot,
+  OfflineQuizSnapshotStore,
+  type OfflineQuizSnapshotRecord,
+} from "@/features/lcms/quiz/quiz-runtime/api/offline-quiz-snapshot-store";
+export {
+  offlineQuizAttemptQueue,
+  OfflineQuizAttemptQueue,
+} from "@/features/lcms/quiz/quiz-runtime/api/offline-quiz-attempt-queue";
 export type {
   FinalSubmitPayload,
   LoadedQuizRuntime,

@@ -6,7 +6,8 @@ import {
 } from "@/features/lcms/quiz/quiz-reports/api/quiz-report-api";
 import { graphQlRequest } from "@/lib/graphql-client";
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
   hasApiBase: () => true,
 }));
 

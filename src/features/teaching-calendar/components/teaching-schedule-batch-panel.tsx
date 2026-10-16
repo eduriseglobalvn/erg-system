@@ -18,6 +18,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { ErgCalendarPermissions } from "@/components/shared/erg-calendar-workspace";
@@ -27,15 +28,18 @@ import {
   loadTeachingScheduleBatches,
   publishTeachingScheduleBatch,
   teachingCalendarQueryKeys,
+  type TeachingScheduleBatchPayload,
   type TeachingScheduleStatus,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
 
 type Props = {
+  canCreate?: boolean;
+  onCreate?: () => void;
   permissions?: ErgCalendarPermissions;
   tenantId: string;
 };
 
-export function TeachingScheduleBatchPanel({ permissions, tenantId }: Props) {
+export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permissions, tenantId }: Props) {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(0);
   const [status, setStatus] = useState<TeachingScheduleStatus | "">("");
@@ -43,16 +47,18 @@ export function TeachingScheduleBatchPanel({ permissions, tenantId }: Props) {
   const input = { page, size: 20, status: status || undefined, tenantId };
   const query = useQuery({
     enabled: Boolean(tenantId),
-    queryFn: () => loadTeachingScheduleBatches(input),
+    queryFn: ({ signal }) => loadTeachingScheduleBatches(input, signal),
     queryKey: teachingCalendarQueryKeys.batches("lcms", input),
   });
   const detailQuery = useQuery({
     enabled: Boolean(tenantId && selectedBatchId),
-    queryFn: () => loadTeachingScheduleBatchDetail({ batchId: selectedBatchId, tenantId }),
+    queryFn: ({ signal }) => loadTeachingScheduleBatchDetail({ batchId: selectedBatchId, tenantId }, signal),
     queryKey: teachingCalendarQueryKeys.batchDetail("lcms", tenantId, selectedBatchId),
   });
-  const invalidate = async () => {
-    await queryClient.invalidateQueries({ queryKey: teachingCalendarQueryKeys.portalRoot("lcms", tenantId) });
+  const invalidate = async (_payload: TeachingScheduleBatchPayload, batchId: string) => {
+    await Promise.all(teachingCalendarQueryKeys.batchMutationTargets("lcms", tenantId, batchId).map((queryKey) =>
+      queryClient.invalidateQueries({ queryKey })
+    ));
   };
   const publishMutation = useMutation({
     mutationFn: (batchId: string) => publishTeachingScheduleBatch(batchId, tenantId),
@@ -71,7 +77,18 @@ export function TeachingScheduleBatchPanel({ permissions, tenantId }: Props) {
           <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Đợt lịch giảng dạy</Typography>
           <Typography variant="body2" color="text.secondary">Xuất bản bản nháp để giáo viên nhận lịch trên LMS.</Typography>
         </div>
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+          <Button
+            data-create-schedule
+            disabled={!canCreate}
+            onClick={onCreate}
+            size="small"
+            startIcon={<AddRoundedIcon />}
+            sx={{ minWidth: 112, whiteSpace: "nowrap" }}
+            variant="contained"
+          >
+            Tạo lịch
+          </Button>
           <TextField
             label="Trạng thái"
             onChange={(event) => { setStatus(event.target.value as TeachingScheduleStatus | ""); setPage(0); }}

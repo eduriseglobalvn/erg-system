@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const source = readFileSync(
-  resolve(process.cwd(), "src/features/lcms/admin-operations/components/admin-operations-workspace.tsx"),
+  resolve(process.cwd(), "src/features/lcms/admin-operations/components/admin-operations-education-editor.tsx"),
   "utf8",
 );
 
@@ -14,14 +14,9 @@ describe("education unit editor MUI policy", () => {
   });
 
   it("uses MUI controls and sx throughout the editor surface", () => {
-    const editor = source.slice(
-      source.indexOf("function EducationUnitEditor"),
-      source.indexOf("function UnitInsightRail"),
-    );
-
-    expect(editor).not.toMatch(/\bclassName\s*=/);
-    expect(editor).not.toContain("<AppSelect");
-    expect(editor).not.toContain("<TsForm");
-    expect(editor).toContain("sx={{");
+    expect(source).not.toMatch(/\bclassName\s*=/);
+    expect(source).not.toContain("<AppSelect");
+    expect(source).not.toContain("<TsForm");
+    expect(source).toContain("sx={{");
   });
 });

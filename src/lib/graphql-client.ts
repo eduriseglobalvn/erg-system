@@ -1,5 +1,15 @@
-import { ApiClientError, apiRequest } from "@/lib/api-client";
-import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { ApiClientError, apiRequest, getApiResponseRequestId, inheritApiResponseRequestId } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import {
+  readStoredAuthSession,
+  type StoredAuthSession,
+} from "@/platform/auth/api/auth-token-storage";
+import {
+  classifyClientTelemetryOutcome,
+  clientTelemetryNow,
+  normalizeGraphQlOperationName,
+  recordClientTelemetry,
+} from "@/lib/client-telemetry";
 
 export type GraphQlPortal = Extract<NonNullable<StoredAuthSession["portal"]>, "crm" | "elearning" | "lcms" | "lms">;
 
@@ -25,9 +35,11 @@ type GraphQlErrorBody = {
 };
 
 type GraphQlRequestInput<TVariables extends Record<string, unknown>> = {
+  errorPolicy?: "allow-partial" | "throw";
   operationName: string;
   portal: GraphQlPortal;
   query: string;
+  signal?: AbortSignal;
   tenantId?: string;
   variables?: TVariables;
 };
@@ -35,12 +47,48 @@ type GraphQlRequestInput<TVariables extends Record<string, unknown>> = {
 const sensitiveVariableKeys = ["authorization", "credential", "password", "secret", "token"];
 
 export async function graphQlRequest<TData, TVariables extends Record<string, unknown> = Record<string, never>>({
+  ...input
+}: GraphQlRequestInput<TVariables>): Promise<TData> {
+  const startedAt = clientTelemetryNow();
+  try {
+    const result = await performGraphQlRequest<TData, TVariables>(input);
+    recordClientTelemetry({
+      durationMs: clientTelemetryNow() - startedAt,
+      errorCode: result.partial ? "GRAPHQL_PARTIAL_ERROR" : undefined,
+      kind: "graphql",
+      name: normalizeGraphQlOperationName(input.operationName),
+      outcome: result.partial ? "partial" : "success",
+      portal: input.portal,
+      requestId: getApiResponseRequestId(result.data),
+      status: 200,
+      timestamp: Date.now(),
+    });
+    return result.data;
+  } catch (error) {
+    recordClientTelemetry({
+      durationMs: clientTelemetryNow() - startedAt,
+      errorCode: error instanceof ApiClientError ? error.code : undefined,
+      kind: "graphql",
+      name: normalizeGraphQlOperationName(input.operationName),
+      outcome: classifyClientTelemetryOutcome(error, input.signal),
+      portal: input.portal,
+      requestId: error instanceof ApiClientError ? error.requestId : undefined,
+      status: error instanceof ApiClientError ? error.status : undefined,
+      timestamp: Date.now(),
+    });
+    throw error;
+  }
+}
+
+async function performGraphQlRequest<TData, TVariables extends Record<string, unknown> = Record<string, never>>({
+  errorPolicy = "throw",
   operationName,
   portal,
   query,
-  tenantId = getDefaultTenantId(),
+  signal,
+  tenantId,
   variables,
-}: GraphQlRequestInput<TVariables>): Promise<TData> {
+}: GraphQlRequestInput<TVariables>): Promise<{ data: TData; partial: boolean }> {
   if (!operationName.trim()) {
     throw new ApiClientError("GraphQL operationName is required.", "GRAPHQL_OPERATION_NAME_MISSING", 400);
   }
@@ -52,8 +100,8 @@ export async function graphQlRequest<TData, TVariables extends Record<string, un
   // - Nếu FE gửi X-Tenant-ID mà khác tenant của session → 403
   // → FE nên bỏ gửi X-Tenant-ID tới GraphQL, hoặc đảm bảo nó khớp session
   // X-Portal: backend suy ra từ URL path, không cần gửi nữa
-  void tenantId;
-  const payload = await apiRequest<GraphQlResponse<TData>>("/api/v1/graphql", {
+  assertTenantMatchesSession(portal, tenantId);
+  const payload = await apiRequest<GraphQlResponse<TData>>(API_ENDPOINTS.graphql, {
     body: JSON.stringify({
       operationName,
       query,
@@ -61,12 +109,22 @@ export async function graphQlRequest<TData, TVariables extends Record<string, un
     }),
     method: "POST",
     portal,
+    signal,
     unwrapEnvelope: false,
     // headers: {
     //   "X-Tenant-ID": tenantId,
     //   "X-Portal": portal,
     // },
   });
+
+  if (payload.errors?.length && errorPolicy === "throw") {
+    throw new ApiClientError(
+      payload.errors.map((error) => error.message).join("; "),
+      payload.data ? "GRAPHQL_PARTIAL_ERROR" : "GRAPHQL_ERROR",
+      200,
+      payload.errors,
+    );
+  }
 
   if (!payload.data) {
     if (payload.errors?.length) {
@@ -80,10 +138,25 @@ export async function graphQlRequest<TData, TVariables extends Record<string, un
   }
 
   if (payload.errors?.length) {
-    console.warn(`GraphQL partial response for ${operationName}:`, payload.errors);
+    console.warn(`GraphQL partial response for ${operationName}: ${payload.errors.length} error(s).`);
   }
 
-  return payload.data;
+  return {
+    data: inheritApiResponseRequestId(payload.data, payload),
+    partial: Boolean(payload.errors?.length),
+  };
+}
+
+function assertTenantMatchesSession(portal: GraphQlPortal, requestedTenantId?: string) {
+  const requested = requestedTenantId?.trim();
+  const authenticated = readStoredAuthSession(portal)?.tenantId?.trim();
+  if (!requested || !authenticated || requested === authenticated) return;
+
+  throw new ApiClientError(
+    "GraphQL tenant does not match the authenticated session.",
+    "GRAPHQL_TENANT_MISMATCH",
+    403,
+  );
 }
 
 export function getDefaultTenantId() {

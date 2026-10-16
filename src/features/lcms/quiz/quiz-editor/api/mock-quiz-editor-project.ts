@@ -5,7 +5,6 @@ import {
   elearningSampleGroupId,
 } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
-import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import { tr } from "@/platform/i18n";
 import type {
   QuizEditorChoice,
@@ -18,15 +17,6 @@ import type {
   QuizProjectSettings,
   SelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-
-export type QuizEditorMockProjectPayload = {
-  groups: QuizEditorGroup[];
-  resultSlide: QuizEditorSlide;
-  quizProject: QuizProjectSettings;
-  playerTemplate: QuizPlayerTemplate;
-  selectedThemeId: string;
-  selectedNode: SelectedEditorNode;
-};
 
 const hotspotMockImageSvg = `
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 500">
@@ -57,17 +47,6 @@ const hotspotMockImageSvg = `
 `.replace(/\s{2,}/g, " ").trim();
 
 const hotspotMockImageDataUrl = `data:image/svg+xml,${encodeURIComponent(hotspotMockImageSvg)}`;
-
-export function createMockQuizEditorProject(): QuizEditorMockProjectPayload {
-  return {
-    groups: createMockQuizEditorGroups(),
-    resultSlide: createMockResultSlide(),
-    quizProject: createMockQuizProjectSettings(),
-    playerTemplate: createMockPlayerTemplate(),
-    selectedThemeId: defaultQuizTheme.id,
-    selectedNode: createMockSelectedEditorNode(),
-  };
-}
 
 export function createMockChoice(id: string, label: string, correct = false): QuizEditorChoice {
   return { id, label, correct };

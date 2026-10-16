@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { extname, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -162,10 +162,198 @@ export function scanLegacyUi(paths) {
   return violations;
 }
 
+const DEFAULT_SCAN_PATHS = ["src", "package.json", "vite.config.ts"];
+const DEFAULT_BASELINE_PATH = "scripts/legacy-ui-baseline.json";
+const LEGACY_FILE_OWNERS = new Map([
+  [
+    "src/features/lms/components/lms-teacher-shell-config.tsx",
+    "src/features/lms/components/lms-teacher-shell.tsx",
+  ],
+  [
+    "src/features/lms/components/lms-teacher-shell-presentation.tsx",
+    "src/features/lms/components/lms-teacher-shell.tsx",
+  ],
+  [
+    "src/features/lms/components/lms-teacher-shell-workspaces.tsx",
+    "src/features/lms/components/lms-teacher-shell.tsx",
+  ],
+  [
+    "src/features/lms/components/assign-homework-desktop-view.tsx",
+    "src/features/lms/components/assign-homework-page.tsx",
+  ],
+  [
+    "src/features/lms/components/assign-homework-mobile-view.tsx",
+    "src/features/lms/components/assign-homework-page.tsx",
+  ],
+  [
+    "src/features/lms/components/assign-homework-parts.tsx",
+    "src/features/lms/components/assign-homework-page.tsx",
+  ],
+  [
+    "src/features/lms/components/exercise-bank/desktop-exercise-bank-view.tsx",
+    "src/features/lms/components/exercise-bank-page.tsx",
+  ],
+  [
+    "src/features/lms/components/exercise-bank/mobile-exercise-bank-view.tsx",
+    "src/features/lms/components/exercise-bank-page.tsx",
+  ],
+  [
+    "src/features/lcms/admin-operations/components/learning-resource-authoring-catalog-screens.tsx",
+    "src/features/lcms/admin-operations/components/learning-resource-authoring-workspace.tsx",
+  ],
+  [
+    "src/features/lcms/admin-operations/components/learning-resource-authoring-upload-screen.tsx",
+    "src/features/lcms/admin-operations/components/learning-resource-authoring-workspace.tsx",
+  ],
+  ...[
+    "admin-operations-overview.tsx",
+    "admin-operations-center-management.tsx",
+    "admin-operations-education-editor.tsx",
+    "admin-operations-insight.tsx",
+    "admin-operations-support.tsx",
+  ].map((file) => [
+    `src/features/lcms/admin-operations/components/${file}`,
+    "src/features/lcms/admin-operations/components/admin-operations-workspace.tsx",
+  ]),
+  ...[
+    "learning-resource-authoring-create-dialog-fields.tsx",
+    "learning-resource-authoring-create-dialog-model.tsx",
+    "learning-resource-authoring-create-dialog-presentation.tsx",
+    "learning-resource-authoring-create-dialog-view.tsx",
+  ].map((file) => [
+    `src/features/lcms/admin-operations/components/${file}`,
+    "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog.tsx",
+  ]),
+  ...[
+    "learning-resource-curriculum-explorer-badges.tsx",
+    "learning-resource-curriculum-explorer-folder-canvas.tsx",
+    "learning-resource-curriculum-explorer-grid.tsx",
+    "learning-resource-curriculum-explorer-inspector.tsx",
+    "learning-resource-curriculum-explorer-lanes.tsx",
+    "learning-resource-curriculum-explorer-list.tsx",
+    "learning-resource-curriculum-explorer-model.tsx",
+    "learning-resource-curriculum-explorer-top-bar.tsx",
+    "learning-resource-curriculum-explorer-tree.tsx",
+  ].map((file) => [
+    `src/features/lcms/admin-operations/components/${file}`,
+    "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer.tsx",
+  ]),
+  ...[
+    "quiz-editor-slide-intro-preview.tsx",
+    "quiz-editor-slide-choice-preview.tsx",
+    "quiz-editor-slide-drag-drop-preview.tsx",
+    "quiz-editor-slide-feedback-preview.tsx",
+    "quiz-editor-slide-media.tsx",
+    "quiz-editor-slide-layout.tsx",
+  ].map((file) => [
+    `src/features/lcms/quiz/quiz-editor/components/${file}`,
+    "src/features/lcms/quiz/quiz-editor/components/quiz-editor-slide-render.tsx",
+  ]),
+  ...[
+    "question-bank-workspace-shell.tsx",
+    "question-bank-compact-header.tsx",
+    "question-bank-structure-panel.tsx",
+    "question-bank-primitives.tsx",
+    "question-library.tsx",
+    "question-form-dialog.tsx",
+    "quiz-builder-panel.tsx",
+    "quiz-bank-panel.tsx",
+  ].map((file) => [
+    `src/features/lcms/quiz/question-bank/components/${file}`,
+    "src/features/lcms/quiz/question-bank/components/question-bank-workspace.tsx",
+  ]),
+  ...[
+    "user-access-control-section-config.tsx",
+    "user-access-control-member-sections.tsx",
+    "user-access-control-role-section.tsx",
+    "user-access-control-access-section.tsx",
+    "user-access-control-section-primitives.tsx",
+  ].map((file) => [
+    `src/features/lcms/admin-operations/components/${file}`,
+    "src/features/lcms/admin-operations/components/user-access-control-sections.tsx",
+  ]),
+  ...[
+    "seo-crm-workspace-shared.tsx",
+    "seo-crm-overview.tsx",
+    "seo-crm-pipeline.tsx",
+    "seo-crm-pnl-workspace.tsx",
+    "seo-crm-followup-handover.tsx",
+  ].map((file) => [
+    `src/features/crm/seo/components/${file}`,
+    "src/features/crm/seo/components/seo-crm-workspace.tsx",
+  ]),
+]);
+const LEARNING_RESOURCE_FIELDS_PATH =
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-fields.tsx";
+const LEARNING_RESOURCE_WORKSPACE_PATH =
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-workspace.tsx";
+const LEGACY_RULE_OWNERS = new Map(
+  [
+    "tailwind-utility:gap-1.5",
+    "tailwind-utility:pt-5",
+    "tailwind-utility:px-6",
+    "tailwind-utility:text-[var(--foreground)]",
+    "tailwind-utility:text-[var(--muted-foreground)]",
+    "tailwind-utility:text-base",
+  ].map((rule) => [`${LEARNING_RESOURCE_FIELDS_PATH}|${rule}`, LEARNING_RESOURCE_WORKSPACE_PATH]),
+);
+
+// A violation's key is file|rule with no line number, so migrating or moving existing legacy code
+// does not churn the baseline; only a NEW (file, rule) pair fails the ratchet.
+export function violationKey(violation) {
+  const displayPath = relative(process.cwd(), violation.file) || violation.file;
+  const normalizedPath = displayPath.replace(/\\/g, "/");
+  const legacyOwner =
+    LEGACY_RULE_OWNERS.get(`${normalizedPath}|${violation.rule}`) ??
+    LEGACY_FILE_OWNERS.get(normalizedPath) ??
+    normalizedPath;
+  return `${legacyOwner}|${violation.rule}`;
+}
+
+export function baselineKeys(paths) {
+  return [...new Set(scanLegacyUi(paths).map(violationKey))].sort();
+}
+
+// Violations whose file|rule key is not in the frozen baseline set — the ratchet's core decision.
+export function newViolations(violations, frozenKeys) {
+  const frozen = new Set(frozenKeys);
+  return violations.filter((violation) => !frozen.has(violationKey(violation)));
+}
+
 function runCli() {
-  const scopes = process.argv.slice(2);
-  const paths = scopes.length > 0 ? scopes : ["src", "package.json", "vite.config.ts"];
+  const args = process.argv.slice(2);
+  const updateBaseline = args.includes("--update-baseline");
+  const useBaseline = updateBaseline || args.includes("--baseline");
+  const scopes = args.filter((arg) => !arg.startsWith("--"));
+  const paths = scopes.length > 0 ? scopes : DEFAULT_SCAN_PATHS;
+
+  if (updateBaseline) {
+    writeFileSync(DEFAULT_BASELINE_PATH, `${JSON.stringify(baselineKeys(paths), null, 2)}\n`);
+    console.log(`Wrote ${DEFAULT_BASELINE_PATH}`);
+    return;
+  }
+
   const violations = scanLegacyUi(paths);
+
+  // Ratchet mode: allow the frozen baseline of pre-existing violations, fail only on NEW (file, rule)
+  // pairs so no new legacy import / Tailwind utility slips in while the migration proceeds separately.
+  if (useBaseline) {
+    const frozenKeys = existsSync(DEFAULT_BASELINE_PATH)
+      ? JSON.parse(readFileSync(DEFAULT_BASELINE_PATH, "utf8"))
+      : [];
+    const fresh = newViolations(violations, frozenKeys);
+    if (fresh.length === 0) {
+      console.log(`Legacy UI baseline holds (${frozenKeys.length} allowed, 0 new).`);
+      return;
+    }
+    for (const violation of fresh) {
+      const displayPath = relative(process.cwd(), violation.file) || violation.file;
+      console.error(`${displayPath}:${violation.line}: ${violation.rule}: ${violation.excerpt}`);
+    }
+    console.error(`Legacy UI baseline failed with ${fresh.length} NEW violation(s) outside the allowlist.`);
+    process.exitCode = 1;
+    return;
+  }
 
   if (violations.length === 0) {
     console.log("Legacy UI policy passed");

@@ -12,6 +12,7 @@ import {
   loadTeachingScheduleBatches,
   teachingCalendarQueryKeys,
 } from "./teaching-calendar-api";
+import { ResponseValidationError } from "@/lib/validate-response";
 
 describe("teaching schedule batches", () => {
   beforeEach(() => graphQlRequest.mockReset());
@@ -30,7 +31,7 @@ describe("teaching schedule batches", () => {
 
     await expect(loadTeachingScheduleBatches({ page: 0, size: 20, status: "DRAFT", tenantId: "tenant-a" })).resolves.toEqual(page);
     expect(graphQlRequest).toHaveBeenCalledWith(expect.objectContaining({
-      operationName: "TEACHING_SCHEDULE_BATCHES",
+      operationName: "TeachingCalendarScheduleBatches",
       portal: "lcms",
       tenantId: "tenant-a",
       variables: { input: { page: 0, size: 20, status: "DRAFT", tenantId: "tenant-a" } },
@@ -41,6 +42,12 @@ describe("teaching schedule batches", () => {
     expect(teachingCalendarQueryKeys.batches("lcms", { page: 0, schoolId: "school-a", size: 20, status: "DRAFT", tenantId: "tenant-a" })).toEqual([
       "teaching-calendar", "lcms", "tenant-a", "batches", "school-a", "DRAFT", 0, 20,
     ]);
+  });
+
+  it("rejects a malformed batch page at the GraphQL boundary", async () => {
+    graphQlRequest.mockResolvedValue({ lcms: { teachingScheduleBatches: { items: null } } });
+
+    await expect(loadTeachingScheduleBatches({ tenantId: "tenant-a" })).rejects.toBeInstanceOf(ResponseValidationError);
   });
 
   it("loads a tenant-scoped LCMS batch detail", async () => {
@@ -58,7 +65,7 @@ describe("teaching schedule batches", () => {
 
     await expect(loadTeachingScheduleBatchDetail({ batchId: "batch-1", tenantId: "tenant-a" })).resolves.toEqual(detail);
     expect(graphQlRequest).toHaveBeenCalledWith(expect.objectContaining({
-      operationName: "TEACHING_SCHEDULE_BATCH_DETAIL",
+      operationName: "TeachingCalendarScheduleBatchDetail",
       portal: "lcms",
       tenantId: "tenant-a",
       variables: { input: { batchId: "batch-1", tenantId: "tenant-a" } },

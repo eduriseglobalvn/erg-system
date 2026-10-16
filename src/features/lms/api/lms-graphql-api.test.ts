@@ -2,10 +2,12 @@ import { expect, test } from "vitest";
 
 import {
   mapAssignmentsToRuns,
+  type LmsTeacherClassOption,
+} from "@/features/lms/api/lms-teacher-homework-api";
+import {
   mapClassWorkspaceToStudents,
   type LmsClassWorkspace,
-  type LmsTeacherClassOption,
-} from "@/features/lms/api/lms-graphql-api";
+} from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 
 test("maps LMS assignments into assignment runs", () => {

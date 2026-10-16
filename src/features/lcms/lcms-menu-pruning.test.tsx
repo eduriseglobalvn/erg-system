@@ -35,7 +35,7 @@ const removedPaths = [
 ];
 
 describe("LCMS pruned navigation contract", () => {
-  it("removes the obsolete sidebar groups while preserving content authoring and administration", () => {
+  it("keeps only permission administration under System and personnel under Management", () => {
     const items = flattenMenuItems(LCMS_MENU_GROUPS);
     const labels = LCMS_MENU_GROUPS.flatMap((group) => group.items.map((item) => item.label));
     const paths = items.flatMap((item) => item.path ? [item.path] : []);
@@ -47,8 +47,19 @@ describe("LCMS pruned navigation contract", () => {
       "/quiz-editor",
       "/resources",
       "/employees",
-      "/setting/setting-center-role",
+      "/settings/permissions",
+      "/settings/roles",
       "/integration/setting-center-api-key",
+    ]));
+    expect(paths).not.toEqual(expect.arrayContaining([
+      "/setting/setting-center-feature",
+      "/setting/promotions/price-discount-programs",
+      "/setting/setting-center-task/task-status",
+      "/setting/setting-center-customer/customer-status",
+      "/setting/setting-class-room",
+      "/setting/setting-calendar-event",
+      "/setting/setting-criteria-score",
+      "/setting/setting-income-expense",
     ]));
   });
 
@@ -60,6 +71,9 @@ describe("LCMS pruned navigation contract", () => {
       "quiz-bank",
       "questions",
       "quiz-editor",
+      "settings/permissions",
+      "settings/roles",
     ]));
+    expect(lcmsWorkspacePaths).toContain("setting/setting-center-feature");
   });
 });

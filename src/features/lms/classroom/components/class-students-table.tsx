@@ -42,6 +42,8 @@ export function SelectControl({
 
 export function SelectionBar({
   allVisibleSelected,
+  assignDisabled = false,
+  assignDisabledReason,
   copy,
   onAssign,
   onClear,
@@ -50,6 +52,8 @@ export function SelectionBar({
   visibleCount,
 }: {
   allVisibleSelected: boolean;
+  assignDisabled?: boolean;
+  assignDisabledReason?: string;
   copy: StudentCopy;
   onAssign: () => void;
   onClear: () => void;
@@ -64,7 +68,7 @@ export function SelectionBar({
         <span className="ml-1">{copy.visibleSummary(visibleCount)}</span>
       </div>
       <div className="flex flex-wrap gap-2">
-        <Button size="small" variant="contained" onClick={onAssign} disabled={selectedCount === 0}>
+        <Button size="small" variant="contained" onClick={onAssign} disabled={selectedCount === 0 || assignDisabled} title={assignDisabled ? assignDisabledReason : undefined}>
           {copy.openAssignDialog(selectedCount)}
         </Button>
         <Button size="small" variant="outlined" onClick={onToggleAll} disabled={visibleCount === 0}>

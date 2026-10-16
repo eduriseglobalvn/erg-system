@@ -5,7 +5,6 @@ import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneR
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
 import SecurityRoundedIcon from "@mui/icons-material/SecurityRounded";
-import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Stack from "@mui/material/Stack";
@@ -15,10 +14,12 @@ import { LmsMobileTopBar } from "./lms-mobile-top-bar";
 import { LmsPwaSetupSheet } from "./lms-pwa-setup-sheet";
 import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } from "./lms-scope-sheet";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
+import { OfflineShellStatus } from "@/components/erg-mui/offline";
+import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 import { useInstallPrompt } from "../hooks/use-install-prompt";
-import { useOnlineStatus } from "../hooks/use-online-status";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
 import { useServiceWorkerUpdate } from "../hooks/use-service-worker-update";
+import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 export function LmsMobileShell<TSection extends string>({
   activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
@@ -32,7 +33,7 @@ export function LmsMobileShell<TSection extends string>({
   onClassChange: (classId: string) => void; onOpenNotifications?: () => void; onNavigate: (path: string) => void;
   onSchoolChange: (schoolId: string) => void; onSignOut: () => void;
 }) {
-  const online = useOnlineStatus();
+  const network = useOfflineShellStatus();
   const installPrompt = useInstallPrompt();
   const notifications = usePwaNotifications();
   const serviceWorkerUpdate = useServiceWorkerUpdate();
@@ -47,10 +48,10 @@ export function LmsMobileShell<TSection extends string>({
   }
 
   return (
-    <Box sx={{ bgcolor: "background.default", color: "text.primary", display: { xs: "flex", xl: "none" }, flex: 1, flexDirection: "column", minHeight: "100dvh", minWidth: 0, overflow: "hidden" }}>
+    <Box sx={{ bgcolor: "background.default", color: "text.primary", display: { xs: "flex", xl: "none" }, flex: 1, flexDirection: "column", height: "100dvh", maxHeight: "100dvh", minHeight: "100dvh", minWidth: 0, overflow: "hidden", width: "100%" }}>
       <LmsMobileTopBar
         activeLabel={activeLabel} canInstall={installPrompt.canInstall} selectedClassName={selectedClassName}
-        installed={installPrompt.installed} notificationCenter={notificationCenter} online={online}
+        installed={installPrompt.installed} notificationCenter={notificationCenter} online={network.online}
         schoolName={schoolName} teacherName={teacherName} unreadNotificationCount={unreadNotificationCount}
         updateAvailable={serviceWorkerUpdate.updateAvailable} onAccountOpen={() => setAccountOpen(true)}
         onInstall={() => setPwaOpen(true)} onOpenNotifications={onOpenNotifications}
@@ -67,16 +68,16 @@ export function LmsMobileShell<TSection extends string>({
         </Box>
       ) : null}
 
-      {!online ? <Alert severity="warning" sx={{ borderRadius: 0, fontSize: 12, fontWeight: 700, py: 0 }}>Đang offline. Giao bài, lịch làm việc và thông báo cần kết nối mạng để cập nhật an toàn.</Alert> : null}
+      <OfflineShellStatus network={network} />
 
-      <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
+      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
       <LmsBottomDock activeSection={activeSection} items={dockItems} onNavigate={navigate} />
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
       <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
         <Stack spacing={1}>
-          <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate("/account")} />
-          <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate("/account/login-logs")} />
+          <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate(teacherPath("/account"))} />
+          <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate(teacherPath("/account/login-logs"))} />
           {onOpenNotifications ? <AccountActionButton icon={<NotificationsNoneRoundedIcon />} label="Mở thông báo" onClick={() => { setAccountOpen(false); onOpenNotifications(); }} /> : null}
           <AccountActionButton danger icon={<LogoutRoundedIcon />} label="Đăng xuất" onClick={onSignOut} />
         </Stack>

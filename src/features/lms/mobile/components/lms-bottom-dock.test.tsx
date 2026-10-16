@@ -24,6 +24,7 @@ describe("LmsBottomDock", () => {
 
     const item = screen.getByRole("button", { name: "Trang chủ" });
     expect(item).toHaveAttribute("aria-current", "page");
+    expect(item).toHaveAttribute("data-selected", "true");
     fireEvent.click(item);
     expect(onNavigate).toHaveBeenCalledWith("/home");
   });

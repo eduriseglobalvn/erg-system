@@ -1,0 +1,15 @@
+{
+  "_comment": "Max raw (uncompressed) bytes per manualChunks prefix from vite.config.ts. Prefix matches dist/assets/<prefix>-<hash>.js (and sub-chunks like tanstack-form). Seeded from a real `vite build` on 2026-07-25 with ~15% headroom. Raise deliberately when a chunk legitimately grows; a jump usually means an accidental eager import. Checked by scripts/check-bundle-budget.mjs (npm run budget:check).",
+  "index": 340000,
+  "pdfjs": 475000,
+  "tanstack": 305000,
+  "dnd": 60000,
+  "icons": 24000,
+  "virtual": 3000,
+  "radix": 3000,
+  "fullcalendar": 900000,
+  "_entry_gzip_budget": 102400,
+  "_precache_entry_budget": 80,
+  "_precache_byte_budget": 2000000,
+  "_performance_note": "The 100 KiB target applies to the Vite entry chunk. The current shared MUI/auth/i18n modulepreload graph is reported separately until the shell dependency split is implemented. PWA precache is bounded independently and must not contain lazy route JavaScript."
+}

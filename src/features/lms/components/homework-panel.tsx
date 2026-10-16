@@ -17,12 +17,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import {
-  Add,
-  MoreVert,
-  Refresh,
-  Search,
-} from "@mui/icons-material";
+import Add from "@mui/icons-material/Add";
+import MoreVert from "@mui/icons-material/MoreVert";
+import Refresh from "@mui/icons-material/Refresh";
+import Search from "@mui/icons-material/Search";
 import type { ClassroomSnapshot, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
 
 interface HomeworkPanelProps {

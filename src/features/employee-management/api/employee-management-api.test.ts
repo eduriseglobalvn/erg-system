@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { ResponseValidationError } from "@/lib/validate-response";
 
 const mocks = vi.hoisted(() => ({
   apiRequest: vi.fn(),
   getBackOfficePortal: vi.fn(() => "lcms"),
 }));
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
   apiRequest: mocks.apiRequest,
   getBackOfficePortal: mocks.getBackOfficePortal,
 }));
@@ -14,7 +16,9 @@ describe("employee management API", () => {
   beforeEach(() => mocks.apiRequest.mockReset());
 
   test("uses canonical tenant-scoped admin endpoints for the full employee workflow", async () => {
-    mocks.apiRequest.mockResolvedValue({});
+    mocks.apiRequest
+      .mockResolvedValue({})
+      .mockResolvedValueOnce({ users: [], meta: { page: 1, limit: 25, total: 0, totalPages: 0 } });
     const api = await import("@/features/employee-management/api/employee-management-api");
 
     await api.listEmployees({ page: 1, limit: 25, search: "teacher", status: "ACTIVE", role: "lms_teacher" });
@@ -62,8 +66,41 @@ describe("employee management API", () => {
     ]);
   });
 
+  test("normalizes an unknown contract status before exposing the employee domain", async () => {
+    mocks.apiRequest.mockResolvedValueOnce({
+      users: [{ id: "user-1", email: "teacher@erg.edu.vn", fullName: "Teacher", roles: [], status: "FUTURE_STATUS" }],
+      meta: { page: 0, limit: 25, total: 1, totalPages: 1 },
+    });
+    const { listEmployees } = await import("@/features/employee-management/api/employee-management-api");
+
+    const result = await listEmployees({ page: 0, limit: 25 });
+
+    expect(result.users[0]?.status).toBe("UNKNOWN");
+  });
+
+  test("rejects a malformed employee list at the transport boundary", async () => {
+    mocks.apiRequest.mockResolvedValueOnce({ meta: { page: 0, limit: 25, total: 0, totalPages: 0 } });
+    const { listEmployees } = await import("@/features/employee-management/api/employee-management-api");
+
+    await expect(listEmployees({ page: 0, limit: 25 })).rejects.toBeInstanceOf(ResponseValidationError);
+  });
+
   test("encodes dynamic user route segments from the contract", async () => {
-    const { employeeManagementRoutes } = await import("@/features/employee-management/api/employee-management-routes");
-    expect(employeeManagementRoutes.user("user/1")).toBe("/api/v1/admin/users/user%2F1");
+    const { API_ENDPOINTS } = await import("@/lib/api/api-endpoints");
+    expect(API_ENDPOINTS.adminUsers.detail("user/1")).toBe("/api/v1/admin/users/user%2F1");
+  });
+
+  test("forwards caller cancellation to employee reads", async () => {
+    mocks.apiRequest
+      .mockResolvedValueOnce({ users: [], meta: { page: 0, limit: 25, total: 0, totalPages: 0 } })
+      .mockResolvedValueOnce({ id: "user-1" });
+    const signal = new AbortController().signal;
+    const { getEmployee, listEmployees } = await import("@/features/employee-management/api/employee-management-api");
+
+    await listEmployees({ page: 0, limit: 25 }, signal);
+    await getEmployee("user-1", signal);
+
+    expect(mocks.apiRequest.mock.calls[0]?.[1]).toMatchObject({ signal });
+    expect(mocks.apiRequest.mock.calls[1]?.[1]).toMatchObject({ signal });
   });
 });

@@ -70,6 +70,27 @@ test("fetches the LMS notification inbox from the v1 self API", async () => {
   expect(headers.has("X-Portal")).toBe(false);
 });
 
+test("forwards caller cancellation to notification reads", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  storePortalSession("lms");
+  const controller = new AbortController();
+  let transportSignal: AbortSignal | undefined;
+  const fetchMock = vi.fn((_url: string | URL | Request, init?: RequestInit) => {
+    transportSignal = init?.signal ?? undefined;
+    return new Promise<Response>((_resolve, reject) => {
+      transportSignal?.addEventListener("abort", () => reject(transportSignal?.reason), { once: true });
+    });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  const reason = new Error("navigation changed");
+  const request = fetchNotificationFeed({ portal: "lms" }, controller.signal);
+  await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledOnce());
+  controller.abort(reason);
+  await expect(request).rejects.toBe(reason);
+  expect(transportSignal?.aborted).toBe(true);
+});
+
 test("scopes notification query keys by portal tenant and account", () => {
   const scope = { tenantId: "tenant-a", accountId: "account-a" };
 

@@ -34,3 +34,16 @@ test("scopes teaching-calendar workspace and reference catalog keys by portal an
     "reference-catalog",
   ]);
 });
+
+test("targets batch invalidation without refetching the entire tenant calendar root", () => {
+  expect(teachingCalendarQueryKeys.batchMutationTargets("lcms", "tenant-a", "batch-1")).toEqual([
+    ["teaching-calendar", "lcms", "tenant-a", "batches"],
+    ["teaching-calendar", "lcms", "tenant-a", "batch-detail", "batch-1"],
+    ["teaching-calendar", "lcms", "tenant-a", "workspace"],
+  ]);
+  expect(teachingCalendarQueryKeys.batchMutationTargets("lcms", "tenant-a", "batch-1")).not.toContainEqual([
+    "teaching-calendar",
+    "lcms",
+    "tenant-a",
+  ]);
+});

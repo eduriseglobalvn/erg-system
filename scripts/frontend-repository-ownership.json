@@ -1,0 +1,57 @@
+{
+  "version": 1,
+  "roles": {
+    "erg-system": "canonical-operational-frontend",
+    "elearning": "frozen-secondary-legacy-frontend",
+    "erg": "canonical-public-cms-frontend"
+  },
+  "exactPathOverlap": {
+    "count": 281,
+    "sha256": "3f3894610239a653b9271c44ddd26ac033efba76bae4ef36b987d37fa92c6dd2"
+  },
+  "frozenSecondaryScopes": [
+    {
+      "name": "lms",
+      "prefix": "features/lms/",
+      "count": 59,
+      "sha256": "b29e8ff76bfea4b1580ffd63e897906eaec7e8989d5946edc63ce9e926f0bb0a"
+    },
+    {
+      "name": "lcms",
+      "prefix": "features/lcms/",
+      "count": 92,
+      "sha256": "c97496e5ba6c5cc51ab6693502d9210c04f99899a9c912abb865a7ad0affac5d"
+    },
+    {
+      "name": "crm",
+      "prefix": "features/crm/",
+      "count": 11,
+      "sha256": "45047711e415d16a19f156d952ee4b8600456d20dd37a75877c1b1ad46723e24"
+    },
+    {
+      "name": "elearning",
+      "prefix": "features/elearning/",
+      "count": 32,
+      "sha256": "3a0c01ee2c6f978200a02972cbb56edda1971191e32bc25703ae5951e4524872"
+    },
+    {
+      "name": "platform",
+      "prefix": "platform/",
+      "count": 38,
+      "sha256": "d631f6e4fc19219aa6a8bdc20c2b880994ed1174cf44ba72c89cf80befd3bd50"
+    },
+    {
+      "name": "quiz-components",
+      "prefix": "components/quiz/",
+      "count": 17,
+      "sha256": "7ffe50687ea806b90a40420c0802f27225693b518d8cd8928dd0a5c0c6068612"
+    }
+  ],
+  "forbiddenPublicPrefixes": [
+    "features/lms/",
+    "features/lcms/",
+    "features/crm/",
+    "features/elearning/",
+    "platform/auth/"
+  ]
+}

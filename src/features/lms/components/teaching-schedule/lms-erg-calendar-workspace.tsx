@@ -24,6 +24,7 @@ import {
   type TeachingCalendarViewMode,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { createInitialCalendarRange } from "@/features/teaching-calendar/components/calendar-date-range";
+import { useLmsMobileBreakpoint } from "@/features/lms/mobile";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 
 const lmsCalendarLanes = ["Lịch theo trường", "Lịch theo môn"];
@@ -64,26 +65,22 @@ export function LmsErgCalendarWorkspace({
   teacherName: string;
 }) {
   const { session } = useAuthSession("lms");
+  const isMobile = useLmsMobileBreakpoint();
   const tenantId = session?.tenantId ?? "";
-  const [initialRange] = useState(() => createInitialCalendarRange("week"));
+  const [initialRange] = useState(() => createInitialCalendarRange(isMobile ? "month" : "week"));
   const [visibleRange, setVisibleRange] = useState<ErgCalendarVisibleRange>(() => ({
     activeLane: "Tất cả",
     from: initialRange.from,
-    mode: "week",
+    mode: isMobile ? "schedule" : "week",
     selectedScopeId: "",
     selectedScopeLabel: "",
     to: initialRange.to,
   }));
-  const workspaceInput = useMemo<MyTeachingCalendarInput>(() => ({
-    classIds: selectedClass?.id ? [selectedClass.id] : undefined,
-    from: visibleRange.from,
-    schoolIds: visibleRange.activeLane === lmsCalendarLanes[0] && visibleRange.selectedScopeId ? [visibleRange.selectedScopeId] : selectedClass?.schoolId ? [selectedClass.schoolId] : undefined,
-    statuses: ["PUBLISHED"],
-    subjectIds: visibleRange.activeLane === lmsCalendarLanes[1] && visibleRange.selectedScopeId ? [visibleRange.selectedScopeId] : undefined,
+  const workspaceInput = useMemo<MyTeachingCalendarInput>(() => createLmsCalendarWorkspaceInput({
+    selectedClass,
     tenantId,
-    to: visibleRange.to,
-    viewMode: mapLmsLaneToViewMode(visibleRange.activeLane),
-  }), [selectedClass?.id, selectedClass?.schoolId, tenantId, visibleRange.activeLane, visibleRange.from, visibleRange.selectedScopeId, visibleRange.to]);
+    visibleRange,
+  }), [selectedClass, tenantId, visibleRange]);
   const workspaceQueryKey = useMemo(
     () => teachingCalendarQueryKeys.workspace("lms", "teacher", workspaceInput),
     [workspaceInput],
@@ -91,7 +88,7 @@ export function LmsErgCalendarWorkspace({
   const workspaceQuery = useQuery({
     enabled: !isBootstrapLoading && Boolean(tenantId),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
-    queryFn: () => loadLmsMyTeachingCalendar(workspaceInput),
+    queryFn: ({ signal }) => loadLmsMyTeachingCalendar(workspaceInput, signal),
     queryKey: workspaceQueryKey,
     refetchOnMount: false,
     refetchOnReconnect: false,
@@ -104,7 +101,7 @@ export function LmsErgCalendarWorkspace({
   const apiCatalog = useMemo(() => mapTeachingCalendarCatalog(workspaceQuery.data?.catalog, workspaceQuery.data?.filterOptions), [workspaceQuery.data?.catalog, workspaceQuery.data?.filterOptions]);
   const referenceCatalogQuery = useQuery({
     enabled: !isBootstrapLoading && Boolean(tenantId),
-    queryFn: () => loadTeachingCalendarReferenceCatalog("lms"),
+    queryFn: ({ signal }) => loadTeachingCalendarReferenceCatalog("lms", signal),
     gcTime: TEACHING_CALENDAR_WORKSPACE_GC_TIME_MS,
     queryKey: teachingCalendarQueryKeys.referenceCatalog("lms", tenantId),
     refetchOnMount: false,
@@ -127,10 +124,13 @@ export function LmsErgCalendarWorkspace({
   const [stableScheduleCatalog, setStableScheduleCatalog] = useState<ErgScheduleCatalog | undefined>();
   useEffect(() => {
     if (scheduleCatalog) {
-      setStableScheduleCatalog(scheduleCatalog);
+      setStableScheduleCatalog((current) => mergeTeachingCalendarCatalog(scheduleCatalog, current));
     }
   }, [scheduleCatalog]);
-  const createScheduleCatalog = scheduleCatalog ?? stableScheduleCatalog;
+  const createScheduleCatalog = useMemo(
+    () => mergeTeachingCalendarCatalog(scheduleCatalog, stableScheduleCatalog),
+    [scheduleCatalog, stableScheduleCatalog],
+  );
   const handleVisibleRangeChange = useCallback((nextRange: ErgCalendarVisibleRange) => {
     setVisibleRange((current) => (
       current.activeLane === nextRange.activeLane &&
@@ -153,9 +153,10 @@ export function LmsErgCalendarWorkspace({
       filterEventsByScope={false}
       errorMessage={workspaceQuery.error instanceof Error ? workspaceQuery.error.message : referenceCatalogQuery.error instanceof Error ? referenceCatalogQuery.error.message : undefined}
       initialDate={initialRange.initialDate}
-      initialMode="week"
+      initialMode={isMobile ? "schedule" : "week"}
       isLoading={isBootstrapLoading || !tenantId || workspaceQuery.isPending || referenceCatalogQuery.isPending}
       lanes={lmsCalendarLanes}
+      mobileLayout={isMobile}
       monthCountLabel="lịch dạy"
       monthCountOverride={workspaceQuery.data?.events.length}
       onRetry={() => void Promise.all([workspaceQuery.refetch(), referenceCatalogQuery.refetch()])}
@@ -173,6 +174,34 @@ export function LmsErgCalendarWorkspace({
       todayDate={initialRange.initialDate}
     />
   );
+}
+
+export function createLmsCalendarWorkspaceInput({
+  selectedClass,
+  tenantId,
+  visibleRange,
+}: {
+  selectedClass?: Pick<ClassroomSnapshot, "id" | "schoolId">;
+  tenantId: string;
+  visibleRange: ErgCalendarVisibleRange;
+}): MyTeachingCalendarInput {
+  const viewMode = mapLmsLaneToViewMode(visibleRange.activeLane);
+  const isAggregateView = viewMode === "ALL";
+
+  return {
+    classIds: isAggregateView && selectedClass?.id ? [selectedClass.id] : undefined,
+    from: visibleRange.from,
+    schoolIds: viewMode === "BY_SCHOOL"
+      ? visibleRange.selectedScopeId ? [visibleRange.selectedScopeId] : undefined
+      : isAggregateView && selectedClass?.schoolId ? [selectedClass.schoolId] : undefined,
+    statuses: ["PUBLISHED"],
+    subjectIds: viewMode === "BY_SUBJECT" && visibleRange.selectedScopeId
+      ? [visibleRange.selectedScopeId]
+      : undefined,
+    tenantId,
+    to: visibleRange.to,
+    viewMode,
+  };
 }
 
 function mapLmsLaneToViewMode(activeLane: string): TeachingCalendarViewMode {

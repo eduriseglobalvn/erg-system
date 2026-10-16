@@ -10,77 +10,19 @@ import type {
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
-import { sampleQuiz } from "@/lib/sample-quiz";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import type {
+  ElearningStudentDashboardQuery,
+  ElearningStudentDashboardQueryVariables,
+} from "@/lib/api/generated/graphql";
+import { isObject, validateResponse } from "@/lib/validate-response";
+import ElearningStudentDashboardDocument from "./student-dashboard.graphql?raw";
 
-type ElearningStudentDashboardResponse = {
-  elearning: {
-    studentDashboard: ElearningStudentDashboardDTO;
-  };
-};
-
-type ElearningStudentDashboardDTO = {
-  tenantId?: string | null;
-  viewer?: {
-    userId?: string | null;
-    tenantId?: string | null;
-    accountType?: string | null;
-    accessLevel?: string | null;
-  } | null;
-  profile?: {
-    userId?: string | null;
-    studentId?: string | null;
-    studentCode?: string | null;
-    fullName?: string | null;
-    email?: string | null;
-    schoolId?: string | null;
-    academicClassId?: string | null;
-    status?: string | null;
-    updatedAt?: string | null;
-  } | null;
-  summary?: {
-    enrolledCourseCount?: number | null;
-    activeAssignmentCount?: number | null;
-    pendingActionCount?: number | null;
-    generatedAt?: string | null;
-    scoreSummary?: {
-      completedAttemptCount?: number | null;
-      attemptedAssignmentCount?: number | null;
-      passedAttemptCount?: number | null;
-      averagePercent?: number | null;
-      bestPercent?: number | null;
-    } | null;
-  } | null;
-  courses?: Array<{
-    id?: string | null;
-    title?: string | null;
-    status?: string | null;
-    progressPercent?: number | null;
-    updatedAt?: string | null;
-  }>;
-  assignments?: Array<{
-    id?: string | null;
-    title?: string | null;
-    status?: string | null;
-    dueAt?: string | null;
-  }>;
-  nextActions?: Array<{
-    id?: string | null;
-    kind?: string | null;
-    label?: string | null;
-    targetId?: string | null;
-    dueAt?: string | null;
-  }>;
-  announcements?: Array<{
-    id?: string | null;
-    title?: string | null;
-    content?: string | null;
-    pinned?: boolean | null;
-    publishedAt?: string | null;
-    updatedAt?: string | null;
-  }>;
-};
+// Types come from the generated GraphQL contract (src/lib/api/generated/graphql.ts, ERG-018).
+// The document lives in student-dashboard.graphql; codegen keeps these in sync with the BE schema.
+type ElearningStudentDashboardResponse = ElearningStudentDashboardQuery;
+type ElearningStudentDashboardDTO = ElearningStudentDashboardQuery["elearning"]["studentDashboard"];
 
 export type StudentDashboardApiData = {
   assignments: StudentDashboardAssignment[];
@@ -88,112 +30,82 @@ export type StudentDashboardApiData = {
   teacherAnnouncements: StudentTeacherAnnouncement[];
 };
 
-const ElearningStudentDashboardDocument = `
-query ElearningStudentDashboard($input: StudentDashboardInput) {
-  elearning {
-    studentDashboard(input: $input) {
-      tenantId
-      viewer {
-        userId
-        tenantId
-        accountType
-        accessLevel
-      }
-      profile {
-        userId
-        studentId
-        studentCode
-        fullName
-        email
-        schoolId
-        academicClassId
-        status
-        updatedAt
-      }
-      summary {
-        enrolledCourseCount
-        activeAssignmentCount
-        pendingActionCount
-        generatedAt
-        scoreSummary {
-          completedAttemptCount
-          attemptedAssignmentCount
-          passedAttemptCount
-          averagePercent
-          bestPercent
-        }
-      }
-      courses {
-        id
-        title
-        status
-        progressPercent
-        updatedAt
-      }
-      assignments {
-        id
-        title
-        status
-        dueAt
-      }
-      nextActions {
-        id
-        kind
-        label
-        targetId
-        dueAt
-      }
-      announcements {
-        id
-        title
-        content
-        pinned
-        publishedAt
-        updatedAt
-      }
-    }
-  }
-}
-`;
-
-export async function loadStudentDashboardData(): Promise<StudentDashboardApiData> {
+export async function loadStudentDashboardData({
+  signal,
+  tenantId = getDefaultTenantId(),
+}: { signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
   const session = getCurrentElearningViewerSession();
 
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       assignments: studentAssignments,
-      profile: mergeProfileSession(studentDashboardProfile, session, studentAssignments.length),
+      profile: mergeProfileSession(studentDashboardProfile, session),
       teacherAnnouncements: studentTeacherAnnouncements,
     };
   }
 
-  const response = await graphQlRequest<ElearningStudentDashboardResponse, { input: { tenantId: string } }>({
+  const response = await graphQlRequest<
+    ElearningStudentDashboardResponse,
+    ElearningStudentDashboardQueryVariables & Record<string, unknown>
+  >({
     operationName: "ElearningStudentDashboard",
     portal: "elearning",
     query: ElearningStudentDashboardDocument,
+    signal,
     variables: {
       input: {
-        tenantId: getDefaultTenantId(),
+        tenantId,
       },
     },
   });
-  return mapStudentDashboard(response.elearning.studentDashboard, session);
+  const dashboardResponse = validateResponse(response, isStudentDashboardResponse, "elearning.student-dashboard");
+  return mapStudentDashboard(dashboardResponse.elearning.studentDashboard, session);
+}
+
+function isStudentDashboardResponse(value: unknown): value is ElearningStudentDashboardResponse {
+  if (!isObject(value) || !isObject(value.elearning) || !isObject(value.elearning.studentDashboard)) return false;
+  const dashboard = value.elearning.studentDashboard;
+  if (
+    typeof dashboard.tenantId !== "string" ||
+    !isObject(dashboard.viewer) ||
+    typeof dashboard.viewer.userId !== "string" ||
+    typeof dashboard.viewer.tenantId !== "string" ||
+    !isObject(dashboard.profile) ||
+    typeof dashboard.profile.userId !== "string" ||
+    !isObject(dashboard.summary) ||
+    !Array.isArray(dashboard.courses) ||
+    !Array.isArray(dashboard.assignments) ||
+    !Array.isArray(dashboard.nextActions) ||
+    !Array.isArray(dashboard.announcements)
+  ) return false;
+
+  return dashboard.courses.every(hasStringIdAndTitle) &&
+    dashboard.assignments.every(hasStringIdAndTitle) &&
+    dashboard.nextActions.every((action) =>
+      isObject(action) && typeof action.id === "string" && typeof action.kind === "string" && typeof action.label === "string") &&
+    dashboard.announcements.every((announcement) =>
+      isObject(announcement) &&
+      typeof announcement.id === "string" &&
+      typeof announcement.title === "string" &&
+      typeof announcement.pinned === "boolean");
+}
+
+function hasStringIdAndTitle(value: unknown) {
+  return isObject(value) && typeof value.id === "string" && typeof value.title === "string";
 }
 
 function mapStudentDashboard(
   dashboard: ElearningStudentDashboardDTO,
   session: ReturnType<typeof getCurrentElearningViewerSession>,
 ): StudentDashboardApiData {
-  const assignments = (dashboard.assignments ?? []).filter(hasId).map((assignment, index) => mapAssignment(assignment, dashboard, index));
-  const submittedCount = assignments.filter((assignment) => assignment.status === "submitted").length;
+  const assignments = (dashboard.assignments ?? []).filter(hasId).map((assignment) => mapAssignment(assignment, dashboard));
   const announcements = (dashboard.announcements ?? []).filter(hasId).map((announcement) => mapAnnouncement(announcement, dashboard));
 
   return {
     assignments,
     profile: mergeProfileSession(
-      mapProfile(dashboard, assignments.length, submittedCount),
+      mapProfile(dashboard, assignments.length),
       session,
-      assignments.length,
     ),
     teacherAnnouncements: announcements,
   };
@@ -202,7 +114,6 @@ function mapStudentDashboard(
 function mergeProfileSession(
   baseProfile: StudentDashboardProfile,
   session: ReturnType<typeof getCurrentElearningViewerSession>,
-  assignmentCount: number,
 ): StudentDashboardProfile {
   if (!session) return baseProfile;
 
@@ -215,80 +126,55 @@ function mergeProfileSession(
     schoolName: session.schoolName || baseProfile.schoolName,
     gradeLabel: isTeacherViewer ? session.title || session.className || "Giáo viên" : baseProfile.gradeLabel,
     homeroomTeacher: isTeacherViewer ? "Tự truy cập Elearning" : baseProfile.homeroomTeacher,
-    totalAssignments: assignmentCount || baseProfile.totalAssignments,
   };
 }
 
 function mapProfile(
   dashboard: ElearningStudentDashboardDTO,
   assignmentCount: number,
-  submittedCount: number,
 ): StudentDashboardProfile {
   const profile = dashboard.profile;
   const summary = dashboard.summary;
   const scoreSummary = summary?.scoreSummary;
-  const attemptedCount = scoreSummary?.attemptedAssignmentCount ?? assignmentCount;
-  const passedCount = scoreSummary?.passedAttemptCount ?? submittedCount;
-  const weeklyGoalProgress = attemptedCount ? Math.round((passedCount / Math.max(attemptedCount, 1)) * 100) : 0;
   const activeAssignmentCount = summary?.activeAssignmentCount ?? 0;
-  const enrolledCourseCount = summary?.enrolledCourseCount ?? 0;
 
   return {
-    ...studentDashboardProfile,
-    id: profile?.studentId || profile?.userId || studentDashboardProfile.id,
-    name: profile?.fullName || studentDashboardProfile.name,
-    className: profile?.academicClassId || studentDashboardProfile.className,
-    schoolName: profile?.schoolId || studentDashboardProfile.schoolName,
-    averageScore: Math.round(scoreSummary?.averagePercent ?? studentDashboardProfile.averageScore),
-    completedAssignments: scoreSummary?.completedAttemptCount ?? submittedCount,
-    totalAssignments: assignmentCount || activeAssignmentCount,
-    motivationPoints: Math.max(0, enrolledCourseCount * 10 + (passedCount ?? 0) * 15),
-    weeklyGoalProgress: Math.max(0, Math.min(100, weeklyGoalProgress)),
+    id: profile?.studentId || profile?.userId || dashboard.viewer.userId || "",
+    name: profile?.fullName || "",
+    className: profile?.academicClassId || "",
+    schoolName: profile?.schoolId || "",
+    gradeLabel: "",
+    homeroomTeacher: "",
+    averageScore: scoreSummary ? Math.round(scoreSummary.averagePercent ?? 0) : null,
+    completedAssignments: scoreSummary?.completedAttemptCount ?? null,
+    totalAssignments: activeAssignmentCount || assignmentCount || 0,
+    motivationPoints: null,
+    weeklyGoalProgress: null,
   };
 }
 
 function mapAssignment(
   assignment: NonNullable<ElearningStudentDashboardDTO["assignments"]>[number],
   dashboard: ElearningStudentDashboardDTO,
-  index: number,
 ): StudentDashboardAssignment {
-  const status = normalizeStatus(assignment.status, assignment.dueAt);
-  const scoreSummary = dashboard.summary?.scoreSummary;
-  const maxScore = 100;
-  const bestScore = status === "submitted" ? Math.round(scoreSummary?.bestPercent ?? scoreSummary?.averagePercent ?? 0) : null;
-  const progressRate = progressForStatus(status);
-  const courses = dashboard.courses ?? [];
-  const course = courses[index % Math.max(courses.length, 1)];
+  const status = normalizeStatus(assignment.status, assignment.dueAt, dashboard.summary?.generatedAt);
+  const focusNote = dashboard.nextActions?.find((action) => action.targetId === assignment.id)?.label;
 
   return {
-    id: assignment.id || `assignment-${index + 1}`,
-    quizId: assignment.id || sampleQuiz.id,
-    title: assignment.title || `Bài tập ${index + 1}`,
-    subtitle: course?.title || "Bài tập từ LMS ERG",
-    subjectLabel: course?.title || subjectLabelFor(index),
-    teacherName: "Giáo viên ERG",
+    id: assignment.id,
+    ...(assignment.quizId ? { quizId: assignment.quizId } : {}),
+    title: assignment.title,
     status,
-    progressRate,
-    answeredCount: status === "not_started" ? 0 : Math.max(1, Math.round((progressRate / 100) * 10)),
-    totalQuestions: 10,
-    score: bestScore,
-    maxScore,
+    progressRate: null,
+    answeredCount: null,
+    totalQuestions: null,
+    score: null,
+    maxScore: null,
     dueLabel: assignment.dueAt ? formatDueLabel(assignment.dueAt) : "Chưa có hạn nộp",
     statusLabel: statusLabelFor(status),
-    lastActivityLabel: assignment.dueAt ? formatDateTimeLabel(assignment.dueAt) : "Mới cập nhật",
-    focusNote: dashboard.nextActions?.find((action) => action.targetId === assignment.id)?.label || "Theo dõi tiến độ và hoàn thành bài theo lịch được giao.",
-    attempts:
-      bestScore !== null
-        ? [
-            {
-              id: `attempt-${assignment.id}`,
-              score: bestScore,
-              maxScore,
-              completedAtLabel: "Đã nộp",
-              durationLabel: "20 phút",
-            },
-          ]
-        : [],
+    lastActivityLabel: "Chưa có hoạt động",
+    ...(focusNote ? { focusNote } : {}),
+    attempts: [],
   };
 }
 
@@ -300,8 +186,7 @@ function mapAnnouncement(
     id: announcement.id || "announcement",
     title: announcement.title || "Thông báo lớp học",
     content: announcement.content || "",
-    teacherName: "ERG",
-    targetLabel: dashboard.profile?.academicClassId || studentDashboardProfile.className,
+    targetLabel: dashboard.profile?.academicClassId || undefined,
     createdAtLabel: formatDateTimeLabel(announcement.publishedAt || announcement.updatedAt || ""),
     isPinned: Boolean(announcement.pinned),
   };
@@ -311,20 +196,15 @@ function hasId<TValue extends { id?: string | null }>(value: TValue): value is T
   return Boolean(value.id);
 }
 
-function normalizeStatus(status: string | null | undefined, dueAt?: string | null): StudentAssignmentStatus {
+function normalizeStatus(status: string | null | undefined, dueAt?: string | null, nowValue?: string | null): StudentAssignmentStatus {
   const normalized = status?.toLowerCase() ?? "";
   if (normalized === "submitted" || normalized === "completed" || normalized === "done") return "submitted";
-  if (dueAt && new Date(dueAt).getTime() < Date.now() && normalized !== "submitted") return "overdue";
+  const nowMs = nowValue ? Date.parse(nowValue) : Number.NaN;
+  const dueMs = dueAt ? Date.parse(dueAt) : Number.NaN;
+  if (Number.isFinite(dueMs) && Number.isFinite(nowMs) && dueMs < nowMs && normalized !== "submitted") return "overdue";
   if (normalized === "in_progress" || normalized === "doing" || normalized === "started") return "in_progress";
   if (normalized === "overdue") return "overdue";
   return "not_started";
-}
-
-function progressForStatus(status: StudentAssignmentStatus) {
-  if (status === "submitted") return 100;
-  if (status === "in_progress") return 67;
-  if (status === "overdue") return 35;
-  return 0;
 }
 
 function statusLabelFor(status: StudentAssignmentStatus) {
@@ -340,10 +220,6 @@ function statusLabelFor(status: StudentAssignmentStatus) {
   }
 }
 
-function subjectLabelFor(index: number) {
-  return ["Tin học", "Tiếng Anh", "Toán học", "Khoa học"][index % 4];
-}
-
 function formatDueLabel(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Chưa có hạn nộp";
@@ -352,6 +228,6 @@ function formatDueLabel(value: string) {
 
 function formatDateTimeLabel(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Mới cập nhật";
+  if (Number.isNaN(date.getTime())) return "Chưa có hoạt động";
   return date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
 }

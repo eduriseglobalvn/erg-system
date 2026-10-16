@@ -1,0 +1,14 @@
+.git
+.github
+.codex
+.claude
+node_modules
+dist
+coverage
+playwright-report
+test-results
+outputs
+*.log
+.env
+.env.*
+!.env.docker.example

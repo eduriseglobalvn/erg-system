@@ -2,7 +2,9 @@ import { expect, test } from "vitest";
 
 import {
   buildCurriculumExplorerModel,
+  buildCurriculumRoadmapStages,
   getResourceCommandSpecs,
+  resolveResourceCurriculumLocation,
 } from "@/features/lcms/admin-operations/utils/learning-resource-curriculum-view-model";
 import type {
   AttachedResourceItem,
@@ -77,6 +79,7 @@ const resources: AttachedResourceItem[] = [
     subjectId: "subject-ic3",
     categoryId: "level-1",
     sectionId: "topic-1",
+    topicId: "taxonomy-topic-files",
     selectedFileType: "PDF",
     fileTypeBadge: "PDF",
     status: "published",
@@ -124,6 +127,43 @@ test("builds subject-level model with clear folder summary", () => {
   expect(model.summary.lectures).toBe(1);
   expect(model.summary.documents).toBe(1);
   expect(model.summary.exercises).toBe(1);
+});
+
+test("builds a roadmap with level milestones and topic checkpoints", () => {
+  const stages = buildCurriculumRoadmapStages({
+    subject,
+    localContentItems,
+    resources,
+    taxonomyTopics: [{ id: "taxonomy-topic-files", label: "Digital Literacy", subjectId: "subject-ic3" }],
+    quizBankItems,
+  });
+
+  expect(stages).toHaveLength(1);
+  expect(stages[0].level.title).toBe("Level 1");
+  expect(stages[0].level.summary).toMatchObject({ topics: 1, totalContent: 3 });
+  expect(stages[0].topics).toHaveLength(1);
+  expect(stages[0].topics[0].title).toBe("Digital Literacy");
+  expect(stages[0].topics[0].lessons).toHaveLength(1);
+  expect(stages[0].topics[0].lessons[0].folder).toMatchObject({
+    title: "01. File management",
+    role: "topic",
+    summary: { lectures: 1, documents: 1, exercises: 1, totalContent: 3 },
+  });
+  expect(stages[0].topics[0].lessons[0].content.map((item) => item.typeLabel)).toEqual([
+    "Bài giảng",
+    "Tài liệu",
+    "Bài tập",
+  ]);
+});
+
+test("resolves the same subject-level-topic path for resources and course structure", () => {
+  expect(resolveResourceCurriculumLocation([subject], resources[0])).toEqual({
+    subjectLabel: "IC3 GS6",
+    levelLabel: "Level 1",
+    topicLabel: "01. File management",
+    pathLabels: ["IC3 GS6", "Level 1", "01. File management"],
+    isResolved: true,
+  });
 });
 
 test("keeps the curriculum root available for creating a subject", () => {

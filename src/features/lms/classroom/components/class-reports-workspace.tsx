@@ -1,20 +1,14 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { BarChart3, TrendingUp, Trophy } from "lucide-react";
 
 import {
   DashboardMetricCard,
   DashboardPageShell,
   DashboardSectionCard,
-  DashboardSegmentedControl,
 } from "@/components/dashboard/dashboard-page-shell";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
-import {
-  classroomSchools,
-  getLeaderboard,
-  getSchoolSnapshots,
-} from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomSnapshot, LeaderboardEntry, LeaderboardScope } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
@@ -22,37 +16,29 @@ import { useI18n } from "@/platform/i18n";
 export function ClassReportsWorkspace({
   activeLeaf,
   onOpenLeaf,
+  snapshots,
   selectedClassId,
   selectedSchoolId,
 }: {
   activeLeaf: DashboardLeaf;
   onOpenLeaf: (leafId: string) => void;
+  snapshots: ClassroomSnapshot[];
   selectedClassId: string;
   selectedSchoolId: string;
 }) {
   const { locale } = useI18n();
   const copy = locale === "vi" ? viCopy : enCopy;
-  const [scope, setScope] = useState<LeaderboardScope>("class");
+  const scope: LeaderboardScope = "class";
 
-  const school = classroomSchools.find((item) => item.id === selectedSchoolId) ?? classroomSchools[0];
-  const schoolClasses = useMemo(() => getSchoolSnapshots(selectedSchoolId), [selectedSchoolId]);
+  const schoolClasses = useMemo(() => snapshots.filter((snapshot) => snapshot.schoolId === selectedSchoolId), [selectedSchoolId, snapshots]);
   const selectedClass = schoolClasses.find((item) => item.id === selectedClassId) ?? schoolClasses[0];
-  const leaderboard = useMemo(() => {
-    const base = getLeaderboard(scope);
-    if (scope === "cluster") return base;
-
-    const bySchool = base.filter((entry) => entry.schoolName === school.name);
-    if (scope === "class" && selectedClass) {
-      const byClass = bySchool.filter((entry) => entry.className === selectedClass.className);
-      return byClass.length ? byClass : bySchool.length ? bySchool : base;
-    }
-    return bySchool.length ? bySchool : base;
-  }, [school.name, scope, selectedClass]);
+  const leaderboard: LeaderboardEntry[] = [];
 
   const leader = leaderboard[0];
-  const averageCompletion = selectedClass?.completionRate ?? 0;
-  const averageScore = selectedClass?.averageScore ?? 0;
-  const supportTotal = selectedClass?.riskStudents ?? 0;
+  const metricsAvailable = selectedClass?.metricsAvailable !== false && Boolean(selectedClass);
+  const averageCompletion = metricsAvailable ? selectedClass?.completionRate ?? 0 : null;
+  const averageScore = metricsAvailable ? selectedClass?.averageScore ?? 0 : null;
+  const supportTotal = metricsAvailable ? selectedClass?.riskStudents ?? 0 : null;
   const strongestClass = selectedClass;
   const classNeedingCare = selectedClass;
 
@@ -71,7 +57,7 @@ export function ClassReportsWorkspace({
       <div className="grid gap-4 xl:grid-cols-4">
         <DashboardMetricCard
           label={copy.metrics.completion}
-          value={`${averageCompletion}%`}
+          value={averageCompletion === null ? copy.noData : `${averageCompletion}%`}
           detail={copy.metrics.completionDetail}
           delta={strongestClass ? copy.metrics.strongest(strongestClass.className) : "-"}
           icon={<TrendingUp className="h-4 w-4" />}
@@ -79,7 +65,7 @@ export function ClassReportsWorkspace({
         />
         <DashboardMetricCard
           label={copy.metrics.score}
-          value={`${averageScore}`}
+          value={averageScore === null ? copy.noData : `${averageScore}`}
           detail={copy.metrics.scoreDetail}
           delta={leader ? copy.metrics.leader(leader.name) : copy.noData}
           icon={<Trophy className="h-4 w-4" />}
@@ -87,7 +73,7 @@ export function ClassReportsWorkspace({
         />
         <DashboardMetricCard
           label={copy.metrics.support}
-          value={`${supportTotal}`}
+          value={supportTotal === null ? copy.noData : `${supportTotal}`}
           detail={copy.metrics.supportDetail}
           delta={classNeedingCare ? copy.metrics.watch(classNeedingCare.className) : "-"}
           icon={<BarChart3 className="h-4 w-4" />}
@@ -108,22 +94,13 @@ export function ClassReportsWorkspace({
           title={copy.leaderboardTitle}
           description={copy.leaderboardDescription}
           action={
-            <DashboardSegmentedControl
-              options={[
-                { value: "class", label: copy.scope.class },
-                { value: "grade", label: copy.scope.grade },
-                { value: "school", label: copy.scope.school },
-                { value: "cluster", label: copy.scope.cluster },
-              ]}
-              value={scope}
-              onChange={(value) => setScope(value as LeaderboardScope)}
-            />
+              <span className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-slate-500">{copy.metricsUnavailable}</span>
           }
         >
           <div className="space-y-3">
-            {leaderboard.map((entry, index) => (
+            {leaderboard.length ? leaderboard.map((entry, index) => (
               <LeaderboardRow key={entry.id} copy={copy} entry={entry} rank={index + 1} />
-            ))}
+            )) : <div className="rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-6 text-sm font-medium text-slate-500">{copy.metricsUnavailable}</div>}
           </div>
         </DashboardSectionCard>
 
@@ -196,22 +173,14 @@ function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: Classr
           <div className="text-sm font-semibold text-slate-950">{snapshot.className}</div>
           <div className="mt-1 text-sm text-slate-500">{snapshot.gradeLabel}</div>
         </div>
-        <Chip
-          label={`${snapshot.riskStudents} ${copy.supportUnit}`}
-          size="small"
-          color={snapshot.riskStudents >= 5 ? "warning" : "success"}
-        />
+        <Chip label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.supportUnit}`} size="small" color={snapshot.metricsAvailable === false ? "default" : snapshot.riskStudents >= 5 ? "warning" : "success"} />
       </div>
       <div className="mt-4">
         <div className="flex justify-between text-sm">
           <span className="text-slate-500">{copy.completionLabel}</span>
-          <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
+          <span className="font-semibold text-slate-950">{snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`}</span>
         </div>
-        <LinearProgress
-          variant="determinate"
-          value={snapshot.completionRate}
-          sx={{ mt: 2, height: 8, borderRadius: 1 }}
-        />
+        {snapshot.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 2, height: 8, borderRadius: 1 }} />}
       </div>
     </article>
   );
@@ -244,6 +213,7 @@ const viCopy = {
   openJourney: "Xem học sinh",
   classSelectLabel: "Chọn lớp",
   noData: "Chưa có dữ liệu",
+  metricsUnavailable: "Backend chưa cung cấp số liệu vận hành cho báo cáo này.",
   scope: {
     class: "Theo lớp",
     grade: "Theo khối",
@@ -291,6 +261,7 @@ const enCopy = {
   openJourney: "View students",
   classSelectLabel: "Select class",
   noData: "No data yet",
+  metricsUnavailable: "The backend does not expose operational metrics for this report.",
   scope: {
     class: "By class",
     grade: "By grade",

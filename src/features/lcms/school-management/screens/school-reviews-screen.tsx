@@ -7,5 +7,5 @@ import { useSchoolManagementContext } from "@/features/lcms/school-management/co
 export default function SchoolReviewsScreen() {
   const { selectedSchool } = useSchoolManagementContext();
   if (!selectedSchool) return null;
-  return <SchoolPageShell title="Đánh giá trường" description="Theo dõi chất lượng triển khai, phản hồi và các nội dung cần follow-up." action={<Button startIcon={<AddCommentRoundedIcon />} variant="contained">Ghi nhận đánh giá</Button>}><SchoolReviewsPanel school={selectedSchool} /></SchoolPageShell>;
+  return <SchoolPageShell title="Đánh giá trường" description="Theo dõi chất lượng triển khai, phản hồi và các nội dung cần follow-up." action={<Button disabled title="Backend chưa cung cấp review mutation ở phase hiện tại." startIcon={<AddCommentRoundedIcon />} variant="contained">Ghi nhận đánh giá</Button>}><SchoolReviewsPanel school={selectedSchool} /></SchoolPageShell>;
 }

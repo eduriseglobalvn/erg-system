@@ -2,6 +2,7 @@ import {
   createRuntimeKey,
   type LocalQuizAttemptScope,
   localQuizAttemptStore,
+  saveApprovedOfflineQuizSnapshot,
   startAttempt,
 } from "@/features/lcms/quiz/quiz-runtime";
 import { normalizeAnswerForSubmission } from "@/lib/quiz";
@@ -51,7 +52,36 @@ export async function ensureServerAttempt(
     quizId: quizPackage.quizId,
   });
 
-  return localQuizAttemptStore.markServerStarted(session, startedAttempt.attemptId);
+  const nextSession = await localQuizAttemptStore.markServerStarted(session, startedAttempt);
+  // Missing offlineAllowed is intentionally a no-op. The learner endpoint currently
+  // does not publish this capability, so the client must never infer it from a quiz id.
+  await saveApprovedOfflineQuizSnapshot({
+    session: nextSession,
+    quizPackage,
+    policy: startedAttempt.policySnapshot,
+  });
+  return nextSession;
+}
+
+export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now()) {
+  if (typeof session.serverClockOffsetMs !== "number" || !Number.isFinite(session.serverClockOffsetMs)) {
+    return null;
+  }
+
+  return nowMs + session.serverClockOffsetMs;
+}
+
+export function attemptDeadlineMs(
+  session: { deadlineAt?: string; serverStartedAt?: string; serverClockOffsetMs?: number },
+  durationSeconds: number,
+) {
+  const explicitDeadline = session.deadlineAt ? Date.parse(session.deadlineAt) : Number.NaN;
+  if (Number.isFinite(explicitDeadline)) return explicitDeadline;
+
+  const startedAt = session.serverStartedAt ? Date.parse(session.serverStartedAt) : Number.NaN;
+  if (Number.isFinite(startedAt) && durationSeconds > 0) return startedAt + durationSeconds * 1000;
+
+  return null;
 }
 
 export function buildNormalizedAnswers(questions: Question[], drafts: Record<string, AnswerPayload>) {

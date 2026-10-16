@@ -27,7 +27,8 @@ import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useRef, useState, type ChangeEvent } from "react";
-import { buildClassImportPreview, parseClassImportCsv, type ClassImportPreviewRow } from "@/features/lcms/school-management/components/class-import-utils";
+import { fetchGoogleSheetCsv } from "@/features/lcms/imports/google-sheets-csv-adapter";
+import { buildClassImportPreview, type ClassImportPreviewRow } from "@/features/lcms/school-management/components/class-import-utils";
 import type { SchoolClass } from "@/features/lcms/school-management/types/school-management-types";
 
 type ClassRow = Omit<SchoolClass, "id">;
@@ -75,15 +76,10 @@ export function ClassImportDialog({ classLabel = "Lớp học", existingClassNam
   }
 
   async function readSheet() {
-    const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-    if (!match) { setMessage("Đường dẫn Google Sheets chưa hợp lệ."); return; }
     setLoading(true); setMessage(""); setPreview([]);
     try {
-      const gid = new URL(url).searchParams.get("gid") ?? "0";
-      const response = await fetch(`https://docs.google.com/spreadsheets/d/${match[1]}/gviz/tq?tqx=out:csv&gid=${gid}`);
-      if (!response.ok) throw new Error();
-      makePreview(parseClassImportCsv(await response.text()), "Google Sheets");
-    } catch { setMessage("Không đọc được Google Sheets. Kiểm tra quyền chia sẻ bằng liên kết."); }
+      makePreview(await fetchGoogleSheetCsv(url), "Google Sheets");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Không đọc được Google Sheets."); }
     finally { setLoading(false); }
   }
 

@@ -285,6 +285,24 @@ export type QuizPackage = {
   contentHash: string;
   signature?: string;
   publicKeyId?: string;
+  signatureAlgorithm?: string;
+  packageFormat?: "single" | "bundle";
+  minRuntimeVersion?: string;
+  downloadUrl?: string;
+  sizeBytes?: number;
+  releaseChannel?: string;
+  portableReady?: boolean;
+  etag?: string;
+  revokedAt?: string;
+  tenantId?: string;
+  quizVersionId?: string;
+  assetsManifest?: Record<string, {
+    contentBase64?: string;
+    mimeType?: string;
+    sha256?: string;
+    sizeBytes?: number;
+    url?: string;
+  }>;
   gradingMode: "client-first" | "server-authoritative";
   source: "local" | "server" | "tauri-cache";
   quiz: Quiz;

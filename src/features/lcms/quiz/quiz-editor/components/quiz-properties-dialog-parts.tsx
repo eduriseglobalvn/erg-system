@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { XCircle as HighlightOffOutlinedIcon } from "@/components/mui-icon-shim";
+import HighlightOffOutlinedIcon from "@mui/icons-material/HighlightOff";
 
 import {
   getQuizThemePreset,
@@ -251,7 +251,7 @@ export function QuizResultPreview({
               <div className="classic-editor__result-final-art is-pink" />
               <div className="classic-editor__result-final-art is-warm" />
               <div className="classic-editor__result-final-mark is-fail">
-                <HighlightOffOutlinedIcon size="1em" />
+                <HighlightOffOutlinedIcon sx={{ fontSize: "1em" }} />
               </div>
               <strong>{value.result.failMessage}</strong>
               {value.result.showStatistics ? (

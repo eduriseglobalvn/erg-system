@@ -1,15 +1,15 @@
 {
-  "id": "/lms",
-  "name": "ERG LMS",
-  "short_name": "ERG LMS",
-  "description": "Ứng dụng LMS cho giáo viên ERG: bài tập, điểm danh, bảng điểm, lịch dạy và tài nguyên học tập.",
+  "id": "/",
+  "name": "ERG Learning",
+  "short_name": "ERG",
+  "description": "Ứng dụng học tập ERG dành cho giáo viên và học viên: lớp học, bài tập, lịch, kết quả và thông báo.",
   "lang": "vi-VN",
   "dir": "ltr",
-  "start_url": "/homework?source=pwa",
+  "start_url": "/?source=pwa",
   "scope": "/",
   "display": "standalone",
   "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "theme_color": "#0f6cbd",
   "background_color": "#f8fafc",
   "categories": ["education", "productivity"],
@@ -35,10 +35,10 @@
   ],
   "shortcuts": [
     {
-      "name": "Bài tập",
-      "short_name": "Bài tập",
-      "description": "Mở nhanh màn giao bài và bài tập LMS.",
-      "url": "/homework?source=pwa-shortcut",
+      "name": "Teacher Workspace",
+      "short_name": "Giáo viên",
+      "description": "Mở không gian làm việc dành cho giáo viên.",
+      "url": "/teacher?source=pwa-shortcut",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",
@@ -48,10 +48,10 @@
       ]
     },
     {
-      "name": "Điểm danh",
-      "short_name": "Điểm danh",
-      "description": "Mở nhanh màn điểm danh lớp học.",
-      "url": "/attendance?source=pwa-shortcut",
+      "name": "Bài tập giáo viên",
+      "short_name": "Giao bài",
+      "description": "Mở nhanh kho bài tập và màn giao bài.",
+      "url": "/teacher/homework?source=pwa-shortcut",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",
@@ -61,10 +61,10 @@
       ]
     },
     {
-      "name": "Bảng điểm",
-      "short_name": "Điểm",
-      "description": "Mở nhanh bảng điểm LMS.",
-      "url": "/score?source=pwa-shortcut",
+      "name": "Student Workspace",
+      "short_name": "Học viên",
+      "description": "Mở không gian học tập dành cho học viên.",
+      "url": "/student?source=pwa-shortcut",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",
@@ -74,10 +74,10 @@
       ]
     },
     {
-      "name": "Lịch dạy",
-      "short_name": "Lịch",
-      "description": "Mở nhanh lịch dạy LMS.",
-      "url": "/calendar?source=pwa-shortcut",
+      "name": "Bài tập học viên",
+      "short_name": "Làm bài",
+      "description": "Mở nhanh danh sách bài tập của học viên.",
+      "url": "/student?tab=assignments&source=pwa-shortcut",
       "icons": [
         {
           "src": "/android-chrome-192x192.png",

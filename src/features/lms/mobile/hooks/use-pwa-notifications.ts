@@ -8,6 +8,7 @@ import {
   type NotificationDeviceClientInfo,
   type NotificationDeviceRegistrationInput,
   type NotificationPermissionState,
+  type NotificationPortal,
 } from "@/features/notifications/api/notification-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
@@ -24,18 +25,20 @@ type StoredPwaNotificationDevice = {
   endpoint?: string;
   firebaseInstallationId?: string;
   permissionState: NotificationPermissionState;
-  portal: "lms";
+  portal: PwaNotificationPortal;
   registrationToken?: string;
   serviceWorkerScope?: string;
   syncedAt: string;
 };
 
-const NOTIFICATION_PORTAL = "lms";
-const HEARTBEAT_INTERVAL_MS = 15 * 60_000;
-const DEVICE_STORAGE_KEY = "erg-lms-pwa-notification-device";
+type PwaNotificationPortal = Extract<NotificationPortal, "lms" | "elearning">;
 
-export function usePwaNotifications() {
-  const [state, setState] = useState<NotificationState>(() => getInitialNotificationState());
+const DEFAULT_NOTIFICATION_PORTAL: PwaNotificationPortal = "lms";
+const HEARTBEAT_INTERVAL_MS = 15 * 60_000;
+const LMS_DEVICE_STORAGE_KEY = "erg-lms-pwa-notification-device";
+
+export function usePwaNotifications(portal: PwaNotificationPortal = DEFAULT_NOTIFICATION_PORTAL) {
+  const [state, setState] = useState<NotificationState>(() => getInitialNotificationState(portal));
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const syncInFlightRef = useRef<Promise<NotificationState> | null>(null);
@@ -47,13 +50,13 @@ export function usePwaNotifications() {
 
     const request = (async (): Promise<NotificationState> => {
       if (!isNotificationSupported()) {
-        clearStoredDeviceRegistration();
+        clearStoredDeviceRegistration(portal);
         setState("unsupported");
         return "unsupported";
       }
 
       if (Notification.permission !== "granted") {
-        clearStoredDeviceRegistration();
+        clearStoredDeviceRegistration(portal);
         const nextState = resolvePermissionOnlyState(Notification.permission);
         setState(nextState);
         return nextState;
@@ -61,12 +64,12 @@ export function usePwaNotifications() {
 
       const currentRegistration = await readCurrentBrowserPushRegistration();
       if (!currentRegistration) {
-        clearStoredDeviceRegistration();
+        clearStoredDeviceRegistration(portal);
         setState("default");
         return "default";
       }
 
-      await syncRegistrationWithApi(currentRegistration);
+      await syncRegistrationWithApi(currentRegistration, portal);
       setState("enabled");
       return "enabled";
     })();
@@ -80,7 +83,7 @@ export function usePwaNotifications() {
         syncInFlightRef.current = null;
       }
     }
-  }, []);
+  }, [portal]);
 
   useEffect(() => {
     if (!isNotificationSupported() || Notification.permission !== "granted") {
@@ -119,7 +122,7 @@ export function usePwaNotifications() {
 
   const enableNotifications = useCallback(async () => {
     if (!isNotificationSupported()) {
-      clearStoredDeviceRegistration();
+      clearStoredDeviceRegistration(portal);
       setState("unsupported");
       return "unsupported" as const;
     }
@@ -130,14 +133,14 @@ export function usePwaNotifications() {
     try {
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
-        clearStoredDeviceRegistration();
+        clearStoredDeviceRegistration(portal);
         const nextState = resolvePermissionOnlyState(permission);
         setState(nextState);
         return permission;
       }
 
       const currentRegistration = await ensureBrowserPushRegistration();
-      await syncRegistrationWithApi(currentRegistration);
+      await syncRegistrationWithApi(currentRegistration, portal);
       setState("enabled");
       return "granted" as const;
     } catch (caught) {
@@ -154,11 +157,11 @@ export function usePwaNotifications() {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [portal]);
 
   const disableNotifications = useCallback(async () => {
     if (!isNotificationSupported()) {
-      clearStoredDeviceRegistration();
+      clearStoredDeviceRegistration(portal);
       setState("unsupported");
       return false;
     }
@@ -168,27 +171,27 @@ export function usePwaNotifications() {
 
     try {
       const currentRegistration = await readCurrentBrowserPushRegistration();
-      const storedDevice = readStoredDeviceRegistration();
+      const storedDevice = readStoredDeviceRegistration(portal);
       const registrationToken = currentRegistration?.subscription.endpoint ?? storedDevice?.registrationToken;
       const firebaseInstallationId = storedDevice?.firebaseInstallationId;
 
       if (registrationToken || firebaseInstallationId) {
         await unregisterNotificationDevice({
-          portal: NOTIFICATION_PORTAL,
+          portal,
           firebaseInstallationId,
           registrationToken,
         });
       }
 
       if (storedDevice?.deviceRegistrationId) {
-        await revokeNotificationDevice(storedDevice.deviceRegistrationId, NOTIFICATION_PORTAL).catch(() => undefined);
+        await revokeNotificationDevice(storedDevice.deviceRegistrationId, portal).catch(() => undefined);
       }
 
       if (currentRegistration?.subscription) {
         await currentRegistration.subscription.unsubscribe();
       }
 
-      clearStoredDeviceRegistration();
+      clearStoredDeviceRegistration(portal);
       setState(resolvePermissionOnlyState(Notification.permission));
       return true;
     } catch (caught) {
@@ -198,7 +201,7 @@ export function usePwaNotifications() {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [portal]);
 
   return {
     busy,
@@ -209,13 +212,16 @@ export function usePwaNotifications() {
   };
 }
 
-async function syncRegistrationWithApi({ registration, subscription }: BrowserPushRegistration) {
-  const input = await buildDeviceRegistrationInput(registration, subscription);
-  const storedDevice = readStoredDeviceRegistration();
+async function syncRegistrationWithApi(
+  { registration, subscription }: BrowserPushRegistration,
+  portal: PwaNotificationPortal,
+) {
+  const input = await buildDeviceRegistrationInput(registration, subscription, portal);
+  const storedDevice = readStoredDeviceRegistration(portal);
 
   if (storedDevice && deviceIdentityMatches(input, storedDevice)) {
     await heartbeatNotificationDevice({
-      portal: NOTIFICATION_PORTAL,
+      portal,
       deviceRegistrationId: storedDevice.deviceRegistrationId,
       firebaseInstallationId: input.firebaseInstallationId,
       registrationToken: input.registrationToken,
@@ -228,7 +234,7 @@ async function syncRegistrationWithApi({ registration, subscription }: BrowserPu
       registrationToken: input.registrationToken,
       serviceWorkerScope: input.serviceWorkerScope,
       syncedAt: new Date().toISOString(),
-    });
+    }, portal);
     return;
   }
 
@@ -238,21 +244,22 @@ async function syncRegistrationWithApi({ registration, subscription }: BrowserPu
     endpoint: input.endpoint,
     firebaseInstallationId: input.firebaseInstallationId,
     permissionState: input.permissionState,
-    portal: NOTIFICATION_PORTAL,
+    portal,
     registrationToken: input.registrationToken,
     serviceWorkerScope: input.serviceWorkerScope,
     syncedAt: response.lastSeenAt ?? new Date().toISOString(),
-  });
+  }, portal);
 }
 
 async function buildDeviceRegistrationInput(
   registration: ServiceWorkerRegistration,
   subscription: PushSubscription,
+  portal: PwaNotificationPortal,
 ): Promise<NotificationDeviceRegistrationInput> {
   const pushRegistration = await resolvePushRegistrationAdapter(subscription);
 
   return {
-    portal: NOTIFICATION_PORTAL,
+    portal,
     platform: "web_pwa",
     firebaseInstallationId: pushRegistration.firebaseInstallationId,
     registrationToken: pushRegistration.registrationToken,
@@ -308,10 +315,10 @@ async function ensureBrowserPushRegistration(): Promise<BrowserPushRegistration>
   return { registration, subscription };
 }
 
-function getInitialNotificationState(): NotificationState {
+function getInitialNotificationState(portal: PwaNotificationPortal): NotificationState {
   if (!isNotificationSupported()) return "unsupported";
   if (Notification.permission === "denied") return "blocked";
-  if (Notification.permission === "granted" && readStoredDeviceRegistration()) return "enabled";
+  if (Notification.permission === "granted" && readStoredDeviceRegistration(portal)) return "enabled";
   return "default";
 }
 
@@ -344,19 +351,20 @@ function deviceIdentityMatches(input: NotificationDeviceRegistrationInput, store
 }
 
 
-export function getPwaNotificationDeviceStorageKey() {
+export function getPwaNotificationDeviceStorageKey(portal: PwaNotificationPortal = DEFAULT_NOTIFICATION_PORTAL) {
   const tenantId = getDefaultTenantId();
-  const session = readStoredAuthSession(NOTIFICATION_PORTAL) as { accountId?: string | null } | null;
+  const session = readStoredAuthSession(portal) as { accountId?: string | null } | null;
   const accountId = session?.accountId?.trim();
-  if (!accountId) return DEVICE_STORAGE_KEY;
-  return `${DEVICE_STORAGE_KEY}:${tenantId}:${accountId}`;
+  const baseKey = pwaNotificationDeviceBaseKey(portal);
+  if (!accountId) return baseKey;
+  return `${baseKey}:${tenantId}:${accountId}`;
 }
 
-function readStoredDeviceRegistration(): StoredPwaNotificationDevice | null {
+function readStoredDeviceRegistration(portal: PwaNotificationPortal): StoredPwaNotificationDevice | null {
   if (typeof window === "undefined") return null;
 
   try {
-    const value = window.localStorage.getItem(getPwaNotificationDeviceStorageKey());
+    const value = window.localStorage.getItem(getPwaNotificationDeviceStorageKey(portal));
     if (!value) return null;
     return JSON.parse(value) as StoredPwaNotificationDevice;
   } catch {
@@ -364,25 +372,29 @@ function readStoredDeviceRegistration(): StoredPwaNotificationDevice | null {
   }
 }
 
-function writeStoredDeviceRegistration(value: StoredPwaNotificationDevice) {
+function writeStoredDeviceRegistration(value: StoredPwaNotificationDevice, portal: PwaNotificationPortal) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.setItem(getPwaNotificationDeviceStorageKey(), JSON.stringify(value));
+    window.localStorage.setItem(getPwaNotificationDeviceStorageKey(portal), JSON.stringify(value));
   } catch {
     // Storage is best-effort; the backend registration remains the source of truth.
   }
 }
 
-function clearStoredDeviceRegistration() {
+function clearStoredDeviceRegistration(portal: PwaNotificationPortal) {
   if (typeof window === "undefined") return;
 
   try {
-    window.localStorage.removeItem(getPwaNotificationDeviceStorageKey());
-    window.localStorage.removeItem(DEVICE_STORAGE_KEY);
+    window.localStorage.removeItem(getPwaNotificationDeviceStorageKey(portal));
+    window.localStorage.removeItem(pwaNotificationDeviceBaseKey(portal));
   } catch {
     // Best-effort cleanup only.
   }
+}
+
+function pwaNotificationDeviceBaseKey(portal: PwaNotificationPortal) {
+  return portal === "elearning" ? "erg-elearning-pwa-notification-device" : LMS_DEVICE_STORAGE_KEY;
 }
 
 function readLocale() {

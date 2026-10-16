@@ -9,32 +9,33 @@ import {
   type QuestionBankSaveQuestionInput,
   type QuestionBankWorkspaceInput,
 } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
-import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
+import { QUERY_POLICIES } from "@/lib/query-policy";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 
-export const QUESTION_BANK_WORKSPACE_STALE_TIME_MS = 5 * 60_000;
-export const QUESTION_BANK_WORKSPACE_GC_TIME_MS = 30 * 60_000;
+export const QUESTION_BANK_WORKSPACE_STALE_TIME_MS = QUERY_POLICIES.reference.staleTime;
+export const QUESTION_BANK_WORKSPACE_GC_TIME_MS = QUERY_POLICIES.reference.gcTime;
 
 export const questionBankQueryKeys = {
-  root: ["question-bank"] as const,
+  root: (tenantId: string = getDefaultTenantId()) => ["question-bank", tenantId] as const,
   workspace: (
     tenantId: string = getDefaultTenantId(),
     filters: Omit<QuestionBankWorkspaceInput, "tenantId"> = {},
-  ) => [...questionBankQueryKeys.root, "workspace", tenantId, normalizeQuestionBankWorkspaceFilters(filters)] as const,
+  ) => [...questionBankQueryKeys.root(tenantId), "workspace", normalizeQuestionBankWorkspaceFilters(filters)] as const,
 };
 
 export function questionBankWorkspaceQueryOptions(
   tenantId: string = getDefaultTenantId(),
   filters: Omit<QuestionBankWorkspaceInput, "tenantId"> = {},
 ) {
-  const apiBacked = hasApiBase();
+  const fixtureBacked = runtimeFixturesEnabled();
 
   return {
     gcTime: QUESTION_BANK_WORKSPACE_GC_TIME_MS,
-    ...(apiBacked ? {} : { initialData: mockQuestionBankData, initialDataUpdatedAt: 0 }),
+    ...(fixtureBacked ? { initialData: mockQuestionBankData, initialDataUpdatedAt: 0 } : {}),
     placeholderData: (previousData: ReturnType<typeof mockQuestionBankData> | undefined) =>
-      previousData ?? (apiBacked ? undefined : mockQuestionBankData()),
-    queryFn: () => loadQuestionBankData(tenantId, filters),
+      previousData ?? (fixtureBacked ? mockQuestionBankData() : undefined),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadQuestionBankData(tenantId, filters, signal),
     queryKey: questionBankQueryKeys.workspace(tenantId, filters),
     refetchOnWindowFocus: false,
     staleTime: QUESTION_BANK_WORKSPACE_STALE_TIME_MS,
@@ -48,27 +49,27 @@ export function useQuestionBankWorkspaceQuery(
   return useQuery(questionBankWorkspaceQueryOptions(tenantId, filters));
 }
 
-export function useCreateQuestionBankQuestionMutation() {
+export function useCreateQuestionBankQuestionMutation(tenantId: string = getDefaultTenantId()) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: QuestionBankSaveQuestionInput) => createQuestionBankQuestion(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root(tenantId) }),
   });
 }
 
-export function useUpdateQuestionBankQuestionMutation() {
+export function useUpdateQuestionBankQuestionMutation(tenantId: string = getDefaultTenantId()) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: QuestionBankSaveQuestionInput) => updateQuestionBankQuestion(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root(tenantId) }),
   });
 }
 
-export function useDeleteQuestionBankQuestionMutation() {
+export function useDeleteQuestionBankQuestionMutation(tenantId: string = getDefaultTenantId()) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (questionId: string) => deleteQuestionBankQuestion(questionId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root(tenantId) }),
   });
 }
 

@@ -1,10 +1,8 @@
-import {
-  FileCheck,
-  Folder,
-  GraduationCap,
-  Link as LinkIcon,
-  Presentation,
-} from "@/components/mui-icon-shim";
+import FileCheck from "@mui/icons-material/Task";
+import Folder from "@mui/icons-material/Folder";
+import GraduationCap from "@mui/icons-material/School";
+import LinkIcon from "@mui/icons-material/Link";
+import Presentation from "@mui/icons-material/Slideshow";
 
 import type {
   LearningResourceResourceCard,
@@ -109,8 +107,12 @@ export function flattenNodes(nodes: StudioNode[]): StudioNode[] {
   return nodes.flatMap((node) => [node, ...flattenNodes(node.children)]);
 }
 
-export function screenKind(activeLeafId: string) {
-  if (activeLeafId === "admin-learning-resources") return "structure";
+export type LearningResourceAuthoringScreen = "subjects" | "structure" | "resources" | "upload" | "publish";
+
+export function screenKind(activeLeafId: string): LearningResourceAuthoringScreen {
+  if (activeLeafId === "resources") return "resources";
+  if (activeLeafId === "structure") return "structure";
+  if (activeLeafId === "admin-learning-resources") return "resources";
   if (activeLeafId === "admin-learning-structure") return "structure";
   if (activeLeafId === "admin-learning-resource-list") return "resources";
   if (activeLeafId === "admin-learning-resource-upload") return "upload";

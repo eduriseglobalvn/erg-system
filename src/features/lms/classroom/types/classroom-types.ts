@@ -12,6 +12,8 @@ export type ClassroomSchool = {
   averageScore: number;
   overdueAssignments: number;
   flaggedStudents: number;
+  /** False when the session bootstrap only contains unit metadata. */
+  metricsAvailable?: boolean;
 };
 
 export type ClassroomSnapshot = {
@@ -29,6 +31,8 @@ export type ClassroomSnapshot = {
   riskStudents: number;
   competitionPoints: number;
   lastSubmissionAt: string;
+  /** False when the session bootstrap only contains class metadata. */
+  metricsAvailable?: boolean;
 };
 
 export type AssignmentRun = {

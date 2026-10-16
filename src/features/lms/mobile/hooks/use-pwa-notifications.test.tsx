@@ -42,6 +42,13 @@ test("scopes stored PWA notification device by tenant and LMS account", () => {
   expect(getPwaNotificationDeviceStorageKey()).toBe("erg-lms-pwa-notification-device:tenant-a:student-b");
 });
 
+test("uses an isolated device key for the Student PWA", () => {
+  expect(getPwaNotificationDeviceStorageKey("elearning")).toBe(
+    "erg-elearning-pwa-notification-device:tenant-a:student-b",
+  );
+  expect(mocks.readStoredAuthSession).toHaveBeenCalledWith("elearning");
+});
+
 test("does not treat a legacy global notification device as enabled for a signed-in account", () => {
   window.localStorage.setItem(
     "erg-lms-pwa-notification-device",

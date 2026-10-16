@@ -12,6 +12,8 @@ export type TeacherAccount = {
   bio?: string;
   role: AccountRole;
   provider: AuthProvider;
+  /** Server-issued role names retained for capability/session projection. */
+  roles?: string[];
   department: string;
   title: string;
   features: string[];

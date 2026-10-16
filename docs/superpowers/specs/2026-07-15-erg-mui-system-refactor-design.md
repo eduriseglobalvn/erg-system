@@ -1,5 +1,7 @@
 # ERG MUI System Refactor Design
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 **Ngày:** 2026-07-15
 **Trạng thái:** Đã chốt hướng thị giác B — trắng, tinh tế, hiện đại; chờ xác nhận đặc tả trước khi lập kế hoạch triển khai.
 

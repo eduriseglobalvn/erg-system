@@ -1,12 +1,30 @@
+import { ERG_WORKSPACE_DOMAINS, workspaceUrl, type Workspace } from "@/platform/workspaces/workspace-domain";
+
+/** Canonical production origins. Legacy portal constants below remain for migration compatibility. */
+export const PUBLIC_SITE_HOST = ERG_WORKSPACE_DOMAINS.public;
+export const AUTH_PORTAL_HOST = ERG_WORKSPACE_DOMAINS.auth;
+export const LMS_WORKSPACE_HOST = ERG_WORKSPACE_DOMAINS.lms;
+export const CRM_WORKSPACE_HOST = ERG_WORKSPACE_DOMAINS.crm;
+export const API_ORIGIN_HOST = ERG_WORKSPACE_DOMAINS.api;
+
 export const LCMS_PORTAL_HOST = "lcms.erg.edu.local";
 export const LMS_PORTAL_HOST = "lms.erg.edu.local";
 export const CRM_PORTAL_HOST = "crm.erg.edu.local";
 export const ELEARNING_PORTAL_HOST = "elearning.erg.edu.local";
 export const ELEARNING_VUONG_PORTAL_HOST = "elearning.vuongtran.io.vn";
 export const LCMS_PORTAL_HOSTS = [LCMS_PORTAL_HOST, `${LCMS_PORTAL_HOST}:3001`];
-export const LMS_PORTAL_HOSTS = [LMS_PORTAL_HOST, `${LMS_PORTAL_HOST}:3001`];
-export const CRM_PORTAL_HOSTS = [CRM_PORTAL_HOST, `${CRM_PORTAL_HOST}:3001`];
+export const LMS_PORTAL_HOSTS = [LMS_PORTAL_HOST, `${LMS_PORTAL_HOST}:3001`, LMS_WORKSPACE_HOST];
+export const CRM_PORTAL_HOSTS = [CRM_PORTAL_HOST, `${CRM_PORTAL_HOST}:3001`, CRM_WORKSPACE_HOST];
 export const ELEARNING_PORTAL_HOSTS = [ELEARNING_PORTAL_HOST, `${ELEARNING_PORTAL_HOST}:3001`, ELEARNING_VUONG_PORTAL_HOST];
+
+export function getWorkspaceUrl(workspace: Workspace, path = "") {
+  return workspaceUrl(workspace, path);
+}
+
+export function getSharedAuthUrl(path = "/login") {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `https://${AUTH_PORTAL_HOST}${normalizedPath}`;
+}
 
 function getRuntimePortalHost(host: string) {
   if (typeof window === "undefined") return host;

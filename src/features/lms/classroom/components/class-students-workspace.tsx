@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import SearchIcon from "@mui/icons-material/Search";
 
@@ -24,13 +25,14 @@ import {
   loadLmsClassWorkspace,
   mapClassWorkspaceToStudents,
   type LmsClassWorkspace,
-} from "@/features/lms/api/lms-graphql-api";
+} from "@/features/lms/api/lms-classroom-api";
 import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { hasApiBase } from "@/lib/api-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { useI18n } from "@/platform/i18n";
 import {
   AssignmentDialog,
@@ -54,9 +56,10 @@ export function resolveClassStudentsWorkspaceStudents(
   workspaceStudents: ClassroomStudent[],
   fallbackStudents: ClassroomStudent[],
   apiBacked: boolean,
+  fixturesEnabled: boolean,
 ): ClassroomStudent[] {
   if (apiBacked) return workspaceStudents;
-  return workspaceStudents.length ? workspaceStudents : fallbackStudents;
+  return fixturesEnabled && workspaceStudents.length === 0 ? fallbackStudents : workspaceStudents;
 }
 
 export function ClassStudentsWorkspace({
@@ -93,13 +96,14 @@ export function ClassStudentsWorkspace({
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const paceStateUpdate = usePacedStateBatch();
   const apiBacked = hasApiBase();
+  const fixturesEnabled = runtimeFixturesEnabled();
   const classWorkspaceQuery = useQuery({
     queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
       classId: selectedClassId,
       schoolId: selectedSchoolId,
       usage: "class-students-workspace",
     }),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       loadLmsClassWorkspace({
         assignmentPage: 0,
         assignmentSize: 50,
@@ -109,16 +113,17 @@ export function ClassStudentsWorkspace({
         schoolId: selectedSchoolId,
         size: 50,
         studentStatus: "active",
-      }),
+      }, signal),
     enabled: apiBacked && Boolean(selectedClassId),
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
     refetchOnWindowFocus: false,
   });
 
   const fallbackSelectedClass =
-    classroomSnapshots.find((snapshot) => snapshot.id === selectedClassId && snapshot.schoolId === selectedSchoolId) ??
-    getSchoolSnapshots(selectedSchoolId)[0];
+    fixturesEnabled
+      ? classroomSnapshots.find((snapshot) => snapshot.id === selectedClassId && snapshot.schoolId === selectedSchoolId) ?? getSchoolSnapshots(selectedSchoolId)[0]
+      : undefined;
   const selectedClass = useMemo(
     () =>
       classWorkspaceQuery.data
@@ -126,22 +131,22 @@ export function ClassStudentsWorkspace({
         : fallbackSelectedClass,
     [classWorkspaceQuery.data, fallbackSelectedClass, selectedSchoolId],
   );
-  const school = classroomSchools.find((item) => item.id === selectedSchoolId) ?? classroomSchools[0];
+  const school = fixturesEnabled ? classroomSchools.find((item) => item.id === selectedSchoolId) ?? classroomSchools[0] : undefined;
   const subjectOptions = useMemo(
-    () => Array.from(new Set([...assignmentRuns, ...assignmentCatalog].map((assignment) => assignment.subjectLabel))),
-    [],
+    () => fixturesEnabled ? Array.from(new Set([...assignmentRuns, ...assignmentCatalog].map((assignment) => assignment.subjectLabel))) : [],
+    [fixturesEnabled],
   );
   const fallbackSchoolStudents = useMemo(
-    () => classroomStudents.filter((student) => student.schoolId === selectedSchoolId),
-    [selectedSchoolId],
+    () => fixturesEnabled ? classroomStudents.filter((student) => student.schoolId === selectedSchoolId) : [],
+    [fixturesEnabled, selectedSchoolId],
   );
   const workspaceStudents = useMemo(
     () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : []),
     [classWorkspaceQuery.data, selectedClass],
   );
   const schoolStudents = useMemo(
-    () => resolveClassStudentsWorkspaceStudents(workspaceStudents, fallbackSchoolStudents, apiBacked),
-    [apiBacked, fallbackSchoolStudents, workspaceStudents],
+    () => resolveClassStudentsWorkspaceStudents(workspaceStudents, fallbackSchoolStudents, apiBacked, fixturesEnabled),
+    [apiBacked, fallbackSchoolStudents, fixturesEnabled, workspaceStudents],
   );
 
   const visibleStudents = useMemo(() => {
@@ -177,7 +182,7 @@ export function ClassStudentsWorkspace({
   const selectedLevel = selectedSubject?.levels.find((level) => level.id === selectedLevelId) ?? selectedSubject?.levels[0];
   const levelAssignments = selectedLevel?.topics.flatMap((topic) => topic.items) ?? [];
   const selectedAssignments = levelAssignments.filter((assignment) => selectedAssignmentIds.includes(assignment.id));
-  const canDeliver = selectedStudents.length > 0 && selectedAssignments.length > 0 && Boolean(dueDate);
+  const canDeliver = fixturesEnabled && selectedStudents.length > 0 && selectedAssignments.length > 0 && Boolean(dueDate);
 
   useEffect(() => {
     paceStateUpdate(() => setFocusedStudentId(null));
@@ -354,6 +359,8 @@ export function ClassStudentsWorkspace({
           <SelectionBar
             allVisibleSelected={allVisibleSelected}
             copy={copy}
+            assignDisabled={!fixturesEnabled}
+            assignDisabledReason={copy.assignmentUnavailable}
             onAssign={() => setAssignDialogOpen(true)}
             onClear={() => setSelectedStudentIds([])}
             onToggleAll={toggleVisibleStudents}
@@ -376,9 +383,9 @@ export function ClassStudentsWorkspace({
 
           <DashboardSectionCard title={copy.recentTitle} description={copy.recentDescription}>
             <Stack spacing={1.5}>
-              {(recentBatches.length ? recentBatches : getInitialBatches(copy)).map((batch) => (
+            {(recentBatches.length ? recentBatches : fixturesEnabled ? getInitialBatches(copy) : []).map((batch) => (
                 <Box key={batch.id} sx={{ border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper", p: 2 }}>
-                  <Stack direction="row" alignItems="flex-start" spacing={1.5}>
+                  <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
                     <Box sx={{ display: "grid", width: 36, height: 36, flexShrink: 0, placeItems: "center", borderRadius: 1, bgcolor: "success.50", color: "success.main" }}>
                       <CheckCircleIcon sx={{ fontSize: 16 }} />
                     </Box>
@@ -394,6 +401,7 @@ export function ClassStudentsWorkspace({
                   </Stack>
                 </Box>
               ))}
+              {!recentBatches.length && !fixturesEnabled ? <Typography color="text.secondary" variant="body2">{copy.assignmentUnavailable}</Typography> : null}
             </Stack>
           </DashboardSectionCard>
         </Stack>
@@ -414,7 +422,7 @@ export function ClassStudentsWorkspace({
         onNoteChange={setTeacherNote}
         onSubjectChange={pickSubject}
         open={assignDialogOpen}
-        schoolName={selectedClass?.schoolName ?? school.name}
+        schoolName={selectedClass?.schoolName ?? school?.name ?? "Phạm vi hiện tại"}
         selectedCount={selectedStudents.length}
         selectedAssignmentIds={selectedAssignmentIds}
         selectedLevelId={selectedLevel?.id ?? ""}
@@ -474,6 +482,7 @@ function mapClassWorkspaceToSnapshot(
     ),
     competitionPoints: fallback?.competitionPoints ?? 0,
     lastSubmissionAt: classInfo.updatedAt ? formatClassWorkspaceDate(classInfo.updatedAt) : fallback?.lastSubmissionAt ?? "Chua co du lieu",
+    metricsAvailable: true,
   };
 }
 
@@ -483,20 +492,11 @@ function formatClassWorkspaceDate(value: string) {
   return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
 }
 
-function createStudentProfileDraft(student: { avatarSeed: string; id: string; mentorNote: string; name: string }) {
-  const baseUsername = removeVietnameseMarks(student.name).toLowerCase().replace(/[^a-z0-9]+/g, ".").replace(/^\.+|\.+$/g, "");
+function createStudentProfileDraft(student: { id: string; mentorNote: string; name: string }) {
   return {
     name: student.name,
-    username: baseUsername || student.id,
-    password: `${student.avatarSeed.toLowerCase()}@2026`,
+    username: student.id,
+    password: "",
     note: student.mentorNote,
   };
-}
-
-function removeVietnameseMarks(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
 }

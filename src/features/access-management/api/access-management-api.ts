@@ -1,6 +1,8 @@
 import { getBackOfficePortal } from "@/lib/api-client";
 import { createApiClient } from "@/lib/api/create-api-client";
-import { accessManagementRoutes as routes } from "@/features/access-management/api/access-management-routes";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import { mapPermissionPageDto, type PermissionPageDto } from "@/lib/api/mappers/admin-contract-mappers";
+import { isObject, validateResponse } from "@/lib/validate-response";
 import type {
   AccessRole,
   AssignRolesRequest,
@@ -20,8 +22,9 @@ const client = () => createApiClient({ portal: getBackOfficePortal(), auth: "req
 
 export const accessManagementQueryKeys = {
   root: (tenantId: string) => ["access-management", tenantId] as const,
+  permissionsRoot: (tenantId: string) => [...accessManagementQueryKeys.root(tenantId), "permissions"] as const,
   permissions: (tenantId: string, filters: PermissionCatalogFilters) =>
-    [...accessManagementQueryKeys.root(tenantId), "permissions", filters] as const,
+    [...accessManagementQueryKeys.permissionsRoot(tenantId), filters] as const,
   permission: (tenantId: string, permissionId: string) =>
     [...accessManagementQueryKeys.root(tenantId), "permission", permissionId] as const,
   permissionGroups: (tenantId: string) =>
@@ -33,69 +36,73 @@ export const accessManagementQueryKeys = {
     [...accessManagementQueryKeys.root(tenantId), "effective-permissions", userId] as const,
 };
 
-export function listPermissions(filters: PermissionCatalogFilters) {
-  const search = new URLSearchParams();
-  search.set("page", String(Math.max(0, filters.page)));
-  search.set("limit", String(Math.max(1, filters.limit)));
-  setOptionalSearchParam(search, "search", filters.search);
-  setOptionalSearchParam(search, "group", filters.group);
-  setOptionalSearchParam(search, "portal", filters.portal);
-  setOptionalSearchParam(search, "status", filters.status);
-  if (filters.used !== undefined) search.set("used", String(filters.used));
-  return client().request<PermissionPage>(`${routes.permissionsCatalog}?${search.toString()}` as `${typeof routes.permissionsCatalog}?${string}`);
+export async function listPermissions(filters: PermissionCatalogFilters, signal?: AbortSignal): Promise<PermissionPage> {
+  const response = await client().operation(API_ENDPOINTS.access.permissionsCatalog, "get", {
+    query: {
+      page: Math.max(0, filters.page),
+      limit: Math.max(1, filters.limit),
+      search: filters.search?.trim() || undefined,
+      group: filters.group?.trim() || undefined,
+      portal: filters.portal?.trim() || undefined,
+      status: filters.status?.trim() || undefined,
+      used: filters.used,
+    },
+    ...(signal ? { signal } : {}),
+  });
+  const dto = validateResponse(response, isPermissionPageDto, "access.permissions");
+  return mapPermissionPageDto(dto);
 }
 
-export function getPermission(permissionId: string) {
-  return client().request<SystemPermission>(routes.permission(permissionId));
+function isPermissionPageDto(value: unknown): value is PermissionPageDto {
+  return isObject(value) && Array.isArray(value.items);
 }
 
-export function listPermissionGroups() {
-  return client().request<PermissionGroup[]>(routes.permissionGroups);
+export function getPermission(permissionId: string, signal?: AbortSignal) {
+  return client().request<SystemPermission>(API_ENDPOINTS.access.permission(permissionId), signal ? { signal } : undefined);
 }
 
-export function listRoles() {
-  return client().request<AccessRole[]>(routes.roles);
+export function listPermissionGroups(signal?: AbortSignal) {
+  return client().request<PermissionGroup[]>(API_ENDPOINTS.access.permissionGroups, signal ? { signal } : undefined);
 }
 
-export function getRole(roleId: string) {
-  return client().request<AccessRole>(routes.role(roleId));
+export function listRoles(signal?: AbortSignal) {
+  return client().request<AccessRole[]>(API_ENDPOINTS.access.roles, signal ? { signal } : undefined);
+}
+
+export function getRole(roleId: string, signal?: AbortSignal) {
+  return client().request<AccessRole>(API_ENDPOINTS.access.role(roleId), signal ? { signal } : undefined);
 }
 
 export function createRole(payload: CreateRoleRequest) {
-  return client().request<AccessRole>(routes.roles, { method: "POST", body: JSON.stringify(payload) });
+  return client().request<AccessRole>(API_ENDPOINTS.access.roles, { method: "POST", body: JSON.stringify(payload) });
 }
 
 export function updateRole(roleId: string, payload: UpdateRoleRequest) {
-  return client().request<AccessRole>(routes.role(roleId), { method: "PUT", body: JSON.stringify(payload) });
+  return client().request<AccessRole>(API_ENDPOINTS.access.role(roleId), { method: "PUT", body: JSON.stringify(payload) });
 }
 
 export function deleteRole(roleId: string) {
-  return client().request<void>(routes.role(roleId), { method: "DELETE" });
+  return client().request<void>(API_ENDPOINTS.access.role(roleId), { method: "DELETE" });
 }
 
 export function assignUserRoles(userId: string, payload: AssignRolesRequest) {
-  return client().request<unknown>(routes.userRoles(userId), { method: "POST", body: JSON.stringify(payload) });
+  return client().request<unknown>(API_ENDPOINTS.access.userRoles(userId), { method: "POST", body: JSON.stringify(payload) });
 }
 
 export function assignScopedUserRole(userId: string, payload: AssignScopedRoleRequest) {
-  return client().request<ScopedRoleAssignment>(routes.userRoleAssignments(userId), { method: "POST", body: JSON.stringify(payload) });
+  return client().request<ScopedRoleAssignment>(API_ENDPOINTS.access.userRoleAssignments(userId), { method: "POST", body: JSON.stringify(payload) });
 }
 
 export function revokeScopedUserRole(userId: string, assignmentId: string, reason: string) {
-  return client().request<ScopedRoleAssignment>(routes.userRoleAssignment(userId, assignmentId), {
+  return client().request<ScopedRoleAssignment>(API_ENDPOINTS.access.userRoleAssignment(userId, assignmentId), {
     method: "DELETE", body: JSON.stringify({ reason: reason.trim() || undefined }),
   });
 }
 
-export function getEffectivePermissions(userId: string) {
-  return client().request<EffectivePermissions>(routes.effectivePermissions(userId));
+export function getEffectivePermissions(userId: string, signal?: AbortSignal) {
+  return client().request<EffectivePermissions>(API_ENDPOINTS.access.effectivePermissions(userId), signal ? { signal } : undefined);
 }
 
 export function previewUserPermissions(userId: string, changes: Record<string, unknown>) {
-  return client().request<PermissionPreview>(routes.preview(userId), { method: "POST", body: JSON.stringify({ changes }) });
-}
-
-function setOptionalSearchParam(search: URLSearchParams, key: string, value?: string) {
-  const normalized = value?.trim();
-  if (normalized) search.set(key, normalized);
+  return client().request<PermissionPreview>(API_ENDPOINTS.access.preview(userId), { method: "POST", body: JSON.stringify({ changes }) });
 }

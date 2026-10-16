@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
+import { ResponseValidationError } from "@/lib/validate-response";
 
 const mocks = vi.hoisted(() => ({
   apiRequest: vi.fn(),
   getBackOfficePortal: vi.fn(() => "lcms"),
 }));
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
   apiRequest: mocks.apiRequest,
   getBackOfficePortal: mocks.getBackOfficePortal,
 }));
@@ -37,8 +39,8 @@ describe("DB-backed access management API", () => {
   });
 
   test("encodes dynamic role route segments from the contract", async () => {
-    const { accessManagementRoutes } = await import("@/features/access-management/api/access-management-routes");
-    expect(accessManagementRoutes.role("role/1")).toBe("/api/v1/roles/role%2F1");
+    const { API_ENDPOINTS } = await import("@/lib/api/api-endpoints");
+    expect(API_ENDPOINTS.access.role("role/1")).toBe("/api/v1/roles/role%2F1");
   });
 
   test("uses only canonical v1 REST endpoints for permission groups and roles", async () => {
@@ -89,6 +91,28 @@ describe("DB-backed access management API", () => {
     expect(mocks.apiRequest).toHaveBeenCalledTimes(1);
   });
 
+  test("normalizes an unknown contract status before exposing the permission domain", async () => {
+    mocks.apiRequest.mockResolvedValueOnce({
+      items: [{ id: "perm-1", name: "lms.read", group: "lms", label: "Read", status: "FUTURE_STATUS" }],
+      page: 0,
+      limit: 25,
+      total: 1,
+      totalPages: 1,
+    });
+    const { listPermissions } = await import("@/features/access-management/api/access-management-api");
+
+    const result = await listPermissions({ page: 0, limit: 25 });
+
+    expect(result.items[0]?.status).toBe("UNKNOWN");
+  });
+
+  test("rejects a malformed permission page at the transport boundary", async () => {
+    mocks.apiRequest.mockResolvedValueOnce({ page: 0, limit: 25, total: 0, totalPages: 0 });
+    const { listPermissions } = await import("@/features/access-management/api/access-management-api");
+
+    await expect(listPermissions({ page: 0, limit: 25 })).rejects.toBeInstanceOf(ResponseValidationError);
+  });
+
   test("scopes query keys by tenant and every server-side filter", async () => {
     const { accessManagementQueryKeys } = await import("@/features/access-management/api/access-management-api");
     const filters = { page: 1, limit: 25, search: "teacher", group: "lms", portal: "lms", status: "ACTIVE" };
@@ -106,5 +130,19 @@ describe("DB-backed access management API", () => {
       "perm-1",
     ]);
     expect(accessManagementQueryKeys.roles("tenant-a")).toEqual(["access-management", "tenant-a", "roles"]);
+  });
+
+  test("forwards caller cancellation to access catalog reads", async () => {
+    mocks.apiRequest
+      .mockResolvedValueOnce({ items: [], page: 0, limit: 25, total: 0, totalPages: 0 })
+      .mockResolvedValueOnce([]);
+    const signal = new AbortController().signal;
+    const { listPermissions, listRoles } = await import("@/features/access-management/api/access-management-api");
+
+    await listPermissions({ page: 0, limit: 25 }, signal);
+    await listRoles(signal);
+
+    expect(mocks.apiRequest.mock.calls[0]?.[1]).toMatchObject({ signal });
+    expect(mocks.apiRequest.mock.calls[1]?.[1]).toMatchObject({ signal });
   });
 });

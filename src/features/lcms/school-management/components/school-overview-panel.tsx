@@ -10,7 +10,11 @@ import Typography from "@mui/material/Typography";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
 
 export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
+  const totalStudents = school.students.length;
   const atRisk = school.students.filter((student) => student.status === "at-risk").length;
+  const activeStudents = school.students.filter((student) => student.status === "studying").length;
+  const profileComplete = school.students.filter((student) => Boolean(student.code && student.fullName && student.grade && student.className)).length;
+  const percentOf = (value: number) => totalStudents ? Math.round((value / totalStudents) * 100) : 0;
   const metrics = [
     { label: "Học sinh", value: school.students.length, helper: "Tài khoản đã đồng bộ", icon: <GroupsRoundedIcon />, tone: "primary.main" },
     { label: "Lớp học", value: school.classes.length, helper: `${school.grades.length} khối đang hoạt động`, icon: <ApartmentRoundedIcon />, tone: "info.main" },
@@ -31,8 +35,8 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", xl: "minmax(0,1.35fr) minmax(300px,.65fr)" } }}>
         <Paper variant="outlined" sx={{ p: 2.5 }}>
           <Typography sx={{ fontWeight: 850 }} variant="subtitle1">Tình trạng học sinh</Typography>
-          <Typography color="text.secondary" variant="body2">Theo dõi mức tham gia và cảnh báo trong 30 ngày gần nhất.</Typography>
-          {[{ label: "Đang học ổn định", value: school.students.length - atRisk, percent: 86, color: "success" }, { label: "Cần giáo viên hỗ trợ", value: atRisk, percent: 14, color: "warning" }, { label: "Đã đủ hồ sơ", value: Math.max(0, school.students.length - 3), percent: 92, color: "primary" }].map((item) => (
+          <Typography color="text.secondary" variant="body2">Tỷ lệ được tính từ dữ liệu học sinh mà backend trả về cho trường này.</Typography>
+          {[{ label: "Đang học ổn định", value: activeStudents, percent: percentOf(activeStudents), color: "success" }, { label: "Cần giáo viên hỗ trợ", value: atRisk, percent: percentOf(atRisk), color: "warning" }, { label: "Đã đủ hồ sơ", value: profileComplete, percent: percentOf(profileComplete), color: "primary" }].map((item) => (
             <Box key={item.label} sx={{ mt: 2.25 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.75 }}><Typography variant="body2">{item.label}</Typography><Typography sx={{ fontWeight: 800 }} variant="body2">{item.value} · {item.percent}%</Typography></Box>
               <LinearProgress color={item.color as "success" | "warning" | "primary"} value={item.percent} variant="determinate" sx={{ borderRadius: 4, height: 7 }} />

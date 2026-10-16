@@ -34,7 +34,7 @@ test("allows teacher sessions to enter elearning only with explicit entitlement"
   ).toBe(true);
 });
 
-test("does not grant elearning from admin role or email alone", () => {
+test("allows the configured root admin to enter elearning from a shared session", () => {
   const adminAccount: TeacherAccount = {
     ...teacherAccount,
     email: "admin@erg.edu.vn",
@@ -52,7 +52,7 @@ test("does not grant elearning from admin role or email alone", () => {
       teacherAccount: adminAccount,
       teacherSession,
     }),
-  ).toBe(false);
+  ).toBe(true);
 });
 
 test("allows elearning when a student session exists", () => {
@@ -120,4 +120,29 @@ test("does not merge LMS entitlement into LCMS", () => {
       teacherSession,
     }),
   ).toBe(false);
+});
+
+test("requires the canonical route permission for a student workspace", () => {
+  const studentSession: StudentSession = {
+    accessToken: "student-token",
+    className: "6A",
+    email: "student@erg.edu.vn",
+    loggedInAt: "2026-01-01T00:00:00.000Z",
+    name: "Student One",
+    portal: "elearning",
+    rememberMe: true,
+    permissions: ["elearning.assignment.read_self"],
+    deniedPermissions: [],
+  };
+
+  expect(canAccessPortal({ portal: "elearning", studentSession, requiredPermission: "elearning.assignment.read_self" })).toBe(true);
+  expect(canAccessPortal({ portal: "elearning", studentSession, requiredPermission: "elearning.assignment.submit" })).toBe(false);
+});
+
+test("does not treat a client-side wildcard portal list as a grant without a canonical workspace", () => {
+  expect(canAccessPortal({
+    portal: "crm",
+    teacherAccount,
+    teacherSession: { accessToken: "token", portals: ["*"] },
+  })).toBe(false);
 });

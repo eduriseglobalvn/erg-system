@@ -12,7 +12,15 @@ import { clearTeacherSessionSnapshot, readStoredAuthSession, resolveCurrentPorta
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useI18n } from "@/platform/i18n";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import { AUTH_REAUTH_REQUIRED_EVENT, AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
+import {
+  ACCOUNT_DISABLED_EVENT,
+  AUTHORIZATION_CHANGED_EVENT,
+  AUTH_REAUTH_REQUIRED_EVENT,
+  AUTH_SESSION_INVALID_EVENT,
+  AUTH_SESSION_REPLACED_EVENT,
+  hasApiBase,
+  isBffAuthEnabled,
+} from "@/lib/api-client";
 import type {
   AccountTab,
   AuthMode,
@@ -131,6 +139,7 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
             deniedPermissions: bffSession.deniedPermissions,
             roles: bffSession.roles,
             portals: bffSession.portals,
+            workspaces: bffSession.workspaces,
             portal,
           });
           return bffSession.account;
@@ -199,13 +208,31 @@ export function useAuthSession(portal: StoredAuthSession["portal"] = resolveCurr
       setReauthRequired(true);
     }
 
+    function handleAccountDisabled() {
+      logoutAccount();
+      setAccount(null);
+      setProfileForm(defaultProfileForm);
+      pushNotice({ tone: "info", message: "Tài khoản đã bị vô hiệu hóa. Liên hệ quản trị viên nếu bạn cần khôi phục truy cập." });
+    }
+
+    function handleAuthorizationChanged() {
+      logoutAccount();
+      setAccount(null);
+      setProfileForm(defaultProfileForm);
+      pushNotice({ tone: "info", message: "Quyền truy cập vừa thay đổi. Vui lòng đăng nhập lại để đồng bộ quyền mới." });
+    }
+
     window.addEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
     window.addEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
     window.addEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
+    window.addEventListener(ACCOUNT_DISABLED_EVENT, handleAccountDisabled);
+    window.addEventListener(AUTHORIZATION_CHANGED_EVENT, handleAuthorizationChanged);
     return () => {
       window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, handleSessionReplaced);
       window.removeEventListener(AUTH_SESSION_INVALID_EVENT, handleSessionInvalid);
       window.removeEventListener(AUTH_REAUTH_REQUIRED_EVENT, handleReauthRequired);
+      window.removeEventListener(ACCOUNT_DISABLED_EVENT, handleAccountDisabled);
+      window.removeEventListener(AUTHORIZATION_CHANGED_EVENT, handleAuthorizationChanged);
     };
   }, []);
 

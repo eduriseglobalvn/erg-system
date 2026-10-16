@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest, getBackOfficePortal, hasApiBase } from "@/lib/api-client";
 import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-types";
 
@@ -7,7 +8,7 @@ import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-t
  */
 export async function getCenters(): Promise<ClassroomSchool[]> {
   try {
-    const data = await apiRequest<ClassroomSchool[]>("/api/v1/centers", { portal: getBackOfficePortal() });
+    const data = await apiRequest<ClassroomSchool[]>(API_ENDPOINTS.legacy.v1Centers, { portal: getBackOfficePortal() });
     return data;
   } catch (error) {
     if (hasApiBase()) throw error;
@@ -20,5 +21,5 @@ export async function getCenters(): Promise<ClassroomSchool[]> {
  * Defines which centers and modules (LMS/learning resources) the user can access.
  */
 export async function getUserAccessScopes(userID: string) {
-  return apiRequest(`/api/v1/users/${userID}/access-scopes`, { portal: getBackOfficePortal() });
+  return apiRequest(API_ENDPOINTS.userAdmin.accessScopes(userID), { portal: getBackOfficePortal() });
 }

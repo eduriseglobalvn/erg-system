@@ -1,52 +1,63 @@
 import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import type { StudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
+import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { PLATFORM_ROOT_ADMIN_EMAIL } from "@/platform/auth/permissions/workspace-capability-projection";
+import { workspaceFromLegacyPortal } from "@/platform/workspaces/legacy-portal-compat";
+import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
 type PortalAccessInput = {
   portal: NonNullable<StoredAuthSession["portal"]>;
   studentSession?: StudentSession | null;
   teacherAccount?: TeacherAccount | null;
   teacherSession?: StoredAuthSession | null;
+  requiredPermission?: string;
+  requiredWorkspace?: Workspace;
 };
 
-export function canAccessPortal({ portal, studentSession, teacherAccount, teacherSession }: PortalAccessInput) {
-  void teacherAccount;
+export function canAccessPortal({ portal, studentSession, teacherAccount, teacherSession, requiredPermission, requiredWorkspace }: PortalAccessInput) {
+  const workspace = requiredWorkspace ?? workspaceFromLegacyPortal(portal);
   if (portal === "elearning") {
-    if (studentSession?.portal === "elearning" && studentSession.accessToken) {
+    if (studentSession?.portal === "elearning" && studentSession.accessToken && (!requiredPermission || hasStudentPermission(studentSession, requiredPermission))) {
       return true;
     }
 
-    return Boolean(teacherSession && hasExplicitPortalAccess(teacherSession, portal));
+    return Boolean(teacherSession && hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission, isRootAdmin(teacherAccount)));
   }
 
   if (!teacherSession) return false;
-  return hasExplicitPortalAccess(teacherSession, portal);
+  return hasExplicitPortalAccess(teacherSession, portal, workspace, requiredPermission, isRootAdmin(teacherAccount));
 }
 
-function hasExplicitPortalAccess(session: StoredAuthSession, portal: NonNullable<StoredAuthSession["portal"]>) {
-  const portals = session.portals ?? [];
-  return portals.includes("*") || portals.includes(portal) || hasPortalPermission(session.permissions, portal);
+function hasExplicitPortalAccess(
+  session: StoredAuthSession,
+  portal: NonNullable<StoredAuthSession["portal"]>,
+  workspace: Workspace | undefined,
+  requiredPermission?: string,
+  rootAdmin = false,
+) {
+  const workspaces = session.workspaces?.length
+    ? session.workspaces
+    : (session.portals ?? []).filter((value) => value !== "*").map(workspaceFromLegacyPortal).filter((value): value is Workspace => Boolean(value));
+  if (workspace && !rootAdmin && !workspaces.includes(workspace)) return false;
+
+  if (requiredPermission && !rootAdmin && !evaluatePermission({
+    permission: requiredPermission,
+    grantedPermissions: session.permissions,
+    deniedPermissions: session.deniedPermissions,
+  })) return false;
+
+  return rootAdmin || session.portals?.includes(portal) === true || Boolean(workspace && workspaces.includes(workspace));
 }
 
-function hasPortalPermission(permissions: StoredAuthSession["permissions"], portal: NonNullable<StoredAuthSession["portal"]>) {
-  const normalized = permissions?.map((permission) => permission.trim().toLowerCase()) ?? [];
-  if (
-    normalized.some((permission) =>
-      ["*", "admin", "super_admin", "super-admin", "system:admin", "system.super_admin", "erg_super_admin"].includes(permission),
-    )
-  ) {
-    return true;
-  }
+function isRootAdmin(account?: TeacherAccount | null) {
+  return account?.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
+}
 
-  return normalized.some((permission) =>
-    permission.startsWith(`${portal}.`) || [
-      portal,
-      `${portal}:access`,
-      `${portal}:login`,
-      `${portal}:read`,
-      `portal:${portal}`,
-      `portal:${portal}:access`,
-      `${portal}.*`,
-    ].includes(permission),
-  );
+function hasStudentPermission(session: StudentSession, permission: string) {
+  return evaluatePermission({
+    permission,
+    grantedPermissions: session.permissions,
+    deniedPermissions: session.deniedPermissions,
+  });
 }

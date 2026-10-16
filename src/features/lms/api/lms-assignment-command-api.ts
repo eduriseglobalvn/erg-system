@@ -1,6 +1,8 @@
 import { apiRequest } from "@/lib/api-client";
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import { isNonEmptyString, isObject, validateResponse } from "@/lib/validate-response";
 
 export type CreateLmsAssignmentInput = {
   title: string;
@@ -112,7 +114,7 @@ query LmsStudentGroups($tenantId: String, $classId: String) {
 `;
 
 export async function createLmsAssignment(input: CreateLmsAssignmentInput): Promise<CreateLmsAssignmentResult> {
-  return apiRequest<CreateLmsAssignmentResult>("/api/v1/lms/assignments", {
+  const response = await apiRequest<CreateLmsAssignmentResult>(API_ENDPOINTS.lms.assignments, {
     body: JSON.stringify({
       attemptLimit: input.attemptLimit,
       classId: input.classId,
@@ -132,10 +134,11 @@ export async function createLmsAssignment(input: CreateLmsAssignmentInput): Prom
     method: "POST",
     portal: "lms",
   });
+  return validateResponse(response, isAssignmentResult, "lms.assignment.create");
 }
 
 export async function updateLmsAssignment(input: UpdateLmsAssignmentInput): Promise<void> {
-  await apiRequest<void>(`/api/v1/lms/assignments/${input.assignmentId}`, {
+  await apiRequest<void>(API_ENDPOINTS.lms.assignment(input.assignmentId), {
     body: JSON.stringify({
       attemptLimit: input.attemptLimit,
       dueAt: input.dueAt,
@@ -151,7 +154,7 @@ export async function updateLmsAssignment(input: UpdateLmsAssignmentInput): Prom
 }
 
 export async function updateLmsAssignmentRecipients(input: UpdateLmsAssignmentRecipientsInput): Promise<CreateLmsAssignmentResult> {
-  return apiRequest<CreateLmsAssignmentResult>(`/api/v1/lms/assignments/${input.assignmentId}/recipients`, {
+  const response = await apiRequest<CreateLmsAssignmentResult>(API_ENDPOINTS.lms.assignmentRecipients(input.assignmentId), {
     body: JSON.stringify({
       classId: input.classId,
       groupId: input.groupId,
@@ -161,10 +164,11 @@ export async function updateLmsAssignmentRecipients(input: UpdateLmsAssignmentRe
     method: "PUT",
     portal: "lms",
   });
+  return validateResponse(response, isAssignmentResult, "lms.assignment.recipients");
 }
 
 export async function deleteLmsAssignment(assignmentId: string): Promise<void> {
-  await apiRequest<void>(`/api/v1/lms/assignments/${assignmentId}`, {
+  await apiRequest<void>(API_ENDPOINTS.lms.assignment(assignmentId), {
     method: "DELETE",
     portal: "lms",
   });
@@ -173,7 +177,7 @@ export async function deleteLmsAssignment(assignmentId: string): Promise<void> {
 export async function loadLmsStudentGroups(input: {
   tenantId?: string;
   classId?: string | null;
-} = {}): Promise<LmsStudentGroupWorkspace> {
+} = {}, signal?: AbortSignal): Promise<LmsStudentGroupWorkspace> {
   const tenantId = input.tenantId ?? getDefaultTenantId();
   if (!hasApiBase()) {
     return {
@@ -189,6 +193,7 @@ export async function loadLmsStudentGroups(input: {
     operationName: "LmsStudentGroups",
     portal: "lms",
     query: StudentGroupsDocument,
+    signal,
     tenantId,
     variables: {
       classId: input.classId ?? null,
@@ -196,11 +201,23 @@ export async function loadLmsStudentGroups(input: {
     },
   });
 
-  return response.lms.studentGroups;
+  return validateResponse(response, isStudentGroupsResponse, "lms.student-groups").lms.studentGroups;
+}
+
+function isAssignmentResult(value: unknown): value is CreateLmsAssignmentResult {
+  return isObject(value)
+    && isNonEmptyString(value.assignmentId)
+    && typeof value.recipientCount === "number"
+    && Array.isArray(value.resources);
+}
+
+function isStudentGroupsResponse(value: unknown): value is StudentGroupsGraphQlResponse {
+  if (!isObject(value) || !isObject(value.lms) || !isObject(value.lms.studentGroups)) return false;
+  return isNonEmptyString(value.lms.studentGroups.tenantId) && Array.isArray(value.lms.studentGroups.groups);
 }
 
 export async function createLmsStudentGroup(input: LmsStudentGroupInput): Promise<LmsStudentGroupResult> {
-  return apiRequest<LmsStudentGroupResult>("/api/v1/lms/student-groups", {
+  return apiRequest<LmsStudentGroupResult>(API_ENDPOINTS.lms.studentGroups, {
     body: JSON.stringify(input),
     method: "POST",
     portal: "lms",
@@ -208,7 +225,7 @@ export async function createLmsStudentGroup(input: LmsStudentGroupInput): Promis
 }
 
 export async function updateLmsStudentGroup(groupId: string, input: LmsStudentGroupInput): Promise<LmsStudentGroupResult> {
-  return apiRequest<LmsStudentGroupResult>(`/api/v1/lms/student-groups/${groupId}`, {
+  return apiRequest<LmsStudentGroupResult>(API_ENDPOINTS.lms.studentGroup(groupId), {
     body: JSON.stringify(input),
     method: "PUT",
     portal: "lms",
@@ -216,7 +233,7 @@ export async function updateLmsStudentGroup(groupId: string, input: LmsStudentGr
 }
 
 export async function deleteLmsStudentGroup(groupId: string): Promise<void> {
-  await apiRequest<void>(`/api/v1/lms/student-groups/${groupId}`, {
+  await apiRequest<void>(API_ENDPOINTS.lms.studentGroup(groupId), {
     method: "DELETE",
     portal: "lms",
   });

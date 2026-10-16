@@ -6,36 +6,31 @@ import {
   DashboardSegmentedControl,
   DashboardStatusBadge,
 } from "@/components/dashboard/dashboard-page-shell";
-import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
-import {
-  assignmentRuns,
-  classroomClusters,
-  classroomSchools,
-  classroomSnapshots,
-  interventionQueue,
-} from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomSchool, ClassroomSnapshot, InterventionItem } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";
 
 type OverviewMode = "center" | "school";
-type BadgeTone = "success" | "warning" | "danger" | "outline" | "secondary";
 
 export function OverviewWorkspace({
   activeLeaf,
   managementScope,
   mode,
   onOpenLeaf,
+  schools,
+  snapshots,
   selectedSchoolId,
 }: {
   activeLeaf: DashboardLeaf;
   managementScope: ManagementScope;
   mode: OverviewMode;
   onOpenLeaf: (leafId: string) => void;
+  schools: ClassroomSchool[];
+  snapshots: ClassroomSnapshot[];
   selectedSchoolId: string;
 }) {
   const { locale } = useI18n();
@@ -45,10 +40,11 @@ export function OverviewWorkspace({
   const scopedSchools = useMemo(
     () =>
       isGlobalScope
-        ? classroomSchools
-        : classroomSchools.filter((school) => school.id === selectedSchoolId),
-    [isGlobalScope, selectedSchoolId],
+        ? schools
+        : schools.filter((school) => school.id === selectedSchoolId),
+    [isGlobalScope, schools, selectedSchoolId],
   );
+  const hasClusterData = scopedSchools.length > 0 && scopedSchools.every((school) => school.metricsAvailable !== false);
 
   const filteredSchools = useMemo(
     () => scopedSchools.filter((school) => (!isGlobalScope || clusterId === "all" ? true : school.clusterId === clusterId)),
@@ -57,24 +53,25 @@ export function OverviewWorkspace({
   const filteredSnapshots = useMemo(
     () => {
       const schoolIds = new Set(filteredSchools.map((school) => school.id));
-      return classroomSnapshots.filter((snapshot) => schoolIds.has(snapshot.schoolId));
+      return snapshots.filter((snapshot) => schoolIds.has(snapshot.schoolId));
     },
-    [filteredSchools],
+    [filteredSchools, snapshots],
   );
 
   const totals = useMemo(() => {
     const activeStudents = filteredSchools.reduce((sum, school) => sum + school.activeStudents, 0);
     const activeClasses = filteredSchools.reduce((sum, school) => sum + school.activeClasses, 0);
-    const averageCompletion = Math.round(
-      filteredSchools.reduce((sum, school) => sum + school.completionRate, 0) / Math.max(filteredSchools.length, 1),
-    );
-    const averageScore = Math.round(
-      filteredSchools.reduce((sum, school) => sum + school.averageScore, 0) / Math.max(filteredSchools.length, 1),
-    );
-    const flaggedStudents = filteredSchools.reduce((sum, school) => sum + school.flaggedStudents, 0);
-    const overdueAssignments = filteredSchools.reduce((sum, school) => sum + school.overdueAssignments, 0);
+    const metricsAvailable = filteredSchools.length > 0 && filteredSchools.every((school) => school.metricsAvailable !== false);
+    const averageCompletion = metricsAvailable
+      ? Math.round(filteredSchools.reduce((sum, school) => sum + school.completionRate, 0) / filteredSchools.length)
+      : null;
+    const averageScore = metricsAvailable
+      ? Math.round(filteredSchools.reduce((sum, school) => sum + school.averageScore, 0) / filteredSchools.length)
+      : null;
+    const flaggedStudents = metricsAvailable ? filteredSchools.reduce((sum, school) => sum + school.flaggedStudents, 0) : null;
+    const overdueAssignments = metricsAvailable ? filteredSchools.reduce((sum, school) => sum + school.overdueAssignments, 0) : null;
 
-    return { activeStudents, activeClasses, averageCompletion, averageScore, flaggedStudents, overdueAssignments };
+    return { activeStudents, activeClasses, averageCompletion, averageScore, flaggedStudents, overdueAssignments, metricsAvailable };
   }, [filteredSchools]);
 
   const classesNeedingSupport = useMemo(
@@ -86,21 +83,20 @@ export function OverviewWorkspace({
     [filteredSchools],
   );
 
-  const activeCluster = classroomClusters.find((cluster) => cluster.id === clusterId);
-  const scopeLabel = isGlobalScope ? activeCluster?.label ?? copy.allClusters : filteredSchools[0]?.name ?? copy.selectedCenter;
+  const scopeLabel = isGlobalScope ? (clusterId === "all" ? copy.allClusters : clusterId) : filteredSchools[0]?.name ?? copy.selectedCenter;
   const summaryItems =
     mode === "center"
       ? [
-          { label: copy.summary.openAssignments, value: String(assignmentRuns.length), detail: copy.summary.openAssignmentsHint },
-          { label: copy.summary.needsSupport, value: String(totals.flaggedStudents), detail: copy.summary.needsSupportHint },
-          { label: copy.summary.completion, value: `${totals.averageCompletion}%`, detail: copy.summary.completionHint },
+          { label: copy.summary.openAssignments, value: "—", detail: copy.summary.openAssignmentsUnavailable },
+          { label: copy.summary.needsSupport, value: formatMetric(totals.flaggedStudents), detail: totals.metricsAvailable ? copy.summary.needsSupportHint : copy.summary.metricsUnavailable },
+          { label: copy.summary.completion, value: formatPercent(totals.averageCompletion), detail: totals.metricsAvailable ? copy.summary.completionHint : copy.summary.metricsUnavailable },
           { label: copy.summary.scope, value: scopeLabel, detail: copy.summary.scopeHint(filteredSchools.length) },
         ]
       : [
           { label: copy.summary.schools, value: String(filteredSchools.length), detail: copy.summary.schoolHint },
           { label: copy.summary.classes, value: String(totals.activeClasses), detail: copy.summary.classHint },
-          { label: copy.summary.needsSupport, value: String(totals.flaggedStudents), detail: copy.summary.needsSupportHint },
-          { label: copy.summary.averageScore, value: String(totals.averageScore), detail: copy.summary.averageScoreHint },
+          { label: copy.summary.needsSupport, value: formatMetric(totals.flaggedStudents), detail: totals.metricsAvailable ? copy.summary.needsSupportHint : copy.summary.metricsUnavailable },
+          { label: copy.summary.averageScore, value: formatMetric(totals.averageScore), detail: totals.metricsAvailable ? copy.summary.averageScoreHint : copy.summary.metricsUnavailable },
         ];
 
   return (
@@ -111,11 +107,13 @@ export function OverviewWorkspace({
       breadcrumbs={activeLeaf.breadcrumb}
       actions={
         <>
-          {isGlobalScope ? (
+          {isGlobalScope && hasClusterData ? (
             <DashboardSegmentedControl
               options={[
                 { value: "all", label: copy.allClusters },
-                ...classroomClusters.map((cluster) => ({ value: cluster.id, label: cluster.label })),
+                { value: "central", label: "Cụm trung tâm" },
+                { value: "east", label: "Cụm phía đông" },
+                { value: "south", label: "Cụm phía nam" },
               ]}
               value={clusterId}
               onChange={setClusterId}
@@ -129,8 +127,8 @@ export function OverviewWorkspace({
       {mode === "center" ? (
         <>
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.1fr)_minmax(380px,0.9fr)]">
-            <TodayActionPanel copy={copy} items={interventionQueue} onOpenLeaf={onOpenLeaf} />
-            <AssignmentRunPanel copy={copy} />
+            <UnavailablePanel title={copy.todayActionsTitle} detail={copy.todayActionsUnavailable} />
+            <UnavailablePanel title={copy.assignmentTitle} detail={copy.summary.openAssignmentsUnavailable} />
           </div>
 
           <div className="grid gap-4 xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
@@ -165,82 +163,6 @@ function SummaryStrip({ items }: { items: Array<{ label: string; value: string; 
   );
 }
 
-function TodayActionPanel({
-  copy,
-  items,
-  onOpenLeaf,
-}: {
-  copy: OverviewCopy;
-  items: InterventionItem[];
-  onOpenLeaf: (leafId: string) => void;
-}) {
-  return (
-    <DashboardSectionCard
-      title={copy.todayActionsTitle}
-      description={copy.todayActionsDescription}
-      action={<Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>{copy.openStudentList}</Button>}
-    >
-      <div className="space-y-3">
-        {items.map((item) => (
-          <article key={item.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-sm font-semibold text-slate-950">{item.studentName}</h3>
-                  <span className="text-sm text-slate-300">/</span>
-                  <span className="text-sm font-medium text-slate-600">{item.className}</span>
-                </div>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{item.issue}</p>
-                <p className="mt-2 text-[13px] font-semibold leading-5 text-slate-600">
-                  {item.schoolName} - {item.impact}
-                </p>
-              </div>
-              <DashboardStatusBadge label={copy.urgency[item.urgency]} tone={getUrgencyTone(item.urgency)} />
-            </div>
-          </article>
-        ))}
-      </div>
-    </DashboardSectionCard>
-  );
-}
-
-function AssignmentRunPanel({ copy }: { copy: OverviewCopy }) {
-  return (
-    <DashboardSectionCard title={copy.assignmentTitle} description={copy.assignmentDescription}>
-      <div className="space-y-3">
-        {assignmentRuns.map((assignment) => (
-          <article key={assignment.id} className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <h3 className="line-clamp-2 text-sm font-semibold leading-6 text-slate-950">{assignment.title}</h3>
-                <p className="mt-1 text-sm text-slate-500">
-                  {assignment.subjectLabel} - {assignment.targetLevel}
-                </p>
-              </div>
-              <Chip
-                label={assignment.dueLabel}
-                size="small"
-                color={assignment.needsReviewCount > 12 ? "warning" : "default"}
-                variant={assignment.needsReviewCount > 12 ? "filled" : "outlined"}
-              />
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-3 text-sm">
-              <span className="font-medium text-slate-600">{copy.completionLabel}</span>
-              <span className="font-semibold text-slate-950">{assignment.completionRate}%</span>
-            </div>
-            <LinearProgress variant="determinate" value={assignment.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <MiniStat label={copy.submittedLabel} value={String(assignment.submittedCount)} />
-              <MiniStat label={copy.inProgressLabel} value={String(assignment.inProgressCount)} />
-              <MiniStat label={copy.needsReviewLabel} value={String(assignment.needsReviewCount)} tone={assignment.needsReviewCount > 12 ? "danger" : "default"} />
-            </div>
-          </article>
-        ))}
-      </div>
-    </DashboardSectionCard>
-  );
-}
-
 function SchoolHealthPanel({
   copy,
   schools,
@@ -262,20 +184,20 @@ function SchoolHealthPanel({
                   {copy.schoolPrincipal}: {school.principal}
                 </p>
               </div>
-              <DashboardStatusBadge label={copy.schoolStatus(school.flaggedStudents)} tone={school.flaggedStudents > 28 ? "warning" : "success"} />
+              <DashboardStatusBadge label={school.metricsAvailable === false ? copy.noData : copy.schoolStatus(school.flaggedStudents)} tone={school.metricsAvailable === false ? "outline" : school.flaggedStudents > 28 ? "warning" : "success"} />
             </div>
             <div className="mt-4 grid gap-2 sm:grid-cols-3">
               <MiniStat label={copy.classroomsLabel} value={String(school.activeClasses)} />
-              <MiniStat label={copy.completionLabel} value={`${school.completionRate}%`} />
-              <MiniStat label={copy.studentsNeedSupport} value={String(school.flaggedStudents)} tone={school.flaggedStudents > 28 ? "danger" : "default"} />
+              <MiniStat label={copy.completionLabel} value={school.metricsAvailable === false ? copy.noData : `${school.completionRate}%`} />
+              <MiniStat label={copy.studentsNeedSupport} value={school.metricsAvailable === false ? copy.noData : String(school.flaggedStudents)} tone={school.metricsAvailable === false ? "default" : school.flaggedStudents > 28 ? "danger" : "default"} />
             </div>
             {showDetails ? (
               <div className="mt-4">
                 <div className="flex items-center justify-between text-sm">
                   <span className="font-medium text-slate-600">{copy.averageScoreLabel}</span>
-                  <span className="font-semibold text-slate-950">{school.averageScore}</span>
+                  <span className="font-semibold text-slate-950">{school.metricsAvailable === false ? copy.noData : school.averageScore}</span>
                 </div>
-                <LinearProgress variant="determinate" value={school.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
+                {school.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.summary.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={school.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
               </div>
             ) : null}
           </article>
@@ -343,12 +265,12 @@ function ClassListPanel({
                   {snapshot.schoolName} - {snapshot.gradeLabel} - {snapshot.homeroomTeacher}
                 </p>
               </div>
-              <CompactCell label={copy.classTable.students} value={String(snapshot.studentCount)} />
-              <CompactCell label={copy.classTable.assignments} value={String(snapshot.activeAssignments)} />
-              <CompactCell label={copy.classTable.completion} value={`${snapshot.completionRate}%`} />
+              <CompactCell label={copy.classTable.students} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.studentCount)} />
+              <CompactCell label={copy.classTable.assignments} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.activeAssignments)} />
+              <CompactCell label={copy.classTable.completion} value={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`} />
               <div>
                 <span className="font-medium text-slate-500 lg:hidden">{copy.classTable.support}: </span>
-                <DashboardStatusBadge label={`${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.riskStudents > 5 ? "warning" : "outline"} />
+                <DashboardStatusBadge label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.metricsAvailable === false ? "outline" : snapshot.riskStudents > 5 ? "warning" : "outline"} />
               </div>
             </article>
           ))}
@@ -376,17 +298,17 @@ function ClassRow({
             {snapshot.schoolName} - {snapshot.gradeLabel} - {snapshot.homeroomTeacher}
           </p>
         </div>
-        <DashboardStatusBadge label={`${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.riskStudents > 5 ? "warning" : "outline"} />
+        <DashboardStatusBadge label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.studentsNeedSupport}`} tone={snapshot.metricsAvailable === false ? "outline" : snapshot.riskStudents > 5 ? "warning" : "outline"} />
       </div>
       <div className="mt-4 flex items-center justify-between text-sm">
         <span className="font-medium text-slate-600">{copy.completionLabel}</span>
-        <span className="font-semibold text-slate-950">{snapshot.completionRate}%</span>
+        <span className="font-semibold text-slate-950">{snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`}</span>
       </div>
-      <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />
+      {snapshot.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.summary.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 1, height: 8, borderRadius: 1, bgcolor: "grey.200" }} />}
       {!compact ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
-          <MiniStat label={copy.classroomsStudentCount} value={String(snapshot.studentCount)} />
-          <MiniStat label={copy.activeAssignmentsLabel} value={String(snapshot.activeAssignments)} />
+          <MiniStat label={copy.classroomsStudentCount} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.studentCount)} />
+          <MiniStat label={copy.activeAssignmentsLabel} value={snapshot.metricsAvailable === false ? copy.noData : String(snapshot.activeAssignments)} />
           <MiniStat label={copy.lastActivityLabel} value={snapshot.lastSubmissionAt} />
         </div>
       ) : null}
@@ -411,6 +333,24 @@ function MiniStat({
   );
 }
 
+function UnavailablePanel({ detail, title }: { detail: string; title: string }) {
+  return (
+    <DashboardSectionCard title={title} description={detail}>
+      <div className="rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-6 text-sm font-medium text-slate-500">
+        {detail}
+      </div>
+    </DashboardSectionCard>
+  );
+}
+
+function formatMetric(value: number | null) {
+  return value === null ? "—" : String(value);
+}
+
+function formatPercent(value: number | null) {
+  return value === null ? "—" : `${value}%`;
+}
+
 function CompactCell({ label, value }: { label: string; value: string }) {
   return (
     <div className="text-sm font-semibold text-slate-950">
@@ -418,12 +358,6 @@ function CompactCell({ label, value }: { label: string; value: string }) {
       {value}
     </div>
   );
-}
-
-function getUrgencyTone(urgency: InterventionItem["urgency"]): BadgeTone {
-  if (urgency === "high") return "danger";
-  if (urgency === "medium") return "warning";
-  return "outline";
 }
 
 type OverviewCopy = typeof enCopy;
@@ -434,6 +368,7 @@ const viCopy = {
   centerTitle: "Báo cáo tổng quan",
   schoolTitle: "Báo cáo trường/lớp",
   last30Days: "30 ngày gần đây",
+  noData: "Chưa có dữ liệu",
   selectedCenter: "Trung tâm đã chọn",
   centerDescription:
     "Tập trung vào việc cần xử lý hôm nay: bài đang chạy, học sinh cần nhắc và lớp có dấu hiệu chậm nhịp.",
@@ -449,8 +384,10 @@ const viCopy = {
   summary: {
     openAssignments: "Bài đang mở",
     openAssignmentsHint: "Theo dõi các bài còn ảnh hưởng tới tiến độ hôm nay.",
+    openAssignmentsUnavailable: "Backend chưa cung cấp aggregate assignment cho dashboard.",
     needsSupport: "Cần hỗ trợ",
     needsSupportHint: "Học sinh/lớp nên được nhắc hoặc kiểm tra thêm.",
+    metricsUnavailable: "Backend chưa cung cấp số liệu vận hành trong bootstrap.",
     completion: "Hoàn thành",
     completionHint: "Tỷ lệ trung bình trong phạm vi đang chọn.",
     scope: "Phạm vi",
@@ -464,6 +401,7 @@ const viCopy = {
   },
   todayActionsTitle: "Cần xử lý hôm nay",
   todayActionsDescription: "Chỉ giữ những việc giáo viên nên xử lý trước để lớp không rớt nhịp.",
+  todayActionsUnavailable: "Backend chưa cung cấp intervention queue cho dashboard.",
   assignmentTitle: "Bài đang mở",
   assignmentDescription: "Theo dõi bài nào sắp quá hạn, bài nào còn nhiều học sinh đang làm hoặc cần chấm.",
   schoolHealthTitle: "Tình hình trường",
@@ -504,6 +442,7 @@ const enCopy = {
   centerTitle: "Overview report",
   schoolTitle: "School and class report",
   last30Days: "Last 30 days",
+  noData: "No data yet",
   selectedCenter: "Selected center",
   centerDescription:
     "Focus on today's work: live assignments, students to nudge, and classes that are slowing down.",
@@ -519,8 +458,10 @@ const enCopy = {
   summary: {
     openAssignments: "Open work",
     openAssignmentsHint: "Assignments still affecting today's progress.",
+    openAssignmentsUnavailable: "The backend does not expose an assignment aggregate for this dashboard.",
     needsSupport: "Need support",
     needsSupportHint: "Students or classes that should be nudged.",
+    metricsUnavailable: "Operational metrics are not included in the current bootstrap contract.",
     completion: "Completion",
     completionHint: "Average completion in the selected scope.",
     scope: "Scope",
@@ -534,6 +475,7 @@ const enCopy = {
   },
   todayActionsTitle: "Needs action today",
   todayActionsDescription: "Only the items teachers should handle first so the class rhythm does not slip.",
+  todayActionsUnavailable: "The backend does not expose an intervention queue for this dashboard.",
   assignmentTitle: "Open assignments",
   assignmentDescription: "Track what is nearing deadline, still in progress, or waiting for review.",
   schoolHealthTitle: "School health",

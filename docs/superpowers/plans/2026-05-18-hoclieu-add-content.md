@@ -1,5 +1,7 @@
 # Hoclieu Add Content Implementation Plan
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Refactor the LMS add-content modal so it supports separate lecture and exercise flows, with mock attachments rendered beside real resources.

@@ -1,6 +1,9 @@
 import { useForm } from "@tanstack/react-form";
 import { useState, type FormEvent } from "react";
-import { Building2, CheckCircle2, MapPin, School } from "@/components/mui-icon-shim";
+import Building2 from "@mui/icons-material/Apartment";
+import CheckCircle2 from "@mui/icons-material/CheckCircleOutlined";
+import MapPin from "@mui/icons-material/Place";
+import School from "@mui/icons-material/School";
 import { useMutation } from "@tanstack/react-query";
 
 import Button from "@mui/material/Button";

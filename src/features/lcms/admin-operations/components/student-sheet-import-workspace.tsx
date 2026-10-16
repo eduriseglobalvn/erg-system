@@ -24,22 +24,14 @@ import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroo
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
-
-type GvizCell = {
-  v?: string | number | boolean | null;
-  f?: string | null;
-} | null;
-
-type GvizResponse = {
-  table?: {
-    cols?: Array<{ label?: string }>;
-    rows?: Array<{ c?: GvizCell[] }>;
-  };
-};
-
-type SheetTab = {
-  name: string;
-};
+import {
+  fetchGoogleSheetTabs,
+  loadGoogleSheetViaJsonp,
+  parseGoogleSheetUrl,
+  type GoogleSheetTab as SheetTab,
+  type GoogleVisualizationCell as GvizCell,
+  type GoogleVisualizationResponse as GvizResponse,
+} from "@/features/lcms/imports/google-sheets-csv-adapter";
 
 type ParsedStudentRow = {
   id: string;
@@ -189,7 +181,7 @@ export function StudentSheetImportWorkspace({
 
       try {
         const parsedUrl = parseGoogleSheetUrl(trimmedUrl);
-        const nextTabs = await loadGoogleSheetTabs(parsedUrl.spreadsheetId).catch(() => []);
+        const nextTabs = await fetchGoogleSheetTabs(parsedUrl.spreadsheetId).catch(() => []);
         const requestedSheetName = sheetNameOverride ?? selectedSheetName;
         const activeSheetName =
           requestedSheetName && (!nextTabs.length || nextTabs.some((tab) => tab.name === requestedSheetName))
@@ -319,7 +311,7 @@ export function StudentSheetImportWorkspace({
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
               <Box component="label" sx={{ display: "block" }}>
-                <Stack direction="row" alignItems="center" spacing={0.75} sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", color: "text.secondary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
                   <TableViewOutlinedIcon sx={{ color: "success.main", fontSize: 18 }} /> Đường dẫn Google Sheet
                 </Stack>
                 <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 12 }}>Sheet cần bật quyền xem bằng liên kết.</Typography>
@@ -351,7 +343,7 @@ export function StudentSheetImportWorkspace({
             </Paper>
 
             <Paper variant="outlined" sx={{ borderRadius: 1.5, bgcolor: "action.hover", p: 2 }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1.5} sx={{ borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
+              <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
                 <Box>
                   <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</Typography>
                   <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>
@@ -403,7 +395,7 @@ export function StudentSheetImportWorkspace({
             </Paper>
 
             <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
-              <Stack direction="row" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1.5} sx={{ borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
+              <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
                 <Box>
                   <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>Khoảng dữ liệu</Typography>
                   <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>Chọn tab và vùng ô cần đọc.</Typography>
@@ -436,7 +428,7 @@ export function StudentSheetImportWorkspace({
               {sheetTabs.length > 0 && (
                 <Box sx={{ pt: 2 }}>
                   <Typography sx={{ mb: 1, color: "text.secondary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Chuyển đổi nhanh các tab lớp</Typography>
-                  <Stack direction="row" flexWrap="wrap" gap={0.75}>
+                  <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.75 }}>
                     {sheetTabs.slice(0, 10).map((tab) => (
                       <Button
                         key={tab.name}
@@ -520,7 +512,7 @@ export function StudentSheetImportWorkspace({
                           </Box>
                         </TableCell>
                         <TableCell>
-                          <Stack direction="row" alignItems="center" spacing={1.5}>
+                          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                             <Avatar variant="rounded" sx={{ width: 32, height: 32, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 10, fontWeight: 700 }}>
                               {getInitials(student.fullName)}
                             </Avatar>
@@ -710,89 +702,6 @@ function EditableCell({
   );
 }
 
-function parseGoogleSheetUrl(input: string) {
-  const idMatch = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
-  const gidMatch = input.match(/[?#&]gid=(\d+)/);
-
-  if (!idMatch?.[1]) {
-    throw new Error("Link Google Sheet chưa đúng định dạng.");
-  }
-
-  return {
-    spreadsheetId: idMatch[1],
-    gid: gidMatch?.[1] ?? "0",
-  };
-}
-
-async function loadGoogleSheetTabs(spreadsheetId: string): Promise<SheetTab[]> {
-  const response = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit?usp=sharing`);
-  if (!response.ok) {
-    throw new Error("Không đọc được danh sách tab trong Google Sheet.");
-  }
-
-  const html = await response.text();
-  const captions = Array.from(html.matchAll(/docs-sheet-tab-caption">([^<]+)</g))
-    .map((match) => decodeHtml(match[1] ?? "").trim())
-    .filter(Boolean);
-  const uniqueCaptions = Array.from(new Set(captions));
-
-  return uniqueCaptions.map((name) => ({ name }));
-}
-
-function loadGoogleSheetViaJsonp({
-  spreadsheetId,
-  gid,
-  sheetName,
-}: {
-  spreadsheetId: string;
-  gid: string;
-  sheetName?: string;
-}) {
-  return new Promise<GvizResponse>((resolve, reject) => {
-    const callbackName = `__ergSheetImport_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const script = document.createElement("script");
-    const callbackRegistry = window as unknown as Record<string, (payload: GvizResponse) => void>;
-
-    const cleanup = () => {
-      delete callbackRegistry[callbackName];
-      script.remove();
-      window.clearTimeout(timeoutId);
-    };
-
-    const timeoutId = window.setTimeout(() => {
-      cleanup();
-      reject(new Error("Google Sheet phản hồi quá lâu. Kiểm tra lại quyền chia sẻ hoặc tệp sheet."));
-    }, 15000);
-
-    callbackRegistry[callbackName] = (payload: GvizResponse) => {
-      cleanup();
-      if (!payload.table) {
-        reject(new Error("Không đọc được dữ liệu trong sheet."));
-        return;
-      }
-      resolve(payload);
-    };
-
-    script.onerror = () => {
-      cleanup();
-      reject(new Error("Không tải được Google Sheet. Tệp sheet cần được cấp quyền xem công khai."));
-    };
-
-    const params = new URLSearchParams({
-      tqx: `out:json;responseHandler:${callbackName}`,
-    });
-
-    if (sheetName) {
-      params.set("sheet", sheetName);
-    } else {
-      params.set("gid", gid);
-    }
-
-    script.src = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/gviz/tq?${params.toString()}`;
-    document.body.appendChild(script);
-  });
-}
-
 function parseStudentSheet(payload: GvizResponse, options: ParseOptions): ParsedSheetResult {
   const cols = payload.table?.cols ?? [];
   const gvizRows = payload.table?.rows ?? [];
@@ -978,15 +887,6 @@ function toSlug(value: string) {
     .replace(/(^\.|\.$)/g, "");
 }
 
-function decodeHtml(value: string) {
-  return value
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
-}
-
 function getInitials(value: string) {
   const parts = value.trim().split(/\s+/).filter(Boolean);
   const first = parts.at(0)?.charAt(0) ?? "H";
@@ -1015,7 +915,7 @@ function parseBirthdayForApi(value: string) {
 
 function RuleLine({ label, value }: { label: string; value: string }) {
   return (
-    <Stack direction="row" alignItems="flex-start" justifyContent="space-between" spacing={2} sx={{ borderRadius: 1, bgcolor: "action.hover", px: 1.5, py: 1 }}>
+    <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", justifyContent: "space-between", borderRadius: 1, bgcolor: "action.hover", px: 1.5, py: 1 }}>
       <Typography sx={{ color: "text.primary", fontSize: 12, fontWeight: 600 }}>{label}</Typography>
       <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, textAlign: "right" }}>{value}</Typography>
     </Stack>

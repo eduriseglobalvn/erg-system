@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import {
   classroomSchools,
   classroomSnapshots,
@@ -6,6 +7,7 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import type { DashboardUserPermissions, ManagementScope } from "@/types/scope-types";
 
@@ -117,7 +119,7 @@ export type UpdateEducationUnitInput = Partial<Omit<CreateEducationUnitInput, "c
   managerUserId?: string;
 };
 
-export async function loadCurrentSessionBootstrap() {
+export async function loadCurrentSessionBootstrap(signal?: AbortSignal) {
   if (!hasApiBase()) {
     return null;
   }
@@ -128,12 +130,15 @@ export async function loadCurrentSessionBootstrap() {
     return currentSessionBootstrapCache.data;
   }
 
-  if (currentSessionBootstrapRequest?.scopeKey === scopeKey) {
+  if (!signal && currentSessionBootstrapRequest?.scopeKey === scopeKey) {
     return currentSessionBootstrapRequest.promise;
   }
 
-  const request = apiRequest<SessionCurrentResponseDTO>("/api/v1/sessions/current")
+  const request = (signal
+    ? apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.legacy.v1SessionsCurrent, { signal })
+    : apiRequest<SessionCurrentResponseDTO>(API_ENDPOINTS.legacy.v1SessionsCurrent))
     .then((data) => {
+      if (signal?.aborted) throw signal.reason;
       currentSessionBootstrapCache = {
         data,
         expiresAt: Date.now() + SESSION_BOOTSTRAP_CACHE_MS,
@@ -142,12 +147,12 @@ export async function loadCurrentSessionBootstrap() {
       return data;
     })
     .finally(() => {
-      if (currentSessionBootstrapRequest?.scopeKey === scopeKey) {
+      if (!signal && currentSessionBootstrapRequest?.scopeKey === scopeKey) {
         currentSessionBootstrapRequest = null;
       }
     });
 
-  currentSessionBootstrapRequest = { promise: request, scopeKey };
+  if (!signal) currentSessionBootstrapRequest = { promise: request, scopeKey };
   return request;
 }
 
@@ -163,7 +168,7 @@ function tokenFingerprint(token?: string) {
 }
 
 export async function listManageableUnits() {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return mockBootstrap().systemUnits;
   }
 
@@ -173,13 +178,14 @@ export async function listManageableUnits() {
 
 export async function listEducationUnits(
   params: Record<string, string | number | undefined> = {},
+  signal?: AbortSignal,
 ): Promise<ListResponse<LmsEducationUnitDTO>> {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     const items = filterEducationUnits(mockBootstrap().manageableUnits, params);
     return { items, source: "mock", total: items.length } satisfies ListResponse<LmsEducationUnitDTO>;
   }
 
-  const session = await loadCurrentSessionBootstrap();
+  const session = await loadCurrentSessionBootstrap(signal);
   if (!session) {
     throw new Error("Session bootstrap is empty.");
   }
@@ -199,10 +205,10 @@ function filterEducationUnits(units: LmsEducationUnitDTO[], params: Record<strin
     .slice(0, Number.isFinite(limit) && limit > 0 ? limit : undefined);
 }
 
-export async function loadLmsDashboardBootstrap(): Promise<LmsDashboardBootstrap> {
-  if (!hasApiBase()) return mockBootstrap();
+export async function loadLmsDashboardBootstrap(signal?: AbortSignal): Promise<LmsDashboardBootstrap> {
+  if (runtimeFixturesEnabled()) return mockBootstrap();
 
-  const session = await loadCurrentSessionBootstrap();
+  const session = await loadCurrentSessionBootstrap(signal);
   if (!session) throw new Error("Session bootstrap is empty.");
 
   const educationUnits = uniqueUnits(normalizeManageableUnits(session));
@@ -232,7 +238,7 @@ export async function updateLmsCurrentScope(scope: ManagementScope) {
 }
 
 export async function createEducationUnit(input: CreateEducationUnitInput) {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       id: `unit-${Math.random().toString(36).slice(2, 9)}`,
       name: input.name,
@@ -242,14 +248,14 @@ export async function createEducationUnit(input: CreateEducationUnitInput) {
     } satisfies LmsEducationUnitDTO;
   }
 
-  return apiRequest<LmsEducationUnitDTO>("/api/lms/education-units", {
+  return apiRequest<LmsEducationUnitDTO>(API_ENDPOINTS.legacy.lmsEducationUnits, {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
 export async function updateEducationUnit(id: string, input: UpdateEducationUnitInput) {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       id,
       name: input.name || "Cơ sở giáo dục",
@@ -260,7 +266,7 @@ export async function updateEducationUnit(id: string, input: UpdateEducationUnit
     } satisfies LmsEducationUnitDTO;
   }
 
-  return apiRequest<LmsEducationUnitDTO>(`/api/lms/education-units/${encodeURIComponent(id)}`, {
+  return apiRequest<LmsEducationUnitDTO>(API_ENDPOINTS.lms.educationUnit(id), {
     method: "PATCH",
     body: JSON.stringify(input),
   });
@@ -365,13 +371,14 @@ function unitsToSchools(units: LmsEducationUnitDTO[], snapshots: ClassroomSnapsh
       id: unit.id,
       name: unit.name,
       clusterId: clusterByIndex(index),
-      principal: unit.type === "school" ? "Quản trị trường" : "Quản trị trung tâm",
+      principal: "Chưa có dữ liệu",
       activeStudents: unitClasses.reduce((sum, item) => sum + item.studentCount, 0),
       activeClasses: unitClasses.length,
-      completionRate: average(unitClasses.map((item) => item.completionRate), 84),
-      averageScore: average(unitClasses.map((item) => item.averageScore), 82),
+      completionRate: average(unitClasses.map((item) => item.completionRate), 0),
+      averageScore: average(unitClasses.map((item) => item.averageScore), 0),
       overdueAssignments: 0,
       flaggedStudents: unitClasses.reduce((sum, item) => sum + item.riskStudents, 0),
+      metricsAvailable: false,
     };
   });
 }
@@ -386,8 +393,8 @@ function classesToSnapshots(classes: LmsClassDTO[], units: LmsEducationUnitDTO[]
       schoolName: classroom.centerName || unit?.name || "ERG Learning",
       clusterId: clusterByIndex(index),
       className: classroom.name,
-      gradeLabel: `Khối ${grade}`,
-      homeroomTeacher: "Giáo viên chủ nhiệm",
+      gradeLabel: classroom.grade ? `Khối ${grade}` : "Chưa có dữ liệu",
+      homeroomTeacher: "Chưa có dữ liệu",
       studentCount: 0,
       activeAssignments: 0,
       completionRate: 0,
@@ -395,6 +402,7 @@ function classesToSnapshots(classes: LmsClassDTO[], units: LmsEducationUnitDTO[]
       riskStudents: 0,
       competitionPoints: 0,
       lastSubmissionAt: "Chưa có dữ liệu",
+      metricsAvailable: false,
     };
   });
 }

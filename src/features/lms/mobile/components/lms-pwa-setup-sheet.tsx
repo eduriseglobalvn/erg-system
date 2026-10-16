@@ -30,17 +30,19 @@ type NotificationSetupState = {
 
 type MuiIcon = ComponentType<SvgIconProps>;
 
-export function LmsPwaSetupSheet({ installPrompt, notifications, open, onOpenChange }: {
+export function LmsPwaSetupSheet({ installPrompt, notifications, open, onOpenChange, workspace = "TEACHER" }: {
   installPrompt: InstallPromptState; notifications: NotificationSetupState; open: boolean; onOpenChange: (open: boolean) => void;
+  workspace?: "TEACHER" | "STUDENT";
 }) {
   const installReady = installPrompt.canInstall && !installPrompt.installed;
   const androidInstall = installPrompt.platform === "android";
   const manualInstall = installPrompt.isManualInstall;
+  const workspaceLabel = workspace === "STUDENT" ? "Student Workspace" : "Teacher Workspace";
 
   return (
-    <MobileBottomSheet description="Mở nhanh như ứng dụng và nhận thông báo lớp học." onOpenChange={onOpenChange} open={open} title="Cài LMS trên điện thoại">
+    <MobileBottomSheet description={`Mở nhanh ${workspaceLabel} như ứng dụng và nhận thông báo lớp học.`} onOpenChange={onOpenChange} open={open} title="Cài ERG Learning">
       <Stack spacing={1.5}>
-        <SetupCard description="LMS mở bằng cửa sổ riêng, có biểu tượng ERG và lối tắt cho Bài tập, Điểm danh, Bảng điểm, Lịch dạy." icon={PhoneAndroidRoundedIcon} title="Thêm vào màn hình chính">
+        <SetupCard description={`${workspaceLabel} mở bằng cửa sổ riêng, có biểu tượng ERG và lối tắt đúng theo vai trò.`} icon={PhoneAndroidRoundedIcon} title="Thêm vào màn hình chính">
           {installPrompt.installed ? <StatusLine label="Đã cài trên thiết bị này." tone="success" /> : installReady ? (
             <Stack spacing={1} sx={{ mt: 2 }}>
               <Button fullWidth onClick={() => void installPrompt.promptInstall()} startIcon={<DownloadRoundedIcon />} sx={{ minHeight: 48 }}>Thêm vào màn hình chính</Button>
@@ -58,7 +60,7 @@ export function LmsPwaSetupSheet({ installPrompt, notifications, open, onOpenCha
         </SetupCard>
 
         <Paper sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
-          <Stack alignItems="flex-start" direction="row" spacing={1.5}><MoreVertRoundedIcon sx={{ color: "text.secondary", fontSize: 18, mt: 0.25 }} /><Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7 }}>Trên Chrome Android, các lối tắt nằm trong menu khi nhấn giữ biểu tượng ERG LMS. Trên iPhone, iOS chỉ cho thêm biểu tượng thủ công từ Safari.</Typography></Stack>
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}><MoreVertRoundedIcon sx={{ color: "text.secondary", fontSize: 18, mt: 0.25 }} /><Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7 }}>Trên Chrome Android, các lối tắt nằm trong menu khi nhấn giữ biểu tượng ERG. Trên iPhone, iOS chỉ cho thêm biểu tượng thủ công từ Safari.</Typography></Stack>
         </Paper>
       </Stack>
     </MobileBottomSheet>
@@ -68,7 +70,7 @@ export function LmsPwaSetupSheet({ installPrompt, notifications, open, onOpenCha
 function SetupCard({ children, description, icon: Icon, title }: { children: ReactNode; description: string; icon: MuiIcon; title: string }) {
   return (
     <Paper sx={{ border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2 }}>
-      <Stack alignItems="flex-start" direction="row" spacing={1.5}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
         <Box sx={{ alignItems: "center", bgcolor: "primary.light", borderRadius: 1.75, color: "primary.dark", display: "flex", flexShrink: 0, height: 44, justifyContent: "center", width: 44 }}><Icon sx={{ fontSize: 21 }} /></Box>
         <Box sx={{ flex: 1, minWidth: 0 }}><Typography sx={{ fontSize: 14, fontWeight: 800 }}>{title}</Typography><Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.7, mt: 0.5 }}>{description}</Typography></Box>
       </Stack>
@@ -86,7 +88,7 @@ function NotificationStatus({ notifications }: { notifications: NotificationSetu
 }
 
 function InstructionStep({ icon: Icon, text }: { icon: MuiIcon; text: string }) {
-  return <Stack alignItems="center" direction="row" spacing={1.5} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 1.5, minHeight: 44, px: 1.5 }}><Icon color="primary" sx={{ flexShrink: 0, fontSize: 18 }} /><Typography sx={{ fontSize: 13, fontWeight: 700 }}>{text}</Typography></Stack>;
+  return <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 1.5, minHeight: 44, px: 1.5 }}><Icon color="primary" sx={{ flexShrink: 0, fontSize: 18 }} /><Typography sx={{ fontSize: 13, fontWeight: 700 }}>{text}</Typography></Stack>;
 }
 
 function StatusLine({ label, tone }: { label: string; tone: "success" | "warning" | "error" }) {

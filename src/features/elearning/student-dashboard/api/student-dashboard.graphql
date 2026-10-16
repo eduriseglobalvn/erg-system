@@ -1,0 +1,66 @@
+query ElearningStudentDashboard($input: StudentDashboardInput) {
+  elearning {
+    studentDashboard(input: $input) {
+      tenantId
+      viewer {
+        userId
+        tenantId
+        accountType
+        accessLevel
+      }
+      profile {
+        userId
+        studentId
+        studentCode
+        fullName
+        email
+        schoolId
+        academicClassId
+        status
+        updatedAt
+      }
+      summary {
+        enrolledCourseCount
+        activeAssignmentCount
+        pendingActionCount
+        generatedAt
+        scoreSummary {
+          completedAttemptCount
+          attemptedAssignmentCount
+          passedAttemptCount
+          averagePercent
+          bestPercent
+        }
+      }
+      courses {
+        id
+        title
+        status
+        progressPercent
+        updatedAt
+      }
+      assignments {
+        id
+        quizId
+        title
+        status
+        dueAt
+      }
+      nextActions {
+        id
+        kind
+        label
+        targetId
+        dueAt
+      }
+      announcements {
+        id
+        title
+        content
+        pinned
+        publishedAt
+        updatedAt
+      }
+    }
+  }
+}

@@ -8,8 +8,10 @@ import {
 } from "@/features/lms/api/lms-assignment-command-api";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { graphQlRequest } from "@/lib/graphql-client";
+import { ResponseValidationError } from "@/lib/validate-response";
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
   apiRequest: vi.fn(),
   hasApiBase: vi.fn(() => true),
 }));
@@ -70,6 +72,17 @@ describe("lms assignment command API", () => {
       method: "POST",
       portal: "lms",
     });
+  });
+
+  test("rejects a malformed assignment command result at the REST boundary", async () => {
+    apiRequestMock.mockResolvedValueOnce({ recipientCount: 2, resources: [] } as never);
+
+    await expect(createLmsAssignment({
+      idempotencyKey: "assignment-create:invalid",
+      quizIds: ["quiz-a"],
+      recipientMode: "class",
+      title: "Invalid response",
+    })).rejects.toBeInstanceOf(ResponseValidationError);
   });
 
   test("updates recipients through the normalized BE endpoint", async () => {

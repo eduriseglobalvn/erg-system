@@ -1,4 +1,5 @@
 import { getApiBase } from "@/lib/platform";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import {
   clearStoredAuthSessions,
   getStoredAccessToken,
@@ -8,6 +9,14 @@ import {
   type StoredAuthSession,
 } from "@/platform/auth/api/auth-token-storage";
 import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
+import {
+  classifyClientTelemetryOutcome,
+  clientTelemetryNow,
+  normalizeTelemetryEndpoint,
+  recordClientTelemetry,
+} from "@/lib/client-telemetry";
+import { isBffAuthEnabled } from "@/platform/auth/bff/auth-mode";
+export { isBffAuthEnabled };
 
 export const AUTH_SESSION_REPLACED = "AUTH_SESSION_REPLACED";
 export const AUTH_SESSION_REPLACED_EVENT = "erg-auth-session-replaced";
@@ -41,11 +50,13 @@ export type ApiRequestOptions = RequestInit & {
   skipAuthRefresh?: boolean;
   timeoutMs?: number;
   unwrapEnvelope?: boolean;
+  responseType?: "json" | "blob";
 };
 
 const DEFAULT_API_TIMEOUT_MS = 15_000;
 const inFlightGetRequests = new Map<string, Promise<unknown>>();
 const inFlightRefreshRequests = new Map<string, Promise<string | null>>();
+const apiResponseRequestIds = new WeakMap<object, string>();
 let csrfTokenPromise: Promise<{ headerName: string; token: string }> | null = null;
 
 export class ApiClientError extends Error {
@@ -68,11 +79,61 @@ export function hasApiBase() {
   return Boolean(getApiBase());
 }
 
-export function isBffAuthEnabled() {
-  return import.meta.env.VITE_AUTH_MODE === "oidc-bff";
+export function getApiResponseRequestId(value: unknown) {
+  if (!value || typeof value !== "object") return undefined;
+  const directRequestId = "request_id" in value && typeof value.request_id === "string"
+    ? value.request_id
+    : undefined;
+  return directRequestId || apiResponseRequestIds.get(value);
+}
+
+export function inheritApiResponseRequestId<T>(target: T, source: unknown): T {
+  const requestId = getApiResponseRequestId(source);
+  if (requestId && target && typeof target === "object") {
+    apiResponseRequestIds.set(target, requestId);
+  }
+  return target;
 }
 
 export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Promise<T> {
+  if (path.split("?", 1)[0] === API_ENDPOINTS.graphql) {
+    return performApiRequest<T>(path, init);
+  }
+
+  const startedAt = clientTelemetryNow();
+  const method = (init?.method ?? "GET").toUpperCase();
+  const portal = init?.portal ?? portalFromPath(path);
+  try {
+    const result = await performApiRequest<T>(path, init);
+    recordClientTelemetry({
+      durationMs: clientTelemetryNow() - startedAt,
+      kind: "rest",
+      method,
+      name: normalizeTelemetryEndpoint(path),
+      outcome: "success",
+      portal,
+      requestId: getApiResponseRequestId(result),
+      timestamp: Date.now(),
+    });
+    return result;
+  } catch (error) {
+    recordClientTelemetry({
+      durationMs: clientTelemetryNow() - startedAt,
+      errorCode: error instanceof ApiClientError ? error.code : undefined,
+      kind: "rest",
+      method,
+      name: normalizeTelemetryEndpoint(path),
+      outcome: classifyClientTelemetryOutcome(error, init?.signal ?? undefined),
+      portal,
+      requestId: error instanceof ApiClientError ? error.requestId : undefined,
+      status: error instanceof ApiClientError ? error.status : undefined,
+      timestamp: Date.now(),
+    });
+    throw error;
+  }
+}
+
+async function performApiRequest<T>(path: string, init?: ApiRequestOptions): Promise<T> {
   const apiBase = getApiBase();
   if (!apiBase) {
     throw new ApiClientError("API base URL is not configured.", "API_BASE_MISSING", 0);
@@ -105,7 +166,7 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
-  if (isBffAuthEnabled() && isCommandMethod(init?.method) && path !== "/api/v1/auth/csrf") {
+  if (isBffAuthEnabled() && isCommandMethod(init?.method) && path !== API_ENDPOINTS.auth.csrf) {
     const csrf = await getCsrfToken();
     if (!headers.has(csrf.headerName)) headers.set(csrf.headerName, csrf.token);
   }
@@ -116,7 +177,9 @@ export async function apiRequest<T>(path: string, init?: ApiRequestOptions): Pro
 
   const url = `${apiBase}${path}`;
   const method = (init?.method ?? "GET").toUpperCase();
-  const canDedupeGet = method === "GET" && init?.body === undefined;
+  // A caller-specific AbortSignal must not share a request: aborting one observer
+  // should never cancel the request observed by another caller.
+  const canDedupeGet = method === "GET" && init?.body === undefined && !init?.signal;
   const dedupeKey = canDedupeGet ? buildGetDedupeKey(url, headers, init, portal) : "";
 
   if (dedupeKey) {
@@ -151,6 +214,10 @@ function buildGetDedupeKey(
     `portal:${portal ?? "unknown"}`,
     `auth:${headers.get("Authorization") ?? "anonymous"}`,
     `cache:${init?.cache ?? "no-store"}`,
+    `credentials:${init?.credentials ?? "include"}`,
+    `envelope:${init?.unwrapEnvelope === false ? "raw" : "data"}`,
+    `timeout:${init?.timeoutMs ?? DEFAULT_API_TIMEOUT_MS}`,
+    `response:${init?.responseType ?? "json"}`,
     variantHeaders,
   ].join("|");
 }
@@ -166,7 +233,11 @@ async function executeApiRequest<T>(
     return undefined as T;
   }
 
-  const body = await readJson<ApiEnvelope<T> | T>(response);
+  const body = await readResponseBody<ApiEnvelope<T> | T>(response, init?.responseType);
+  const responseRequestId = response.headers.get("X-Request-ID") ?? getApiResponseRequestId(body);
+  if (responseRequestId && body && typeof body === "object") {
+    apiResponseRequestIds.set(body, responseRequestId);
+  }
   const errorBody = getErrorBody(body);
 
   if (!response.ok || errorBody) {
@@ -184,12 +255,16 @@ async function executeApiRequest<T>(
           return undefined as T;
         }
 
-        const retryBody = await readJson<ApiEnvelope<T> | T>(retryResponse);
+        const retryBody = await readResponseBody<ApiEnvelope<T> | T>(retryResponse, init?.responseType);
+        const retryRequestId = retryResponse.headers.get("X-Request-ID") ?? getApiResponseRequestId(retryBody);
+        if (retryRequestId && retryBody && typeof retryBody === "object") {
+          apiResponseRequestIds.set(retryBody, retryRequestId);
+        }
         const retryErrorBody = getErrorBody(retryBody);
 
         if (retryResponse.ok && !retryErrorBody) {
           if (isApiEnvelope<T>(retryBody) && "data" in retryBody) {
-            return retryBody.data as T;
+            return inheritApiResponseRequestId(retryBody.data as T, retryBody);
           }
 
           return retryBody as T;
@@ -229,7 +304,7 @@ async function executeApiRequest<T>(
   }
 
   if (init?.unwrapEnvelope !== false && isApiEnvelope<T>(body) && "data" in body) {
-    return body.data as T;
+    return inheritApiResponseRequestId(body.data as T, body);
   }
 
   return body as T;
@@ -243,12 +318,15 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
     throw sourceSignal.reason;
   }
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  let removeSourceAbortListener: (() => void) | undefined;
 
   if (timeoutController && sourceSignal) {
     if (sourceSignal.aborted) {
       timeoutController.abort(sourceSignal.reason);
     } else {
-      sourceSignal.addEventListener("abort", () => timeoutController.abort(sourceSignal.reason), { once: true });
+      const onSourceAbort = () => timeoutController.abort(sourceSignal.reason);
+      sourceSignal.addEventListener("abort", onSourceAbort, { once: true });
+      removeSourceAbortListener = () => sourceSignal.removeEventListener("abort", onSourceAbort);
     }
   }
 
@@ -256,7 +334,7 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
     timeoutId = setTimeout(() => timeoutController.abort(new Error("API_REQUEST_TIMEOUT")), timeoutMs);
   }
 
-  const { signal: _signal, timeoutMs: _timeoutMs, ...fetchInit } = init ?? {};
+  const { signal: _signal, timeoutMs: _timeoutMs, responseType: _responseType, ...fetchInit } = init ?? {};
 
   try {
     return await fetch(url, {
@@ -284,6 +362,7 @@ async function fetchApi(url: string, headers: Headers, init?: ApiRequestOptions)
     if (timeoutId) {
       clearTimeout(timeoutId);
     }
+    removeSourceAbortListener?.();
   }
 }
 
@@ -313,6 +392,19 @@ function isApiEnvelope<T>(value: unknown): value is ApiEnvelope<T> {
   const candidate = value as { errors?: unknown };
   return "data" in value || "error" in value || "success" in value || "statusCode" in value || "request_id" in value
     || ("errors" in value && !Array.isArray(candidate.errors));
+}
+
+async function readResponseBody<T>(response: Response, responseType: ApiRequestOptions["responseType"]): Promise<T> {
+  if (responseType !== "blob") {
+    return readJson<T>(response);
+  }
+
+  const contentType = response.headers.get("content-type")?.toLowerCase() ?? "";
+  if (!response.ok || contentType.includes("json")) {
+    return readJson<T>(response);
+  }
+
+  return response.blob() as Promise<T>;
 }
 
 function getErrorBody(value: unknown) {
@@ -401,12 +493,8 @@ async function refreshStoredAuthSessionOnce(session: NonNullable<ReturnType<type
   try {
     const headers = new Headers({
       "Content-Type": "application/json",
-      "X-Tenant-ID": import.meta.env.VITE_TENANT_ID?.trim() || "erg",
       "X-Request-ID": createRequestId(),
     });
-    if (session.portal) {
-      headers.set("X-Portal", session.portal);
-    }
 
     const response = await fetchApi(`${apiBase}/api/v1/auth/refresh`, headers, {
       method: "POST",
@@ -481,25 +569,25 @@ function expiresInToDate(expiresIn?: number) {
 
 function portalFromPath(path: string): StoredAuthSession["portal"] | undefined {
   const normalized = path.toLowerCase();
-  if (normalized.includes("/api/curriculum") || normalized.includes("/api/content")) return "lcms";
+  if (normalized.includes(API_ENDPOINTS.routing.curriculumBase) || normalized.includes(API_ENDPOINTS.routing.contentBase)) return "lcms";
   if (
-    normalized.includes("/api/v1/users/me") ||
-    normalized.includes("/api/users/me")
+    normalized.includes(API_ENDPOINTS.legacy.v1UsersMe) ||
+    normalized.includes(`${API_ENDPOINTS.routing.legacyUsersBase}/me`)
   ) {
     return resolveCurrentPortal();
   }
   if (
-    normalized.includes("/api/v1/admin") ||
-    normalized.includes("/api/admin") ||
-    normalized.includes("/api/users") ||
-    normalized.includes("/api/v1/users") ||
-    normalized.includes("/api/v1/centers")
+    normalized.includes(API_ENDPOINTS.routing.adminBase) ||
+    normalized.includes(API_ENDPOINTS.routing.legacyAdminBase) ||
+    normalized.includes(API_ENDPOINTS.routing.legacyUsersBase) ||
+    normalized.includes(API_ENDPOINTS.routing.usersBase) ||
+    normalized.includes(API_ENDPOINTS.routing.centers)
   ) {
     return currentBackOfficePortal();
   }
-  if (normalized.includes("/api/v1/")) return "lms";
-  if (normalized.includes("/api/lms")) return "lms";
-  if (normalized.includes("/api/elearning")) return "elearning";
+  if (normalized.includes(API_ENDPOINTS.routing.versionedBase)) return "lms";
+  if (normalized.includes(API_ENDPOINTS.routing.legacyLmsBase)) return "lms";
+  if (normalized.includes(API_ENDPOINTS.routing.elearningBase)) return "elearning";
   return undefined;
 }
 
@@ -525,8 +613,8 @@ function requiresAuth(path: string, init?: ApiRequestOptions) {
 
 function isPublicApiPath(path: string) {
   return (
-    path === "/api/v1/auth/login" ||
-    path === "/api/v1/auth/refresh"
+    path === API_ENDPOINTS.auth.login ||
+    path === API_ENDPOINTS.auth.refresh
   );
 }
 
@@ -545,7 +633,7 @@ function isCommandMethod(method?: string) {
 async function getCsrfToken() {
   if (csrfTokenPromise) return csrfTokenPromise;
   csrfTokenPromise = (async () => {
-    const response = await fetch(`${getApiBase()}/api/v1/auth/csrf`, {
+    const response = await fetch(`${getApiBase()}${API_ENDPOINTS.auth.csrf}`, {
       credentials: "include",
       headers: { "X-Request-ID": createRequestId() },
     });

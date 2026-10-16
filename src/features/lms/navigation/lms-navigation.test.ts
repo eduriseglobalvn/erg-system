@@ -4,6 +4,9 @@ import { canNavigateToLmsPath, filterLmsNavigation } from "@/features/lms/naviga
 
 describe("LMS permission-aware navigation", () => {
   test("uses the route permission catalog for exact and nested paths", () => {
+    expect(canNavigateToLmsPath("/teacher", [], [])).toBe(true);
+    expect(canNavigateToLmsPath("/teacher/home", [], [])).toBe(true);
+    expect(canNavigateToLmsPath("/teacher/dashboard", [], [])).toBe(true);
     expect(canNavigateToLmsPath("/score", ["lms.grade.read"], [])).toBe(true);
     expect(canNavigateToLmsPath("/notifications/notification-1", ["lms.notification.read"], [])).toBe(true);
     expect(canNavigateToLmsPath("/score", ["lms.*"], ["lms.grade.*"])).toBe(false);

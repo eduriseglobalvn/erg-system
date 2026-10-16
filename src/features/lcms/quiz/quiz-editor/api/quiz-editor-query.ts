@@ -23,6 +23,7 @@ import {
   type QuizEditorSaveDraftInput,
   type QuizEditorUpsertSlideInput,
   type QuizEditorWorkspaceInput,
+  type QuizEditorApiPortal,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
 import {
@@ -67,7 +68,7 @@ export const quizEditorMutationKeys = {
 export function quizEditorWorkspaceQueryOptions(input: QuizEditorWorkspaceInput = {}) {
   return {
     gcTime: QUIZ_EDITOR_REFERENCE_GC_TIME_MS,
-    queryFn: () => loadQuizEditorWorkspace(input),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadQuizEditorWorkspace(input, signal),
     queryKey: quizEditorQueryKeys.workspace(input),
     staleTime: QUIZ_EDITOR_WORKSPACE_STALE_TIME_MS,
   };
@@ -77,7 +78,7 @@ export function quizEditorDraftQueryOptions(quizId: string, tenantId: string = g
   return {
     enabled: Boolean(quizId),
     gcTime: QUIZ_EDITOR_REFERENCE_GC_TIME_MS,
-    queryFn: () => loadQuizEditorDraft(quizId),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadQuizEditorDraft(quizId, signal),
     queryKey: quizEditorQueryKeys.draft(quizId, tenantId),
     staleTime: QUIZ_EDITOR_DRAFT_STALE_TIME_MS,
   };
@@ -87,7 +88,7 @@ export function quizEditorVersionsQueryOptions(quizId: string, tenantId: string 
   return {
     enabled: Boolean(quizId),
     gcTime: QUIZ_EDITOR_REFERENCE_GC_TIME_MS,
-    queryFn: () => loadQuizEditorVersions(quizId),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadQuizEditorVersions(quizId, signal),
     queryKey: quizEditorQueryKeys.versions(quizId, tenantId),
     staleTime: QUIZ_EDITOR_WORKSPACE_STALE_TIME_MS,
   };
@@ -113,7 +114,7 @@ export function useCreateQuizEditorQuizMutation() {
     mutationKey: quizEditorMutationKeys.create,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
     },
   });
 }
@@ -128,7 +129,7 @@ export function useDeleteQuizEditorQuizMutation() {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.versions(quizId) });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
       clearNormalizedQuizPackageCache(quizId);
       void queryClient.invalidateQueries({ queryKey: quizRuntimeQueryKeys.packageRoot() });
     },
@@ -144,7 +145,7 @@ export function useSaveQuizEditorDraftMutation() {
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
     },
   });
 }
@@ -158,7 +159,7 @@ export function useUpsertQuizEditorSlideMutation() {
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
     },
   });
 }
@@ -172,7 +173,7 @@ export function useReorderQuizEditorSlidesMutation() {
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
     },
   });
 }
@@ -194,7 +195,7 @@ export function usePublishQuizEditorDraftMutation() {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.versions(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.workspaceRoot() });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
       clearNormalizedQuizPackageCache(input.quizId);
       void queryClient.invalidateQueries({ queryKey: quizRuntimeQueryKeys.packageRoot() });
     },
@@ -210,7 +211,7 @@ export function useForkQuizEditorVersionMutation() {
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.versions(input.quizId) });
-      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root });
+      void queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root() });
     },
   });
 }
@@ -231,7 +232,7 @@ export function useCommitQuizEditorMediaMutation() {
 
 export function useExportQuizEditorBundleMutation() {
   return useMutation({
-    mutationFn: (input: { quizId?: string; quizVersionId?: string }) => exportQuizEditorBundle(input),
+    mutationFn: (input: { portal?: QuizEditorApiPortal; quizId?: string; quizVersionId?: string }) => exportQuizEditorBundle(input),
     mutationKey: quizEditorMutationKeys.exportBundle,
   });
 }
@@ -246,5 +247,6 @@ function normalizeWorkspaceInput(input: QuizEditorWorkspaceInput) {
     size: Math.min(Math.max(input.size ?? 20, 1), 50),
     status: input.status ?? "",
     subjectId: input.subjectId ?? "",
+    portal: input.portal ?? "lcms",
   };
 }

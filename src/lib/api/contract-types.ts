@@ -27,6 +27,20 @@ export type ApiResponseData<P extends ContractPath, M extends ContractMethod<P>>
       ? Data
       : SuccessResponse<P, M>;
 
+type OperationRequestBody<P extends ContractPath, M extends ContractMethod<P>> =
+  Operation<P, M> extends { requestBody?: { content: infer Content } }
+    ? Content extends Record<string, infer Body> ? Body : never
+    : never;
+
+export type ApiOperationBody<P extends ContractPath, M extends ContractMethod<P>> = OperationRequestBody<P, M>;
+
+export type ApiOperationOptions<P extends ContractPath, M extends ContractMethod<P>> = {
+  body?: ApiOperationBody<P, M>;
+  headers?: HeadersInit;
+  query?: Operation<P, M> extends { parameters: { query?: infer Query } } ? Query : never;
+  signal?: AbortSignal;
+};
+
 export function encodeApiPathSegment(value: string) {
   return encodeURIComponent(value);
 }

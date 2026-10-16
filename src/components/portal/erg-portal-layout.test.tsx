@@ -3,7 +3,7 @@ import { expect, it, vi } from "vitest";
 
 import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 
-vi.mock("@/routes/router-compat", () => ({
+vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname: "/calendar" }),
   useNavigate: () => vi.fn(),
 }));

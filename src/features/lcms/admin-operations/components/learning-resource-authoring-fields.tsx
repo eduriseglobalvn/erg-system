@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
-import { CheckCircle2, Search } from "@/components/mui-icon-shim";
+import CheckCircle2 from "@mui/icons-material/CheckCircleOutlined";
+import Search from "@mui/icons-material/Search";
 
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
@@ -8,6 +9,18 @@ import TextField from "@mui/material/TextField";
 import { inputClassName } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
+
+export function AuthoringCardHeader({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("flex flex-col gap-1.5 px-6 pt-5", className)}>{children}</div>;
+}
+
+export function AuthoringCardTitle({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("text-base font-semibold text-[var(--foreground)]", className)}>{children}</div>;
+}
+
+export function AuthoringCardDescription({ className, children }: { className?: string; children: ReactNode }) {
+  return <div className={cn("text-sm text-[var(--muted-foreground)]", className)}>{children}</div>;
+}
 
 export function StatusSelectField({
   value,

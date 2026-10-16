@@ -6,8 +6,7 @@ import {
 import { apiRequest, hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
 import { getApiBase } from "@/lib/platform";
 import { removePersistedJsonValue } from "@/stores/persisted-store";
-
-const AUTH_V1_BASE = "/api/v1/auth";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 
 export type StudentSession = {
   accessToken?: string;
@@ -20,6 +19,8 @@ export type StudentSession = {
   schoolName?: string;
   rememberMe: boolean;
   refreshToken?: string;
+  permissions?: string[];
+  deniedPermissions?: string[];
   portal?: "elearning";
   title?: string;
   viewerKind?: "student" | "teacher";
@@ -69,7 +70,7 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
   if (isBffAuthEnabled()) {
     const returnTo = `${window.location.pathname}${window.location.search}`;
     const query = new URLSearchParams({ portal: "elearning", returnTo });
-    window.location.assign(`${getApiBase()}${AUTH_V1_BASE}/login?${query.toString()}`);
+    window.location.assign(`${getApiBase()}${API_ENDPOINTS.auth.login}?${query.toString()}`);
     return new Promise<StudentSession>(() => undefined);
   }
 
@@ -79,9 +80,11 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
     access_token?: string;
     refreshToken?: string;
     refresh_token?: string;
+    permissions?: string[];
+    deniedPermissions?: string[];
     expiresIn?: number;
     expires_in?: number;
-  }>(`${AUTH_V1_BASE}/login`, {
+  }>(API_ENDPOINTS.auth.login, {
     portal: "elearning",
     method: "POST",
     body: JSON.stringify({
@@ -105,6 +108,8 @@ export async function loginStudentWithApi(input: StudentLoginInput) {
     name: response.user?.fullName ?? input.email.trim(),
     portal: "elearning",
     refreshToken,
+    permissions: response.permissions ?? [],
+    deniedPermissions: response.deniedPermissions ?? [],
     rememberMe: input.rememberMe,
     viewerKind: "student",
   };

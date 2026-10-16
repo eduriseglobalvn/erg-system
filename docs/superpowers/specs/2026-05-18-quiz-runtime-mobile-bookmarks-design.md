@@ -1,5 +1,7 @@
 # Quiz Runtime Mobile + Bookmark Design
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 **Context**
 
 The current quiz runtime is centered in `src/components/quiz/player-shell.tsx`, where desktop layout, responsive behavior, and attempt state are mixed together. That makes mobile-specific evolution difficult, especially for a future PWA path where mobile interaction patterns should be allowed to diverge from web.

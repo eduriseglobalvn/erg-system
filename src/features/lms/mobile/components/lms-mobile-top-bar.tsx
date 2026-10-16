@@ -26,15 +26,15 @@ export function LmsMobileTopBar({
   const iconButtonSx = { bgcolor: "background.paper", border: "1px solid", borderColor: "divider", height: 40, width: 40 };
 
   return (
-    <Box component="header" sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", boxShadow: "0 8px 24px rgba(15,23,42,0.06)", display: { xs: "block", xl: "none" }, pb: 1.25, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", px: 1.5, position: "sticky", top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
-      <Stack alignItems="center" direction="row" spacing={1} sx={{ minHeight: 48 }}>
+    <Box component="header" data-testid="lms-mobile-header" sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", boxShadow: "0 8px 24px rgba(15,23,42,0.06)", display: { xs: "block", xl: "none" }, flexShrink: 0, pb: 1.25, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", px: 1.5, position: "sticky", top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", minHeight: 48 }}>
         <IconButton aria-label="Chọn lớp" onClick={onScopeOpen} sx={iconButtonSx}>
           <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ maxHeight: 24, maxWidth: 28, objectFit: "contain" }} />
         </IconButton>
 
         <ButtonBase onClick={onScopeOpen} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 5, flex: 1, minHeight: 40, minWidth: 0, px: 1.5, py: 0.5, textAlign: "left" }}>
           <Box sx={{ minWidth: 0, width: "100%" }}>
-            <Stack alignItems="center" direction="row" spacing={0.5}>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
               <Typography noWrap sx={{ fontSize: 14, fontWeight: 800, lineHeight: 1.4 }}>{selectedClassName || "Lớp học"}</Typography>
               <ExpandMoreRoundedIcon sx={{ color: "text.secondary", flexShrink: 0, fontSize: 17 }} />
             </Stack>
@@ -42,7 +42,7 @@ export function LmsMobileTopBar({
           </Box>
         </ButtonBase>
 
-        <Stack alignItems="center" direction="row" spacing={0.5}>
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
           {updateAvailable ? <IconButton aria-label="Cập nhật ứng dụng" onClick={onUpdate} sx={iconButtonSx}><RefreshRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
           {canInstall && !installed ? <IconButton aria-label="Cài LMS PWA" onClick={onInstall} sx={iconButtonSx}><DownloadRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
           {!online ? <Box aria-label="Đang offline" sx={{ alignItems: "center", bgcolor: "warning.light", borderRadius: "50%", color: "warning.dark", display: "flex", height: 40, justifyContent: "center", width: 40 }}><WifiOffRoundedIcon sx={{ fontSize: 19 }} /></Box> : null}

@@ -3,6 +3,7 @@ import { beforeEach, expect, test, vi } from "vitest";
 import { createQuizPackage } from "@/lib/assessment-engine";
 import { apiRequest } from "@/lib/api-client";
 import { sampleQuiz } from "@/lib/sample-quiz";
+import { ResponseValidationError } from "@/lib/validate-response";
 import {
   buildClientSubmitPayload,
   getQuizPackage,
@@ -14,12 +15,11 @@ import {
   submitFinalAttempt,
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-api";
 
-vi.mock("@/lib/api-client", () => {
-  return {
-    apiRequest: vi.fn(),
-    hasApiBase: () => true,
-  };
-});
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
+  apiRequest: vi.fn(),
+  hasApiBase: () => true,
+}));
 
 const apiRequestMock = vi.mocked(apiRequest);
 
@@ -57,6 +57,23 @@ test("can load quiz packages with the LMS teacher portal session", async () => {
   });
 });
 
+test("forwards caller cancellation while loading a quiz package", async () => {
+  const quizPackage = createQuizPackage(sampleQuiz, {
+    gradingMode: "server-authoritative",
+    source: "server",
+  });
+  apiRequestMock.mockResolvedValueOnce(quizPackage as never);
+  const signal = new AbortController().signal;
+
+  await getQuizPackage(sampleQuiz.id, "elearning", "tenant-a", signal);
+
+  expect(apiRequestMock).toHaveBeenCalledWith(`/api/v1/lms/quizzes/${sampleQuiz.id}/package`, {
+    cache: "default",
+    portal: "elearning",
+    signal,
+  });
+});
+
 test("reuses the normalized runtime package if a revalidation exposes an empty 304 body", async () => {
   const quizPackage = createQuizPackage(sampleQuiz, {
     gradingMode: "server-authoritative",
@@ -91,6 +108,12 @@ test("does not fall back to local quiz when API package loading fails", async ()
   apiRequestMock.mockRejectedValueOnce(error);
 
   await expect(getQuizPackage(sampleQuiz.id)).rejects.toBe(error);
+});
+
+test("rejects a malformed quiz package at the runtime boundary", async () => {
+  apiRequestMock.mockResolvedValueOnce({ contentHash: "hash-without-quiz" } as never);
+
+  await expect(getQuizPackage("quiz-invalid")).rejects.toBeInstanceOf(ResponseValidationError);
 });
 
 test("normalizes published backend quiz detail and merges client answer key", async () => {
@@ -180,9 +203,16 @@ test("keeps training attempts in canonical order even when authoring settings re
 });
 
 test("starts quiz attempts with the elearning student portal session", async () => {
-  apiRequestMock.mockResolvedValueOnce({ attemptId: "attempt-server-1" } as never);
+  apiRequestMock.mockResolvedValueOnce({
+    attemptId: "attempt-server-1",
+    startedAt: "2026-06-19T01:00:00.000Z",
+    policySnapshot: {
+      deadlineAt: "2026-06-19T01:30:00.000Z",
+      serverTimeAtStart: "2026-06-19T01:00:00.000Z",
+    },
+  } as never);
 
-  await startAttempt({
+  const result = await startAttempt({
     assignmentId: "assignment-1",
     idempotencyKey: "start-key-1",
     localAttemptId: "attempt-local-1",
@@ -198,6 +228,11 @@ test("starts quiz attempts with the elearning student portal session", async () 
       method: "POST",
     }),
   );
+  expect(result).toMatchObject({
+    attemptId: "attempt-server-1",
+    startedAt: "2026-06-19T01:00:00.000Z",
+    policySnapshot: { deadlineAt: "2026-06-19T01:30:00.000Z" },
+  });
 });
 
 test("does not create a local server-start marker when API start attempt fails", async () => {

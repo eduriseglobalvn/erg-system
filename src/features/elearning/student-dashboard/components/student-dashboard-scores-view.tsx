@@ -58,14 +58,24 @@ function Stack({
 
 export function ScoresView({ assignments, copy }: { assignments: StudentDashboardAssignment[]; copy: DashboardCopy }) {
   const attemptedAssignments = assignments.filter((assignment) => assignment.attempts.length > 0);
-  const bestScore = attemptedAssignments.reduce((best, assignment) => Math.max(best, assignment.score ?? 0), 0);
+  const bestScore = attemptedAssignments.reduce<number | null>(
+    (best, assignment) => {
+      const assignmentScore = assignment.score ?? assignment.attempts.reduce<number | null>(
+        (attemptBest, attempt) => attemptBest === null ? attempt.score : Math.max(attemptBest, attempt.score),
+        null,
+      );
+      if (assignmentScore === null) return best;
+      return best === null ? assignmentScore : Math.max(best, assignmentScore);
+    },
+    null,
+  );
   const totalAttempts = assignments.reduce((total, assignment) => total + assignment.attempts.length, 0);
 
   return (
     <Stack spacing={2}>
       <ScoresPageHeader description={copy.scoresDescription} icon={<GraduationCap sx={{ fontSize: 20 }} />} title={copy.scoresTitle} />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
-        <ScoreMetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.bestScoreLabel} tone="success" value={bestScore} />
+        <ScoreMetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.bestScoreLabel} tone="success" value={bestScore ?? "—"} />
         <ScoreMetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} value={attemptedAssignments.length} />
         <ScoreMetricCard icon={<Clock3 sx={{ fontSize: 18 }} />} label={copy.recentResultsTitle} tone="info" value={totalAttempts} />
       </Box>
@@ -98,8 +108,13 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
 }
 
 function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment; copy: DashboardCopy }) {
-  const bestScore = assignment.attempts.reduce((best, attempt) => Math.max(best, attempt.score), assignment.score ?? 0);
-  const scorePercent = assignment.maxScore > 0 ? Math.round((bestScore / assignment.maxScore) * 100) : 0;
+  const bestScore = assignment.score ?? assignment.attempts.reduce<number | null>(
+    (best, attempt) => best === null ? attempt.score : Math.max(best, attempt.score),
+    null,
+  );
+  const scorePercent = bestScore !== null && assignment.maxScore && assignment.maxScore > 0
+    ? Math.round((bestScore / assignment.maxScore) * 100)
+    : null;
   const latestAttempts = assignment.attempts.slice(0, 3);
 
   return (
@@ -116,7 +131,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
         <Box sx={{ minWidth: 0, p: { xs: 1.45, md: 1.75 } }}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }}>
             <Stack direction="row" spacing={0.8} sx={{ flexWrap: "wrap", rowGap: 0.65 }}>
-              <Chip label={assignment.subjectLabel} size="small" variant="outlined" sx={{ borderRadius: "7px", fontWeight: 850, height: 28 }} />
+              {assignment.subjectLabel ? <Chip label={assignment.subjectLabel} size="small" variant="outlined" sx={{ borderRadius: "7px", fontWeight: 850, height: 28 }} /> : null}
               <Chip
                 label={assignment.attempts.length ? `${assignment.attempts.length} lượt làm` : "Chưa làm"}
                 size="small"
@@ -124,7 +139,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
               />
             </Stack>
             <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 750 }}>
-              {assignment.teacherName}
+              {assignment.teacherName ?? "Chưa có giáo viên"}
             </Typography>
           </Stack>
 
@@ -189,21 +204,27 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
             {copy.bestScoreLabel}
           </Typography>
           <Typography variant="h4" sx={{ color: MUI_TEXT, fontWeight: 950, lineHeight: 1.1, mt: 0.55 }}>
-            {copy.scoreBadge(bestScore, assignment.maxScore)}
+            {bestScore === null || assignment.maxScore === null ? "—" : copy.scoreBadge(bestScore, assignment.maxScore)}
           </Typography>
-          <LinearProgress
-            value={scorePercent}
-            variant="determinate"
-            sx={{
-              bgcolor: "rgba(15,108,189,0.1)",
-              borderRadius: 99,
-              height: 8,
-              mt: 1.2,
-              "& .MuiLinearProgress-bar": { bgcolor: MUI_PRIMARY, borderRadius: 99 },
-            }}
-          />
+          {scorePercent === null ? (
+            <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", mt: 1.2 }}>
+              Chưa có dữ liệu điểm chi tiết.
+            </Typography>
+          ) : (
+            <LinearProgress
+              value={scorePercent}
+              variant="determinate"
+              sx={{
+                bgcolor: "rgba(15,108,189,0.1)",
+                borderRadius: 99,
+                height: 8,
+                mt: 1.2,
+                "& .MuiLinearProgress-bar": { bgcolor: MUI_PRIMARY, borderRadius: 99 },
+              }}
+            />
+          )}
           <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", fontWeight: 850, mt: 0.75 }}>
-            {scorePercent}% hoàn thành
+            {scorePercent === null ? "Chưa có dữ liệu" : `${scorePercent}% hoàn thành`}
           </Typography>
         </Box>
       </Box>

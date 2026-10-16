@@ -26,7 +26,9 @@ export const ergEnterpriseTokens = {
     infoSoft: "rgba(2, 132, 199, 0.1)",
   },
   font: {
-    body: '"Manrope Variable", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    // @fontsource/manrope registers the family as "Manrope". Keep the
+    // variable alias as a fallback for host applications that provide it.
+    body: '"Manrope", "Manrope Variable", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     mono: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',
   },
   radius: {
