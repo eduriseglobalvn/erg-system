@@ -8,15 +8,15 @@ import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatIndentDecreaseIcon from "@mui/icons-material/FormatIndentDecrease";
 import FormatIndentIncreaseIcon from "@mui/icons-material/FormatIndentIncrease";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
-import FormatLineSpacingIcon from "@mui/icons-material/FormatLineSpacing";
+import FormatLineSpacingIcon from "@mui/icons-material/FormatSize";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
-import FormatSizeIcon from "@mui/icons-material/FormatSize";
+import FormatSizeIcon from "@mui/icons-material/TextFields";
 import FormatStrikethroughIcon from "@mui/icons-material/FormatStrikethrough";
 import SubscriptIcon from "@mui/icons-material/Subscript";
 import SuperscriptIcon from "@mui/icons-material/Superscript";
 import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
-import HorizontalRuleIcon from "@mui/icons-material/HorizontalRule";
+import HorizontalRuleIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 
 import { resolveQuizFontStack } from "@/config/fonts";
@@ -50,7 +50,7 @@ export function SharedTextFormatControls({
         onClick={onOpenTextStyles}
         className={cn("classic-editor__shared-textstyles-tile", !onOpenTextStyles && "is-disabled")}
       >
-        <FormatSizeIcon className="h-6 w-6" fontSize="inherit" />
+        <FormatSizeIcon className="h-6 w-6" sx={{ fontSize: "1em" }} />
         <span>{t("quiz.textStyles")}</span>
       </button>
 
@@ -86,36 +86,36 @@ export function SharedTextFormatControls({
 
         <div className="classic-editor__shared-text-format-row">
           <SharedTextIconButton
-            icon={<FormatBoldIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatBoldIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.bold}
             disabled={disabled}
             onClick={() => onUpdate({ bold: !value.bold })}
           />
           <SharedTextIconButton
-            icon={<FormatItalicIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatItalicIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.italic}
             disabled={disabled}
             onClick={() => onUpdate({ italic: !value.italic })}
           />
           <SharedTextIconButton
-            icon={<FormatUnderlinedIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatUnderlinedIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.underline}
             disabled={disabled}
             onClick={() => onUpdate({ underline: !value.underline })}
           />
           <SharedTextIconButton
-            icon={<HorizontalRuleIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<HorizontalRuleIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled={disabled}
             onClick={() => onUpdate({ fontSize: Math.max(8, value.fontSize - 1) })}
           />
           <SharedTextIconButton
-            icon={<AddIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<AddIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled={disabled}
             onClick={() => onUpdate({ fontSize: Math.min(40, value.fontSize + 1) })}
           />
-          <SharedTextIconButton icon={<FormatStrikethroughIcon className="h-3.5 w-3.5" fontSize="inherit" />} disabled />
-          <SharedTextIconButton icon={<SubscriptIcon className="h-3.5 w-3.5" fontSize="inherit" />} disabled />
-          <SharedTextIconButton icon={<SuperscriptIcon className="h-3.5 w-3.5" fontSize="inherit" />} disabled />
+          <SharedTextIconButton icon={<FormatStrikethroughIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />} disabled />
+          <SharedTextIconButton icon={<SubscriptIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />} disabled />
+          <SharedTextIconButton icon={<SuperscriptIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />} disabled />
         </div>
 
         <div className="classic-editor__shared-text-caption">Font</div>
@@ -124,45 +124,45 @@ export function SharedTextFormatControls({
       <div className="classic-editor__shared-text-column is-paragraph">
         <div className="classic-editor__shared-paragraph-grid">
           <SharedTextIconButton
-            icon={<FormatListBulletedIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatListBulletedIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled
           />
           <SharedTextIconButton
-            icon={<FormatListNumberedIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatListNumberedIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled
           />
           <SharedTextIconButton
-            icon={<FormatIndentDecreaseIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatIndentDecreaseIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled
           />
           <SharedTextIconButton
-            icon={<FormatIndentIncreaseIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatIndentIncreaseIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled
           />
           <SharedTextIconButton
-            icon={<FormatLineSpacingIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatLineSpacingIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             disabled
           />
           <SharedTextIconButton
-            icon={<FormatAlignLeftIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatAlignLeftIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.align === "left"}
             disabled={disabled}
             onClick={() => onUpdate({ align: "left" })}
           />
           <SharedTextIconButton
-            icon={<FormatAlignCenterIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatAlignCenterIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.align === "center"}
             disabled={disabled}
             onClick={() => onUpdate({ align: "center" })}
           />
           <SharedTextIconButton
-            icon={<FormatAlignRightIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatAlignRightIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.align === "right"}
             disabled={disabled}
             onClick={() => onUpdate({ align: "right" })}
           />
           <SharedTextIconButton
-            icon={<FormatAlignJustifyIcon className="h-3.5 w-3.5" fontSize="inherit" />}
+            icon={<FormatAlignJustifyIcon className="h-3.5 w-3.5" sx={{ fontSize: "1em" }} />}
             active={value.align === "justify"}
             disabled={disabled}
             onClick={() => onUpdate({ align: "justify" })}

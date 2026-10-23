@@ -1,21 +1,22 @@
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import TrackChangesRoundedIcon from "@mui/icons-material/TrackChangesRounded";
 
 import type { StudentAssignmentStatus } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 
 export const viCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Điểm bài tập", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
+    { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "scores", label: "Khóa học", icon: <LayersOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "assignments", label: "Bài tập & thi", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "discussion", label: "Phòng luyện", icon: <TrackChangesRoundedIcon sx={{ fontSize: 18 }} /> },
+    { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
   ],
   heroEyebrow: "Bảng học tập",
+  learnerFallbackName: "bạn",
   heroTitle: (name: string) => `Chào ${name}, chọn bài cần làm hôm nay.`,
   heroDescription: (taskTitle: string) =>
     `Ưu tiên của bạn là "${taskTitle}". Màn hình này gom bài tập, tiến độ và điểm số vào từng trang rõ ràng để bạn không phải tìm lâu.`,
@@ -35,7 +36,7 @@ export const viCopy: DashboardCopy = {
   todayTitle: "Bài cần xử lý hôm nay",
   assignmentsTitle: "Bài tập",
   assignmentsDescription: "Tất cả bài được giao, trạng thái quá hạn, tiến độ hoàn thành và điểm số.",
-  scoresTitle: "Điểm bài tập",
+  scoresTitle: "Khóa học của tôi",
   scoresDescription: "Theo dõi điểm cao nhất và 3 kết quả gần đây của từng bài tập đã được giao.",
   bestScoreLabel: "Điểm cao nhất",
   recentResultsTitle: "Kết quả gần đây",
@@ -104,13 +105,14 @@ export const viCopy: DashboardCopy = {
 
 export const enCopy: DashboardCopy = {
   navItems: [
-    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon fontSize="small" /> },
-    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon fontSize="small" /> },
-    { key: "scores", label: "Assignment scores", icon: <SchoolOutlinedIcon fontSize="small" /> },
-    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon fontSize="small" /> },
-    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon fontSize="small" /> },
+    { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "scores", label: "Courses", icon: <LayersOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "assignments", label: "Assignments & Exams", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "discussion", label: "Practice Room", icon: <TrackChangesRoundedIcon sx={{ fontSize: 18 }} /> },
+    { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
   ],
   heroEyebrow: "Learning board",
+  learnerFallbackName: "there",
   heroTitle: (name: string) => `Hi ${name}, choose what to finish today.`,
   heroDescription: (taskTitle: string) =>
     `Your priority is "${taskTitle}". Assignments, progress, and scores are separated into clear pages so students can find the next action quickly.`,
@@ -130,7 +132,7 @@ export const enCopy: DashboardCopy = {
   todayTitle: "Tasks to handle today",
   assignmentsTitle: "Assignments",
   assignmentsDescription: "All assigned tasks, overdue status, completion progress, and score.",
-  scoresTitle: "Assignment scores",
+  scoresTitle: "My Courses",
   scoresDescription: "Review the best score and 3 most recent results for each assigned task.",
   bestScoreLabel: "Best score",
   recentResultsTitle: "Recent results",

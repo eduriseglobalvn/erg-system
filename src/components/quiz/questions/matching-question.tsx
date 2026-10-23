@@ -10,17 +10,31 @@ import {
   type DragStartEvent,
 } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { Check, ChevronDown, Link2, X } from "lucide-react";
-import { useMemo, useState, type ButtonHTMLAttributes, type ReactNode } from "react";
+import { Check, ChevronDown, ImagePlus, Link2, X } from "lucide-react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ButtonHTMLAttributes,
+  type ChangeEvent,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+  type TextareaHTMLAttributes,
+} from "react";
 
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { MatchingPair } from "@/lib/types";
+import type { MatchingPair, QuestionImage } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 type DisplayMatchingPair = MatchingPair & {
   leftText: string;
   rightText: string;
+  leftIcon?: MatchingPair["promptIcon"];
+  rightIcon?: MatchingPair["responseIcon"];
   leftImage?: MatchingPair["promptImage"];
   rightImage?: MatchingPair["responseImage"];
 };
@@ -31,6 +45,8 @@ export function MatchingQuestion({
   submitted = false,
   reviewMode = false,
   onChange,
+  editable = false,
+  onQuestionChange,
 }: QuestionComponentProps) {
   const isMobile = useIsMobile();
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -48,6 +64,8 @@ export function MatchingQuestion({
           ...pair,
           leftText: pair.prompt,
           rightText: pair.response,
+          leftIcon: pair.promptIcon,
+          rightIcon: pair.responseIcon,
           leftImage: pair.promptImage,
           rightImage: pair.responseImage,
         };
@@ -72,6 +90,29 @@ export function MatchingQuestion({
   const activePair = activeId ? pairMap.get(activeId) ?? null : null;
   const connectedRows = submitted || reviewMode ? rowIds : (value.matchingConnectedRows ?? []);
 
+  function emitPairs(nextPairs: MatchingPair[]) {
+    onQuestionChange?.({ ...question, matching: nextPairs });
+  }
+
+  function updatePair(pairId: string, patch: Partial<MatchingPair>) {
+    emitPairs(displayPairs.map((pair) => (pair.id === pairId ? { ...pair, ...patch } : pair)));
+  }
+
+  function removePair(pairId: string) {
+    emitPairs(displayPairs.filter((pair) => pair.id !== pairId));
+  }
+
+  function addPair() {
+    emitPairs([
+      ...displayPairs,
+      {
+        id: createMatchingId("match"),
+        prompt: `Prompt ${displayPairs.length + 1}`,
+        response: "Response",
+      },
+    ]);
+  }
+
   function emit(nextOrder: string[], nextConnectedRows: string[]) {
     onChange({
       matchingOrder: nextOrder,
@@ -81,6 +122,108 @@ export function MatchingQuestion({
 
   function handleDragStart(event: DragStartEvent) {
     setActiveId(String(event.active.id));
+  }
+
+  function handleEditableDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    setActiveId(null);
+    if (!over) return;
+
+    const draggedResponseId = String(active.id);
+    const overId = String(over.id);
+    if (!overId.startsWith("row:")) return;
+
+    const targetRowId = overId.replace("row:", "");
+    const sourceIndex = displayPairs.findIndex((pair) => pair.id === draggedResponseId);
+    const targetIndex = displayPairs.findIndex((pair) => pair.id === targetRowId);
+    if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) return;
+
+    const responses = displayPairs.map((pair) => ({
+      response: pair.response,
+      responseIcon: pair.responseIcon,
+      responseImage: pair.responseImage,
+    }));
+    const [movedResponse] = responses.splice(sourceIndex, 1);
+    responses.splice(targetIndex, 0, movedResponse);
+
+    emitPairs(
+      displayPairs.map((pair, index) => ({
+        ...pair,
+        response: responses[index]?.response ?? pair.response,
+        responseIcon: responses[index]?.responseIcon,
+        responseImage: responses[index]?.responseImage,
+      })),
+    );
+  }
+
+  if (editable && onQuestionChange) {
+    return (
+      <QuestionBodyWithImage question={question}>
+        <div className="matching-puzzle">
+          <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleEditableDragEnd} onDragCancel={() => setActiveId(null)}>
+            <div className="matching-puzzle__list">
+              {displayPairs.map((pair, index) => (
+                <MatchingPuzzleRow key={pair.id} rowId={pair.id} className="is-connected">
+                  <div className="matching-puzzle__prompt-card">
+                    <span className="matching-puzzle__review-index">{index + 1}.</span>
+                    <MatchingInlineMedia
+                      image={pair.leftImage}
+                      icon={pair.leftIcon}
+                      label={pair.leftText}
+                      size="lg"
+                      onImageResize={
+                        pair.leftImage
+                          ? (width) => updatePair(pair.id, { promptImage: { ...pair.leftImage!, width } })
+                          : undefined
+                      }
+                      onImageRemove={pair.leftImage ? () => updatePair(pair.id, { promptImage: undefined }) : undefined}
+                    />
+                    <AutoResizeMatchingTextarea
+                      className="quiz-runtime-edit-input matching-puzzle__prompt-text"
+                      value={pair.prompt}
+                      onChange={(event) => updatePair(pair.id, { prompt: event.target.value })}
+                      aria-label={`Prompt ${index + 1}`}
+                    />
+                    <MatchingImageControls
+                      image={pair.promptImage}
+                      label={`Ảnh prompt ${index + 1}`}
+                      onChange={(promptImage) => updatePair(pair.id, { promptImage })}
+                    />
+                  </div>
+
+                  <MatchingRowTarget>
+                    <EditableMatchingResponseChip
+                      id={pair.id}
+                      pair={pair}
+                      index={index}
+                      active={activeId === pair.id}
+                      onResponseChange={(response) => updatePair(pair.id, { response })}
+                      onResponseImageChange={(responseImage) => updatePair(pair.id, { responseImage })}
+                      onRemove={() => removePair(pair.id)}
+                      removable={displayPairs.length > 2}
+                    />
+                  </MatchingRowTarget>
+                </MatchingPuzzleRow>
+              ))}
+            </div>
+
+            <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }}>
+              {activePair ? (
+                <MatchingChip
+                  label={activePair.rightText}
+                  icon={activePair.rightIcon}
+                  image={activePair.rightImage}
+                  overlay
+                />
+              ) : null}
+            </DragOverlay>
+          </DndContext>
+          <button type="button" className="quiz-runtime-edit-add" onClick={addPair}>
+            Add pair
+          </button>
+        </div>
+      </QuestionBodyWithImage>
+    );
   }
 
   function handleDragEnd(event: DragEndEvent) {
@@ -156,7 +299,10 @@ export function MatchingQuestion({
                     <Link2 className="h-4 w-4" />
                   </div>
                   <div className="border-b px-4 py-3" style={{ borderColor: "rgba(148,163,184,0.18)" }}>
-                    <div className="min-w-0 text-[15px] leading-6 text-slate-600">{pair.leftText}</div>
+                    <div className="flex min-w-0 items-center gap-2 text-[15px] leading-6 text-slate-600">
+                      <MatchingInlineMedia image={pair.leftImage} icon={pair.leftIcon} label={pair.leftText} />
+                      <span className="min-w-0 flex-1">{pair.leftText}</span>
+                    </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-[22px_minmax(0,1fr)]">
@@ -174,14 +320,15 @@ export function MatchingQuestion({
                           <img src={selectedOption.rightImage.url} alt={selectedOption.rightImage.alt ?? selectedOption.rightText} className="h-full w-full object-contain" />
                         </span>
                       ) : null}
-                      <span className="truncate text-sm text-slate-500">{selectedOption?.rightText ?? "- Select -"}</span>
+                      <MatchingInlineMedia icon={selectedOption?.rightIcon} label={selectedOption?.rightText ?? ""} />
+                      <span className="truncate text-sm text-slate-500">{selectedOption?.rightText ?? "- Chọn -"}</span>
                     </span>
                     <ChevronDown className="h-4 w-4 flex-none text-slate-400" />
                   </button>
                 </div>
                 {reviewMode ? (
                   <div className={`px-3 pb-3 text-xs font-medium ${isCorrect ? "text-lime-600" : "text-rose-600"}`}>
-                    {isCorrect ? "Matched correctly" : `Correct answer: ${pair.rightText}`}
+                    {isCorrect ? "Ghép chính xác" : `Đáp án đúng: ${pair.rightText}`}
                   </div>
                 ) : null}
               </div>
@@ -209,9 +356,9 @@ export function MatchingQuestion({
 
   return (
     <QuestionBodyWithImage question={question}>
-      <div className="flex flex-col gap-4 sm:gap-5">
+      <div className="matching-puzzle">
         <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
-          <div className="flex flex-col gap-3">
+          <div className="matching-puzzle__list">
             {displayPairs.map((pair, index) => {
               const assignedId = currentOrder[index];
               const assignedPair = assignedId ? pairMap.get(assignedId) ?? null : null;
@@ -221,38 +368,36 @@ export function MatchingQuestion({
               const rowConnected = connectedRows.includes(pair.id);
 
               return (
-                <div
+                <MatchingPuzzleRow
                   key={pair.id}
-                  className={`grid items-stretch gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] ${rowConnected ? "md:gap-0" : "md:gap-8"}`}
+                  rowId={pair.id}
+                  className={cn(
+                    rowConnected && "is-connected",
+                    showReviewCorrect && "is-correct",
+                    showReviewWrong && "is-incorrect",
+                  )}
                 >
-                  <div
-                    className="relative flex min-h-[56px] min-w-0 items-center rounded-lg border bg-white px-4 py-2 pr-8 text-lg leading-[1.35] shadow-sm sm:text-[22px]"
-                    style={{
-                      borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)",
-                      color: showReviewCorrect ? "#111827" : showReviewWrong ? "#111827" : "var(--quiz-option-text)",
-                    }}
-                  >
+                  <div className="matching-puzzle__prompt-card">
                     {reviewMode ? (
                       <span
-                        className="mr-2 text-xl font-semibold"
+                        className="matching-puzzle__review-index"
                         style={{ color: showReviewCorrect ? "#78b816" : "#e65a4d" }}
                       >
                         {index + 1}.
                       </span>
                     ) : null}
-                    <span>{pair.leftText}</span>
-                    <span
-                      className="pointer-events-none absolute right-[-2px] top-1/2 z-[3] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 bg-white"
-                      style={{ borderColor: showReviewCorrect ? "#8ac241" : showReviewWrong ? "#ff8178" : "var(--quiz-canvas-border)" }}
-                    />
+                    <MatchingInlineMedia image={pair.leftImage} icon={pair.leftIcon} label={pair.leftText} size="lg" />
+                    <span className="matching-puzzle__prompt-text">{pair.leftText}</span>
                   </div>
 
-                  <MatchingRowTarget rowId={pair.id}>
+                  <MatchingRowTarget>
                     {assignedPair ? (
                       <DraggableMatchingChip
                         id={assignedPair.id}
                         rowId={pair.id}
                         label={assignedPair.rightText}
+                        icon={assignedPair.rightIcon}
+                        image={assignedPair.rightImage}
                         disabled={submitted}
                         correct={showReviewCorrect}
                         incorrect={showReviewWrong}
@@ -262,16 +407,29 @@ export function MatchingQuestion({
                       />
                     ) : null}
                   </MatchingRowTarget>
-                </div>
+                </MatchingPuzzleRow>
               );
             })}
           </div>
 
-          <DragOverlay dropAnimation={null}>{activePair ? <MatchingChip label={activePair.rightText} overlay /> : null}</DragOverlay>
+          <DragOverlay dropAnimation={{ duration: 180, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }}>
+            {activePair ? (
+              <MatchingChip
+                label={activePair.rightText}
+                icon={activePair.rightIcon}
+                image={activePair.rightImage}
+                overlay
+              />
+            ) : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </QuestionBodyWithImage>
   );
+}
+
+function createMatchingId(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
 }
 
 function MobileMatchingAnswerPicker({
@@ -299,7 +457,7 @@ function MobileMatchingAnswerPicker({
     <div className="fixed inset-0 z-[280] bg-slate-950/55 px-4 py-12">
       <div className="mx-auto mt-10 flex max-h-[78vh] w-full max-w-md flex-col overflow-hidden rounded-lg bg-white shadow-sm">
         <div className="relative border-b px-4 py-3 text-center" style={{ borderColor: "rgba(148,163,184,0.22)" }}>
-          <div className="text-sm font-medium text-slate-700">Select an Answer</div>
+          <div className="text-sm font-medium text-slate-700">Chọn đáp án</div>
           <button
             type="button"
             className="absolute right-3 top-1/2 grid h-7 w-7 -translate-y-1/2 place-items-center rounded-md text-[var(--erg-blue)]"
@@ -334,6 +492,7 @@ function MobileMatchingAnswerPicker({
                     <img src={option.rightImage.url} alt={option.rightImage.alt ?? option.rightText} className="h-full w-full object-contain" />
                   </span>
                 ) : null}
+                <MatchingInlineMedia icon={option.rightIcon} label={option.rightText} />
                 <span className="min-w-0 flex-1 py-4">{option.rightText}</span>
                 {isAssignedAnywhere ? (
                   <span className="grid h-6 w-6 flex-none place-items-center rounded-full bg-emerald-500 text-white">
@@ -347,6 +506,224 @@ function MobileMatchingAnswerPicker({
       </div>
     </div>
   );
+}
+
+function EditableMatchingResponseChip({
+  id,
+  pair,
+  index,
+  active,
+  removable,
+  onResponseChange,
+  onResponseImageChange,
+  onRemove,
+}: {
+  id: string;
+  pair: DisplayMatchingPair;
+  index: number;
+  active: boolean;
+  removable: boolean;
+  onResponseChange: (response: string) => void;
+  onResponseImageChange: (image: QuestionImage | undefined) => void;
+  onRemove: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="w-full min-w-0"
+      style={isDragging ? undefined : { transform: CSS.Translate.toString(transform) }}
+    >
+      <div
+        className={cn(
+          "matching-puzzle__response-card is-connected",
+          active && "is-active",
+          isDragging && "is-dragging",
+          "matching-puzzle__response-card--editable",
+        )}
+      >
+        <MatchingInlineMedia
+          image={pair.rightImage}
+          icon={pair.rightIcon}
+          label={pair.rightText}
+          size="lg"
+          onImageResize={
+            pair.rightImage
+              ? (width) => onResponseImageChange({ ...pair.rightImage!, width })
+              : undefined
+          }
+          onImageRemove={pair.rightImage ? () => onResponseImageChange(undefined) : undefined}
+        />
+        <AutoResizeMatchingTextarea
+          className="quiz-runtime-edit-input matching-puzzle__response-text"
+          value={pair.response}
+          onChange={(event) => onResponseChange(event.target.value)}
+          aria-label={`Response ${index + 1}`}
+        />
+        <MatchingImageControls
+          image={pair.responseImage}
+          label={`Ảnh đáp án ${index + 1}`}
+          onChange={onResponseImageChange}
+        />
+        {removable ? (
+          <button type="button" className="quiz-runtime-edit-remove matching-puzzle__remove-button" onClick={onRemove} aria-label={`Xóa cặp ${index + 1}`}>
+            <X className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="matching-puzzle__handle-button"
+          aria-label={`Kéo đáp án ${index + 1} để ghép`}
+          {...(attributes as ButtonHTMLAttributes<HTMLButtonElement>)}
+          {...(listeners as ButtonHTMLAttributes<HTMLButtonElement>)}
+        >
+          <span aria-hidden="true" className="matching-puzzle__handle" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function MatchingImageControls({
+  image,
+  label,
+  onChange,
+}: {
+  image?: QuestionImage;
+  label: string;
+  onChange: (image: QuestionImage | undefined) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const imageUrl = await readImageAsDataUrl(file);
+    onChange({ url: imageUrl, alt: file.name });
+  }
+
+  return (
+    <span className="matching-puzzle__media-controls">
+      <input
+        ref={inputRef}
+        className="sr-only"
+        type="file"
+        accept="image/*"
+        aria-label={label}
+        onChange={handleFileChange}
+      />
+      <button
+        type="button"
+        className="matching-puzzle__media-button"
+        aria-label={image?.url ? `${label} - đổi ảnh` : `${label} - chèn ảnh`}
+        onClick={() => inputRef.current?.click()}
+      >
+        <ImagePlus className="h-4 w-4" />
+      </button>
+      {image?.url ? (
+        <button
+          type="button"
+          className="matching-puzzle__media-button matching-puzzle__media-button--danger"
+          aria-label={`${label} - xóa ảnh`}
+          onClick={() => onChange(undefined)}
+        >
+          <X className="h-4 w-4" />
+        </button>
+      ) : null}
+    </span>
+  );
+}
+
+function readImageAsDataUrl(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(reader.error ?? new Error("Cannot read image file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function ImageResizeHandle({
+  width,
+  min,
+  max,
+  onResize,
+}: {
+  width: number;
+  min: number;
+  max: number;
+  onResize: (width: number) => void;
+}) {
+  function handlePointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startWidth = width;
+    const pointerId = event.pointerId;
+    event.currentTarget.setPointerCapture(pointerId);
+
+    function handlePointerMove(moveEvent: PointerEvent) {
+      const nextWidth = Math.max(min, Math.min(max, Math.round(startWidth + moveEvent.clientX - startX)));
+      onResize(nextWidth);
+    }
+
+    function handlePointerUp() {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    }
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp, { once: true });
+  }
+
+  return (
+    <button
+      type="button"
+      className="question-image-resize-handle"
+      aria-label="Resize image"
+      onPointerDown={handlePointerDown}
+    />
+  );
+}
+
+function AutoResizeMatchingTextarea({
+  value,
+  onChange,
+  ...props
+}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  value: string;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    resizeMatchingTextarea(textareaRef.current);
+  }, [value]);
+
+  return (
+    <textarea
+      {...props}
+      ref={textareaRef}
+      value={value}
+      rows={1}
+      onChange={onChange}
+      onInput={(event) => resizeMatchingTextarea(event.currentTarget)}
+      style={{
+        ...(props.style ?? {}),
+        overflowWrap: "anywhere",
+        whiteSpace: "pre-wrap",
+      }}
+    />
+  );
+}
+
+function resizeMatchingTextarea(textarea: HTMLTextAreaElement | null) {
+  if (!textarea) return;
+  textarea.style.height = "0px";
+  textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
 function createNextMatchingAssignments(
@@ -364,11 +741,97 @@ function createNextMatchingAssignments(
   return nextAssignments;
 }
 
+function MatchingInlineMedia({
+  image,
+  icon,
+  label,
+  size = "sm",
+  onImageResize,
+  onImageRemove,
+}: {
+  image?: MatchingPair["promptImage"];
+  icon?: string;
+  label: string;
+  size?: "sm" | "lg";
+  onImageResize?: (width: number) => void;
+  onImageRemove?: () => void;
+}) {
+  if (image?.url) {
+    return (
+      <span
+        className={cn(
+          "matching-inline-media grid flex-none place-items-center overflow-hidden rounded-md border border-slate-200 bg-white",
+          onImageResize && "matching-inline-media--resizable",
+          size === "lg" ? "matching-inline-media--lg h-10 w-10" : "h-8 w-8",
+        )}
+        style={image.width ? ({ "--matching-editor-image-size": `${image.width}px` } as CSSProperties) : undefined}
+      >
+        <img src={image.url} alt={image.alt ?? label} className="h-full w-full object-contain" />
+        {onImageRemove ? (
+          <button
+            type="button"
+            className="matching-inline-media__remove"
+            aria-label={`Xóa ảnh ${label}`}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              onImageRemove();
+            }}
+          >
+            <X className="h-3 w-3" />
+          </button>
+        ) : null}
+        {onImageResize ? (
+          <ImageResizeHandle
+            width={image.width ?? 76}
+            onResize={onImageResize}
+            min={44}
+            max={150}
+          />
+        ) : null}
+      </span>
+    );
+  }
+
+  if (!icon) return null;
+
+  return (
+    <span
+      className={cn(
+        "matching-inline-media grid flex-none place-items-center rounded-md border font-semibold",
+        size === "lg" ? "matching-inline-media--lg h-10 w-10 text-xl" : "h-8 w-8 text-base",
+      )}
+      style={{
+        color: "var(--quiz-accent-start)",
+        borderColor: "color-mix(in srgb, var(--quiz-accent-start) 28%, transparent)",
+        backgroundColor: "color-mix(in srgb, var(--quiz-accent-start) 9%, transparent)",
+      }}
+      aria-hidden="true"
+    >
+      {icon}
+    </span>
+  );
+}
+
 function MatchingRowTarget({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <div className="matching-puzzle__target">
+      {children}
+    </div>
+  );
+}
+
+function MatchingPuzzleRow({
   rowId,
+  className,
   children,
 }: {
   rowId: string;
+  className?: string;
   children: ReactNode;
 }) {
   const { isOver, setNodeRef } = useDroppable({ id: `row:${rowId}` });
@@ -376,8 +839,7 @@ function MatchingRowTarget({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[56px] w-full min-w-0 items-stretch ${isOver ? "rounded-lg ring-2 ring-offset-2" : ""}`}
-      style={isOver ? { backgroundColor: "var(--quiz-option-selected-bg)", ["--tw-ring-color" as string]: "rgba(59, 130, 246, 0.24)" } : undefined}
+      className={cn("matching-puzzle__row", className, isOver && "is-over")}
     >
       {children}
     </div>
@@ -388,6 +850,8 @@ function DraggableMatchingChip({
   id,
   rowId,
   label,
+  icon,
+  image,
   disabled,
   correct,
   incorrect,
@@ -398,6 +862,8 @@ function DraggableMatchingChip({
   id: string;
   rowId: string;
   label: string;
+  icon?: string;
+  image?: MatchingPair["responseImage"];
   disabled: boolean;
   correct?: boolean;
   incorrect?: boolean;
@@ -417,12 +883,12 @@ function DraggableMatchingChip({
     <div
       ref={setNodeRef}
       className="w-full min-w-0"
-      style={{
-        transform: CSS.Translate.toString(transform),
-      }}
+      style={isDragging ? undefined : { transform: CSS.Translate.toString(transform) }}
     >
       <MatchingChip
         label={label}
+        icon={icon}
+        image={image}
         dragging={isDragging}
         locked={disabled}
         correct={correct}
@@ -441,6 +907,8 @@ function DraggableMatchingChip({
 
 function MatchingChip({
   label,
+  icon,
+  image,
   dragging = false,
   overlay = false,
   locked = false,
@@ -452,6 +920,8 @@ function MatchingChip({
   dragProps,
 }: {
   label: string;
+  icon?: string;
+  image?: MatchingPair["responseImage"];
   dragging?: boolean;
   overlay?: boolean;
   locked?: boolean;
@@ -465,40 +935,29 @@ function MatchingChip({
   return (
     <button
       type="button"
-      className={`relative inline-flex min-h-[56px] w-full min-w-0 items-center justify-between gap-3 rounded-r-lg border px-4 pl-7 text-left text-lg leading-[1.35] shadow-sm transition sm:text-[22px] ${
-        overlay || active
-          ? "border-[#c6b66a] bg-[#fff0a8] shadow-sm"
-          : correct
-            ? "border-[#8fb37f] bg-[#f4fff0]"
-            : incorrect
-              ? "border-[#ff8178] bg-[#fff7f6]"
-            : "border-slate-300 bg-white"
-      } ${connected ? "md:-ml-[2px] md:border-l-0" : ""} ${dragging ? "opacity-15" : ""} ${locked ? "cursor-default" : "cursor-grab"}`}
-      style={!overlay && !active && !correct && !incorrect ? { borderColor: "var(--quiz-canvas-border)", backgroundColor: "var(--quiz-input-bg)", color: "var(--quiz-option-text)" } : undefined}
+      className={cn(
+        "matching-puzzle__response-card",
+        overlay && "is-overlay",
+        active && "is-active",
+        correct && "is-correct",
+        incorrect && "is-incorrect",
+        connected && "is-connected",
+        dragging && "is-dragging",
+        locked ? "is-locked" : "is-draggable",
+      )}
       {...dragProps}
     >
-      <span
-        className={`pointer-events-none absolute left-[-18px] top-1/2 z-[4] h-7 w-[18px] -translate-y-1/2 rounded-l-full border border-r-0 ${
-          overlay || active
-            ? "border-[#c6b66a] bg-[#fff0a8]"
-            : correct
-              ? "border-[#8fb37f] bg-[#f4fff0]"
-              : incorrect
-                ? "border-[#ff8178] bg-[#fff7f6]"
-                : "border-slate-300 bg-white"
-        }`}
-        style={!overlay && !active && !correct && !incorrect ? { borderColor: "var(--quiz-canvas-border)", backgroundColor: "var(--quiz-input-bg)" } : undefined}
-      />
-      {reviewIndex ? (
+      {reviewIndex && (correct || incorrect) ? (
         <span
-          className="font-semibold"
+          className="matching-puzzle__index"
           style={{ color: correct ? "#78b816" : incorrect ? "#e65a4d" : "currentColor" }}
         >
           {reviewIndex}.
         </span>
       ) : null}
-      <span className="min-w-0 flex-1 whitespace-normal break-words">{label}</span>
-      {!overlay ? <span aria-hidden="true" className="text-xl text-slate-500">⋮⋮</span> : null}
+      <MatchingInlineMedia image={image} icon={icon} label={label} size="lg" />
+      <span className="matching-puzzle__response-text">{label}</span>
+      {!overlay ? <span aria-hidden="true" className="matching-puzzle__handle" /> : null}
     </button>
   );
 }

@@ -1,113 +1,61 @@
 import type { ReactNode } from "react";
-import { Bell, ChevronDown, Download, RefreshCw, WifiOff } from "lucide-react";
-
+import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
+import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
+import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
+import Avatar from "@mui/material/Avatar";
+import Badge from "@mui/material/Badge";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { ERG_ASSETS } from "@/config/seo";
-import { cn } from "@/lib/utils";
 
 export function LmsMobileTopBar({
-  activeLabel,
-  canInstall,
-  className,
-  installed,
-  notificationCenter,
-  online,
-  schoolName,
-  teacherName,
-  updateAvailable,
-  onAccountOpen,
-  onInstall,
-  onScopeOpen,
-  onUpdate,
+  canInstall, selectedClassName, installed, notificationCenter, online, schoolName, teacherName,
+  unreadNotificationCount = 0, updateAvailable, onAccountOpen, onInstall, onOpenNotifications, onScopeOpen, onUpdate,
 }: {
-  activeLabel: string;
-  canInstall: boolean;
-  className: string;
-  installed: boolean;
-  notificationCenter?: ReactNode;
-  online: boolean;
-  schoolName: string;
-  teacherName: string;
-  updateAvailable: boolean;
-  onAccountOpen: () => void;
-  onInstall: () => void;
-  onScopeOpen: () => void;
-  onUpdate: () => void;
+  activeLabel: string; canInstall: boolean; selectedClassName: string; installed: boolean;
+  notificationCenter?: ReactNode; online: boolean; schoolName: string; teacherName: string;
+  unreadNotificationCount?: number; updateAvailable: boolean; onAccountOpen: () => void; onInstall: () => void;
+  onOpenNotifications?: () => void; onScopeOpen: () => void; onUpdate: () => void;
 }) {
-  const initial = teacherName.trim().slice(0, 1).toUpperCase();
+  const initial = teacherName.trim().slice(0, 1).toUpperCase() || "GV";
+  const iconButtonSx = { bgcolor: "background.paper", border: "1px solid", borderColor: "divider", height: 40, width: 40 };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-white/70 bg-white/92 px-3 pb-2 pt-[calc(env(safe-area-inset-top,0px)+8px)] shadow-[0_1px_0_rgba(15,23,42,0.04),0_10px_24px_rgba(15,23,42,0.04)] backdrop-blur-xl xl:hidden">
-      <div className="flex min-h-[56px] items-center gap-2">
-        <button
-          type="button"
-          aria-label="Ve man bai tap"
-          className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#d9e2ef] bg-white transition hover:bg-[#f8fbff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25"
-          onClick={onScopeOpen}
-        >
-          <img src={ERG_ASSETS.logo} alt="ERG" className="max-h-8 max-w-9 object-contain" />
-        </button>
+    <Box component="header" data-testid="lms-mobile-header" sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", boxShadow: "0 8px 24px rgba(15,23,42,0.06)", display: { xs: "block", xl: "none" }, flexShrink: 0, pb: 1.25, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", px: 1.5, position: "sticky", top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
+      <Stack direction="row" spacing={1} sx={{ alignItems: "center", minHeight: 48 }}>
+        <IconButton aria-label="Chọn lớp" onClick={onScopeOpen} sx={iconButtonSx}>
+          <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ maxHeight: 24, maxWidth: 28, objectFit: "contain" }} />
+        </IconButton>
 
-        <button
-          type="button"
-          className="min-w-0 flex-1 rounded-[14px] px-2.5 py-1.5 text-left transition hover:bg-[#f8fbff] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25"
-          onClick={onScopeOpen}
-        >
-          <div className="flex min-w-0 items-center gap-1.5">
-            <span className="truncate text-[15px] font-extrabold leading-5 text-slate-950">{activeLabel}</span>
-            <ChevronDown className="h-4 w-4 shrink-0 text-slate-400" />
-          </div>
-          <div className="mt-0.5 truncate text-[11px] font-bold text-slate-500">
-            {className} · {schoolName}
-          </div>
-        </button>
+        <ButtonBase onClick={onScopeOpen} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 5, flex: 1, minHeight: 40, minWidth: 0, px: 1.5, py: 0.5, textAlign: "left" }}>
+          <Box sx={{ minWidth: 0, width: "100%" }}>
+            <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+              <Typography noWrap sx={{ fontSize: 14, fontWeight: 800, lineHeight: 1.4 }}>{selectedClassName || "Lớp học"}</Typography>
+              <ExpandMoreRoundedIcon sx={{ color: "text.secondary", flexShrink: 0, fontSize: 17 }} />
+            </Stack>
+            <Typography color="text.secondary" noWrap sx={{ fontSize: 10.5, fontWeight: 700, lineHeight: 1.4 }}>{schoolName}</Typography>
+          </Box>
+        </ButtonBase>
 
-        <div className="flex shrink-0 items-center gap-1">
-          {updateAvailable ? (
-            <button
-              type="button"
-              aria-label="Cap nhat ung dung"
-              className="grid h-11 w-11 place-items-center rounded-[14px] border border-[#dbeafe] bg-[#eef6ff] text-[var(--primary)] shadow-[0_1px_2px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25"
-              onClick={onUpdate}
-            >
-              <RefreshCw className="h-5 w-5" />
-            </button>
-          ) : null}
-          {canInstall && !installed ? (
-            <button
-              type="button"
-              aria-label="Cai LMS PWA"
-              className="grid h-11 w-11 place-items-center rounded-[14px] border border-[#dbeafe] bg-[#eef6ff] text-[var(--primary)] shadow-[0_1px_2px_rgba(15,23,42,0.06)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25"
-              onClick={onInstall}
-            >
-              <Download className="h-5 w-5" />
-            </button>
-          ) : null}
-          {!online ? (
-            <span className="grid h-11 w-11 place-items-center rounded-[14px] border border-amber-100 bg-amber-50 text-amber-700" aria-label="Dang offline">
-              <WifiOff className="h-5 w-5" />
-            </span>
-          ) : null}
+        <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
+          {updateAvailable ? <IconButton aria-label="Cập nhật ứng dụng" onClick={onUpdate} sx={iconButtonSx}><RefreshRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
+          {canInstall && !installed ? <IconButton aria-label="Cài LMS PWA" onClick={onInstall} sx={iconButtonSx}><DownloadRoundedIcon sx={{ fontSize: 19 }} /></IconButton> : null}
+          {!online ? <Box aria-label="Đang offline" sx={{ alignItems: "center", bgcolor: "warning.light", borderRadius: "50%", color: "warning.dark", display: "flex", height: 40, justifyContent: "center", width: 40 }}><WifiOffRoundedIcon sx={{ fontSize: 19 }} /></Box> : null}
           {notificationCenter ?? (
-            <button
-              type="button"
-              aria-label="Thong bao"
-              className="grid h-11 w-11 place-items-center rounded-[14px] border border-[#d9e2ef] bg-white text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
-            >
-              <Bell className="h-5 w-5" />
-            </button>
+            <IconButton aria-label="Thông báo" onClick={onOpenNotifications} sx={iconButtonSx}>
+              <Badge badgeContent={unreadNotificationCount > 9 ? "9+" : unreadNotificationCount} color="error"><NotificationsNoneRoundedIcon sx={{ fontSize: 19 }} /></Badge>
+            </IconButton>
           )}
-          <button
-            type="button"
-            aria-label={`Tai khoan ${teacherName}`}
-            className={cn(
-              "grid h-11 w-11 place-items-center rounded-[14px] border border-[#d9e2ef] bg-white text-xs font-extrabold text-white shadow-[0_1px_2px_rgba(15,23,42,0.04)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25",
-            )}
-            onClick={onAccountOpen}
-          >
-            <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--primary)] shadow-[inset_0_1px_0_rgba(255,255,255,0.28)]">{initial || "GV"}</span>
-          </button>
-        </div>
-      </div>
-    </header>
+          <IconButton aria-label={`Tài khoản ${teacherName}`} onClick={onAccountOpen} sx={{ height: 40, p: 0.5, width: 40 }}>
+            <Avatar sx={{ bgcolor: "warning.main", fontSize: 12, fontWeight: 800, height: 32, width: 32 }}>{initial}</Avatar>
+          </IconButton>
+        </Stack>
+      </Stack>
+    </Box>
   );
 }

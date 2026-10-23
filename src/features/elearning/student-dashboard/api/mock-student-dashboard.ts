@@ -4,7 +4,7 @@ import type {
   StudentDiscussionThread,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { sampleQuiz } from "@/lib/sample-quiz";
+import { sampleQuiz, testingSampleQuiz, trainingSampleQuiz } from "@/lib/sample-quiz";
 
 export const studentDashboardProfile: StudentDashboardProfile = {
   id: "student-current",
@@ -21,6 +21,44 @@ export const studentDashboardProfile: StudentDashboardProfile = {
 };
 
 export const studentAssignments: StudentDashboardAssignment[] = [
+  {
+    id: "assignment-training-mode-demo",
+    quizId: trainingSampleQuiz.id,
+    title: trainingSampleQuiz.title,
+    subtitle: "Test training: không trộn câu hỏi, không trộn đáp án, nộp từng câu.",
+    subjectLabel: "ERG Training",
+    teacherName: "Nguyễn Phát Tài",
+    status: "not_started",
+    progressRate: 0,
+    answeredCount: 0,
+    totalQuestions: trainingSampleQuiz.sections[0]?.questions.length ?? 0,
+    score: null,
+    maxScore: 140,
+    dueLabel: "Bài test chế độ training",
+    statusLabel: "Chưa bắt đầu",
+    lastActivityLabel: "Vừa được tạo để kiểm thử",
+    focusNote: "Dùng bài này để kiểm tra Enter bắt đầu, Enter nộp từng câu và không có nút Quay lại/Tiếp theo.",
+    attempts: [],
+  },
+  {
+    id: "assignment-testing-mode-demo",
+    quizId: testingSampleQuiz.id,
+    title: testingSampleQuiz.title,
+    subtitle: "Test testing: bắt buộc trộn câu hỏi, trộn đáp án và chỉ nộp khi làm hết bài.",
+    subjectLabel: "ERG Testing",
+    teacherName: "Nguyễn Phát Tài",
+    status: "not_started",
+    progressRate: 0,
+    answeredCount: 0,
+    totalQuestions: testingSampleQuiz.sections[0]?.questions.length ?? 0,
+    score: null,
+    maxScore: 140,
+    dueLabel: "Bài test chế độ testing",
+    statusLabel: "Chưa bắt đầu",
+    lastActivityLabel: "Vừa được tạo để kiểm thử",
+    focusNote: "Dùng bài này để kiểm tra shuffle, phím mũi tên chuyển câu và Enter nộp khi đã làm hết.",
+    attempts: [],
+  },
   {
     id: "assignment-active",
     quizId: sampleQuiz.id,

@@ -1,10 +1,8 @@
-import {
-  FileCheck,
-  Folder,
-  GraduationCap,
-  Link as LinkIcon,
-  Presentation,
-} from "lucide-react";
+import FileCheck from "@mui/icons-material/Task";
+import Folder from "@mui/icons-material/Folder";
+import GraduationCap from "@mui/icons-material/School";
+import LinkIcon from "@mui/icons-material/Link";
+import Presentation from "@mui/icons-material/Slideshow";
 
 import type {
   LearningResourceResourceCard,
@@ -109,8 +107,12 @@ export function flattenNodes(nodes: StudioNode[]): StudioNode[] {
   return nodes.flatMap((node) => [node, ...flattenNodes(node.children)]);
 }
 
-export function screenKind(activeLeafId: string) {
-  if (activeLeafId === "admin-learning-resources") return "structure";
+export type LearningResourceAuthoringScreen = "subjects" | "structure" | "resources" | "upload" | "publish";
+
+export function screenKind(activeLeafId: string): LearningResourceAuthoringScreen {
+  if (activeLeafId === "resources") return "resources";
+  if (activeLeafId === "structure") return "structure";
+  if (activeLeafId === "admin-learning-resources") return "resources";
   if (activeLeafId === "admin-learning-structure") return "structure";
   if (activeLeafId === "admin-learning-resource-list") return "resources";
   if (activeLeafId === "admin-learning-resource-upload") return "upload";
@@ -143,15 +145,15 @@ export function toEditTargetFromNode(node: StudioNode | null | undefined): Taxon
 export function getAddContentOptionMeta(optionId: ContentDialogOptionId) {
   if (optionId === "category") {
     return {
-      title: "Nhóm học liệu",
-      description: "Mỗi nhóm học liệu chỉ chứa danh sách bài học bên trong.",
+      title: "Level",
+      description: "Level nằm dưới môn học và dùng để gom các chủ đề theo cấp độ học.",
       icon: <Folder className="h-5 w-5" />,
     };
   }
   if (optionId === "section") {
     return {
-      title: "Bài học",
-      description: "Bài học là nơi gắn slide thuyết trình, bài tập và tài liệu trong cùng một chỗ.",
+      title: "Chủ đề",
+      description: "Chủ đề nằm trong một level và là nơi gắn slide, bài tập hoặc tài liệu.",
       icon: <GraduationCap className="h-5 w-5" />,
     };
   }
@@ -219,7 +221,7 @@ export function slugifyPathSegment(value: string) {
 }
 
 export function buildExplorerPathUrl(subject?: StudioSubject, path: StudioNode[] = [], target?: StudioNode | LocalContentItem | AttachedResourceItem) {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://lcms.erg.edu.vn";
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://lcms.erg.edu.local";
   const segments = ["resources"];
   if (subject?.label) segments.push(slugifyPathSegment(subject.label));
   path.forEach((item) => segments.push(slugifyPathSegment(item.label)));

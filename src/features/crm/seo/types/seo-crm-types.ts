@@ -14,6 +14,7 @@ export type SeoFollowUpType = "call" | "meeting" | "proposal" | "contract" | "ha
 
 export type SeoSchoolLead = {
   id: string;
+  schoolId: string;
   schoolName: string;
   district: string;
   province: string;
@@ -31,6 +32,7 @@ export type SeoSchoolLead = {
   lastTouchAt: string;
   notes: string;
   risks: string[];
+  version: number;
 };
 
 export type SeoRevenueLine = {
@@ -65,6 +67,7 @@ export type SeoOpportunity = {
   ownerName: string;
   revenueLines: SeoRevenueLine[];
   costLines: SeoCostLine[];
+  version: number;
 };
 
 export type SeoFollowUp = {
@@ -75,6 +78,7 @@ export type SeoFollowUp = {
   dueAt: string;
   ownerName: string;
   done: boolean;
+  version: number;
 };
 
 export type SeoHandoverRequest = {
@@ -89,6 +93,14 @@ export type SeoHandoverRequest = {
     label: string;
     done: boolean;
   }>;
+  version: number;
+};
+
+export type SeoCrmWorkspace = {
+  leads: SeoSchoolLead[];
+  opportunities: SeoOpportunity[];
+  followUps: SeoFollowUp[];
+  handovers: SeoHandoverRequest[];
 };
 
 export type SeoPnlSummary = {

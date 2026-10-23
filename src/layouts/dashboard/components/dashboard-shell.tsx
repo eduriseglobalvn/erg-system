@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-keys";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { AppSidebar } from "@/components/app-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { CreateEducationUnitDialog } from "@/features/lcms/admin-operations";
 import { DashboardContextBar } from "@/layouts/dashboard/components/dashboard-context-bar";
 import { buildDashboardSections, type DashboardScopeMode } from "@/layouts/dashboard/config/dashboard-navigation";
@@ -30,6 +29,8 @@ import type { ContentScope, DashboardUserPermissions, ManagementScope } from "@/
 
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { createPersistedStore } from "@/stores/persisted-store";
 
@@ -70,18 +71,20 @@ function scopesEqual(left: ManagementScope | null | undefined, right: Management
 }
 
 export function DashboardShell() {
-  const { actions: authActions } = useAuthSession();
+  const { actions: authActions, account } = useAuthSession();
   const { t } = useI18n();
   const apiBacked = hasApiBase();
+  const fixturesEnabled = runtimeFixturesEnabled();
+  const tenantId = getDefaultTenantId();
   const storedContext = useMemo(() => readStoredDashboardContext(), []);
   const [createdSchools, setCreatedSchools] = useState<ClassroomSchool[]>([]);
   const [createdCenterIds, setCreatedCenterIds] = useState<string[]>([]);
   const [selectedManagementScope, setManagementScope] = useState<ManagementScope | null>(() =>
-    storedContext.managementScope ?? (apiBacked ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
+    storedContext.managementScope ?? (apiBacked || !fixturesEnabled ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
   );
   const bootstrapQuery = useQuery({
-    queryKey: queryKeys.dashboard.bootstrap(),
-    queryFn: loadLmsDashboardBootstrap,
+    queryKey: queryKeys.dashboard.bootstrap("lms", tenantId, account?.id),
+    queryFn: ({ signal }) => loadLmsDashboardBootstrap(signal),
     enabled: apiBacked,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -90,21 +93,24 @@ export function DashboardShell() {
   const bootstrapData = bootstrapQuery.data;
   const bootstrapPermissions = useMemo<DashboardUserPermissions>(
     () => bootstrapData?.permissions ?? {
-      canAccessGlobalErg: !apiBacked,
-      assignedCenterIds: apiBacked ? [] : classroomSchools.map((school) => school.id),
+      canAccessGlobalErg: fixturesEnabled && !apiBacked,
+      assignedCenterIds: apiBacked || !fixturesEnabled ? [] : classroomSchools.map((school) => school.id),
+      roles: apiBacked || !fixturesEnabled ? [] : ["teacher", "lms_teacher_standard"],
+      grantedPermissions: apiBacked || !fixturesEnabled ? [] : ["lms.*", "account.self.*"],
+      deniedPermissions: [],
     },
-    [apiBacked, bootstrapData?.permissions],
+    [apiBacked, bootstrapData?.permissions, fixturesEnabled],
   );
   const schools = useMemo(() => {
-    const baseSchools = bootstrapData?.schools ?? (apiBacked ? [] : classroomSchools);
+    const baseSchools = bootstrapData?.schools ?? (fixturesEnabled && !apiBacked ? classroomSchools : []);
     return createdSchools.reduce(
       (nextSchools, school) => (nextSchools.some((item) => item.id === school.id) ? nextSchools : [...nextSchools, school]),
       baseSchools,
     );
-  }, [apiBacked, bootstrapData?.schools, createdSchools]);
+  }, [apiBacked, bootstrapData?.schools, createdSchools, fixturesEnabled]);
   const manageableUnits = bootstrapData?.manageableUnits ?? [];
   const systemUnits = bootstrapData?.systemUnits ?? [];
-  const classes = bootstrapData?.classes ?? (apiBacked ? [] : classroomSnapshots);
+  const classes = bootstrapData?.classes ?? (fixturesEnabled && !apiBacked ? classroomSnapshots : []);
   const currentUserPermissions = useMemo<DashboardUserPermissions>(
     () => ({
       ...bootstrapPermissions,
@@ -156,12 +162,12 @@ export function DashboardShell() {
   const visibleSchools = currentUserPermissions.canAccessGlobalErg
     ? schools
     : schools.filter((school) => allowedSchoolIds.includes(school.id));
-  const selectedSchoolId = managementScope.centerId ?? defaultSchoolId;
-  const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? classroomSchools[0]!;
+  const selectedSchoolId = managementScope.centerId ?? (fixturesEnabled ? defaultSchoolId : "");
+  const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0];
   const selectedClassOptions = classes.filter((classroom) => classroom.schoolId === selectedSchoolId);
   const firstClassInSchool = selectedClassOptions[0];
   const selectedClassId =
-    managementScope.level === "class" ? managementScope.classId : firstClassInSchool?.id ?? defaultClassId;
+    managementScope.level === "class" ? managementScope.classId : firstClassInSchool?.id ?? (fixturesEnabled ? defaultClassId : "");
   const isSchoolDenied =
     managementScope.level !== "global" &&
     !currentUserPermissions.canAccessGlobalErg &&
@@ -170,7 +176,7 @@ export function DashboardShell() {
   const contentScope: ContentScope =
     managementScope.level === "global"
       ? { type: "global" }
-      : { type: "center", centerId: selectedSchool.id, centerName: selectedSchool.name };
+      : { type: "center", centerId: selectedSchool?.id ?? managementScope.centerId, centerName: selectedSchool?.name ?? "Phạm vi hiện tại" };
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(`(max-width: ${COMPACT_DASHBOARD_BREAKPOINT - 1}px)`);
@@ -283,6 +289,7 @@ export function DashboardShell() {
       averageScore: 0,
       overdueAssignments: 0,
       flaggedStudents: 0,
+      metricsAvailable: false,
     };
 
     setCreatedSchools((current) => (current.some((school) => school.id === nextSchool.id) ? current : [...current, nextSchool]));
@@ -293,6 +300,8 @@ export function DashboardShell() {
   const dashboardContent = (
     <DashboardContent
       activeLeaf={activeLeaf}
+      adminCenters={schools}
+      adminClasses={classes}
       canAccessGlobalErg={currentUserPermissions.canAccessGlobalErg}
       contentScope={contentScope}
       deniedSchoolName={isSchoolDenied ? selectedSchool?.name : undefined}
@@ -307,7 +316,17 @@ export function DashboardShell() {
   );
 
   return (
-    <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-[#f4f8fd] text-slate-950">
+    <Box
+      sx={{
+        bgcolor: "background.default",
+        color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
+        height: "100dvh",
+        maxHeight: "100dvh",
+        overflow: "hidden",
+      }}
+    >
       <DashboardContextBar
       canAccessGlobalErg={currentUserPermissions.canAccessGlobalErg}
       activePortal={activePortal}
@@ -323,31 +342,59 @@ export function DashboardShell() {
         selectedClassId={selectedClassId}
         selectedSchoolId={selectedSchoolId}
       />
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        <SidebarProvider open={sidebarOpen} onOpenChange={setSidebarOpen} className="h-full">
-          <SidebarTrigger
-            aria-label={t("sidebar.expandMenu")}
-            className="fixed left-3 top-3 z-50 border border-slate-200 bg-white text-slate-700 shadow-sm md:hidden"
-          />
+      <Box sx={{ display: "flex", flex: 1, minHeight: 0, overflow: "hidden" }}>
+        <IconButton
+          aria-label={t("sidebar.expandMenu")}
+          onClick={() => setSidebarOpen(true)}
+          sx={{
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            display: { xs: "inline-flex", md: "none" },
+            left: 12,
+            position: "fixed",
+            top: 12,
+            zIndex: (theme) => theme.zIndex.drawer + 2,
+          }}
+        >
+          <MenuRoundedIcon />
+        </IconButton>
+
+        <Box sx={{ display: { xs: "none", md: "block" }, height: "100%" }}>
           <AppSidebar
             activeLeafId={activeLeaf.id}
             dashboardSections={dashboardSections}
             onSelectLeaf={openLeaf}
           />
-          <SidebarInset className="min-h-0 flex-1 overflow-hidden">
-            <div className="flex h-full min-h-0 flex-col">
-              <div className="min-h-0 flex-1 overflow-hidden">
-                {dashboardContent}
-              </div>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </div>
+        </Box>
+
+        <Drawer
+          onClose={() => setSidebarOpen(false)}
+          open={sidebarOpen}
+          slotProps={{ paper: { sx: { width: 280 } } }}
+          sx={{ display: { xs: "block", md: "none" } }}
+        >
+          <Box sx={{ height: "100%" }}>
+            <AppSidebar
+              activeLeafId={activeLeaf.id}
+              dashboardSections={dashboardSections}
+              onSelectLeaf={(leafId) => {
+                openLeaf(leafId);
+                setSidebarOpen(false);
+              }}
+            />
+          </Box>
+        </Drawer>
+
+        <Box component="main" sx={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          {dashboardContent}
+        </Box>
+      </Box>
       <CreateEducationUnitDialog
         open={createEducationUnitOpen}
         onOpenChange={setCreateEducationUnitOpen}
         onCreated={handleEducationUnitCreated}
       />
-    </div>
+    </Box>
   );
 }

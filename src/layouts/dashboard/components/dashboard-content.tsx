@@ -1,56 +1,106 @@
-import {
-  ClassListWorkspace,
-  ClassReportsWorkspace,
-  ClassStudentsWorkspace,
-  OverviewWorkspace,
-} from "@/features/lms/classroom";
-import { AdminOperationsWorkspace } from "@/features/lcms/admin-operations";
-import { DashboardPlaceholderWorkspace } from "@/layouts/dashboard/components/dashboard-placeholder-workspace";
-import { QuizEditorWorkspace } from "@/layouts/dashboard/components/quiz-editor-workspace";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { lazy, Suspense, type ComponentType } from "react";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
-import { PublicDisclosureAdminWorkspace } from "@/features/lcms/public-disclosure";
-import { QuestionBankWorkspace } from "@/features/lcms/quiz/question-bank";
+import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
-import { SeoCrmWorkspace } from "@/features/crm/seo";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 
-export function DashboardContent({
+const AdminOperationsWorkspace = lazyNamed(
+  () => import("@/features/lcms/admin-operations/components/admin-operations-workspace"),
+  "AdminOperationsWorkspace",
+);
+const ClassListWorkspace = lazyNamed(
+  () => import("@/features/lms/classroom/components/class-list-workspace"),
+  "ClassListWorkspace",
+);
+const ClassReportsWorkspace = lazyNamed(
+  () => import("@/features/lms/classroom/components/class-reports-workspace"),
+  "ClassReportsWorkspace",
+);
+const ClassStudentsWorkspace = lazyNamed(
+  () => import("@/features/lms/classroom/components/class-students-workspace"),
+  "ClassStudentsWorkspace",
+);
+const DashboardPlaceholderWorkspace = lazyNamed(
+  () => import("@/layouts/dashboard/components/dashboard-placeholder-workspace"),
+  "DashboardPlaceholderWorkspace",
+);
+const OverviewWorkspace = lazyNamed(
+  () => import("@/features/lms/classroom/components/overview-workspace"),
+  "OverviewWorkspace",
+);
+const QuestionBankWorkspace = lazyNamed(
+  () => import("@/features/lcms/quiz/question-bank/components/question-bank-workspace"),
+  "QuestionBankWorkspace",
+);
+const QuizEditorWorkspace = lazyNamed(
+  () => import("@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace"),
+  "QuizEditorWorkspace",
+);
+const SeoCrmWorkspace = lazyNamed(
+  () => import("@/features/crm/seo/components/seo-crm-workspace"),
+  "SeoCrmWorkspace",
+);
+
+function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(loader: () => Promise<T>, key: K) {
+  return lazy(async () => ({ default: (await loader())[key] as ComponentType<any> }));
+}
+
+export function DashboardContent(props: Parameters<typeof DashboardContentInner>[0]) {
+  return (
+    <Suspense fallback={<DashboardContentFallback />}>
+      <DashboardContentInner {...props} />
+    </Suspense>
+  );
+}
+
+function DashboardContentInner({
   activeLeaf,
-  canAccessGlobalErg,
+  adminCenters = [],
+  adminClasses = [],
   contentScope,
   deniedSchoolName,
   managementScope,
   onOpenLeaf,
+  onOpenQuiz,
   pendingQuestionImports,
+  quizEditorQuizId,
   selectedClassId,
   selectedSchoolId,
   onQuestionImportsHandled,
   onCreateQuizFromBank,
 }: {
   activeLeaf: DashboardLeaf;
+  adminCenters?: ClassroomSchool[];
+  adminClasses?: ClassroomSnapshot[];
   canAccessGlobalErg: boolean;
   contentScope: ContentScope;
   deniedSchoolName?: string;
   managementScope: ManagementScope;
   onOpenLeaf: (leafId: string) => void;
+  onOpenQuiz?: (quizId: string) => void;
   pendingQuestionImports: QuestionBankQuestion[];
+  quizEditorQuizId?: string | null;
   selectedClassId: string;
   selectedSchoolId: string;
   onQuestionImportsHandled: () => void;
-  onCreateQuizFromBank: (questions: QuestionBankQuestion[]) => void;
+  onCreateQuizFromBank: (questions: QuestionBankQuestion[], options?: CreateQuizFromBankOptions) => void;
 }) {
   if (deniedSchoolName) {
     return <AccessDeniedWorkspace deniedSchoolName={deniedSchoolName} />;
   }
 
   if (activeLeaf.variant.startsWith("admin-")) {
-    if (activeLeaf.variant === "admin-public-disclosure") {
-      return <PublicDisclosureAdminWorkspace embedded />;
-    }
-
     return (
       <AdminOperationsWorkspace
         activeLeaf={activeLeaf}
+        centers={adminCenters}
+        classes={adminClasses}
         managementScope={managementScope}
         onOpenLeaf={onOpenLeaf}
       />
@@ -63,13 +113,14 @@ export function DashboardContent({
 
   if (activeLeaf.variant === "quiz-editor") {
     return (
-      <div className="flex h-full min-h-0 min-w-0 flex-1 overflow-hidden bg-background pl-1">
+      <Box sx={{ bgcolor: "background.default", flex: 1, height: "100%", minHeight: 0, minWidth: 0, overflow: "hidden", pl: 0.5 }}>
         <QuizEditorWorkspace
           activeLeaf={activeLeaf}
+          quizId={quizEditorQuizId}
           pendingImportedQuestions={pendingQuestionImports}
           onImportedQuestionsHandled={onQuestionImportsHandled}
         />
-      </div>
+      </Box>
     );
   }
 
@@ -77,6 +128,8 @@ export function DashboardContent({
     return (
       <OverviewWorkspace
         activeLeaf={activeLeaf}
+        schools={adminCenters}
+        snapshots={adminClasses}
         managementScope={managementScope}
         mode="center"
         onOpenLeaf={onOpenLeaf}
@@ -89,6 +142,8 @@ export function DashboardContent({
     return (
       <OverviewWorkspace
         activeLeaf={activeLeaf}
+        schools={adminCenters}
+        snapshots={adminClasses}
         managementScope={managementScope}
         mode="school"
         onOpenLeaf={onOpenLeaf}
@@ -101,9 +156,9 @@ export function DashboardContent({
     return (
       <QuestionBankWorkspace
         activeLeaf={activeLeaf}
-        canManageGlobalContent={canAccessGlobalErg}
         contentScope={contentScope}
         onCreateQuiz={onCreateQuizFromBank}
+        onOpenQuiz={onOpenQuiz}
       />
     );
   }
@@ -125,6 +180,8 @@ export function DashboardContent({
         activeLeaf={activeLeaf}
         mode={activeLeaf.variant === "class-active" ? "active" : "ended"}
         onOpenLeaf={onOpenLeaf}
+        schools={adminCenters}
+        snapshots={adminClasses}
         selectedSchoolId={selectedSchoolId}
       />
     );
@@ -135,6 +192,7 @@ export function DashboardContent({
       <ClassReportsWorkspace
         activeLeaf={activeLeaf}
         onOpenLeaf={onOpenLeaf}
+        snapshots={adminClasses}
         selectedClassId={selectedClassId}
         selectedSchoolId={selectedSchoolId}
       />
@@ -144,19 +202,57 @@ export function DashboardContent({
   return <DashboardPlaceholderWorkspace activeLeaf={activeLeaf} onOpenLeaf={onOpenLeaf} />;
 }
 
+function DashboardContentFallback() {
+  return (
+    <Stack spacing={1.5} sx={{ p: 2.5 }}>
+      <Skeleton height={36} variant="rounded" width="35%" />
+      <Skeleton height={180} variant="rounded" />
+      <Skeleton height={180} variant="rounded" />
+    </Stack>
+  );
+}
+
 function AccessDeniedWorkspace({ deniedSchoolName }: { deniedSchoolName: string }) {
   return (
-    <main className="flex h-full items-center justify-center overflow-y-auto bg-slate-50 px-5 py-8">
-      <section className="w-full max-w-[720px] rounded-lg border border-rose-200 bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto grid h-14 w-14 place-items-center rounded-lg bg-rose-50 text-xl font-semibold text-rose-700">
+    <Box
+      component="main"
+      sx={{
+        alignItems: "center",
+        bgcolor: "#F8FAFC",
+        display: "flex",
+        height: "100%",
+        justifyContent: "center",
+        overflowY: "auto",
+        px: 2.5,
+        py: 4,
+      }}
+    >
+      <Paper sx={{ maxWidth: 720, p: 4, textAlign: "center", width: "100%" }}>
+        <Box
+          sx={{
+            alignItems: "center",
+            bgcolor: "rgba(255, 86, 48, 0.12)",
+            borderRadius: 1,
+            color: "#B71D18",
+            display: "grid",
+            fontSize: 20,
+            fontWeight: 600,
+            height: 56,
+            justifyContent: "center",
+            mx: "auto",
+            width: 56,
+          }}
+        >
           403
-        </div>
-        <h1 className="mt-5 text-xl font-semibold text-slate-950">Access denied</h1>
-        <p className="mt-3 text-sm leading-6 text-[var(--muted-foreground)]">
+        </Box>
+        <Typography component="h1" sx={{ color: "#0F172A", fontSize: 20, fontWeight: 600, mt: 2.5 }}>
+          Access denied
+        </Typography>
+        <Typography sx={{ color: "#637381", fontSize: 14, lineHeight: "24px", mt: 1.5 }}>
           Tài khoản giáo viên hiện tại chưa có quyền truy cập dữ liệu của <strong>{deniedSchoolName}</strong>.
           Vui lòng chọn trường được cấp quyền ở menu bên trái hoặc liên hệ quản trị viên để mở quyền.
-        </p>
-      </section>
-    </main>
+        </Typography>
+      </Paper>
+    </Box>
   );
 }

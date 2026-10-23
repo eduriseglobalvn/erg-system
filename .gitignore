@@ -1,4 +1,4 @@
-﻿# Logs
+# Logs
 logs
 *.log
 npm-debug.log*
@@ -10,19 +10,65 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-portable
+src-tauri/tauri.portable.generated.json
+src-tauri/tauri.release.generated.json
+src-tauri/target
+deploy/desktop/releases/*.exe
+deploy/desktop/releases/*.msi
+deploy/desktop/releases/*.dmg
+deploy/desktop/releases/*.sig
 *.local
 certs/
 .codex-*.png
 .codex-chrome-*/
+.codex-qa/**/chrome-profile*/
 .omc/
+docs/**
+!docs/architecture/
+!docs/architecture/cross-repo-contract-release-protocol.md
+!docs/architecture/frontend-repository-ownership.md
+!docs/architecture/crm-api-query-cache-audit.md
+!docs/architecture/elearning-api-query-offline-audit.md
+
+# Env (bổ sung tường minh ngoài *.local)
+.env
+.env.*
+!.env.example
+
+# Test / build output
+coverage/
+test-results/
+.vite/
+.playwright-mcp/
+.playwright-screens/
+
+# QA / debug artifacts
+.agent-artifacts/
+.codex-qa/
+.codex-tmp/
+.codex-*.log
+tmp/
+.tmp-*.png
+.tmp-*.log
+.vitest-report*
+capture-quiz.mjs
+centerup-*.png
+centerup-*.json
+centerup-*.html
+lcms-*.png
+menu-*.png
+quiz-*.png
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
 .DS_Store
+Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.superpowers/

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "__ERG_UPDATER_PUBLIC_KEY__",
+      "endpoints": [
+        "https://releases.erg.edu.vn/desktop/feed/{{target}}/{{arch}}/{{current_version}}.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
+}

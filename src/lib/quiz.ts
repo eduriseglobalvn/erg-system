@@ -299,6 +299,19 @@ export function normalizeAnswerForSubmission(question: Question, answer?: Answer
 }
 
 function pointInArea(point: HotspotPoint, area: HotspotArea): boolean {
+  if (area.shape === "ellipse") {
+    const radiusX = area.width / 2;
+    const radiusY = area.height / 2;
+    if (radiusX <= 0 || radiusY <= 0) return false;
+
+    const centerX = area.x + radiusX;
+    const centerY = area.y + radiusY;
+    const normalizedX = (point.x - centerX) / radiusX;
+    const normalizedY = (point.y - centerY) / radiusY;
+
+    return normalizedX * normalizedX + normalizedY * normalizedY <= 1;
+  }
+
   return (
     point.x >= area.x &&
     point.x <= area.x + area.width &&

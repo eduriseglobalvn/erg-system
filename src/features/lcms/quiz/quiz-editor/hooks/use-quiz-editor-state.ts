@@ -6,6 +6,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tr } from "@/platform/i18n";
 import { createQuizSlideFromBankQuestion } from "@/features/lcms/quiz/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
   createMockChoice,
   createMockFeedbackRows,
@@ -19,6 +20,7 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
 import type {
   IntroSlideKind,
+  QuestionCreationPreset,
   QuestionType,
   QuizEditorChoice,
   QuizEditorDragDropItem,
@@ -141,11 +143,8 @@ export function useQuizEditorState() {
     setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: nextSlide.id });
   }
 
-  function importQuestionBankQuestions(questions: QuestionBankQuestion[]) {
-    if (!questions.length) return;
-
-    const targetGroupId = resolveTargetGroupId();
-    const importedSlides = questions.map((question) =>
+  function createSlidesFromQuestionBank(questions: QuestionBankQuestion[]) {
+    return questions.map((question) =>
       createQuizSlideFromBankQuestion(question, createId, {
         questionFont: quizProject.questionDefaults.questionFont,
         answerFont: quizProject.questionDefaults.answerFont,
@@ -156,6 +155,13 @@ export function useQuizEditorState() {
         incorrectFeedback: quizProject.questionDefaults.incorrectFeedback,
       }),
     );
+  }
+
+  function importQuestionBankQuestions(questions: QuestionBankQuestion[]) {
+    if (!questions.length) return;
+
+    const targetGroupId = resolveTargetGroupId();
+    const importedSlides = createSlidesFromQuestionBank(questions);
 
     setGroups((currentGroups) =>
       currentGroups.map((group) =>
@@ -165,7 +171,37 @@ export function useQuizEditorState() {
     setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: importedSlides[0]!.id });
   }
 
-  function addQuestion(type: QuestionType) {
+  function replaceWithQuestionBankQuestions(questions: QuestionBankQuestion[], title = "Question bank") {
+    const importedSlides = createSlidesFromQuestionBank(questions);
+    const selectedGroupId = groups.find((group) => group.id === "group-1")?.id ?? groups.find((group) => group.id !== "group-intro")?.id ?? "group-1";
+
+    setGroups((currentGroups) => {
+      const hasQuestionGroup = currentGroups.some((group) => group.id === selectedGroupId);
+      const nextGroups = currentGroups.map((group) => {
+        if (group.id !== selectedGroupId) return group;
+        return { ...group, title, slides: importedSlides };
+      });
+
+      if (hasQuestionGroup) return nextGroups;
+      return [
+        ...nextGroups,
+        {
+          id: selectedGroupId,
+          title,
+          rule: "all",
+          randomCount: 0,
+          slides: importedSlides,
+        },
+      ];
+    });
+
+    setSelectedNode(
+      importedSlides[0]
+        ? { type: "slide", groupId: selectedGroupId, slideId: importedSlides[0].id }
+        : { type: "group", groupId: selectedGroupId },
+    );
+  }
+  function addQuestion(type: QuestionType, preset?: QuestionCreationPreset) {
     const defaultFeedbackRows = createFeedbackRows(
       quizProject.questionDefaults.correctFeedback,
       quizProject.questionDefaults.incorrectFeedback,
@@ -175,9 +211,33 @@ export function useQuizEditorState() {
         : { ...row, score: quizProject.questionDefaults.negativePoints },
     );
 
+    const choices =
+      preset === "yes-no"
+        ? [
+            createChoice(createId("choice"), tr("player.yes"), true),
+            createChoice(createId("choice"), tr("player.no"), false),
+          ]
+        : [
+            createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
+            createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
+            createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
+          ];
+
+    const isMatchQuestion = type === "matching" || type === "drag-and-drop";
+    const matchItems: QuizEditorDragDropItem[] = [
+      {
+        id: createId("item"),
+        label: "",
+        emoji: "",
+        target: "",
+        media: null,
+        targetMedia: null,
+      },
+    ];
+
     insertSlide({
       id: createId("slide"),
-      title: tr("quiz.newQuestionTitle"),
+      title: isMatchQuestion ? "" : tr("quiz.newQuestionTitle"),
       kind: type,
       textStyle: {
         ...defaultQuizTextStyle,
@@ -189,14 +249,12 @@ export function useQuizEditorState() {
         },
       },
       choiceControlType: type === "multiple-choice" || type === "true-false" ? "radio" : "checkbox",
-      choices: [
-        createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
-        createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
-        createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
-      ],
+      choices: isMatchQuestion ? [] : choices,
+      dragDropItems: isMatchQuestion ? matchItems : undefined,
       feedbackRows: defaultFeedbackRows,
       options: createQuestionOptions({
         shuffleAnswers: quizProject.questionDefaults.shuffleAnswers,
+        matchingAuthoringMode: isMatchQuestion ? "edit" : undefined,
       }),
     });
   }
@@ -587,6 +645,24 @@ export function useQuizEditorState() {
     setPlayerTemplate(nextPlayerTemplate);
   }
 
+  function hydrateDraftDocument(draft: QuizEditorDraftDocument) {
+    const firstGroup = draft.tree[0] ?? null;
+    const firstSlide = firstGroup?.slides[0] ?? null;
+
+    setGroups(draft.tree);
+    setQuizProject(draft.settings);
+    setPlayerTemplate(draft.playerTemplate);
+    setResultSlide(createMockResultSlide());
+    setSelectedThemeId(defaultQuizTheme.id);
+    setSelectedNode(
+      firstGroup && firstSlide
+        ? { type: "slide", groupId: firstGroup.id, slideId: firstSlide.id }
+        : firstGroup
+          ? { type: "group", groupId: firstGroup.id }
+          : createMockSelectedEditorNode(),
+    );
+  }
+
   function updateSelectedSlideTextStyle(patch: Partial<QuizEditorTextStyle>) {
     if (!selectedSlide) return;
 
@@ -830,6 +906,7 @@ export function useQuizEditorState() {
     expandAllGroups,
     addQuestion,
     importQuestionBankQuestions,
+    replaceWithQuestionBankQuestions,
     addIntroduction,
     addQuestionGroup,
     copySelected,
@@ -856,6 +933,7 @@ export function useQuizEditorState() {
     updateSelectedResultTab,
     updateQuizProject,
     updatePlayerTemplate,
+    hydrateDraftDocument,
     setSelectedThemeId,
   };
 }

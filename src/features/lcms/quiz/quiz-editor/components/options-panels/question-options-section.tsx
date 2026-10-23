@@ -24,11 +24,6 @@ const branchingOptions = [
   { value: "By answer", labelKey: "quiz.optionByAnswer" },
 ] as const;
 
-const scoreOptions = [
-  { value: "By Result", labelKey: "common.byResult" },
-  { value: "Custom", labelKey: "quiz.optionCustom" },
-] as const;
-
 const dragSnapOptions = [
   { value: "Any drop target", labelKey: "common.anyDropTarget" },
   { value: "Correct only", labelKey: "quiz.optionCorrectOnly" },
@@ -79,10 +74,6 @@ export function QuestionOptionsSection({
   const branchingValue = normalizeSelectValue(options?.branching, "By Result", {
     [t("common.byResult")]: "By Result",
     [t("quiz.optionByAnswer")]: "By answer",
-  });
-  const scoreValue = normalizeSelectValue(options?.score, "By Result", {
-    [t("common.byResult")]: "By Result",
-    [t("quiz.optionCustom")]: "Custom",
   });
   const dragSnapValue = normalizeSelectValue(options?.dragDrop?.snapTo, "Any drop target", {
     [t("common.anyDropTarget")]: "Any drop target",
@@ -151,19 +142,6 @@ export function QuestionOptionsSection({
             </AppSelect>
           </OptionRow>
         ) : null}
-        <OptionRow label={t("common.score")}>
-          <AppSelect
-            className="classic-editor__select"
-            value={scoreValue}
-            onChange={(event) => onUpdateOptions({ score: event.target.value })}
-          >
-            {scoreOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {t(option.labelKey)}
-              </option>
-            ))}
-          </AppSelect>
-        </OptionRow>
         <OptionRow label={t("common.attempts")}>
           <AppSelect
             className="classic-editor__select"

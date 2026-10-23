@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Search } from "lucide-react";
+import AlertTriangle from "@mui/icons-material/WarningAmber";
+import RefreshCw from "@mui/icons-material/Refresh";
+import Search from "@mui/icons-material/Search";
 import { queryKeys } from "@/lib/query-keys";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { QUERY_POLICIES } from "@/lib/query-policy";
+import Button from "@mui/material/Button";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import {
   AccessSection,
@@ -29,6 +35,8 @@ import {
   type EffectiveAccess,
   type UserAccessPolicy,
 } from "@/features/lcms/admin-operations/api/access-management-api";
+import { createTeacherAccount, type CreateTeacherAccountResponse } from "@/features/lcms/admin-operations/api/teacher-account-api";
+import { CreateTeacherAccountDialog } from "@/features/lcms/admin-operations/components/create-teacher-account-dialog";
 import {
   assignAdminUserRoles,
   getAdminUser,
@@ -52,6 +60,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
+import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 
 export function UserAccessControlWorkspace({
   defaultSection = "profile",
@@ -61,6 +70,8 @@ export function UserAccessControlWorkspace({
   scopeDescription?: string;
 }) {
   const queryClient = useQueryClient();
+  const tenantId = getDefaultTenantId();
+  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
   const [users, setUsers] = useState<AccessManagedUser[]>([]);
   const [options, setOptions] = useState<AccessManagementOptions | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -89,6 +100,8 @@ export function UserAccessControlWorkspace({
   const [savingAccess, setSavingAccess] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [retryToken, setRetryToken] = useState(0);
+  const [createTeacherDialogOpen, setCreateTeacherDialogOpen] = useState(false);
   const debouncedQuery = useDebouncedValue(query);
   const debouncedScopeSearch = useDebouncedValue(scopeSearch);
   const paceStateUpdate = usePacedStateBatch();
@@ -105,7 +118,10 @@ export function UserAccessControlWorkspace({
   const accessMutation = useMutation({
     mutationFn: ({ userId, policies }: { userId: string; policies: UserAccessPolicy[] }) => saveUserAccess(userId, { policies }),
   });
-
+  const provisionTeacherMutation = useMutation({
+    mutationKey: queryKeys.adminOperations.userAccess.provision(tenantId, accountId),
+    mutationFn: createTeacherAccount,
+  });
 
   useEffect(() => {
     paceStateUpdate(() => setActiveSection(defaultSection));
@@ -121,14 +137,14 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status),
-        queryFn: () => listAccessManagedUsers({ search: debouncedQuery, status, page: 1, limit: 100 }),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId),
+        queryFn: ({ signal }) => listAccessManagedUsers({ search: debouncedQuery, status, page: 1, limit: 100 }, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.options(),
-        queryFn: getAccessManagementOptions,
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.options(tenantId, accountId),
+        queryFn: ({ signal }) => getAccessManagementOptions(signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
     ])
       .then(([userList, accessOptions]) => {
@@ -150,7 +166,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, paceStateUpdate, queryClient, status]);
+  }, [accountId, debouncedQuery, paceStateUpdate, queryClient, retryToken, status, tenantId]);
 
   useEffect(() => {
     if (!selectedUserId) {
@@ -174,14 +190,14 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.detailAccess(selectedUserId),
-        queryFn: () => getUserAccess(selectedUserId),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.detailAccess(selectedUserId, tenantId, accountId),
+        queryFn: ({ signal }) => getUserAccess(selectedUserId, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.detailUser(selectedUserId),
-        queryFn: () => getAdminUser(selectedUserId),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.detailUser(selectedUserId, tenantId, accountId),
+        queryFn: ({ signal }) => getAdminUser(selectedUserId, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
     ])
       .then(([accessDetail, userDetail]) => {
@@ -202,7 +218,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [paceStateUpdate, queryClient, selectedUserId]);
+  }, [accountId, paceStateUpdate, queryClient, selectedUserId, tenantId]);
 
   useEffect(() => {
     if (!policies.length) {
@@ -216,9 +232,9 @@ export function UserAccessControlWorkspace({
     let cancelled = false;
     queryClient
       .fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.preview(policies),
-        queryFn: () => previewUserAccess({ policies }),
-        staleTime: 30_000,
+        queryKey: queryKeys.adminOperations.userAccess.preview(policies, tenantId, accountId),
+        queryFn: ({ signal }) => previewUserAccess({ policies }, signal),
+        staleTime: QUERY_POLICIES.realtime.staleTime,
       })
       .then((result) => {
         if (!cancelled) setEffective(result);
@@ -228,7 +244,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [options?.modules, paceStateUpdate, policies, queryClient, selectedUserDetail, selectedUserId, users]);
+  }, [accountId, options?.modules, paceStateUpdate, policies, queryClient, selectedUserDetail, selectedUserId, tenantId, users]);
 
   useEffect(() => {
     if (!draft.scopeType) {
@@ -245,9 +261,9 @@ export function UserAccessControlWorkspace({
     });
     queryClient
       .fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.scopes(draft.scopeType, debouncedScopeSearch),
-        queryFn: () => listAccessScopes({ scopeType: draft.scopeType, search: debouncedScopeSearch, page: 1, limit: 20 }),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.scopes(draft.scopeType, debouncedScopeSearch, tenantId, accountId),
+        queryFn: ({ signal }) => listAccessScopes({ scopeType: draft.scopeType, search: debouncedScopeSearch, page: 1, limit: 20 }, signal),
+        staleTime: QUERY_POLICIES.transactional.staleTime,
       })
       .then((result) => {
         if (cancelled) return;
@@ -264,7 +280,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [debouncedScopeSearch, draft.scopeType, paceStateUpdate, queryClient]);
+  }, [accountId, debouncedScopeSearch, draft.scopeType, paceStateUpdate, queryClient, tenantId]);
 
   const selectedListUser = users.find((user) => user.id === selectedUserId);
   const selectedUser = selectedUserId ? mergeUser(selectedListUser, selectedUserDetail) : null;
@@ -275,6 +291,20 @@ export function UserAccessControlWorkspace({
   const scopeOptions = draft.scopeType ? scopeResults : [];
   const superAdmin = isSuperAdmin(selectedUser);
   const rootAdmin = isRootAdmin(selectedUser);
+  const hasLoadError = Boolean(error && !loadingUsers && users.length === 0);
+
+  function retryLoadUsers() {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.options(tenantId, accountId) });
+    setRetryToken((current) => current + 1);
+  }
+
+  function handleTeacherCreated(response: CreateTeacherAccountResponse) {
+    setSelectedUserId(response.user.id);
+    setNotice("Tài khoản giáo viên đã được tạo. Trạng thái onboarding sẽ do backend quản lý.");
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId) });
+    setRetryToken((current) => current + 1);
+  }
 
   function applyUserDetail(userDetail: AdminUserDetail) {
     setSelectedUserDetail(userDetail);
@@ -330,7 +360,7 @@ export function UserAccessControlWorkspace({
         modules: draft.modules,
       },
     ]);
-    setNotice("Đã thêm quyền vào bản nháp. Bấm Lưu phân quyền để áp dụng.");
+    setNotice("Đã thêm cấu hình quyền vào bản nháp. Hãy bấm 'Lưu phân quyền' để áp dụng chính thức.");
   }
 
   async function persistProfile() {
@@ -340,9 +370,9 @@ export function UserAccessControlWorkspace({
     setNotice("");
     try {
       applyUserDetail(await profileMutation.mutateAsync({ userId: selectedUserId, draft: profileDraft }));
-      setNotice("Đã cập nhật thông tin thành viên.");
+      setNotice("Đã cập nhật hồ sơ thành viên thành công.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không thể cập nhật thông tin thành viên.");
+      setError(err instanceof Error ? err.message : "Không thể cập nhật hồ sơ thành viên.");
     } finally {
       setSavingProfile(false);
     }
@@ -355,7 +385,7 @@ export function UserAccessControlWorkspace({
     setNotice("");
     try {
       applyUserDetail(await rolesMutation.mutateAsync({ userId: selectedUserId, roles: roleDraft }));
-      setNotice("Đã cập nhật vai trò đăng nhập.");
+      setNotice("Đã cập nhật vai trò đăng nhập thành công.");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Không thể cập nhật vai trò.");
     } finally {
@@ -369,9 +399,9 @@ export function UserAccessControlWorkspace({
     setNotice("");
     try {
       applyUserDetail(await statusMutation.mutateAsync({ userId: selectedUserId, status: nextStatus }));
-      setNotice(nextStatus === "ACTIVE" ? "Tài khoản đã được kích hoạt." : "Tài khoản đã được khóa.");
+      setNotice(nextStatus === "ACTIVE" ? "Tài khoản đã kích hoạt thành công." : "Trạng thái tài khoản đã thay đổi.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không thể cập nhật trạng thái tài khoản.");
+      setError(err instanceof Error ? err.message : "Không thể thay đổi trạng thái tài khoản.");
     }
   }
 
@@ -386,65 +416,85 @@ export function UserAccessControlWorkspace({
       setPolicies(detail.policies);
       setEffective(detail.effective);
       setUsers((current) => sortUsers(current.map((user) => (user.id === detail.user.id ? detail.user : user))));
-      setNotice("Đã lưu phân quyền truy cập.");
+      setNotice("Đã cập nhật phân quyền truy cập thành công.");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Không thể lưu phân quyền.");
+      setError(err instanceof Error ? err.message : "Không thể lưu phân quyền truy cập.");
     } finally {
       setSavingAccess(false);
     }
   }
 
   return (
-    <div className="min-h-full overflow-hidden rounded-lg border border-[#e0e4ea] bg-white shadow-sm">
-      <header className="border-b border-[#e0e4ea] px-5 py-5 lg:px-6">
+    <div
+      className={cn(
+        "overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm",
+        hasLoadError ? "" : "flex min-h-full flex-col",
+      )}
+    >
+      <header className="border-b border-slate-200 px-6 py-5 bg-slate-50/40">
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div className="max-w-3xl">
-            <p className="text-xs font-semibold text-[var(--erg-blue)]">ERG IAM</p>
-            <h2 className="mt-2 text-xl font-semibold text-slate-950">Quản lý thành viên và quyền truy cập</h2>
-            <p className="mt-2 text-sm leading-6 text-slate-500">
-              Một nơi để xem hồ sơ, trạng thái tài khoản, vai trò đăng nhập và phạm vi LMS của từng thành viên.
+            <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--erg-blue)]">ERG Identity & Access Management</p>
+            <h2 className="mt-1.5 text-base font-bold text-slate-800">Quản lý tài khoản & phân quyền hệ thống</h2>
+            <p className="mt-1 text-xs text-slate-400">
+              Tập trung vào tài khoản nhân sự: chỉnh hồ sơ đăng nhập, active/deactive, gán vai trò và cấp quyền truy cập LMS/Content theo phạm vi hệ thống.
             </p>
-            {scopeDescription ? <p className="mt-2 text-xs font-semibold text-[var(--erg-blue)]">Phạm vi: {scopeDescription}</p> : null}
+            {scopeDescription ? <p className="mt-2 text-[10px] font-bold text-[var(--erg-blue)]">Cơ sở thụ hưởng: {scopeDescription}</p> : null}
           </div>
-          <div className="grid grid-cols-3 overflow-hidden rounded-lg border border-[#e0e4ea] bg-[#fafbfc] text-center">
-            <HeaderMetric label="Thành viên" value={String(users.length)} />
-            <HeaderMetric label="Đang hoạt động" value={String(users.filter((user) => user.status === "ACTIVE").length)} />
-            <HeaderMetric label="Chưa onboarding" value={String(users.filter((user) => !user.isProfileCompleted).length)} />
+          <div className="flex flex-wrap items-center justify-end gap-3">
+            <Button
+              disabled={!options}
+              startIcon={<PersonAddIcon />}
+              variant="contained"
+              onClick={() => setCreateTeacherDialogOpen(true)}
+            >
+              Tạo tài khoản giáo viên
+            </Button>
+            <div className="grid grid-cols-3 overflow-hidden rounded-xl border border-slate-200 bg-white text-center divide-x divide-slate-200 shadow-sm shrink-0">
+              <HeaderMetric label="Tổng tài khoản" value={String(users.length)} />
+              <HeaderMetric label="Đang active" value={String(users.filter((user) => user.status === "ACTIVE").length)} />
+              <HeaderMetric label="Chưa onboarding" value={String(users.filter((user) => !user.isProfileCompleted).length)} />
+            </div>
           </div>
         </div>
-        {error ? <Banner tone="error">{error}</Banner> : null}
+        {error && !hasLoadError ? <Banner tone="error">{error}</Banner> : null}
         {notice ? <Banner tone="success">{notice}</Banner> : null}
       </header>
 
-      <div className="grid min-h-[720px] lg:grid-cols-[360px_minmax(0,1fr)]">
-        <aside className="border-b border-slate-200 bg-slate-50/60 lg:border-b-0 lg:border-r">
-          <div className="space-y-3 border-b border-slate-200 p-4">
+      {hasLoadError ? (
+        <div className="border-t border-slate-200 bg-white p-6">
+          <UserAccessErrorState message={error} onRetry={retryLoadUsers} />
+        </div>
+      ) : (
+      <div className="grid min-h-[560px] flex-1 lg:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="border-b border-slate-200 bg-slate-50/20 lg:border-b-0 lg:border-r">
+          <div className="space-y-2.5 border-b border-slate-200 p-4 bg-white">
             <label className="relative block">
-              <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" />
               <input
-                className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white pl-9 pr-3 text-sm outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
-                placeholder="Tìm theo tên, email, số điện thoại"
+                className="h-9 w-full rounded-lg border border-[#d7e0ec] bg-slate-50/50 pl-9 pr-3 text-xs outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue)]/15 placeholder:text-slate-400 font-medium"
+                placeholder="Tìm tên, email, điện thoại..."
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
               />
             </label>
             <AppSelect
-              className="h-9 w-full rounded-md border border-[#d7e0ec] bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
+              className="h-9 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-xs font-bold text-slate-700 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue)]/15"
               value={status}
               onChange={(event) => setStatus(event.target.value)}
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="ACTIVE">Đang hoạt động</option>
-              <option value="INACTIVE">Deactive/nghỉ việc</option>
-              <option value="BLOCKED">Đã khóa</option>
-              <option value="BANNED">Banned</option>
+              <option value="INACTIVE">Ngừng hoạt động</option>
+              <option value="BLOCKED">Đang tạm khóa</option>
+              <option value="BANNED">Bị chặn vĩnh viễn</option>
               <option value="PENDING">Chờ kích hoạt</option>
             </AppSelect>
           </div>
 
-          <div className="max-h-[655px] overflow-auto p-3">
-            {loadingUsers ? <LoadingBlock label="Đang tải thành viên" /> : null}
-            {!loadingUsers && users.length === 0 ? <EmptyBlock label="Chưa có thành viên phù hợp." /> : null}
+          <div className="max-h-[520px] overflow-y-auto p-3.5 scrollbar-thin">
+            {loadingUsers ? <LoadingBlock label="Đang tải danh sách thành viên..." /> : null}
+            {!loadingUsers && users.length === 0 && !hasLoadError ? <EmptyBlock label="Không tìm thấy thành viên nào." /> : null}
             {users.map((user) => (
               <MemberRow key={user.id} user={user} active={user.id === selectedUserId} onClick={() => setSelectedUserId(user.id)} />
             ))}
@@ -453,42 +503,51 @@ export function UserAccessControlWorkspace({
 
         <main className="min-w-0 bg-white">
           {!selectedUser ? (
-            <div className="grid min-h-[540px] place-items-center p-8">
-              <EmptyBlock label="Chọn một thành viên để xem chi tiết." />
+            <div className="grid min-h-[360px] place-items-center p-8">
+              {hasLoadError ? (
+                <UserAccessErrorState message={error} onRetry={retryLoadUsers} />
+              ) : (
+                <EmptyBlock label="Chọn một thành viên từ danh sách bên trái để cấu hình chi tiết." />
+              )}
             </div>
           ) : (
-            <div className="p-5 lg:p-6">
-                <MemberDetailHeader
-                  user={selectedUser}
-                  effective={effective}
-                  loading={loadingDetail}
-                  rootAdmin={rootAdmin}
-                  superAdmin={superAdmin}
-                  onActivate={() => void persistStatus("ACTIVE")}
-                  onDeactivate={() => void persistStatus("INACTIVE")}
-                  onBan={() => void persistStatus("BANNED")}
-                  onBlock={() => void persistStatus("BLOCKED")}
+            <div className="p-6 space-y-6">
+              <MemberDetailHeader
+                user={selectedUser}
+                effective={effective}
+                loading={loadingDetail}
+                rootAdmin={rootAdmin}
+                superAdmin={superAdmin}
+                onActivate={() => void persistStatus("ACTIVE")}
+                onDeactivate={() => void persistStatus("INACTIVE")}
+                onBan={() => void persistStatus("BANNED")}
+                onBlock={() => void persistStatus("BLOCKED")}
               />
 
-              <div className="mt-5 flex flex-wrap gap-2 border-b border-slate-200">
-                {(Object.keys(sectionLabels) as WorkspaceSection[]).map((section) => (
-                  <button
-                    key={section}
-                    className={cn(
-                      "relative -mb-px h-11 rounded-t-xl px-4 text-sm font-semibold transition",
-                      activeSection === section
-                        ? "border-x border-t border-slate-200 bg-white text-slate-950"
-                        : "text-slate-500 hover:bg-slate-50 hover:text-slate-900",
-                    )}
-                    onClick={() => setActiveSection(section)}
-                  >
-                    {sectionLabels[section]}
-                  </button>
-                ))}
+              {/* Polished Tabs Section */}
+              <div className="flex border-b border-slate-200 mt-2 bg-slate-50/50 p-1 rounded-xl">
+                {(Object.keys(sectionLabels) as WorkspaceSection[]).map((section) => {
+                  const active = activeSection === section;
+                  return (
+                    <button
+                      key={section}
+                      type="button"
+                      className={cn(
+                        "flex-1 py-2 text-xs font-bold rounded-lg transition-all duration-150",
+                        active
+                          ? "bg-white text-slate-800 shadow border border-slate-200/60"
+                          : "text-slate-400 hover:text-slate-700"
+                      )}
+                      onClick={() => setActiveSection(section)}
+                    >
+                      {sectionLabels[section]}
+                    </button>
+                  );
+                })}
               </div>
 
-              <div className="mt-5 pb-8">
-                {activeSection === "profile" ? (
+              <div className="mt-4 pb-12">
+                {activeSection === "profile" && (
                   <ProfileSection
                     draft={profileDraft}
                     user={selectedUser}
@@ -496,9 +555,9 @@ export function UserAccessControlWorkspace({
                     onChange={setProfileDraft}
                     onSave={() => void persistProfile()}
                   />
-                ) : null}
+                )}
 
-                {activeSection === "roles" ? (
+                {activeSection === "roles" && (
                   <RolesSection
                     currentRoles={roleDraft}
                     rootAdmin={rootAdmin}
@@ -506,9 +565,9 @@ export function UserAccessControlWorkspace({
                     onChange={setRoleDraft}
                     onSave={() => void persistRoles()}
                   />
-                ) : null}
+                )}
 
-                {activeSection === "access" ? (
+                {activeSection === "access" && (
                   <AccessSection
                     draft={draft}
                     effective={effective}
@@ -529,11 +588,54 @@ export function UserAccessControlWorkspace({
                     onScopeSearchChange={setScopeSearch}
                     onScopeTypeChange={updateDraftScopeType}
                   />
-                ) : null}
+                )}
               </div>
             </div>
           )}
         </main>
+      </div>
+      )}
+      <CreateTeacherAccountDialog
+        open={createTeacherDialogOpen}
+        options={options ?? { modules: [], roleGroups: [], scopes: [] }}
+        onClose={() => setCreateTeacherDialogOpen(false)}
+        onCreated={handleTeacherCreated}
+        onProvision={(input) => provisionTeacherMutation.mutateAsync(input)}
+      />
+    </div>
+  );
+}
+
+function UserAccessErrorState({
+  message,
+  onRetry,
+}: {
+  message: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="w-full max-w-xl rounded-2xl border border-rose-200 bg-rose-50/70 p-5 text-left shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-rose-200 bg-white text-rose-600">
+          <AlertTriangle className="h-5 w-5" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="text-sm font-bold text-rose-900">Không tải được danh sách thành viên</h3>
+          <p className="mt-1 break-words text-xs leading-5 text-rose-700">{message}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outlined"
+              size="small"
+              onClick={onRetry}
+              startIcon={<RefreshCw className="h-3.5 w-3.5" />}
+              className="h-8 border-rose-200 bg-white text-xs font-bold text-rose-700 hover:bg-rose-100"
+            >
+              Tải lại
+            </Button>
+            <span className="text-[11px] font-semibold text-rose-700/80">Kiểm tra API IAM hoặc đăng nhập lại nếu phiên đã hết hạn.</span>
+          </div>
+        </div>
       </div>
     </div>
   );

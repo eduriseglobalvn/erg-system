@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation } from "@/routes/router-compat";
+import { useLocation } from "@tanstack/react-router";
 
 import { ERG_ASSETS, getSeoForLocation } from "@/config/seo";
 
@@ -36,7 +36,7 @@ export function AppSeo() {
 
   useEffect(() => {
     const seo = getSeoForLocation(window.location.hostname, location.pathname);
-    const url = `${window.location.origin}${location.pathname}${location.search}`;
+    const url = `${window.location.origin}${location.pathname}${location.searchStr}`;
 
     document.documentElement.lang = "vi";
     document.title = seo.title;
@@ -58,8 +58,8 @@ export function AppSeo() {
 
     upsertLink("icon", ERG_ASSETS.favicon, { type: "image/png", sizes: "32x32" });
     upsertLink("shortcut icon", ERG_ASSETS.favicon, { type: "image/png" });
-    upsertLink("apple-touch-icon", ERG_ASSETS.favicon, { sizes: "180x180" });
-  }, [location.pathname, location.search]);
+    upsertLink("apple-touch-icon", ERG_ASSETS.appleTouchIcon, { sizes: "180x180" });
+  }, [location.pathname, location.searchStr]);
 
   return null;
 }

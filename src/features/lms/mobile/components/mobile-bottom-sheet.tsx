@@ -1,7 +1,11 @@
-import { useEffect, type ReactNode } from "react";
-import { X } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import { type ReactNode, useId } from "react";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 
 export function MobileBottomSheet({
   children,
@@ -16,53 +20,46 @@ export function MobileBottomSheet({
   title: string;
   onOpenChange: (open: boolean) => void;
 }) {
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") onOpenChange(false);
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onOpenChange, open]);
-
-  if (!open) return null;
+  const titleId = useId();
+  const descriptionId = useId();
 
   return (
-    <div className="fixed inset-0 z-50 xl:hidden" role="presentation">
-      <button
-        type="button"
-        aria-label="Dong bang dieu khien"
-        className="absolute inset-0 h-full w-full bg-slate-950/45 backdrop-blur-[2px]"
-        onClick={() => onOpenChange(false)}
-      />
-      <section
-        role="dialog"
-        aria-modal="true"
-        aria-label={title}
-        className={cn(
-          "absolute inset-x-2 bottom-2 max-h-[88dvh] overflow-hidden rounded-t-[24px] rounded-b-[18px] border border-white/80 bg-white shadow-[0_-24px_70px_rgba(31,41,55,0.28),0_-2px_10px_rgba(96,165,250,0.10)]",
-          "pb-[calc(env(safe-area-inset-bottom,0px)+10px)]",
-        )}
-      >
-        <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-slate-300/90" />
-        <div className="flex min-h-14 items-start justify-between gap-3 border-b border-[#e5edf7] px-4 py-3.5">
-          <div className="min-w-0">
-            <h2 className="truncate text-[15px] font-extrabold text-slate-950">{title}</h2>
-            {description ? <p className="mt-1 text-xs font-semibold text-slate-500">{description}</p> : null}
-          </div>
-          <button
-            type="button"
-            aria-label="Dong"
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#e5edf7] bg-[#f8fbff] text-slate-600 transition hover:bg-white hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="max-h-[calc(88dvh-82px)] overflow-y-auto bg-[#f7faff] px-4 py-3">{children}</div>
-      </section>
-    </div>
+    <Drawer
+      anchor="bottom"
+      onClose={() => onOpenChange(false)}
+      open={open}
+      slotProps={{
+        backdrop: { sx: { backdropFilter: "blur(2px)", bgcolor: "rgba(15,23,42,0.45)" } },
+        paper: {
+          "aria-describedby": description ? descriptionId : undefined,
+          "aria-labelledby": titleId,
+          role: "dialog",
+          sx: {
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: "24px 24px 0 0",
+            display: { xs: "flex", xl: "none" },
+            maxHeight: "88dvh",
+            overflow: "hidden",
+            pb: "calc(env(safe-area-inset-bottom, 0px) + 10px)",
+          },
+        },
+      }}
+    >
+      <Box sx={{ bgcolor: "text.disabled", borderRadius: 4, height: 6, mt: 1.5, mx: "auto", opacity: 0.45, width: 48 }} />
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between", minHeight: 64, px: 2, py: 1.5 }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography id={titleId} noWrap sx={{ fontSize: 15, fontWeight: 800 }}>{title}</Typography>
+          {description ? <Typography color="text.secondary" id={descriptionId} sx={{ fontSize: 12, fontWeight: 600, mt: 0.5 }}>{description}</Typography> : null}
+        </Box>
+        <IconButton aria-label="Đóng" onClick={() => onOpenChange(false)} sx={{ bgcolor: "background.default", border: "1px solid", borderColor: "divider", flexShrink: 0 }}>
+          <CloseRoundedIcon />
+        </IconButton>
+      </Stack>
+      <Divider />
+      <Box sx={{ bgcolor: "background.default", maxHeight: "calc(88dvh - 82px)", overflowY: "auto", px: 2, py: 1.5 }}>
+        {children}
+      </Box>
+    </Drawer>
   );
 }

@@ -15,6 +15,18 @@ export function useInstallPrompt() {
   const [platform, setPlatform] = useState<InstallPlatform>(() => detectInstallPlatform());
 
   useEffect(() => {
+    // Check getInstalledRelatedApps if supported by the browser (Chrome/Edge on Android and Desktop)
+    if (typeof navigator !== "undefined" && "getInstalledRelatedApps" in navigator) {
+      (navigator as unknown as { getInstalledRelatedApps: () => Promise<unknown[]> })
+        .getInstalledRelatedApps()
+        .then((apps) => {
+          if (apps && apps.length > 0) {
+            setInstalled(true);
+          }
+        })
+        .catch(() => {});
+    }
+
     const handleBeforeInstallPrompt = (event: Event) => {
       event.preventDefault();
       setInstallEvent(event as BeforeInstallPromptEvent);
@@ -47,6 +59,7 @@ export function useInstallPrompt() {
 
     if (choice.outcome === "accepted") {
       setInstallEvent(null);
+      setInstalled(true);
     }
 
     return choice.outcome;
@@ -55,6 +68,8 @@ export function useInstallPrompt() {
   return {
     canInstall: Boolean(installEvent),
     installed,
+    isAndroid: platform === "android",
+    isDesktop: platform === "desktop",
     isIos: platform === "ios",
     isManualInstall: !installEvent && !installed && platform === "ios",
     platform,
@@ -64,7 +79,14 @@ export function useInstallPrompt() {
 
 function isRunningStandalone() {
   if (typeof window === "undefined") return false;
-  return window.matchMedia?.("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  const isStandaloneMedia =
+    window.matchMedia?.("(display-mode: standalone)").matches ||
+    window.matchMedia?.("(display-mode: fullscreen)").matches ||
+    window.matchMedia?.("(display-mode: minimal-ui)").matches;
+  const isIosStandalone = window.navigator.standalone === true;
+  const isAndroidTwa = typeof document !== "undefined" && document.referrer?.startsWith("android-app://");
+
+  return Boolean(isStandaloneMedia || isIosStandalone || isAndroidTwa);
 }
 
 function detectInstallPlatform(): InstallPlatform {
@@ -77,7 +99,7 @@ function detectInstallPlatform(): InstallPlatform {
 
   if (/iphone|ipad|ipod/.test(userAgent) || isiPadOs) return "ios";
   if (/android/.test(userAgent)) return "android";
-  if (/chrome|edge|firefox|safari/.test(userAgent)) return "desktop";
+  if (/windows|macintosh|linux/.test(userAgent) || /chrome|edge|firefox|safari/.test(userAgent)) return "desktop";
   return "unknown";
 }
 

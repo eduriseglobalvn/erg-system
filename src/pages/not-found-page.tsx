@@ -1,4 +1,9 @@
-import { Link } from "@/routes/router-compat";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
+
+import { Link } from "@tanstack/react-router";
 
 import { useI18n } from "@/platform/i18n";
 
@@ -6,26 +11,23 @@ export function NotFoundPage() {
   const { t } = useI18n();
 
   return (
-    <main className="grid min-h-screen place-items-center p-4 sm:p-6 lg:p-8">
-      <section className="w-full max-w-xl rounded-lg border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
-        <p className="inline-flex rounded-md bg-[rgb(204_0_34_/_0.06)] px-3 py-1.5 text-xs font-semibold text-[var(--erg-red)]">
+    <Box component="main" sx={{ display: "grid", minHeight: "100vh", p: { xs: 2, sm: 3, lg: 4 }, placeItems: "center" }}>
+      <Paper component="section" elevation={1} sx={{ border: "1px solid", borderColor: "divider", maxWidth: 576, p: { xs: 3, sm: 4 }, width: "100%" }}>
+        <Typography component="p" sx={{ bgcolor: "rgba(204,0,34,0.06)", borderRadius: 1, color: "error.main", display: "inline-flex", fontSize: 12, fontWeight: 700, px: 1.5, py: 0.75 }}>
           404
-        </p>
-        <h1 className="mt-4 text-2xl font-semibold leading-tight text-slate-900">
+        </Typography>
+        <Typography component="h1" sx={{ color: "text.primary", fontSize: 24, fontWeight: 700, lineHeight: 1.25, mt: 2 }}>
           {t("notFound.title")}
-        </h1>
-        <p className="mt-3 text-sm leading-6 text-slate-500">
+        </Typography>
+        <Typography component="p" color="text.secondary" sx={{ fontSize: 14, lineHeight: 1.5, mt: 1.5 }}>
           {t("notFound.description")}
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link
-            className="inline-flex min-h-10 items-center justify-center rounded-md bg-[var(--erg-red)] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700"
-            to="/"
-          >
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mt: 3 }}>
+          <Button component={Link} color="error" sx={{ minHeight: 40, px: 2 }} to="/" variant="contained">
             {t("notFound.backHome")}
-          </Link>
-        </div>
-      </section>
-    </main>
+          </Button>
+        </Box>
+      </Paper>
+    </Box>
   );
 }

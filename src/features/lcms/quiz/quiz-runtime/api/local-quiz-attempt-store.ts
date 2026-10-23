@@ -1,31 +1,39 @@
-import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal, StartAttemptResult } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import type { AnswerPayload } from "@/lib/types";
-import {
-  getPersistedJsonValue,
-  removePersistedJsonValue,
-  setPersistedJsonValue,
-} from "@/stores/persisted-store";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { createOfflineScopedJsonStore } from "@/platform/offline/offline-scoped-json-store";
+import { offlineScopeKey } from "@/platform/offline/offline-outbox";
 
 const SESSION_VERSION = 1;
 const SESSION_PREFIX = "erg:local-quiz-attempt:v1:";
+const sessionStore = createOfflineScopedJsonStore("quiz-attempt-sessions-v2");
 
 type StoredSession = LocalQuizAttemptSession & {
   version: number;
 };
 
+export type LocalQuizAttemptScope = {
+  accountId?: string | null;
+  portal?: QuizRuntimePortal | null;
+  tenantId?: string | null;
+};
+
 export const localQuizAttemptStore = {
-  async getSession(assignmentId: string, quizId: string): Promise<LocalQuizAttemptSession | null> {
-    const stored = readJson<StoredSession>(getSessionKey(assignmentId, quizId));
+  async getSession(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope): Promise<LocalQuizAttemptSession | null> {
+    const stored = await readStoredSession(assignmentId, quizId, scope);
     if (!stored || stored.version !== SESSION_VERSION) {
       return null;
     }
 
     return {
       attemptId: stored.attemptId,
+      accountId: stored.accountId,
       assignmentId: stored.assignmentId,
       quizId: stored.quizId,
+      portal: stored.portal,
       packageHash: stored.packageHash,
       quizVersion: stored.quizVersion,
+      tenantId: stored.tenantId,
       startedAt: stored.startedAt,
       updatedAt: stored.updatedAt,
       submittedAt: stored.submittedAt,
@@ -33,25 +41,40 @@ export const localQuizAttemptStore = {
       answers: stored.answers,
       bookmarkedQuestionIds: stored.bookmarkedQuestionIds ?? [],
       clientEvents: stored.clientEvents,
+      serverStarted: stored.serverStarted ?? false,
+      shuffleSeed: stored.shuffleSeed,
+      startIdempotencyKey: stored.startIdempotencyKey,
       submitIdempotencyKey: stored.submitIdempotencyKey,
+      serverStartedAt: stored.serverStartedAt,
+      serverTimeAtStart: stored.serverTimeAtStart,
+      deadlineAt: stored.deadlineAt,
+      serverClockOffsetMs: stored.serverClockOffsetMs,
     };
   },
 
   async createSession(input: {
+    accountId?: string | null;
     assignmentId: string;
     attemptId: string;
     packageHash: string;
+    portal?: QuizRuntimePortal | null;
     quizId: string;
     quizVersion: string;
+    shuffleSeed?: string;
+    startIdempotencyKey: string;
     submitIdempotencyKey: string;
+    tenantId?: string | null;
   }): Promise<LocalQuizAttemptSession> {
     const now = new Date().toISOString();
     const session: LocalQuizAttemptSession = {
       attemptId: input.attemptId,
+      accountId: normalizeAccountId(input.accountId),
       assignmentId: input.assignmentId,
       quizId: input.quizId,
+      portal: normalizePortal(input.portal),
       packageHash: input.packageHash,
       quizVersion: input.quizVersion,
+      tenantId: normalizeTenantId(input.tenantId),
       startedAt: now,
       updatedAt: now,
       status: "in_progress",
@@ -59,12 +82,16 @@ export const localQuizAttemptStore = {
       bookmarkedQuestionIds: [],
       clientEvents: [
         {
+          id: createRuntimeKey("evt"),
           type: "attempt_started",
           createdAt: now,
           packageHash: input.packageHash,
           quizVersion: input.quizVersion,
         },
       ],
+      serverStarted: false,
+      shuffleSeed: input.shuffleSeed,
+      startIdempotencyKey: input.startIdempotencyKey,
       submitIdempotencyKey: input.submitIdempotencyKey,
     };
 
@@ -73,7 +100,7 @@ export const localQuizAttemptStore = {
   },
 
   async saveSession(session: LocalQuizAttemptSession): Promise<void> {
-    writeJson(getSessionKey(session.assignmentId, session.quizId), {
+    await sessionStore.set(getScopeKey(session), getSessionRecordKey(session.assignmentId, session.quizId), {
       ...session,
       version: SESSION_VERSION,
     });
@@ -94,6 +121,7 @@ export const localQuizAttemptStore = {
       clientEvents: [
         ...session.clientEvents,
         {
+          id: createRuntimeKey("evt"),
           type: "answer_changed",
           createdAt: now,
           questionId,
@@ -123,6 +151,7 @@ export const localQuizAttemptStore = {
       clientEvents: [
         ...session.clientEvents,
         {
+          id: createRuntimeKey("evt"),
           type: "bookmark_toggled",
           createdAt: now,
           questionId,
@@ -160,18 +189,67 @@ export const localQuizAttemptStore = {
       },
       "submitted",
       {
+        id: createRuntimeKey("evt"),
         type: "attempt_submitted",
         submittedAt,
       },
     );
   },
 
-  async clearSession(assignmentId: string, quizId: string): Promise<void> {
-    if (!canUseLocalStorage()) {
-      return;
-    }
+  async markServerStarted(
+    session: LocalQuizAttemptSession,
+    result: StartAttemptResult,
+  ): Promise<LocalQuizAttemptSession> {
+    const now = new Date().toISOString();
+    const policy = result.policySnapshot;
+    const serverStartedAt = policy?.startedAt ?? result.startedAt;
+    const serverTimeAtStart = policy?.serverTimeAtStart ?? serverStartedAt;
+    const serverTimeMs = serverTimeAtStart ? Date.parse(serverTimeAtStart) : Number.NaN;
+    const serverClockOffsetMs = Number.isFinite(serverTimeMs) ? serverTimeMs - Date.now() : undefined;
+    const nextSession: LocalQuizAttemptSession = {
+      ...session,
+      attemptId: result.attemptId,
+      serverStarted: true,
+      startedAt: serverStartedAt ?? session.startedAt,
+      updatedAt: now,
+      ...(serverStartedAt ? { serverStartedAt } : {}),
+      ...(serverTimeAtStart ? { serverTimeAtStart } : {}),
+      ...(policy?.deadlineAt ? { deadlineAt: policy.deadlineAt } : {}),
+      ...(serverClockOffsetMs !== undefined ? { serverClockOffsetMs } : {}),
+      clientEvents: [
+        ...session.clientEvents,
+        {
+          id: createRuntimeKey("evt"),
+          type: "server_attempt_started",
+          createdAt: now,
+          serverStartedAt,
+          serverTimeAtStart,
+        },
+      ],
+    };
 
-    removePersistedJsonValue(getSessionKey(assignmentId, quizId));
+    await this.saveSession(nextSession);
+    return nextSession;
+  },
+
+  async clearSession(assignmentId: string, quizId: string): Promise<void> {
+    await sessionStore.remove(getScopeKey(), getSessionRecordKey(assignmentId, quizId));
+    removeLegacyLocalStorage(assignmentId, quizId);
+  },
+
+  async clearScopedSession(assignmentId: string, quizId: string, scope: LocalQuizAttemptScope): Promise<void> {
+    await sessionStore.remove(getScopeKey(scope), getSessionRecordKey(assignmentId, quizId));
+    removeLegacyLocalStorage(assignmentId, quizId, scope);
+  },
+
+  async clearSessionsForQuiz(quizId: string): Promise<void> {
+    await sessionStore.clearAll();
+    removeLegacyLocalStorage(undefined, quizId);
+  },
+
+  async clearAllSessions(): Promise<void> {
+    await sessionStore.clearAll();
+    removeLegacyLocalStorage();
   },
 
   async saveWithStatus(
@@ -187,10 +265,11 @@ export const localQuizAttemptStore = {
       clientEvents: event
         ? [
             ...session.clientEvents,
-            {
-              createdAt: now,
-              ...event,
-            },
+          {
+            id: createRuntimeKey("evt"),
+            createdAt: now,
+            ...event,
+          },
           ]
         : session.clientEvents,
     };
@@ -199,6 +278,21 @@ export const localQuizAttemptStore = {
     return nextSession;
   },
 };
+
+async function readStoredSession(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
+  const scopeKey = getScopeKey(scope ?? {});
+  const recordKey = getSessionRecordKey(assignmentId, quizId);
+  const secureSession = await sessionStore.get<StoredSession>(scopeKey, recordKey);
+  if (secureSession) return secureSession;
+
+  const legacySession = readLegacyJson<StoredSession>(getLegacySessionKey(assignmentId, quizId, scope));
+  if (!legacySession) return null;
+
+  // One-time migration: legacy localStorage is never used as the active store.
+  await sessionStore.set(scopeKey, recordKey, legacySession);
+  removeLegacyLocalStorage(assignmentId, quizId, scope);
+  return legacySession;
+}
 
 export function createRuntimeKey(prefix: string) {
   const randomId =
@@ -209,26 +303,66 @@ export function createRuntimeKey(prefix: string) {
   return `${prefix}_${randomId}`;
 }
 
-function getSessionKey(assignmentId: string, quizId: string) {
+function getScopeKey(scope?: { tenantId?: string | null; portal?: QuizRuntimePortal | null; accountId?: string | null }) {
+  return offlineScopeKey({
+    tenantId: normalizeTenantId(scope?.tenantId),
+    accountId: normalizeAccountId(scope?.accountId),
+    workspace: normalizePortal(scope?.portal),
+  });
+}
+
+function getSessionRecordKey(assignmentId: string, quizId: string) {
+  return `attempt:${assignmentId}:${quizId}`;
+}
+
+function getLegacySessionKey(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
+  if (scope) {
+    return `${SESSION_PREFIX}${normalizeTenantId(scope.tenantId)}:${normalizePortal(scope.portal)}:${normalizeAccountId(scope.accountId)}:${assignmentId}:${quizId}`;
+  }
   return `${SESSION_PREFIX}${assignmentId}:${quizId}`;
 }
 
-function readJson<T>(key: string): T | null {
+function normalizeTenantId(tenantId: LocalQuizAttemptScope["tenantId"]) {
+  return tenantId?.trim() || getDefaultTenantId();
+}
+
+function normalizePortal(portal: LocalQuizAttemptScope["portal"]) {
+  return portal ?? "elearning";
+}
+
+function normalizeAccountId(accountId: LocalQuizAttemptScope["accountId"]) {
+  return accountId?.trim() || "anonymous";
+}
+
+function readLegacyJson<T>(key: string): T | null {
   if (!canUseLocalStorage()) {
     return null;
   }
 
-  return getPersistedJsonValue<T | null>(key, null);
-}
-
-function writeJson(key: string, value: unknown) {
-  if (!canUseLocalStorage()) {
-    return;
+  try {
+    const rawValue = window.localStorage.getItem(key);
+    return rawValue ? (JSON.parse(rawValue) as T) : null;
+  } catch {
+    return null;
   }
-
-  setPersistedJsonValue(key, value);
 }
 
 function canUseLocalStorage() {
   return typeof window !== "undefined" && Boolean(window.localStorage);
+}
+
+function removeLegacyLocalStorage(assignmentId?: string, quizId?: string, scope?: LocalQuizAttemptScope) {
+  if (!canUseLocalStorage()) return;
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(SESSION_PREFIX)) continue;
+    if (assignmentId && quizId && scope) {
+      if (key !== getLegacySessionKey(assignmentId, quizId, scope)) continue;
+    } else if (assignmentId && quizId) {
+      if (key !== getLegacySessionKey(assignmentId, quizId)) continue;
+    } else if (quizId && !key.endsWith(`:${quizId}`)) {
+      continue;
+    }
+    window.localStorage.removeItem(key);
+  }
 }

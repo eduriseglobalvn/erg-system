@@ -1,10 +1,15 @@
 import { useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import { Search } from "lucide-react";
 
-import { Input } from "@/components/ui/dashboard-kit";
+import TextField from "@mui/material/TextField";
+import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 import { AppSelect } from "@/components/ui/app-select";
@@ -34,7 +39,16 @@ const scopeModeOptions: Array<{ label: string; value: ScopeMode }> = [
   { label: "Theo nhóm", value: "group" },
 ];
 
-export function ClassManagementPage({ classes, selectedClass, selectedSchoolName, students }: ClassManagementPageProps) {
+export function resolveClassManagementStudents(
+  workspaceStudents: ClassroomStudent[] | undefined,
+  fallbackStudents: ClassroomStudent[],
+  apiBacked: boolean,
+): ClassroomStudent[] {
+  if (apiBacked) return workspaceStudents ?? [];
+  return workspaceStudents?.length ? workspaceStudents : fallbackStudents;
+}
+
+export function ClassManagementPage({ classes, selectedClass, selectedSchoolName, students: fallbackStudents }: ClassManagementPageProps) {
   const [scopeMode, setScopeMode] = useState<ScopeMode>("class");
   const [scopeId, setScopeId] = useState(selectedClass?.id ?? classes[0]?.id ?? "");
   const [searchValue, setSearchValue] = useState("");
@@ -44,6 +58,39 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   const [studentDrafts, setStudentDrafts] = useState<Record<string, StudentProfileDetailDraft>>({});
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
   const debouncedSearchValue = useDebouncedValue(searchValue);
+  const apiBacked = hasApiBase();
+  const selectedClassId = selectedClass?.id ?? classes[0]?.id ?? "";
+
+  const classWorkspaceQuery = useQuery({
+    queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
+      classId: selectedClassId,
+      schoolId: selectedClass?.schoolId,
+      usage: "class-management",
+    }),
+    queryFn: ({ signal }) =>
+      loadLmsClassWorkspace({
+        assignmentPage: 0,
+        assignmentSize: 50,
+        assignmentStatus: "active",
+        classId: selectedClassId,
+        page: 0,
+        schoolId: selectedClass?.schoolId,
+        size: 50,
+        studentStatus: "active",
+      }, signal),
+    enabled: apiBacked && Boolean(selectedClassId),
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
+    refetchOnWindowFocus: false,
+  });
+  const workspaceStudents = useMemo(
+    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : undefined),
+    [classWorkspaceQuery.data, selectedClass],
+  );
+  const students = useMemo(
+    () => resolveClassManagementStudents(workspaceStudents, fallbackStudents, apiBacked),
+    [apiBacked, fallbackStudents, workspaceStudents],
+  );
 
   const schoolClasses = useMemo(() => classes.filter((classroom) => !selectedClass || classroom.schoolId === selectedClass.schoolId), [classes, selectedClass]);
   const gradeLabels = useMemo(() => Array.from(new Set(schoolClasses.map((classroom) => classroom.gradeLabel))), [schoolClasses]);
@@ -148,8 +195,11 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
           </AppSelect>
           <div className="relative min-w-[220px] flex-1 xl:max-w-[340px]">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
-              className="h-10 rounded-lg border border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold text-slate-900 shadow-none focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            <TextField
+              size="small"
+              fullWidth
+              sx={{ pl: 0 }}
+              className="[&_.MuiInputBase-root]:h-10 [&_.MuiInputBase-input]:pl-9 [&_.MuiInputBase-input]:text-[14px] [&_.MuiInputBase-input]:font-semibold"
               onChange={(event) => setSearchValue(event.target.value)}
               placeholder="Tìm học sinh"
               value={searchValue}

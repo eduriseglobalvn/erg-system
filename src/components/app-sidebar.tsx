@@ -1,99 +1,102 @@
 "use client";
 
-import * as React from "react";
-
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MenuBookIcon,
-  PieChartIcon,
-  QuizIcon,
-  SchoolIcon,
-  SettingsIcon,
-  SmartToyIcon,
-  VerifiedIcon,
-} from "@/components/icons";
+import { useState } from "react";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import GroupOutlinedIcon from "@mui/icons-material/GroupOutlined";
+import MenuBookOutlinedIcon from "@mui/icons-material/MenuBookOutlined";
+import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
+import SchoolOutlinedIcon from "@mui/icons-material/SchoolOutlined";
+import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import { NavMain } from "@/components/nav-main";
-import {
-  Sidebar,
-  SidebarContent,
-} from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar-context";
+import { DashboardAccountCard } from "@/layouts/dashboard/components/dashboard-account-card";
 import type { DashboardGroup } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
+const COLLAPSED_WIDTH = 76;
 
 export function AppSidebar({
   activeLeafId,
   dashboardSections,
   onSelectLeaf,
-  ...props
-}: React.ComponentProps<typeof Sidebar> & {
+}: {
   activeLeafId: string;
   dashboardSections: DashboardGroup[];
   onSelectLeaf: (leafId: string) => void;
 }) {
-  const navMain = dashboardSections.map((group) => ({
-    ...group,
-    url: "#",
-    icon: getSectionIcon(group.iconKey),
-    tone: getSectionTone(group.iconKey),
-    isActive: group.items.some((item) => item.id === activeLeafId),
-    items: group.items.map((item) => ({
-      title: item.title,
-      leafId: item.id,
-    })),
+  const [collapsed, setCollapsed] = useState(false);
+  const { t } = useI18n();
+  const width = collapsed ? COLLAPSED_WIDTH : ergEnterpriseTokens.size.sidebar;
+  const navigationItems = dashboardSections.map((section) => ({
+    ...section,
+    icon: getSectionIcon(section.iconKey),
   }));
 
   return (
-    <Sidebar
-      variant="inset"
-      collapsible="icon"
-      className="relative overflow-visible border-r border-[#cbd7e6] bg-[#f8fbff] shadow-[1px_0_0_rgba(15,23,42,0.05)] group-data-[collapsible=icon]:px-0"
-      {...props}
+    <Box
+      aria-label="Điều hướng LMS"
+      component="nav"
+      data-sidebar-width={width}
+      sx={{
+        bgcolor: "background.paper",
+        borderRight: "1px solid",
+        borderColor: "divider",
+        display: "flex",
+        flexDirection: "column",
+        flexShrink: 0,
+        height: "100%",
+        overflow: "visible",
+        position: "relative",
+        transition: "width 280ms cubic-bezier(0.2, 0, 0, 1)",
+        width,
+        "@media (prefers-reduced-motion: reduce)": { transitionDuration: "1ms" },
+      }}
     >
-      <SidebarEdgeToggle />
-      <SidebarContent className="h-full min-h-0 overflow-y-auto overscroll-contain px-2.5 py-4 pb-10 group-data-[collapsible=icon]:overflow-visible group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-5">
-        <NavMain items={navMain} activeLeafId={activeLeafId} onSelectLeaf={onSelectLeaf} />
-      </SidebarContent>
-    </Sidebar>
+      <IconButton
+        aria-label={collapsed ? t("sidebar.expandMenu") : t("sidebar.collapseMenu")}
+        onClick={() => setCollapsed((value) => !value)}
+        size="small"
+        sx={{
+          bgcolor: "background.paper",
+          border: "1px solid",
+          borderColor: "divider",
+          position: "absolute",
+          right: -14,
+          top: 18,
+          zIndex: 4,
+          "&:hover": { bgcolor: "background.paper", color: "primary.main" },
+        }}
+      >
+        {collapsed ? <ChevronRightRoundedIcon fontSize="small" /> : <ChevronLeftRoundedIcon fontSize="small" />}
+      </IconButton>
+
+      <Box sx={{ flex: 1, minHeight: 0, overflowX: "hidden", overflowY: "auto", p: collapsed ? 1 : 1.5 }}>
+        <NavMain
+          activeLeafId={activeLeafId}
+          collapsed={collapsed}
+          items={navigationItems}
+          onSelectLeaf={onSelectLeaf}
+        />
+      </Box>
+
+      <Box sx={{ maxHeight: collapsed ? 0 : 260, opacity: collapsed ? 0 : 1, overflow: "hidden", transition: "opacity 160ms ease, max-height 220ms ease" }}>
+        <DashboardAccountCard />
+      </Box>
+    </Box>
   );
-}
-
-function SidebarEdgeToggle() {
-  const { state, toggleSidebar } = useSidebar();
-  const { t } = useI18n();
-  const isExpanded = state === "expanded";
-
-  return (
-    <button
-      type="button"
-      onClick={toggleSidebar}
-      aria-label={isExpanded ? t("sidebar.collapseMenu") : t("sidebar.expandMenu")}
-      className="absolute top-1/2 -right-3 z-40 grid size-8 -translate-y-1/2 place-items-center rounded-full border border-[#cbd7e6] bg-white text-slate-600 shadow-[var(--shadow-xs)] ring-2 ring-[#f8fbff] transition hover:border-[#b8c8db] hover:bg-white hover:text-[var(--primary)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)]"
-    >
-      {isExpanded ? <ChevronLeftIcon className="size-4" /> : <ChevronRightIcon className="size-4" />}
-    </button>
-  );
-}
-
-function getSectionTone(iconKey: DashboardGroup["iconKey"]) {
-  if (iconKey === "materials") return "text-[#7c3cff]";
-  if (iconKey === "classroom") return "text-[#0f9f76]";
-  if (iconKey === "docs") return "text-[#ef5b5b]";
-  if (iconKey === "settings") return "text-[#2d7cff]";
-  if (iconKey === "admin") return "text-[#ff6b35]";
-  if (iconKey === "members") return "text-[#2d7cff]";
-
-  return "text-[#2d7cff]";
 }
 
 function getSectionIcon(iconKey: DashboardGroup["iconKey"]) {
-  if (iconKey === "materials") return <QuizIcon />;
-  if (iconKey === "classroom") return <SmartToyIcon />;
-  if (iconKey === "docs") return <MenuBookIcon />;
-  if (iconKey === "settings") return <SettingsIcon />;
-  if (iconKey === "admin") return <SchoolIcon />;
-  if (iconKey === "members") return <VerifiedIcon />;
-
-  return <PieChartIcon />;
+  if (iconKey === "materials") return <QuizOutlinedIcon />;
+  if (iconKey === "classroom") return <SchoolOutlinedIcon />;
+  if (iconKey === "docs") return <MenuBookOutlinedIcon />;
+  if (iconKey === "settings") return <SettingsOutlinedIcon />;
+  if (iconKey === "admin") return <AdminPanelSettingsOutlinedIcon />;
+  if (iconKey === "members") return <GroupOutlinedIcon />;
+  return <AssessmentOutlinedIcon />;
 }

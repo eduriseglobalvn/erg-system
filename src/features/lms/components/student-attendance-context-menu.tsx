@@ -1,14 +1,16 @@
-import { FileText, MessageSquarePlus, UserPlus, UserRoundCheck } from "lucide-react";
+import AddCommentIcon from "@mui/icons-material/AddComment";
+import DescriptionIcon from "@mui/icons-material/Description";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
+import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Paper from "@mui/material/Paper";
+import Typography from "@mui/material/Typography";
 
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import { cn } from "@/lib/utils";
 
 type StudentAttendanceContextMenuProps = {
-  menu: {
-    x: number;
-    y: number;
-    student: ClassroomStudent;
-  } | null;
+  menu: { x: number; y: number; student: ClassroomStudent } | null;
   onAddStudent: () => void;
   onAddNote: (student: ClassroomStudent) => void;
   onChangeStatus: (student: ClassroomStudent) => void;
@@ -27,43 +29,45 @@ export function StudentAttendanceContextMenu({
   if (!menu) return null;
 
   const actions = [
-    { label: "Thêm HS mới", icon: UserPlus, onClick: onAddStudent },
-    { label: "Thay đổi trạng thái HS", icon: UserRoundCheck, onClick: () => onChangeStatus(menu.student) },
-    { label: "Note nhanh", icon: MessageSquarePlus, onClick: () => onAddNote(menu.student) },
-    { label: "Ghi chú với HS này", icon: FileText, onClick: () => onOpenNote(menu.student) },
+    { label: "Thêm HS mới", icon: <PersonAddAlt1Icon fontSize="small" />, onClick: onAddStudent },
+    { label: "Thay đổi trạng thái HS", icon: <HowToRegIcon fontSize="small" />, onClick: () => onChangeStatus(menu.student) },
+    { label: "Note nhanh", icon: <AddCommentIcon fontSize="small" />, onClick: () => onAddNote(menu.student) },
+    { label: "Ghi chú với HS này", icon: <DescriptionIcon fontSize="small" />, onClick: () => onOpenNote(menu.student) },
   ];
 
   return (
     <>
-      <button type="button" aria-label="Đóng menu học sinh" className="fixed inset-0 z-[70] cursor-default" onClick={onClose} />
-      <div
-        className="fixed z-[80] w-64 overflow-hidden rounded-lg border border-[#cbd7e6] bg-white py-1 text-[14px] shadow-md shadow-slate-900/10"
-        style={{ left: menu.x, top: menu.y }}
+      <Box
+        component="button"
+        type="button"
+        aria-label="Đóng menu học sinh"
+        onClick={onClose}
+        sx={{ position: "fixed", inset: 0, zIndex: 70, m: 0, p: 0, border: 0, bgcolor: "transparent", cursor: "default" }}
+      />
+      <Paper
         role="menu"
+        elevation={4}
+        sx={{ position: "fixed", zIndex: 80, left: menu.x, top: menu.y, width: 256, overflow: "hidden", py: 0.5, border: 1, borderColor: "divider", borderRadius: 1 }}
       >
-        <div className="border-b border-[#dbe4f0] px-3 py-2.5">
-          <div className="truncate text-[14px] font-bold text-slate-950">{menu.student.name}</div>
-          <div className="mt-1 text-[13px] font-semibold text-slate-600">{menu.student.className}</div>
-        </div>
-        {actions.map((action) => {
-          const Icon = action.icon;
-          return (
-            <button
-              key={action.label}
-              type="button"
-              className={cn("flex w-full items-center gap-2 px-3 py-2.5 text-left text-[14px] font-semibold text-slate-700 hover:bg-[var(--erg-blue-light)] hover:text-[var(--erg-blue)]")}
-              onClick={() => {
-                action.onClick();
-                onClose();
-              }}
-              role="menuitem"
-            >
-              <Icon className="h-4 w-4" />
-              {action.label}
-            </button>
-          );
-        })}
-      </div>
+        <Box sx={{ borderBottom: 1, borderColor: "divider", px: 1.5, py: 1.25 }}>
+          <Typography noWrap sx={{ fontSize: 14, fontWeight: 700 }}>{menu.student.name}</Typography>
+          <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 13, fontWeight: 600 }}>{menu.student.className}</Typography>
+        </Box>
+        {actions.map((action) => (
+          <ButtonBase
+            key={action.label}
+            role="menuitem"
+            onClick={() => {
+              action.onClick();
+              onClose();
+            }}
+            sx={{ display: "flex", width: "100%", justifyContent: "flex-start", gap: 1, px: 1.5, py: 1.25, color: "text.secondary", fontSize: 14, fontWeight: 600, textAlign: "left", "&:hover": { bgcolor: "action.hover", color: "primary.main" } }}
+          >
+            {action.icon}
+            {action.label}
+          </ButtonBase>
+        ))}
+      </Paper>
     </>
   );
 }

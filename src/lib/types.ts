@@ -45,6 +45,7 @@ export type Feedback = {
 export type QuestionImage = {
   url: string;
   alt?: string;
+  width?: number;
 };
 
 export type Choice = {
@@ -57,6 +58,8 @@ export type MatchingPair = {
   id: string;
   prompt: string;
   response: string;
+  promptIcon?: string;
+  responseIcon?: string;
   promptImage?: QuestionImage;
   responseImage?: QuestionImage;
 };
@@ -64,6 +67,7 @@ export type MatchingPair = {
 export type SequenceItem = {
   id: string;
   label: string;
+  image?: QuestionImage;
 };
 
 export type InlineBlank = {
@@ -136,6 +140,7 @@ export type HotspotArea = {
   width: number;
   height: number;
   correct: boolean;
+  visible?: boolean;
 };
 
 export type HotspotImage = {
@@ -280,6 +285,24 @@ export type QuizPackage = {
   contentHash: string;
   signature?: string;
   publicKeyId?: string;
+  signatureAlgorithm?: string;
+  packageFormat?: "single" | "bundle";
+  minRuntimeVersion?: string;
+  downloadUrl?: string;
+  sizeBytes?: number;
+  releaseChannel?: string;
+  portableReady?: boolean;
+  etag?: string;
+  revokedAt?: string;
+  tenantId?: string;
+  quizVersionId?: string;
+  assetsManifest?: Record<string, {
+    contentBase64?: string;
+    mimeType?: string;
+    sha256?: string;
+    sizeBytes?: number;
+    url?: string;
+  }>;
   gradingMode: "client-first" | "server-authoritative";
   source: "local" | "server" | "tauri-cache";
   quiz: Quiz;

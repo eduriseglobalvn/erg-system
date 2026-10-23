@@ -1,10 +1,14 @@
-import { useMemo, useState, type ReactNode } from "react";
+﻿import { useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, LogOut, MapPin, MonitorSmartphone, Search } from "lucide-react";
 
-import { Button, Input } from "@/components/ui/dashboard-kit";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
 import { queryKeys } from "@/lib/query-keys";
 import { listMyLoginSessions, type LoginSessionLog } from "@/platform/auth/api/account-api";
+import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { hasApiBase } from "@/lib/api-client";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 import { cn } from "@/lib/utils";
 
 type LoginSessionRow = LoginSessionLog & {
@@ -83,7 +87,7 @@ const mockLoginSessions: LoginSessionRow[] = [
     sessionId: "mock-lcms-switch",
     portal: "lcms",
     ipAddress: "103.90.226.15",
-    deviceName: "Chrome - LCMS tab",
+    deviceName: "Chrome - Admin LMS tab",
     deviceType: "Desktop",
     userAgent: "Chrome 124.0 / Windows 11",
     current: false,
@@ -98,14 +102,21 @@ const mockLoginSessions: LoginSessionRow[] = [
   },
 ];
 
+export function resolveLoginSessionRows(data: LoginSessionLog[] | undefined, apiBacked = hasApiBase()): LoginSessionRow[] {
+  if (apiBacked) return data ?? [];
+  return data?.length ? data : mockLoginSessions;
+}
+
 export function LmsLoginLogsPage({ onManageAccount }: { onManageAccount: () => void }) {
+  const { account } = useAuthSession("lms");
+  const tenantId = getDefaultTenantId();
   const [searchQuery, setSearchQuery] = useState("");
   const [revokedSessionIds, setRevokedSessionIds] = useState<Set<string>>(() => new Set());
   const logsQuery = useQuery({
-    queryKey: queryKeys.account.loginSessions(),
-    queryFn: listMyLoginSessions,
+    queryKey: queryKeys.account.loginSessions(tenantId, account?.id),
+    queryFn: ({ signal }) => listMyLoginSessions(signal),
   });
-  const logs: LoginSessionRow[] = (logsQuery.data?.length ? logsQuery.data : mockLoginSessions).map((log) =>
+  const logs: LoginSessionRow[] = resolveLoginSessionRows(logsQuery.data).map((log) =>
     revokedSessionIds.has(log.sessionId)
       ? {
           ...log,
@@ -137,15 +148,19 @@ export function LmsLoginLogsPage({ onManageAccount }: { onManageAccount: () => v
         </div>
         <div className="relative min-w-[260px] flex-1 xl:max-w-[460px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-          <Input
+          <TextField
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
             placeholder="Tìm theo IP, thiết bị, vị trí, phương thức"
-            className="h-10 rounded-lg border-[#d7e0ec] bg-white pl-9 text-[14px] font-semibold shadow-none focus:bg-white"
+            size="small"
+            fullWidth
+            sx={{
+              "& .MuiInputBase-root": { height: 40, bgcolor: "white", borderRadius: "8px" },
+              "& .MuiInputBase-input": { pl: "36px", fontSize: "14px", fontWeight: 600 },
+            }}
           />
         </div>
-        <Button variant="outline" className="h-10 rounded-lg px-3 text-[14px]" onClick={onManageAccount}>
-          <ArrowLeft data-icon="inline-start" />
+        <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onManageAccount} startIcon={<ArrowLeft data-icon="inline-start" />}>
           Quản lý tài khoản
         </Button>
       </div>

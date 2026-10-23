@@ -38,7 +38,7 @@ describe("MatchingQuestion mobile", () => {
     );
 
     fireEvent.click(screen.getByRole("button", { name: /hiển thị url của trang web hiện tại/i }));
-    expect(screen.getByText("Select an Answer")).toBeInTheDocument();
+    expect(screen.getByText("Chọn đáp án")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /hộp địa chỉ/i }));
 

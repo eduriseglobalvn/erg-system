@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
 
 export type AdminUserDetail = {
@@ -43,26 +44,24 @@ export type AdminProfileUpdate = {
   department?: string;
 };
 
-export function getAdminUser(userId: string) {
-  return apiRequest<AdminUserDetail>(`/api/users/${encodeURIComponent(userId)}`, { portal: getBackOfficePortal() });
+export function getAdminUser(userId: string, signal?: AbortSignal) {
+  return apiRequest<{ account: { user: AdminUserDetail } }>(API_ENDPOINTS.adminUsers.detail(userId), {
+    portal: getBackOfficePortal(),
+    signal,
+  }).then((response) => response.account.user);
 }
 
 export async function updateAdminUserProfile(userId: string, input: AdminProfileUpdate) {
-  await apiRequest<AdminUserDetail>(`/api/lms/auth/accounts/${encodeURIComponent(userId)}/profile`, {
+  await apiRequest<unknown>(API_ENDPOINTS.adminUsers.detail(userId), {
     portal: getBackOfficePortal(),
-    method: "PUT",
+    method: "PATCH",
     body: JSON.stringify({
       fullName: input.fullName,
       phone: input.phone,
-      jobTitle: input.jobTitle,
-      avatarUrl: input.avatarUrl,
-      bio: input.bio,
-      gender: input.gender,
-      dateOfBirth: input.dateOfBirth,
-      address: input.address,
-      city: input.city,
-      district: input.district,
-      region: input.region,
+      profile: input.jobTitle || input.department ? {
+        departmentId: input.department,
+        jobTitle: input.jobTitle,
+      } : undefined,
     }),
   });
 
@@ -72,7 +71,7 @@ export async function updateAdminUserProfile(userId: string, input: AdminProfile
 export type AdminUserStatus = "ACTIVE" | "BLOCKED" | "BANNED" | "INACTIVE";
 
 export async function updateAdminUserStatus(userId: string, status: AdminUserStatus) {
-  await apiRequest<{ message: string }>(`/api/users/${encodeURIComponent(userId)}/status`, {
+  await apiRequest<unknown>(API_ENDPOINTS.adminUsers.status(userId), {
     portal: getBackOfficePortal(),
     method: "PUT",
     body: JSON.stringify({ status }),
@@ -82,7 +81,7 @@ export async function updateAdminUserStatus(userId: string, status: AdminUserSta
 }
 
 export async function assignAdminUserRoles(userId: string, roles: string[]) {
-  await apiRequest<{ message: string }>(`/api/users/${encodeURIComponent(userId)}/roles`, {
+  await apiRequest<unknown>(API_ENDPOINTS.adminUsers.roles(userId), {
     portal: getBackOfficePortal(),
     method: "POST",
     body: JSON.stringify({ roles }),

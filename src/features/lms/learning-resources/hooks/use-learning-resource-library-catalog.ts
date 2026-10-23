@@ -1,19 +1,23 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 import {
-  loadLearningResourceLibraryBootstrap,
-  loadLearningResourceLibraryProgress,
   loadLearningResourceResourceForViewer,
   mapLibraryResourceToLearningResourceResource,
   type LearningResourceLibraryBootstrapDTO,
   type LearningResourceLibraryProgressDTO,
 } from "@/features/lms/learning-resources/api/learning-resource-api";
+import {
+  learningResourceLibraryBootstrapQueryOptions,
+  learningResourceLibraryProgressQueryOptions,
+  learningResourceLibraryQueryKeys,
+} from "@/features/lms/learning-resources/api/learning-resource-query";
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLearningResourceDashboardScope } from "@/features/lms/learning-resources/hooks/learning-resource-dashboard-scope-context";
 import type { LearningResourceTeacherProgressSummary } from "@/features/lms/learning-resources/types/teacher-resource-dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { getDefaultTenantId } from "@/lib/graphql-client";
 
 type LearningResourceLibraryLesson = {
   id: string;
@@ -139,23 +143,17 @@ async function openLibraryResource(resource: LearningResourceResource) {
   return hydratedResource;
 }
 
-function libraryBootstrapQueryKey(schoolId: string, academicYear: string) {
-  return ["learning-resources", "library-bootstrap", schoolId, academicYear] as const;
-}
-
-export function libraryProgressQueryKey(schoolId: string, academicYear: string) {
-  return ["learning-resources", "library-progress", schoolId, academicYear] as const;
-}
-
 function progressMap(progress: LearningResourceLibraryProgressDTO | undefined) {
   return new Map((progress?.lessons ?? []).map((lesson) => [lesson.lessonId, lesson.progressRate]));
 }
 
 export function useLearningResourceLibraryCatalog() {
-  const queryClient = useQueryClient();
   const scope = useLearningResourceDashboardScope();
   const schoolId = scope?.selectedSchoolId ?? "";
   const academicYear = scope?.academicYear ?? getCurrentAcademicYear();
+  const tenantId = scope?.tenantId ?? getDefaultTenantId();
+  const accountId = scope?.accountId;
+  const libraryScope = useMemo(() => ({ accountId, academicYear, schoolId, tenantId }), [academicYear, accountId, schoolId, tenantId]);
 
   const [selectedSubjectId, setSelectedSubjectId] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState("");
@@ -164,39 +162,13 @@ export function useLearningResourceLibraryCatalog() {
   const [resourceError, setResourceError] = useState<string | null>(null);
   const debouncedSearchValue = useDebouncedValue(searchValue);
 
-  const libraryQuery = useQuery({
-    queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
-    queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
-    enabled: Boolean(schoolId),
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
-    refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
-  });
+  const libraryQuery = useQuery(learningResourceLibraryBootstrapQueryOptions(libraryScope));
 
-  const progressQuery = useQuery({
-    queryKey: libraryProgressQueryKey(schoolId, academicYear),
-    queryFn: () => loadLearningResourceLibraryProgress({ schoolId, academicYear }),
-    enabled: Boolean(schoolId),
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
-    refetchOnWindowFocus: false,
-    placeholderData: (previousData) => previousData,
-  });
+  const progressQuery = useQuery(learningResourceLibraryProgressQueryOptions(libraryScope));
 
   const subjects = useMemo(() => toLibrarySubjects(libraryQuery.data, progressMap(progressQuery.data)), [libraryQuery.data, progressQuery.data]);
   const firstSubjectId = subjects[0]?.id ?? "";
   const effectiveSubjectId = subjects.some((subject) => subject.id === selectedSubjectId) ? selectedSubjectId : firstSubjectId;
-
-  useEffect(() => {
-    if (!schoolId) return;
-
-    void queryClient.prefetchQuery({
-      queryKey: libraryBootstrapQueryKey(schoolId, academicYear),
-      queryFn: () => loadLearningResourceLibraryBootstrap({ schoolId, academicYear }),
-      staleTime: 5 * 60_000,
-    });
-  }, [academicYear, queryClient, schoolId]);
 
   const activeSubject = useMemo(
     () => subjects.find((subject) => subject.id === effectiveSubjectId) ?? subjects[0] ?? null,
@@ -311,7 +283,7 @@ export function useLearningResourceLibraryCatalog() {
     loading,
     loadingSubject,
     onOpenResource: handleOpenResource,
-    progressQueryKey: libraryProgressQueryKey(schoolId, academicYear),
+    progressQueryKey: learningResourceLibraryQueryKeys.progress(libraryScope),
     onSelectLesson: handleSelectLesson,
     onSelectSection: handleSelectSection,
     onSelectSubject: handleSelectSubject,

@@ -121,14 +121,6 @@ function buildSystemSections(genericDescription: string): DashboardGroup[] {
       iconKey: "settings",
       title: "Cấu hình",
       items: [
-        createLeaf(
-          "admin-public-disclosure",
-          "Công khai pháp lý",
-          "Cấu hình",
-          root,
-          "Quản lý PDF công khai, metadata, vị trí public và watermark trước khi xuất bản.",
-          "admin-public-disclosure",
-        ),
         createLeaf("general-settings", "Thiết lập chung", "Cấu hình", root, genericDescription, "placeholder"),
       ],
     },

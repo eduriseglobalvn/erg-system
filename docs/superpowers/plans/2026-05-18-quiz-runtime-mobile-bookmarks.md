@@ -1,5 +1,7 @@
 # Quiz Runtime Mobile + Bookmark Implementation Plan
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Split the learner quiz runtime into distinct web and mobile shells and add local-only bookmarks for question review.

@@ -5,13 +5,12 @@ import type {
 } from "@/platform/auth/types/auth-types";
 import type { AuthSessionResponseDTO } from "@/platform/auth/api/auth-api";
 import {
-  clearTeacherSessionSnapshot,
+  clearStoredAuthSessions,
   hasStoredAuthCredential,
   readTeacherSessionSnapshot,
   readStoredAuthSession,
   resolveCurrentPortal,
-  setTeacherSessionSnapshot,
-  TEACHER_LOCAL_SESSION_KEY,
+  writeStoredAuthIdentity,
   TEACHER_TEMP_SESSION_KEY,
   portalSessionKey,
   type StoredAuthSession,
@@ -20,9 +19,10 @@ import {
 import { clearCrossDomainSession } from "@/platform/auth/api/cross-domain-session";
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
+import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
+import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_ACCOUNT } from "@/platform/auth/config/auth-bypass";
 import {
   getPersistedJsonValue,
-  removePersistedJsonValue,
   setPersistedJsonValue,
 } from "@/stores/persisted-store";
 
@@ -30,24 +30,9 @@ type AccountSession = StoredAuthIdentity & {
   loggedInAt: string;
 };
 
-type RegisterInput = {
-  fullName: string;
-  email: string;
-  password: string;
-  department: string;
-};
-
-type LoginInput = {
-  email: string;
-  password: string;
-  rememberMe: boolean;
-};
-
 const ACCOUNTS_KEY = "erg-learning.accounts";
 export const AUTH_ACCOUNT_CHANGED_EVENT = "erg-auth-account-changed";
 const defaultAccounts: TeacherAccount[] = [];
-const MOCK_ADMIN_ACCOUNT_ID = "mock-admin-account";
-const MOCK_ADMIN_EMAIL = "admin@erg.edu.vn";
 
 function canUseStorage() {
   return typeof window !== "undefined";
@@ -71,13 +56,15 @@ function writeAccounts(accounts: TeacherAccount[]) {
 export function listAccounts() {
   if (!canUseStorage()) return defaultAccounts;
 
-  const stored = getPersistedJsonValue<TeacherAccount[]>(ACCOUNTS_KEY, []);
+  const stored = getPersistedJsonValue<Array<TeacherAccount & { password?: string }>>(ACCOUNTS_KEY, []);
   if (!stored.length) {
     writeAccounts(defaultAccounts);
     return defaultAccounts;
   }
 
-  return stored;
+  const sanitized = stored.map(({ password: _legacyPassword, ...account }) => account);
+  if (stored.some((account) => "password" in account)) writeAccounts(sanitized);
+  return sanitized;
 }
 
 function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
@@ -85,15 +72,12 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
   if (portal) return readStoredAuthSession(portal) as AccountSession | null;
 
   // Try SSO hydration first — if another portal set a cookie or passed an sso_token,
-  // this writes the session into localStorage before we read it.
+  // Cookie hydration writes the session into localStorage before we read it;
+  // credentials are never accepted from a URL.
   const candidates = [
-    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "crm"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
-    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "admin"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
-    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lms"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lms")), null),
-    getPersistedJsonValue<AccountSession | null>(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, "lcms"), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "lcms")), null),
     readTeacherSessionSnapshot() as AccountSession | null,
   ];
@@ -107,19 +91,7 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
 }
 
 function writeSession(session: AccountSession) {
-  setTeacherSessionSnapshot(session);
-  if (!canUseStorage()) return;
-
-  const portal = session.portal && session.portal !== "elearning" ? session.portal : "lms";
-  const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
-  const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
-  if (session.rememberMe) {
-    setPersistedJsonValue(localKey, session);
-    window.sessionStorage.removeItem(tempKey);
-  } else {
-    window.sessionStorage.setItem(tempKey, JSON.stringify(session));
-    removePersistedJsonValue(localKey);
-  }
+  writeStoredAuthIdentity(session);
 }
 
 function notifyAuthAccountChanged() {
@@ -128,15 +100,8 @@ function notifyAuthAccountChanged() {
 }
 
 function clearSession() {
-  clearTeacherSessionSnapshot();
   clearCrossDomainSession();
-  if (!canUseStorage()) return;
-  removePersistedJsonValue(TEACHER_LOCAL_SESSION_KEY);
-  window.sessionStorage.removeItem(TEACHER_TEMP_SESSION_KEY);
-  for (const portal of ["admin", "crm", "lms", "lcms"] as const) {
-    removePersistedJsonValue(portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal));
-    window.sessionStorage.removeItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal));
-  }
+  clearStoredAuthSessions();
 }
 
 function saveAccount(nextAccount: TeacherAccount) {
@@ -155,11 +120,16 @@ export function saveCurrentAccount(nextAccount: TeacherAccount) {
 }
 
 export function getCurrentAccount(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
+  if (isBffAuthMode()) return null;
   const session = readSession(portal);
-  if (!session) return null;
-  if (requiresServerSession() && !session.accessToken) return null;
+  if (!session) return AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null;
+  if (requiresServerSession() && !session.accessToken) return AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null;
 
-  return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session);
+  return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session) ?? (AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null);
+}
+
+function isBffAuthMode() {
+  return import.meta.env.VITE_AUTH_MODE === "oidc-bff";
 }
 
 function requiresServerSession() {
@@ -177,11 +147,30 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
   const jwtClaims = accessToken ? decodeJwtPayload(accessToken) : null;
   const jwtPortals = portalsFromJwtClaims(jwtClaims);
   const jwtPermissions = permissionsFromJwtClaims(jwtClaims);
+  const jwtTenantId = typeof jwtClaims?.tenantId === "string"
+    ? jwtClaims.tenantId
+    : typeof jwtClaims?.tenant_id === "string"
+      ? jwtClaims.tenant_id
+      : undefined;
   const portals = result.portals ?? jwtPortals ?? (isNewAuthSession ? [portal] : previousSession?.portals ?? [portal]);
-  const permissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
+  const deniedPermissions = result.deniedPermissions ?? (isNewAuthSession ? [] : previousSession?.deniedPermissions ?? []);
+  const basePermissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
+  const isRootAdmin = result.account.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
+  const permissions = isRootAdmin && !deniedPermissions.includes("*")
+    ? Array.from(new Set([...basePermissions, "*"]))
+    : basePermissions;
+  const roles = result.roles ?? result.account.roles ?? (isNewAuthSession ? [] : previousSession?.roles ?? []);
+  const projectedWorkspaces = projectVerifiedWorkspaces({
+    accountEmail: result.account.email,
+    workspaces: result.workspaces,
+    roles,
+    permissions,
+    deniedPermissions,
+    portals,
+  });
+  const shouldProjectWorkspaces = isNewAuthSession || !previousSession?.workspaces?.length;
   const account: TeacherAccount = {
     ...result.account,
-    password: "",
   };
   const existing = listAccounts();
   const nextAccounts = existing.some((entry) => entry.id === account.id)
@@ -193,12 +182,17 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
     accountId: account.id,
     rememberMe,
     loggedInAt: new Date().toISOString(),
+    accountEmail: account.email,
     accessToken,
     refreshToken: result.refreshToken ?? previousSession?.refreshToken,
     expiresAt: result.expiresAt ?? previousSession?.expiresAt,
     permissions,
+    deniedPermissions,
+    roles,
+    workspaces: result.workspaces ?? (shouldProjectWorkspaces ? projectedWorkspaces : previousSession?.workspaces),
     portal,
     portals,
+    tenantId: result.tenantId ?? jwtTenantId ?? previousSession?.tenantId,
   });
   notifyAuthAccountChanged();
 
@@ -207,7 +201,7 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
 
 function accountFromSession(session: AccountSession): TeacherAccount | null {
   const claims = session.accessToken ? decodeJwtPayload(session.accessToken) : null;
-  const email = (typeof claims?.email === "string" ? claims.email : "") || (typeof claims?.sub === "string" ? claims.sub : "");
+  const email = (typeof claims?.email === "string" ? claims.email : "") || (typeof claims?.sub === "string" ? claims.sub : "") || session.accountEmail || "";
 
   if (!email) return null;
 
@@ -223,9 +217,9 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
     id: session.accountId || email,
     fullName,
     email,
-    password: "",
     role,
     provider: "password",
+    roles,
     department: "ERG",
     title: role === "admin" ? "Quản trị viên" : "Giáo viên",
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
@@ -236,7 +230,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
 
 function mapRoleFromRoles(roles: string[]): AccountRole {
   const normalized = roles.map((role) => role.toLowerCase());
-  if (normalized.some((role) => ["admin", "super_admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
+  if (normalized.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
     return "admin";
   }
   if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";
@@ -270,6 +264,8 @@ type JwtPayload = {
   full_name?: unknown;
   name?: unknown;
   sub?: unknown;
+  tenantId?: unknown;
+  tenant_id?: unknown;
   permissions?: unknown;
   portal?: unknown;
   portals?: unknown;
@@ -287,151 +283,6 @@ function decodeJwtPayload(token: string): JwtPayload | null {
   } catch {
     return null;
   }
-}
-
-export function registerAccount(input: RegisterInput) {
-  const normalizedEmail = input.email.trim().toLowerCase();
-  const accounts = listAccounts();
-
-  if (accounts.some((account) => account.email.toLowerCase() === normalizedEmail)) {
-    throw new Error(tr("auth.errorEmailExists"));
-  }
-
-  const nextAccount: TeacherAccount = {
-    id: `account-${Math.random().toString(36).slice(2, 10)}`,
-    fullName: input.fullName.trim(),
-    email: normalizedEmail,
-    password: input.password,
-    role: "teacher",
-    provider: "password",
-    department: input.department.trim(),
-    title: "Giảng viên mới",
-    features: [
-      tr("auth.defaultCapabilityDashboard"),
-      tr("auth.defaultCapabilityMaterials"),
-      tr("auth.defaultCapabilityClasses"),
-      tr("auth.defaultCapabilityAccount"),
-    ],
-    createdAt: new Date().toISOString(),
-    lastLoginAt: null,
-  };
-
-  writeAccounts([...accounts, nextAccount]);
-  return nextAccount;
-}
-
-export function loginWithPassword(input: LoginInput) {
-  const normalizedEmail = input.email.trim().toLowerCase();
-  const account = listAccounts().find((entry) => entry.email.toLowerCase() === normalizedEmail);
-
-  if (!account || account.password !== input.password) {
-    throw new Error(tr("auth.errorEmailPasswordWrong"));
-  }
-
-  const nextAccount = saveAccount({
-    ...account,
-    lastLoginAt: new Date().toISOString(),
-  });
-
-  writeSession({
-    accountId: nextAccount.id,
-    rememberMe: input.rememberMe,
-    loggedInAt: new Date().toISOString(),
-    portal: "lms",
-  });
-  notifyAuthAccountChanged();
-
-  return nextAccount;
-}
-
-export function loginWithMockAdmin({
-  portal = "lms",
-  rememberMe,
-}: {
-  portal?: StoredAuthSession["portal"];
-  rememberMe: boolean;
-}) {
-  const now = new Date();
-  const nextAccount = saveAccount({
-    id: MOCK_ADMIN_ACCOUNT_ID,
-    fullName: "Admin ERG",
-    email: MOCK_ADMIN_EMAIL,
-    password: "",
-    role: "admin",
-    provider: "password",
-    department: "ERG",
-    title: "Quản trị viên",
-    features: ["LMS", "LCMS", "CRM", "Elearning", "Quản trị hệ thống"],
-    isProfileCompleted: true,
-    status: "active",
-    createdAt: now.toISOString(),
-    lastLoginAt: now.toISOString(),
-  });
-
-  writeSession({
-    accountId: nextAccount.id,
-    rememberMe,
-    loggedInAt: now.toISOString(),
-    accessToken: "mock-admin-fe-access-token",
-    expiresAt: new Date(now.getTime() + 12 * 60 * 60 * 1000).toISOString(),
-    portal: portal === "elearning" ? "lms" : portal,
-    portals: ["*"],
-    permissions: ["*"],
-  });
-  notifyAuthAccountChanged();
-
-  return nextAccount;
-}
-
-export function loginWithProvider(provider: Extract<AuthProvider, "google" | "apple">, rememberMe: boolean) {
-  const providerEmail = provider === "google" ? "teacher.google@erg.vn" : "teacher.apple@erg.vn";
-  const providerName =
-    provider === "google" ? "Giảng viên Google ERG" : "Giảng viên Apple ERG";
-  const providerDepartment =
-    provider === "google" ? "Khối học liệu số" : "Khối đào tạo nội bộ";
-
-  const accounts = listAccounts();
-  const existing = accounts.find((account) => account.email === providerEmail);
-
-  const account =
-    existing ??
-    ({
-      id: `provider-${provider}`,
-      fullName: providerName,
-      email: providerEmail,
-      password: "",
-      role: "teacher",
-      provider,
-      department: providerDepartment,
-      title: "Giảng viên tích hợp",
-      features: [
-        tr("auth.defaultCapabilityDashboard"),
-        tr("auth.defaultCapabilityMaterials"),
-        tr("auth.defaultCapabilityClasses"),
-        tr("auth.defaultCapabilityAccount"),
-      ],
-      createdAt: new Date().toISOString(),
-      lastLoginAt: null,
-    } satisfies TeacherAccount);
-
-  if (!existing) {
-    writeAccounts([...accounts, account]);
-  }
-
-  const nextAccount = saveAccount({
-    ...account,
-    lastLoginAt: new Date().toISOString(),
-  });
-
-  writeSession({
-    accountId: nextAccount.id,
-    rememberMe,
-    loggedInAt: new Date().toISOString(),
-    portal: "lms",
-  });
-  notifyAuthAccountChanged();
-
-  return nextAccount;
 }
 
 export function logoutAccount() {
@@ -457,26 +308,6 @@ export function updateAccountProfile(
     avatarUrl: payload.avatarUrl?.trim() ?? account.avatarUrl,
     bio: payload.bio?.trim() ?? account.bio,
     isProfileCompleted: true,
-  });
-}
-
-export function updateAccountPassword(accountId: string, currentPassword: string, nextPassword: string) {
-  const account = listAccounts().find((entry) => entry.id === accountId);
-  if (!account) {
-    throw new Error(tr("auth.errorAccountNotFound"));
-  }
-
-  if (account.provider !== "password") {
-    throw new Error(tr("auth.errorLinkedPasswordChange"));
-  }
-
-  if (account.password !== currentPassword) {
-    throw new Error(tr("auth.errorCurrentPasswordWrong"));
-  }
-
-  return saveAccount({
-    ...account,
-    password: nextPassword,
   });
 }
 

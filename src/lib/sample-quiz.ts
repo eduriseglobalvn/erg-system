@@ -20,9 +20,9 @@ const hotspotMockImage = `data:image/svg+xml,${encodeURIComponent(`
     <rect x="180" y="160" width="840" height="64" rx="18" fill="#0f6cbd" opacity="0.9"/>
     <rect x="190" y="270" width="360" height="210" rx="24" fill="#f1f5f9"/>
     <rect x="625" y="284" width="300" height="150" rx="24" fill="#fff7ed" stroke="#f97316" stroke-width="6"/>
-    <text x="215" y="200" font-family="Inter" font-size="30" font-weight="700" fill="#ffffff">System Settings</text>
-    <text x="660" y="345" font-family="Inter" font-size="32" font-weight="700" fill="#0f172a">Version 23H2</text>
-    <text x="660" y="392" font-family="Inter" font-size="24" fill="#475569">Build 22631</text>
+    <text x="215" y="200" font-family="Inter" font-size="30" font-weight="700" fill="#ffffff">Cài đặt hệ thống</text>
+    <text x="660" y="345" font-family="Inter" font-size="32" font-weight="700" fill="#0f172a">Phiên bản 23H2</text>
+    <text x="660" y="392" font-family="Inter" font-size="24" fill="#475569">Bản dựng 22631</text>
   </svg>
 `)}`;
 
@@ -43,11 +43,11 @@ function createCableMockImage(label: string, color: string) {
 const cableUsbCImage = createCableMockImage("USB-C", "#60a5fa");
 const cableUsbAImage = createCableMockImage("USB-A", "#34d399");
 const cableHdmiImage = createCableMockImage("HDMI", "#f59e0b");
-const cableLightningImage = createCableMockImage("LIGHT", "#f472b6");
+const cableLightningImage = createCableMockImage("SÉT", "#f472b6");
 
 export const sampleQuiz: Quiz = {
   id: "avs-demo",
-  title: "GS6 LV3 OTTHBS (TRAINING)",
+  title: "GS6 LV3 OTTHBS (Luyện tập)",
   subtitle: "Demo 14 dạng câu hỏi",
   version: "2.0",
   description: "Bộ câu hỏi mẫu để học sinh xem và làm thử toàn bộ dạng câu hỏi ERG hỗ trợ.",
@@ -63,8 +63,8 @@ export const sampleQuiz: Quiz = {
   },
   result: {
     passMessage: "Chúc mừng, em đã hoàn thành tốt bài demo.",
-    failMessage: "Em đã hoàn thành bài demo. Hãy review lại các câu còn sai nhé.",
-    reviewButtonLabel: "REVIEW QUIZ",
+    failMessage: "Em đã hoàn thành bài demo. Hãy xem lại các câu còn sai nhé.",
+    reviewButtonLabel: "XEM LẠI BÀI",
     thankYouMessage: "Cảm ơn em đã hoàn thành bài làm.",
     showReviewButton: true,
     submitAllPrompt: "Em đã trả lời hết câu hỏi. Em muốn nộp bài ngay không?",
@@ -172,15 +172,15 @@ export const sampleQuiz: Quiz = {
         {
           id: "q7b-matching-image",
           kind: "matching",
-          title: "Match each connector name with the correct image.",
-          instructions: "Tap a row to open the answer picker with image options.",
+          title: "Ghép tên từng đầu kết nối với đúng hình minh họa.",
+          instructions: "Bấm vào từng dòng để mở danh sách hình cần chọn.",
           points: 10,
           feedback: standardFeedback,
           matching: [
-            { id: "q7b-pair-1", prompt: "USB-C", response: "USB-C connector", responseImage: { url: cableUsbCImage, alt: "USB-C cable" } },
-            { id: "q7b-pair-2", prompt: "USB-A", response: "USB-A connector", responseImage: { url: cableUsbAImage, alt: "USB-A cable" } },
-            { id: "q7b-pair-3", prompt: "HDMI", response: "HDMI connector", responseImage: { url: cableHdmiImage, alt: "HDMI cable" } },
-            { id: "q7b-pair-4", prompt: "Lightning", response: "Lightning connector", responseImage: { url: cableLightningImage, alt: "Lightning cable" } },
+            { id: "q7b-pair-1", prompt: "USB-C", response: "Đầu kết nối USB-C", responseImage: { url: cableUsbCImage, alt: "Cáp USB-C" } },
+            { id: "q7b-pair-2", prompt: "USB-A", response: "Đầu kết nối USB-A", responseImage: { url: cableUsbAImage, alt: "Cáp USB-A" } },
+            { id: "q7b-pair-3", prompt: "HDMI", response: "Đầu kết nối HDMI", responseImage: { url: cableHdmiImage, alt: "Cáp HDMI" } },
+            { id: "q7b-pair-4", prompt: "Lightning", response: "Đầu kết nối Lightning", responseImage: { url: cableLightningImage, alt: "Cáp Lightning" } },
           ],
         },
         {
@@ -288,10 +288,10 @@ export const sampleQuiz: Quiz = {
             { id: "target-snack", label: "Đồ ăn vặt" },
           ],
           dragDropItems: [
-            { id: "item-broccoli", label: "Broccoli", correctTargetId: "target-healthy" },
-            { id: "item-apple", label: "Apple", correctTargetId: "target-healthy" },
-            { id: "item-cookie", label: "Cookie", correctTargetId: "target-snack" },
-            { id: "item-chips", label: "Chips", correctTargetId: "target-snack" },
+            { id: "item-broccoli", label: "Bông cải xanh", correctTargetId: "target-healthy" },
+            { id: "item-apple", label: "Táo", correctTargetId: "target-healthy" },
+            { id: "item-cookie", label: "Bánh quy", correctTargetId: "target-snack" },
+            { id: "item-chips", label: "Khoai tây chiên", correctTargetId: "target-snack" },
           ],
         },
         {
@@ -337,3 +337,40 @@ export const sampleQuiz: Quiz = {
     },
   ],
 };
+
+export const trainingSampleQuiz: Quiz = {
+  ...sampleQuiz,
+  id: "erg-training-demo",
+  title: "ERG ôn tập kỹ năng số (Training)",
+  subtitle: "Chế độ luyện tập từng câu",
+  description: "Bài luyện tập ERG dùng để kiểm tra luồng training: không trộn câu hỏi, không trộn đáp án và nộp theo từng câu.",
+  settings: {
+    ...sampleQuiz.settings,
+    mode: "training",
+    shuffleQuestions: false,
+    shuffleChoices: false,
+    revealFeedbackPerStep: true,
+  },
+};
+
+export const testingSampleQuiz: Quiz = {
+  ...sampleQuiz,
+  id: "erg-testing-demo",
+  title: "ERG kiểm tra kỹ năng số (Testing)",
+  subtitle: "Chế độ kiểm tra đầy đủ",
+  description: "Bài kiểm tra ERG dùng để kiểm tra luồng testing: bắt buộc trộn câu hỏi, trộn đáp án và chỉ nộp khi đã làm hết bài.",
+  settings: {
+    ...sampleQuiz.settings,
+    mode: "testing",
+    timeLimitMinutes: 20,
+    shuffleQuestions: true,
+    shuffleChoices: true,
+    revealFeedbackPerStep: false,
+  },
+};
+
+export const localQuizCatalog: Quiz[] = [trainingSampleQuiz, testingSampleQuiz, sampleQuiz];
+
+export function getLocalQuizById(quizId: string): Quiz | null {
+  return localQuizCatalog.find((quiz) => quiz.id === quizId) ?? null;
+}

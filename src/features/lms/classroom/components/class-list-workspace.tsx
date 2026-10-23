@@ -7,12 +7,12 @@ import {
   DashboardSectionCard,
 } from "@/components/dashboard/dashboard-page-shell";
 import { DataTable } from "@/components/ui/data-table";
-import { Badge, Button, EmptyState, Input, ProgressBar } from "@/components/ui/dashboard-kit";
-import {
-  classroomSchools,
-  getSchoolSnapshots,
-} from "@/features/lms/classroom/api/mock-classroom-data";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import Chip from "@mui/material/Chip";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+import LinearProgress from "@mui/material/LinearProgress";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { AppSelect } from "@/components/ui/app-select";
@@ -23,6 +23,8 @@ type ClassListWorkspaceProps = {
   activeLeaf: DashboardLeaf;
   mode: ClassListMode;
   onOpenLeaf: (leafId: string) => void;
+  schools: ClassroomSchool[];
+  snapshots: ClassroomSnapshot[];
   selectedSchoolId: string;
 };
 
@@ -35,14 +37,16 @@ export function ClassListWorkspace({
   activeLeaf,
   mode,
   onOpenLeaf,
+  schools,
+  snapshots,
   selectedSchoolId,
 }: ClassListWorkspaceProps) {
   const [gradeFilter, setGradeFilter] = useState("all");
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearchValue = useDebouncedValue(searchValue);
-  const selectedSchool = classroomSchools.find((school) => school.id === selectedSchoolId) ?? classroomSchools[0];
-  const schoolClasses = useMemo(() => getSchoolSnapshots(selectedSchoolId), [selectedSchoolId]);
-  const endedClasses = useMemo(() => buildEndedClasses(schoolClasses), [schoolClasses]);
+  const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0];
+  const schoolClasses = useMemo(() => snapshots.filter((snapshot) => snapshot.schoolId === selectedSchoolId), [selectedSchoolId, snapshots]);
+  const endedClasses: EndedClassRow[] = [];
   const rows = mode === "active" ? schoolClasses : endedClasses;
   const gradeOptions = Array.from(new Set(rows.map((item) => item.gradeLabel)));
   const normalizedSearch = debouncedSearchValue.trim().toLowerCase();
@@ -73,11 +77,12 @@ export function ClassListWorkspace({
       },
       {
         accessorKey: "studentCount",
-        cell: ({ row }) => row.original.studentCount.toLocaleString("vi-VN"),
+        cell: ({ row }) => row.original.metricsAvailable === false ? "—" : row.original.studentCount.toLocaleString("vi-VN"),
         header: "Học sinh",
       },
       {
         accessorKey: "averageScore",
+        cell: ({ row }) => row.original.metricsAvailable === false ? "—" : row.original.averageScore,
         header: "Điểm TB",
       },
       {
@@ -89,19 +94,22 @@ export function ClassListWorkspace({
           return mode === "active" ? (
             <div>
               <div className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-slate-950">{row.original.completionRate}%</span>
+                <span className="font-semibold text-slate-950">{row.original.metricsAvailable === false ? "—" : `${row.original.completionRate}%`}</span>
               </div>
-              <ProgressBar
-                className="mt-2 h-2"
-                indicatorClassName={row.original.riskStudents >= 5 ? "bg-amber-500" : "bg-emerald-500"}
+              {row.original.metricsAvailable === false ? <div className="mt-2 text-xs font-medium text-slate-500">Chưa có số liệu vận hành từ backend.</div> : <LinearProgress
+                variant="determinate"
                 value={row.original.completionRate}
-              />
+                color={row.original.riskStudents >= 5 ? "warning" : "success"}
+                sx={{ mt: 1, height: 8, borderRadius: 1 }}
+              />}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Badge tone={archiveStatus === "review" ? "warning" : "success"}>
-                {archiveStatus === "review" ? "Cần rà soát" : "Sẵn sàng"}
-              </Badge>
+              <Chip
+                label={archiveStatus === "review" ? "Cần rà soát" : "Sẵn sàng"}
+                size="small"
+                color={archiveStatus === "review" ? "warning" : "success"}
+              />
               <span className="text-sm font-medium text-slate-500">{endedAt}</span>
             </div>
           );
@@ -112,10 +120,10 @@ export function ClassListWorkspace({
         id: "actions",
         cell: () => (
           <div className="flex gap-2 lg:justify-end">
-            <Button size="sm" variant="outline" onClick={() => onOpenLeaf("class-reports")}>
+            <Button size="small" variant="outlined" onClick={() => onOpenLeaf("class-reports")}>
               Báo cáo
             </Button>
-            <Button size="sm" onClick={() => onOpenLeaf("class-students")}>
+            <Button size="small" variant="contained" onClick={() => onOpenLeaf("class-students")}>
               Học sinh
             </Button>
           </div>
@@ -145,21 +153,21 @@ export function ClassListWorkspace({
         <div className="flex flex-wrap gap-2">
           {mode === "active" ? (
             <>
-              <Button variant="outline">Nhập từ Excel</Button>
-              <Button>Thêm lớp học</Button>
+              <Button disabled title="Backend chưa cung cấp class import contract." variant="outlined">Nhập từ Excel</Button>
+              <Button disabled title="Backend chưa cung cấp class mutation contract." variant="contained">Thêm lớp học</Button>
             </>
           ) : (
-            <Button variant="outline">Xuất báo cáo</Button>
+            <Button disabled title="Backend chưa cung cấp archived-class report contract." variant="outlined">Xuất báo cáo</Button>
           )}
         </div>
       }
     >
       <DashboardSectionCard
         title={mode === "active" ? "Danh sách lớp đang hoạt động" : "Danh sách lớp đã kết thúc"}
-        description={`${selectedSchool.name} · ${filteredRows.length} lớp hiển thị`}
+        description={`${selectedSchool?.name ?? "Phạm vi hiện tại"} · ${filteredRows.length} lớp hiển thị`}
         action={
           mode === "active" ? (
-            <Button variant="outline" onClick={() => onOpenLeaf("class-students")}>
+            <Button variant="outlined" onClick={() => onOpenLeaf("class-students")}>
               Xem học sinh
             </Button>
           ) : null
@@ -168,7 +176,9 @@ export function ClassListWorkspace({
         <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_180px]">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
+            <TextField
+              size="small"
+              fullWidth
               aria-label="Tìm lớp học"
               placeholder="Tìm theo tên lớp hoặc giáo viên"
               value={searchValue}
@@ -201,24 +211,18 @@ export function ClassListWorkspace({
         {filteredRows.length ? (
           <DataTable className="mt-4 rounded-lg" columns={columns} data={filteredRows} />
         ) : (
-          <EmptyState
-            className="mt-4"
-            title={mode === "active" ? "Chưa có lớp đang hoạt động" : "Chưa có lớp đã kết thúc"}
-            description="Thử đổi bộ lọc hoặc chọn trung tâm khác ở thanh Đang xem."
-            action={<Button variant="outline" onClick={clearFilters}>Xóa bộ lọc</Button>}
-          />
+          <Box className="mt-4 rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-8 text-center">
+            <div className="text-sm font-semibold text-slate-950">
+              {mode === "active" ? "Chưa có lớp đang hoạt động" : "Chưa có contract lớp đã kết thúc"}
+            </div>
+            <div className="mt-2 text-sm text-slate-500">
+              {mode === "active" ? "Thử đổi bộ lọc hoặc chọn trung tâm khác ở thanh Đang xem." : "Backend chưa cung cấp trạng thái lưu trữ và thời điểm kết thúc lớp."}
+            </div>
+            <Button sx={{ mt: 2 }} variant="outlined" onClick={clearFilters}>Xóa bộ lọc</Button>
+          </Box>
         )}
       </DashboardSectionCard>
     </DashboardPageShell>
   );
 }
 
-function buildEndedClasses(classes: ClassroomSnapshot[]): EndedClassRow[] {
-  return classes.slice(0, Math.max(1, Math.min(3, classes.length))).map((classroom, index) => ({
-    ...classroom,
-    id: `${classroom.id}-ended`,
-    completionRate: 100,
-    endedAt: index === 0 ? "31/12/2025" : "30/09/2025",
-    archiveStatus: index % 2 === 0 ? "ready" : "review",
-  }));
-}

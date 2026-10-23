@@ -1,215 +1,148 @@
-import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
-import TaskAltOutlinedIcon from "@mui/icons-material/TaskAltOutlined";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
+import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
+import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
+import Skeleton from "@mui/material/Skeleton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
 
-import { Button, Card, ProgressBar } from "@/components/ui/dashboard-kit";
+import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
   StudentDashboardAssignment,
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 
-type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
-
-type DiscussionPreviewItem = {
-  id: string;
-  authorName: string;
-  className: string;
-  commentCount: number;
-  content: string;
-  createdAtLabel: string;
-};
+const surfaceSx = {
+  bgcolor: "background.paper",
+  border: "1px solid",
+  borderColor: "divider",
+  borderRadius: "22px",
+  boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
+} as const;
 
 export function StudentDashboardMobileOverview({
   announcement,
-  announcementPinnedLabel,
-  discussionPosts,
-  discussionSectionTitle,
-  heroDescription,
-  heroEyebrow,
-  heroTitle,
-  onOpenAssignment,
-  onPageChange,
+  assignmentsLoading,
+  completedAssignments,
+  copy,
   openAssignments,
-  primaryAction,
+  overdueAssignments,
   priorityAssignment,
   profile,
-  secondaryAction,
-  todayTitle,
+  onOpenAssignment,
+  onPageChange,
 }: {
   announcement: StudentTeacherAnnouncement | undefined;
-  announcementPinnedLabel: string;
-  discussionPosts: DiscussionPreviewItem[];
-  discussionSectionTitle: string;
-  heroDescription: string;
-  heroEyebrow: string;
-  heroTitle: string;
+  assignmentsLoading: boolean;
+  completedAssignments: StudentDashboardAssignment[];
+  copy: DashboardCopy;
+  openAssignments: StudentDashboardAssignment[];
+  overdueAssignments: StudentDashboardAssignment[];
+  priorityAssignment?: StudentDashboardAssignment;
+  profile: StudentDashboardProfile;
   onOpenAssignment: (assignmentId: string) => void;
   onPageChange: (page: StudentPageKey) => void;
-  openAssignments: StudentDashboardAssignment[];
-  primaryAction: string;
-  priorityAssignment: StudentDashboardAssignment;
-  profile: StudentDashboardProfile;
-  secondaryAction: string;
-  todayTitle: string;
 }) {
+  const totalAssignments = openAssignments.length + completedAssignments.length;
+
   return (
-    <section className="px-4 py-4">
-      <div className="space-y-3.5">
-        <Card className="overflow-hidden rounded-lg border border-slate-200/80 bg-white p-5 shadow-sm">
-          <div className="inline-flex rounded-md bg-[#ebf3fc] px-3 py-1 text-[10px] font-semibold text-[var(--erg-blue)]">
-            {heroEyebrow}
-          </div>
-          <h1 className="mt-4 text-[27px] font-semibold leading-[1.12]  text-[#0f172a]">
-            {heroTitle}
-          </h1>
-          <p className="mt-3 text-[14px] leading-6 text-slate-600">{heroDescription}</p>
+    <Stack spacing={1.5}>
+      <Paper sx={{ ...surfaceSx, overflow: "hidden", p: 2, position: "relative" }}>
+        <Box aria-hidden sx={{ bgcolor: "primary.main", bottom: 0, left: 0, position: "absolute", top: 0, width: 4 }} />
+        <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(15,108,189,0.08)", color: "primary.main", fontSize: 11, fontWeight: 800 }} />
+        <Typography sx={{ fontSize: 20, fontWeight: 900, lineHeight: 1.25, mt: 1.25 }}>
+          {copy.heroTitle(profile.name.trim() || copy.learnerFallbackName)}
+        </Typography>
+        <Typography color="text.secondary" sx={{ display: "-webkit-box", fontSize: 13, lineHeight: 1.55, mt: 0.75, overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 }}>
+          {priorityAssignment ? copy.heroDescription(priorityAssignment.title) : copy.assignmentsDescription}
+        </Typography>
 
-          <div className="mt-4 grid grid-cols-3 gap-2.5">
-            <MobileStat label="Open" value={`${openAssignments.length}`} />
-            <MobileStat label="Done" value={`${profile.completedAssignments}`} />
-            <MobileStat label="Avg" value={`${profile.averageScore}`} />
-          </div>
+        {priorityAssignment ? (
+          <Box sx={{ bgcolor: "background.default", borderRadius: 2.5, mt: 1.5, p: 1.25 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
+              <Box sx={{ bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", display: "grid", flexShrink: 0, height: 36, placeItems: "center", width: 36 }}>
+                <AutoStoriesRoundedIcon sx={{ fontSize: 20 }} />
+              </Box>
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography noWrap sx={{ fontSize: 13, fontWeight: 900 }}>{priorityAssignment.title}</Typography>
+                <Typography color="text.secondary" noWrap sx={{ fontSize: 11.5, fontWeight: 600 }}>{priorityAssignment.statusLabel} · {priorityAssignment.dueLabel}</Typography>
+              </Box>
+              <ButtonBase aria-label={copy.priority.action} disabled={!priorityAssignment.quizId} onClick={() => onOpenAssignment(priorityAssignment.id)} sx={{ bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", height: 36, width: 36 }}>
+                <ArrowForwardRoundedIcon sx={{ fontSize: 20 }} />
+              </ButtonBase>
+            </Stack>
+            {priorityAssignment.progressRate !== null ? <LinearProgress variant="determinate" value={priorityAssignment.progressRate} sx={{ borderRadius: 99, height: 5, mt: 1, "& .MuiLinearProgress-bar": { borderRadius: 99 } }} /> : null}
+          </Box>
+        ) : null}
 
-          <div className="mt-4 flex gap-3">
-            <Button
-              className="h-10 flex-1 rounded-lg bg-[var(--erg-blue)] text-[14px] font-semibold text-white shadow-sm hover:bg-[var(--erg-blue-hover)]"
-              onClick={() => onOpenAssignment(priorityAssignment.id)}
-            >
-              {primaryAction}
-            </Button>
-            <Button
-              variant="outline"
-              className="h-10 rounded-lg border-slate-200 bg-white px-4 text-[14px] font-medium text-slate-700"
-              onClick={() => onPageChange("assignments")}
-            >
-              {secondaryAction}
-            </Button>
-          </div>
-        </Card>
+        <Button fullWidth variant="contained" onClick={() => priorityAssignment?.quizId ? onOpenAssignment(priorityAssignment.id) : onPageChange("assignments")} sx={{ borderRadius: 2.5, fontWeight: 900, mt: 1.5, minHeight: 42, textTransform: "none" }}>
+          {priorityAssignment?.quizId ? copy.primaryAction : copy.secondaryAction}
+        </Button>
+      </Paper>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center gap-2">
-            {announcement?.isPinned ? <Capsule>{announcementPinnedLabel}</Capsule> : null}
-            <Capsule>{announcement?.targetLabel ?? profile.className}</Capsule>
-          </div>
-          <h2 className="mt-4 text-[20px] font-semibold leading-[1.15]  text-slate-900">
-            {announcement?.title ?? "Lịch học và bài ưu tiên tuần này"}
-          </h2>
-          <p className="mt-3 text-[14px] leading-6 text-slate-600">
-            {announcement?.content ?? "Khi giáo viên gửi thông báo mới, nội dung quan trọng sẽ hiện tại đây."}
-          </p>
-          {announcement ? (
-            <div className="mt-4 text-xs font-semibold text-slate-500">
-              {announcement.teacherName} · {announcement.createdAtLabel}
-            </div>
-          ) : null}
+      <Box sx={{ display: "grid", gap: 1.25, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+        <MobileMetric icon={<AssignmentRoundedIcon />} label={copy.stats.open} value={openAssignments.length} />
+        <MobileMetric icon={<ScheduleRoundedIcon />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
+        <MobileMetric icon={<CheckCircleRoundedIcon />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${totalAssignments}`} />
+        <MobileMetric icon={<SchoolRoundedIcon />} label={copy.stats.average} tone="info" value={profile.averageScore ?? "—"} />
+      </Box>
 
-          <Button
-            variant="outline"
-            className="mt-4 h-10 w-full rounded-lg border-slate-200 bg-white text-[14px] font-medium text-slate-700"
-            onClick={() => onPageChange("announcements")}
-          >
-            Thông báo giáo viên
-          </Button>
-        </Card>
+      <Paper sx={{ ...surfaceSx, overflow: "hidden" }}>
+        <Stack direction="row" sx={{ alignItems: "center", borderBottom: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 1.75, py: 1.4 }}>
+          <Typography sx={{ fontSize: 15, fontWeight: 900 }}>{copy.todayTitle}</Typography>
+          <Button onClick={() => onPageChange("assignments")} size="small" sx={{ fontSize: 12, fontWeight: 800, minWidth: 0, textTransform: "none" }}>{copy.secondaryAction}</Button>
+        </Stack>
+        <Stack spacing={0.25} sx={{ p: 0.75 }}>
+          {assignmentsLoading ? Array.from({ length: 3 }).map((_, index) => <Skeleton height={62} key={index} sx={{ borderRadius: 2 }} variant="rounded" />) : null}
+          {!assignmentsLoading && openAssignments.length === 0 ? <Typography color="text.secondary" sx={{ fontSize: 13, px: 1, py: 2, textAlign: "center" }}>{copy.assignmentsDescription}</Typography> : null}
+          {!assignmentsLoading ? openAssignments.slice(0, 3).map((assignment) => <MobileAssignmentRow assignment={assignment} copy={copy} key={assignment.id} onOpenAssignment={onOpenAssignment} />) : null}
+        </Stack>
+      </Paper>
 
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none  text-slate-900">{todayTitle}</div>
-            <button type="button" className="text-[13px] font-semibold text-[var(--erg-blue)]" onClick={() => onPageChange("assignments")}>
-              {secondaryAction}
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {openAssignments.slice(0, 3).map((assignment) => (
-              <article
-                key={assignment.id}
-                className="rounded-lg border border-slate-200 bg-[#fafbff] p-4"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-400">
-                      <Capsule>{assignment.statusLabel}</Capsule>
-                      <Capsule>{assignment.subjectLabel}</Capsule>
-                    </div>
-                    <h3 className="mt-3 text-[17px] font-semibold leading-6 text-slate-900">{assignment.title}</h3>
-                    <p className="mt-1 text-[14px] text-slate-500">{assignment.dueLabel}</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="grid h-10 min-w-10 place-items-center rounded-lg bg-[var(--erg-blue)] px-3 text-white shadow-sm"
-                    onClick={() => onOpenAssignment(assignment.id)}
-                  >
-                    <TaskAltOutlinedIcon fontSize="small" />
-                  </button>
-                </div>
-
-                <div className="mt-4">
-                  <div className="flex items-center justify-between gap-3 text-xs font-semibold text-slate-400">
-                    <span>Progress</span>
-                    <span>{assignment.progressRate}%</span>
-                  </div>
-                  <ProgressBar
-                    value={assignment.progressRate}
-                    className="mt-2 h-2 bg-slate-100"
-                    indicatorClassName={assignment.status === "overdue" ? "bg-[var(--erg-red)]" : "bg-[var(--erg-blue)]"}
-                  />
-                  <p className="mt-3 text-[14px] leading-6 text-slate-600">{assignment.focusNote}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="rounded-lg border border-slate-200/80 bg-white p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-3">
-            <div className="text-[20px] font-semibold leading-none  text-slate-900">{discussionSectionTitle}</div>
-            <button type="button" className="grid h-9 w-9 place-items-center rounded-lg bg-[#ebf3fc] text-[var(--erg-blue)]" onClick={() => onPageChange("discussion")}>
-              <ForumOutlinedIcon fontSize="small" />
-            </button>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {discussionPosts.map((post) => (
-              <button
-                key={post.id}
-                type="button"
-                className="w-full rounded-lg border border-slate-200 bg-[#fafbff] px-4 py-4 text-left transition hover:bg-white"
-                onClick={() => onPageChange("discussion")}
-              >
-                <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-500">
-                  <Capsule>{post.className}</Capsule>
-                  <span>{post.authorName}</span>
-                  <span>·</span>
-                  <span>{post.createdAtLabel}</span>
-                </div>
-                <p className="mt-3 line-clamp-2 whitespace-pre-line text-[14px] leading-6 text-slate-700">{post.content}</p>
-                <div className="mt-3 text-xs font-semibold text-slate-400">
-                  {post.commentCount} replies
-                </div>
-              </button>
-            ))}
-          </div>
-        </Card>
-      </div>
-    </section>
+      {announcement ? (
+        <Paper sx={{ ...surfaceSx, p: 1.75 }}>
+          <Typography color="primary.main" sx={{ fontSize: 11, fontWeight: 900, textTransform: "uppercase" }}>{copy.announcementTitle}</Typography>
+          <Typography sx={{ fontSize: 14, fontWeight: 900, mt: 0.6 }}>{announcement.title}</Typography>
+          <Typography color="text.secondary" sx={{ display: "-webkit-box", fontSize: 12.5, lineHeight: 1.5, mt: 0.4, overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 }}>{announcement.content}</Typography>
+        </Paper>
+      ) : null}
+    </Stack>
   );
 }
 
-function Capsule({ children }: { children: string }) {
+function MobileMetric({ icon, label, tone = "primary", value }: { icon: ReactNode; label: string; tone?: "primary" | "error" | "success" | "info"; value: ReactNode }) {
+  const colors = { error: "#D92D20", info: "#0284C7", primary: "#0F6CBD", success: "#15803D" };
+  const color = colors[tone];
   return (
-    <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold text-slate-500">
-      {children}
-    </span>
+    <Paper sx={{ ...surfaceSx, boxShadow: "0 8px 22px rgba(15,23,42,0.045)", minHeight: 104, p: 1.5 }}>
+      <Box sx={{ alignItems: "center", bgcolor: `${color}14`, borderRadius: 2, color, display: "flex", height: 34, justifyContent: "center", width: 34, "& svg": { fontSize: 19 } }}>{icon}</Box>
+      <Typography sx={{ color: "text.primary", fontSize: 20, fontWeight: 900, lineHeight: 1, mt: 1.2 }}>{value}</Typography>
+      <Typography color="text.secondary" noWrap sx={{ fontSize: 10.5, fontWeight: 800, mt: 0.65, textTransform: "uppercase" }}>{label}</Typography>
+    </Paper>
   );
 }
 
-function MobileStat({ label, value }: { label: string; value: string }) {
+function MobileAssignmentRow({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-[#fbfcff] px-3 py-3">
-      <div className="text-[10px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-[28px] font-semibold leading-none  text-[var(--erg-blue)]">{value}</div>
-    </div>
+    <ButtonBase disabled={!assignment.quizId} onClick={() => onOpenAssignment(assignment.id)} sx={{ borderRadius: 2.5, display: "flex", gap: 1.25, justifyContent: "flex-start", minHeight: 62, p: 1, textAlign: "left", width: "100%", "&:hover": { bgcolor: "action.hover" } }}>
+      <Box sx={{ bgcolor: assignment.status === "overdue" ? "error.light" : "info.light", borderRadius: 2, color: assignment.status === "overdue" ? "error.main" : "primary.main", display: "grid", flexShrink: 0, height: 40, placeItems: "center", width: 40 }}>
+        <AutoStoriesRoundedIcon sx={{ fontSize: 20 }} />
+      </Box>
+      <Box sx={{ flex: 1, minWidth: 0 }}>
+        <Typography noWrap sx={{ fontSize: 13.5, fontWeight: 900 }}>{assignment.title}</Typography>
+        <Typography color="text.secondary" noWrap sx={{ fontSize: 11.5, fontWeight: 600, mt: 0.25 }}>{assignment.subjectLabel ?? assignment.statusLabel} · {assignment.dueLabel}</Typography>
+      </Box>
+      <Typography color="primary.main" sx={{ fontSize: 11.5, fontWeight: 900 }}>{copy.assignmentAction(assignment.status)}</Typography>
+    </ButtonBase>
   );
 }

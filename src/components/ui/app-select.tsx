@@ -1,9 +1,8 @@
-import { Children, isValidElement, useMemo, useState, type ChangeEvent, type ReactElement, type ReactNode, type SelectHTMLAttributes } from "react";
-
-import { Select, SelectContent, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-
-const emptyValue = "__app_select_empty__";
+import { Children, isValidElement, useMemo, useState, type ChangeEvent, type CSSProperties, type ReactElement, type ReactNode, type SelectHTMLAttributes } from "react";
+import FormControl from "@mui/material/FormControl";
+import ListSubheader from "@mui/material/ListSubheader";
+import MenuItem from "@mui/material/MenuItem";
+import Select, { type SelectChangeEvent } from "@mui/material/Select";
 
 type OptionModel = {
   disabled?: boolean;
@@ -19,9 +18,9 @@ type GroupModel = {
 type AppSelectProps = Omit<SelectHTMLAttributes<HTMLSelectElement>, "children" | "multiple" | "size"> & {
   children?: ReactNode;
   /**
-   * When "native", renders a lightweight native <select> element instead of Radix Select.
+   * When "native", renders a lightweight native <select> element.
    * Use this for high-frequency renders (table cells, repeated filter bars).
-   * Defaults to "custom" (Radix Select).
+   * Defaults to "custom" (MUI Select).
    */
   variant?: "custom" | "native";
 };
@@ -40,33 +39,35 @@ export function AppSelect({
 }: AppSelectProps) {
   const groups = useMemo(() => parseSelectChildren(children), [children]);
   const flatOptions = groups.flatMap((group) => group.options);
-  const initialValue = normalizeValue(String(defaultValue ?? value ?? flatOptions.find((option) => !option.disabled)?.value ?? ""));
+  const initialValue = String(defaultValue ?? value ?? flatOptions.find((option) => !option.disabled)?.value ?? "");
   const [uncontrolledValue, setUncontrolledValue] = useState(initialValue);
-  const selectedValue = value === undefined ? uncontrolledValue : normalizeValue(String(value));
-  const isClassificationSelect = (props as Record<string, unknown>)["data-classification-select"] === "true" || (props as Record<string, unknown>)["data-classification-select"] === true;
-  const classificationValue = isClassificationSelect ? denormalizeValue(selectedValue).slice(0, 1).toUpperCase() : undefined;
-  const triggerProps = pickTriggerProps(props);
+  const selectedValue = value === undefined ? uncontrolledValue : String(value);
+  const isClassificationSelect =
+    (props as Record<string, unknown>)["data-classification-select"] === "true" ||
+    (props as Record<string, unknown>)["data-classification-select"] === true;
+  const isQuizPlayerSelect =
+    (props as Record<string, unknown>)["data-quiz-player-select"] === "true" ||
+    (props as Record<string, unknown>)["data-quiz-player-select"] === true;
+  const classificationValue = isClassificationSelect ? selectedValue.slice(0, 1).toUpperCase() : undefined;
+  const passthrough = pickPassthroughProps(props);
+  const customStyle = style as CSSProperties | undefined;
 
-  // Lightweight native <select> path – no Radix runtime overhead
+  // Lightweight native <select> path – no MUI runtime overhead
   if (variant === "native") {
     const nativeValue = value === undefined ? uncontrolledValue : String(value);
     return (
       <select
         aria-label={ariaLabel}
+        className={className}
         data-classification={classificationValue}
         disabled={disabled}
-        style={style}
+        style={style as CSSProperties}
         value={nativeValue}
         onChange={(event) => {
           if (value === undefined) setUncontrolledValue(event.target.value);
           onChange?.(event as unknown as ChangeEvent<HTMLSelectElement>);
         }}
-        className={cn(
-          "erg-select-native h-10 min-w-[150px] rounded-lg border !border-[#d7e0ec] bg-white pl-3.5 !text-[14px] !font-bold text-slate-900 shadow-none focus:!border-[#d7e0ec]",
-          isClassificationSelect && "erg-grade-pill min-w-0 justify-center text-center",
-          className,
-        )}
-        {...triggerProps}
+        {...passthrough}
       >
         {flatOptions.map((option) => (
           <option key={option.value} value={option.value} disabled={option.disabled}>
@@ -77,52 +78,124 @@ export function AppSelect({
     );
   }
 
-  function handleValueChange(nextValue: string) {
-    const nativeValue = denormalizeValue(nextValue);
+  function handleChange(event: SelectChangeEvent<string>) {
+    const nextValue = event.target.value;
     if (value === undefined) setUncontrolledValue(nextValue);
-    onChange?.({ target: { value: nativeValue }, currentTarget: { value: nativeValue } } as ChangeEvent<HTMLSelectElement>);
+    onChange?.({
+      target: { value: nextValue },
+      currentTarget: { value: nextValue },
+    } as ChangeEvent<HTMLSelectElement>);
   }
 
+  const showGroupLabels = groups.length > 1 || Boolean(groups[0]?.label);
+
   return (
-    <Select value={selectedValue} onValueChange={handleValueChange} disabled={disabled}>
-      <SelectTrigger
+    <FormControl
+      size="small"
+      disabled={disabled}
+      sx={{ minWidth: isQuizPlayerSelect ? "clamp(220px, 14vw, 300px)" : 150 }}
+      className={className}
+      style={customStyle}
+    >
+      <Select
         aria-label={ariaLabel}
         data-classification={classificationValue}
-        hideIcon={false}
-        style={style}
-        className={cn(
-          "h-10 min-w-[150px] rounded-lg border !border-[#d7e0ec] bg-white px-3.5 !text-[14px] !font-bold text-slate-900 shadow-none hover:!border-[#b8c8db] focus-visible:!border-[#d7e0ec]",
-          isClassificationSelect && "relative min-w-0 justify-center px-3.5 pr-7 text-center shadow-none *:data-[slot=select-value]:w-full *:data-[slot=select-value]:justify-center [&>svg]:absolute [&>svg]:right-2 [&>svg]:size-3.5",
-          className,
-        )}
-        {...triggerProps}
+        displayEmpty
+        renderValue={(selected) => {
+          const selectedOption = flatOptions.find((option) => option.value === selected);
+          return selectedOption?.label ?? "";
+        }}
+        value={selectedValue}
+        onChange={handleChange}
+        MenuProps={
+          isQuizPlayerSelect
+            ? {
+                slotProps: {
+                  paper: {
+                    sx: {
+                      mt: 0.75,
+                      border: "1px solid rgba(0,0,136,0.10)",
+                      borderRadius: "12px",
+                      boxShadow: "0 18px 44px rgba(28,37,46,0.16)",
+                      overflow: "hidden",
+                      "& .MuiMenuItem-root": {
+                        fontSize: "var(--quiz-control-text-size)",
+                        fontWeight: 750,
+                        minHeight: 50,
+                        px: 2.5,
+                      },
+                      "& .MuiMenuItem-root.Mui-selected": {
+                        backgroundColor: "rgba(0,0,136,0.08)",
+                        color: "#000088",
+                        fontWeight: 850,
+                      },
+                      "& .MuiMenuItem-root.Mui-selected:hover": {
+                        backgroundColor: "rgba(0,0,136,0.12)",
+                      },
+                    },
+                  },
+                },
+              }
+            : undefined
+        }
+        sx={{
+          height: isQuizPlayerSelect ? "var(--quiz-control-height)" : 40,
+          fontSize: isQuizPlayerSelect ? "var(--quiz-control-text-size)" : 14,
+          fontWeight: isQuizPlayerSelect ? 850 : 700,
+          borderRadius: isQuizPlayerSelect ? "10px" : undefined,
+          backgroundColor: isQuizPlayerSelect ? customStyle?.backgroundColor ?? "#fff" : undefined,
+          color: isQuizPlayerSelect ? customStyle?.color ?? "#000088" : undefined,
+          boxShadow: isQuizPlayerSelect ? "0 10px 24px rgba(0,0,136,0.08)" : undefined,
+          "& .MuiSelect-select": isQuizPlayerSelect
+            ? {
+                alignItems: "center",
+                display: "flex",
+                py: 0,
+              }
+            : undefined,
+          "& .MuiOutlinedInput-notchedOutline": isQuizPlayerSelect
+            ? {
+                borderColor: customStyle?.borderColor ?? "rgba(0,0,136,0.18)",
+                borderWidth: 1.5,
+              }
+            : undefined,
+          "&:hover .MuiOutlinedInput-notchedOutline": isQuizPlayerSelect
+            ? {
+                borderColor: "#000088",
+              }
+            : undefined,
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": isQuizPlayerSelect
+            ? {
+                borderColor: "#000088",
+                borderWidth: 2,
+              }
+            : undefined,
+          ...(isClassificationSelect ? { minWidth: 0, textAlign: "center" } : null),
+        }}
+        {...passthrough}
       >
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent position="popper" align="start" className="p-1 shadow-lg shadow-slate-900/10">
-        {groups.map((group, groupIndex) => (
-          <SelectGroupBlock key={`${group.label}-${groupIndex}`} group={group} showLabel={groups.length > 1 || Boolean(group.label)} />
-        ))}
-      </SelectContent>
-    </Select>
+        {groups.flatMap((group, groupIndex) => {
+          const items: ReactNode[] = [];
+          if (showGroupLabels && group.label) {
+            items.push(<ListSubheader key={`label-${group.label}-${groupIndex}`}>{group.label}</ListSubheader>);
+          }
+          for (const option of group.options) {
+            items.push(
+              <MenuItem key={`${group.label}-${option.value}`} value={option.value} disabled={option.disabled}>
+                {option.label}
+              </MenuItem>,
+            );
+          }
+          return items;
+        })}
+      </Select>
+    </FormControl>
   );
 }
 
-function pickTriggerProps(props: Record<string, unknown>) {
-  return Object.fromEntries(Object.entries(props).filter(([key]) => key.startsWith("data-") || key.startsWith("aria-") || key === "id" || key === "title"));
-}
-
-function SelectGroupBlock({ group, showLabel }: { group: GroupModel; showLabel: boolean }) {
-  return (
-    <>
-      {showLabel ? <SelectLabel>{group.label}</SelectLabel> : null}
-      {group.options.map((option) => (
-        <SelectItem key={option.value} value={normalizeValue(option.value)} disabled={option.disabled} className="font-medium">
-          {option.label}
-        </SelectItem>
-      ))}
-      {showLabel ? <SelectSeparator /> : null}
-    </>
+function pickPassthroughProps(props: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(props).filter(([key]) => key.startsWith("data-") || key.startsWith("aria-") || key === "id" || key === "title"),
   );
 }
 
@@ -139,7 +212,9 @@ function parseSelectChildren(children: ReactNode): GroupModel[] {
     if (element.type === "optgroup") {
       groups.push({
         label: element.props.label ?? "",
-        options: Children.toArray(element.props.children).filter(isValidElement).map((option) => parseOptionElement(option as ReactElement<{ children?: ReactNode; disabled?: boolean; value?: string }>)),
+        options: Children.toArray(element.props.children)
+          .filter(isValidElement)
+          .map((option) => parseOptionElement(option as ReactElement<{ children?: ReactNode; disabled?: boolean; value?: string }>)),
       });
     }
   });
@@ -158,12 +233,4 @@ function parseOptionElement(element: ReactElement<{ children?: ReactNode; disabl
 
 function optionLabel(children: ReactNode): string {
   return Children.toArray(children).join("");
-}
-
-function normalizeValue(value: string) {
-  return value === "" ? emptyValue : value;
-}
-
-function denormalizeValue(value: string) {
-  return value === emptyValue ? "" : value;
 }

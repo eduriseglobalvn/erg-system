@@ -16,7 +16,7 @@ export function shouldUseHashRouter() {
 }
 
 export function getApiBase() {
-  return import.meta.env.VITE_API_BASE?.trim() || "http://localhost:8080";
+  return import.meta.env.VITE_API_BASE?.trim() || (typeof window !== "undefined" ? window.location.origin : "");
 }
 
 export function getGradingStrategy() {

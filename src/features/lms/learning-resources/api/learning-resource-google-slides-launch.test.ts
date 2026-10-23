@@ -2,7 +2,8 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 const apiRequestMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
   apiRequest: apiRequestMock,
   hasApiBase: () => true,
 }));
@@ -37,7 +38,7 @@ function googleLaunchResource(): LearningResourceResource {
       resourceId: "resource-google",
       title: "Google deck",
       description: "Google Slides",
-      launchUrl: "https://api.example.test/api/v1/hoclieu/assets/asset-google/launch",
+      launchUrl: "https://api.example.test/api/content/assets/asset-google/launch",
     },
   };
 }
@@ -46,21 +47,11 @@ beforeEach(() => {
   apiRequestMock.mockReset();
 });
 
-test("maps manual slide count from Google Slides launch responses", async () => {
-  apiRequestMock.mockResolvedValueOnce({
-    assetId: "asset-google",
-    resourceId: "resource-google",
-    launchMode: "google_slide_embed",
-    embedUrl: "https://docs.google.com/presentation/d/demo/embed",
-    slideCount: 2,
-  });
-
+test("does not refetch removed API launch endpoints", async () => {
   const resource = await loadLearningResourceResourceForViewer(googleLaunchResource());
 
-  expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/hoclieu/assets/asset-google/launch");
-  expect(resource.viewer).toMatchObject({
-    pageCount: 2,
-  });
+  expect(apiRequestMock).not.toHaveBeenCalled();
+  expect(resource.viewer.pageCount).toBeUndefined();
 });
 
 test("keeps Google Slides resources that already carry an embedUrl without refetching metadata", async () => {

@@ -1,77 +1,115 @@
-import { useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
-import AudiotrackIcon from "@mui/icons-material/Audiotrack";
-import CalculateIcon from "@mui/icons-material/Calculate";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
+import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ContentCutIcon from "@mui/icons-material/ContentCut";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import DeleteOutlineIcon from "@mui/icons-material/Delete";
+import ErrorOutlineIcon from "@mui/icons-material/Error";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import FormatBoldIcon from "@mui/icons-material/FormatBold";
 import FormatItalicIcon from "@mui/icons-material/FormatItalic";
 import FormatUnderlinedIcon from "@mui/icons-material/FormatUnderlined";
 import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import PreviewIcon from "@mui/icons-material/Preview";
 import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
-import SpellcheckIcon from "@mui/icons-material/Spellcheck";
-import StarIcon from "@mui/icons-material/Star";
-import StickyNote2Icon from "@mui/icons-material/StickyNote2";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
-import TuneIcon from "@mui/icons-material/Tune";
+import {
+  Box,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Button,
+  Checkbox,
+  Chip,
+  Divider,
+  FormControlLabel,
+  IconButton,
+  MenuItem,
+  Select,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 
 import { resolveQuizFontStack } from "@/config/fonts";
-import { ChoiceEditorTable } from "@/features/lcms/quiz/quiz-editor/components/form-view/choice-editor-table";
-import { DragDropMatchTable } from "@/features/lcms/quiz/quiz-editor/components/form-view/drag-drop-match-table";
-import { FeedbackBranchingTable } from "@/features/lcms/quiz/quiz-editor/components/form-view/feedback-branching-table";
-import { InstructionDescriptionPanel } from "@/features/lcms/quiz/quiz-editor/components/form-view/instruction-description-panel";
 import { LearnerQuestionAuthoringPreview } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview";
-import { MediaAttachmentPanel } from "@/features/lcms/quiz/quiz-editor/components/form-view/media-attachment-panel";
-import { ResultTabs } from "@/features/lcms/quiz/quiz-editor/components/form-view/result-tabs";
-import { FinalSlideOptionsSection } from "@/features/lcms/quiz/quiz-editor/components/options-panels/final-slide-options-section";
-import { InstructionOptionsSection } from "@/features/lcms/quiz/quiz-editor/components/options-panels/instruction-options-section";
-import { QuestionOptionsSection } from "@/features/lcms/quiz/quiz-editor/components/options-panels/question-options-section";
 import {
   defaultQuizTextStyle,
   quizEditorFontOptions,
   quizEditorFontSizeOptions,
+  resolveSlideTextStyle,
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
+import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { useI18n } from "@/platform/i18n";
+import type { Question } from "@/lib/types";
 import type {
-  QuizEditorChoice,
-  QuizEditorDragDropItem,
+  QuizEditorFeedbackBranching,
   QuizEditorFeedbackRow,
   QuizEditorFinalSlideOptions,
   QuizEditorSlide,
+  QuizEditorSlideMedia,
+  QuizEditorSlideOptions,
   QuizEditorTextStyle,
+  QuizEditorTextStyleTarget,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getSlideKindLabelKey } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { cn } from "@/utils/cn";
-import { AppSelect } from "@/components/ui/app-select";
+import { cn } from "@/utils/cn";
+
 
 type QuestionEditorDialogProps = {
   open: boolean;
   slide: QuizEditorSlide | null;
   groupTitle: string | null;
   entries: Array<{ groupId: string; slideId: string; title: string }>;
+  selectedThemeId: string;
   onClose: () => void;
   onSave: (slide: QuizEditorSlide) => void;
   onNavigate: (groupId: string, slideId: string) => void;
+  onOpenPlayerTemplate: () => void;
   onPreview: (slide: QuizEditorSlide) => void;
 };
+
+type InlineMediaTarget =
+  | { kind: "choice"; id: string }
+  | { kind: "drag-item"; id: string; field: "label" | "target" }
+  | { kind: "slide" };
 
 export function QuestionEditorDialog({
   open,
   slide,
   groupTitle,
   entries,
+  selectedThemeId,
   onClose,
   onSave,
   onNavigate,
+  onOpenPlayerTemplate,
   onPreview,
 }: QuestionEditorDialogProps) {
   const { t } = useI18n();
   const [draftSlide, setDraftSlide] = useState<QuizEditorSlide | null>(slide ? cloneSlide(slide) : null);
+  const [activeTextTarget, setActiveTextTarget] = useState<QuizEditorTextStyleTarget>("question");
   const mediaInputRef = useRef<HTMLInputElement | null>(null);
+  const pendingMediaTargetRef = useRef<InlineMediaTarget | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [onClose, open]);
 
   const currentIndex = useMemo(
     () => (draftSlide ? entries.findIndex((entry) => entry.slideId === draftSlide.id) : -1),
@@ -82,52 +120,26 @@ export function QuestionEditorDialog({
     return null;
   }
 
-  const resolvedTextStyle = { ...defaultQuizTextStyle, ...draftSlide.textStyle };
-  const feedbackValue =
-    draftSlide.options?.feedback === t("common.byResult")
-      ? "By Result"
-      : draftSlide.options?.feedback === t("quiz.byQuestion")
-        ? "By Question"
-        : draftSlide.options?.feedback ?? "By Question";
-  const branchingValue =
-    draftSlide.options?.branching === t("common.byResult")
-      ? "By Result"
-      : draftSlide.options?.branching === t("common.none")
-        ? "None"
-        : draftSlide.options?.branching ?? "None";
+  const resolvedTextStyle = resolveSlideTextStyle(draftSlide, activeTextTarget);
+  const activeFormats = [
+    resolvedTextStyle.bold ? "bold" : null,
+    resolvedTextStyle.italic ? "italic" : null,
+    resolvedTextStyle.underline ? "underline" : null,
+  ].filter(Boolean) as string[];
+  const questionThemeColor = draftSlide.options?.themeColor ?? "#0f6cbd";
+
+  function handleFontChange(event: { target: { value: unknown } }) {
+    updateTextStyle({ fontFamily: String(event.target.value) });
+  }
+
+  function handleFontSizeChange(event: { target: { value: unknown } }) {
+    updateTextStyle({ fontSize: Number(event.target.value) });
+  }
 
   function updateTextStyle(patch: Partial<QuizEditorTextStyle>) {
     setDraftSlide((current) =>
       current
-        ? {
-            ...current,
-            textStyle: { ...defaultQuizTextStyle, ...current.textStyle, ...patch },
-          }
-        : current,
-    );
-  }
-
-  function updateOptions(patch: Partial<NonNullable<QuizEditorSlide["options"]>>) {
-    setDraftSlide((current) =>
-      current
-        ? {
-            ...current,
-            options: { ...current.options, ...patch },
-          }
-        : current,
-    );
-  }
-
-  function updateCorrectScore(score: number) {
-    setDraftSlide((current) =>
-      current
-        ? {
-            ...current,
-            feedbackRows:
-              current.feedbackRows?.map((row) =>
-                row.kind === "correct" ? { ...row, score } : row,
-              ) ?? current.feedbackRows,
-          }
+        ? updateSlideTextStyleTarget(current, activeTextTarget, patch)
         : current,
     );
   }
@@ -178,6 +190,7 @@ export function QuestionEditorDialog({
   }
 
   function handlePickMedia() {
+    pendingMediaTargetRef.current = getActiveInlineMediaTarget();
     mediaInputRef.current?.click();
   }
 
@@ -189,20 +202,22 @@ export function QuestionEditorDialog({
     reader.onload = () => {
       const result = reader.result;
       if (typeof result !== "string") return;
+      const target = pendingMediaTargetRef.current ?? { kind: "slide" as const };
+      const nextMedia = {
+        type: "image" as const,
+        src: result,
+        alt: file.name.replace(/\.[^/.]+$/, ""),
+        name: file.name,
+        x: target.kind === "slide" ? 0.74 : undefined,
+        y: target.kind === "slide" ? 0.48 : undefined,
+        width: target.kind === "slide" ? 0.34 : undefined,
+      };
 
       setDraftSlide((current) =>
-        current
-          ? {
-              ...current,
-              media: {
-                type: "image",
-                src: result,
-                alt: current.media?.alt || file.name.replace(/\.[^/.]+$/, ""),
-                name: file.name,
-              },
-            }
+        current ? applyInlineMedia(current, target, nextMedia)
           : current,
       );
+      pendingMediaTargetRef.current = null;
     };
     reader.readAsDataURL(file);
     event.target.value = "";
@@ -241,51 +256,50 @@ export function QuestionEditorDialog({
   }
 
   function updateTitle(value: string) {
-    setDraftSlide((current) => (current ? { ...current, title: value } : current));
+    setDraftSlide((current) =>
+      current
+        ? {
+            ...current,
+            title: value,
+            runtimeQuestion: current.runtimeQuestion ? { ...current.runtimeQuestion, title: value } : current.runtimeQuestion,
+          }
+        : current,
+    );
   }
 
-  function updateDescription(value: string) {
-    setDraftSlide((current) => (current ? { ...current, description: value } : current));
+  function handleUpdateSlideMedia(media: QuizEditorSlideMedia) {
+    setDraftSlide((current) => (current ? { ...current, media } : current));
+  }
+
+  function updateRuntimeQuestion(question: Question) {
+    setDraftSlide((current) => (current ? syncQuizEditorSlideFromRuntimeQuestion(current, question) : current));
   }
 
   function updateInstructions(items: string[]) {
     setDraftSlide((current) => (current ? { ...current, instructions: items } : current));
   }
 
-  function updateChoices(choices: QuizEditorChoice[]) {
-    setDraftSlide((current) => (current ? { ...current, choices } : current));
-  }
-
-  function updateItems(items: QuizEditorDragDropItem[]) {
-    setDraftSlide((current) => (current ? { ...current, dragDropItems: items } : current));
-  }
-
   function updateFeedbackRows(rows: QuizEditorFeedbackRow[]) {
     setDraftSlide((current) => (current ? { ...current, feedbackRows: rows } : current));
   }
 
-  function updateResultTab(tab: "passed" | "failed") {
-    setDraftSlide((current) => (current ? { ...current, activeResultTab: tab } : current));
-  }
-
   return (
-    <div className="classic-editor__dialog-backdrop" onClick={onClose}>
+    <div className="classic-editor__dialog-backdrop">
       <div
         className={cn("classic-editor__dialog", "classic-editor__question-editor-dialog")}
-        onClick={(event) => event.stopPropagation()}
       >
-        <div className="classic-editor__dialog-titlebar">
-          <div className="classic-editor__dialog-title">
-            <TextFieldsIcon className="h-4 w-4 text-[#41688f]" fontSize="inherit" />
-            <span>{t("quiz.questionEditor")}</span>
-            <small>
+        <Box className="classic-editor__dialog-titlebar">
+          <Box className="classic-editor__dialog-title">
+            <TextFieldsIcon fontSize="small" color="primary" />
+            <Typography component="span" variant="subtitle2">{t("quiz.questionEditor")}</Typography>
+            <Typography component="small" variant="caption">
               {groupTitle ?? t("quiz.ungrouped")} / {t(getSlideKindLabelKey(draftSlide.kind))}
-            </small>
-          </div>
-          <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
-          </button>
-        </div>
+            </Typography>
+          </Box>
+          <IconButton size="small" className="classic-editor__dialog-close" onClick={onClose} aria-label={t("common.cancel")}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
 
         <input
           ref={mediaInputRef}
@@ -295,201 +309,140 @@ export function QuestionEditorDialog({
           onChange={handleMediaInputChange}
         />
 
-        <div className="classic-editor__question-editor-toolbar is-modern-ribbon">
-          <div className="classic-editor__question-editor-group is-clipboard">
-            <div className="classic-editor__question-editor-clipboard">
-              <QuestionEditorRibbonButton
-                icon={<ContentCutIcon className="h-3.5 w-3.5" fontSize="inherit" />}
-                label={t("common.cut")}
+        <Box className="classic-editor__question-editor-toolbar is-modern-ribbon is-mui-editor">
+          <Box className="classic-editor__mui-editor-group is-clipboard">
+            <Tooltip title={t("common.cut")} arrow>
+              <IconButton
+                size="small"
+                onMouseDown={(event) => event.preventDefault()}
                 onClick={() => void handleClipboardCommand("cut")}
-              />
-              <QuestionEditorRibbonButton
-                icon={<ContentCopyIcon className="h-3.5 w-3.5" fontSize="inherit" />}
-                label={t("common.copy")}
-                onClick={() => void handleClipboardCommand("copy")}
-              />
-              <QuestionEditorRibbonButton
-                icon={<ContentPasteIcon className="h-3.5 w-3.5" fontSize="inherit" />}
-                label={t("common.paste")}
-                onClick={() => void handleClipboardCommand("paste")}
-              />
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.clipboard")}</span>
-          </div>
-
-          <div className="classic-editor__question-editor-group is-text-format">
-            <div className="classic-editor__question-editor-controls">
-              <div className="classic-editor__question-editor-font-row">
-                <AppSelect
-                  value={resolvedTextStyle.fontFamily}
-                  onChange={(event) => updateTextStyle({ fontFamily: event.target.value })}
-                  className="classic-editor__question-editor-select is-font"
-                  style={{ fontFamily: resolveQuizFontStack(resolvedTextStyle.fontFamily) }}
-                >
-                  {quizEditorFontOptions.map((font) => (
-                    <option key={font} value={font} style={{ fontFamily: resolveQuizFontStack(font) }}>
-                      {font}
-                    </option>
-                  ))}
-                </AppSelect>
-                <AppSelect
-                  value={resolvedTextStyle.fontSize}
-                  onChange={(event) => updateTextStyle({ fontSize: Number(event.target.value) })}
-                  className="classic-editor__question-editor-select is-size"
-                >
-                  {quizEditorFontSizeOptions.map((size) => (
-                    <option key={size} value={size}>
-                      {size}
-                    </option>
-                  ))}
-                </AppSelect>
-              </div>
-              <div className="classic-editor__question-editor-format-row">
-                <button
-                  type="button"
-                  className={cn("classic-editor__question-editor-icon", resolvedTextStyle.bold && "is-active")}
-                  onClick={() => updateTextStyle({ bold: !resolvedTextStyle.bold })}
-                  title={t("common.font")}
-                >
-                  <FormatBoldIcon className="h-4 w-4" fontSize="inherit" />
-                </button>
-                <button
-                  type="button"
-                  className={cn("classic-editor__question-editor-icon", resolvedTextStyle.italic && "is-active")}
-                  onClick={() => updateTextStyle({ italic: !resolvedTextStyle.italic })}
-                  title={t("common.font")}
-                >
-                  <FormatItalicIcon className="h-4 w-4" fontSize="inherit" />
-                </button>
-                <button
-                  type="button"
-                  className={cn("classic-editor__question-editor-icon", resolvedTextStyle.underline && "is-active")}
-                  onClick={() => updateTextStyle({ underline: !resolvedTextStyle.underline })}
-                  title={t("common.font")}
-                >
-                  <FormatUnderlinedIcon className="h-4 w-4" fontSize="inherit" />
-                </button>
-              </div>
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.font")}</span>
-          </div>
-
-          <div className="classic-editor__question-editor-group is-score">
-            <div className="classic-editor__question-editor-stack">
-              <label className="classic-editor__question-editor-row-label">
-                <StarIcon className="h-4 w-4 text-[#f4a300]" fontSize="inherit" />
-                <span>{t("common.score")}</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={extractCorrectScore(draftSlide)}
-                  onChange={(event) => updateCorrectScore(Number(event.target.value))}
-                  className="classic-editor__question-editor-number is-score"
-                  aria-label={t("common.score")}
-                />
-              </label>
-              <label className="classic-editor__question-editor-row-label">
-                <TuneIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
-                <span>{t("common.attempts")}</span>
-                <input
-                  type="number"
-                  min={1}
-                  value={draftSlide.options?.attempts ?? 1}
-                  onChange={(event) => updateOptions({ attempts: Number(event.target.value) })}
-                  className="classic-editor__question-editor-number is-spin"
-                />
-              </label>
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.score")}</span>
-          </div>
-
-          <div className="classic-editor__question-editor-group is-feedback">
-            <div className="classic-editor__question-editor-stack">
-              <label className="classic-editor__question-editor-row-label">
-                <RateReviewOutlinedIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
-                <span>{t("common.feedback")}</span>
-                <AppSelect
-                  value={feedbackValue}
-                  onChange={(event) => updateOptions({ feedback: event.target.value })}
-                  className="classic-editor__question-editor-select"
-                >
-                  <option value="By Question">{t("quiz.byQuestion")}</option>
-                  <option value="By Result">{t("common.byResult")}</option>
-                </AppSelect>
-              </label>
-              <label className="classic-editor__question-editor-row-label">
-                <AltRouteIcon className="h-4 w-4 text-[#54769f]" fontSize="inherit" />
-                <span>{t("common.branching")}</span>
-                <AppSelect
-                  value={branchingValue}
-                  onChange={(event) => updateOptions({ branching: event.target.value })}
-                  className="classic-editor__question-editor-select"
-                >
-                  <option value="None">{t("common.none")}</option>
-                  <option value="By Result">{t("common.byResult")}</option>
-                  <option value="Next Question">{t("quiz.nextQuestion")}</option>
-                </AppSelect>
-              </label>
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.feedback")}</span>
-          </div>
-
-          <div className="classic-editor__question-editor-group is-insert">
-            <div className="classic-editor__question-editor-insert-row">
-              <QuestionEditorRibbonButton
-                icon={<AddPhotoAlternateIcon className="h-5 w-5" fontSize="inherit" />}
-                label={draftSlide.media ? t("quiz.replaceImage") : t("common.picture")}
-                onClick={handlePickMedia}
-                variant="tile"
-              />
-              <QuestionEditorRibbonButton
-                icon={<StickyNote2Icon className="h-5 w-5" fontSize="inherit" />}
-                label={t("player.notes")}
-                disabled
-                variant="tile"
-              />
-              <QuestionEditorRibbonButton
-                icon={<CalculateIcon className="h-5 w-5" fontSize="inherit" />}
-                label={t("common.equation")}
-                disabled
-                variant="tile"
-              />
-              <QuestionEditorRibbonButton
-                icon={<AudiotrackIcon className="h-5 w-5" fontSize="inherit" />}
-                label={t("common.audio")}
-                disabled
-                variant="tile"
-              />
-              <QuestionEditorRibbonButton
-                icon={<OndemandVideoIcon className="h-5 w-5" fontSize="inherit" />}
-                label={t("common.video")}
-                disabled
-                variant="tile"
-              />
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.insert")}</span>
-          </div>
-
-          <div className="classic-editor__question-editor-group is-review">
-            <div className="classic-editor__question-editor-review-row">
-              <QuestionEditorRibbonButton
-                icon={<SpellcheckIcon className="h-6 w-6" fontSize="inherit" />}
-                label="Spell"
-                variant="large"
-                disabled
-              />
-              <button
-                type="button"
-                className="classic-editor__question-editor-tool is-large"
-                onClick={() => onPreview(draftSlide)}
+                aria-label={t("common.cut")}
               >
-                <PreviewIcon className="h-7 w-7" fontSize="inherit" />
-                <span>{t("common.preview")}</span>
-              </button>
-            </div>
-            <span className="classic-editor__question-editor-group-label">{t("common.preview")}</span>
-          </div>
-        </div>
+                <ContentCutIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t("common.copy")} arrow>
+              <IconButton
+                size="small"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => void handleClipboardCommand("copy")}
+                aria-label={t("common.copy")}
+              >
+                <ContentCopyIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t("common.paste")} arrow>
+              <IconButton
+                size="small"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => void handleClipboardCommand("paste")}
+                aria-label={t("common.paste")}
+              >
+                <ContentPasteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+
+          <Divider orientation="vertical" flexItem />
+
+          <Box className="classic-editor__mui-editor-group is-font">
+            <Select
+              size="small"
+              value={resolvedTextStyle.fontFamily}
+              onChange={handleFontChange}
+              className="classic-editor__mui-editor-select is-font"
+              sx={{ fontFamily: resolveQuizFontStack(resolvedTextStyle.fontFamily) }}
+              MenuProps={{ disablePortal: true }}
+            >
+              {quizEditorFontOptions.map((font) => (
+                <MenuItem key={font} value={font} sx={{ fontFamily: resolveQuizFontStack(font) }}>
+                  {font}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <Select
+              size="small"
+              value={resolvedTextStyle.fontSize}
+              onChange={handleFontSizeChange}
+              className="classic-editor__mui-editor-select is-size"
+              MenuProps={{ disablePortal: true }}
+            >
+              {quizEditorFontSizeOptions.map((size) => (
+                <MenuItem key={size} value={size}>
+                  {size}
+                </MenuItem>
+              ))}
+            </Select>
+
+            <ToggleButtonGroup
+              size="small"
+              value={activeFormats}
+              onChange={(_, value: string[]) =>
+                updateTextStyle({
+                  bold: value.includes("bold"),
+                  italic: value.includes("italic"),
+                  underline: value.includes("underline"),
+                })
+              }
+              aria-label={t("common.font")}
+              className="classic-editor__mui-format-group"
+            >
+              <ToggleButton value="bold" aria-label="Bold">
+                <FormatBoldIcon fontSize="small" />
+              </ToggleButton>
+              <ToggleButton value="italic" aria-label="Italic">
+                <FormatItalicIcon fontSize="small" />
+              </ToggleButton>
+              <ToggleButton value="underline" aria-label="Underline">
+                <FormatUnderlinedIcon fontSize="small" />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <Divider orientation="vertical" flexItem />
+
+          <Box className="classic-editor__mui-editor-group is-insert">
+            <QuestionEditorRibbonButton
+              icon={<AddPhotoAlternateIcon fontSize="small" />}
+              label={t("quiz.addImage")}
+              onClick={handlePickMedia}
+            />
+            <QuestionEditorRibbonButton icon={<OndemandVideoIcon fontSize="small" />} label={t("common.video")} disabled />
+          </Box>
+
+          <Divider orientation="vertical" flexItem />
+
+          <Box className="classic-editor__mui-editor-group is-review">
+            <label className="classic-editor__question-theme-color-control">
+              <ColorLensOutlinedIcon fontSize="small" />
+              <span>Màu câu</span>
+              <i style={{ backgroundColor: questionThemeColor }} />
+              <input
+                type="color"
+                value={questionThemeColor}
+                onInput={(event) => updateSlideOptions({ themeColor: event.currentTarget.value })}
+                onChange={(event) => updateSlideOptions({ themeColor: event.target.value })}
+                aria-label="Màu câu"
+              />
+            </label>
+            <QuestionEditorRibbonButton
+              icon={<ColorLensOutlinedIcon fontSize="small" />}
+              label="Giao diện"
+              onClick={onOpenPlayerTemplate}
+            />
+            <Button
+              type="button"
+              size="small"
+              variant="contained"
+              startIcon={<PreviewIcon fontSize="small" />}
+              onClick={() => onPreview(draftSlide)}
+              className="classic-editor__mui-preview-button"
+            >
+              {t("common.preview")}
+            </Button>
+          </Box>
+        </Box>
 
         <div className="classic-editor__question-editor-body">
           <div className="classic-editor__question-editor-shell is-visual">
@@ -498,21 +451,18 @@ export function QuestionEditorDialog({
                 draftSlide={draftSlide}
                 onUpdateTitle={updateTitle}
                 onUpdateInstructions={updateInstructions}
-                onUpdateChoices={updateChoices}
-                onUpdateItems={updateItems}
                 onUpdateFeedbackRows={updateFeedbackRows}
+                onUpdateRuntimeQuestion={updateRuntimeQuestion}
+                onUpdateSlideMedia={handleUpdateSlideMedia}
+                onTextTargetFocus={setActiveTextTarget}
+                selectedThemeId={selectedThemeId}
               />
             </div>
 
             <aside className="classic-editor__question-editor-sidebar">
               <QuestionEditorInspector
                 draftSlide={draftSlide}
-                onUpdateDescription={updateDescription}
-                onUpdateInstructions={updateInstructions}
-                onUpdateChoices={updateChoices}
-                onUpdateItems={updateItems}
                 onUpdateFeedbackRows={updateFeedbackRows}
-                onUpdateResultTab={updateResultTab}
                 onPickMedia={handlePickMedia}
                 onRemoveMedia={handleRemoveMedia}
                 onUpdateMediaAlt={handleUpdateMediaAlt}
@@ -523,29 +473,35 @@ export function QuestionEditorDialog({
           </div>
         </div>
 
-        <div className="classic-editor__dialog-actions classic-editor__question-editor-actions">
-          <div className="classic-editor__dialog-action-group">
-            <button
+        <Box className="classic-editor__dialog-actions classic-editor__question-editor-actions">
+          <Box className="classic-editor__dialog-action-group">
+            <Button
               type="button"
+              size="small"
+              variant="outlined"
               className="classic-editor__dialog-secondary"
               onClick={() => handleNavigate(-1)}
               disabled={currentIndex <= 0}
             >
               {t("quiz.previousQuestion")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              size="small"
+              variant="outlined"
               className="classic-editor__dialog-secondary"
               onClick={() => handleNavigate(1)}
               disabled={currentIndex < 0 || currentIndex >= entries.length - 1}
             >
               {t("quiz.nextQuestion")}
-            </button>
-          </div>
+            </Button>
+          </Box>
 
-          <div className="classic-editor__dialog-action-group">
-            <button
+          <Box className="classic-editor__dialog-action-group">
+            <Button
               type="button"
+              size="small"
+              variant="contained"
               className="classic-editor__dialog-primary"
               onClick={() => {
                 onSave(draftSlide);
@@ -553,12 +509,12 @@ export function QuestionEditorDialog({
               }}
             >
               {t("common.save")}
-            </button>
-            <button type="button" className="classic-editor__dialog-secondary" onClick={onClose}>
+            </Button>
+            <Button type="button" size="small" variant="outlined" className="classic-editor__dialog-secondary" onClick={onClose}>
               {t("common.cancel")}
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Box>
+        </Box>
       </div>
     </div>
   );
@@ -567,30 +523,27 @@ export function QuestionEditorDialog({
 function QuestionEditorRibbonButton({
   icon,
   label,
-  variant = "compact",
   disabled = false,
   onClick,
 }: {
   icon: ReactNode;
   label: string;
-  variant?: "compact" | "large" | "tile";
   disabled?: boolean;
   onClick?: () => void;
 }) {
   return (
-    <button
+    <Button
       type="button"
-      className={cn(
-        "classic-editor__question-editor-tool",
-        variant === "large" && "is-large",
-        variant === "tile" && "is-tile",
-      )}
+      size="small"
+      variant="text"
+      startIcon={icon}
+      className="classic-editor__mui-tool-button"
       disabled={disabled}
+      onMouseDown={(event) => event.preventDefault()}
       onClick={onClick}
     >
-      {icon}
-      <span>{label}</span>
-    </button>
+      {label}
+    </Button>
   );
 }
 
@@ -602,7 +555,7 @@ async function handleClipboardCommand(command: "cut" | "copy" | "paste") {
     const end = editable.selectionEnd ?? start;
 
     if (command === "paste") {
-      const text = await navigator.clipboard?.readText().catch(() => "");
+      const text = await navigator.clipboard?.readText().catch(() => "") || localTextClipboard;
       if (text) {
         replaceEditableSelection(editable, text, start, end);
         return;
@@ -611,6 +564,7 @@ async function handleClipboardCommand(command: "cut" | "copy" | "paste") {
 
     const selectedText = editable.value.slice(start, end);
     if (selectedText) {
+      localTextClipboard = selectedText;
       await navigator.clipboard?.writeText(selectedText).catch(() => undefined);
 
       if (command === "cut") {
@@ -623,6 +577,8 @@ async function handleClipboardCommand(command: "cut" | "copy" | "paste") {
 
   document.execCommand(command);
 }
+
+let localTextClipboard = "";
 
 function getActiveEditableElement() {
   const element = document.activeElement;
@@ -655,92 +611,44 @@ function VisualQuestionCanvas({
   draftSlide,
   onUpdateTitle,
   onUpdateInstructions,
-  onUpdateChoices,
-  onUpdateItems,
   onUpdateFeedbackRows,
+  onUpdateRuntimeQuestion,
+  onUpdateSlideMedia,
+  onTextTargetFocus,
+  selectedThemeId,
 }: {
   draftSlide: QuizEditorSlide;
   onUpdateTitle: (value: string) => void;
   onUpdateInstructions: (items: string[]) => void;
-  onUpdateChoices: (items: QuizEditorChoice[]) => void;
-  onUpdateItems: (items: QuizEditorDragDropItem[]) => void;
   onUpdateFeedbackRows: (rows: QuizEditorFeedbackRow[]) => void;
+  onUpdateRuntimeQuestion: (question: Question) => void;
+  onUpdateSlideMedia: (media: QuizEditorSlideMedia) => void;
+  onTextTargetFocus: (target: QuizEditorTextStyleTarget) => void;
+  selectedThemeId: string;
 }) {
-  const { t } = useI18n();
-  const [renderMode, setRenderMode] = useState<"question" | "correct" | "incorrect">("question");
-  const hasFeedbackLayer =
-    draftSlide.kind !== "result-slide" &&
-    draftSlide.kind !== "instruction-slide" &&
-    draftSlide.kind !== "intro-slide" &&
-    draftSlide.kind !== "info-slide" &&
-    Boolean(draftSlide.feedbackRows?.length);
-  const visibleRenderMode = hasFeedbackLayer ? renderMode : "question";
-
   return (
     <section className="classic-editor__visual-editor">
-      <div className="classic-editor__visual-header">
-        <div>
-          <div className="classic-editor__visual-kicker">{t("quiz.learnerViewEditor")}</div>
-          <h2>{draftSlide.title}</h2>
-          <p>{t("quiz.learnerViewEditorCopy")}</p>
-        </div>
-
-        <div className="classic-editor__visual-tabs">
-          <button
-            type="button"
-            className={cn("classic-editor__visual-tab", visibleRenderMode === "question" && "is-active")}
-            onClick={() => setRenderMode("question")}
-          >
-            {t("quiz.questionScreen")}
-          </button>
-          {hasFeedbackLayer ? (
-            <>
-              <button
-                type="button"
-                className={cn("classic-editor__visual-tab", visibleRenderMode === "correct" && "is-active")}
-                onClick={() => setRenderMode("correct")}
-              >
-                {t("quiz.correctFeedbackScreen")}
-              </button>
-              <button
-                type="button"
-                className={cn("classic-editor__visual-tab", visibleRenderMode === "incorrect" && "is-active")}
-                onClick={() => setRenderMode("incorrect")}
-              >
-                {t("quiz.incorrectFeedbackScreen")}
-              </button>
-            </>
-          ) : null}
-        </div>
-      </div>
-
       <div className="classic-editor__visual-stage">
         <LearnerQuestionAuthoringPreview
           slide={draftSlide}
-          previewMode={visibleRenderMode}
+          previewMode="question"
           onUpdateTitle={onUpdateTitle}
           onUpdateInstructions={onUpdateInstructions}
-          onUpdateChoices={onUpdateChoices}
-          onUpdateDragDropItems={onUpdateItems}
           onUpdateFeedbackRows={onUpdateFeedbackRows}
+          onUpdateRuntimeQuestion={onUpdateRuntimeQuestion}
+          onUpdateSlideMedia={onUpdateSlideMedia}
+          onTextTargetFocus={onTextTargetFocus}
+          themeId={selectedThemeId}
         />
       </div>
 
-      <div className="classic-editor__visual-hint">
-        {t("quiz.directEditHint")}
-      </div>
     </section>
   );
 }
 
 function QuestionEditorInspector({
   draftSlide,
-  onUpdateDescription,
-  onUpdateInstructions,
-  onUpdateChoices,
-  onUpdateItems,
   onUpdateFeedbackRows,
-  onUpdateResultTab,
   onPickMedia,
   onRemoveMedia,
   onUpdateMediaAlt,
@@ -748,12 +656,7 @@ function QuestionEditorInspector({
   onUpdateFinalSlideOptions,
 }: {
   draftSlide: QuizEditorSlide;
-  onUpdateDescription: (value: string) => void;
-  onUpdateInstructions: (items: string[]) => void;
-  onUpdateChoices: (choices: QuizEditorChoice[]) => void;
-  onUpdateItems: (items: QuizEditorDragDropItem[]) => void;
   onUpdateFeedbackRows: (rows: QuizEditorFeedbackRow[]) => void;
-  onUpdateResultTab: (tab: "passed" | "failed") => void;
   onPickMedia: () => void;
   onRemoveMedia: () => void;
   onUpdateMediaAlt: (value: string) => void;
@@ -763,75 +666,424 @@ function QuestionEditorInspector({
   const { t } = useI18n();
 
   return (
-    <>
-      <section className="classic-editor__question-editor-sidebar-card">
-        <div className="classic-editor__inspector-title">{t("quiz.mediaSettings")}</div>
-        <MediaAttachmentPanel
-          media={draftSlide.media}
-          onPickMedia={onPickMedia}
-          onRemoveMedia={onRemoveMedia}
-          onChangeAlt={onUpdateMediaAlt}
-        />
-      </section>
-
-      <section className="classic-editor__question-editor-sidebar-card">
-        <div className="classic-editor__inspector-title">{t("quiz.answerInspector")}</div>
-        {draftSlide.kind === "instruction-slide" ? (
-          <InstructionDescriptionPanel slide={draftSlide} onChange={onUpdateInstructions} />
-        ) : draftSlide.kind === "drag-and-drop" ? (
-          <DragDropMatchTable items={draftSlide.dragDropItems ?? []} onChange={onUpdateItems} />
-        ) : isChoiceSlide(draftSlide) ? (
-          <ChoiceEditorTable
-            choices={draftSlide.choices ?? []}
-            controlType={draftSlide.choiceControlType ?? "checkbox"}
-            onChange={onUpdateChoices}
-          />
-        ) : draftSlide.kind === "result-slide" ? (
-          <ResultTabs activeTab={draftSlide.activeResultTab ?? "passed"} onChange={onUpdateResultTab} />
-        ) : (
-          <textarea
-            value={draftSlide.description ?? ""}
-            onChange={(event) => onUpdateDescription(event.target.value)}
-            className="classic-editor__textarea classic-editor__textarea--manager"
-            rows={8}
-          />
-        )}
-      </section>
-
+    <Box className="classic-editor__mui-inspector">
       {draftSlide.feedbackRows?.length ? (
-        <section className="classic-editor__question-editor-sidebar-card">
-          <div className="classic-editor__inspector-title">{t("quiz.feedbackAndScoring")}</div>
-          <FeedbackBranchingTable rows={draftSlide.feedbackRows} onChange={onUpdateFeedbackRows} />
-        </section>
+        <InspectorSection title={t("quiz.feedbackAndScoring")} defaultExpanded>
+          <MuiFeedbackAndScoring rows={draftSlide.feedbackRows} onChange={onUpdateFeedbackRows} />
+        </InspectorSection>
       ) : null}
 
-      <section className="classic-editor__question-editor-sidebar-card">
-        {draftSlide.kind === "instruction-slide" ? (
-          <InstructionOptionsSection slide={draftSlide} onUpdateOptions={onUpdateOptions} />
-        ) : draftSlide.kind === "result-slide" ? (
-          <FinalSlideOptionsSection slide={draftSlide} onUpdateOptions={onUpdateFinalSlideOptions} />
+      <InspectorSection title={t("quiz.questionSettings")} defaultExpanded>
+        {draftSlide.kind === "result-slide" ? (
+          <MuiFinalSlideSettings slide={draftSlide} onUpdateOptions={onUpdateFinalSlideOptions} />
         ) : (
-          <QuestionOptionsSection slide={draftSlide} onUpdateOptions={onUpdateOptions} />
+          <MuiQuestionSettings slide={draftSlide} onUpdateOptions={onUpdateOptions} />
         )}
-      </section>
-    </>
+      </InspectorSection>
+
+      <InspectorSection title={t("quiz.mediaSettings")} defaultExpanded={Boolean(draftSlide.media?.src)}>
+        <MuiMediaSettings
+          slide={draftSlide}
+          onPickMedia={onPickMedia}
+          onRemoveMedia={onRemoveMedia}
+          onUpdateMediaAlt={onUpdateMediaAlt}
+        />
+      </InspectorSection>
+    </Box>
   );
 }
 
-function isChoiceSlide(slide: QuizEditorSlide) {
+function updateSlideTextStyleTarget(
+  slide: QuizEditorSlide,
+  target: QuizEditorTextStyleTarget,
+  patch: Partial<QuizEditorTextStyle>,
+): QuizEditorSlide {
+  const currentStyle = resolveSlideTextStyle(slide, target);
+  const nextStyle = { ...defaultQuizTextStyle, ...currentStyle, ...patch };
+
+  return {
+    ...slide,
+    textStyle: target === "question" ? nextStyle : slide.textStyle,
+    textStyles: {
+      ...slide.textStyles,
+      [target]: nextStyle,
+    },
+  };
+}
+
+function InspectorSection({
+  title,
+  defaultExpanded = false,
+  children,
+}: {
+  title: string;
+  defaultExpanded?: boolean;
+  children: ReactNode;
+}) {
   return (
-    slide.kind === "multiple-choice" ||
-    slide.kind === "multiple-response" ||
-    slide.kind === "true-false"
+    <Accordion disableGutters defaultExpanded={defaultExpanded} className="classic-editor__mui-inspector-section">
+      <AccordionSummary expandIcon={<ExpandMoreIcon fontSize="small" />}>
+        <Typography component="h3" variant="subtitle2">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails>{children}</AccordionDetails>
+    </Accordion>
   );
 }
 
-function extractCorrectScore(slide: QuizEditorSlide) {
+function MuiMediaSettings({
+  slide,
+  onPickMedia,
+  onRemoveMedia,
+  onUpdateMediaAlt,
+}: {
+  slide: QuizEditorSlide;
+  onPickMedia: () => void;
+  onRemoveMedia: () => void;
+  onUpdateMediaAlt: (value: string) => void;
+}) {
+  const { t } = useI18n();
+  const media = slide.media;
+
   return (
-    slide.feedbackRows?.find((row) => row.kind === "correct")?.score ??
-    slide.feedbackRows?.find((row) => row.kind === "answered")?.score ??
-    0
+    <StackPanel>
+      <Box className="classic-editor__mui-media-head">
+        <Box>
+          <Typography variant="overline">{t("common.picture")}</Typography>
+        </Box>
+        <Button
+          size="small"
+          variant="contained"
+          startIcon={<AddPhotoAlternateIcon fontSize="small" />}
+          onClick={onPickMedia}
+        >
+          {t("quiz.addImage")}
+        </Button>
+      </Box>
+
+      <Box className={cn("classic-editor__mui-media-preview", media?.src ? "has-media" : "is-empty")}>
+        {media?.src ? (
+          <>
+            <img src={media.src} alt={media.alt || t("common.picture")} />
+            <IconButton size="small" color="error" onClick={onRemoveMedia} aria-label={t("common.remove")}>
+              <DeleteOutlineIcon fontSize="small" />
+            </IconButton>
+          </>
+        ) : (
+          <Box component="button" type="button" className="classic-editor__mui-media-empty" onClick={onPickMedia}>
+            <AddPhotoAlternateIcon fontSize="small" />
+            <Typography variant="body2">{t("quiz.addImage")}</Typography>
+          </Box>
+        )}
+      </Box>
+
+      <TextField
+        size="small"
+        fullWidth
+        label={t("quiz.imageAltText")}
+        value={media?.alt ?? ""}
+        onChange={(event) => onUpdateMediaAlt(event.target.value)}
+        placeholder={t("quiz.imageAltPlaceholder")}
+        disabled={!media}
+      />
+    </StackPanel>
   );
+}
+
+const branchingOptions: QuizEditorFeedbackBranching[] = ["By Result", "Next Question", "Finish Quiz"];
+const questionTypeOptions = ["Graded", "Survey", "Practice"] as const;
+const feedbackOptions = ["By Result", "None", "By choice"] as const;
+function MuiFeedbackAndScoring({
+  rows,
+  onChange,
+}: {
+  rows: QuizEditorFeedbackRow[];
+  onChange: (rows: QuizEditorFeedbackRow[]) => void;
+}) {
+  const { t } = useI18n();
+
+  function updateRow(rowId: string, patch: Partial<QuizEditorFeedbackRow>) {
+    onChange(rows.map((row) => (row.id === rowId ? { ...row, ...patch } : row)));
+  }
+
+  return (
+    <StackPanel>
+      {rows.map((row) => {
+        const isCorrect = row.kind === "correct";
+        const isIncorrect = row.kind === "incorrect";
+        const label = isCorrect ? t("common.correct") : isIncorrect ? t("common.incorrect") : t("common.answered");
+        const icon = isCorrect ? (
+          <CheckCircleOutlineIcon fontSize="small" />
+        ) : isIncorrect ? (
+          <ErrorOutlineIcon fontSize="small" />
+        ) : (
+          <RateReviewOutlinedIcon fontSize="small" />
+        );
+
+        return (
+          <Box key={row.id} className="classic-editor__mui-feedback-row" data-state={row.kind}>
+            <Box className="classic-editor__mui-feedback-title">
+              <Chip
+                size="small"
+                variant="outlined"
+                icon={icon}
+                label={label}
+                color={isCorrect ? "success" : isIncorrect ? "error" : "primary"}
+              />
+            </Box>
+
+            <TextField
+              size="small"
+              fullWidth
+              multiline
+              minRows={2}
+              placeholder={t("common.feedback")}
+              aria-label={t("common.feedback")}
+              value={row.feedback}
+              onChange={(event) => updateRow(row.id, { feedback: event.target.value })}
+              className="classic-editor__mui-feedback-input"
+            />
+
+            <Box className="classic-editor__mui-feedback-meta">
+              <Box className="classic-editor__native-select-wrap classic-editor__native-select-wrap--feedback">
+                <AltRouteIcon fontSize="small" className="classic-editor__native-select-start-icon" aria-hidden="true" />
+                <select
+                  className="classic-editor__native-select classic-editor__native-select--feedback"
+                  aria-label={t("common.feedbackAndBranching")}
+                  value={row.branching ?? "By Result"}
+                  onChange={(event) =>
+                    updateRow(row.id, { branching: event.currentTarget.value as QuizEditorFeedbackBranching })
+                  }
+                >
+                  {branchingOptions.map((option) => (
+                    <option key={option} value={option}>
+                      {formatBranchingLabel(option, t)}
+                    </option>
+                  ))}
+                </select>
+                <ExpandMoreIcon fontSize="small" aria-hidden="true" />
+              </Box>
+            </Box>
+          </Box>
+        );
+      })}
+    </StackPanel>
+  );
+}
+
+function MuiQuestionSettings({
+  slide,
+  onUpdateOptions,
+}: {
+  slide: QuizEditorSlide;
+  onUpdateOptions: (patch: Partial<QuizEditorSlideOptions>) => void;
+}) {
+  const { t } = useI18n();
+  const options = slide.options ?? {};
+
+  return (
+    <StackPanel>
+      <Box className="classic-editor__mui-settings-grid">
+        <LabeledSelect
+          label={t("common.questionType")}
+          value={options.questionType ?? "Graded"}
+          options={questionTypeOptions.map((value) => ({
+            value,
+            label: formatQuestionTypeLabel(value, t),
+            description:
+              value === "Graded"
+                ? t("common.feedback")
+                : value === "Survey"
+                  ? t("quiz.optionByChoice")
+                  : t("quiz.optionPractice"),
+          }))}
+          onChange={(value) => onUpdateOptions({ questionType: value })}
+        />
+        <LabeledSelect
+          label={t("common.feedback")}
+          value={options.feedback ?? "By Result"}
+          options={feedbackOptions.map((value) => ({
+            value,
+            label: formatFeedbackOptionLabel(value, t),
+            description: value === "None" ? t("common.none") : t("common.feedbackAndBranching"),
+          }))}
+          onChange={(value) => onUpdateOptions({ feedback: value })}
+        />
+      </Box>
+
+      <Box className="classic-editor__mui-check-list">
+        <FormControlLabel
+          control={<Checkbox size="small" checked={options.limitTime ?? false} onChange={(event) => onUpdateOptions({ limitTime: event.target.checked })} />}
+          label={t("quiz.limitTimeToAnswer")}
+        />
+        <TextField
+          size="small"
+          value={options.timeLimit ?? "01:00"}
+          onChange={(event) => onUpdateOptions({ timeLimit: event.target.value })}
+          disabled={!options.limitTime}
+          className="classic-editor__mui-time-field"
+        />
+        <FormControlLabel
+          control={<Checkbox size="small" checked={options.shuffleAnswers ?? false} onChange={(event) => onUpdateOptions({ shuffleAnswers: event.target.checked })} />}
+          label={t("quiz.shuffleAnswers")}
+        />
+        <FormControlLabel
+          control={<Checkbox size="small" checked={options.acceptPartial ?? false} onChange={(event) => onUpdateOptions({ acceptPartial: event.target.checked })} />}
+          label={t("quiz.acceptPartial")}
+        />
+      </Box>
+
+      {slide.kind === "multiple-response" ? (
+        <Box className="classic-editor__mui-inline-setting">
+          <FormControlLabel
+            control={<Checkbox size="small" checked={options.limitResponses ?? false} onChange={(event) => onUpdateOptions({ limitResponses: event.target.checked })} />}
+            label={t("quiz.limitResponses")}
+          />
+          <LabeledSelect
+            label=""
+            value={String(options.limitResponsesValue ?? 1)}
+            options={[1, 2, 3, 4].map((value) => ({ value: String(value), label: String(value) }))}
+            onChange={(value) => onUpdateOptions({ limitResponsesValue: Number(value) })}
+          />
+        </Box>
+      ) : null}
+
+    </StackPanel>
+  );
+}
+
+function MuiFinalSlideSettings({
+  slide,
+  onUpdateOptions,
+}: {
+  slide: QuizEditorSlide;
+  onUpdateOptions: (patch: Partial<QuizEditorFinalSlideOptions>) => void;
+}) {
+  const { t } = useI18n();
+  const options = slide.options?.finalSlide;
+
+  return (
+    <Box className="classic-editor__mui-check-list">
+      <FormControlLabel
+        control={<Checkbox size="small" checked={options?.showUserScore ?? false} onChange={(event) => onUpdateOptions({ showUserScore: event.target.checked })} />}
+        label={t("quiz.showUsersScore")}
+      />
+      <FormControlLabel
+        control={<Checkbox size="small" checked={options?.allowReview ?? false} onChange={(event) => onUpdateOptions({ allowReview: event.target.checked })} />}
+        label={t("quiz.allowUserReviewQuiz")}
+      />
+      <FormControlLabel
+        control={<Checkbox size="small" checked={options?.allowRetry ?? false} onChange={(event) => onUpdateOptions({ allowRetry: event.target.checked })} />}
+        label={t("quiz.allowUserRetryQuiz")}
+      />
+    </Box>
+  );
+}
+
+function LabeledSelect({
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: Array<{ value: string; label: string; description?: string }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <Box className="classic-editor__mui-labeled-select">
+      {label ? <Typography variant="caption">{label}</Typography> : null}
+      <Box className="classic-editor__native-select-wrap">
+        <select
+          className="classic-editor__native-select"
+          aria-label={label || "Select"}
+          value={value}
+          onChange={(event) => onChange(event.currentTarget.value)}
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.description ? `${option.label} - ${option.description}` : option.label}
+            </option>
+          ))}
+        </select>
+        <ExpandMoreIcon fontSize="small" aria-hidden="true" />
+      </Box>
+    </Box>
+  );
+}
+
+function StackPanel({ children }: { children: ReactNode }) {
+  return <Box className="classic-editor__mui-stack-panel">{children}</Box>;
+}
+
+function formatBranchingLabel(option: QuizEditorFeedbackBranching, t: ReturnType<typeof useI18n>["t"]) {
+  if (option === "By Result") return t("common.byResult");
+  if (option === "Next Question") return t("quiz.nextQuestion");
+  return t("player.finish");
+}
+
+function formatQuestionTypeLabel(option: (typeof questionTypeOptions)[number], t: ReturnType<typeof useI18n>["t"]) {
+  if (option === "Graded") return t("common.graded");
+  if (option === "Survey") return t("quiz.optionSurvey");
+  return t("quiz.optionPractice");
+}
+
+function formatFeedbackOptionLabel(option: (typeof feedbackOptions)[number], t: ReturnType<typeof useI18n>["t"]) {
+  if (option === "By Result") return t("common.byResult");
+  if (option === "None") return t("common.none");
+  return t("quiz.optionByChoice");
+}
+
+function getActiveInlineMediaTarget(): InlineMediaTarget {
+  const activeElement = document.activeElement;
+  if (!(activeElement instanceof HTMLElement)) {
+    return { kind: "slide" };
+  }
+
+  const targetElement = activeElement.closest<HTMLElement>("[data-media-target-kind]");
+  const kind = targetElement?.dataset.mediaTargetKind;
+  const id = targetElement?.dataset.mediaTargetId;
+  const field = targetElement?.dataset.mediaTargetField;
+
+  if (kind === "choice" && id) {
+    return { kind, id };
+  }
+
+  if (kind === "drag-item" && id) {
+    return { kind, id, field: field === "target" ? "target" : "label" };
+  }
+
+  return { kind: "slide" };
+}
+
+function applyInlineMedia(
+  slide: QuizEditorSlide,
+  target: InlineMediaTarget,
+  media: QuizEditorSlideMedia,
+): QuizEditorSlide {
+  if (target.kind === "choice") {
+    return {
+      ...slide,
+      choices: slide.choices?.map((choice) =>
+        choice.id === target.id ? { ...choice, media } : choice,
+      ),
+    };
+  }
+
+  if (target.kind === "drag-item") {
+    return {
+      ...slide,
+      dragDropItems: slide.dragDropItems?.map((item) =>
+        item.id === target.id
+          ? target.field === "target"
+            ? { ...item, targetMedia: media }
+            : { ...item, media }
+          : item,
+      ),
+    };
+  }
+
+  return { ...slide, media };
 }
 
 function cloneSlide(slide: QuizEditorSlide) {

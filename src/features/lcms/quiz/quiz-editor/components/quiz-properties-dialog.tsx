@@ -1,10 +1,10 @@
 import { useState } from "react";
 import CloseIcon from "@mui/icons-material/Close";
-import InsightsOutlinedIcon from "@mui/icons-material/InsightsOutlined";
+import InsightsOutlinedIcon from "@mui/icons-material/Insights";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
+import QuizOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import TuneOutlinedIcon from "@mui/icons-material/TuneOutlined";
+import TuneOutlinedIcon from "@mui/icons-material/Tune";
 
 import { resolveQuizFontStack } from "@/config/fonts";
 import {
@@ -72,11 +72,11 @@ export function QuizPropertiesDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            <SettingsOutlinedIcon className="h-4 w-4 text-[#41688f]" fontSize="inherit" />
+            <SettingsOutlinedIcon className="h-4 w-4 text-[#41688f]" sx={{ fontSize: "1em" }} />
             <span>{t("quiz.quizProperties")}</span>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
           </button>
         </div>
 
@@ -92,7 +92,7 @@ export function QuizPropertiesDialog({
                   onClick={() => setActiveTab(tabId)}
                   className={cn("classic-editor__property-tab", activeTab === tabId && "is-active")}
                 >
-                  <Icon className="h-4 w-4" fontSize="inherit" />
+                  <Icon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                   <span>{t(getTabLabelKey(tabId))}</span>
                 </button>
               );
@@ -654,41 +654,6 @@ export function QuizPropertiesDialog({
             {activeTab === "question-settings" ? (
               <>
                 <PropertySection title={t("quiz.propertiesSectionQuestionDefaults")}>
-                  <div className="classic-editor__property-grid is-two">
-                    <PropertyField label={t("quiz.propertiesPositivePoints")}>
-                      <input
-                        type="number"
-                        value={draft.questionDefaults.positivePoints}
-                        onChange={(event) =>
-                          setDraft((current) => ({
-                            ...current,
-                            questionDefaults: {
-                              ...current.questionDefaults,
-                              positivePoints: Number(event.target.value),
-                            },
-                          }))
-                        }
-                        className="classic-editor__property-number"
-                      />
-                    </PropertyField>
-                    <PropertyField label={t("quiz.propertiesNegativePoints")}>
-                      <input
-                        type="number"
-                        value={draft.questionDefaults.negativePoints}
-                        onChange={(event) =>
-                          setDraft((current) => ({
-                            ...current,
-                            questionDefaults: {
-                              ...current.questionDefaults,
-                              negativePoints: Number(event.target.value),
-                            },
-                          }))
-                        }
-                        className="classic-editor__property-number"
-                      />
-                    </PropertyField>
-                  </div>
-
                   <div className="classic-editor__property-check-list">
                     <label className="classic-editor__property-check">
                       <input

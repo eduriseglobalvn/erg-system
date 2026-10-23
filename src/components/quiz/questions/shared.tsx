@@ -1,9 +1,13 @@
+import Box from "@mui/material/Box";
+import FormControl from "@mui/material/FormControl";
+import IconButton from "@mui/material/IconButton";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import type { ReactNode } from "react";
 
-import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { AnswerPayload, Question } from "@/lib/types";
-import { AppSelect } from "@/components/ui/app-select";
+import type { AnswerPayload, Question } from "@/lib/types";
+import { useI18n } from "@/platform/i18n";
 
 export function QuestionBodyWithImage({
   question,
@@ -15,10 +19,10 @@ export function QuestionBodyWithImage({
   const isMobile = useIsMobile();
 
   return (
-    <div className={`flex flex-col ${isMobile ? "gap-3" : "gap-5"}`}>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: isMobile ? 1.5 : 2.5 }}>
       {question.contentImage ? <QuestionContentImage question={question} /> : null}
       {children}
-    </div>
+    </Box>
   );
 }
 
@@ -36,16 +40,23 @@ export function QuestionContentImage({
   }
 
   return (
-    <div
-      className={`overflow-hidden border bg-white shadow-sm ${className} ${isMobile ? "rounded-md" : "rounded-lg"}`.trim()}
-      style={{ borderColor: "var(--quiz-canvas-border)" }}
+    <Box
+      className={className}
+      sx={{
+        bgcolor: "common.white",
+        border: "1px solid var(--quiz-canvas-border)",
+        borderRadius: isMobile ? 0.75 : 1,
+        boxShadow: 1,
+        overflow: "hidden",
+      }}
     >
-      <img
+      <Box
+        component="img"
         src={question.contentImage.url}
         alt={question.contentImage.alt ?? question.title}
-        className={`block h-auto w-full object-contain ${isMobile ? "max-h-[180px]" : "max-h-[420px]"}`}
+        sx={{ display: "block", height: "auto", maxHeight: isMobile ? 180 : 420, objectFit: "contain", width: "100%" }}
       />
-    </div>
+    </Box>
   );
 }
 
@@ -72,55 +83,67 @@ export function InlineChoiceSelect({
   const isAnswered = Boolean(selectedValue);
   const isCorrect = reviewMode && isAnswered && selectedValue === correctValue;
   const isWrong = reviewMode && isAnswered && selectedValue !== correctValue;
+  const successColor = "#118D57";
+  const dangerColor = "#e82828";
 
   return (
-    <div className="relative flex-none">
-      <AppSelect
-        aria-label={blank.statement}
-        className={`outline-none transition ${
-          isMobile
-            ? "min-h-10 min-w-[92px] rounded-md border px-3 pr-9 text-sm font-medium"
-            : "min-h-13 min-w-[180px] rounded-lg border px-4 pr-10 text-lg font-medium"
-        }`}
-        disabled={submitted}
-        style={{
-          borderColor: isCorrect ? "#78b816" : isWrong ? "#ef6b5f" : "var(--quiz-canvas-border)",
-          backgroundColor: isCorrect ? "#fbfff4" : isWrong ? "#fff8f7" : "var(--quiz-input-bg)",
-          color: isCorrect ? "#66a80f" : isWrong ? "#df4f43" : "var(--quiz-option-text)",
-        }}
-        value={selectedValue}
-        onChange={(event) =>
-          onChange({
-            inlineSelections: {
-              ...(value.inlineSelections ?? {}),
-              [blank.id]: event.target.value,
+    <Box sx={{ flex: "none", position: "relative" }}>
+      <FormControl size="small" sx={{ minWidth: isMobile ? 104 : 220 }}>
+        <Select
+          aria-label={blank.statement}
+          data-quiz-player-select="true"
+          disabled={submitted}
+          displayEmpty
+          value={selectedValue}
+          onChange={(event) =>
+            onChange({
+              inlineSelections: {
+                ...(value.inlineSelections ?? {}),
+                [blank.id]: event.target.value,
+              },
+            })
+          }
+          sx={{
+            bgcolor: isCorrect ? "rgba(34,197,94,0.08)" : isWrong ? "rgba(232,40,40,0.055)" : "var(--quiz-input-bg)",
+            color: isCorrect ? successColor : isWrong ? dangerColor : "var(--quiz-option-text)",
+            transition: "border-color 160ms ease, background-color 160ms ease",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: isCorrect ? "rgba(17,141,87,0.62)" : isWrong ? "rgba(232,40,40,0.62)" : "var(--quiz-canvas-border)",
             },
-          })
-        }
-      >
-        <option value="">{t("player.selectPlaceholder")}</option>
-        {blank.options.map((option) => (
-          <option key={option} value={option}>
-            {option === "yes"
-              ? t("player.yes")
-              : option === "no"
-                ? t("player.no")
-                : option}
-          </option>
-        ))}
-      </AppSelect>
+          }}
+        >
+          <MenuItem value=""><em>{t("player.selectPlaceholder")}</em></MenuItem>
+          {blank.options.map((option) => (
+            <MenuItem key={option} value={option}>
+              {option === "yes" ? t("player.yes") : option === "no" ? t("player.no") : option}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
       {isWrong ? (
-        <button
+        <IconButton
           type="button"
           aria-label="Xem đáp án đúng"
-          className={`absolute top-1/2 grid -translate-y-1/2 place-items-center rounded-full border border-[#ef6b5f] font-semibold text-[#df4f43] transition hover:bg-[#fff0ee] focus:outline-none focus:ring-2 focus:ring-[#ef6b5f]/30 ${
-            isMobile ? "right-1.5 h-6 w-6 text-sm" : "right-2 h-7 w-7 text-base"
-          }`}
           onClick={onRevealCorrectAnswer}
+          size="small"
+          sx={{
+            border: "1px solid rgba(232,40,40,0.45)",
+            color: dangerColor,
+            fontSize: isMobile ? 14 : 16,
+            fontWeight: 600,
+            height: isMobile ? 24 : 28,
+            position: "absolute",
+            right: isMobile ? 6 : 8,
+            top: "50%",
+            transform: "translateY(-50%)",
+            transition: "background-color 160ms ease",
+            width: isMobile ? 24 : 28,
+            "&:hover": { bgcolor: "rgba(232,40,40,0.08)" },
+          }}
         >
           ?
-        </button>
+        </IconButton>
       ) : null}
-    </div>
+    </Box>
   );
 }

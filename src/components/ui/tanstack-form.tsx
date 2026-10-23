@@ -1,8 +1,8 @@
 import * as React from "react";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
+import Box from "@mui/material/Box";
+import FormLabel from "@mui/material/FormLabel";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 
 type FieldError = string | { message?: string } | null | undefined;
 
@@ -30,72 +30,119 @@ function getErrorMessage(errors?: FieldError[]) {
 
 function TsForm({
   className,
+  style,
+  children,
   ...props
 }: React.ComponentProps<"form">) {
-  return <form className={cn("space-y-4", className)} {...props} />;
+  return (
+    <Box
+      component="form"
+      className={className}
+      style={style}
+      sx={{ display: "flex", flexDirection: "column", gap: 2 }}
+      {...props}
+    >
+      {children}
+    </Box>
+  );
 }
 
 function TsFormItem({
   className,
+  style,
   invalid,
+  children,
   ...props
 }: React.ComponentProps<"div"> & {
   invalid?: boolean;
 }) {
   return (
-    <div
+    <Box
       data-slot="ts-form-item"
       data-invalid={invalid ? "true" : undefined}
-      className={cn("grid gap-2", className)}
+      className={className}
+      style={style}
+      sx={{ display: "grid", gap: 1 }}
       {...props}
-    />
+    >
+      {children}
+    </Box>
   );
 }
 
 function TsFormLabel({
   className,
+  style,
+  invalid,
+  children,
+  htmlFor,
+  color: _color,
   ...props
-}: React.ComponentProps<typeof Label>) {
+}: React.ComponentProps<"label"> & { invalid?: boolean }) {
   return (
-    <Label
+    <FormLabel
+      component="label"
+      htmlFor={htmlFor}
       data-slot="ts-form-label"
-      className={cn("data-[invalid=true]:text-destructive", className)}
+      error={invalid}
+      className={className}
+      style={style}
+      sx={{ fontSize: 14, fontWeight: 600, color: "text.primary", "&.Mui-error": { color: "error.main" } }}
       {...props}
-    />
+    >
+      {children}
+    </FormLabel>
   );
 }
 
 function TsFormMessage({
   className,
+  style,
   children,
-  ...props
-}: React.ComponentProps<"p">) {
+  id,
+}: {
+  className?: string;
+  style?: React.CSSProperties;
+  children?: React.ReactNode;
+  id?: string;
+}) {
   if (!children) {
     return null;
   }
 
   return (
-    <p
+    <Typography
       data-slot="ts-form-message"
-      className={cn("text-sm text-destructive", className)}
-      {...props}
+      id={id}
+      variant="caption"
+      className={className}
+      style={style}
+      sx={{ color: "error.main" }}
     >
       {children}
-    </p>
+    </Typography>
   );
 }
 
 function TsTextField<TValue extends string = string>({
   field,
   label,
-  className,
-  inputClassName,
   id,
-  ...props
-}: Omit<React.ComponentProps<typeof Input>, "name" | "value" | "onBlur" | "onChange"> & {
+  type,
+  placeholder,
+  disabled,
+  autoComplete,
+  className,
+}: {
   field: FieldLike<TValue>;
   label: React.ReactNode;
+  id?: string;
+  type?: string;
+  placeholder?: string;
+  disabled?: boolean;
+  autoComplete?: string;
   inputClassName?: string;
+  className?: string;
 }) {
   const generatedId = React.useId();
   const inputId = id ?? `${field.name}-${generatedId}`;
@@ -103,23 +150,24 @@ function TsTextField<TValue extends string = string>({
   const invalid = Boolean(error);
 
   return (
-    <TsFormItem className={className} invalid={invalid}>
-      <TsFormLabel htmlFor={inputId} data-invalid={invalid ? "true" : undefined}>
-        {label}
-      </TsFormLabel>
-      <Input
-        id={inputId}
-        name={field.name}
-        value={(field.state.value ?? "") as TValue}
-        aria-invalid={invalid}
-        aria-describedby={invalid ? `${inputId}-message` : undefined}
-        className={inputClassName}
-        onBlur={field.handleBlur}
-        onChange={(event) => field.handleChange(event.target.value as TValue)}
-        {...props}
-      />
-      <TsFormMessage id={`${inputId}-message`}>{error}</TsFormMessage>
-    </TsFormItem>
+    <TextField
+      id={inputId}
+      name={field.name}
+      label={label}
+      type={type}
+      placeholder={placeholder}
+      disabled={disabled}
+      autoComplete={autoComplete}
+      value={(field.state.value ?? "") as TValue}
+      error={invalid}
+      helperText={error}
+      size="small"
+      fullWidth
+      className={className}
+      slotProps={{ htmlInput: { "aria-invalid": invalid } }}
+      onBlur={field.handleBlur}
+      onChange={(event) => field.handleChange(event.target.value as TValue)}
+    />
   );
 }
 

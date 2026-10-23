@@ -146,7 +146,7 @@ function MenuPanel({
               <span className="classic-editor__context-icon">{item.icon ?? ""}</span>
               <span className="classic-editor__context-label">{item.label}</span>
               <span className="classic-editor__context-arrow">
-                {item.children?.length ? <ChevronRightIcon fontSize="inherit" /> : null}
+                {item.children?.length ? <ChevronRightIcon sx={{ fontSize: "1em" }} /> : null}
               </span>
             </button>
 

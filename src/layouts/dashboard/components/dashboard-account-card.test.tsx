@@ -18,13 +18,14 @@ vi.mock("@/platform/i18n", () => ({
   }),
 }));
 
-test("keeps the mock teacher account visible with a Fluent Avatar fallback", () => {
-  const { container } = render(<DashboardAccountCard />);
+test("keeps the mock teacher account visible with accessible MUI actions", () => {
+  render(<DashboardAccountCard />);
 
   expect(screen.getByText("Nguyen Ngoc Anh")).toBeInTheDocument();
   expect(screen.getByText("ngocanh@erg.vn")).toBeInTheDocument();
-
-  const avatar = container.querySelector("[data-slot='avatar']");
-  expect(avatar).toBeInTheDocument();
-  expect(container.querySelector("[data-slot='avatar-fallback']")).toHaveClass("bg-[var(--erg-blue)]");
+  expect(screen.getByText("NN")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Cài đặt" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Trợ giúp" })).toBeVisible();
+  expect(screen.getByRole("button", { name: "Tìm kiếm" })).toBeVisible();
+  expect(screen.getByLabelText("Tài khoản của Nguyen Ngoc Anh")).toBeVisible();
 });

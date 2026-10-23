@@ -9,7 +9,6 @@ const teacherAccount: TeacherAccount = {
   id: "teacher-1",
   fullName: "Teacher One",
   email: "teacher@erg.edu.vn",
-  password: "",
   role: "teacher",
   provider: "password",
   department: "ERG",
@@ -19,11 +18,11 @@ const teacherAccount: TeacherAccount = {
   lastLoginAt: "2026-01-01T00:00:00.000Z",
 };
 
-test("allows teacher sessions to enter elearning", () => {
+test("allows teacher sessions to enter elearning only with explicit entitlement", () => {
   const teacherSession: StoredAuthSession = {
     accessToken: "teacher-token",
     portal: "lms",
-    portals: ["lms"],
+    portals: ["lms", "elearning"],
   };
 
   expect(
@@ -35,7 +34,7 @@ test("allows teacher sessions to enter elearning", () => {
   ).toBe(true);
 });
 
-test("allows admin accounts to enter elearning with teacher session", () => {
+test("allows the configured root admin to enter elearning from a shared session", () => {
   const adminAccount: TeacherAccount = {
     ...teacherAccount,
     email: "admin@erg.edu.vn",
@@ -107,7 +106,7 @@ test("allows CRM when the session has admin-style access", () => {
   ).toBe(true);
 });
 
-test("allows LCMS with an LMS teacher session", () => {
+test("does not merge LMS entitlement into LCMS", () => {
   const teacherSession: StoredAuthSession = {
     accessToken: "lms-token",
     portal: "lms",
@@ -120,5 +119,30 @@ test("allows LCMS with an LMS teacher session", () => {
       teacherAccount,
       teacherSession,
     }),
-  ).toBe(true);
+  ).toBe(false);
+});
+
+test("requires the canonical route permission for a student workspace", () => {
+  const studentSession: StudentSession = {
+    accessToken: "student-token",
+    className: "6A",
+    email: "student@erg.edu.vn",
+    loggedInAt: "2026-01-01T00:00:00.000Z",
+    name: "Student One",
+    portal: "elearning",
+    rememberMe: true,
+    permissions: ["elearning.assignment.read_self"],
+    deniedPermissions: [],
+  };
+
+  expect(canAccessPortal({ portal: "elearning", studentSession, requiredPermission: "elearning.assignment.read_self" })).toBe(true);
+  expect(canAccessPortal({ portal: "elearning", studentSession, requiredPermission: "elearning.assignment.submit" })).toBe(false);
+});
+
+test("does not treat a client-side wildcard portal list as a grant without a canonical workspace", () => {
+  expect(canAccessPortal({
+    portal: "crm",
+    teacherAccount,
+    teacherSession: { accessToken: "token", portals: ["*"] },
+  })).toBe(false);
 });

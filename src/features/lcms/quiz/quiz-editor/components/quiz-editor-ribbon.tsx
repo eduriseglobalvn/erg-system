@@ -1,27 +1,50 @@
 import { FormViewRibbon } from "@/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon";
-import type { IntroSlideKind, QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type {
+  IntroSlideKind,
+  QuestionCreationPreset,
+  QuestionType,
+} from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type {
+  CourseScopeOption,
+  LevelScopeOption,
+  TopicOption,
+} from "@/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon";
 
 type RibbonProps = {
-  onAddQuestionGroup: () => void;
-  onAddQuestion: (type: QuestionType) => void;
+  searchValue: string;
+  courseOptions: CourseScopeOption[];
+  selectedCourseId: string;
+  levelOptions: LevelScopeOption[];
+  selectedLevelId: string | null;
+  topicOptions: TopicOption[];
+  selectedTopicId: string;
+  onChangeCourse: (value: string) => void;
+  onChangeLevel: (value: string) => void;
+  onChangeTopic: (value: string) => void;
+  onChangeSearch: (value: string) => void;
+  onAddQuestion: (type: QuestionType, preset?: QuestionCreationPreset) => void;
   onAddIntroduction: (type: IntroSlideKind) => void;
-  onOpenQuizProperties: () => void;
-  onOpenResults: () => void;
   onOpenPlayerTemplate: () => void;
-  onOpenPreview: () => void;
   onOpenPublish: () => void;
 };
 
 export function QuizEditorRibbon(props: RibbonProps) {
   return (
     <FormViewRibbon
-      onAddQuestionGroup={props.onAddQuestionGroup}
+      searchValue={props.searchValue}
+      courseOptions={props.courseOptions}
+      selectedCourseId={props.selectedCourseId}
+      levelOptions={props.levelOptions}
+      selectedLevelId={props.selectedLevelId}
+      topicOptions={props.topicOptions}
+      selectedTopicId={props.selectedTopicId}
+      onChangeCourse={props.onChangeCourse}
+      onChangeLevel={props.onChangeLevel}
+      onChangeTopic={props.onChangeTopic}
+      onChangeSearch={props.onChangeSearch}
       onAddQuestion={props.onAddQuestion}
       onAddIntroduction={props.onAddIntroduction}
-      onOpenQuizProperties={props.onOpenQuizProperties}
-      onOpenResults={props.onOpenResults}
       onOpenPlayerTemplate={props.onOpenPlayerTemplate}
-      onOpenPreview={props.onOpenPreview}
       onOpenPublish={props.onOpenPublish}
     />
   );

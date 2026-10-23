@@ -1,10 +1,10 @@
-import { useMemo, useState, type KeyboardEvent } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown, Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
 import { AppSelect } from "@/components/ui/app-select";
-import { Input } from "@/components/ui/dashboard-kit";
+import TextField from "@mui/material/TextField";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score-sheet-panel";
+import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score/score-sheet-model";
 import { cn } from "@/lib/utils";
 
 type MobileScoreMode = "student" | "column" | "sheet";
@@ -18,17 +18,18 @@ type MobileScoreEditor = {
 type MobileScoreSheetPanelProps = {
   addOfflineColumn: () => void;
   bonusScores: Record<string, string>;
-  commitScoreInputOnEnter: (event: KeyboardEvent<HTMLInputElement>) => void;
   getClassification: (student: ClassroomStudent) => Classification;
   getStudentState: (student: ClassroomStudent) => StudentState;
-  manualScores: Record<string, string>;
   offlineColumnName: string;
   onOfflineColumnNameChange: (value: string) => void;
+  onCommitScore: (columnId: string, studentId: string, value?: string) => void;
   onOpenStudentDetail: (student: ClassroomStudent) => void;
   onRequestClassificationChange: (student: ClassroomStudent, next: Classification) => void;
   onUpdateBonusScore: (studentId: string, score: string) => void;
   onUpdateManualScore: (columnId: string, studentId: string, score: string) => void;
+  offlinePending?: boolean;
   scoreColumns: ScoreColumn[];
+  scoreValueFor: (student: ClassroomStudent, column: ScoreColumn, studentIndex: number, columnIndex: number) => string;
   searchQuery: string;
   selectedClass?: ClassroomSnapshot;
   selectedSchoolName: string;
@@ -43,19 +44,20 @@ type MobileScoreSheetPanelProps = {
 export function MobileScoreSheetPanel({
   addOfflineColumn,
   bonusScores,
-  commitScoreInputOnEnter,
   getClassification,
   getStudentState,
-  manualScores,
   offlineColumnName,
   onOfflineColumnNameChange,
+  onCommitScore,
   onOpenStudentDetail,
   onRequestClassificationChange,
   onSearchQueryChange,
   onSelectedSubjectChange,
   onUpdateBonusScore,
   onUpdateManualScore,
+  offlinePending,
   scoreColumns,
+  scoreValueFor,
   searchQuery,
   selectedClass,
   selectedSchoolName,
@@ -75,20 +77,14 @@ export function MobileScoreSheetPanel({
     return `${selectedSchoolName} · ${visibleStudents.length} học sinh · ${activeCount} đang học`;
   }, [getStudentState, selectedSchoolName, visibleStudents]);
 
-  function scoreValueFor(column: ScoreColumn, student: ClassroomStudent, studentIndex: number, columnIndex: number) {
-    const manual = manualScores[`${column.id}:${student.id}`];
-    if (manual !== undefined) return manual;
-    if (column.kind === "offline") return "";
-    return String(getDefaultScore(student, column, studentIndex, columnIndex));
-  }
-
   function openEditor(column: ScoreColumn, student: ClassroomStudent, studentIndex: number, columnIndex: number) {
-    setEditor({ column, student, value: scoreValueFor(column, student, studentIndex, columnIndex) });
+    setEditor({ column, student, value: scoreValueFor(student, column, studentIndex, columnIndex) });
   }
 
   function saveEditor() {
     if (!editor) return;
     onUpdateManualScore(editor.column.id, editor.student.id, editor.value);
+    onCommitScore(editor.column.id, editor.student.id, editor.value);
     setEditor(null);
   }
 
@@ -103,11 +99,17 @@ export function MobileScoreSheetPanel({
         <div className="mt-3 grid grid-cols-[minmax(0,1fr)_112px] gap-2">
           <label className="relative block min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <Input
+            <TextField
               value={searchQuery}
               onChange={(event) => onSearchQueryChange(event.target.value)}
               placeholder="Tìm học sinh"
-              className="h-11 rounded-[14px] border-[#d9e2ef] bg-white pl-9 text-[15px] font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.04)]"
+              size="small"
+              fullWidth
+              sx={{
+                "& .MuiInputBase-root": { height: 44, bgcolor: "white", borderRadius: "14px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" },
+                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d9e2ef" },
+                "& .MuiInputBase-input": { pl: "36px", fontSize: "15px", fontWeight: 600 },
+              }}
             />
           </label>
           <label className="flex h-11 min-w-0 items-center gap-1 rounded-[14px] border border-[#d9e2ef] bg-white px-2 text-[12px] font-semibold text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
@@ -126,6 +128,8 @@ export function MobileScoreSheetPanel({
             </AppSelect>
           </label>
         </div>
+
+        {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
 
         <div className="mt-3 grid grid-cols-3 gap-1 rounded-[16px] bg-[#e9f0fb] p-1.5">
           {[
@@ -171,7 +175,6 @@ export function MobileScoreSheetPanel({
                         <input
                           value={bonusScores[student.id] ?? ""}
                           onChange={(event) => onUpdateBonusScore(student.id, event.target.value)}
-                          onKeyDown={commitScoreInputOnEnter}
                           inputMode="decimal"
                           aria-label={`Điểm cộng trừ của ${studentNameFor(student)}`}
                           placeholder="+/-"
@@ -192,7 +195,7 @@ export function MobileScoreSheetPanel({
                         onClick={() => openEditor(column, student, studentIndex, columnIndex)}
                       >
                         <span className="block truncate text-[11px] font-bold text-slate-500">{column.label}</span>
-                        <span className="mt-1 block text-[16px] font-bold text-slate-950">{scoreValueFor(column, student, studentIndex, columnIndex) || "-"}</span>
+                        <span className="mt-1 block text-[16px] font-bold text-slate-950">{scoreValueFor(student, column, studentIndex, columnIndex) || "-"}</span>
                       </button>
                     ))}
                   </div>
@@ -234,9 +237,12 @@ export function MobileScoreSheetPanel({
                       <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">{activeColumn.label}</span>
                     </button>
                     <input
-                      value={scoreValueFor(activeColumn, student, studentIndex, columnIndex)}
+                      value={scoreValueFor(student, activeColumn, studentIndex, columnIndex)}
                       onChange={(event) => onUpdateManualScore(activeColumn.id, student.id, event.target.value)}
-                      onKeyDown={commitScoreInputOnEnter}
+                      onBlur={(event) => onCommitScore(activeColumn.id, student.id, event.currentTarget.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") event.currentTarget.blur();
+                      }}
                       inputMode="decimal"
                       aria-label={`${studentNameFor(student)} ${activeColumn.label}`}
                       className="h-11 rounded-[12px] border border-[#d9e2ef] px-2 text-center text-[15px] font-bold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
@@ -267,10 +273,10 @@ export function MobileScoreSheetPanel({
                   <button
                     key={`${student.id}-${column.id}`}
                     type="button"
-                    className={cn("min-h-12 border-b border-r border-[#d9e2ef] px-1 text-center text-[13px] font-bold", scoreTone(scoreValueFor(column, student, studentIndex, columnIndex), column.maxScore))}
+                    className={cn("min-h-12 border-b border-r border-[#d9e2ef] px-1 text-center text-[13px] font-bold", scoreTone(scoreValueFor(student, column, studentIndex, columnIndex), column.maxScore))}
                     onClick={() => openEditor(column, student, studentIndex, columnIndex)}
                   >
-                    {scoreValueFor(column, student, studentIndex, columnIndex) || "-"}
+                    {scoreValueFor(student, column, studentIndex, columnIndex) || "-"}
                   </button>
                 ))}
               </div>
@@ -333,11 +339,6 @@ export function MobileScoreSheetPanel({
       ) : null}
     </div>
   );
-}
-
-function getDefaultScore(student: ClassroomStudent, column: ScoreColumn, studentIndex: number, columnIndex: number) {
-  const raw = (student.averageScore / 10 + ((columnIndex % 3) - 1) * 0.45 + (studentIndex % 2) * 0.1) / 10;
-  return Math.max(0, Math.min(column.maxScore, Math.round(raw * column.maxScore)));
 }
 
 function nextClassification(current: Classification): Classification {

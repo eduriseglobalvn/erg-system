@@ -1,0 +1,15 @@
+import { FileBlob, SpreadsheetFile } from "@oai/artifact-tool";
+const path = "D:/ERG/TASK/ERG_Task_Management_.xlsx";
+const input = await FileBlob.load(path);
+const workbook = await SpreadsheetFile.importXlsx(input);
+const sheet = workbook.worksheets.getItem("Tất cả Task");
+const today = new Date("2026-08-26T00:00:00");
+sheet.getRange("G212").values = [["Thiết kế và triển khai CRUD khung chương trình theo từng môn, trình bày dạng bảng giống Excel; Admin chọn trường + môn + năm học, khai báo ngày bắt đầu dạy và lịch học, hệ thống tính tiết theo ngày điểm danh để làm nổi bật bài/tiết hiện tại trên LMS. Bảo đảm version, thứ tự dòng, trạng thái xuất bản, lịch sử thay đổi và không làm mất dữ liệu khi chỉnh sửa cấu trúc đã có."]];
+sheet.getRange("Q212").values = [[today]];
+sheet.getRange("U212").values = [[0.35]];
+sheet.getRange("X212").values = [["Kế hoạch thiết kế 2026-08-26:\n1) Chốt domain: CurriculumTemplate theo subject/version; CurriculumNode theo level/topic/lesson/activity; SchoolSubjectCurriculumSetting theo schoolId, subjectId, academicYear, startDate, teachingDays, sessionsPerDay và timezone. Không nhúng startDate vào taxonomy dùng chung.\n2) Admin CRUD dạng Excel: bộ lọc trường/môn/năm học; bảng cột STT, chủ đề, tiết, tên bài học, số tiết, ngày dự kiến, trạng thái; inline edit tên/số tiết/thứ tự; thêm dòng/thêm nhóm; kéo thả/đánh số lại; import/export XLSX; draft/publish/archive; preview ngày học.\n3) API/contract: dùng curriculum taxonomy CRUD hiện có cho subject/level/topic; bổ sung contract riêng cho template/version, bulk upsert/reorder và school-subject schedule setting; optimistic concurrency/version; impact check trước archive/delete.\n4) Attendance integration: bỏ COURSE_START_DATE hardcode; query setting theo school + subject + academicYear; hàm tính lessonIndex từ startDate + teachingDays + session rules; match lessonIndex với node/lesson; highlight current lesson, past, upcoming, missing-config.\n5) Verification: unit test tính ngày-tiết qua cuối tuần/ngày nghỉ/đổi lịch; API mapper/query-key scope test; Admin CRUD E2E create/edit/reorder/publish/archive/import; LMS attendance E2E highlight đúng tiết; typecheck/lint/build/contract gate.\n\nJitter fix 2026-08-26: virtual attendance table thêm spacer top/bottom theo totalSize để scrollbar không đổi chiều cao khi scroll; ESLint target pass; attendance + navigation 2 files / 4 tests pass."]];
+sheet.getRange("Y212").values = [["src/features/lms/components/attendance/attendance-student-table.tsx; src/features/lms/components/attendance/use-attendance-sheet-controller.ts; src/features/lms/components/attendance/attendance-sheet-model.ts; src/features/lcms/admin-operations/components/learning-resource-authoring-structure-screen.tsx; src/features/lcms/admin-operations/api/learning-resource-authoring-taxonomy-command-api.ts; contracts/backend/erg-openapi.json; contracts/backend/schema.graphqls; tests; D:/ERG/TASK/ERG_Task_Management_.xlsx"]];
+sheet.getRange("M212:Q212").format.numberFormat = "yyyy-mm-dd";
+const output = await SpreadsheetFile.exportXlsx(workbook);
+await output.save(path);
+console.log("updated ERG-137 design plan");

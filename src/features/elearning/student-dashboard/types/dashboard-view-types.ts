@@ -11,7 +11,7 @@ export type StudentViewState =
 
 export type StudentPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
 
-export type StudentDockPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements";
+export type StudentDockPageKey = "overview" | "assignments" | "scores" | "discussion" | "announcements" | "account";
 
 export type DiscussionScrollTarget = {
   replyId?: string;
@@ -29,6 +29,7 @@ export type StudentDiscussionNotification = DiscussionScrollTarget & {
 export type DashboardCopy = {
   navItems: Array<{ key: StudentPageKey; label: string; icon: ReactNode }>;
   heroEyebrow: string;
+  learnerFallbackName: string;
   heroTitle: (name: string) => string;
   heroDescription: (taskTitle: string) => string;
   primaryAction: string;

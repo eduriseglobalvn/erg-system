@@ -1,30 +1,23 @@
-import { Building2, Check, GraduationCap } from "lucide-react";
-
-import { LmsSelect } from "@/components/ui/lms-kit";
-import { cn } from "@/lib/utils";
-
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-export type LmsMobileSchoolOption = {
-  id: string;
-  name: string;
-};
-
-export type LmsMobileClassOption = {
-  id: string;
-  className: string;
-  schoolId: string;
-};
+export type LmsMobileSchoolOption = { id: string; name: string };
+export type LmsMobileClassOption = { className: string; id: string; schoolId: string };
 
 export function LmsScopeSheet({
-  classes,
-  open,
-  schools,
-  selectedClassId,
-  selectedSchoolId,
-  onClassChange,
-  onOpenChange,
-  onSchoolChange,
+  classes, open, schools, selectedClassId, selectedSchoolId,
+  onClassChange, onOpenChange, onSchoolChange,
 }: {
   classes: LmsMobileClassOption[];
   open: boolean;
@@ -40,74 +33,71 @@ export function LmsScopeSheet({
 
   return (
     <MobileBottomSheet
-      open={open}
-      title="Pham vi giang day"
-      description={selectedSchool?.name ?? "Chon truong va lop dang day"}
+      description={selectedSchool?.name ?? "Chọn trường và lớp đang dạy"}
       onOpenChange={onOpenChange}
+      open={open}
+      title="Phạm vi giảng dạy"
     >
-      <div className="space-y-4">
-        <label className="block space-y-2">
-          <span className="flex items-center gap-2 text-xs font-extrabold uppercase text-[var(--muted-foreground)]">
-            <Building2 className="h-4 w-4" />
-            Truong
-          </span>
-          <LmsSelect
-            aria-label="Chon truong"
-            className="h-12 w-full text-[15px]"
-            value={selectedSchoolId}
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary" }}>
+          <BusinessRoundedIcon sx={{ fontSize: 18 }} />
+          <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Trường</Typography>
+        </Stack>
+        <FormControl fullWidth>
+          <InputLabel id="lms-mobile-school-label">Chọn trường</InputLabel>
+          <Select
+            label="Chọn trường"
+            labelId="lms-mobile-school-label"
             onChange={(event) => onSchoolChange(event.target.value)}
+            value={selectedSchoolId}
           >
-            {schools.map((school) => (
-              <option key={school.id} value={school.id}>
-                {school.name}
-              </option>
-            ))}
-          </LmsSelect>
-        </label>
+            {schools.map((school) => <MenuItem key={school.id} value={school.id}>{school.name}</MenuItem>)}
+          </Select>
+        </FormControl>
 
-        <section className="space-y-2">
-          <div className="flex items-center gap-2 text-xs font-extrabold uppercase text-[var(--muted-foreground)]">
-            <GraduationCap className="h-4 w-4" />
-            Lop dang day
-          </div>
-          <div className="grid gap-2">
-            {selectedClassOptions.length ? (
-              selectedClassOptions.map((classroom) => {
-                const active = classroom.id === selectedClassId;
-
-                return (
-                  <button
-                    key={classroom.id}
-                    type="button"
-                    className={cn(
-                      "flex min-h-12 items-center justify-between gap-3 rounded-[12px] border px-3 py-2 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--primary)]/25",
-                      active
-                        ? "border-[#b8d6fa] bg-[#eef6ff] text-[var(--primary)]"
-                        : "border-[var(--border)] bg-white text-[var(--foreground)] hover:bg-[var(--surface-hover)]",
-                    )}
-                    onClick={() => {
-                      onClassChange(classroom.id);
-                      onOpenChange(false);
-                    }}
-                  >
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm font-extrabold">{classroom.className}</span>
-                      <span className="mt-0.5 block text-xs font-semibold text-[var(--muted-foreground)]">
-                        {selectedSchool?.name ?? "ERG"}
-                      </span>
-                    </span>
-                    {active ? <Check className="h-5 w-5 shrink-0" /> : null}
-                  </button>
-                );
-              })
-            ) : (
-              <div className="rounded-[12px] border border-dashed border-[var(--border)] px-3 py-4 text-sm font-semibold text-[var(--muted-foreground)]">
-                Chua co lop trong truong nay.
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary", pt: 0.5 }}>
+          <SchoolRoundedIcon sx={{ fontSize: 18 }} />
+          <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Lớp đang dạy</Typography>
+        </Stack>
+        <Stack spacing={1}>
+          {selectedClassOptions.length ? selectedClassOptions.map((classroom) => {
+            const active = classroom.id === selectedClassId;
+            return (
+              <ButtonBase
+                key={classroom.id}
+                onClick={() => { onClassChange(classroom.id); onOpenChange(false); }}
+                sx={{
+                  alignItems: "center",
+                  bgcolor: active ? ergEnterpriseTokens.color.primarySofter : "background.paper",
+                  border: "1px solid",
+                  borderColor: active ? "primary.light" : "divider",
+                  borderRadius: 2,
+                  color: active ? "primary.main" : "text.primary",
+                  display: "flex",
+                  gap: 1.5,
+                  justifyContent: "space-between",
+                  minHeight: 52,
+                  px: 1.5,
+                  py: 1,
+                  textAlign: "left",
+                  width: "100%",
+                  "&:hover": { bgcolor: active ? ergEnterpriseTokens.color.primarySoft : "action.hover" },
+                }}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>{classroom.className}</Typography>
+                  <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, mt: 0.25 }}>{selectedSchool?.name ?? "ERG"}</Typography>
+                </Box>
+                {active ? <CheckRoundedIcon sx={{ flexShrink: 0 }} /> : null}
+              </ButtonBase>
+            );
+          }) : (
+            <Box sx={{ border: "1px dashed", borderColor: "divider", borderRadius: 2, px: 1.5, py: 2 }}>
+              <Typography color="text.secondary" sx={{ fontWeight: 600 }} variant="body2">Chưa có lớp trong trường này.</Typography>
+            </Box>
+          )}
+        </Stack>
+      </Stack>
     </MobileBottomSheet>
   );
 }

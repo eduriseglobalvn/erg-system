@@ -76,11 +76,11 @@ export function SlidePreviewDialog({
       >
         <div className="classic-editor__dialog-titlebar">
           <div className="classic-editor__dialog-title">
-            {isPublishMode ? <CloudUploadIcon className="h-4 w-4 text-[#4a79b1]" fontSize="inherit" /> : <PlayArrowIcon className="h-4 w-4 text-[#4a79b1]" fontSize="inherit" />}
+            {isPublishMode ? <CloudUploadIcon className="h-4 w-4 text-[#4a79b1]" sx={{ fontSize: "1em" }} /> : <PlayArrowIcon className="h-4 w-4 text-[#4a79b1]" sx={{ fontSize: "1em" }} />}
             <span>{title}</span>
           </div>
           <button type="button" className="classic-editor__dialog-close" onClick={onClose}>
-            <CloseIcon className="h-4 w-4" fontSize="inherit" />
+            <CloseIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
           </button>
         </div>
 
@@ -126,7 +126,7 @@ export function SlidePreviewDialog({
                   }}
                   disabled={currentIndex === 0}
                 >
-                  <ChevronLeftIcon className="h-4 w-4" fontSize="inherit" />
+                  <ChevronLeftIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 </button>
                 <span className="classic-editor__slide-preview-stage-label">
                   {currentIndex + 1}/{slides.length} - {currentSlide.title}
@@ -140,7 +140,7 @@ export function SlidePreviewDialog({
                   }}
                   disabled={currentIndex === slides.length - 1}
                 >
-                  <ChevronRightIcon className="h-4 w-4" fontSize="inherit" />
+                  <ChevronRightIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 </button>
 
                 <div className="classic-editor__slide-preview-review-tabs">
@@ -204,12 +204,12 @@ export function SlidePreviewDialog({
                   URL.revokeObjectURL(url);
                 }}
               >
-                <DownloadIcon className="h-4 w-4" fontSize="inherit" />
+                <DownloadIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 <span>{t("quiz.exportJson")}</span>
               </button>
             ) : (
               <button type="button" className="classic-editor__dialog-primary" onClick={onClose}>
-                <CheckCircleOutlinedIcon className="h-4 w-4" fontSize="inherit" />
+                <CheckCircleOutlinedIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 <span>{t("common.done")}</span>
               </button>
             )}

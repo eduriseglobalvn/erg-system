@@ -1,3 +1,9 @@
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import Typography from "@mui/material/Typography";
+
 import type { AnswerResult, Attempt, Question, QuizResultDisplay } from "@/lib/types";
 
 type SubmitDialogMode = "all-answered" | "confirm";
@@ -14,62 +20,56 @@ export function FinalResultScreen({
   const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
 
   return (
-    <div className="grid min-h-[420px] place-items-center overflow-hidden bg-white px-6 py-8">
-      <div className="grid justify-items-center gap-4 text-center">
-        <div
-          className={`grid h-16 w-16 place-items-center rounded-lg text-xl font-semibold text-white ${
-            attempt.passed ? "bg-emerald-500" : "bg-[var(--erg-red)]"
-          }`}
-        >
+    <Box sx={{ alignItems: "center", bgcolor: "common.white", display: "grid", justifyItems: "center", minHeight: 420, overflow: "hidden", px: 3, py: 4 }}>
+      <Box sx={{ display: "grid", gap: 2, justifyItems: "center", textAlign: "center" }}>
+        <Box sx={{ alignItems: "center", bgcolor: attempt.passed ? "success.main" : "error.main", borderRadius: 1, color: "common.white", display: "grid", fontSize: 20, fontWeight: 600, height: 64, placeItems: "center", width: 64 }}>
           {attempt.passed ? "✓" : "×"}
-        </div>
-        <h2 className="text-xl font-semibold text-[var(--erg-blue)] ">
+        </Box>
+        <Typography component="h2" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
           {resultMessage}
-        </h2>
-        <div className="grid gap-2">
-          <span className="text-sm font-semibold text-slate-500">Điểm</span>
-          <strong className="text-xl font-semibold text-[var(--erg-blue)]">
+        </Typography>
+        <Box sx={{ display: "grid", gap: 1 }}>
+          <Typography component="span" sx={{ color: "text.secondary", fontSize: 14, fontWeight: 600 }}>Điểm</Typography>
+          <Typography component="strong" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
             {attempt.totalScore}/{attempt.maxScore}
-          </strong>
-          <span className="text-sm font-semibold text-slate-400">
-            {attempt.percent}%
-          </span>
-        </div>
+          </Typography>
+          <Typography component="span" sx={{ color: "text.disabled", fontSize: 14, fontWeight: 600 }}>{attempt.percent}%</Typography>
+        </Box>
         {resultDisplay.showReviewButton ? (
-          <button
-            type="button"
-            onClick={onReview}
-            className="min-h-10 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
-          >
+          <Button variant="contained" onClick={onReview} sx={{ minHeight: 40, px: 2 }}>
             {resultDisplay.reviewButtonLabel}
-          </button>
+          </Button>
         ) : null}
-        <div className="text-base font-medium text-slate-500">
-          {resultDisplay.thankYouMessage}
-        </div>
-      </div>
-    </div>
+        <Typography sx={{ color: "text.secondary", fontSize: 16, fontWeight: 500 }}>{resultDisplay.thankYouMessage}</Typography>
+      </Box>
+    </Box>
   );
 }
 
-export function QuestionFeedbackPanel({ result }: { result: AnswerResult }) {
-  const tone = result.correct ? "correct" : "wrong";
-  const title = result.correct ? "Đáp án chính xác!" : result.partiallyRight ? "Đáp án gần đúng!" : "Đáp án chưa đúng!";
-  const headerClass =
-    tone === "correct"
-      ? "bg-[#78b816]"
-      : result.partiallyRight
-        ? "bg-[#f59e0b]"
-        : "bg-[#e65a4d]";
+export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
+  const title = result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
+  const message = result.correct ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
 
   return (
-    <div className="mx-auto mt-8 w-full max-w-[884px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-      <div className={`flex min-h-12 items-center justify-between px-5 text-base font-semibold text-white ${headerClass}`}>
+    <Box
+      sx={{
+        bgcolor: "common.white",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1,
+        boxShadow: floating ? "0 18px 44px rgba(15,23,42,0.16)" : 1,
+        mx: floating ? 0 : "auto",
+        mt: floating ? 0 : 4,
+        maxWidth: 884,
+        overflow: "hidden",
+        width: "100%",
+      }}
+    >
+      <Box sx={{ alignItems: "center", bgcolor: result.correct ? "#22C55E" : "#e82828", color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
         <span>{title}</span>
-        <span className="text-xl font-light">⌄</span>
-      </div>
-      <div className="px-5 py-5 text-base leading-7 text-slate-950">{result.message}</div>
-    </div>
+      </Box>
+      <Box sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>
+    </Box>
   );
 }
 
@@ -89,40 +89,39 @@ export function SubmitConfirmDialog({
   const isAllAnswered = mode === "all-answered";
 
   return (
-    <div className="fixed inset-0 z-[260] grid place-items-center bg-black/10">
-      <div className="flex w-[min(590px,calc(100vw-56px))] items-center gap-4 border border-slate-300 bg-white px-7 py-8 shadow-sm">
-        <div className="grid h-8 w-8 flex-none place-items-center rounded-md border border-slate-300 text-base font-semibold text-slate-500">
-          ?
-        </div>
-        <div className="grid flex-1 gap-6">
-          <p className="text-sm font-medium text-slate-900">
+    <Dialog
+      open
+      onClose={submitting ? undefined : onCancel}
+      slotProps={{
+        paper: { "aria-label": "Xác nhận nộp bài", sx: {
+          alignItems: "center",
+          border: "1px solid",
+          borderColor: "divider",
+          borderRadius: 0,
+          boxShadow: 1,
+          display: "flex",
+          maxWidth: 590,
+          width: "calc(100vw - 56px)",
+        } },
+      }}
+    >
+      <DialogContent sx={{ alignItems: "center", display: "flex", gap: 2, px: 3.5, py: 4, width: "100%" }}>
+        <Box aria-hidden sx={{ alignItems: "center", border: "1px solid", borderColor: "divider", borderRadius: 0.75, color: "text.secondary", display: "grid", flex: "none", fontSize: 16, fontWeight: 600, height: 32, placeItems: "center", width: 32 }}>?</Box>
+        <Box sx={{ display: "grid", flex: 1, gap: 3 }}>
+          <Typography id="quiz-submit-confirm-title" sx={{ color: "text.primary", fontSize: 14, fontWeight: 500 }}>
             {isAllAnswered ? resultDisplay.submitAllPrompt : resultDisplay.confirmSubmitPrompt}
-          </p>
-          <div className="flex flex-wrap justify-center gap-3">
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={onConfirm}
-              className="min-h-9 min-w-[136px] rounded-md bg-[var(--erg-blue)] px-5 text-sm font-semibold text-white shadow-sm disabled:opacity-60"
-            >
-              {submitting
-                ? "SUBMITTING..."
-                : isAllAnswered
-                  ? resultDisplay.submitAllLabel
-                  : resultDisplay.confirmYesLabel}
-            </button>
-            <button
-              type="button"
-              disabled={submitting}
-              onClick={onCancel}
-              className="min-h-9 min-w-[136px] rounded-md bg-slate-100 px-5 text-sm font-semibold text-slate-700 shadow-sm disabled:opacity-60"
-            >
+          </Typography>
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
+            <Button disabled={submitting} variant="contained" onClick={onConfirm} sx={{ minHeight: 36, minWidth: 136, px: 2.5 }}>
+              {submitting ? "ĐANG NỘP..." : isAllAnswered ? resultDisplay.submitAllLabel : resultDisplay.confirmYesLabel}
+            </Button>
+            <Button disabled={submitting} variant="outlined" onClick={onCancel} sx={{ bgcolor: "grey.100", color: "text.secondary", minHeight: 36, minWidth: 136, px: 2.5 }}>
               {isAllAnswered ? resultDisplay.returnToQuizLabel : resultDisplay.confirmNoLabel}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+            </Button>
+          </Box>
+        </Box>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -134,16 +133,12 @@ export function AnswerKeyCard({ question }: { question: Question }) {
   }
 
   return (
-    <div className="mt-4 overflow-hidden rounded-lg border border-slate-200 bg-white/95 shadow-sm">
-      <div className="bg-[var(--erg-blue)] px-4 py-3 text-sm font-semibold text-white">
-        Đáp án
-      </div>
-      <div className="grid gap-2 px-4 py-4 text-sm leading-6 text-slate-600">
-        {lines.map((line) => (
-          <div key={line}>{line}</div>
-        ))}
-      </div>
-    </div>
+    <Box sx={{ bgcolor: "rgba(255,255,255,0.95)", border: "1px solid", borderColor: "divider", borderRadius: 1, boxShadow: 1, mt: 2, overflow: "hidden" }}>
+      <Box sx={{ bgcolor: "var(--erg-blue)", color: "common.white", fontSize: 14, fontWeight: 600, px: 2, py: 1.5 }}>Đáp án</Box>
+      <Box sx={{ color: "text.secondary", display: "grid", fontSize: 14, gap: 1, lineHeight: "24px", px: 2, py: 2 }}>
+        {lines.map((line) => <div key={line}>{line}</div>)}
+      </Box>
+    </Box>
   );
 }
 
@@ -151,14 +146,11 @@ function getAnswerKeyLines(question: Question): string[] {
   switch (question.kind) {
     case "single_choice":
     case "true_false":
-      return (question.choices ?? []).filter((choice) => choice.correct).map((choice) => `Đáp án đúng: ${choice.label}`);
     case "multiple_response":
       return (question.choices ?? []).filter((choice) => choice.correct).map((choice) => `Đáp án đúng: ${choice.label}`);
     case "short_answer":
     case "fill_blank":
-      return (question.textBlanks ?? []).map(
-        (blank, index) => `${index + 1}. ${blank.label}: ${blank.correctAnswers[0] ?? ""}`,
-      );
+      return (question.textBlanks ?? []).map((blank, index) => `${index + 1}. ${blank.label}: ${blank.correctAnswers[0] ?? ""}`);
     case "numeric":
       return question.numericAnswer
         ? [`Đáp án đúng: ${question.numericAnswer.correctValue}${question.numericAnswer.unit ? ` ${question.numericAnswer.unit}` : ""}`]
@@ -169,9 +161,7 @@ function getAnswerKeyLines(question: Question): string[] {
       return (question.sequenceItems ?? []).map((item, index) => `${index + 1}. ${item.label}`);
     case "inline_choice":
     case "select_from_lists":
-      return (question.inlineBlanks ?? []).map(
-        (blank, index) => `${index + 1}. ${blank.statement}: ${formatInlineOption(blank.correctOptionId)}`,
-      );
+      return (question.inlineBlanks ?? []).map((blank, index) => `${index + 1}. ${blank.statement}: ${formatInlineOption(blank.correctOptionId)}`);
     case "drag_words":
       return (question.wordSlots ?? []).map((slot, index) => {
         const word = question.wordBank?.find((item) => item.id === slot.correctWordId);
@@ -194,13 +184,7 @@ function getAnswerKeyLines(question: Question): string[] {
 }
 
 function formatInlineOption(option: string) {
-  if (option === "yes") {
-    return "Có";
-  }
-
-  if (option === "no") {
-    return "Không";
-  }
-
+  if (option === "yes") return "Có";
+  if (option === "no") return "Không";
   return option;
 }

@@ -9,15 +9,15 @@ test("maps library bootstrap resources to launchable LearningResource resources"
       title: "IC3 GS6 Level 1 - Slide bài giảng",
       type: "lecture",
       fileType: "PPTX",
-      thumbnailUrl: "/mock/hoclieu/res-ic3-gs6-l1-slide.png",
-      launchUrl: "/api/v1/hoclieu/assets/asset-ic3-gs6-l1-slide/launch",
+      thumbnailUrl: "/mock/learning-resources/res-ic3-gs6-l1-slide.png",
+      launchUrl: "/api/content/assets/asset-ic3-gs6-l1-slide/launch",
       slides: [
         {
           id: "slide-1",
           index: 1,
           title: "Mở đầu",
-          imageUrl: "/mock/hoclieu/slides/slide-1.png",
-          thumbnailUrl: "/mock/hoclieu/slides/thumb-1.png",
+          imageUrl: "/mock/learning-resources/slides/slide-1.png",
+          thumbnailUrl: "/mock/learning-resources/slides/thumb-1.png",
         },
       ],
     },
@@ -37,7 +37,7 @@ test("maps library bootstrap resources to launchable LearningResource resources"
   expect(resource.fileType).toBe("PPTX");
   expect(resource.launchMode).toBe("google_slide_embed");
   expect(resource.viewer.embedUrl).toBeUndefined();
-  expect(resource.viewer.launchUrl).toContain("/api/v1/hoclieu/assets/asset-ic3-gs6-l1-slide/launch");
+  expect(resource.viewer.launchUrl).toContain("/api/content/assets/asset-ic3-gs6-l1-slide/launch");
   expect(resource.viewer.pageCount).toBe(1);
   expect(resource.viewer.slides?.[0]).toMatchObject({
     id: "slide-1",
@@ -61,7 +61,7 @@ test("keeps slide viewer identity from bootstrap resources for progress tracking
           id: "slide-1",
           index: 1,
           title: "Mở đầu",
-          imageUrl: "/mock/hoclieu/slides/slide-1.png",
+          imageUrl: "/mock/learning-resources/slides/slide-1.png",
         },
       ],
     },
