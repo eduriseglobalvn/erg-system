@@ -1,5 +1,7 @@
 # Single API Registry and Cache Optimization Implementation Plan
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
 **Goal:** Centralize every FE→BE REST endpoint in one `API_ENDPOINTS` registry and optimize TanStack Query caching/persistence without leaking stale or sensitive data.

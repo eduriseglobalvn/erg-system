@@ -3,7 +3,8 @@ import { beforeEach, expect, test, vi } from "vitest";
 const apiRequestMock = vi.hoisted(() => vi.fn());
 const graphQlRequestMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
   apiRequest: apiRequestMock,
   hasApiBase: () => true,
 }));
@@ -119,7 +120,7 @@ test("creates topic resources as canonical content placements", async () => {
   );
   expect(apiRequestMock).toHaveBeenNthCalledWith(
     2,
-    "/api/curriculum/topics/topic-1/content-items",
+    "/api/v1/curriculum/topics/topic-1/content-items",
     expect.objectContaining({
       method: "POST",
       body: expect.stringContaining('"contentItemId":"content-1"'),
@@ -243,7 +244,7 @@ test("loads curriculum impact before taxonomy removal actions", async () => {
 
   const impact = await loadLearningResourceTaxonomyImpact("sections", "topic-1");
 
-  expect(apiRequestMock).toHaveBeenCalledWith("/api/curriculum/topics/topic-1/impact");
+  expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/curriculum/topics/topic-1/impact");
   expect(impact).toMatchObject({
     nodeId: "topic-1",
     nodeType: "topic",
@@ -262,15 +263,15 @@ test("creates updates and deletes mapped curriculum taxonomy kinds through canon
   await updateLearningResourceTaxonomy("categories", "level-1", { label: "Level 1", subjectId: "subject-1" });
   await deleteLearningResourceTaxonomy("sections", "topic-1");
 
-  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/curriculum/subjects", {
+  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/curriculum/subjects", {
     method: "POST",
     body: JSON.stringify({ code: "tin-hoc", name: "Tin hoc", slug: "tin-hoc" }),
   });
-  expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/curriculum/levels/level-1", {
+  expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/v1/curriculum/levels/level-1", {
     method: "PATCH",
     body: JSON.stringify({ code: "level-1", name: "Level 1", subjectId: "subject-1" }),
   });
-  expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/curriculum/topics/topic-1", {
+  expect(apiRequestMock).toHaveBeenNthCalledWith(3, "/api/v1/curriculum/topics/topic-1", {
     method: "DELETE",
   });
 });
@@ -282,11 +283,11 @@ test("creates levels and topics with their required parent path", async () => {
   await createLearningResourceTaxonomy("levels", { label: "Level 1", subjectId: "subject-1" });
   await createLearningResourceTaxonomy("topics", { label: "Topic 1", categoryId: "level-1", subjectId: "subject-1" });
 
-  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/curriculum/subjects/subject-1/levels", {
+  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/curriculum/subjects/subject-1/levels", {
     method: "POST",
     body: JSON.stringify({ code: "level-1", name: "Level 1", subjectId: "subject-1" }),
   });
-  expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/curriculum/levels/level-1/topics", {
+  expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/v1/curriculum/levels/level-1/topics", {
     method: "POST",
     body: JSON.stringify({ code: "topic-1", name: "Topic 1", subjectId: "subject-1", levelId: "level-1", categoryId: "level-1" }),
   });
@@ -304,7 +305,7 @@ test("archives taxonomy through curriculum endpoint instead of hard deleting", a
 
   const archived = await archiveLearningResourceTaxonomy("subjects", "subject-1");
 
-  expect(apiRequestMock).toHaveBeenCalledWith("/api/curriculum/subjects/subject-1/archive", {
+  expect(apiRequestMock).toHaveBeenCalledWith("/api/v1/curriculum/subjects/subject-1/archive", {
     method: "POST",
   });
   expect(archived).toMatchObject({ id: "subject-1", status: "archived" });

@@ -1,21 +1,19 @@
 import { expect, test } from "vitest";
 
-import {
-  libraryBootstrapQueryKey,
-  libraryProgressQueryKey,
-  toLibrarySubjects,
-} from "@/features/lms/learning-resources/hooks/use-learning-resource-library-catalog";
+import { learningResourceLibraryQueryKeys } from "@/features/lms/learning-resources/api/learning-resource-query";
+import { toLibrarySubjects } from "@/features/lms/learning-resources/hooks/use-learning-resource-library-catalog";
 
 test("scopes library bootstrap and progress keys by tenant and account", () => {
-  expect(libraryBootstrapQueryKey({ academicYear: "2025-2026", schoolId: "school-a", tenantId: "tenant-a" })).toEqual([
+  expect(learningResourceLibraryQueryKeys.bootstrap({ accountId: "teacher-a", academicYear: "2025-2026", schoolId: "school-a", tenantId: "tenant-a" })).toEqual([
     "learning-resources",
     "library-bootstrap",
     "tenant-a",
+    "teacher-a",
     "school-a",
     "2025-2026",
   ]);
   expect(
-    libraryProgressQueryKey({
+    learningResourceLibraryQueryKeys.progress({
       academicYear: "2025-2026",
       accountId: "teacher-a",
       schoolId: "school-a",

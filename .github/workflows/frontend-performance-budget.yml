@@ -1,0 +1,59 @@
+name: Frontend performance budget
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "public/**"
+      - "index.html"
+      - "vite.config.ts"
+      - "tsconfig*.json"
+      - "package.json"
+      - "bun.lock"
+      - "scripts/check-bundle-budget.mjs"
+      - "scripts/check-bundle-budget.test.mjs"
+      - "scripts/bundle-budget.json"
+      - ".github/workflows/frontend-performance-budget.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  bundle-budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout frontend
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+
+      - name: Install locked dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Verify budget policy
+        run: bun run budget:test
+
+      - name: Build production bundle
+        run: bun run build
+
+      - name: Enforce bundle budget
+        shell: bash
+        run: |
+          set -o pipefail
+          bun run budget:check 2>&1 | tee bundle-budget-report.txt
+
+      - name: Upload bundle budget report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bundle-budget-report
+          path: bundle-budget-report.txt
+          if-no-files-found: warn
+          retention-days: 14

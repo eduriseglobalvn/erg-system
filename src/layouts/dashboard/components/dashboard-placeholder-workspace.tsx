@@ -39,7 +39,7 @@ export function DashboardPlaceholderWorkspace({
       <DashboardSectionCard title={template?.title ?? copy.title} description={template?.description ?? copy.description}>
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1fr) 320px" } }}>
           <Box sx={{ bgcolor: "background.default", border: "1px dashed", borderColor: "divider", borderRadius: 2, p: 2.5 }}>
-            <Stack alignItems="flex-start" direction="row" spacing={1.5}>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
               <Box sx={{ alignItems: "center", bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, color: "primary.main", display: "flex", flexShrink: 0, height: 44, justifyContent: "center", width: 44 }}>
                 <LayersRoundedIcon sx={{ fontSize: 20 }} />
               </Box>
@@ -49,7 +49,7 @@ export function DashboardPlaceholderWorkspace({
                   {template?.body ?? copy.description}
                 </Typography>
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 2 }}>
-                  {(template?.chips ?? ["LCMS", "LMS source", "Setup"]).map((chip) => (
+                  {(template?.chips ?? ["Admin LMS", "Teacher source", "Setup"]).map((chip) => (
                     <Chip key={chip} label={chip} size="small" color="secondary" />
                   ))}
                 </Box>
@@ -58,7 +58,7 @@ export function DashboardPlaceholderWorkspace({
           </Box>
 
           <Box sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, p: 2.5 }}>
-            <Stack alignItems="center" direction="row" spacing={1} sx={{ color: "text.primary", fontSize: 14, fontWeight: 800 }}>
+            <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 14, fontWeight: 800 }}>
               <ChecklistRoundedIcon color="primary" sx={{ fontSize: 18 }} />
               Checklist
             </Stack>
@@ -82,8 +82,8 @@ const viCopy = {
   backToOps: "Về tổng quan",
   title: "Workspace đang cấu hình",
   description:
-    "Module này đã được đặt đúng vị trí trong LCMS để làm nguồn cho LMS. Các bước cấu hình chi tiết sẽ nối vào API/workflow tương ứng.",
-  checklist: ["Có vị trí trong LCMS", "Có liên kết chức năng LMS", "Sẵn sàng nối API khi backend mở"],
+    "Module này đã được đặt đúng vị trí trong Admin LMS để làm nguồn cho Teacher Workspace. Các bước cấu hình chi tiết sẽ nối vào API/workflow tương ứng.",
+  checklist: ["Có vị trí trong Admin LMS", "Có liên kết chức năng Teacher", "Sẵn sàng nối API khi backend mở"],
 };
 
 const enCopy = {
@@ -91,8 +91,8 @@ const enCopy = {
   backToOps: "Back to overview",
   title: "Workspace in setup",
   description:
-    "This module is placed in LCMS as an LMS source surface and is ready for its workflow/API connection.",
-  checklist: ["Placed in LCMS", "Mapped to an LMS function", "Ready for API wiring"],
+    "This module is placed in Admin LMS as a Teacher Workspace source surface and is ready for its workflow/API connection.",
+  checklist: ["Placed in Admin LMS", "Mapped to a Teacher function", "Ready for API wiring"],
 };
 
 function getLcmsTemplate(id: string) {
@@ -153,9 +153,9 @@ function getLcmsTemplate(id: string) {
     "general-settings": {
       badge: "System",
       title: "Cấu hình hệ thống",
-      description: "Thiết lập chung cho LCMS, LMS và Elearning.",
+      description: "Thiết lập chung cho Admin LMS, Teacher Workspace và Student Workspace.",
       headline: "Cấu hình ít, rõ, kiểm soát được ảnh hưởng.",
-      body: "Module này giữ các thiết lập toàn cục như scope mặc định, quy tắc publish, trạng thái nội dung và các nhãn dùng chung giữa LCMS và LMS.",
+      body: "Module này giữ các thiết lập toàn cục như scope mặc định, quy tắc publish, trạng thái nội dung và các nhãn dùng chung giữa Admin LMS và Teacher Workspace.",
       chips: ["System", "Scope", "Defaults"],
       checklist: ["Xác định scope mặc định", "Cấu hình trạng thái nội dung", "Đồng bộ nhãn dùng chung"],
     },

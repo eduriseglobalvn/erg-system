@@ -39,10 +39,11 @@ test("class management uses fallback students only without API base", () => {
 });
 
 test("class students workspace does not use fallback students when API base is configured", () => {
-  expect(resolveClassStudentsWorkspaceStudents([], fallbackStudents, true)).toEqual([]);
-  expect(resolveClassStudentsWorkspaceStudents(workspaceStudents, fallbackStudents, true)).toEqual(workspaceStudents);
+  expect(resolveClassStudentsWorkspaceStudents([], fallbackStudents, true, false)).toEqual([]);
+  expect(resolveClassStudentsWorkspaceStudents(workspaceStudents, fallbackStudents, true, false)).toEqual(workspaceStudents);
 });
 
-test("class students workspace uses fallback students only without API base", () => {
-  expect(resolveClassStudentsWorkspaceStudents([], fallbackStudents, false)).toEqual(fallbackStudents);
+test("class students workspace uses fallback students only when fixtures are explicitly enabled", () => {
+  expect(resolveClassStudentsWorkspaceStudents([], fallbackStudents, false, true)).toEqual(fallbackStudents);
+  expect(resolveClassStudentsWorkspaceStudents([], fallbackStudents, false, false)).toEqual([]);
 });

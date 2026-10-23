@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
 
@@ -28,7 +29,7 @@ export type PasswordChangeResult = {
 };
 
 export function updateMyTeacherProfile(input: UpdateMyTeacherProfileInput) {
-  return apiRequest<TeacherAccount>("/api/v1/users/me", {
+  return apiRequest<TeacherAccount>(API_ENDPOINTS.account.me, {
     portal: "lms",
     method: "PATCH",
     body: JSON.stringify({
@@ -42,7 +43,7 @@ export function updateMyTeacherProfile(input: UpdateMyTeacherProfileInput) {
 }
 
 export function requestRecoveryEmailChallenge(recoveryEmail: string) {
-  return apiRequest<RecoveryEmailChallenge>("/api/v1/users/me/recovery-email/challenges", {
+  return apiRequest<RecoveryEmailChallenge>(API_ENDPOINTS.account.recoveryChallenges, {
     portal: "lms",
     method: "POST",
     body: JSON.stringify({ recoveryEmail: recoveryEmail.trim().toLowerCase() }),
@@ -50,7 +51,7 @@ export function requestRecoveryEmailChallenge(recoveryEmail: string) {
 }
 
 export function verifyRecoveryEmailChallenge(input: { challengeId: string; otp: string }) {
-  return apiRequest<RecoveryEmailVerification>("/api/v1/users/me/recovery-email/verify", {
+  return apiRequest<RecoveryEmailVerification>(API_ENDPOINTS.account.recoveryVerify, {
     portal: "lms",
     method: "POST",
     body: JSON.stringify({ challengeId: input.challengeId, otp: input.otp.trim() }),
@@ -58,7 +59,7 @@ export function verifyRecoveryEmailChallenge(input: { challengeId: string; otp: 
 }
 
 export function changeMyPassword(input: { currentPassword: string; newPassword: string }) {
-  return apiRequest<PasswordChangeResult>("/api/v1/users/me/password", {
+  return apiRequest<PasswordChangeResult>(API_ENDPOINTS.account.password, {
     portal: "lms",
     method: "PUT",
     body: JSON.stringify({ old_password: input.currentPassword, new_password: input.newPassword }),

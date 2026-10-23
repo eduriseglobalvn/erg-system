@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
-import { STUDENT_LOCAL_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
+import { STUDENT_LOCAL_SESSION_KEY, STUDENT_TEMP_SESSION_KEY } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession, loginStudentWithApi } from "@/platform/auth/api/student-auth-storage";
 
 beforeEach(() => {
@@ -40,16 +40,17 @@ test("student login sends elearning portal to backend and stores returned token"
 
   const [, init] = fetchMock.mock.calls[0] ?? [];
   expect(JSON.parse(String((init as RequestInit).body))).toMatchObject({
-    email: "student@erg.edu.vn",
+    identifier: "student@erg.edu.vn",
     password: "password123",
     rememberMe: true,
     portal: "elearning",
   });
   expect(session.accessToken).toBe("student-access-token");
-  expect(JSON.parse(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY) ?? "{}")).toMatchObject({
+  expect(JSON.parse(window.sessionStorage.getItem(STUDENT_TEMP_SESSION_KEY) ?? "{}")).toMatchObject({
     accessToken: "student-access-token",
     portal: "elearning",
   });
+  expect(window.localStorage.getItem(STUDENT_LOCAL_SESSION_KEY)).toBeNull();
 });
 
 test("student session expires when stored expiry is in the past", () => {

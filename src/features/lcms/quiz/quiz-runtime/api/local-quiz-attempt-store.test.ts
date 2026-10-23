@@ -6,8 +6,9 @@ import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime/
 const SESSION_KEY = "erg:local-quiz-attempt:v1:assignment-1:quiz-1";
 
 describe("localQuizAttemptStore bookmarks", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     window.localStorage.clear();
+    await localQuizAttemptStore.clearAllSessions();
   });
 
   test("creates sessions with an empty bookmark list", async () => {
@@ -38,6 +39,22 @@ describe("localQuizAttemptStore bookmarks", () => {
 
     expect(bookmarked.bookmarkedQuestionIds).toEqual(["question-2"]);
     expect(restored?.bookmarkedQuestionIds).toEqual(["question-2"]);
+  });
+
+  test("does not write active attempt data to plain localStorage", async () => {
+    await localQuizAttemptStore.createSession({
+      accountId: "student-a",
+      assignmentId: "assignment-1",
+      attemptId: "attempt-1",
+      packageHash: "hash-1",
+      portal: "elearning",
+      quizId: "quiz-1",
+      quizVersion: "v1",
+      submitIdempotencyKey: "submit-1",
+      tenantId: "tenant-a",
+    });
+
+    expect(Object.keys(window.localStorage).filter((key) => key.startsWith("erg:local-quiz-attempt:"))).toEqual([]);
   });
 
   test("keeps local attempt sessions separated by tenant portal and account", async () => {
@@ -105,5 +122,41 @@ describe("localQuizAttemptStore bookmarks", () => {
     const restored = await localQuizAttemptStore.getSession("assignment-1", "quiz-1");
 
     expect(restored?.bookmarkedQuestionIds).toEqual([]);
+  });
+
+  test("persists server attempt policy without replacing it with the browser clock", async () => {
+    const session = await localQuizAttemptStore.createSession({
+      accountId: "student-a",
+      assignmentId: "assignment-1",
+      attemptId: "attempt-local",
+      packageHash: "hash-1",
+      portal: "elearning",
+      quizId: "quiz-1",
+      quizVersion: "v1",
+      submitIdempotencyKey: "submit-1",
+      tenantId: "tenant-a",
+    });
+
+    const started = await localQuizAttemptStore.markServerStarted(session, {
+      attemptId: "attempt-server",
+      startedAt: "2026-06-19T01:00:00.000Z",
+      policySnapshot: {
+        deadlineAt: "2026-06-19T01:30:00.000Z",
+        serverTimeAtStart: "2026-06-19T01:00:00.000Z",
+      },
+    });
+    const restored = await localQuizAttemptStore.getSession("assignment-1", "quiz-1", {
+      accountId: "student-a",
+      portal: "elearning",
+      tenantId: "tenant-a",
+    });
+
+    expect(started.attemptId).toBe("attempt-server");
+    expect(started.startedAt).toBe("2026-06-19T01:00:00.000Z");
+    expect(started.serverStartedAt).toBe("2026-06-19T01:00:00.000Z");
+    expect(started.deadlineAt).toBe("2026-06-19T01:30:00.000Z");
+    expect(typeof started.serverClockOffsetMs).toBe("number");
+    expect(restored?.startedAt).toBe("2026-06-19T01:00:00.000Z");
+    expect(restored?.deadlineAt).toBe("2026-06-19T01:30:00.000Z");
   });
 });

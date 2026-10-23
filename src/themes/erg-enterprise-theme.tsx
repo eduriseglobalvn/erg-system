@@ -1,5 +1,15 @@
 import { alpha, createTheme } from "@mui/material/styles";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
+import "@fontsource/plus-jakarta-sans/400.css";
+import "@fontsource/plus-jakarta-sans/500.css";
+import "@fontsource/plus-jakarta-sans/600.css";
+import "@fontsource/plus-jakarta-sans/700.css";
+import "@fontsource/plus-jakarta-sans/800.css";
+import "@fontsource/be-vietnam-pro/400.css";
+import "@fontsource/be-vietnam-pro/500.css";
+import "@fontsource/be-vietnam-pro/600.css";
+import "@fontsource/be-vietnam-pro/700.css";
+import "@fontsource/be-vietnam-pro/800.css";
 import "@fontsource/manrope/index.css";
 
 export const ergEnterpriseTheme = createTheme({

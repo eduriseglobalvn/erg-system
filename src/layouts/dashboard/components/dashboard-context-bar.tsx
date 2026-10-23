@@ -20,7 +20,7 @@ export function DashboardContextBar({ onLogout, ...scopeProps }: DashboardContex
         zIndex: (theme) => theme.zIndex.appBar,
       }}
     >
-      <Stack alignItems="center" direction="row" justifyContent="space-between" spacing={1.5} sx={{ minHeight: 64, px: { xs: 2, md: 3 }, py: 1 }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between", minHeight: 64, px: { xs: 2, md: 3 }, py: 1 }}>
         <DashboardScopeSelector {...scopeProps} />
         <DashboardAccountMenu onLogout={onLogout} />
       </Stack>

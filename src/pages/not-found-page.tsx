@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
-import { Link } from "@/routes/router-compat";
+import { Link } from "@tanstack/react-router";
 
 import { useI18n } from "@/platform/i18n";
 

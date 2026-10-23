@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Skeleton from "@mui/material/Skeleton";
 import { lazy, Suspense, type ComponentType, type LazyExoticComponent } from "react";
 import { SchoolManagementProvider } from "@/features/lcms/school-management/components/school-management-context";
-import { useLocation } from "@/routes/router-compat";
+import { useLocation } from "@tanstack/react-router";
 
 const screens: Record<string, LazyExoticComponent<ComponentType>> = {
   "/schools": lazy(() => import("@/features/lcms/school-management/screens/school-directory-screen")),

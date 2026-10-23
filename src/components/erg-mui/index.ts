@@ -5,3 +5,4 @@ export * from "./erg-layout";
 export * from "./erg-overlays";
 export * from "./erg-table";
 export * from "./charts";
+export * from "./offline";

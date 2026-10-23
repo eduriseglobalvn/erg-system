@@ -1,17 +1,15 @@
 import { memo, type MouseEvent } from "react";
-import {
-  BookMarked,
-  ClipboardList,
-  FileCheck,
-  FileText,
-  GraduationCap,
-  Headphones,
-  HelpCircle,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  Presentation,
-  Video,
-} from "@/components/mui-icon-shim";
+import BookMarked from "@mui/icons-material/BookmarkAdded";
+import ClipboardList from "@mui/icons-material/Assignment";
+import FileCheck from "@mui/icons-material/Task";
+import FileText from "@mui/icons-material/Article";
+import GraduationCap from "@mui/icons-material/School";
+import Headphones from "@mui/icons-material/Headphones";
+import HelpCircle from "@mui/icons-material/HelpOutlineOutlined";
+import ImageIcon from "@mui/icons-material/Image";
+import LinkIcon from "@mui/icons-material/Link";
+import Presentation from "@mui/icons-material/Slideshow";
+import Video from "@mui/icons-material/Videocam";
 
 import { LearningResourceExplorerTreeRow, WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
 import { TaxonomyIcon, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";

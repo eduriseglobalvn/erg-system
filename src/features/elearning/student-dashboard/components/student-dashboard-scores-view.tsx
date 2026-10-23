@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import CheckCircle2 from "@mui/icons-material/CheckCircleOutlineRounded";
 import Clock3 from "@mui/icons-material/ScheduleRounded";
 import GraduationCap from "@mui/icons-material/SchoolRounded";
@@ -58,14 +58,154 @@ function Stack({
 
 export function ScoresView({ assignments, copy }: { assignments: StudentDashboardAssignment[]; copy: DashboardCopy }) {
   const attemptedAssignments = assignments.filter((assignment) => assignment.attempts.length > 0);
-  const bestScore = attemptedAssignments.reduce((best, assignment) => Math.max(best, assignment.score ?? 0), 0);
+  const bestScore = attemptedAssignments.reduce<number | null>(
+    (best, assignment) => {
+      const assignmentScore = assignment.score ?? assignment.attempts.reduce<number | null>(
+        (attemptBest, attempt) => attemptBest === null ? attempt.score : Math.max(attemptBest, attempt.score),
+        null,
+      );
+      if (assignmentScore === null) return best;
+      return best === null ? assignmentScore : Math.max(best, assignmentScore);
+    },
+    null,
+  );
   const totalAttempts = assignments.reduce((total, assignment) => total + assignment.attempts.length, 0);
 
+  const [courseFilter, setCourseFilter] = useState<"all" | "in_progress" | "not_started" | "completed">("all");
+
   return (
-    <Stack spacing={2}>
-      <ScoresPageHeader description={copy.scoresDescription} icon={<GraduationCap sx={{ fontSize: 20 }} />} title={copy.scoresTitle} />
+    <Stack spacing={2.5}>
+      <Box sx={{ mb: 0.5 }}>
+        <Typography variant="h5" sx={{ fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em" }}>
+          {copy.scoresTitle}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "#64748B", mt: 0.4, fontWeight: 550 }}>
+          1 khóa học
+        </Typography>
+      </Box>
+
+      <Box sx={{ display: "flex", gap: 1, overflowX: "auto", pb: 0.5, maxWidth: "100%", scrollbarWidth: "none", "&::-webkit-scrollbar": { display: "none" } }}>
+        {[
+          { key: "all", label: "Tất cả", count: 1 },
+          { key: "in_progress", label: "Đang học", count: 0 },
+          { key: "not_started", label: "Chưa học", count: 0 },
+          { key: "completed", label: "Đã hoàn thành", count: 1 },
+        ].map((tab) => {
+          const active = courseFilter === tab.key;
+          return (
+            <Box
+              key={tab.key}
+              component="button"
+              onClick={() => setCourseFilter(tab.key as any)}
+              sx={{
+                alignItems: "center",
+                bgcolor: active ? "#2563EB" : "#FFFFFF",
+                border: `1px solid ${active ? "#2563EB" : "#E2E8F0"}`,
+                borderRadius: "99px",
+                boxShadow: active ? "0 2px 8px rgba(37, 99, 235, 0.25)" : "none",
+                color: active ? "#FFFFFF" : "#475569",
+                cursor: "pointer",
+                display: "inline-flex",
+                flexShrink: 0,
+                fontSize: 13,
+                fontWeight: active ? 700 : 550,
+                gap: 0.8,
+                outline: "none",
+                px: 1.8,
+                py: 0.6,
+                transition: "all 140ms ease",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  bgcolor: active ? "#1D4ED8" : "#F8FAFC",
+                  borderColor: active ? "#1D4ED8" : "#CBD5E1",
+                  color: active ? "#FFFFFF" : "#0F172A",
+                },
+              }}
+            >
+              <span>{tab.label}</span>
+              <Box
+                component="span"
+                sx={{
+                  bgcolor: active ? "rgba(255,255,255,0.24)" : "#F1F5F9",
+                  borderRadius: "99px",
+                  color: active ? "#FFFFFF" : "#64748B",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  px: 0.85,
+                  py: 0.1,
+                }}
+              >
+                {tab.count}
+              </Box>
+            </Box>
+          );
+        })}
+      </Box>
+
+      <Paper
+        sx={{
+          bgcolor: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          borderRadius: "16px",
+          boxShadow: "0 2px 12px rgba(15,23,42,0.04)",
+          p: { xs: 1.8, md: 2.2 },
+          transition: "all 180ms ease",
+          "&:hover": { boxShadow: "0 8px 24px rgba(15,23,42,0.06)", borderColor: "#CBD5E1" },
+        }}
+      >
+        <Stack direction="row" spacing={2} alignItems="center">
+          <Box
+            sx={{
+              alignItems: "center",
+              background: "linear-gradient(135deg, #0284C7 0%, #2563EB 50%, #4F46E5 100%)",
+              borderRadius: "14px",
+              color: "#FFFFFF",
+              display: "flex",
+              flexShrink: 0,
+              height: 52,
+              justifyContent: "center",
+              width: 52,
+            }}
+          >
+            <GraduationCap sx={{ fontSize: 26 }} />
+          </Box>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between" sx={{ mb: 0.4 }}>
+              <Typography variant="subtitle1" noWrap sx={{ color: "#0F172A", fontSize: 15, fontWeight: 800 }}>
+                [Tập huấn 2026] IC3 GS6
+              </Typography>
+              <Box
+                sx={{
+                  bgcolor: "#ECFDF5",
+                  border: "1px solid #D1FAE5",
+                  borderRadius: "99px",
+                  color: "#059669",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  px: 1.15,
+                  py: 0.25,
+                }}
+              >
+                Hoàn thành
+              </Box>
+            </Stack>
+            <Typography variant="body2" sx={{ color: "#64748B", fontSize: 12.5, fontWeight: 500, mb: 1 }}>
+              Tự do · 4 bài học
+            </Typography>
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Box sx={{ flex: 1, bgcolor: "#E2E8F0", borderRadius: 99, height: 5, overflow: "hidden" }}>
+                <Box sx={{ bgcolor: "#10B981", borderRadius: 99, height: "100%", width: "100%" }} />
+              </Box>
+              <Typography variant="caption" sx={{ color: "#10B981", fontSize: 12, fontWeight: 800 }}>
+                100%
+              </Typography>
+            </Stack>
+          </Box>
+        </Stack>
+      </Paper>
+
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" } }}>
-        <ScoreMetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.bestScoreLabel} tone="success" value={bestScore} />
+        <ScoreMetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.bestScoreLabel} tone="success" value={bestScore ?? "—"} />
         <ScoreMetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} value={attemptedAssignments.length} />
         <ScoreMetricCard icon={<Clock3 sx={{ fontSize: 18 }} />} label={copy.recentResultsTitle} tone="info" value={totalAttempts} />
       </Box>
@@ -98,8 +238,13 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
 }
 
 function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment; copy: DashboardCopy }) {
-  const bestScore = assignment.attempts.reduce((best, attempt) => Math.max(best, attempt.score), assignment.score ?? 0);
-  const scorePercent = assignment.maxScore > 0 ? Math.round((bestScore / assignment.maxScore) * 100) : 0;
+  const bestScore = assignment.score ?? assignment.attempts.reduce<number | null>(
+    (best, attempt) => best === null ? attempt.score : Math.max(best, attempt.score),
+    null,
+  );
+  const scorePercent = bestScore !== null && assignment.maxScore && assignment.maxScore > 0
+    ? Math.round((bestScore / assignment.maxScore) * 100)
+    : null;
   const latestAttempts = assignment.attempts.slice(0, 3);
 
   return (
@@ -116,7 +261,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
         <Box sx={{ minWidth: 0, p: { xs: 1.45, md: 1.75 } }}>
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1} justifyContent="space-between" alignItems={{ xs: "flex-start", sm: "center" }}>
             <Stack direction="row" spacing={0.8} sx={{ flexWrap: "wrap", rowGap: 0.65 }}>
-              <Chip label={assignment.subjectLabel} size="small" variant="outlined" sx={{ borderRadius: "7px", fontWeight: 850, height: 28 }} />
+              {assignment.subjectLabel ? <Chip label={assignment.subjectLabel} size="small" variant="outlined" sx={{ borderRadius: "7px", fontWeight: 850, height: 28 }} /> : null}
               <Chip
                 label={assignment.attempts.length ? `${assignment.attempts.length} lượt làm` : "Chưa làm"}
                 size="small"
@@ -124,7 +269,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
               />
             </Stack>
             <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 750 }}>
-              {assignment.teacherName}
+              {assignment.teacherName ?? "Chưa có giáo viên"}
             </Typography>
           </Stack>
 
@@ -189,21 +334,27 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
             {copy.bestScoreLabel}
           </Typography>
           <Typography variant="h4" sx={{ color: MUI_TEXT, fontWeight: 950, lineHeight: 1.1, mt: 0.55 }}>
-            {copy.scoreBadge(bestScore, assignment.maxScore)}
+            {bestScore === null || assignment.maxScore === null ? "—" : copy.scoreBadge(bestScore, assignment.maxScore)}
           </Typography>
-          <LinearProgress
-            value={scorePercent}
-            variant="determinate"
-            sx={{
-              bgcolor: "rgba(15,108,189,0.1)",
-              borderRadius: 99,
-              height: 8,
-              mt: 1.2,
-              "& .MuiLinearProgress-bar": { bgcolor: MUI_PRIMARY, borderRadius: 99 },
-            }}
-          />
+          {scorePercent === null ? (
+            <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", mt: 1.2 }}>
+              Chưa có dữ liệu điểm chi tiết.
+            </Typography>
+          ) : (
+            <LinearProgress
+              value={scorePercent}
+              variant="determinate"
+              sx={{
+                bgcolor: "rgba(15,108,189,0.1)",
+                borderRadius: 99,
+                height: 8,
+                mt: 1.2,
+                "& .MuiLinearProgress-bar": { bgcolor: MUI_PRIMARY, borderRadius: 99 },
+              }}
+            />
+          )}
           <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", fontWeight: 850, mt: 0.75 }}>
-            {scorePercent}% hoàn thành
+            {scorePercent === null ? "Chưa có dữ liệu" : `${scorePercent}% hoàn thành`}
           </Typography>
         </Box>
       </Box>
@@ -211,38 +362,6 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
   );
 }
 
-function ScoresPageHeader({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {
-  return (
-    <Card sx={elevatedCardSx}>
-      <CardContent sx={{ py: 2.6 }}>
-        <Stack direction="row" spacing={1.5} alignItems="center">
-          <Box
-            sx={{
-              bgcolor: "rgba(15,108,189,0.08)",
-              border: "1px solid rgba(15,108,189,0.14)",
-              borderRadius: 2.5,
-              color: MUI_PRIMARY,
-              display: "grid",
-              height: 48,
-              placeItems: "center",
-              width: 48,
-            }}
-          >
-            {icon}
-          </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h6" sx={{ color: MUI_TEXT, fontWeight: 900, lineHeight: 1.15 }}>
-              {title}
-            </Typography>
-            <Typography variant="body2" sx={{ color: MUI_MUTED, mt: 0.35 }}>
-              {description}
-            </Typography>
-          </Box>
-        </Stack>
-      </CardContent>
-    </Card>
-  );
-}
 
 function ScoreMetricCard({
   icon,

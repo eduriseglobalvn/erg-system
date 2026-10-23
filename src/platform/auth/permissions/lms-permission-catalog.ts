@@ -54,7 +54,7 @@ export const LMS_PERMISSION_CATALOG = [
 
 export type LmsPermission = (typeof LMS_PERMISSION_CATALOG)[number];
 
-export const LMS_PROTECTED_ROUTES = [...lmsPaths, "resources", "homework/class"] as const;
+export const LMS_PROTECTED_ROUTES = [...lmsPaths] as const;
 
 export type LmsProtectedRoute = (typeof LMS_PROTECTED_ROUTES)[number];
 

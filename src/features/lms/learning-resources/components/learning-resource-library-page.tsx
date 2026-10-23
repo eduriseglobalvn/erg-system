@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "@/routes/router-compat";
 import {
   ChevronRight,
   FileQuestion,
@@ -11,17 +10,15 @@ import {
   Presentation,
   type LucideIcon,
 } from "lucide-react";
-import {
-  Clipboard as CommandClipboard,
-  Copy as CommandCopy,
-  FileQuestion as CommandFileQuestion,
-  Folder as CommandFolder,
-  MoreHorizontal as CommandMoreHorizontal,
-  Pencil as CommandPencil,
-  Presentation as CommandPresentation,
-  Scissors as CommandScissors,
-  Trash2 as CommandTrash2,
-} from "@/components/mui-icon-shim";
+import CommandClipboard from "@mui/icons-material/ContentPaste";
+import CommandCopy from "@mui/icons-material/ContentCopy";
+import CommandFileQuestion from "@mui/icons-material/HelpOutlineOutlined";
+import CommandFolder from "@mui/icons-material/Folder";
+import CommandMoreHorizontal from "@mui/icons-material/MoreHoriz";
+import CommandPencil from "@mui/icons-material/Edit";
+import CommandPresentation from "@mui/icons-material/Slideshow";
+import CommandScissors from "@mui/icons-material/ContentCut";
+import CommandTrash2 from "@mui/icons-material/DeleteOutlined";
 
 import {
   LearningResourceExplorerCardGrid,
@@ -36,6 +33,7 @@ import {
   type LearningResourceExplorerCommand,
   type ExplorerViewMode,
 } from "@/components/learning-resources/explorer-ui";
+import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import {
   loadLearningResourceLibrarySections,
@@ -58,7 +56,6 @@ import {
 import { displayText } from "@/features/lms/learning-resources/components/learning-resource-library-utils";
 import { ResourceViewerModal } from "@/features/lms/learning-resources/components/learning-resource-viewer-modal";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
-import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 
 const fileIcons: Record<LearningResourceFileType, LucideIcon> = {
   PDF: FileText,
@@ -495,7 +492,7 @@ function LearningResourceExplorer({
           if (parentCategoryId) onSelectCategory(parentCategoryId);
         }}
         onRefresh={onRefresh}
-        searchLabel="Tìm kiếm học liệu LMS"
+        searchLabel={`Tìm trong ${LEARNING_RESOURCE_WORKSPACE_LABEL.toLocaleLowerCase("vi-VN")}`}
         searchPlaceholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
         searchValue={keyword}
         title={selectedExplorerUrl}
@@ -641,8 +638,8 @@ function MobileLearningResourceExplorer({
       <header className="shrink-0 border-b border-[#dbe4f0] bg-white/95 px-3 py-3 shadow-[0_10px_28px_rgba(96,165,250,0.06)] backdrop-blur-md">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[12px] font-bold uppercase text-[var(--erg-blue)]">{displayText(activeSubject?.label) || "Kho học liệu"}</p>
-            <h2 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || "Tài nguyên"}</h2>
+            <p className="text-[12px] font-bold uppercase text-[var(--erg-blue)]">{displayText(activeSubject?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</p>
+            <h2 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</h2>
           </div>
           <button type="button" onClick={onRefresh} className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#dce6f1] bg-[#f8fbff] text-slate-700 shadow-[var(--shadow-xs)]" aria-label="Làm mới học liệu">
             <RefreshCw className="h-4 w-4" />
@@ -744,10 +741,7 @@ function EmptyState() {
 }
 
 export function LearningResourceLibraryPage() {
-  const { gradeId: routeGradeId } = useParams<{ gradeId?: string }>();
-  const initialGradeId = LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)
-    ? routeGradeId ?? DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId
-    : DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId;
+  const initialGradeId = DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId;
   const initialSelection = useMemo(() => {
     if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
       return getDefaultMockLearningResourceLibrarySelection(initialGradeId);
@@ -755,8 +749,8 @@ export function LearningResourceLibraryPage() {
     return getDefaultSelectionForGrade(initialGradeId);
   }, [initialGradeId]);
   const [account, setAccount] = useState(() => getCurrentAccount());
-  const [activeGradeId, setActiveGradeId] = useState(initialSelection.gradeId);
-  const [activeSubjectId, setActiveSubjectId] = useState(initialSelection.subjectId);
+  const activeGradeId = initialSelection.gradeId;
+  const activeSubjectId = initialSelection.subjectId;
   const [activeCategoryId, setActiveCategoryId] = useState(initialSelection.categoryId);
   const [keyword, setKeyword] = useState("");
   const categories = useMemo(() => {
@@ -775,7 +769,6 @@ export function LearningResourceLibraryPage() {
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [viewerLoadingResourceId, setViewerLoadingResourceId] = useState<string | null>(null);
   const [activeResource, setActiveResource] = useState<LearningResourceResource | null>(null);
-  const paceStateUpdate = usePacedStateBatch();
 
   useEffect(() => {
     function handleAuthChanged() {
@@ -785,18 +778,6 @@ export function LearningResourceLibraryPage() {
     window.addEventListener(AUTH_ACCOUNT_CHANGED_EVENT, handleAuthChanged);
     return () => window.removeEventListener(AUTH_ACCOUNT_CHANGED_EVENT, handleAuthChanged);
   }, []);
-
-  useEffect(() => {
-    if (!routeGradeId || !LEARNING_RESOURCE_GRADES.some((grade) => grade.id === routeGradeId)) return;
-    const nextSelection = USE_LEARNING_RESOURCE_AUTHORING_MOCK
-      ? getDefaultMockLearningResourceLibrarySelection(routeGradeId)
-      : getDefaultSelectionForGrade(routeGradeId);
-    paceStateUpdate(() => {
-      setActiveGradeId(nextSelection.gradeId);
-      setActiveSubjectId(nextSelection.subjectId);
-      setActiveCategoryId(nextSelection.categoryId);
-    });
-  }, [paceStateUpdate, routeGradeId]);
 
   useEffect(() => {
     if (!account) return undefined;

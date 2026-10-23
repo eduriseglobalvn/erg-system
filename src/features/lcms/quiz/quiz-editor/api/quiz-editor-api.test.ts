@@ -3,7 +3,9 @@ import { beforeEach, expect, test, vi } from "vitest";
 import {
   createQuizEditorQuiz,
   deleteQuizEditorQuiz,
+  exportQuizEditorBundle,
   loadQuizEditorDraft,
+  loadQuizEditorWorkspace,
   normalizeQuizEditorGroups,
   normalizeQuizPlayerTemplate,
   normalizeQuizProjectSettings,
@@ -13,7 +15,8 @@ import {
 import { apiRequest } from "@/lib/api-client";
 import { graphQlRequest } from "@/lib/graphql-client";
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
   apiRequest: vi.fn(),
   hasApiBase: () => true,
 }));
@@ -212,4 +215,48 @@ test("deletes quiz through the BE authoring endpoint", async () => {
     method: "DELETE",
     portal: "lcms",
   });
+});
+
+test("loads the shared quiz catalog with the Teacher auth portal without leaking portal into GraphQL variables", async () => {
+  graphQlRequestMock.mockResolvedValueOnce({
+    lcms: {
+      quizWorkspace: {
+        categories: [],
+        levels: [],
+        quizzes: { hasNext: false, hasPrevious: false, items: [], page: 0, size: 20, totalItems: 0, totalPages: 0 },
+        subjects: [],
+        tenantId: "tenant-a",
+      },
+    },
+  } as never);
+
+  await loadQuizEditorWorkspace({ page: 0, portal: "lms", size: 20, status: "published" });
+
+  expect(graphQlRequestMock).toHaveBeenCalledWith(expect.objectContaining({
+    portal: "lms",
+    variables: {
+      input: expect.not.objectContaining({ portal: expect.anything() }),
+    },
+  }));
+});
+
+test("exports quiz and immutable quiz-version bundles with the caller portal", async () => {
+  apiRequestMock.mockResolvedValue({ packageId: "pkg-1" } as never);
+
+  await exportQuizEditorBundle({ portal: "lms", quizId: "quiz-a" });
+  await exportQuizEditorBundle({ portal: "lcms", quizVersionId: "version-a" });
+
+  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/lcms/quizzes/quiz-a/bundle", {
+    cache: "default",
+    portal: "lms",
+  });
+  expect(apiRequestMock).toHaveBeenNthCalledWith(2, "/api/v1/lcms/quiz-versions/version-a/bundle", {
+    cache: "default",
+    portal: "lcms",
+  });
+});
+
+test("fails before transport when bundle identity is missing", async () => {
+  await expect(exportQuizEditorBundle({ portal: "lms" })).rejects.toThrow(/quizId or quizVersionId/);
+  expect(apiRequestMock).not.toHaveBeenCalled();
 });

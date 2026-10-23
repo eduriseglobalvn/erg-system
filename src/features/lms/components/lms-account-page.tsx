@@ -58,6 +58,7 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
     setAccount(auth.account);
     setPhone(auth.account?.phone ?? "");
   }, [
+    auth.account,
     auth.account?.email,
     auth.account?.fullName,
     auth.account?.id,

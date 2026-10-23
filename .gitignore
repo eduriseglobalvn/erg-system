@@ -10,6 +10,14 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dist-portable
+src-tauri/tauri.portable.generated.json
+src-tauri/tauri.release.generated.json
+src-tauri/target
+deploy/desktop/releases/*.exe
+deploy/desktop/releases/*.msi
+deploy/desktop/releases/*.dmg
+deploy/desktop/releases/*.sig
 *.local
 certs/
 .codex-*.png
@@ -17,6 +25,11 @@ certs/
 .codex-qa/**/chrome-profile*/
 .omc/
 docs/**
+!docs/architecture/
+!docs/architecture/cross-repo-contract-release-protocol.md
+!docs/architecture/frontend-repository-ownership.md
+!docs/architecture/crm-api-query-cache-audit.md
+!docs/architecture/elearning-api-query-offline-audit.md
 
 # Env (bổ sung tường minh ngoài *.local)
 .env

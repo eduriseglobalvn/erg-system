@@ -4,7 +4,8 @@ const apiRequestMock = vi.hoisted(() => vi.fn());
 const hasApiBaseMock = vi.hoisted(() => vi.fn());
 const loadLmsLearningResourceLibraryMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
   apiRequest: apiRequestMock,
   hasApiBase: hasApiBaseMock,
 }));
@@ -102,4 +103,20 @@ test("returns empty progress when GraphQL is unavailable with API enabled", asyn
     lessons: [],
   });
   expect(apiRequestMock).not.toHaveBeenCalled();
+});
+
+test("preserves cancellation instead of converting it to an empty library", async () => {
+  const controller = new AbortController();
+  const abortReason = new DOMException("cancelled", "AbortError");
+  controller.abort(abortReason);
+  loadLmsLearningResourceLibraryMock.mockRejectedValueOnce(abortReason);
+
+  await expect(loadLearningResourceLibraryBootstrap(
+    { schoolId: "school-1", academicYear: "2026" },
+    controller.signal,
+  )).rejects.toBe(abortReason);
+  expect(loadLmsLearningResourceLibraryMock).toHaveBeenCalledWith(
+    expect.objectContaining({ academicYear: "2026", educationUnitId: "school-1" }),
+    controller.signal,
+  );
 });

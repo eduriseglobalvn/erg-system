@@ -8,9 +8,10 @@ import {
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-api";
 import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 
-export const QUIZ_RUNTIME_PACKAGE_STALE_TIME_MS = 5 * 60_000;
-export const QUIZ_RUNTIME_PACKAGE_GC_TIME_MS = 30 * 60_000;
+export const QUIZ_RUNTIME_PACKAGE_STALE_TIME_MS = QUERY_POLICIES.offlineCore.staleTime;
+export const QUIZ_RUNTIME_PACKAGE_GC_TIME_MS = QUERY_POLICIES.offlineCore.gcTime;
 
 export const quizRuntimeQueryKeys = {
   root: ["quiz-runtime"] as const,
@@ -31,8 +32,9 @@ export function quizPackageQueryOptions(
   tenantId: string = getDefaultTenantId(),
 ) {
   return {
+    enabled: Boolean(quizId),
     gcTime: QUIZ_RUNTIME_PACKAGE_GC_TIME_MS,
-    queryFn: () => getQuizPackage(quizId, portal, tenantId),
+    queryFn: ({ signal }: { signal: AbortSignal }) => getQuizPackage(quizId, portal, tenantId, signal),
     queryKey: quizRuntimeQueryKeys.package(portal, quizId, tenantId),
     staleTime: QUIZ_RUNTIME_PACKAGE_STALE_TIME_MS,
   };

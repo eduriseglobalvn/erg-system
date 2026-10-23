@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import {
   questionBankQuestions,
   questionBankSubjects,
@@ -12,8 +13,10 @@ import type {
   QuizBankStatus,
 } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { apiRequest } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import { isObject, validateResponse } from "@/lib/validate-response";
 
 export type QuestionBankWorkspaceInput = {
   tenantId?: string;
@@ -242,24 +245,28 @@ query LcmsQuestionBankWorkspace($input: QuestionBankWorkspaceInput) {
 export async function loadQuestionBankData(
   tenantId: string = getDefaultTenantId(),
   filters: Omit<QuestionBankWorkspaceInput, "tenantId"> = {},
+  signal?: AbortSignal,
 ): Promise<QuestionBankApiData> {
-  if (!hasApiBase()) return mockQuestionBankData();
-  return mapWorkspace(await loadQuestionBankWorkspace({ ...filters, tenantId, page: filters.page ?? 0, size: filters.size ?? 50 }));
+  if (runtimeFixturesEnabled()) return mockQuestionBankData();
+  return mapWorkspace(await loadQuestionBankWorkspace(
+    { ...filters, tenantId, page: filters.page ?? 0, size: filters.size ?? 50 },
+    signal,
+  ));
 }
 
 export async function createQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {
-  return saveQuestionBankQuestion(input, "POST", "/api/v1/lcms/questions");
+  return saveQuestionBankQuestion(input, "POST", API_ENDPOINTS.legacy.v1LcmsQuestions);
 }
 
 export async function updateQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {
   if (!input.questionId) {
     throw new Error("questionId is required to update a question.");
   }
-  return saveQuestionBankQuestion(input, "PUT", `/api/v1/lcms/questions/${input.questionId}`);
+  return saveQuestionBankQuestion(input, "PUT", API_ENDPOINTS.lcms.question(input.questionId));
 }
 
 export async function deleteQuestionBankQuestion(questionId: string): Promise<QuestionBankDeleteQuestionResult> {
-  return apiRequest<QuestionBankDeleteQuestionResult>(`/api/v1/lcms/questions/${questionId}`, {
+  return apiRequest<QuestionBankDeleteQuestionResult>(API_ENDPOINTS.lcms.question(questionId), {
     method: "DELETE",
     portal: "lcms",
   });
@@ -295,22 +302,36 @@ async function saveQuestionBankQuestion(
   });
 }
 
-async function loadQuestionBankWorkspace(input: QuestionBankWorkspaceInput): Promise<QuestionBankWorkspaceDTO> {
-  return requestQuestionBankWorkspacePage(normalizeQuestionBankInput(input));
+async function loadQuestionBankWorkspace(input: QuestionBankWorkspaceInput, signal?: AbortSignal): Promise<QuestionBankWorkspaceDTO> {
+  return requestQuestionBankWorkspacePage(normalizeQuestionBankInput(input), signal);
 }
 
-async function requestQuestionBankWorkspacePage(input: QuestionBankWorkspaceInput) {
+async function requestQuestionBankWorkspacePage(input: QuestionBankWorkspaceInput, signal?: AbortSignal) {
   const response = await graphQlRequest<QuestionBankWorkspaceResponse, { input: QuestionBankWorkspaceInput }>({
     operationName: "LcmsQuestionBankWorkspace",
     portal: "lcms",
     query: QuestionBankWorkspaceDocument,
+    signal,
     tenantId: input.tenantId ?? getDefaultTenantId(),
     variables: {
       input,
     },
   });
 
-  return response.lcms.questionBankWorkspace;
+  return validateResponse(
+    response,
+    isQuestionBankWorkspaceResponse,
+    "lcms.question-bank-workspace",
+  ).lcms.questionBankWorkspace;
+}
+
+function isQuestionBankWorkspaceResponse(value: unknown): value is QuestionBankWorkspaceResponse {
+  if (!isObject(value) || !isObject(value.lcms) || !isObject(value.lcms.questionBankWorkspace)) return false;
+  const workspace = value.lcms.questionBankWorkspace;
+  return Array.isArray(workspace.subjects) && Array.isArray(workspace.levels) &&
+    Array.isArray(workspace.topics) && Array.isArray(workspace.quizzes) &&
+    (workspace.questions === null || workspace.questions === undefined ||
+      (isObject(workspace.questions) && Array.isArray(workspace.questions.items)));
 }
 
 function normalizeQuestionBankInput(input: QuestionBankWorkspaceInput): QuestionBankWorkspaceInput {

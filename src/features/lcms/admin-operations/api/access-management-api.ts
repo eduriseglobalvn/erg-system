@@ -1,6 +1,8 @@
-import { apiRequest, getBackOfficePortal } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import { ApiClientError, apiRequest, getBackOfficePortal } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 import { LMS_ROLE_GROUP_TEMPLATES } from "@/platform/auth/permissions/lms-permission-catalog";
+import { isObject, validateResponse } from "@/lib/validate-response";
 
 export type AccessScopeType = "system" | "center" | "school";
 
@@ -184,12 +186,13 @@ query LcmsAccessManagementWorkspace($input: AccessManagementWorkspaceInput) {
 }
 `;
 
-export async function loadAccessManagementWorkspace(input: AccessManagementWorkspaceInput = {}) {
+export async function loadAccessManagementWorkspace(input: AccessManagementWorkspaceInput = {}, signal?: AbortSignal) {
   const tenantId = input.tenantId ?? getDefaultTenantId();
   const response = await graphQlRequest<AccessManagementWorkspaceResponse, { input: AccessManagementWorkspaceInput }>({
     operationName: "LcmsAccessManagementWorkspace",
     portal: "lcms",
     query: AccessManagementWorkspaceDocument,
+    signal,
     tenantId,
     variables: {
       input: {
@@ -199,7 +202,14 @@ export async function loadAccessManagementWorkspace(input: AccessManagementWorks
     },
   });
 
-  return response.lcms.accessManagementWorkspace;
+  return validateResponse(response, isAccessManagementWorkspaceResponse, "lcms.access-management-workspace")
+    .lcms.accessManagementWorkspace;
+}
+
+function isAccessManagementWorkspaceResponse(value: unknown): value is AccessManagementWorkspaceResponse {
+  if (!isObject(value) || !isObject(value.lcms) || !isObject(value.lcms.accessManagementWorkspace)) return false;
+  const workspace = value.lcms.accessManagementWorkspace;
+  return isObject(workspace.users) && Array.isArray(workspace.users.items);
 }
 
 export async function listAccessManagedUsers(params: {
@@ -208,7 +218,7 @@ export async function listAccessManagedUsers(params: {
   role?: string;
   page?: number;
   limit?: number;
-}) {
+}, signal?: AbortSignal) {
   try {
     const page = Math.max((params.page ?? 1) - 1, 0);
     const size = params.limit ?? 20;
@@ -218,7 +228,7 @@ export async function listAccessManagedUsers(params: {
       search: params.search || undefined,
       roleId: params.role && params.role !== "all" ? params.role : undefined,
       status: params.status && params.status !== "all" ? params.status : undefined,
-    });
+    }, signal);
     const userPage = workspace.users;
 
     return {
@@ -227,8 +237,9 @@ export async function listAccessManagedUsers(params: {
       page: (userPage?.page ?? page) + 1,
       total: userPage?.totalItems ?? 0,
     } satisfies AccessManagementUserList;
-  } catch {
-    return listAccessManagedUsersRest(params);
+  } catch (error) {
+    if (!isUnavailableAccessWorkspaceCapability(error)) throw error;
+    return listAccessManagedUsersRest(params, signal);
   }
 }
 
@@ -238,7 +249,7 @@ function listAccessManagedUsersRest(params: {
   role?: string;
   page?: number;
   limit?: number;
-}) {
+}, signal?: AbortSignal) {
   const search = new URLSearchParams();
   if (params.search) search.set("search", params.search);
   if (params.status && params.status !== "all") search.set("status", params.status);
@@ -246,12 +257,22 @@ function listAccessManagedUsersRest(params: {
   search.set("page", String(params.page ?? 1));
   search.set("limit", String(params.limit ?? 20));
 
-  return apiRequest<AccessManagementUserList>(`/api/lms/access-management/users?${search.toString()}`, { portal: getBackOfficePortal() });
+  return apiRequest<AccessManagementUserList>(`${API_ENDPOINTS.access.legacyUsers}?${search.toString()}`, {
+    portal: getBackOfficePortal(),
+    signal,
+  });
 }
 
-export async function getAccessManagementOptions() {
-  const options = await apiRequest<AccessManagementOptions>("/api/lms/access-management/options", {
+function isUnavailableAccessWorkspaceCapability(error: unknown) {
+  return error instanceof ApiClientError &&
+    error.code === "GRAPHQL_ERROR" &&
+    (error.status === 404 || error.status === 501);
+}
+
+export async function getAccessManagementOptions(signal?: AbortSignal) {
+  const options = await apiRequest<AccessManagementOptions>(API_ENDPOINTS.legacy.lmsAccessOptions, {
     portal: getBackOfficePortal(),
+    signal,
   });
   return validateAccessManagementOptions(options);
 }
@@ -284,14 +305,17 @@ export function listAccessScopes(params: {
   search?: string;
   page?: number;
   limit?: number;
-}) {
+}, signal?: AbortSignal) {
   const search = new URLSearchParams();
   if (params.scopeType) search.set("scopeType", params.scopeType);
   if (params.search) search.set("search", params.search);
   search.set("page", String(params.page ?? 1));
   search.set("limit", String(params.limit ?? 20));
 
-  return apiRequest<AccessScopeList>(`/api/lms/access-management/scopes?${search.toString()}`, { portal: getBackOfficePortal() });
+  return apiRequest<AccessScopeList>(`${API_ENDPOINTS.access.legacyScopes}?${search.toString()}`, {
+    portal: getBackOfficePortal(),
+    signal,
+  });
 }
 
 function mapAccessWorkspaceUser(user: AccessWorkspaceUserDTO, effectivePermissionsIncluded: boolean): AccessManagedUser {
@@ -326,21 +350,25 @@ function deriveModules(permissions: AccessWorkspacePermissionDTO[]) {
   return Array.from(modules);
 }
 
-export function getUserAccess(userId: string) {
-  return apiRequest<UserAccessDetail>(`/api/lms/access-management/users/${encodeURIComponent(userId)}/access`, { portal: getBackOfficePortal() });
+export function getUserAccess(userId: string, signal?: AbortSignal) {
+  return apiRequest<UserAccessDetail>(API_ENDPOINTS.access.legacyUserAccess(userId), {
+    portal: getBackOfficePortal(),
+    signal,
+  });
 }
 
 export function saveUserAccess(userId: string, payload: SaveUserAccessRequest) {
-  return apiRequest<UserAccessDetail>(`/api/lms/access-management/users/${encodeURIComponent(userId)}/access`, {
+  return apiRequest<UserAccessDetail>(API_ENDPOINTS.access.legacyUserAccess(userId), {
     portal: getBackOfficePortal(),
     method: "PUT",
     body: JSON.stringify(payload),
   });
 }
 
-export function previewUserAccess(payload: SaveUserAccessRequest) {
-  return apiRequest<EffectiveAccess>("/api/lms/access-management/preview", {
+export function previewUserAccess(payload: SaveUserAccessRequest, signal?: AbortSignal) {
+  return apiRequest<EffectiveAccess>(API_ENDPOINTS.legacy.lmsAccessPreview, {
     portal: getBackOfficePortal(),
+    signal,
     method: "POST",
     body: JSON.stringify(payload),
   });

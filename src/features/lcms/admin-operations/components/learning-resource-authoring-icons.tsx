@@ -1,5 +1,104 @@
 import { createElement, type ElementType, type ReactNode } from "react";
-import * as MuiIcons from "@mui/icons-material";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
+import SchoolIcon from "@mui/icons-material/School";
+import LocalLibraryIcon from "@mui/icons-material/LocalLibrary";
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import BookIcon from "@mui/icons-material/Book";
+import BookOnlineIcon from "@mui/icons-material/BookOnline";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkAddedIcon from "@mui/icons-material/BookmarkAdded";
+import ClassIcon from "@mui/icons-material/Class";
+import CastForEducationIcon from "@mui/icons-material/CastForEducation";
+import CoPresentIcon from "@mui/icons-material/CoPresent";
+import PsychologyIcon from "@mui/icons-material/Psychology";
+import PsychologyAltIcon from "@mui/icons-material/PsychologyAlt";
+import ScienceIcon from "@mui/icons-material/Science";
+import BiotechIcon from "@mui/icons-material/Biotech";
+import FunctionsIcon from "@mui/icons-material/Functions";
+import CalculateIcon from "@mui/icons-material/Calculate";
+import PercentIcon from "@mui/icons-material/Percent";
+import DataObjectIcon from "@mui/icons-material/DataObject";
+import CodeIcon from "@mui/icons-material/Code";
+import TerminalIcon from "@mui/icons-material/Terminal";
+import MemoryIcon from "@mui/icons-material/Memory";
+import DeveloperBoardIcon from "@mui/icons-material/DeveloperBoard";
+import LaptopMacIcon from "@mui/icons-material/LaptopMac";
+import ComputerIcon from "@mui/icons-material/Computer";
+import DesktopWindowsIcon from "@mui/icons-material/DesktopWindows";
+import TabletMacIcon from "@mui/icons-material/TabletMac";
+import DevicesIcon from "@mui/icons-material/Devices";
+import LanguageIcon from "@mui/icons-material/Language";
+import TranslateIcon from "@mui/icons-material/Translate";
+import PublicIcon from "@mui/icons-material/Public";
+import TravelExploreIcon from "@mui/icons-material/TravelExplore";
+import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
+import DrawIcon from "@mui/icons-material/Draw";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import BorderColorIcon from "@mui/icons-material/BorderColor";
+import DriveFileRenameOutlineIcon from "@mui/icons-material/DriveFileRenameOutline";
+import CreateIcon from "@mui/icons-material/Create";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import FactCheckIcon from "@mui/icons-material/FactCheck";
+import ChecklistIcon from "@mui/icons-material/Checklist";
+import ChecklistRtlIcon from "@mui/icons-material/ChecklistRtl";
+import QuizIcon from "@mui/icons-material/Quiz";
+import HelpOutlineOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import QuestionAnswerIcon from "@mui/icons-material/QuestionAnswer";
+import ForumIcon from "@mui/icons-material/Forum";
+import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
+import CampaignIcon from "@mui/icons-material/Campaign";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import HeadphonesIcon from "@mui/icons-material/Headphones";
+import MicIcon from "@mui/icons-material/Mic";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
+import SlideshowIcon from "@mui/icons-material/Slideshow";
+import PlayCircleIcon from "@mui/icons-material/PlayCircle";
+import SmartDisplayIcon from "@mui/icons-material/SmartDisplay";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+import ArticleIcon from "@mui/icons-material/Article";
+import DescriptionIcon from "@mui/icons-material/Description";
+import TextSnippetIcon from "@mui/icons-material/TextSnippet";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
+import FolderIcon from "@mui/icons-material/Folder";
+import TopicIcon from "@mui/icons-material/Topic";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import CategoryIcon from "@mui/icons-material/Category";
+import LayersIcon from "@mui/icons-material/Layers";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import HubIcon from "@mui/icons-material/Hub";
+import SchemaIcon from "@mui/icons-material/Schema";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import EventNoteIcon from "@mui/icons-material/EventNote";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import AlarmIcon from "@mui/icons-material/Alarm";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import GradeIcon from "@mui/icons-material/Grade";
+import StarsIcon from "@mui/icons-material/Stars";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import MilitaryTechIcon from "@mui/icons-material/MilitaryTech";
+import VerifiedIcon from "@mui/icons-material/Verified";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
+import TipsAndUpdatesIcon from "@mui/icons-material/TipsAndUpdates";
+import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
+import ExploreIcon from "@mui/icons-material/Explore";
+import ExtensionIcon from "@mui/icons-material/Extension";
+import PaletteIcon from "@mui/icons-material/Palette";
+import ColorLensIcon from "@mui/icons-material/ColorLens";
+import BrushIcon from "@mui/icons-material/Brush";
+import ImageIcon from "@mui/icons-material/Image";
+import PhotoLibraryIcon from "@mui/icons-material/PhotoLibrary";
+import MusicNoteIcon from "@mui/icons-material/MusicNote";
+import GraphicEqIcon from "@mui/icons-material/GraphicEq";
+import GroupsIcon from "@mui/icons-material/Groups";
+import PersonIcon from "@mui/icons-material/Person";
+import Diversity3Icon from "@mui/icons-material/Diversity3";
 import type { SvgIconProps } from "@mui/material/SvgIcon";
 
 import { cn } from "@/lib/utils";
@@ -57,23 +156,108 @@ const legacyIconMap: Record<string, string> = {
   "topic-book": "AutoStories",
 };
 
-const educationIconIds = [
-  "AutoStories", "MenuBook", "School", "LocalLibrary", "LibraryBooks", "Book", "BookOnline", "Bookmark", "BookmarkAdded", "Class",
-  "CastForEducation", "CoPresent", "Psychology", "PsychologyAlt", "Science", "Biotech", "Functions", "Calculate", "Percent", "DataObject",
-  "Code", "Terminal", "Memory", "DeveloperBoard", "LaptopMac", "Computer", "DesktopWindows", "TabletMac", "Devices", "Language",
-  "Translate", "Public", "TravelExplore", "HistoryEdu", "Draw", "EditNote", "BorderColor", "DriveFileRenameOutline", "Create", "Assignment",
-  "AssignmentTurnedIn", "FactCheck", "Checklist", "ChecklistRtl", "Quiz", "HelpOutlineOutlined", "QuestionAnswer", "Forum", "RecordVoiceOver", "Campaign",
-  "VolumeUp", "Headphones", "Mic", "Videocam", "OndemandVideo", "Slideshow", "PlayCircle", "SmartDisplay", "PictureAsPdf", "Article",
-  "Description", "TextSnippet", "NoteAlt", "Folder", "Topic", "Inventory2", "Category", "Layers", "AccountTree", "Hub",
-  "Schema", "Timeline", "EventNote", "CalendarMonth", "AccessTime", "Alarm", "Schedule", "Grade", "Stars", "EmojiEvents",
-  "WorkspacePremium", "MilitaryTech", "Verified", "CheckCircle", "TaskAlt", "Lightbulb", "TipsAndUpdates", "RocketLaunch", "Explore", "Extension",
-  "Palette", "ColorLens", "Brush", "Image", "PhotoLibrary", "MusicNote", "GraphicEq", "Groups", "Person", "Diversity3",
-] as const;
-
-const muiIconEntries: Array<[string, MuiIconComponent]> = educationIconIds.flatMap((name) => {
-  const icon = (MuiIcons as Record<string, unknown>)[name];
-  return isMuiIconComponent(icon) ? [[name, icon]] : [];
-});
+const muiIconEntries: Array<[string, MuiIconComponent]> = [
+  ["AutoStories", AutoStoriesIcon],
+  ["MenuBook", MenuBookIcon],
+  ["School", SchoolIcon],
+  ["LocalLibrary", LocalLibraryIcon],
+  ["LibraryBooks", LibraryBooksIcon],
+  ["Book", BookIcon],
+  ["BookOnline", BookOnlineIcon],
+  ["Bookmark", BookmarkIcon],
+  ["BookmarkAdded", BookmarkAddedIcon],
+  ["Class", ClassIcon],
+  ["CastForEducation", CastForEducationIcon],
+  ["CoPresent", CoPresentIcon],
+  ["Psychology", PsychologyIcon],
+  ["PsychologyAlt", PsychologyAltIcon],
+  ["Science", ScienceIcon],
+  ["Biotech", BiotechIcon],
+  ["Functions", FunctionsIcon],
+  ["Calculate", CalculateIcon],
+  ["Percent", PercentIcon],
+  ["DataObject", DataObjectIcon],
+  ["Code", CodeIcon],
+  ["Terminal", TerminalIcon],
+  ["Memory", MemoryIcon],
+  ["DeveloperBoard", DeveloperBoardIcon],
+  ["LaptopMac", LaptopMacIcon],
+  ["Computer", ComputerIcon],
+  ["DesktopWindows", DesktopWindowsIcon],
+  ["TabletMac", TabletMacIcon],
+  ["Devices", DevicesIcon],
+  ["Language", LanguageIcon],
+  ["Translate", TranslateIcon],
+  ["Public", PublicIcon],
+  ["TravelExplore", TravelExploreIcon],
+  ["HistoryEdu", HistoryEduIcon],
+  ["Draw", DrawIcon],
+  ["EditNote", EditNoteIcon],
+  ["BorderColor", BorderColorIcon],
+  ["DriveFileRenameOutline", DriveFileRenameOutlineIcon],
+  ["Create", CreateIcon],
+  ["Assignment", AssignmentIcon],
+  ["AssignmentTurnedIn", AssignmentTurnedInIcon],
+  ["FactCheck", FactCheckIcon],
+  ["Checklist", ChecklistIcon],
+  ["ChecklistRtl", ChecklistRtlIcon],
+  ["Quiz", QuizIcon],
+  ["HelpOutlineOutlined", HelpOutlineOutlinedIcon],
+  ["QuestionAnswer", QuestionAnswerIcon],
+  ["Forum", ForumIcon],
+  ["RecordVoiceOver", RecordVoiceOverIcon],
+  ["Campaign", CampaignIcon],
+  ["VolumeUp", VolumeUpIcon],
+  ["Headphones", HeadphonesIcon],
+  ["Mic", MicIcon],
+  ["Videocam", VideocamIcon],
+  ["OndemandVideo", OndemandVideoIcon],
+  ["Slideshow", SlideshowIcon],
+  ["PlayCircle", PlayCircleIcon],
+  ["SmartDisplay", SmartDisplayIcon],
+  ["PictureAsPdf", PictureAsPdfIcon],
+  ["Article", ArticleIcon],
+  ["Description", DescriptionIcon],
+  ["TextSnippet", TextSnippetIcon],
+  ["NoteAlt", NoteAltIcon],
+  ["Folder", FolderIcon],
+  ["Topic", TopicIcon],
+  ["Inventory2", Inventory2Icon],
+  ["Category", CategoryIcon],
+  ["Layers", LayersIcon],
+  ["AccountTree", AccountTreeIcon],
+  ["Hub", HubIcon],
+  ["Schema", SchemaIcon],
+  ["Timeline", TimelineIcon],
+  ["EventNote", EventNoteIcon],
+  ["CalendarMonth", CalendarMonthIcon],
+  ["AccessTime", AccessTimeIcon],
+  ["Alarm", AlarmIcon],
+  ["Schedule", ScheduleIcon],
+  ["Grade", GradeIcon],
+  ["Stars", StarsIcon],
+  ["EmojiEvents", EmojiEventsIcon],
+  ["WorkspacePremium", WorkspacePremiumIcon],
+  ["MilitaryTech", MilitaryTechIcon],
+  ["Verified", VerifiedIcon],
+  ["CheckCircle", CheckCircleIcon],
+  ["TaskAlt", TaskAltIcon],
+  ["Lightbulb", LightbulbIcon],
+  ["TipsAndUpdates", TipsAndUpdatesIcon],
+  ["RocketLaunch", RocketLaunchIcon],
+  ["Explore", ExploreIcon],
+  ["Extension", ExtensionIcon],
+  ["Palette", PaletteIcon],
+  ["ColorLens", ColorLensIcon],
+  ["Brush", BrushIcon],
+  ["Image", ImageIcon],
+  ["PhotoLibrary", PhotoLibraryIcon],
+  ["MusicNote", MusicNoteIcon],
+  ["GraphicEq", GraphicEqIcon],
+  ["Groups", GroupsIcon],
+  ["Person", PersonIcon],
+  ["Diversity3", Diversity3Icon],
+];
 
 export const muiTaxonomyIconOptions: TaxonomyIconOption[] = muiIconEntries.map(([id]) => ({
   id,
@@ -143,11 +327,6 @@ export function TaxonomyIcon({
 
 function withAlpha(color: string, alpha: string, fallback: string) {
   return /^#[0-9A-F]{6}$/i.test(color) ? `${color}${alpha}` : fallback;
-}
-
-function isMuiIconComponent(value: unknown): value is MuiIconComponent {
-  if (typeof value === "function") return true;
-  return Boolean(value && typeof value === "object" && "$$typeof" in value);
 }
 
 function humanizeIconName(value: string) {

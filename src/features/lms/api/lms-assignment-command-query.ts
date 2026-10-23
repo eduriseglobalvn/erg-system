@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 
 import {
@@ -10,6 +11,7 @@ import {
   updateLmsAssignmentRecipients,
   updateLmsStudentGroup,
   type CreateLmsAssignmentInput,
+  type CreateLmsAssignmentResult,
   type LmsStudentGroupInput,
   type UpdateLmsAssignmentInput,
   type UpdateLmsAssignmentRecipientsInput,
@@ -17,6 +19,13 @@ import {
 import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { QUERY_POLICIES } from "@/lib/query-policy";
+import {
+  createOfflineTeachingCommandAdapter,
+  type OfflineTeachingCommandResult,
+} from "@/features/lms/offline-teaching/offline-teaching-command-adapter";
+import type { BackendOfflineTeachingPolicySnapshot } from "@/features/lms/offline-teaching/offline-teaching-policy";
+import type { OfflineOutboxStore } from "@/platform/offline";
 
 export const lmsAssignmentCommandMutationKeys = {
   createAssignment: ["lms", "mutation", "assignment-create"] as const,
@@ -32,9 +41,14 @@ export const lmsAssignmentReadQueryKeys = {
   root: ["lms-teacher-shell"] as const,
   homeworkRoot: ["lms-teacher-shell", "teacher-homework-workspace"] as const,
   homeworkTenantRoot: (tenantId: string = getDefaultTenantId()) => [...lmsAssignmentReadQueryKeys.homeworkRoot, tenantId] as const,
-  homeworkWorkspace: (tenantId: string = getDefaultTenantId()) => lmsAssignmentReadQueryKeys.homeworkTenantRoot(tenantId),
+  homeworkAccountRoot: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    [...lmsAssignmentReadQueryKeys.homeworkTenantRoot(tenantId), normalizeLmsAssignmentReadAccountId(accountId)] as const,
+  homeworkWorkspace: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    lmsAssignmentReadQueryKeys.homeworkAccountRoot(tenantId, accountId),
   classWorkspaceRoot: ["lms", "class-workspace"] as const,
   classWorkspaceTenantRoot: (tenantId: string = getDefaultTenantId()) => [...lmsAssignmentReadQueryKeys.classWorkspaceRoot, tenantId] as const,
+  classWorkspaceAccountRoot: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    [...lmsAssignmentReadQueryKeys.classWorkspaceTenantRoot(tenantId), normalizeLmsAssignmentReadAccountId(accountId)] as const,
   classWorkspace: ({
     accountId = resolveLmsAssignmentReadAccountId(),
     classId,
@@ -47,15 +61,19 @@ export const lmsAssignmentReadQueryKeys = {
     schoolId?: string | null;
     tenantId?: string;
     usage: string;
-  }) => [...lmsAssignmentReadQueryKeys.classWorkspaceTenantRoot(tenantId), accountId ?? "anonymous", usage, schoolId ?? "", classId ?? ""] as const,
+  }) => [...lmsAssignmentReadQueryKeys.classWorkspaceAccountRoot(tenantId, accountId ?? "anonymous"), usage, schoolId ?? "", classId ?? ""] as const,
   studentGroupsRoot: ["lms", "student-groups"] as const,
   studentGroupsTenantRoot: (tenantId: string = getDefaultTenantId()) => [...lmsAssignmentReadQueryKeys.studentGroupsRoot, tenantId] as const,
-  studentGroups: (tenantId: string = getDefaultTenantId(), classId?: string | null) =>
-    [...lmsAssignmentReadQueryKeys.studentGroupsTenantRoot(tenantId), classId ?? "all"] as const,
+  studentGroupsAccountRoot: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    [...lmsAssignmentReadQueryKeys.studentGroupsTenantRoot(tenantId), normalizeLmsAssignmentReadAccountId(accountId)] as const,
+  studentGroups: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId(), classId?: string | null) =>
+    [...lmsAssignmentReadQueryKeys.studentGroupsAccountRoot(tenantId, accountId), classId ?? "all"] as const,
   assignmentProgressRoot: ["lms", "assignment-progress-workspace"] as const,
   assignmentProgressTenantRoot: (tenantId: string = getDefaultTenantId()) => [...lmsAssignmentReadQueryKeys.assignmentProgressRoot, tenantId] as const,
-  assignmentProgress: (assignmentId: string, tenantId: string = getDefaultTenantId()) =>
-    [...lmsAssignmentReadQueryKeys.assignmentProgressTenantRoot(tenantId), assignmentId] as const,
+  assignmentProgressAccountRoot: (tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    [...lmsAssignmentReadQueryKeys.assignmentProgressTenantRoot(tenantId), normalizeLmsAssignmentReadAccountId(accountId)] as const,
+  assignmentProgress: (assignmentId: string, tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) =>
+    [...lmsAssignmentReadQueryKeys.assignmentProgressAccountRoot(tenantId, accountId), assignmentId] as const,
 };
 
 
@@ -64,43 +82,86 @@ function resolveLmsAssignmentReadAccountId() {
   return session?.accountId?.trim() || "anonymous";
 }
 
-export const LMS_STUDENT_GROUPS_STALE_TIME_MS = 30_000;
-export const LMS_STUDENT_GROUPS_GC_TIME_MS = 30 * 60_000;
+export const LMS_STUDENT_GROUPS_STALE_TIME_MS = QUERY_POLICIES.transactional.staleTime;
+export const LMS_STUDENT_GROUPS_GC_TIME_MS = QUERY_POLICIES.transactional.gcTime;
+
+export type LmsAssignmentOfflineOptions = {
+  capability?: BackendOfflineTeachingPolicySnapshot | null;
+  isOnline?: () => boolean;
+  store?: OfflineOutboxStore;
+};
 
 export function lmsStudentGroupsQueryOptions(
   tenantId: string = getDefaultTenantId(),
   classId?: string | null,
-  options: { enabled?: boolean } = {},
+  options: { accountId?: string | null; enabled?: boolean } = {},
 ) {
+  const accountId = options.accountId?.trim() || resolveLmsAssignmentReadAccountId();
   return {
     enabled: options.enabled ?? true,
     gcTime: LMS_STUDENT_GROUPS_GC_TIME_MS,
-    queryFn: () => loadLmsStudentGroups({ classId, tenantId }),
-    queryKey: lmsAssignmentReadQueryKeys.studentGroups(tenantId, classId),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadLmsStudentGroups({ classId, tenantId }, signal),
+    queryKey: lmsAssignmentReadQueryKeys.studentGroups(tenantId, accountId, classId),
     staleTime: LMS_STUDENT_GROUPS_STALE_TIME_MS,
   };
+}
+
+function normalizeLmsAssignmentReadAccountId(accountId?: string | null) {
+  return accountId?.trim() || "anonymous";
 }
 
 export function useLmsStudentGroupsQuery(
   tenantId: string = getDefaultTenantId(),
   classId?: string | null,
-  options: { enabled?: boolean } = {},
+  options: { accountId?: string | null; enabled?: boolean } = {},
 ) {
   return useQuery(lmsStudentGroupsQueryOptions(tenantId, classId, options));
 }
 
-export function useCreateLmsAssignmentMutation() {
+export function useCreateLmsAssignmentMutation(options: { offline?: LmsAssignmentOfflineOptions } = {}) {
   const queryClient = useQueryClient();
+  const hasOfflineOptions = Boolean(options.offline);
+  const capability = options.offline?.capability;
+  const isOnline = options.offline?.isOnline;
+  const store = options.offline?.store;
+  const offlineAdapter = useMemo(() => hasOfflineOptions ? createOfflineTeachingCommandAdapter({
+    capability,
+    isOnline,
+    scope: {
+      accountId: resolveLmsAssignmentReadAccountId(),
+      tenantId: getDefaultTenantId(),
+      workspace: "TEACHER",
+    },
+    store,
+  }) : null, [capability, hasOfflineOptions, isOnline, store]);
 
   return useMutation({
     meta: {
       feature: "lms-assignment",
       persistence: "assignment-create",
     },
-    mutationFn: (input: CreateLmsAssignmentInput) => createLmsAssignment(input),
+    mutationFn: async (input: CreateLmsAssignmentInput) => {
+      if (!offlineAdapter) return createLmsAssignment(input);
+      return offlineAdapter.execute<ReturnType<typeof toOfflineJsonInput>, CreateLmsAssignmentResult>({
+        entityId: input.idempotencyKey,
+        entityType: "assignment",
+        expectedVersion: 0,
+        idempotencyKey: input.idempotencyKey,
+        operation: "assignment.create",
+        payload: toOfflineJsonInput(input),
+        send: ({ idempotencyKey, payload }) => createLmsAssignment({
+          ...(payload as CreateLmsAssignmentInput),
+          idempotencyKey,
+        }),
+      });
+    },
     mutationKey: lmsAssignmentCommandMutationKeys.createAssignment,
     onSuccess: (result) => {
-      invalidateAssignmentReads(queryClient, result.assignmentId);
+      const confirmed = unwrapConfirmedResult(result);
+      if (confirmed) invalidateAssignmentReads(queryClient, confirmed.assignmentId);
+    },
+    onSettled: (result) => {
+      if (!isPendingResult(result)) invalidateAssignmentReads(queryClient);
     },
   });
 }
@@ -195,19 +256,57 @@ function invalidateAssignmentReads(
   assignmentId?: string,
 ) {
   const tenantId = getDefaultTenantId();
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.homeworkTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.classWorkspaceTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.assignmentProgressTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.reportTenantRoot(tenantId) });
-  if (assignmentId) {
-    void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.assignmentReport(assignmentId, tenantId) });
-  }
+  const accountId = resolveLmsAssignmentReadAccountId();
+  const keys = assignmentId
+    ? assignmentMutationInvalidationKeys(tenantId, assignmentId, accountId)
+    : [
+        lmsAssignmentReadQueryKeys.homeworkAccountRoot(tenantId, accountId),
+        lmsAssignmentReadQueryKeys.classWorkspaceAccountRoot(tenantId, accountId),
+      ];
+  keys.forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }));
 }
 
 function invalidateStudentGroupReads(queryClient: QueryClient) {
   const tenantId = getDefaultTenantId();
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.studentGroupsTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.homeworkTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: lmsAssignmentReadQueryKeys.classWorkspaceTenantRoot(tenantId) });
-  void queryClient.invalidateQueries({ queryKey: quizReportQueryKeys.reportTenantRoot(tenantId) });
+  studentGroupMutationInvalidationKeys(tenantId, resolveLmsAssignmentReadAccountId())
+    .forEach((queryKey) => void queryClient.invalidateQueries({ queryKey }));
+}
+
+export function assignmentMutationInvalidationKeys(
+  tenantId: string,
+  assignmentId: string,
+  accountId: string = resolveLmsAssignmentReadAccountId(),
+) {
+  return [
+    lmsAssignmentReadQueryKeys.homeworkAccountRoot(tenantId, accountId),
+    lmsAssignmentReadQueryKeys.classWorkspaceAccountRoot(tenantId, accountId),
+    lmsAssignmentReadQueryKeys.assignmentProgress(assignmentId, tenantId, accountId),
+    quizReportQueryKeys.assignmentReport(assignmentId, tenantId),
+  ] as const;
+}
+
+export function studentGroupMutationInvalidationKeys(
+  tenantId: string,
+  accountId: string = resolveLmsAssignmentReadAccountId(),
+) {
+  return [
+    lmsAssignmentReadQueryKeys.studentGroupsAccountRoot(tenantId, accountId),
+    lmsAssignmentReadQueryKeys.homeworkAccountRoot(tenantId, accountId),
+    lmsAssignmentReadQueryKeys.classWorkspaceAccountRoot(tenantId, accountId),
+  ] as const;
+}
+
+function unwrapConfirmedResult<T>(value: T | OfflineTeachingCommandResult<T>) {
+  if (value && typeof value === "object" && "status" in value) {
+    return value.status === "confirmed" ? value.value : undefined;
+  }
+  return value;
+}
+
+function isPendingResult(value: unknown) {
+  return Boolean(value && typeof value === "object" && (value as { status?: unknown }).status === "pending");
+}
+
+function toOfflineJsonInput(input: object) {
+  return Object.fromEntries(Object.entries(input).filter(([, value]) => value !== undefined));
 }

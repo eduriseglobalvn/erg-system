@@ -7,7 +7,7 @@ import { ERG_ASSETS } from "@/config/seo";
 
 const routeState = vi.hoisted(() => ({ pathname: "/" }));
 
-vi.mock("@/routes/router-compat", () => ({
+vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname: routeState.pathname }),
 }));
 

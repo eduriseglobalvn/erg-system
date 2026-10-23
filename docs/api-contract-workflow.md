@@ -18,4 +18,20 @@ bun run contract:rest:check
 bun run verify:api-contract
 ```
 
-Route mới phải được khai báo trong route builder và dùng `ContractPath`; không rải chuỗi endpoint trong component. Domain client phải khai báo portal và `auth` rõ ràng.
+Route mới phải được khai báo trong `API_ENDPOINTS` và dùng `ContractPath`; không rải chuỗi endpoint trong component. Domain client phải khai báo portal và `auth` rõ ràng.
+
+## Registry endpoint duy nhất
+
+Mọi REST path BE nằm tại `src/lib/api/api-endpoints.ts` trong object `API_ENDPOINTS`. Endpoint động phải encode từng segment trong registry; caller không tự nối ID. Chạy `bun run endpoint:check` để phát hiện endpoint literal nằm ngoài registry.
+
+Khi endpoint đổi, sửa entry trong `API_ENDPOINTS`, sync OpenAPI và chạy `bun run verify:api-contract`. Không tạo route file riêng theo feature và không thêm nhánh legacy ngoài registry.
+
+## Chính sách cache
+
+- `realtime`: notification, progress, security feed; cache ngắn và không persist.
+- `transactional`: employee, assignment, calendar; cache trung bình và invalidate đúng entity.
+- `reference`: role, permission, school/curriculum catalog; cache dài hơn.
+- `offlineCore`: homework, scores và dữ liệu học tập cốt lõi; persist IndexedDB theo portal/tenant/account.
+- `sensitive`: auth/security; không persist và không retry lỗi 4xx.
+
+Logout, đổi account hoặc đổi tenant phải xóa memory cache và persisted scope cũ. Mutation chỉ invalidate query key nhỏ nhất có liên quan; ưu tiên `setQueryData` khi response chứa entity hoàn chỉnh.

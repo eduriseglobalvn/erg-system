@@ -14,13 +14,14 @@ import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { TeacherOnboardingWorkspace } from "@/platform/auth/components/teacher-onboarding-workspace";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
-import { useLocation, useNavigate } from "@/routes/router-compat";
+import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 export function TeacherOnboardingPage() {
   const auth = useAuthSession("lms");
   const location = useLocation();
   const navigate = useNavigate();
-  const redirect = sanitizeRedirect(new URLSearchParams(location.search).get("redirect"));
+  const redirect = sanitizeRedirect(new URLSearchParams(location.searchStr).get("redirect"));
 
   if (auth.isHydratingProfile) {
     return (
@@ -41,9 +42,9 @@ export function TeacherOnboardingPage() {
       <Box sx={{ mx: "auto", maxWidth: 640, p: 4 }}>
         <Alert
           action={<Button color="inherit" onClick={auth.actions.signOut}>Đăng xuất</Button>}
-          severity="error"
+          severity="warning"
         >
-          Backend chưa trả lifecycle tài khoản. ERG đã chặn truy cập LMS để tránh bỏ qua onboarding.
+          Backend chưa trả lifecycle tài khoản. Quyền portal của bạn vẫn được giữ nguyên; hãy tải lại trang hoặc liên hệ quản trị viên nếu thông báo tiếp tục xuất hiện.
         </Alert>
       </Box>
     );
@@ -76,7 +77,7 @@ export function TeacherOnboardingPage() {
       }}
       onComplete={(lifecycle) => {
         persistLifecycle(lifecycle);
-        navigate(redirect, { replace: true });
+        void navigate({ href: redirect, replace: true });
       }}
       onLogout={auth.actions.signOut}
     />
@@ -84,7 +85,7 @@ export function TeacherOnboardingPage() {
 }
 
 function sanitizeRedirect(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/onboarding")) return "/home";
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/onboarding")) return teacherPath("/home");
   return value;
 }
 

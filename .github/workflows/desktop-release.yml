@@ -1,0 +1,71 @@
+name: ERG desktop release
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: Release channel
+        required: true
+        default: stable
+        type: choice
+        options: [stable, beta, internal]
+      rollout_percent:
+        description: Initial rollout percentage
+        required: true
+        default: "5"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            platform: darwin
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    env:
+      TAURI_UPDATER_PUBLIC_KEY: ${{ secrets.TAURI_UPDATER_PUBLIC_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+      ERG_RELEASE_CHANNEL: ${{ inputs.channel }}
+      ERG_RELEASE_ROLLOUT_PERCENT: ${{ inputs.rollout_percent }}
+      ERG_TAURI_TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Verify signing environment
+        run: bun run desktop:release:check-env
+      - name: Verify frontend and contracts
+        run: |
+          bun run verify:api-contract
+          bun run lint
+          bun run build
+      - name: Build signed Tauri updater artifact
+        run: bun run desktop:release:build
+      - name: Upload signed artifact for manifest publication
+        uses: actions/upload-artifact@v4
+        with:
+          name: erg-lms-desktop-${{ matrix.platform }}-${{ matrix.target }}
+          path: |
+            src-tauri/target/**/bundle/**/*.exe
+            src-tauri/target/**/bundle/**/*.msi
+            src-tauri/target/**/bundle/**/*.dmg
+            src-tauri/target/**/bundle/**/*.zip
+            src-tauri/target/**/bundle/**/*.tar.gz
+            src-tauri/target/**/bundle/**/*.sig
+          if-no-files-found: error

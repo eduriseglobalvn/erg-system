@@ -5,6 +5,7 @@ export const viCopy = {
   description:
     "Một màn duy nhất để giáo viên xem danh sách học sinh, lọc nhóm cần xử lý, chọn học sinh và giao bài ngay. Thiết kế ưu tiên thao tác đơn giản cho giáo viên không rành công nghệ.",
   openReports: "Xem báo cáo",
+  assignmentUnavailable: "Backend chưa cung cấp catalog bài tập và mutation giao bài cho workspace này.",
   listTitle: "Danh sách học sinh",
   listDescription: (count: number, support: number): string =>
     `${count} học sinh đang hiển thị, ${support} em cần hỗ trợ.`,
@@ -107,6 +108,7 @@ export const enCopy = {
   description:
     "One simple workspace for teachers to review the roster, filter the right group, select students, and assign work immediately.",
   openReports: "View reports",
+  assignmentUnavailable: "The backend does not expose an assignment catalog and delivery mutation for this workspace.",
   listTitle: "Student list",
   listDescription: (count: number, support: number): string =>
     `${count} ${count === 1 ? "student" : "students"} shown, ${support} need support.`,

@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { ApiClientError, apiRequest } from "@/lib/api-client";
 import type { UserAccessPolicy } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
@@ -47,7 +48,7 @@ export class TeacherAccountProvisionError extends Error {
 
 export async function createTeacherAccount(input: CreateTeacherAccountInput) {
   try {
-    return await apiRequest<CreateTeacherAccountResponse>("/api/v1/users", {
+    return await apiRequest<CreateTeacherAccountResponse>(API_ENDPOINTS.legacy.v1Users, {
       portal: "lcms",
       method: "POST",
       body: JSON.stringify({
@@ -71,14 +72,14 @@ export async function createTeacherAccount(input: CreateTeacherAccountInput) {
 
 export function resendTeacherInvite(userId: string) {
   return apiRequest<TeacherAccountDeliveryResult>(
-    `/api/v1/users/${encodeURIComponent(userId)}/resend-invite`,
+    API_ENDPOINTS.userAdmin.resendInvite(userId),
     { portal: "lcms", method: "POST" },
   );
 }
 
 export function resetTeacherCredential(userId: string, credentialDelivery: TeacherCredentialDelivery) {
   return apiRequest<TeacherAccountDeliveryResult>(
-    `/api/v1/users/${encodeURIComponent(userId)}/reset-credential`,
+    API_ENDPOINTS.userAdmin.resetCredential(userId),
     {
       portal: "lcms",
       method: "POST",

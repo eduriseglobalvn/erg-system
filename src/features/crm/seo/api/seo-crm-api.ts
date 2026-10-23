@@ -8,7 +8,7 @@ import type {
   SeoSchoolLead,
 } from "@/features/crm/seo/types/seo-crm-types";
 
-export const seoSchoolLeads: SeoSchoolLead[] = [
+export const seoSchoolLeads: Array<Omit<SeoSchoolLead, "schoolId" | "version">> = [
   {
     id: "lead-nguyen-trai",
     schoolName: "THCS Nguyễn Trãi",
@@ -91,21 +91,23 @@ export const seoSchoolLeads: SeoSchoolLead[] = [
   },
 ];
 
-export const seoOpportunities: SeoOpportunity[] = [
+type SeoOpportunityFixture = Omit<SeoOpportunity, "version">;
+
+export const seoOpportunities: SeoOpportunityFixture[] = [
   createOpportunity("opp-nguyen-trai", "lead-nguyen-trai", "SEO-PL-260501", "pnl_review", 12, 35, 950_000, 8),
   createOpportunity("opp-le-quy-don", "lead-le-quy-don", "SEO-PL-260514", "contracting", 14, 40, 1_150_000, 10),
   createOpportunity("opp-binh-minh", "lead-binh-minh", "SEO-PL-260519", "proposal", 6, 30, 780_000, 5),
   createOpportunity("opp-a-chau", "lead-a-chau", "SEO-PL-260526", "handover", 22, 35, 1_080_000, 7),
 ];
 
-export const seoFollowUps: SeoFollowUp[] = [
+export const seoFollowUps: Array<Omit<SeoFollowUp, "version">> = [
   { id: "fu-1", leadId: "lead-le-quy-don", type: "contract", title: "Gửi phụ lục miễn giảm khối 10", dueAt: "2026-05-27", ownerName: "Nguyễn Thùy Linh", done: false },
   { id: "fu-2", leadId: "lead-a-chau", type: "handover", title: "Bàn giao dữ liệu lớp cho quản lý trung tâm", dueAt: "2026-05-28", ownerName: "Trần Mai Anh", done: false },
   { id: "fu-3", leadId: "lead-nguyen-trai", type: "meeting", title: "Họp hiệu trưởng chốt ngân sách", dueAt: "2026-05-29", ownerName: "Đỗ Trần Nam", done: false },
   { id: "fu-4", leadId: "lead-binh-minh", type: "proposal", title: "Gửi proposal gói học thử hè", dueAt: "2026-06-02", ownerName: "Đỗ Trần Nam", done: false },
 ];
 
-export const seoHandoverRequests: SeoHandoverRequest[] = [
+export const seoHandoverRequests: Array<Omit<SeoHandoverRequest, "version">> = [
   {
     id: "handover-a-chau",
     leadId: "lead-a-chau",
@@ -164,7 +166,7 @@ function createOpportunity(
   studentsPerClass: number,
   pricePerStudent: number,
   discountPercent: number,
-): SeoOpportunity {
+): SeoOpportunityFixture {
   return {
     id,
     leadId,

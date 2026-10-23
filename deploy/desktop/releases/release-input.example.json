@@ -1,0 +1,29 @@
+{
+  "version": "0.1.1",
+  "channel": "stable",
+  "baseUrl": "https://downloads.erg.edu.vn/desktop",
+  "artifacts": [
+    {
+      "platform": "windows",
+      "architecture": "x86_64",
+      "installer": "nsis",
+      "path": "src-tauri/target/release/bundle/nsis/ERG-LMS-Desktop_0.1.1_x64-setup.exe",
+      "signaturePath": "src-tauri/target/release/bundle/nsis/ERG-LMS-Desktop_0.1.1_x64-setup.exe.sig",
+      "updaterPath": "src-tauri/target/release/bundle/nsis/ERG-LMS-Desktop_0.1.1_x64-updater.nsis.zip",
+      "updaterSignaturePath": "src-tauri/target/release/bundle/nsis/ERG-LMS-Desktop_0.1.1_x64-updater.nsis.zip.sig",
+      "rolloutPercent": 5,
+      "notes": "Initial signed Teacher/Student desktop release."
+    },
+    {
+      "platform": "darwin",
+      "architecture": "aarch64",
+      "installer": "dmg",
+      "path": "src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/ERG-LMS-Desktop_0.1.1_aarch64.dmg",
+      "signaturePath": "src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/ERG-LMS-Desktop_0.1.1_aarch64.dmg.sig",
+      "updaterPath": "src-tauri/target/aarch64-apple-darwin/release/bundle/macos/ERG-LMS-Desktop.app.tar.gz",
+      "updaterSignaturePath": "src-tauri/target/aarch64-apple-darwin/release/bundle/macos/ERG-LMS-Desktop.app.tar.gz.sig",
+      "rolloutPercent": 5,
+      "notes": "Initial signed Teacher/Student desktop release."
+    }
+  ]
+}

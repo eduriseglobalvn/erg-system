@@ -6,7 +6,8 @@ import {
 import type {
   QuizEditorCreateResult,
   QuizEditorSaveDraftResult,
-} from "@/features/lcms/quiz/quiz-editor";
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 type CreateQuizFromBankDependencies = {
   createQuiz: (input: {
@@ -43,7 +44,7 @@ export async function createQuizFromBankQuestions(
 
   if (!dependencies.hasApiBase()) {
     dependencies.setPendingQuestionImports(questions);
-    dependencies.navigate("/quiz-editor");
+    dependencies.navigate(adminPath("/content/quiz-editor"));
     return;
   }
 
@@ -83,7 +84,7 @@ export async function createQuizFromBankQuestions(
 
   if (!saved) return;
 
-  dependencies.navigate(`/quiz-editor?quizId=${encodeURIComponent(created.quizId)}`);
+  dependencies.navigate(`${adminPath("/content/quiz-editor")}?quizId=${encodeURIComponent(created.quizId)}`);
   dependencies.toastSuccess("Created assignment package from selected questions.");
 }
 

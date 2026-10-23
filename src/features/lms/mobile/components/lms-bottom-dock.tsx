@@ -80,16 +80,23 @@ function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
     <ButtonBase
       aria-current={active ? "page" : undefined}
       aria-label={label}
+      data-selected={active ? "true" : undefined}
       onClick={onClick}
       sx={{
-        borderRadius: "20px",
+        bgcolor: active ? "rgba(15,108,189,0.08)" : "transparent",
+        border: "1px solid",
+        borderColor: active ? "rgba(15,108,189,0.14)" : "transparent",
+        borderRadius: "18px",
+        boxShadow: active ? "0 6px 16px rgba(15,108,189,0.08)" : "none",
         color: active ? "primary.main" : "text.secondary",
         display: "flex",
         flexDirection: "column",
         gap: 0.5,
-        minHeight: 56,
+        minHeight: 62,
         minWidth: 0,
+        px: 0.35,
         "&:active": { transform: "scale(0.97)" },
+        "&:focus-visible": { outline: "3px solid", outlineColor: "rgba(15,108,189,0.24)", outlineOffset: 2 },
         "&:hover": { bgcolor: active ? ergEnterpriseTokens.color.primarySofter : "action.hover" },
       }}
     >

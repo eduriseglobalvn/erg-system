@@ -25,6 +25,7 @@ describe("quizEditor query options", () => {
         kind: "",
         levelId: "",
         page: 0,
+        portal: "lcms",
         search: "Excel",
         size: 20,
         status: "",

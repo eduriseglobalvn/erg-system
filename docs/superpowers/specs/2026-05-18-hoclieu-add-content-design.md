@@ -1,5 +1,7 @@
 # Hoclieu Add Content Design
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 **Goal:** Refactor the `+` add-content flow in LMS authoring so users first choose a content type, then get a dedicated form for structure, lecture, or exercise content.
 
 **Scope:**

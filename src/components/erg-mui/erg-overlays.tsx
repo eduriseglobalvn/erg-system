@@ -55,15 +55,20 @@ export function ErgDrawer({ children, description, slotProps, title, ...props }:
       anchor="right"
       slotProps={{
         ...slotProps,
-        paper: {
-          ...slotProps?.paper,
-          "aria-describedby": description ? descriptionId : undefined,
-          "aria-labelledby": titleId,
-          role: "dialog",
-          sx: [
-            { maxWidth: "100%", width: { xs: "100%", sm: 440 } },
-            ...(Array.isArray(slotProps?.paper?.sx) ? slotProps.paper.sx : [slotProps?.paper?.sx]),
-          ],
+        paper: (ownerState) => {
+          const paperProps = typeof slotProps?.paper === "function"
+            ? slotProps.paper(ownerState)
+            : slotProps?.paper;
+          return {
+            ...paperProps,
+            "aria-describedby": description ? descriptionId : undefined,
+            "aria-labelledby": titleId,
+            role: "dialog",
+            sx: [
+              { maxWidth: "100%", width: { xs: "100%", sm: 440 } },
+              ...(Array.isArray(paperProps?.sx) ? paperProps.sx : [paperProps?.sx]),
+            ],
+          };
         },
       }}
       {...props}

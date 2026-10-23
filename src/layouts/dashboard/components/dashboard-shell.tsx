@@ -29,6 +29,7 @@ import type { ContentScope, DashboardUserPermissions, ManagementScope } from "@/
 
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { createPersistedStore } from "@/stores/persisted-store";
@@ -73,16 +74,17 @@ export function DashboardShell() {
   const { actions: authActions, account } = useAuthSession();
   const { t } = useI18n();
   const apiBacked = hasApiBase();
+  const fixturesEnabled = runtimeFixturesEnabled();
   const tenantId = getDefaultTenantId();
   const storedContext = useMemo(() => readStoredDashboardContext(), []);
   const [createdSchools, setCreatedSchools] = useState<ClassroomSchool[]>([]);
   const [createdCenterIds, setCreatedCenterIds] = useState<string[]>([]);
   const [selectedManagementScope, setManagementScope] = useState<ManagementScope | null>(() =>
-    storedContext.managementScope ?? (apiBacked ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
+    storedContext.managementScope ?? (apiBacked || !fixturesEnabled ? null : { level: "class", centerId: defaultSchoolId, classId: defaultClassId }),
   );
   const bootstrapQuery = useQuery({
     queryKey: queryKeys.dashboard.bootstrap("lms", tenantId, account?.id),
-    queryFn: loadLmsDashboardBootstrap,
+    queryFn: ({ signal }) => loadLmsDashboardBootstrap(signal),
     enabled: apiBacked,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
@@ -91,24 +93,24 @@ export function DashboardShell() {
   const bootstrapData = bootstrapQuery.data;
   const bootstrapPermissions = useMemo<DashboardUserPermissions>(
     () => bootstrapData?.permissions ?? {
-      canAccessGlobalErg: !apiBacked,
-      assignedCenterIds: apiBacked ? [] : classroomSchools.map((school) => school.id),
-      roles: apiBacked ? [] : ["teacher", "lms_teacher_standard"],
-      grantedPermissions: apiBacked ? [] : ["lms.*", "account.self.*"],
+      canAccessGlobalErg: fixturesEnabled && !apiBacked,
+      assignedCenterIds: apiBacked || !fixturesEnabled ? [] : classroomSchools.map((school) => school.id),
+      roles: apiBacked || !fixturesEnabled ? [] : ["teacher", "lms_teacher_standard"],
+      grantedPermissions: apiBacked || !fixturesEnabled ? [] : ["lms.*", "account.self.*"],
       deniedPermissions: [],
     },
-    [apiBacked, bootstrapData?.permissions],
+    [apiBacked, bootstrapData?.permissions, fixturesEnabled],
   );
   const schools = useMemo(() => {
-    const baseSchools = bootstrapData?.schools ?? (apiBacked ? [] : classroomSchools);
+    const baseSchools = bootstrapData?.schools ?? (fixturesEnabled && !apiBacked ? classroomSchools : []);
     return createdSchools.reduce(
       (nextSchools, school) => (nextSchools.some((item) => item.id === school.id) ? nextSchools : [...nextSchools, school]),
       baseSchools,
     );
-  }, [apiBacked, bootstrapData?.schools, createdSchools]);
+  }, [apiBacked, bootstrapData?.schools, createdSchools, fixturesEnabled]);
   const manageableUnits = bootstrapData?.manageableUnits ?? [];
   const systemUnits = bootstrapData?.systemUnits ?? [];
-  const classes = bootstrapData?.classes ?? (apiBacked ? [] : classroomSnapshots);
+  const classes = bootstrapData?.classes ?? (fixturesEnabled && !apiBacked ? classroomSnapshots : []);
   const currentUserPermissions = useMemo<DashboardUserPermissions>(
     () => ({
       ...bootstrapPermissions,
@@ -160,12 +162,12 @@ export function DashboardShell() {
   const visibleSchools = currentUserPermissions.canAccessGlobalErg
     ? schools
     : schools.filter((school) => allowedSchoolIds.includes(school.id));
-  const selectedSchoolId = managementScope.centerId ?? defaultSchoolId;
-  const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? classroomSchools[0]!;
+  const selectedSchoolId = managementScope.centerId ?? (fixturesEnabled ? defaultSchoolId : "");
+  const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0];
   const selectedClassOptions = classes.filter((classroom) => classroom.schoolId === selectedSchoolId);
   const firstClassInSchool = selectedClassOptions[0];
   const selectedClassId =
-    managementScope.level === "class" ? managementScope.classId : firstClassInSchool?.id ?? defaultClassId;
+    managementScope.level === "class" ? managementScope.classId : firstClassInSchool?.id ?? (fixturesEnabled ? defaultClassId : "");
   const isSchoolDenied =
     managementScope.level !== "global" &&
     !currentUserPermissions.canAccessGlobalErg &&
@@ -174,7 +176,7 @@ export function DashboardShell() {
   const contentScope: ContentScope =
     managementScope.level === "global"
       ? { type: "global" }
-      : { type: "center", centerId: selectedSchool.id, centerName: selectedSchool.name };
+      : { type: "center", centerId: selectedSchool?.id ?? managementScope.centerId, centerName: selectedSchool?.name ?? "Phạm vi hiện tại" };
 
   useEffect(() => {
     const mediaQuery = window.matchMedia(`(max-width: ${COMPACT_DASHBOARD_BREAKPOINT - 1}px)`);
@@ -287,6 +289,7 @@ export function DashboardShell() {
       averageScore: 0,
       overdueAssignments: 0,
       flaggedStudents: 0,
+      metricsAvailable: false,
     };
 
     setCreatedSchools((current) => (current.some((school) => school.id === nextSchool.id) ? current : [...current, nextSchool]));
@@ -297,6 +300,8 @@ export function DashboardShell() {
   const dashboardContent = (
     <DashboardContent
       activeLeaf={activeLeaf}
+      adminCenters={schools}
+      adminClasses={classes}
       canAccessGlobalErg={currentUserPermissions.canAccessGlobalErg}
       contentScope={contentScope}
       deniedSchoolName={isSchoolDenied ? selectedSchool?.name : undefined}

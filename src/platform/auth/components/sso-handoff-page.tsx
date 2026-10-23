@@ -2,22 +2,22 @@ import { useEffect } from "react";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
-import { useSearchParams } from "@/routes/router-compat";
+import { useLocation } from "@tanstack/react-router";
 
-import { getStoredAccessToken } from "@/platform/auth/api/auth-token-storage";
 import { normalizeSsoReturnTo } from "@/platform/auth/utils/sso-return-to";
+import { getSharedAuthUrl } from "@/config/portal-urls";
 
 /**
  * SSO handoff page loaded on the source portal, for example LMS.
  *
  * Flow:
  * 1. A target portal redirects to `/sso-handoff?returnTo=<target-url>`.
- * 2. This page checks if the user is logged in on the source portal.
- * 3. If logged in, it redirects to returnTo with sso_token appended.
- * 4. If not logged in, it redirects to login and then back to this handoff page.
+ * 2. This page validates the target and sends the browser through the shared
+ *    auth origin. The auth/BFF owns the session; credentials never travel in
+ *    a query string or cross-domain application cookie.
  */
 export function SsoHandoffPage() {
-  const [params] = useSearchParams();
+  const params = new URLSearchParams(useLocation().searchStr);
   const returnTo = params.get("returnTo");
 
   useEffect(() => {
@@ -29,17 +29,10 @@ export function SsoHandoffPage() {
       return;
     }
 
-    const token = getStoredAccessToken();
-    if (token) {
-      // User is logged in; redirect to target portal with token.
-      const url = new URL(normalizedReturnTo);
-      url.searchParams.set("sso_token", token);
-      window.location.replace(url.toString());
-    } else {
-      // User is not logged in; redirect to login, then come back here.
-      const selfUrl = window.location.href;
-      window.location.replace(`/login?redirect=${encodeURIComponent(selfUrl)}`);
-    }
+    const authUrl = new URL(getSharedAuthUrl());
+    authUrl.searchParams.set("redirect", normalizedReturnTo);
+    authUrl.searchParams.set("returnTo", normalizedReturnTo);
+    window.location.replace(authUrl.toString());
   }, [returnTo]);
 
   return (

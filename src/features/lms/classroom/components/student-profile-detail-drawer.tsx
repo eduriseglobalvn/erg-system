@@ -96,7 +96,7 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
             </section>
 
             <section className="rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <SectionTitle title="Tài khoản elearning" />
+              <SectionTitle title="Tài khoản Student Workspace" />
               <div className="mt-3 grid gap-3 sm:grid-cols-2">
                 <Field label="Username">
                   <input value={draft.username} onChange={(event) => onUpdate({ username: event.target.value })} className={detailInputClass} />
@@ -163,26 +163,18 @@ export function StudentProfileDetailDrawer<TValue extends string = StudentStatus
 }
 
 function buildStudentProfile(student: ClassroomStudent) {
-  const numericSeed = Array.from(student.id).reduce((sum, char) => sum + char.charCodeAt(0), 0);
-  const day = String((numericSeed % 27) + 1).padStart(2, "0");
-  const month = String((numericSeed % 12) + 1).padStart(2, "0");
-  const gradeNumber = Number(student.gradeLabel.match(/\d+/)?.[0] ?? 6);
-  const birthYear = 2018 - gradeNumber;
-  const parentLast = student.name.split(" ").slice(-1)[0] || "Phụ huynh";
-  const phoneSuffix = String(100000 + (numericSeed % 899999)).padStart(6, "0");
-
   return {
-    address: `${(numericSeed % 42) + 8} đường Nguyễn Văn Cừ, phường ${((numericSeed % 8) + 1).toString()}, TP. Hồ Chí Minh`,
-    birthDate: `${day}/${month}/${birthYear}`,
-    careHistory: `Đã trao đổi phụ huynh sau buổi ${((numericSeed % 5) + 1).toString()} về tiến độ ${student.currentStage.toLowerCase()}.`,
-    code: `HS-${student.gradeLabel.replace(/\D/g, "") || "6"}-${student.id.replace(/\D/g, "").slice(-4).padStart(4, "0")}`,
-    device: numericSeed % 2 === 0 ? "Laptop Windows tại nhà" : "Máy tính bảng dùng chung gia đình",
-    gender: numericSeed % 2 === 0 ? "Nam" : "Nữ",
-    guardianEmail: `${removeVietnameseMarks(parentLast).toLowerCase()}${numericSeed % 1000}@example.com`,
-    guardianName: `${numericSeed % 2 === 0 ? "Anh" : "Chị"} ${parentLast}`,
-    guardianPhone: `09${String(numericSeed % 90).padStart(2, "0")}.${phoneSuffix.slice(0, 3)}.${phoneSuffix.slice(3)}`,
-    strengths: student.status === "ahead" ? "Tự học nhanh, làm bài ổn định" : student.status === "support" ? "Cần nhắc nhở nhưng phản hồi tốt" : "Duy trì tiến độ đều",
-    supportPlan: student.status === "support" ? "Cần checkpoint 10 phút sau mỗi buổi học" : "Theo dõi nhịp làm bài hằng tuần",
+    address: "Chưa có dữ liệu",
+    birthDate: "Chưa có dữ liệu",
+    careHistory: "Chưa có dữ liệu",
+    code: student.id,
+    device: "Chưa có dữ liệu",
+    gender: "Chưa có dữ liệu",
+    guardianEmail: "Chưa có dữ liệu",
+    guardianName: "Chưa có dữ liệu",
+    guardianPhone: "Chưa có dữ liệu",
+    strengths: "Chưa có dữ liệu",
+    supportPlan: "Chưa có dữ liệu",
   };
 }
 
@@ -223,10 +215,3 @@ function MiniMetric({ label, value }: { label: string; value: string }) {
 
 const detailInputClass = "h-10 w-full rounded-md border border-[#d7e0ec] bg-white px-2.5 text-[14px] font-semibold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]";
 
-function removeVietnameseMarks(value: string) {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D");
-}

@@ -270,7 +270,10 @@ export function QuizEditorWorkspace({
   );
 
   const apiBackedTaxonomy = hasApiBase();
-  const questionBankSubjects = questionBankQuery.data?.subjects ?? [];
+  const questionBankSubjects = useMemo(
+    () => questionBankQuery.data?.subjects ?? [],
+    [questionBankQuery.data?.subjects],
+  );
   const courseOptions = useMemo<CourseScopeOption[]>(
     () =>
       questionBankSubjects.length

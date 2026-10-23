@@ -11,7 +11,7 @@ type NavigationGroup<Item extends NavigationItem> = {
 };
 
 export function permissionForLmsPath(path: string): LmsPermission | null {
-  const normalized = path.split(/[?#]/, 1)[0]?.replace(/^\/+|\/+$/g, "") ?? "";
+  const normalized = normalizeLmsPath(path);
   const route = Object.keys(LMS_ROUTE_PERMISSIONS)
     .sort((left, right) => right.length - left.length)
     .find((candidate) => normalized === candidate || normalized.startsWith(`${candidate}/`));
@@ -19,9 +19,16 @@ export function permissionForLmsPath(path: string): LmsPermission | null {
 }
 
 export function canNavigateToLmsPath(path: string, grantedPermissions: readonly string[] = [], deniedPermissions: readonly string[] = []) {
+  const normalized = normalizeLmsPath(path);
+  if (!normalized || normalized === "home" || normalized === "dashboard") return true;
   const permission = permissionForLmsPath(path);
   if (!permission) return false;
   return evaluatePermission({ permission, grantedPermissions, deniedPermissions });
+}
+
+function normalizeLmsPath(path: string) {
+  const trimmed = path.split(/[?#]/, 1)[0]?.replace(/^\/+|\/+$/g, "") ?? "";
+  return trimmed === "teacher" ? "" : trimmed.replace(/^teacher\//, "");
 }
 
 export function filterLmsNavigation<Group extends NavigationGroup<Item>, Item extends NavigationItem>(

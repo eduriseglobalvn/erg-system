@@ -18,6 +18,7 @@ import {
 } from "@/features/notifications/api/notification-api";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile/hooks/use-lms-mobile-breakpoint";
 import { cn } from "@/lib/utils";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 
 const LMS_NOTIFICATION_PORTAL = "lms";
 
@@ -32,13 +33,15 @@ export function LmsNotificationListPage({
   const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
   const notificationsQuery = useQuery({
     queryKey: notificationQueryKeys.inbox(LMS_NOTIFICATION_PORTAL, tab, 0, 30, notificationScope),
-    queryFn: () => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 30 }),
-    staleTime: 30_000,
+    queryFn: ({ signal }) => fetchNotificationFeed({ portal: LMS_NOTIFICATION_PORTAL, status: tab, page: 0, size: 30 }, signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
   });
   const unreadCountQuery = useQuery({
     queryKey: notificationQueryKeys.unreadCount(LMS_NOTIFICATION_PORTAL, notificationScope),
-    queryFn: () => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL),
-    staleTime: 30_000,
+    queryFn: ({ signal }) => fetchUnreadNotificationCount(LMS_NOTIFICATION_PORTAL, signal),
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
   });
   const markReadMutation = useMutation({
     mutationFn: (notificationId: string) => markNotificationRead(notificationId, LMS_NOTIFICATION_PORTAL),
@@ -158,11 +161,12 @@ export function LmsNotificationDetailPage({
   const notificationScope = resolveNotificationQueryScope(LMS_NOTIFICATION_PORTAL);
   const notificationQuery = useQuery({
     queryKey: notificationQueryKeys.detail(LMS_NOTIFICATION_PORTAL, notificationId, notificationScope),
-    queryFn: () => fetchNotificationDetail(notificationId, LMS_NOTIFICATION_PORTAL),
+    queryFn: ({ signal }) => fetchNotificationDetail(notificationId, LMS_NOTIFICATION_PORTAL, signal),
     enabled: Boolean(notificationId),
-    staleTime: 30_000,
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
   });
-  const markReadMutation = useMutation({
+  const { mutate: markRead } = useMutation({
     mutationFn: (id: string) => markNotificationRead(id, LMS_NOTIFICATION_PORTAL),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: notificationQueryKeys.root(LMS_NOTIFICATION_PORTAL, notificationScope) });
@@ -173,8 +177,8 @@ export function LmsNotificationDetailPage({
   useEffect(() => {
     if (!notification?.unread || autoMarkedRef.current === notification.id) return;
     autoMarkedRef.current = notification.id;
-    markReadMutation.mutate(notification.id);
-  }, [notification?.id, notification?.unread]);
+    markRead(notification.id);
+  }, [markRead, notification?.id, notification?.unread]);
 
   if (notificationQuery.isLoading) {
     return (

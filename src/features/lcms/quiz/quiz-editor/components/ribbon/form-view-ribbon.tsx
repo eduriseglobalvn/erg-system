@@ -9,15 +9,15 @@ import {
   Select,
   Typography,
 } from "@mui/material";
-import { BookOpen as BookOpenIcon } from "@/components/mui-icon-shim";
-import { Palette as PaletteOutlinedIcon } from "@/components/mui-icon-shim";
-import { ChevronDown as ArrowDropDownIcon } from "@/components/mui-icon-shim";
-import { Layers as LevelIcon } from "@/components/mui-icon-shim";
-import { ListTree as TopicIcon } from "@/components/mui-icon-shim";
-import { Search as SearchIcon } from "@/components/mui-icon-shim";
-import { Upload as PublishIcon } from "@/components/mui-icon-shim";
-import { HelpCircle as QuizOutlinedIcon } from "@/components/mui-icon-shim";
-import { Presentation as SlideshowOutlinedIcon } from "@/components/mui-icon-shim";
+import BookOpenIcon from "@mui/icons-material/AutoStories";
+import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
+import ArrowDropDownIcon from "@mui/icons-material/ExpandMore";
+import LevelIcon from "@mui/icons-material/Layers";
+import TopicIcon from "@mui/icons-material/AccountTree";
+import SearchIcon from "@mui/icons-material/Search";
+import PublishIcon from "@mui/icons-material/Upload";
+import QuizOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
+import SlideshowOutlinedIcon from "@mui/icons-material/Slideshow";
 
 import { IntroductionMenu, QuestionMenu } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus";
 import { useI18n } from "@/platform/i18n";
@@ -159,7 +159,7 @@ export function FormViewRibbon({
           <Box ref={questionTriggerRef}>
             <RibbonAction
               label={t("common.question")}
-              icon={<QuizOutlinedIcon size="1em" />}
+              icon={<QuizOutlinedIcon sx={{ fontSize: "1em" }} />}
               active={openMenu === "question"}
               caret
               primary
@@ -169,7 +169,7 @@ export function FormViewRibbon({
           <Box ref={introductionTriggerRef}>
             <RibbonAction
               label={t("common.introduction")}
-              icon={<SlideshowOutlinedIcon size="1em" />}
+              icon={<SlideshowOutlinedIcon sx={{ fontSize: "1em" }} />}
               active={openMenu === "introduction"}
               caret
               wide
@@ -254,14 +254,14 @@ function RibbonUtilitySection({
         title={playerLabel}
         onClick={onOpenPlayerTemplate}
       >
-        <PaletteOutlinedIcon size="1em" />
+        <PaletteOutlinedIcon sx={{ fontSize: "1em" }} />
       </button>
       <button
         type="button"
         className="classic-editor__ribbon-publish-action"
         onClick={onOpenPublish}
       >
-        <PublishIcon size="1em" />
+        <PublishIcon sx={{ fontSize: "1em" }} />
         <span>{publishLabel}</span>
       </button>
     </Box>
@@ -280,7 +280,7 @@ function RibbonSearchSection({
   return (
     <Box component="section" className="classic-editor__ribbon-search-actions" aria-label={searchLabel}>
       <label className="classic-editor__ribbon-searchbar">
-        <SearchIcon size="1em" />
+        <SearchIcon sx={{ fontSize: "1em" }} />
         <input
           type="search"
           value={searchValue}
@@ -325,7 +325,7 @@ function RibbonScopeSection({
       className={`classic-editor__ribbon-scope ${hasLevelOptions ? "has-level" : "has-topic-only"}`}
       aria-label={hasLevelOptions ? "Môn, level và chủ đề câu hỏi" : "Môn và chủ đề câu hỏi"}
     >
-      <RibbonScopeField icon={<BookOpenIcon size="1em" />} label="Môn">
+      <RibbonScopeField icon={<BookOpenIcon sx={{ fontSize: "1em" }} />} label="Môn">
         <Select
           size="small"
           value={selectedCourseId}
@@ -352,7 +352,7 @@ function RibbonScopeSection({
       </RibbonScopeField>
 
       {hasLevelOptions ? (
-        <RibbonScopeField icon={<LevelIcon size="1em" />} label="Level">
+        <RibbonScopeField icon={<LevelIcon sx={{ fontSize: "1em" }} />} label="Level">
           <Select
             size="small"
             value={selectedLevelId ?? ""}
@@ -379,7 +379,7 @@ function RibbonScopeSection({
         </RibbonScopeField>
       ) : null}
 
-      <RibbonScopeField icon={<TopicIcon size="1em" />} label="Chủ đề">
+      <RibbonScopeField icon={<TopicIcon sx={{ fontSize: "1em" }} />} label="Chủ đề">
         <Select
           size="small"
           value={selectedTopicId}
@@ -542,7 +542,7 @@ function RibbonAction({
       >
         {label}
       </Typography>
-      {caret ? <ArrowDropDownIcon size="1em" /> : null}
+      {caret ? <ArrowDropDownIcon sx={{ fontSize: "1em" }} /> : null}
     </ButtonBase>
   );
 }

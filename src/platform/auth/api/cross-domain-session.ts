@@ -1,5 +1,5 @@
 /**
- * Cross-subdomain session sharing via cookies and URL token handoff.
+ * Cross-subdomain compatibility session sharing via the legacy cookie only.
  *
  * localStorage is scoped per origin, so LMS/LCMS/CRM/Elearning hosts each have
  * separate browser storage.
@@ -7,19 +7,19 @@
  * Strategy:
  * 1. Try to set a cookie on the parent domain. This works for most domains but
  *    may fail for compound TLDs like `.edu.vn` due to the Public Suffix List.
- * 2. When the user navigates between portals, append `?sso_token=<accessToken>`
- *    to the URL. The receiving portal login page hydrates the session.
+ * 2. New SSO handoff is routed through auth.erg.edu.vn. URL token handoff is
+ *    intentionally disabled; ERG-092 will replace this compatibility cookie
+ *    with an HttpOnly BFF session.
  *
  * Flow:
  *   Login on lms.erg.edu.local -> cookie saved + localStorage saved.
  *   Navigate to another portal -> check cookie -> if found, hydrate.
- *   If cookie not found -> redirect to login -> check URL for sso_token -> hydrate.
+ *   If cookie not found -> redirect to the shared auth origin.
  */
 
 import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 const COOKIE_NAME = "erg_sso";
-const SSO_TOKEN_PARAM = "sso_token";
 
 type CookieSessionPayload = {
   t: string;        // accessToken
@@ -139,7 +139,7 @@ export function saveCrossDomainSession(session: {
 }
 
 /**
- * Hydrate localStorage from cross-domain cookie or URL token parameter.
+ * Hydrate localStorage from the legacy cross-domain compatibility cookie.
  * Returns `true` if a session was hydrated.
  */
 export function hydrateSessionFromCookie(
@@ -155,25 +155,7 @@ export function hydrateSessionFromCookie(
   }
 
   // Try 1: URL token parameter (highest priority — this is an explicit handoff)
-  const urlToken = extractSsoTokenFromUrl();
-  if (urlToken) {
-    const claims = decodeJwtClaims(urlToken);
-    const accountId = claims?.sub || claims?.email || "sso-user";
-    const session = {
-      accessToken: urlToken,
-      accountId,
-      portals: ["crm", "lms", "lcms"] as StoredAuthSession["portals"],
-      portal: "lms" as StoredAuthSession["portal"],
-      rememberMe: true,
-      loggedInAt: new Date().toISOString(),
-    };
-    window.localStorage.setItem(localSessionKey, JSON.stringify(session));
-    // Clear the SSO-attempted flag since hydration succeeded
-    window.sessionStorage.removeItem("sso-attempted");
-    return true;
-  }
-
-  // Try 2: Cross-domain cookie
+  // Cross-domain cookie compatibility is retained only until the BFF cutover.
   const raw = getCookie(COOKIE_NAME);
   if (raw) {
     try {
@@ -201,23 +183,6 @@ export function hydrateSessionFromCookie(
 }
 
 /**
- * Extract the sso_token from the current URL and clean it up.
- */
-function extractSsoTokenFromUrl(): string | null {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get(SSO_TOKEN_PARAM);
-  if (!token) return null;
-
-  // Remove the sso_token from the URL to keep it clean (security)
-  params.delete(SSO_TOKEN_PARAM);
-  const cleanSearch = params.toString();
-  const cleanUrl = window.location.pathname + (cleanSearch ? `?${cleanSearch}` : "") + window.location.hash;
-  window.history.replaceState(null, "", cleanUrl);
-
-  return token;
-}
-
-/**
  * Clear the cross-domain session cookie (called on logout).
  */
 export function clearCrossDomainSession() {
@@ -225,23 +190,3 @@ export function clearCrossDomainSession() {
   deleteCookie(COOKIE_NAME);
 }
 
-/**
- * Decode JWT payload to extract claims (sub, email, etc.)
- */
-function decodeJwtClaims(token: string): { sub?: string; email?: string } | null {
-  const parts = token.split(".");
-  if (parts.length < 2) return null;
-
-  try {
-    const payload = parts[1];
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-    const decoded = JSON.parse(window.atob(padded));
-    return {
-      sub: typeof decoded.sub === "string" ? decoded.sub : undefined,
-      email: typeof decoded.email === "string" ? decoded.email : undefined,
-    };
-  } catch {
-    return null;
-  }
-}

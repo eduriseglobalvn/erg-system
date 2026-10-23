@@ -2,7 +2,6 @@ import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import Box from "@mui/material/Box";
-import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -22,7 +21,8 @@ import { SchoolReviewStep } from "@/features/lcms/school-management/components/s
 import { SchoolStructureStep } from "@/features/lcms/school-management/components/setup/school-structure-step";
 import { SchoolStudentsStep } from "@/features/lcms/school-management/components/setup/school-students-step";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
-import { useLocation, useNavigate } from "@/routes/router-compat";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 const baseStepMeta = [
   { label: "Thông tin & loại hình", helper: "Định danh đơn vị" },
@@ -33,12 +33,12 @@ const baseStepMeta = [
 ];
 
 export default function SchoolDetailFlowScreen() {
-  const { selectedSchool, unsupportedApiMessage } = useSchoolManagementContext();
+  const { selectedSchool } = useSchoolManagementContext();
   const location = useLocation();
   const navigate = useNavigate();
   const theme = useTheme();
   const compact = useMediaQuery(theme.breakpoints.down("md"));
-  const parsedStep = Number(new URLSearchParams(location.search).get("step") ?? 0);
+  const parsedStep = Number(new URLSearchParams(location.searchStr).get("step") ?? 0);
   const activeStep = Number.isInteger(parsedStep) && parsedStep >= 0 && parsedStep < baseStepMeta.length ? parsedStep : 0;
   if (!selectedSchool) return null;
 
@@ -51,14 +51,14 @@ export default function SchoolDetailFlowScreen() {
   const content = [<SchoolInformationStep key="information" />, <SchoolStructureStep key="structure" />, <SchoolStudentsStep key="students" />, <SchoolCurriculumStep key="curriculum" />, <SchoolReviewStep key="review" />][activeStep];
 
   function goStep(step: number) {
-    const search = new URLSearchParams(location.search);
+    const search = new URLSearchParams(location.searchStr);
     search.set("schoolId", selectedSchool!.id);
     search.set("step", String(step));
-    navigate(`/schools/detail?${search.toString()}`);
+      void navigate({ href: `${adminPath("/schools/detail")}?${search.toString()}` });
   }
 
   return <SchoolPageShell
-    action={<Button onClick={() => navigate("/schools/list")} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button>}
+      action={<Button onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button>}
     description="Chỉnh sửa theo một flow liên tục; cấu trúc tự thích ứng với loại hình trường."
     title={selectedSchool.name}
   >
@@ -127,11 +127,10 @@ export default function SchoolDetailFlowScreen() {
       </Paper>
 
       <Box sx={{ minWidth: 0 }}>
-        {activeStep >= 1 && activeStep <= 3 ? <Alert severity="info" sx={{ mb: 2 }}>{unsupportedApiMessage} Các control trong bước này chỉ là bản duyệt UI và chưa ghi dữ liệu.</Alert> : null}
         {content}
         <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", mt: 2 }}>
           <Button disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)} startIcon={<ArrowBackRoundedIcon />}>Quay lại</Button>
-          {activeStep < stepMeta.length - 1 ? <Button onClick={() => goStep(activeStep + 1)} endIcon={<ArrowForwardRoundedIcon />} variant="contained">Tiếp theo: {stepMeta[activeStep + 1].label}</Button> : <Button color="success" disabled={!completion[4]} onClick={() => navigate("/schools/list")} startIcon={<CheckCircleRoundedIcon />} variant="contained">Hoàn tất thiết lập</Button>}
+          {activeStep < stepMeta.length - 1 ? <Button onClick={() => goStep(activeStep + 1)} endIcon={<ArrowForwardRoundedIcon />} variant="contained">Tiếp theo: {stepMeta[activeStep + 1].label}</Button> : <Button color="success" disabled={!completion[4]} onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<CheckCircleRoundedIcon />} variant="contained">Hoàn tất thiết lập</Button>}
         </Box>
       </Box>
     </Box>

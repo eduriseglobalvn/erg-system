@@ -24,8 +24,8 @@ export function SchoolStudentsStep() {
   const meta = schoolTypeMeta[selectedSchool.schoolType];
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
 
-  function importStudents(rows: StudentImportRow[]) {
-    addStudents(rows.map((row) => ({ code: row.code || `${selectedSchool!.id}-${Date.now()}`, fullName: row.fullName, birthDate: row.birthDate, grade: row.grade, className: row.className, guardianPhone: row.guardianPhone, subjectIds: [], status: "studying" })));
+  async function importStudents(rows: StudentImportRow[]) {
+    await addStudents(rows.map((row) => ({ code: row.code || `${selectedSchool!.id}-${Date.now()}`, fullName: row.fullName, birthDate: row.birthDate, grade: row.grade, className: row.className, guardianPhone: row.guardianPhone, subjectIds: [], status: "studying" })));
   }
 
   return <>

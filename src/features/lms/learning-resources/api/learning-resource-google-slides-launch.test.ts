@@ -2,7 +2,8 @@ import { beforeEach, expect, test, vi } from "vitest";
 
 const apiRequestMock = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...await importOriginal<typeof import("@/lib/api-client")>(),
   apiRequest: apiRequestMock,
   hasApiBase: () => true,
 }));

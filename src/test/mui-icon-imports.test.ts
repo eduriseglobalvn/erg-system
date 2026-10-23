@@ -28,4 +28,25 @@ describe("MUI icon path imports", () => {
 
     expect(invalidImports).toEqual([]);
   });
+
+  it("does not route icon imports through the compatibility shim", () => {
+    const root = process.cwd();
+    const shim = resolve(root, "src/components/mui-icon-shim.tsx");
+    const consumers = sourceFiles(resolve(root, "src"))
+      .filter((file) => file !== shim)
+      .filter((file) => /from\s+["']@\/components\/mui-icon-shim["']/.test(readFileSync(file, "utf8")))
+      .map((file) => file.replace(`${root}\\`, ""));
+
+    expect(existsSync(shim)).toBe(false);
+    expect(consumers).toEqual([]);
+  });
+
+  it("does not import the MUI icon barrel", () => {
+    const root = process.cwd();
+    const barrelConsumers = sourceFiles(resolve(root, "src"))
+      .filter((file) => /from\s+["']@mui\/icons-material["']/.test(readFileSync(file, "utf8")))
+      .map((file) => file.replace(`${root}\\`, ""));
+
+    expect(barrelConsumers).toEqual([]);
+  });
 });

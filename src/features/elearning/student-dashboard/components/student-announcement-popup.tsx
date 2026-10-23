@@ -75,9 +75,11 @@ export function StudentAnnouncementPopup({
                     {pinnedLabel}
                   </Box>
                 ) : null}
-                <Box component="span" sx={{"borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1.5)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 257.417)"}}>
-                  {announcement.targetLabel}
-                </Box>
+                {announcement.targetLabel ? (
+                  <Box component="span" sx={{"borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1.5)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"oklch(55.4% 0.046 247.417)"}}>
+                    {announcement.targetLabel}
+                  </Box>
+                ) : null}
               </Box>
               <Box component="button"
                 type="button"
@@ -96,7 +98,7 @@ export function StudentAnnouncementPopup({
 
             <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","borderTopStyle":"solid","borderTopWidth":"1px","borderColor":"oklch(96.8% 0.007 247.896)","paddingTop":"calc(0.25rem * 5)"}}>
               <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)"}}>
-                <Box component="div" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"1rem","lineHeight":"calc(1.5 / 1)","fontWeight":"600","color":"oklch(37.2% 0.044 257.287)"}}>{announcement.teacherName}</Box>
+                {announcement.teacherName ? <Box component="div" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"1rem","lineHeight":"calc(1.5 / 1)","fontWeight":"600","color":"oklch(37.2% 0.044 257.287)"}}>{announcement.teacherName}</Box> : null}
                 <Box component="div" sx={{"marginTop":"calc(0.25rem * 1)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{announcement.createdAtLabel}</Box>
               </Box>
               <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 3)","@media (min-width: 40rem)":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>

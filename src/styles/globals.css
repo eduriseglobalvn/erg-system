@@ -15,6 +15,12 @@
    --------------------------------------------------------------------------- */
 @layer base {
   :root {
+    /* Canonical operational type stacks. The app font package exposes
+       "Manrope", while "Manrope Variable" remains a compatible fallback. */
+    --font-app: "Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-editor-ui: var(--font-app);
+    --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+
     /* Shadcn/ui semantic aliases — maps @theme inline tokens */
     --background: #FFFFFF;
     --foreground: #1C252E;
@@ -40,6 +46,16 @@
     --input: rgba(145, 158, 171, 0.2);
     --ring: rgba(105, 108, 255, 0.24);
 
+    /* ERG operational tokens shared by the responsive LMS surfaces. */
+    --erg-blue: #0F6CBD;
+    --erg-blue-hover: #0B5CAB;
+    --erg-blue-light: #EEF6FF;
+    --erg-blue-ring: rgba(15, 108, 189, 0.18);
+    --erg-text: #172033;
+    --erg-border: #D9E2EF;
+    --erg-muted: #637381;
+    --erg-red: #D13438;
+
     --radius: 0.5rem; /* 8px */
 
     /* Sidebar */
@@ -58,21 +74,46 @@
     --chart-3: #FFAB00;
     --chart-4: #FF5630;
     --chart-5: #696CFF;
+
+    /* Native PWA & Device Safe Area Insets (iOS notch/home-bar, Android navigation, Desktop WCO) */
+    --sat: env(safe-area-inset-top, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --wco-height: env(titlebar-area-height, 0px);
+    --wco-width: env(titlebar-area-width, 100%);
+    --wco-x: env(titlebar-area-x, 0px);
+    --wco-y: env(titlebar-area-y, 0px);
   }
 
   * {
     @apply border-border outline-ring/50;
   }
 
-  body {
-    font-family: "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    font-size: 15px;
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    width: 100%;
+  }
+
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+
+body {
+    font-family: var(--font-app);
+    font-size: 14px;
     font-weight: 400;
     line-height: 1.5;
     color: #1C252E;
     background: #FFFFFF;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    margin: 0;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
 
   ::selection {
@@ -80,7 +121,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-app);
     color: #1C252E;
   }
 
@@ -545,6 +586,23 @@
   --quiz-answer-wide-max-width: 1480px;
   --quiz-question-title-font: "Arial Rounded MT Bold", Nunito, "Public Sans", system-ui, sans-serif;
   font-family: "Public Sans", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Keep visually-hidden labels hidden even when a legacy utility bundle is
+   omitted from a production entry point. */
+.sr-only {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  clip-path: inset(50%) !important;
+  white-space: nowrap;
+  border: 0 !important;
+  opacity: 0 !important;
+  pointer-events: none;
 }
 
 .quiz-player-question-title {

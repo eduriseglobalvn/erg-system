@@ -1,4 +1,6 @@
-import { apiRequest, hasApiBase } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import { apiRequest } from "@/lib/api-client";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 
 import { normalizePortal, type NotificationPortal, type NotificationPriority } from "./notification-api";
 
@@ -41,15 +43,15 @@ export type AdminNotificationOutboxRunResponse = {
 };
 
 export async function sendAdminNotification(input: AdminNotificationCommandInput) {
-  return postAdminNotificationCommand("/api/v1/admin/notifications/send", input);
+  return postAdminNotificationCommand(API_ENDPOINTS.legacy.v1AdminNotificationsSend, input);
 }
 
 export async function broadcastAdminNotification(input: AdminNotificationCommandInput) {
-  return postAdminNotificationCommand("/api/v1/admin/notifications/broadcast", input);
+  return postAdminNotificationCommand(API_ENDPOINTS.legacy.v1AdminNotificationsBroadcast, input);
 }
 
 export async function fetchAdminNotificationStats() {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       dead: 0,
       pending: 2,
@@ -58,13 +60,13 @@ export async function fetchAdminNotificationStats() {
     } satisfies AdminNotificationStatsResponse;
   }
 
-  return apiRequest<AdminNotificationStatsResponse>("/api/v1/admin/notifications/stats", {
+  return apiRequest<AdminNotificationStatsResponse>(API_ENDPOINTS.legacy.v1AdminNotificationsStats, {
     portal: ADMIN_NOTIFICATION_PORTAL,
   });
 }
 
 export async function runAdminNotificationOutbox() {
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       dead: 0,
       failed: 0,
@@ -74,7 +76,7 @@ export async function runAdminNotificationOutbox() {
     } satisfies AdminNotificationOutboxRunResponse;
   }
 
-  return apiRequest<AdminNotificationOutboxRunResponse>("/api/v1/admin/notifications/outbox/run", {
+  return apiRequest<AdminNotificationOutboxRunResponse>(API_ENDPOINTS.legacy.v1AdminNotificationsOutboxRun, {
     method: "POST",
     portal: ADMIN_NOTIFICATION_PORTAL,
   });
@@ -97,7 +99,7 @@ async function postAdminNotificationCommand(path: string, input: AdminNotificati
     userIds,
   };
 
-  if (!hasApiBase()) {
+  if (runtimeFixturesEnabled()) {
     return {
       notificationId: `notification-${Date.now().toString(36)}`,
       outboxCount: Math.max(1, userIds.length || 1),

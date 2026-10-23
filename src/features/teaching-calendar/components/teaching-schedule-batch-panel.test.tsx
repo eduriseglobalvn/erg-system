@@ -46,6 +46,22 @@ it("opens batch detail from the paginated batch table", async () => {
   );
 
   fireEvent.click(await screen.findByRole("button", { name: "Xem đợt batch-1" }));
-  await waitFor(() => expect(mocks.loadDetail).toHaveBeenCalledWith({ batchId: "batch-1", tenantId: "tenant-a" }));
+  await waitFor(() => expect(mocks.loadDetail).toHaveBeenCalledWith(
+    { batchId: "batch-1", tenantId: "tenant-a" },
+    expect.any(AbortSignal),
+  ));
   expect(await screen.findByText("12 sự kiện")).toBeInTheDocument();
+});
+
+it("exposes the primary create-schedule action", async () => {
+  const onCreate = vi.fn();
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  render(
+    <QueryClientProvider client={queryClient}>
+      <TeachingScheduleBatchPanel canCreate onCreate={onCreate} permissions={{ canPublish: true }} tenantId="tenant-a" />
+    </QueryClientProvider>,
+  );
+
+  fireEvent.click(await screen.findByRole("button", { name: "Tạo lịch" }));
+  expect(onCreate).toHaveBeenCalledTimes(1);
 });

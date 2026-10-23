@@ -1,20 +1,21 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  Copy,
-  FileQuestion,
-  FileText,
-  Folder,
-  Pencil,
-  Presentation,
-  Trash2,
-} from "@/components/mui-icon-shim";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import Add from "@mui/icons-material/Add";
+import AutoStories from "@mui/icons-material/AutoStories";
+import CalendarMonth from "@mui/icons-material/CalendarMonth";
+import Pencil from "@mui/icons-material/Edit";
+import Trash2 from "@mui/icons-material/DeleteOutlined";
+import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 
 import {
   deleteLearningResourceResource,
   loadLearningResourceResourceDetail,
   type LearningResourceResourceCard,
+  type LearningResourceTaxonomyOption,
 } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import { ResourceEditDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs";
+import { CurriculumTeachingPlanDialog } from "@/features/lcms/admin-operations/components/curriculum-teaching-plan-dialog";
 import type {
   AttachedResourceItem,
   LocalContentItem,
@@ -23,96 +24,134 @@ import type {
   StructureSelection,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import {
-  LearningResourceExplorerCardGrid,
-  LearningResourceExplorerCommandBar,
   LearningResourceExplorerShell,
   LearningResourceExplorerTopBar,
-  LearningResourceExplorerTreePane,
-  LearningResourceExplorerTreeRow,
-  LearningResourceFolderTile,
-  WindowsFolderIcon,
-  type ExplorerViewMode,
-  type LearningResourceExplorerCommand,
 } from "@/components/learning-resources/explorer-ui";
-import {
-  EnterpriseContentGrid,
-  EnterpriseList,
-  flattenContentGroups,
-  targetsEqual,
-} from "@/features/lcms/admin-operations/components/learning-resource-curriculum-explorer";
+import { COURSE_STRUCTURE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import {
   buildExplorerPathUrl,
-  copyTextToClipboard,
+  findNode,
   getDisplayLink,
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";
 import {
-  filterTree,
-  flattenVisibleNodes,
-} from "@/features/lcms/admin-operations/components/learning-resource-authoring-tree";
-import {
   buildCurriculumExplorerModel,
-  getResourceCommandSpecs,
+  buildCurriculumRoadmapStages,
   type CurriculumContentItem,
   type CurriculumFolder,
   type CurriculumTarget,
   type ResourceCommandId,
 } from "@/features/lcms/admin-operations/utils/learning-resource-curriculum-view-model";
+import {
+  CurriculumRoadmapView,
+  type CurriculumRoadmapActions,
+} from "@/features/lcms/admin-operations/components/curriculum-roadmap-view";
 import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import { cn } from "@/lib/utils";
 
-function SubjectTreeSection({
-  subject,
-  treeQuery,
-  selectedNode,
-  expandedNodeIds,
-  selection,
-  onSelectNode,
-  onToggleNode,
-  onCreateChild,
+function SubjectRail({
+  subjects,
   selectedSubjectId,
+  query,
+  onSelectSubject,
+  onBackToSubjects,
 }: {
-  subject: StudioSubject;
-  treeQuery: string;
-  selectedNode?: StudioNode;
-  expandedNodeIds: Set<string>;
-  selection: StructureSelection;
-  onSelectNode: (nodeId: string) => void;
-  onToggleNode: (nodeId: string) => void;
-  onCreateChild: (node: StudioNode) => void;
-  selectedSubjectId: string;
+  subjects: StudioSubject[];
+  selectedSubjectId?: string;
+  query: string;
+  onSelectSubject: (id: string) => void;
+  onBackToSubjects: () => void;
 }) {
-  const visibleRows = useMemo(() => {
-    return flattenVisibleNodes(filterTree(subject.tree, treeQuery), expandedNodeIds);
-  }, [expandedNodeIds, subject.tree, treeQuery]);
+  const normalizedQuery = query.trim().toLocaleLowerCase("vi");
+  const visibleSubjects = normalizedQuery
+    ? subjects.filter((subject) => `${subject.label} ${subject.description ?? ""}`.toLocaleLowerCase("vi").includes(normalizedQuery))
+    : subjects;
 
   return (
-    <div className="mt-0.5 space-y-0.5">
-      {visibleRows.length ? (
-        visibleRows.map(({ node, depth }) => (
-          <LearningResourceExplorerTreeRow
-            key={node.id}
-            label={node.label}
-            title={node.label}
-            icon={<WindowsFolderIcon open={expandedNodeIds.has(node.id)} />}
-            depth={depth + 1}
-            selected={subject.id === selectedSubjectId && node.id === selectedNode?.id && !selection}
-            expanded={expandedNodeIds.has(node.id)}
-            hasChildren={node.children.length > 0}
-            onSelect={() => onSelectNode(node.id)}
-            onToggle={() => onToggleNode(node.id)}
-            onAction={() => onCreateChild(node)}
-          />
-        ))
-      ) : (
-        <div className="px-2 py-3 text-xs text-slate-500">Không tìm thấy nội dung phù hợp.</div>
-      )}
+    <aside className="flex min-h-0 flex-col border-r border-[#D9E2EF] bg-white">
+      <div className="flex h-12 shrink-0 items-center justify-between border-b border-[#D9E2EF] px-3">
+        <span className="text-[12px] font-bold uppercase tracking-wide text-[#52606D]">Môn học</span>
+        <Button size="small" variant="text" onClick={onBackToSubjects} sx={{ minWidth: 0, px: 1, fontSize: 12 }}>
+          Quản lý
+        </Button>
+      </div>
+      <div className="min-h-0 flex-1 overflow-y-auto p-2 [scrollbar-gutter:stable]">
+        {visibleSubjects.map((subject) => {
+          const selected = subject.id === selectedSubjectId;
+          return (
+            <button
+              key={subject.id}
+              type="button"
+              className={cn(
+                "mb-1 flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition focus:outline-none focus-visible:ring-2 focus-visible:ring-[#75B6F2]",
+                selected ? "border-[#B8D6FA] bg-[#EAF4FF]" : "border-transparent hover:bg-[#F4F7FA]",
+              )}
+              onClick={() => onSelectSubject(subject.id)}
+            >
+              <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg", selected ? "bg-white text-[#0F6CBD]" : "bg-[#F1F4F7] text-[#52606D]") }>
+                <AutoStories className="h-[18px] w-[18px]" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[13px] font-bold text-[#172033]">{subject.label}</span>
+                <span className="mt-0.5 block text-[11px] text-[#637381]">{subject.groupCount} level · {subject.lessonCount} bài học</span>
+              </span>
+            </button>
+          );
+        })}
+        {!visibleSubjects.length ? <p className="px-3 py-6 text-center text-xs text-[#637381]">Không tìm thấy môn học.</p> : null}
+      </div>
+    </aside>
+  );
+}
+
+function CurriculumActionBar({
+  selectedKind,
+  selectedLabel,
+  canEdit,
+  canDelete,
+  onOpenSchedule,
+  onCommand,
+}: {
+  selectedKind: "none" | "subject" | "level" | "topic";
+  selectedLabel: string;
+  canEdit: boolean;
+  canDelete: boolean;
+  onOpenSchedule: () => void;
+  onCommand: (id: ResourceCommandId) => void;
+}) {
+  const createCommand = selectedKind === "none" ? "create-subject" : selectedKind === "subject" ? "create-level" : selectedKind === "level" ? "create-topic" : "create-lesson";
+  const createLabel = selectedKind === "none" ? "Tạo môn học" : selectedKind === "subject" ? "Tạo level" : selectedKind === "level" ? "Tạo chủ đề" : "Tạo bài học";
+
+  return (
+    <div className="flex min-h-12 shrink-0 items-center justify-between gap-3 border-b border-[#D9E2EF] bg-white px-3 py-1.5">
+      <div className="min-w-0">
+        <div className="truncate text-[13px] font-bold text-[#172033]">{selectedLabel}</div>
+        <div className="text-[11px] text-[#637381]">{selectedKind === "topic" ? "Danh sách bài học trong chủ đề" : "Cấu trúc môn học: Level → Chủ đề → Bài học"}</div>
+      </div>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<CalendarMonth />}
+          disabled={selectedKind === "none"}
+          onClick={onOpenSchedule}
+          aria-label="Mở khung chương trình môn học"
+          title={selectedKind === "none" ? "Chọn một môn học trước" : "Thiết lập khung chương trình và phân bổ số tiết môn học"}
+          sx={{ textTransform: "none" }}
+        >
+          Khung chương trình
+        </Button>
+        <Button variant="contained" size="small" startIcon={<Add />} onClick={() => onCommand(createCommand)} sx={{ boxShadow: "none", textTransform: "none" }}>
+          {createLabel}
+        </Button>
+        <span className="mx-1 h-6 w-px bg-[#D9E2EF]" />
+        <Tooltip title="Chỉnh sửa mục đang chọn"><span><IconButton size="small" disabled={!canEdit} onClick={() => onCommand("edit")} aria-label="Chỉnh sửa mục đang chọn"><Pencil fontSize="small" /></IconButton></span></Tooltip>
+        <Tooltip title="Xem tác động trước khi xóa"><span><IconButton size="small" color="error" disabled={!canDelete} onClick={() => onCommand("delete")} aria-label="Xem tác động trước khi xóa"><Trash2 fontSize="small" /></IconButton></span></Tooltip>
+      </div>
     </div>
   );
 }
-function collectStudioNodeIds(nodes: StudioNode[]): string[] {
-  return nodes.flatMap((node) => [node.id, ...collectStudioNodeIds(node.children)]);
-}
+
 export function StructureScreen({
   subjects,
   selectedSubject,
@@ -124,6 +163,9 @@ export function StructureScreen({
   onCreateRoot,
   onCreateTopic,
   onCreateChild,
+  onBackToSubjects,
+  onEditSubject,
+  onDeleteSubject,
   onEditSelection,
   onDeleteSelection,
   onEditNodeSelection,
@@ -134,6 +176,7 @@ export function StructureScreen({
   onRefreshData,
   quizBankItems,
   resources,
+  taxonomyTopics,
 }: {
   subjects: StudioSubject[];
   selectedSubject?: StudioSubject;
@@ -145,6 +188,7 @@ export function StructureScreen({
   onCreateRoot: () => void;
   onCreateTopic: () => void;
   onCreateChild: (option?: "section" | "lecture" | "exercise" | "resource") => void;
+  onBackToSubjects: () => void;
   onEditSubject: () => void;
   onDeleteSubject: () => void;
   onEditSelection: () => void;
@@ -157,33 +201,14 @@ export function StructureScreen({
   onRefreshData: () => Promise<void>;
   quizBankItems: QuizBankItem[];
   resources: LearningResourceResourceCard[];
+  taxonomyTopics: LearningResourceTaxonomyOption[];
 }) {
-  const [expandedNodeIds, setExpandedNodeIds] = useState<Set<string>>(new Set());
-  const [expandedSubjectIds, setExpandedSubjectIds] = useState<Set<string>>(new Set());
   const [treeQuery, setTreeQuery] = useState("");
+  const [teachingPlanOpen, setTeachingPlanOpen] = useState(false);
   const [editingResource, setEditingResource] = useState<AttachedResourceItem | null>(null);
   const [attachedResources, setAttachedResources] = useState<Record<string, AttachedResourceItem>>({});
   const [selection, setSelection] = useState<StructureSelection>(null);
-  const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
-  const debouncedTreeQuery = useDebouncedValue(treeQuery);
   const paceStateUpdate = usePacedStateBatch();
-
-  useEffect(() => {
-    if (selectedSubject) {
-      setExpandedSubjectIds((prev) => {
-        if (prev.has(selectedSubject.id)) return prev;
-        const next = new Set(prev);
-        next.add(selectedSubject.id);
-        return next;
-      });
-    }
-  }, [selectedSubject]);
-
-  useEffect(() => {
-    paceStateUpdate(() => {
-      setExpandedNodeIds(new Set(collectStudioNodeIds(selectedSubject?.tree ?? [])));
-    });
-  }, [paceStateUpdate, selectedSubject?.id, selectedSubject?.tree]);
 
   const currentChildren = useMemo(() => selectedNode?.children ?? selectedSubject?.tree ?? [], [selectedNode?.children, selectedSubject?.tree]);
   const selectedNodeOptionId = selectedNode?.optionId;
@@ -292,26 +317,6 @@ export function StructureScreen({
     };
   }, [attachedResources, currentResources]);
 
-  const toggleNode = useCallback((nodeId: string) => {
-    setExpandedNodeIds((current) => {
-      const next = new Set(current);
-      if (next.has(nodeId)) {
-        next.delete(nodeId);
-      } else {
-        next.add(nodeId);
-      }
-      return next;
-    });
-  }, []);
-
-  const handleCreateChild = useCallback((node?: StudioNode) => {
-    if (node) {
-      onSelectNode(node.id);
-      setSelection(null);
-    }
-    onCreateChild();
-  }, [onCreateChild, onSelectNode]);
-
   const handleDeleteResource = useCallback(async (resource: AttachedResourceItem) => {
     await deleteLearningResourceResource(resource.id);
     setAttachedResources((current) => {
@@ -370,6 +375,7 @@ export function StructureScreen({
         label: selectedSubject.label,
         onClick: () => {
           onSelectSubject(selectedSubject.id);
+          onSelectNode("");
           setSelection(null);
         },
       });
@@ -386,6 +392,20 @@ export function StructureScreen({
     return items;
   }, [selectedSubject, selectedPath, onSelectSubject, onSelectNode]);
 
+  const explorerBreadcrumbItems = useMemo(
+    () => breadcrumbItems.length
+      ? breadcrumbItems
+      : [{
+          label: COURSE_STRUCTURE_WORKSPACE_LABEL,
+          onClick: () => {
+            onSelectSubject("");
+            onSelectNode("");
+            setSelection(null);
+          },
+        }],
+    [breadcrumbItems, onSelectNode, onSelectSubject],
+  );
+
   const curriculumModel = useMemo(
     () =>
       buildCurriculumExplorerModel({
@@ -399,7 +419,21 @@ export function StructureScreen({
       }),
     [allAttachedResources, localContentItems, quizBankItems, selectedNode, selectedPath, selectedSubject, subjects],
   );
-  const contentItems = useMemo(() => flattenContentGroups(curriculumModel.contentGroups), [curriculumModel.contentGroups]);
+
+  // Always build all roadmap stages for the entire subject
+  const roadmapStages = useMemo(
+    () => selectedSubject
+      ? buildCurriculumRoadmapStages({
+          subject: selectedSubject,
+          localContentItems,
+          resources: allAttachedResources,
+          taxonomyTopics,
+          quizBankItems,
+        })
+      : [],
+    [allAttachedResources, localContentItems, quizBankItems, selectedSubject, taxonomyTopics],
+  );
+
   const selectedTarget = useMemo<CurriculumTarget | null>(() => {
     if (selection?.type === "node") return { type: "node", id: selection.id };
     if (selection?.type === "local-content") return { type: "local-content", id: selection.id };
@@ -408,30 +442,6 @@ export function StructureScreen({
     if (selectedSubject) return { type: "subject", id: selectedSubject.id };
     return null;
   }, [selectedNode, selectedSubject, selection]);
-  const selectedContentForInspector = useMemo(
-    () => contentItems.find((item) => targetsEqual(item.target, selectedTarget)),
-    [contentItems, selectedTarget],
-  );
-  const commandSpecs = useMemo(
-    () =>
-      getResourceCommandSpecs({
-        selectedKind: curriculumModel.selectedKind,
-        hasSelectedSubject: Boolean(selectedSubject),
-        canEditSelection,
-        canDeleteSelection,
-      }),
-    [canDeleteSelection, canEditSelection, curriculumModel.selectedKind, selectedSubject],
-  );
-  const handleSelectFolder = useCallback((folder: CurriculumFolder) => {
-    if (folder.target.type === "node") {
-      setSelection({ type: "node", id: folder.target.id });
-      return;
-    }
-    if (folder.target.type === "subject") {
-      onSelectSubject(folder.target.id);
-      setSelection(null);
-    }
-  }, [onSelectSubject]);
 
   const handleOpenFolder = useCallback((folder: CurriculumFolder) => {
     setSelection(null);
@@ -483,6 +493,10 @@ export function StructureScreen({
       onCreateTopic();
       return;
     }
+    if (id === "create-lesson") {
+      onCreateChild("section");
+      return;
+    }
     if (id === "add-lecture") {
       onCreateChild("lecture");
       return;
@@ -493,10 +507,6 @@ export function StructureScreen({
     }
     if (id === "add-exercise") {
       onCreateChild("exercise");
-      return;
-    }
-    if (id === "copy-url") {
-      copyTextToClipboard(selectedContentForInspector?.href || selectedExplorerUrl);
       return;
     }
     if (id === "edit") {
@@ -513,138 +523,101 @@ export function StructureScreen({
     onCreateRoot,
     onCreateSubject,
     onCreateTopic,
-    selectedContentForInspector?.href,
-    selectedExplorerUrl,
   ]);
 
-
-  const commandActions = useMemo<LearningResourceExplorerCommand[]>(() => {
-    const enabledCommands = commandSpecs.filter((command) => command.enabled);
-    const commandById = new Map(enabledCommands.map((command) => [command.id, command]));
-    const folderCreateCommand =
-      commandById.get("create-subject") ?? commandById.get("create-level") ?? commandById.get("create-topic");
-    const toAction = (
-      id: ResourceCommandId,
-      icon: ReactNode,
-      label?: string,
-      variant: LearningResourceExplorerCommand["variant"] = "text",
-    ): LearningResourceExplorerCommand | null => {
-      const command = commandById.get(id);
-      if (!command) return null;
-      return {
-        disabled: !command.enabled,
-        icon,
-        label: label ?? command.label,
-        onClick: () => handleResourceCommand(id),
-        title: command.label,
-        variant,
-      };
-    };
-
-    return [
-      folderCreateCommand
-        ? {
-            icon: <Folder className="h-4 w-4" />,
-            label: folderCreateCommand.label,
-            onClick: () => handleResourceCommand(folderCreateCommand.id),
-            title: folderCreateCommand.label,
+  const roadmapActions: CurriculumRoadmapActions = useMemo(
+    () => ({
+      onCreateLevel: onCreateRoot,
+      onCreateTopic: (levelFolder: CurriculumFolder) => {
+        if (levelFolder.target.type === "node") {
+          onSelectNode(levelFolder.target.id);
+        }
+        onCreateTopic();
+      },
+      onCreateLesson: (topicFolder: CurriculumFolder) => {
+        if (topicFolder.target.type === "node") {
+          onSelectNode(topicFolder.target.id);
+        }
+        onCreateChild("section");
+      },
+      onEditFolder: (folder: CurriculumFolder) => {
+        if (folder.target.type === "node") {
+          const node = selectedSubject ? findNode(selectedSubject.tree, folder.target.id) : undefined;
+          if (node) {
+            onEditNodeSelection(node);
+            return;
           }
-        : null,
-      toAction("add-lecture", <Presentation className="h-4 w-4" />, "Thêm bài giảng"),
-      toAction("add-exercise", <FileQuestion className="h-4 w-4" />, "Thêm bài tập"),
-      toAction("add-resource", <FileText className="h-4 w-4" />, "Gắn tài liệu"),
-      { icon: null, label: "separator-content", variant: "separator" },
-      toAction("copy-url", <Copy className="h-4 w-4" />, undefined, "icon"),
-      toAction("edit", <Pencil className="h-4 w-4" />, undefined, "icon"),
-      toAction("delete", <Trash2 className="h-4 w-4" />, undefined, "icon"),
-    ].filter(Boolean) as LearningResourceExplorerCommand[];
-  }, [commandSpecs, handleResourceCommand]);
+        }
+        if (folder.target.type === "subject") {
+          onEditSubject();
+        }
+      },
+      onDeleteFolder: (folder: CurriculumFolder) => {
+        if (folder.target.type === "node") {
+          const node = selectedSubject ? findNode(selectedSubject.tree, folder.target.id) : undefined;
+          if (node) {
+            onDeleteNodeSelection(node);
+            return;
+          }
+        }
+        if (folder.target.type === "subject") {
+          onDeleteSubject();
+        }
+      },
+    }),
+    [
+      onCreateChild,
+      onCreateRoot,
+      onCreateTopic,
+      onDeleteNodeSelection,
+      onDeleteSubject,
+      onEditNodeSelection,
+      onEditSubject,
+      onSelectNode,
+      selectedSubject,
+    ],
+  );
 
-  const visibleItemCount = curriculumModel.selectedKind === "topic" ? contentItems.length : curriculumModel.folders.length;
+  const visibleItemCount = roadmapStages.reduce(
+    (total, stage) => total + 1 + stage.topics.length + stage.topics.reduce((count, topic) => count + topic.lessons.length, 0),
+    0,
+  );
+  const selectedLabel = selectedNode?.label ?? selectedSubject?.label ?? COURSE_STRUCTURE_WORKSPACE_LABEL;
 
   return (
     <LearningResourceExplorerShell className="border-[rgba(145,158,171,0.2)] shadow-none">
       <LearningResourceExplorerTopBar
-        breadcrumbItems={breadcrumbItems}
+        breadcrumbItems={explorerBreadcrumbItems}
         canGoBack={Boolean(selectedNode)}
         onBack={handleGoBack}
         onRefresh={() => void onRefreshData()}
-        searchLabel="Tìm kiếm học liệu"
+        searchLabel="Tìm trong cấu trúc môn học"
         searchPlaceholder={curriculumModel.searchPlaceholder}
         searchValue={treeQuery}
-        title={breadcrumbItems.length ? selectedExplorerUrl : ""}
+        title={selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}
         onSearchChange={setTreeQuery}
       />
-      <LearningResourceExplorerCommandBar actions={commandActions} viewMode={viewMode} onViewModeChange={setViewMode} />
+      <CurriculumActionBar
+        selectedKind={curriculumModel.selectedKind}
+        selectedLabel={selectedLabel}
+        canEdit={canEditSelection}
+        canDelete={canDeleteSelection}
+        onOpenSchedule={() => setTeachingPlanOpen(true)}
+        onCommand={handleResourceCommand}
+      />
 
-      <div className="grid h-[calc(100vh-220px)] min-h-[560px] min-w-0 grid-cols-[250px_minmax(0,1fr)] overflow-hidden">
-        <LearningResourceExplorerTreePane
-          onClick={(event) => {
-            if (event.currentTarget !== event.target) return;
-            onSelectSubject("");
+      <div className="grid h-[calc(100vh-220px)] min-h-[560px] min-w-0 grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)]">
+        <SubjectRail
+          subjects={subjects}
+          selectedSubjectId={selectedSubject?.id}
+          query={treeQuery}
+          onSelectSubject={(subjectId) => {
+            onSelectSubject(subjectId);
             onSelectNode("");
             setSelection(null);
           }}
-        >
-          {subjects.length ? subjects.map((subject) => {
-            const expanded = expandedSubjectIds.has(subject.id);
-            return (
-              <div key={subject.id}>
-                <LearningResourceExplorerTreeRow
-                  label={subject.label}
-                  title={subject.label}
-                  icon={<WindowsFolderIcon open={expanded} />}
-                  selected={selectedSubject?.id === subject.id && !selectedNode?.id && !selection}
-                  expanded={expanded}
-                  hasChildren={subject.tree.length > 0}
-                  onSelect={() => {
-                    onSelectSubject(subject.id);
-                    setSelection(null);
-                    setExpandedSubjectIds((prev) => {
-                      const next = new Set(prev);
-                      next.add(subject.id);
-                      return next;
-                    });
-                  }}
-                  onToggle={() => {
-                    setExpandedSubjectIds((prev) => {
-                      const next = new Set(prev);
-                      if (next.has(subject.id)) {
-                        next.delete(subject.id);
-                      } else {
-                        next.add(subject.id);
-                      }
-                      return next;
-                    });
-                  }}
-                />
-                {expanded ? (
-                  <SubjectTreeSection
-                    subject={subject}
-                    treeQuery={debouncedTreeQuery}
-                    selectedNode={selectedNode}
-                    expandedNodeIds={expandedNodeIds}
-                    selection={selection}
-                    onSelectNode={(nodeId) => {
-                      onSelectSubject(subject.id);
-                      onSelectNode(nodeId);
-                      setSelection(null);
-                    }}
-                    onToggleNode={toggleNode}
-                    onCreateChild={handleCreateChild}
-                    selectedSubjectId={selectedSubject?.id ?? ""}
-                  />
-                ) : null}
-              </div>
-            );
-          }) : (
-            <div
-              className="m-2 rounded-lg border border-dashed border-[#B8D6FA] bg-[#EAF4FF] p-3 text-xs leading-5 text-[#0F6CBD]"
-            >
-              Chưa có môn học. Bấm Tạo môn học để bắt đầu.
-            </div>
-          )}
-        </LearningResourceExplorerTreePane>
+          onBackToSubjects={onBackToSubjects}
+        />
 
         <section
           className="min-h-0 min-w-0 overflow-hidden bg-white"
@@ -655,57 +628,24 @@ export function StructureScreen({
             setSelection(null);
           }}
         >
-          {curriculumModel.selectedKind === "topic" ? (
-            viewMode === "list" ? (
-              <EnterpriseList
-                folders={[]}
-                items={contentItems}
-                selectedTarget={selectedTarget}
-                onOpenContent={handleOpenContent}
-                onOpenFolder={handleOpenFolder}
-                onSelectContent={handleSelectContent}
-                onSelectFolder={handleSelectFolder}
-              />
-            ) : (
-              <EnterpriseContentGrid
-                items={contentItems}
-                selectedTarget={selectedTarget}
-                onOpenContent={handleOpenContent}
-                onSelectContent={handleSelectContent}
-              />
-            )
+          {curriculumModel.selectedKind === "none" ? (
+            <div className="flex h-full items-center justify-center bg-[#F8FAFC] px-8 text-center">
+              <div className="max-w-sm">
+                <span className="mx-auto grid h-11 w-11 place-items-center rounded-lg bg-[#EAF4FF] text-[#0F6CBD]"><AutoStories className="h-5 w-5" /></span>
+                <h3 className="mt-3 text-sm font-bold text-[#172033]">Chọn một môn học</h3>
+                <p className="mt-1 text-[13px] leading-5 text-[#637381]">Chọn môn ở danh sách bên trái để xem và chỉnh sửa level, chủ đề và nội dung học.</p>
+              </div>
+            </div>
           ) : (
-            viewMode === "list" ? (
-              <EnterpriseList
-                folders={curriculumModel.folders}
-                items={[]}
-                selectedTarget={selectedTarget}
-                onOpenFolder={handleOpenFolder}
-                onSelectFolder={handleSelectFolder}
-              />
-            ) : (
-              <LearningResourceExplorerCardGrid
-                className="p-5"
-                contentClassName="lms-resource-card-grid"
-                onClick={(event) => {
-                  if (event.currentTarget !== event.target) return;
-                  onSelectSubject("");
-                  onSelectNode("");
-                  setSelection(null);
-                }}
-              >
-                {curriculumModel.folders.map((folder) => (
-                  <LearningResourceFolderTile
-                    key={folder.id}
-                    label={folder.title}
-                    selected={targetsEqual(selectedTarget, folder.target)}
-                    title={folder.pathLabels.join(" / ")}
-                    onClick={() => handleSelectFolder(folder)}
-                    onDoubleClick={() => handleOpenFolder(folder)}
-                  />
-                ))}
-              </LearningResourceExplorerCardGrid>
-            )
+            <CurriculumRoadmapView
+              stages={roadmapStages}
+              subjectTitle={selectedSubject?.label ?? selectedLabel}
+              query={treeQuery}
+              selectedTarget={selectedTarget}
+              onOpenFolder={handleOpenFolder}
+              onOpenContent={handleOpenContent}
+              actions={roadmapActions}
+            />
           )}
         </section>
       </div>
@@ -718,9 +658,15 @@ export function StructureScreen({
           await onRefreshData();
         }}
       />
+      <CurriculumTeachingPlanDialog
+        open={teachingPlanOpen}
+        onClose={() => setTeachingPlanOpen(false)}
+        subject={selectedSubject}
+        stages={roadmapStages}
+      />
       <div className="flex h-7 items-center justify-between border-t border-[rgba(145,158,171,0.2)] bg-white px-3 text-[12px] text-[#637381]">
         <span>{visibleItemCount} mục hiển thị</span>
-        <span className="max-w-[60%] truncate" title={selectedExplorerUrl}>{selectedExplorerUrl}</span>
+        <span className="max-w-[60%] truncate" title={selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}>{selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}</span>
       </div>
     </LearningResourceExplorerShell>
   );

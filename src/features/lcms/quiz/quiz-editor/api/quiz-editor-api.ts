@@ -1,5 +1,9 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
+import { isObject, validateResponse } from "@/lib/validate-response";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+import type { PortableExamPackageEnvelope } from "@/features/elearning/portable-exam/types/portable-exam-types";
 import { createMockPlayerTemplate, createMockQuizEditorGroups, createMockQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
 import type {
   QuizEditorGroup,
@@ -17,7 +21,10 @@ export type QuizEditorWorkspaceInput = {
   page?: number;
   size?: number;
   tenantId?: string;
+  portal?: QuizEditorApiPortal;
 };
+
+export type QuizEditorApiPortal = "lcms" | "lms";
 
 export type QuizEditorSummary = {
   id: string;
@@ -279,27 +286,29 @@ query LcmsQuizVersions($quizId: String!) {
 }
 `;
 
-export async function loadQuizEditorWorkspace(input: QuizEditorWorkspaceInput = {}): Promise<QuizEditorWorkspaceData> {
+export async function loadQuizEditorWorkspace(input: QuizEditorWorkspaceInput = {}, signal?: AbortSignal): Promise<QuizEditorWorkspaceData> {
   const tenantId = input.tenantId ?? getDefaultTenantId();
+  const { portal = "lcms", ...workspaceInput } = input;
   if (!hasApiBase()) {
     return emptyWorkspace(tenantId);
   }
 
   const response = await graphQlRequest<QuizWorkspaceResponse, { input: QuizEditorWorkspaceInput }>({
     operationName: "LcmsQuizWorkspace",
-    portal: "lcms",
+    portal,
     query: QuizEditorWorkspaceDocument,
+    signal,
     tenantId,
     variables: {
       input: {
-        ...input,
+        ...workspaceInput,
         page: Math.max(0, input.page ?? 0),
         size: Math.min(Math.max(input.size ?? 20, 1), 50),
         tenantId,
       },
     },
   });
-  const workspace = response.lcms.quizWorkspace;
+  const workspace = validateResponse(response, isQuizWorkspaceResponse, "lcms.quiz-editor-workspace").lcms.quizWorkspace;
 
   return {
     tenantId: workspace.tenantId ?? tenantId,
@@ -310,8 +319,8 @@ export async function loadQuizEditorWorkspace(input: QuizEditorWorkspaceInput = 
   };
 }
 
-export async function loadQuizEditorDraft(quizId: string): Promise<QuizEditorDraftDocument> {
-  if (!hasApiBase()) {
+export async function loadQuizEditorDraft(quizId: string, signal?: AbortSignal): Promise<QuizEditorDraftDocument> {
+  if (runtimeFixturesEnabled()) {
     return mockDraft(quizId);
   }
 
@@ -319,9 +328,10 @@ export async function loadQuizEditorDraft(quizId: string): Promise<QuizEditorDra
     operationName: "LcmsQuizDraft",
     portal: "lcms",
     query: QuizDraftDocument,
+    signal,
     variables: { quizId },
   });
-  const draft = response.lcms.quizDraft;
+  const draft = validateResponse(response, isQuizDraftResponse, "lcms.quiz-editor-draft").lcms.quizDraft;
 
   return {
     quizId: draft.quizId,
@@ -335,21 +345,41 @@ export async function loadQuizEditorDraft(quizId: string): Promise<QuizEditorDra
   };
 }
 
-export async function loadQuizEditorVersions(quizId: string): Promise<QuizEditorVersionSummary[]> {
+export async function loadQuizEditorVersions(quizId: string, signal?: AbortSignal): Promise<QuizEditorVersionSummary[]> {
   if (!hasApiBase()) return [];
 
   const response = await graphQlRequest<QuizVersionsResponse, { quizId: string }>({
     operationName: "LcmsQuizVersions",
     portal: "lcms",
     query: QuizVersionsDocument,
+    signal,
     variables: { quizId },
   });
 
-  return response.lcms.quizVersions.items;
+  return validateResponse(response, isQuizVersionsResponse, "lcms.quiz-editor-versions").lcms.quizVersions.items;
+}
+
+function isQuizWorkspaceResponse(value: unknown): value is QuizWorkspaceResponse {
+  if (!isObject(value) || !isObject(value.lcms) || !isObject(value.lcms.quizWorkspace)) return false;
+  const workspace = value.lcms.quizWorkspace;
+  return isObject(workspace.quizzes) && Array.isArray(workspace.quizzes.items) &&
+    Array.isArray(workspace.subjects) && Array.isArray(workspace.levels) && Array.isArray(workspace.categories);
+}
+
+function isQuizDraftResponse(value: unknown): value is QuizDraftResponse {
+  if (!isObject(value) || !isObject(value.lcms) || !isObject(value.lcms.quizDraft)) return false;
+  const draft = value.lcms.quizDraft;
+  return typeof draft.quizId === "string" && typeof draft.draftId === "string" &&
+    typeof draft.docVersion === "number";
+}
+
+function isQuizVersionsResponse(value: unknown): value is QuizVersionsResponse {
+  return isObject(value) && isObject(value.lcms) && isObject(value.lcms.quizVersions) &&
+    Array.isArray(value.lcms.quizVersions.items);
 }
 
 export async function createQuizEditorQuiz(input: QuizEditorCreateInput): Promise<QuizEditorCreateResult> {
-  return apiRequest<QuizEditorCreateResult>("/api/v1/lcms/quizzes", {
+  return apiRequest<QuizEditorCreateResult>(API_ENDPOINTS.legacy.v1LcmsQuizzes, {
     body: JSON.stringify({
       title: input.title,
       subtitle: input.subtitle,
@@ -368,14 +398,14 @@ export async function createQuizEditorQuiz(input: QuizEditorCreateInput): Promis
 }
 
 export async function deleteQuizEditorQuiz(quizId: string): Promise<QuizEditorDeleteResult> {
-  return apiRequest<QuizEditorDeleteResult>(`/api/v1/lcms/quizzes/${quizId}`, {
+  return apiRequest<QuizEditorDeleteResult>(API_ENDPOINTS.lcms.quiz(quizId), {
     method: "DELETE",
     portal: "lcms",
   });
 }
 
 export async function saveQuizEditorDraft(input: QuizEditorSaveDraftInput): Promise<QuizEditorSaveDraftResult> {
-  return apiRequest<QuizEditorSaveDraftResult>(`/api/v1/lcms/quizzes/${input.quizId}/draft`, {
+  return apiRequest<QuizEditorSaveDraftResult>(API_ENDPOINTS.lcms.quizDraft(input.quizId), {
     body: JSON.stringify({
       docVersion: input.docVersion,
       settings: input.settings,
@@ -388,7 +418,7 @@ export async function saveQuizEditorDraft(input: QuizEditorSaveDraftInput): Prom
 }
 
 export async function upsertQuizEditorSlide(input: QuizEditorUpsertSlideInput): Promise<QuizEditorSaveDraftResult> {
-  return apiRequest<QuizEditorSaveDraftResult>(`/api/v1/lcms/quizzes/${input.quizId}/slides`, {
+  return apiRequest<QuizEditorSaveDraftResult>(API_ENDPOINTS.lcms.quizSlides(input.quizId), {
     body: JSON.stringify({
       afterSlideId: input.afterSlideId,
       docVersion: input.docVersion,
@@ -401,7 +431,7 @@ export async function upsertQuizEditorSlide(input: QuizEditorUpsertSlideInput): 
 }
 
 export async function reorderQuizEditorSlides(input: QuizEditorReorderInput): Promise<QuizEditorSaveDraftResult> {
-  return apiRequest<QuizEditorSaveDraftResult>(`/api/v1/lcms/quizzes/${input.quizId}/reorder`, {
+  return apiRequest<QuizEditorSaveDraftResult>(API_ENDPOINTS.lcms.quizReorder(input.quizId), {
     body: JSON.stringify({
       docVersion: input.docVersion,
       groups: input.groups,
@@ -412,14 +442,14 @@ export async function reorderQuizEditorSlides(input: QuizEditorReorderInput): Pr
 }
 
 export async function validateQuizEditorDraft(quizId: string): Promise<QuizEditorValidationResult> {
-  return apiRequest<QuizEditorValidationResult>(`/api/v1/lcms/quizzes/${quizId}/validate`, {
+  return apiRequest<QuizEditorValidationResult>(API_ENDPOINTS.lcms.quizValidate(quizId), {
     method: "POST",
     portal: "lcms",
   });
 }
 
 export async function publishQuizEditorDraft(input: QuizEditorPublishInput): Promise<QuizEditorPublishResult> {
-  return apiRequest<QuizEditorPublishResult>(`/api/v1/lcms/quizzes/${input.quizId}/publish`, {
+  return apiRequest<QuizEditorPublishResult>(API_ENDPOINTS.lcms.quizPublish(input.quizId), {
     body: JSON.stringify({
       docVersion: input.docVersion,
       gradingMode: input.gradingMode,
@@ -437,14 +467,14 @@ export async function forkQuizEditorVersion(input: {
   quizId: string;
   versionId: string;
 }): Promise<{ draftId: string; docVersion: number; baseVersionLabel?: string | null }> {
-  return apiRequest(`/api/v1/lcms/quizzes/${input.quizId}/versions/${input.versionId}/fork`, {
+  return apiRequest(API_ENDPOINTS.lcms.quizFork(input.quizId, input.versionId), {
     method: "POST",
     portal: "lcms",
   });
 }
 
 export async function presignQuizEditorMedia(input: QuizEditorMediaPresignInput): Promise<QuizEditorMediaPresignResult> {
-  return apiRequest<QuizEditorMediaPresignResult>("/api/v1/lcms/media/presign", {
+  return apiRequest<QuizEditorMediaPresignResult>(API_ENDPOINTS.legacy.v1LcmsMediaPresign, {
     body: JSON.stringify(input),
     method: "POST",
     portal: "lcms",
@@ -452,7 +482,7 @@ export async function presignQuizEditorMedia(input: QuizEditorMediaPresignInput)
 }
 
 export async function commitQuizEditorMedia(input: QuizEditorMediaCommitInput): Promise<QuizEditorMediaCommitResult> {
-  return apiRequest<QuizEditorMediaCommitResult>(`/api/v1/lcms/media/${input.mediaId}/commit`, {
+  return apiRequest<QuizEditorMediaCommitResult>(API_ENDPOINTS.lcms.mediaCommit(input.mediaId), {
     body: JSON.stringify({
       mediaId: input.mediaId,
       width: input.width,
@@ -463,19 +493,24 @@ export async function commitQuizEditorMedia(input: QuizEditorMediaCommitInput): 
   });
 }
 
-export async function exportQuizEditorBundle(input: { quizId?: string; quizVersionId?: string }): Promise<unknown> {
+export async function exportQuizEditorBundle(input: {
+  portal?: QuizEditorApiPortal;
+  quizId?: string;
+  quizVersionId?: string;
+}): Promise<PortableExamPackageEnvelope> {
+  const portal = input.portal ?? "lcms";
   if (input.quizVersionId) {
-    return apiRequest(`/api/v1/lcms/quiz-versions/${input.quizVersionId}/bundle`, {
+    return apiRequest<PortableExamPackageEnvelope>(API_ENDPOINTS.lcms.quizVersionsBundle(input.quizVersionId), {
       cache: "default",
-      portal: "lcms",
+      portal,
     });
   }
   if (!input.quizId) {
     throw new Error("quizId or quizVersionId is required to export a quiz bundle.");
   }
-  return apiRequest(`/api/v1/lcms/quizzes/${input.quizId}/bundle`, {
+  return apiRequest<PortableExamPackageEnvelope>(API_ENDPOINTS.lcms.quizBundle(input.quizId), {
     cache: "default",
-    portal: "lcms",
+    portal,
   });
 }
 

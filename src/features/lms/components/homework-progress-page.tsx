@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import { CheckCircle2, Clock3, FileCheck2, Search, UsersRound } from "lucide-react";
 
 import Button from "@mui/material/Button";
@@ -7,7 +8,7 @@ import Chip from "@mui/material/Chip";
 import {
   loadLmsAssignmentProgressWorkspace,
   type LmsAssignmentProgressWorkspace,
-} from "@/features/lms/api/lms-graphql-api";
+} from "@/features/lms/api/lms-assignment-progress-api";
 import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
 import {
   useAssignmentReportQuery,
@@ -20,6 +21,7 @@ import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/featu
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { cn } from "@/lib/utils";
+import { AssignmentProgressExportControl } from "@/features/reporting/components/assignment-progress-export-control";
 
 type ProgressStatus = "completed" | "inprogress" | "notstarted";
 
@@ -36,9 +38,9 @@ type StudentProgressRow = {
 const allStatusValue = "all";
 
 const progressStatusCopy: Record<ProgressStatus, string> = {
-  completed: "ÄÃ£ ná»™p bÃ i",
-  inprogress: "Äang lÃ m",
-  notstarted: "ChÆ°a má»Ÿ",
+  completed: "Đã nộp bài",
+  inprogress: "Đang làm",
+  notstarted: "Chưa mở",
 };
 
 export function HomeworkProgressPage({
@@ -68,10 +70,11 @@ export function HomeworkProgressPage({
 
   const progressQuery = useQuery({
     queryKey: lmsAssignmentReadQueryKeys.assignmentProgress(selectedRunId, tenantId),
-    queryFn: () => loadLmsAssignmentProgressWorkspace({ assignmentId: selectedRunId, page: 0, size: 50 }),
+    queryFn: ({ signal }) =>
+      loadLmsAssignmentProgressWorkspace({ assignmentId: selectedRunId, page: 0, size: 50 }, signal),
     enabled: apiBacked && Boolean(selectedRunId),
-    staleTime: 30_000,
-    gcTime: 5 * 60_000,
+    staleTime: QUERY_POLICIES.realtime.staleTime,
+    gcTime: QUERY_POLICIES.realtime.gcTime,
     refetchOnWindowFocus: false,
   });
   const assignmentReportQuery = useAssignmentReportQuery(apiBacked ? selectedRunId : "");
@@ -97,7 +100,7 @@ export function HomeworkProgressPage({
           progress,
           score: status === "completed" ? Math.min(100, 60 + (index * 4) % 40) : null,
           status,
-          timestamp: status === "completed" ? `${(index % 5) + 1} giá» trÆ°á»›c` : status === "inprogress" ? "10 phÃºt trÆ°á»›c" : "-",
+          timestamp: status === "completed" ? `${(index % 5) + 1} giờ trước` : status === "inprogress" ? "10 phút trước" : "-",
         };
       }),
     [students],
@@ -137,22 +140,23 @@ export function HomeworkProgressPage({
           <div className="min-w-0">
             <div className="flex items-center gap-2 text-[13px] font-semibold text-slate-500">
               <FileCheck2 className="h-3.5 w-3.5 text-[var(--erg-blue)]" />
-              BÃ i táº­p / <span className="text-slate-600">Theo dÃµi bÃ i táº­p</span>
+              Bài tập / <span className="text-slate-600">Theo dõi bài tập</span>
             </div>
-            <h1 className="mt-1 text-xl font-semibold tracking-normal text-slate-950">Theo dÃµi bÃ i táº­p</h1>
+            <h1 className="mt-1 text-xl font-semibold tracking-normal text-slate-950">Theo dõi bài tập</h1>
             <p className="mt-1 truncate text-[13px] font-semibold text-slate-600">
-              Kiá»ƒm tra tiáº¿n Ä‘á»™ lÃ m bÃ i, tráº¡ng thÃ¡i ná»™p vÃ  Ä‘iá»ƒm cá»§a há»c sinh trong {selectedClass?.className ?? "lá»›p hiá»‡n táº¡i"}.
+              Kiểm tra tiến độ làm bài, trạng thái nộp và điểm của học sinh trong {selectedClass?.className ?? "lớp hiện tại"}.
             </p>
           </div>
           <div className="grid min-w-[520px] grid-cols-4 gap-2 max-xl:min-w-0">
-            <ProgressStat icon={UsersRound} label="Tá»•ng HS" value={String(total)} />
-            <ProgressStat icon={CheckCircle2} label="ÄÃ£ ná»™p" value={`${completedPct}%`} />
-            <ProgressStat icon={Clock3} label="Äang lÃ m" value={String(inProgress)} />
-            <ProgressStat icon={FileCheck2} label="ChÆ°a má»Ÿ" value={String(notStarted)} />
+            <ProgressStat icon={UsersRound} label="Tổng HS" value={String(total)} />
+            <ProgressStat icon={CheckCircle2} label="Đã nộp" value={`${completedPct}%`} />
+            <ProgressStat icon={Clock3} label="Đang làm" value={String(inProgress)} />
+            <ProgressStat icon={FileCheck2} label="Chưa mở" value={String(notStarted)} />
           </div>
-          <div className="flex shrink-0 justify-end">
+          <div className="flex shrink-0 items-center justify-end gap-2">
+            <AssignmentProgressExportControl assignmentId={selectedRunId} classId={selectedClass?.id} />
             <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onBack}>
-              Vá» trang bÃ i táº­p
+              Về trang bài tập
             </Button>
           </div>
         </div>
@@ -160,7 +164,7 @@ export function HomeworkProgressPage({
 
       <section className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
-          <h2 className="mb-2 text-[13px] font-bold text-slate-600">BÃ i Ä‘Ã£ giao</h2>
+          <h2 className="mb-2 text-[13px] font-bold text-slate-600">Bài đã giao</h2>
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
             {runs.map((run) => (
               <button
@@ -188,10 +192,10 @@ export function HomeworkProgressPage({
             <div className="shrink-0 border-b border-[#cbd7e6] p-3">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h2 className="truncate text-sm font-semibold text-slate-900">{selectedRun?.title ?? "ChÆ°a cÃ³ bÃ i Ä‘Ã£ giao"}</h2>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-600">Danh sÃ¡ch há»c sinh vÃ  tráº¡ng thÃ¡i lÃ m bÃ i.</p>
+                  <h2 className="truncate text-sm font-semibold text-slate-900">{selectedRun?.title ?? "Chưa có bài đã giao"}</h2>
+                  <p className="mt-1 text-[13px] font-semibold text-slate-600">Danh sách học sinh và trạng thái làm bài.</p>
                 </div>
-                <Chip label={`${filteredRows.length} há»c sinh`} size="small" color="secondary" sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
+                <Chip label={`${filteredRows.length} học sinh`} size="small" color="secondary" sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
               </div>
               <div className="flex flex-wrap gap-2">
                 <div className="relative min-w-[240px] flex-1">
@@ -200,14 +204,14 @@ export function HomeworkProgressPage({
                     type="text"
                     value={searchTerm}
                     onChange={(event) => setSearchTerm(event.target.value)}
-                    placeholder="TÃ¬m há»c sinh hoáº·c lá»›p..."
+                    placeholder="Tìm học sinh hoặc lớp..."
                     className="h-10 w-full rounded-lg border border-[#d7e0ec] bg-white pl-9 pr-3 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                   />
                 </div>
-                <StatusTab value={allStatusValue} label="Táº¥t cáº£" active={statusFilter === allStatusValue} onClick={() => setStatusFilter(allStatusValue)} />
-                <StatusTab value="completed" label="ÄÃ£ ná»™p" active={statusFilter === "completed"} onClick={() => setStatusFilter("completed")} />
-                <StatusTab value="inprogress" label="Äang lÃ m" active={statusFilter === "inprogress"} onClick={() => setStatusFilter("inprogress")} />
-                <StatusTab value="notstarted" label="ChÆ°a má»Ÿ" active={statusFilter === "notstarted"} onClick={() => setStatusFilter("notstarted")} />
+                <StatusTab value={allStatusValue} label="Tất cả" active={statusFilter === allStatusValue} onClick={() => setStatusFilter(allStatusValue)} />
+                <StatusTab value="completed" label="Đã nộp" active={statusFilter === "completed"} onClick={() => setStatusFilter("completed")} />
+                <StatusTab value="inprogress" label="Đang làm" active={statusFilter === "inprogress"} onClick={() => setStatusFilter("inprogress")} />
+                <StatusTab value="notstarted" label="Chưa mở" active={statusFilter === "notstarted"} onClick={() => setStatusFilter("notstarted")} />
               </div>
             </div>
 
@@ -215,12 +219,12 @@ export function HomeworkProgressPage({
               <table className="erg-data-table min-w-[880px] w-full border-collapse text-left text-[14px]">
                 <thead className="sticky top-0 z-10 bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                   <tr>
-                    <th className="border-r border-[#cbd7e6] px-4 py-3">Há»c sinh</th>
-                    <th className="border-r border-[#cbd7e6] px-4 py-3">Lá»›p</th>
-                    <th className="border-r border-[#cbd7e6] px-4 py-3">Tiáº¿n Ä‘á»™</th>
-                    <th className="border-r border-[#cbd7e6] px-4 py-3 text-center">Äiá»ƒm</th>
-                    <th className="border-r border-[#cbd7e6] px-4 py-3">Tráº¡ng thÃ¡i</th>
-                    <th className="px-4 py-3">Hoáº¡t Ä‘á»™ng cuá»‘i</th>
+                    <th className="border-r border-[#cbd7e6] px-4 py-3">Học sinh</th>
+                    <th className="border-r border-[#cbd7e6] px-4 py-3">Lớp</th>
+                    <th className="border-r border-[#cbd7e6] px-4 py-3">Tiến độ</th>
+                    <th className="border-r border-[#cbd7e6] px-4 py-3 text-center">Điểm</th>
+                    <th className="border-r border-[#cbd7e6] px-4 py-3">Trạng thái</th>
+                    <th className="px-4 py-3">Hoạt động cuối</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white">
@@ -247,33 +251,33 @@ export function HomeworkProgressPage({
               </table>
               {filteredRows.length === 0 ? (
                 <div className="m-4 rounded-lg border border-dashed border-[#cbd7e6] p-8 text-center text-sm font-semibold text-slate-500">
-                  KhÃ´ng tÃ¬m tháº¥y há»c sinh phÃ¹ há»£p vá»›i bá»™ lá»c hiá»‡n táº¡i.
+                  Không tìm thấy học sinh phù hợp với bộ lọc hiện tại.
                 </div>
               ) : null}
             </div>
           </div>
 
           <aside className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-            <h2 className="text-sm font-semibold text-slate-900">Tá»•ng quan bÃ i giao</h2>
+            <h2 className="text-sm font-semibold text-slate-900">Tổng quan bài giao</h2>
             <div className="mt-3 rounded-lg border border-[#dbe4f0] bg-[#f8fbff] p-3">
-              <div className="text-[13px] font-bold tracking-normal text-slate-600">BÃ i táº­p</div>
+              <div className="text-[13px] font-bold tracking-normal text-slate-600">Bài tập</div>
               <div className="mt-1 text-sm font-semibold leading-5 text-slate-900">{selectedRun?.title ?? "-"}</div>
               <div className="mt-2 text-[13px] font-semibold text-slate-600">{selectedRun?.dueLabel ?? "-"}</div>
               {questionAnalyticsSummary ? (
                 <div className="mt-2 text-[13px] font-semibold text-slate-600">
-                  {questionAnalyticsSummary.questionCount} cÃ¢u há»i - Ä‘Ãºng TB {questionAnalyticsSummary.averageCorrectRate}%
+                  {questionAnalyticsSummary.questionCount} câu hỏi - đúng TB {questionAnalyticsSummary.averageCorrectRate}%
                 </div>
               ) : null}
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <ProgressQuickInfo label="HoÃ n thÃ nh" value={`${completed}/${total}`} tone="text-emerald-600" />
-              <ProgressQuickInfo label="Äang lÃ m" value={String(inProgress)} tone="text-amber-600" />
-              <ProgressQuickInfo label="ChÆ°a má»Ÿ" value={String(notStarted)} tone="text-slate-500" />
-              <ProgressQuickInfo label="Cáº§n cháº¥m" value={String(needsReviewCount)} tone="text-rose-500" />
+              <ProgressQuickInfo label="Hoàn thành" value={`${completed}/${total}`} tone="text-emerald-600" />
+              <ProgressQuickInfo label="Đang làm" value={String(inProgress)} tone="text-amber-600" />
+              <ProgressQuickInfo label="Chưa mở" value={String(notStarted)} tone="text-slate-500" />
+              <ProgressQuickInfo label="Cần chấm" value={String(needsReviewCount)} tone="text-rose-500" />
             </div>
             <div className="mt-3 rounded-lg border border-[#dbe4f0] p-3">
               <div className="mb-2 flex items-center justify-between text-[13px] font-bold text-slate-600">
-                <span>Tá»· lá»‡ hoÃ n thÃ nh</span>
+                <span>Tỷ lệ hoàn thành</span>
                 <span>{completedPct}%</span>
               </div>
               <div className="h-2 overflow-hidden rounded-md bg-slate-100">

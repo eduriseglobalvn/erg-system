@@ -1,5 +1,7 @@
 # Thiết kế quản trị hợp đồng API ERG
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 **Mục tiêu:** Biến mọi thay đổi hợp đồng REST và GraphQL trong `erg-spring` thành thay đổi tường minh, tái lập được và dễ sử dụng trong `erg-system`, đồng thời chặn các thay đổi phá vỡ tương thích tại CI trước khi chúng đi vào runtime.
 
 ## Phạm vi

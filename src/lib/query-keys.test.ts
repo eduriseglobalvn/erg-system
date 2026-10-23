@@ -46,11 +46,13 @@ test("scopes admin operation read caches by tenant", () => {
     "admin-operations",
     "education-units",
     "tenant-a",
+    "anonymous",
   ]);
   expect(queryKeys.adminOperations.educationUnits("school", "center", "tenant-a")).toEqual([
     "admin-operations",
     "education-units",
     "tenant-a",
+    "anonymous",
     "school",
     "center",
   ]);
@@ -58,11 +60,13 @@ test("scopes admin operation read caches by tenant", () => {
     "admin-operations",
     "learning-resources-v2",
     "tenant-a",
+    "anonymous",
   ]);
   expect(queryKeys.adminOperations.learningResourcesWorkspace(120, "tenant-a")).toEqual([
     "admin-operations",
     "learning-resources-v2",
     "tenant-a",
+    "anonymous",
     "workspace",
     120,
   ]);
@@ -70,12 +74,14 @@ test("scopes admin operation read caches by tenant", () => {
     "admin-operations",
     "user-access",
     "tenant-a",
+    "anonymous",
     "options",
   ]);
   expect(queryKeys.adminOperations.userAccess.provision("tenant-a")).toEqual([
     "admin-operations",
     "user-access",
     "tenant-a",
+    "anonymous",
     "provision",
   ]);
 });

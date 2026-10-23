@@ -1,10 +1,11 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import { Search } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
 import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
-import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -66,7 +67,7 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
       schoolId: selectedClass?.schoolId,
       usage: "class-management",
     }),
-    queryFn: () =>
+    queryFn: ({ signal }) =>
       loadLmsClassWorkspace({
         assignmentPage: 0,
         assignmentSize: 50,
@@ -76,10 +77,10 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
         schoolId: selectedClass?.schoolId,
         size: 50,
         studentStatus: "active",
-      }),
+      }, signal),
     enabled: apiBacked && Boolean(selectedClassId),
-    staleTime: 60_000,
-    gcTime: 5 * 60_000,
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
     refetchOnWindowFocus: false,
   });
   const workspaceStudents = useMemo(

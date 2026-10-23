@@ -30,13 +30,13 @@ export function DateTimePickerPopover({ open, value, onChange, onClose, mode = "
   const applyValue = () => { onChange(mode === "date" ? formatDateOnlyValue(selectedDate) : formatDateTimeValue(selectedDate, timeValue)); onClose(); };
   return (
     <Box sx={{ position: "absolute", right: 0, top: "calc(100% + 10px)", zIndex: 50, width: 320, overflow: "hidden", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper", color: "text.primary", boxShadow: 3 }}>
-      <Stack direction="row" justifyContent="space-between" sx={{ borderBottom: 1, borderColor: "divider", px: 2, py: 1.5 }}>
+      <Stack direction="row" sx={{ justifyContent: "space-between", borderBottom: 1, borderColor: "divider", px: 2, py: 1.5 }}>
         <Button size="small" onClick={() => setStep("date")} sx={{ bgcolor: step === "date" ? "primary.light" : "transparent", color: step === "date" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>1. Chọn ngày</Button>
         {mode === "date-time" && <Button size="small" onClick={() => setStep("time")} sx={{ bgcolor: step === "time" ? "primary.light" : "transparent", color: step === "time" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>2. Chọn giờ</Button>}
       </Stack>
       {step === "date" ? (
         <Box sx={{ p: 2 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+          <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mb: 1.5 }}>
             <IconButton size="small" onClick={() => moveMonth(-1)} aria-label="Tháng trước"><ChevronLeftIcon fontSize="small" /></IconButton>
             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>Tháng {viewMonth + 1}/{viewYear}</Typography>
             <IconButton size="small" onClick={() => moveMonth(1)} aria-label="Tháng sau"><ChevronRightIcon fontSize="small" /></IconButton>
@@ -50,7 +50,7 @@ export function DateTimePickerPopover({ open, value, onChange, onClose, mode = "
         <Box sx={{ p: 2 }}>
           <Box sx={{ borderRadius: 1, bgcolor: "grey.50", px: 2, py: 1.5, textAlign: "center" }}><Typography sx={{ color: "text.secondary", fontSize: 13, fontWeight: 700 }}>Ngày đã chọn</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: 600 }}>{formatDateOnlyValue(selectedDate)}</Typography></Box>
           <TextField label="Giờ làm bài" type="time" fullWidth value={timeValue} onChange={(event) => setTimeValue(normalizeTimeValue(event.target.value))} slotProps={{ inputLabel: { shrink: true } }} sx={{ mt: 2, "& input": { textAlign: "center", fontWeight: 700 } }} />
-          <Stack direction="row" justifyContent="flex-end" spacing={1} sx={{ mt: 2 }}><Button size="small" variant="outlined" onClick={() => setStep("date")} sx={{ textTransform: "none", fontWeight: 600 }}>Chọn lại ngày</Button><Button size="small" variant="contained" onClick={applyValue} sx={{ textTransform: "none", fontWeight: 700 }}>Áp dụng</Button></Stack>
+          <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end", mt: 2 }}><Button size="small" variant="outlined" onClick={() => setStep("date")} sx={{ textTransform: "none", fontWeight: 600 }}>Chọn lại ngày</Button><Button size="small" variant="contained" onClick={applyValue} sx={{ textTransform: "none", fontWeight: 700 }}>Áp dụng</Button></Stack>
         </Box>
       )}
     </Box>

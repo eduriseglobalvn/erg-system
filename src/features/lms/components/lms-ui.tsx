@@ -27,7 +27,15 @@ export function LmsSectionTitle(props: TypographyProps) {
 }
 
 export function LmsSelect(props: NativeSelectProps) {
-  return <NativeSelect fullWidth sx={{ bgcolor: "background.paper", borderRadius: 2, fontSize: 14, fontWeight: 700, minHeight: 40, px: 1.25 }} {...props} />;
+  const { inputProps, ...nativeProps } = props;
+  return (
+    <NativeSelect
+      fullWidth
+      sx={{ bgcolor: "background.paper", borderRadius: 2, fontSize: 14, fontWeight: 700, minHeight: 40, px: 1.25 }}
+      inputProps={{ ...inputProps, "aria-label": nativeProps["aria-label"] ?? inputProps?.["aria-label"] }}
+      {...nativeProps}
+    />
+  );
 }
 
 type LmsSearchInputProps = Omit<TextFieldProps, "variant"> & { inputClassName?: string };

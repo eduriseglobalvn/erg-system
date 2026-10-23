@@ -1,4 +1,5 @@
 import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { LearningResourceTaxonomyOption } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import type {
   AttachedResourceItem,
   LocalContentItem,
@@ -67,10 +68,37 @@ export type CurriculumExplorerModel = {
   searchPlaceholder: string;
 };
 
+export type CurriculumRoadmapLesson = {
+  folder: CurriculumFolder;
+  content: CurriculumContentItem[];
+};
+
+export type CurriculumRoadmapTopic = {
+  folder?: CurriculumFolder;
+  node?: StudioNode;
+  id: string;
+  title: string;
+  lessons: CurriculumRoadmapLesson[];
+};
+
+export type CurriculumRoadmapStage = {
+  level: CurriculumFolder;
+  topics: CurriculumRoadmapTopic[];
+};
+
+export type ResourceCurriculumLocation = {
+  subjectLabel: string;
+  levelLabel?: string;
+  topicLabel?: string;
+  pathLabels: string[];
+  isResolved: boolean;
+};
+
 export type ResourceCommandId =
   | "create-subject"
   | "create-level"
   | "create-topic"
+  | "create-lesson"
   | "add-lecture"
   | "add-resource"
   | "add-exercise"
@@ -153,6 +181,141 @@ export function buildCurriculumExplorerModel({
     summary,
     pathLabels,
     searchPlaceholder: getSearchPlaceholder(selectedKind, selectedSubject),
+  };
+}
+
+export function buildCurriculumRoadmapStages({
+  subject,
+  levelNode,
+  localContentItems,
+  resources,
+  taxonomyTopics,
+  quizBankItems,
+}: {
+  subject: StudioSubject;
+  levelNode?: StudioNode;
+  localContentItems: LocalContentItem[];
+  resources: AttachedResourceItem[];
+  taxonomyTopics: LearningResourceTaxonomyOption[];
+  quizBankItems: QuizBankItem[];
+}): CurriculumRoadmapStage[] {
+  const levelNodes = levelNode
+    ? [levelNode]
+    : subject.tree.filter((node) => getNodeFolderRole(node) === "level");
+
+  return levelNodes.map((level) => {
+    const topicGroups = new Map<string, CurriculumRoadmapTopic>();
+
+    collectTopicNodes(level.children).forEach((lessonNode) => {
+      const contentGroups = buildTopicContentGroups(subject, lessonNode, localContentItems, resources, quizBankItems);
+      const content = [...contentGroups.lecture, ...contentGroups.resource, ...contentGroups.exercise];
+      const matchingResources = resources.filter(
+        (resource) => resource.subjectId === subject.id && resourceBelongsToNode(resource, lessonNode),
+      );
+      const matchingLocalItems = localContentItems.filter(
+        (item) => item.subjectId === subject.id && localContentBelongsToNode(item, lessonNode),
+      );
+      const taxonomyTopicId = lessonNode.metadata?.topicId
+        || lessonNode.location.topicId
+        || matchingResources.find((resource) => resource.topicId)?.topicId;
+      const localTopicLabel = matchingLocalItems.find((item) => item.topicLabel)?.topicLabel;
+      const taxonomyTopic = taxonomyTopics.find((topic) =>
+        topic.id === taxonomyTopicId || Boolean(localTopicLabel && normalizeForMatch(topic.label) === normalizeForMatch(localTopicLabel)),
+      );
+      const groupId = taxonomyTopic?.id || (localTopicLabel ? `label-${normalizeForMatch(localTopicLabel)}` : lessonNode.id);
+      const groupTitle = taxonomyTopic?.label || localTopicLabel || lessonNode.label;
+      const group = topicGroups.get(groupId) ?? {
+        id: groupId,
+        title: groupTitle,
+        folder: nodeToFolder({
+          node: lessonNode,
+          pathLabels: [subject.label, level.label, groupTitle],
+          resources,
+          localContentItems,
+          subject,
+        }),
+        node: lessonNode,
+        lessons: [],
+      };
+
+      if (lessonNode.children && lessonNode.children.length > 0) {
+        lessonNode.children.forEach((childLesson) => {
+          const childContentGroups = buildTopicContentGroups(subject, childLesson, localContentItems, resources, quizBankItems);
+          const childContent = [...childContentGroups.lecture, ...childContentGroups.resource, ...childContentGroups.exercise];
+          group.lessons.push({
+            folder: nodeToFolder({
+              node: childLesson,
+              pathLabels: [subject.label, level.label, group.title],
+              resources,
+              localContentItems,
+              subject,
+            }),
+            content: childContent,
+          });
+        });
+      } else {
+        group.lessons.push({
+          folder: nodeToFolder({
+            node: lessonNode,
+            pathLabels: [subject.label, level.label, group.title],
+            resources,
+            localContentItems,
+            subject,
+          }),
+          content,
+        });
+      }
+      topicGroups.set(groupId, group);
+      return;
+    });
+
+    return {
+      level: nodeToFolder({
+        node: level,
+        pathLabels: [subject.label],
+        resources,
+        localContentItems,
+        subject,
+      }),
+      topics: [...topicGroups.values()],
+    };
+  });
+}
+
+export function resolveResourceCurriculumLocation(
+  subjects: StudioSubject[],
+  resource: Pick<AttachedResourceItem, "subjectId" | "categoryId" | "levelId" | "sectionId" | "topicId">,
+): ResourceCurriculumLocation {
+  const subject = subjects.find((candidate) => candidate.id === resource.subjectId);
+  if (!subject) {
+    return {
+      subjectLabel: "Chưa xác định môn học",
+      pathLabels: ["Chưa xác định môn học"],
+      isResolved: false,
+    };
+  }
+
+  const expectedLevelId = resource.levelId || resource.categoryId;
+  const level = subject.tree.find((node) =>
+    node.optionId === expectedLevelId
+    || node.location.categoryId === expectedLevelId,
+  );
+  const topic = level
+    ? findDescendant(level.children, (node) =>
+        node.optionId === resource.sectionId
+        || node.optionId === resource.topicId
+        || node.location.sectionId === resource.sectionId
+        || node.location.topicId === resource.topicId,
+      )
+    : undefined;
+  const pathLabels = [subject.label, level?.label, topic?.label].filter(Boolean) as string[];
+
+  return {
+    subjectLabel: subject.label,
+    levelLabel: level?.label,
+    topicLabel: topic?.label,
+    pathLabels,
+    isResolved: Boolean(level && topic),
   };
 }
 
@@ -383,6 +546,21 @@ function countNodesByRole(nodes: StudioNode[], role: CurriculumFolderRole): numb
     const current = getNodeFolderRole(node) === role ? 1 : 0;
     return total + current + countNodesByRole(node.children, role);
   }, 0);
+}
+
+function collectTopicNodes(nodes: StudioNode[]): StudioNode[] {
+  return nodes.flatMap((node) =>
+    getNodeFolderRole(node) === "topic" ? [node] : collectTopicNodes(node.children),
+  );
+}
+
+function findDescendant(nodes: StudioNode[], predicate: (node: StudioNode) => boolean): StudioNode | undefined {
+  for (const node of nodes) {
+    if (predicate(node)) return node;
+    const nested = findDescendant(node.children, predicate);
+    if (nested) return nested;
+  }
+  return undefined;
 }
 
 function localContentBelongsToNode(item: LocalContentItem, node: StudioNode) {

@@ -12,6 +12,9 @@ export type SchoolStudent = {
   guardianPhone: string;
   subjectIds: string[];
   status: "studying" | "at-risk" | "inactive";
+  averageScore?: number | null;
+  version?: number;
+  academicClassId?: string | null;
 };
 
 export type SchoolClass = {
@@ -20,6 +23,10 @@ export type SchoolClass = {
   grade: string;
   homeroomTeacher: string;
   studentCount: number;
+  status?: string;
+  academicYear?: string | null;
+  homeroomTeacherId?: string | null;
+  version?: number;
 };
 
 export type SchoolSubject = {
@@ -28,6 +35,8 @@ export type SchoolSubject = {
   code: string;
   studentCount: number;
   teacherCount: number;
+  status?: string;
+  version?: number;
 };
 
 export type SchoolReview = {

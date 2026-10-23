@@ -7,6 +7,7 @@ import react from "@vitejs/plugin-react";
 import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 import { VitePWA } from "vite-plugin-pwa";
+import { filterPwaPrecacheManifest } from "./scripts/pwa-precache-policy.mjs";
 
 const devHttpsPfx = path.resolve(__dirname, "certs/erg-dev.pfx");
 
@@ -22,8 +23,13 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
     react(),
     tailwindcss(),
-    VitePWA({
-      registerType: "autoUpdate",
+    // Skip the PWA plugin in test mode: workbox/service-worker generation keeps
+    // handles open and prevents the vitest worker process from exiting.
+    ...(mode === "test"
+      ? []
+      : [
+          VitePWA({
+      registerType: "prompt",
       manifestFilename: "manifest.webmanifest",
       includeAssets: ["favicon.svg", "apple-touch-icon.png", "android-chrome-192x192.png", "android-chrome-512x512.png", "pwa-maskable-512x512.png"],
       manifest: false,
@@ -31,8 +37,12 @@ export default defineConfig(({ command, mode }) => {
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         importScripts: ["pwa-push.js"],
-        skipWaiting: true,
+        skipWaiting: false,
         globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        globIgnores: ["**/mock/**"],
+        manifestTransforms: [
+          (entries) => filterPwaPrecacheManifest(entries, path.resolve(__dirname, "dist/index.html")),
+        ],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         navigateFallback: "/index.html",
         navigateFallbackDenylist: [/^\/api\//, /^\/auth\//, /^\/sso\//],
@@ -88,25 +98,43 @@ export default defineConfig(({ command, mode }) => {
       devOptions: {
         enabled: false,
       },
-    }),
+          }),
+        ]),
   ],
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+    alias: [
+      ...(mode === "production" ? [
+        {
+          find: "@/features/lms/classroom/api/mock-classroom-data",
+          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/classroom-data.ts"),
+        },
+        {
+          find: "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data",
+          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/learning-resource-authoring-data.ts"),
+        },
+        {
+          find: "@/features/lcms/school-management/api/mock-training-monitoring",
+          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/training-monitoring-data.ts"),
+        },
+      ] : []),
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+    ],
     dedupe: ["react", "react-dom"],
   },
   build: {
     target: "esnext",
-    modulePreload: {
-      resolveDependencies(_filename, deps, context) {
-        if (context.hostType !== "html") return deps;
-        return deps.filter(
-          (dep) =>
-            !/^(assets\/)?(pdfjs|pdf\.worker|fullcalendar|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
-        );
+      modulePreload: {
+        resolveDependencies(_filename, deps, context) {
+          // Dynamic route chunks fetch their own graph on demand; preloading
+          // every dependency eagerly inflated the entry and defeated route
+          // code-splitting on mobile/PWA cold starts.
+          if (context.hostType !== "html") return [];
+          return deps.filter(
+            (dep) =>
+              !/^(assets\/)?(pdfjs|pdf\.worker|fullcalendar|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
+          );
+        },
       },
-    },
     reportCompressedSize: true,
     rollupOptions: {
       output: {
@@ -126,13 +154,34 @@ export default defineConfig(({ command, mode }) => {
   },
   test: {
     environment: "jsdom",
-    exclude: ["**/node_modules/**", "**/dist/**", "**/.codex-chrome-*/**"],
+    exclude: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.agent-artifacts/**",
+      "**/.codex-chrome-*/**",
+      "**/scripts/**",
+      "src/test/e2e/**/*.spec.ts",
+    ],
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     testTimeout: 10_000,
+    // The default `forks` pool never exits after the suite finishes on this
+    // project (a lingering handle blocks the parent), and re-transforms MUI in
+    // every child. `threads` terminates workers deterministically and shares
+    // the jsdom transform cache. Inline @mui/material so Vite (which honors the
+    // `module` field) resolves MUI's react-transition-group subpath directory
+    // imports; Node's native ESM resolver used by thread workers rejects them.
+    // Keep @mui/icons-material external so its barrel isn't transformed per run.
+    pool: "threads",
+    // The default CPU-sized worker pool makes jsdom/MUI tests contend heavily:
+    // files that pass alone exceed the 10s test timeout in the full suite.
+    // Two workers keeps per-test latency below the timeout across the complete
+    // jsdom/MUI suite; four workers still caused isolated 10s timeouts under
+    // contention even though those files passed when run alone.
+    maxWorkers: 2,
     server: {
       deps: {
-        inline: [/@mui\//, /react-transition-group/],
+        inline: [/@mui\/material/, /@mui\/x-date-pickers/, /react-transition-group/],
       },
     },
   },
@@ -145,6 +194,7 @@ export default defineConfig(({ command, mode }) => {
         "**/.codex-qa/**",
         "**/.codex-chrome-*/**",
         "**/dist/**",
+        "**/src-tauri/**",
       ],
     },
     proxy: {

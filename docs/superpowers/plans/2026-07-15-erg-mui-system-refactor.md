@@ -1,5 +1,7 @@
 # ERG MUI System Refactor Implementation Plan
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Migrate the complete ERG frontend to ERG MUI, remove all Tailwind/shadcn/Radix/lucide usage and dependencies, and preserve approved layouts, workflows, specialized interactions, and Matching Question visuals.

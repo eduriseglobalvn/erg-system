@@ -1,0 +1,45 @@
+query LmsAttendanceWorkspace($input: AttendanceWorkspaceInput!) {
+  lms {
+    attendanceWorkspace(input: $input) {
+      tenantId
+      classId
+      subjectId
+      from
+      to
+      records {
+        id
+        studentId
+        subjectId
+        attendanceDate
+        lessonIndex
+        status
+        version
+        updatedAt
+      }
+    }
+  }
+}
+
+query LmsGradebookWorkspace($input: GradebookWorkspaceInput!) {
+  lms {
+    gradebookWorkspace(input: $input) {
+      tenantId
+      classId
+      subjectId
+      columns { id label maxScore kind position version updatedAt }
+      scores { studentId columnId score maxScore version updatedAt }
+    }
+  }
+}
+
+mutation LmsUpsertAttendance($input: UpsertAttendanceInput!) {
+  upsertAttendance(input: $input) {
+    id studentId subjectId attendanceDate lessonIndex status version updatedAt
+  }
+}
+
+mutation LmsUpsertGradebookScore($input: UpsertGradebookScoreInput!) {
+  upsertGradebookScore(input: $input) {
+    studentId columnId score maxScore version updatedAt
+  }
+}

@@ -2,6 +2,20 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
+  account: {
+    id: "teacher-1",
+    fullName: "Nguyễn An",
+    email: "teacher@erg.edu.vn",
+    phone: "",
+    role: "teacher",
+    title: "Giáo viên",
+    status: "ACTIVE",
+    lifecycle: { recoveryEmailMasked: "r***@erg.edu.vn", recoveryEmailVerified: true },
+  },
+  session: {
+    permissions: ["lms.grade.read", "account.self.update", "account.self.password.change"],
+    deniedPermissions: [],
+  },
   updateProfile: vi.fn(),
   requestRecovery: vi.fn(),
   verifyRecovery: vi.fn(),
@@ -24,20 +38,8 @@ vi.mock("@/platform/auth/api/auth-storage", () => ({
 
 vi.mock("@/platform/auth/hooks/use-auth-session", () => ({
   useAuthSession: () => ({
-    account: {
-      id: "teacher-1",
-      fullName: "Nguyễn An",
-      email: "teacher@erg.edu.vn",
-      phone: "",
-      role: "teacher",
-      title: "Giáo viên",
-      status: "ACTIVE",
-      lifecycle: { recoveryEmailMasked: "r***@erg.edu.vn", recoveryEmailVerified: true },
-    },
-    session: {
-      permissions: ["lms.grade.read", "account.self.update", "account.self.password.change"],
-      deniedPermissions: [],
-    },
+    account: mocks.account,
+    session: mocks.session,
     actions: { signOut: mocks.signOut },
   }),
 }));
@@ -46,7 +48,9 @@ import { LmsAccountPage } from "@/features/lms/components/lms-account-page";
 
 describe("LMS account self-service", () => {
   beforeEach(() => {
-    Object.values(mocks).forEach((mock) => mock.mockReset());
+    Object.values(mocks).forEach((mock) => {
+      if (vi.isMockFunction(mock)) mock.mockReset();
+    });
   });
 
   test("updates the phone through the account security API", async () => {

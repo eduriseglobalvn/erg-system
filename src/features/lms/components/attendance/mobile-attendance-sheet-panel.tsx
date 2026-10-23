@@ -3,7 +3,7 @@ import { CalendarDays, Download, Search, UserRound } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { AttendanceColumn, AttendanceStatus, CurriculumItem } from "@/features/lms/components/attendance-sheet-panel";
+import type { AttendanceColumn, AttendanceStatus, CurriculumItem } from "@/features/lms/components/attendance/attendance-sheet-model";
 import { cn } from "@/lib/utils";
 
 type MobileAttendanceMode = "today" | "week" | "program";
@@ -18,6 +18,7 @@ type MobileAttendanceSheetPanelProps = {
   onSearchQueryChange: (value: string) => void;
   onSelectedDateChange: (value: string) => void;
   onSetAttendanceStatus: (studentId: string, columnId: string, status: AttendanceStatus) => void;
+  offlinePending?: boolean;
   searchQuery: string;
   selectedClass?: ClassroomSnapshot;
   selectedDate: string;
@@ -43,6 +44,7 @@ export function MobileAttendanceSheetPanel({
   onSearchQueryChange,
   onSelectedDateChange,
   onSetAttendanceStatus,
+  offlinePending,
   searchQuery,
   selectedClass,
   selectedDate,
@@ -115,6 +117,8 @@ export function MobileAttendanceSheetPanel({
           </label>
         </div>
 
+        {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
+
         <div className="mt-3 grid grid-cols-3 gap-1 rounded-[16px] bg-[#e9f0fb] p-1.5">
           {[
             ["today", "Hôm nay"],
@@ -147,7 +151,7 @@ export function MobileAttendanceSheetPanel({
             {filteredStudents.map((student, studentIndex) => {
               const statuses = todayColumns.map((column, columnIndex) => getStatus(student.id, studentIndex, column, columnIndex));
               const summary = attendanceSummary(statuses);
-              const currentStatus = statuses[0] || "present";
+              const currentStatus = statuses[0] ?? "";
               return (
                 <article key={student.id} className="rounded-[16px] border border-white bg-white p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
                   <div className="flex min-w-0 items-center gap-3">

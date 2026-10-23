@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ERG LMS Desktop",
+  "version": "0.1.0",
+  "identifier": "vn.erg.lms.desktop",
+  "build": {
+    "beforeDevCommand": "bun run dev",
+    "devUrl": "http://127.0.0.1:3001",
+    "beforeBuildCommand": "bun run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "ERG LMS Desktop",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "resizable": true,
+        "fullscreen": false,
+        "visible": true,
+        "devtools": false
+      }
+    ],
+    "security": {
+      "capabilities": ["main-window"],
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self'; connect-src 'self' http://ipc.localhost https://auth.erg.edu.vn https://api.erg.edu.vn https://lms.erg.edu.vn https://crm.erg.edu.vn; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' https:; font-src 'self' data: https:; frame-src 'self' https://auth.erg.edu.vn https://api.erg.edu.vn https://lms.erg.edu.vn https://crm.erg.edu.vn",
+      "devCsp": "default-src 'self' http://127.0.0.1:3001; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' http://127.0.0.1:3001; connect-src 'self' http://ipc.localhost http://127.0.0.1:3001 ws://127.0.0.1:3001 https://auth.erg.edu.vn https://api.erg.edu.vn https://lms.erg.edu.vn https://crm.erg.edu.vn; img-src 'self' data: blob: https:; style-src 'self' 'unsafe-inline' http://127.0.0.1:3001 https:; font-src 'self' data: http://127.0.0.1:3001 https:"
+    }
+  },
+  "bundle": {
+    "active": false,
+    "createUpdaterArtifacts": false,
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

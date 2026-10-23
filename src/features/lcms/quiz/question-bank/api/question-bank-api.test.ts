@@ -9,7 +9,8 @@ import {
   updateQuestionBankQuestion,
 } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
 
-vi.mock("@/lib/api-client", () => ({
+vi.mock("@/lib/api-client", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api-client")>()),
   apiRequest: vi.fn(),
   hasApiBase: () => true,
 }));

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import { Layers, Plus, Search, Users, UsersRound } from "lucide-react";
 
 import Checkbox from "@mui/material/Checkbox";
@@ -15,7 +16,7 @@ import {
   useUpdateLmsStudentGroupMutation,
 } from "@/features/lms/api/lms-assignment-command-query";
 import type { LmsStudentGroup, LmsStudentGroupInput } from "@/features/lms/api/lms-assignment-command-api";
-import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-graphql-api";
+import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
@@ -98,8 +99,8 @@ export function StudentGroupsPage({
   const studentRosterQueries = useQueries({
     queries: studentRosterClasses.map((classroom) => ({
       enabled: apiBacked && Boolean(classroom.id),
-      gcTime: 5 * 60_000,
-      queryFn: () =>
+      gcTime: QUERY_POLICIES.transactional.gcTime,
+      queryFn: ({ signal }) =>
         loadLmsClassWorkspace({
           assignmentPage: 0,
           assignmentSize: 20,
@@ -109,14 +110,14 @@ export function StudentGroupsPage({
           schoolId: classroom.schoolId,
           size: 200,
           studentStatus: "active",
-        }),
+        }, signal),
       queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
         classId: classroom.id,
         schoolId: classroom.schoolId,
         usage: "student-groups-roster",
       }),
       refetchOnWindowFocus: false,
-      staleTime: 60_000,
+      staleTime: QUERY_POLICIES.transactional.staleTime,
     })),
   });
   const createGroupMutation = useCreateLmsStudentGroupMutation();

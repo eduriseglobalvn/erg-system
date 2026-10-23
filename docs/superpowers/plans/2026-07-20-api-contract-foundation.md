@@ -1,5 +1,7 @@
 # Kế hoạch triển khai nền tảng hợp đồng API ERG
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 > **Dành cho agent thực thi:** BẮT BUỘC dùng `superpowers:executing-plans` để thực hiện tuần tự từng task. Mỗi bước sử dụng checkbox (`- [ ]`) để theo dõi.
 
 **Mục tiêu:** Thiết lập nguồn OpenAPI có tính quyết định tại `erg-spring`, chặn breaking change, sinh REST type tái lập tại `erg-system`, sửa transport boundary và chuyển auth/employee-access sang path được kiểm tra bằng contract.

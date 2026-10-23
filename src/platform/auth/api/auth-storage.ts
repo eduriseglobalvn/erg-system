@@ -10,8 +10,7 @@ import {
   readTeacherSessionSnapshot,
   readStoredAuthSession,
   resolveCurrentPortal,
-  setTeacherSessionSnapshot,
-  TEACHER_LOCAL_SESSION_KEY,
+  writeStoredAuthIdentity,
   TEACHER_TEMP_SESSION_KEY,
   portalSessionKey,
   type StoredAuthSession,
@@ -20,9 +19,10 @@ import {
 import { clearCrossDomainSession } from "@/platform/auth/api/cross-domain-session";
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
+import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
+import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_ACCOUNT } from "@/platform/auth/config/auth-bypass";
 import {
   getPersistedJsonValue,
-  removePersistedJsonValue,
   setPersistedJsonValue,
 } from "@/stores/persisted-store";
 
@@ -72,7 +72,8 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
   if (portal) return readStoredAuthSession(portal) as AccountSession | null;
 
   // Try SSO hydration first — if another portal set a cookie or passed an sso_token,
-  // this writes the session into localStorage before we read it.
+  // Cookie hydration writes the session into localStorage before we read it;
+  // credentials are never accepted from a URL.
   const candidates = [
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "crm")), null),
     parseJson<AccountSession | null>(window.sessionStorage.getItem(portalSessionKey(TEACHER_TEMP_SESSION_KEY, "admin")), null),
@@ -90,14 +91,7 @@ function readSession(portal: StoredAuthSession["portal"] = resolveCurrentPortal(
 }
 
 function writeSession(session: AccountSession) {
-  setTeacherSessionSnapshot(session);
-  if (!canUseStorage()) return;
-
-  const portal = session.portal && session.portal !== "elearning" ? session.portal : "lms";
-  const localKey = portalSessionKey(TEACHER_LOCAL_SESSION_KEY, portal);
-  const tempKey = portalSessionKey(TEACHER_TEMP_SESSION_KEY, portal);
-  window.sessionStorage.setItem(tempKey, JSON.stringify(session));
-  removePersistedJsonValue(localKey);
+  writeStoredAuthIdentity(session);
 }
 
 function notifyAuthAccountChanged() {
@@ -126,11 +120,16 @@ export function saveCurrentAccount(nextAccount: TeacherAccount) {
 }
 
 export function getCurrentAccount(portal: StoredAuthSession["portal"] = resolveCurrentPortal()) {
+  if (isBffAuthMode()) return null;
   const session = readSession(portal);
-  if (!session) return null;
-  if (requiresServerSession() && !session.accessToken) return null;
+  if (!session) return AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null;
+  if (requiresServerSession() && !session.accessToken) return AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null;
 
-  return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session);
+  return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session) ?? (AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null);
+}
+
+function isBffAuthMode() {
+  return import.meta.env.VITE_AUTH_MODE === "oidc-bff";
 }
 
 function requiresServerSession() {
@@ -154,9 +153,22 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
       ? jwtClaims.tenant_id
       : undefined;
   const portals = result.portals ?? jwtPortals ?? (isNewAuthSession ? [portal] : previousSession?.portals ?? [portal]);
-  const permissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
   const deniedPermissions = result.deniedPermissions ?? (isNewAuthSession ? [] : previousSession?.deniedPermissions ?? []);
-  const roles = result.roles ?? (isNewAuthSession ? [] : previousSession?.roles ?? []);
+  const basePermissions = result.permissions ?? jwtPermissions ?? (isNewAuthSession ? [] : previousSession?.permissions ?? []);
+  const isRootAdmin = result.account.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL;
+  const permissions = isRootAdmin && !deniedPermissions.includes("*")
+    ? Array.from(new Set([...basePermissions, "*"]))
+    : basePermissions;
+  const roles = result.roles ?? result.account.roles ?? (isNewAuthSession ? [] : previousSession?.roles ?? []);
+  const projectedWorkspaces = projectVerifiedWorkspaces({
+    accountEmail: result.account.email,
+    workspaces: result.workspaces,
+    roles,
+    permissions,
+    deniedPermissions,
+    portals,
+  });
+  const shouldProjectWorkspaces = isNewAuthSession || !previousSession?.workspaces?.length;
   const account: TeacherAccount = {
     ...result.account,
   };
@@ -170,12 +182,14 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
     accountId: account.id,
     rememberMe,
     loggedInAt: new Date().toISOString(),
+    accountEmail: account.email,
     accessToken,
     refreshToken: result.refreshToken ?? previousSession?.refreshToken,
     expiresAt: result.expiresAt ?? previousSession?.expiresAt,
     permissions,
     deniedPermissions,
     roles,
+    workspaces: result.workspaces ?? (shouldProjectWorkspaces ? projectedWorkspaces : previousSession?.workspaces),
     portal,
     portals,
     tenantId: result.tenantId ?? jwtTenantId ?? previousSession?.tenantId,
@@ -187,7 +201,7 @@ export function saveServerAuthSession(result: AuthSessionResponseDTO, rememberMe
 
 function accountFromSession(session: AccountSession): TeacherAccount | null {
   const claims = session.accessToken ? decodeJwtPayload(session.accessToken) : null;
-  const email = (typeof claims?.email === "string" ? claims.email : "") || (typeof claims?.sub === "string" ? claims.sub : "");
+  const email = (typeof claims?.email === "string" ? claims.email : "") || (typeof claims?.sub === "string" ? claims.sub : "") || session.accountEmail || "";
 
   if (!email) return null;
 
@@ -205,6 +219,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
     email,
     role,
     provider: "password",
+    roles,
     department: "ERG",
     title: role === "admin" ? "Quản trị viên" : "Giáo viên",
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
@@ -215,7 +230,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
 
 function mapRoleFromRoles(roles: string[]): AccountRole {
   const normalized = roles.map((role) => role.toLowerCase());
-  if (normalized.some((role) => ["admin", "super_admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
+  if (normalized.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
     return "admin";
   }
   if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";

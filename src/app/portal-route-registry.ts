@@ -24,9 +24,12 @@ export const lcmsWorkspacePaths = [
   "report-templates",
   "legal",
   "settings",
+  "settings/permissions",
+  "settings/roles",
   "customers",
   "center-tasks",
   "employees",
+  "employees/access-logs",
   "employees/face-detection",
   "employees/timesheet",
   "employees/teacher-absence",
@@ -51,6 +54,22 @@ export const lcmsWorkspacePaths = [
   "integration/setting-call-center",
   "integration/setting-zalo-account",
   "integration/setting-center-api-key",
+  "calendar",
+] as const;
+
+export const ADMIN_CONTENT_ROUTE_PREFIX = "/admin/content" as const;
+export const ADMIN_LEARNING_STANDARDS_PATH = "/admin/integrations/learning-standards" as const;
+export const LEGACY_LEARNING_STANDARDS_PATH = "/integration/learning-standards" as const;
+export const ADMIN_ENTERPRISE_CONNECTORS_PATH = "/admin/integrations/enterprise-connectors" as const;
+export const LEGACY_ENTERPRISE_CONNECTORS_PATH = "/integration/enterprise-connectors" as const;
+export const ADMIN_CONTENT_HOME_PATH = ADMIN_CONTENT_ROUTE_PREFIX;
+export const ADMIN_CONTENT_ROUTE_PATHS = [
+  ADMIN_CONTENT_HOME_PATH,
+  `${ADMIN_CONTENT_ROUTE_PREFIX}/structure`,
+  `${ADMIN_CONTENT_ROUTE_PREFIX}/resources`,
+  `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-bank`,
+  `${ADMIN_CONTENT_ROUTE_PREFIX}/questions`,
+  `${ADMIN_CONTENT_ROUTE_PREFIX}/quiz-editor`,
 ] as const;
 
 export const crmPaths = [
@@ -69,6 +88,7 @@ export const lmsPaths = [
   "homework/assign",
   "homework/exercise-bank",
   "homework/progress",
+  "homework/class",
   "homework/student-groups",
   "notifications",
   "account",
@@ -77,5 +97,6 @@ export const lmsPaths = [
   "attendance",
   "calendar",
   "class-log",
+  "resources",
   "reports",
 ] as const;

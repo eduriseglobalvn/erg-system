@@ -3,7 +3,7 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
-import { Link } from "@/routes/router-compat";
+import { Link } from "@tanstack/react-router";
 
 export function Field({
   label,

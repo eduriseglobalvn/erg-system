@@ -25,7 +25,7 @@ export function quizQuestionAnalyticsQueryOptions(
   return {
     enabled: Boolean(quizVersionId),
     gcTime: QUIZ_REPORT_GC_TIME_MS,
-    queryFn: () => loadQuizQuestionAnalytics({ quizVersionId, tenantId }),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadQuizQuestionAnalytics({ quizVersionId, tenantId }, signal),
     queryKey: quizReportQueryKeys.questionAnalytics(quizVersionId, tenantId),
     staleTime: QUIZ_REPORT_STALE_TIME_MS,
   };
@@ -38,7 +38,7 @@ export function assignmentReportQueryOptions(
   return {
     enabled: Boolean(assignmentId),
     gcTime: QUIZ_REPORT_GC_TIME_MS,
-    queryFn: () => loadAssignmentReport({ assignmentId, tenantId }),
+    queryFn: ({ signal }: { signal: AbortSignal }) => loadAssignmentReport({ assignmentId, tenantId }, signal),
     queryKey: quizReportQueryKeys.assignmentReport(assignmentId, tenantId),
     staleTime: QUIZ_REPORT_STALE_TIME_MS,
   };

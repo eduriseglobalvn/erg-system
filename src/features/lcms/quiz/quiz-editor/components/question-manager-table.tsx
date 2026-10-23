@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { Copy as ContentCopyIcon } from "@/components/mui-icon-shim";
-import { Trash2 as DeleteOutlinedIcon } from "@/components/mui-icon-shim";
-import { Maximize2 as OpenInFullIcon } from "@/components/mui-icon-shim";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
+import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 
 import { useI18n, type MessageKey } from "@/platform/i18n";
 import type {
@@ -115,7 +115,7 @@ export function QuestionManagerTable({
                 disabled={!selectedRow}
                 onClick={onOpenEditor}
               >
-                <OpenInFullIcon className="h-4 w-4" size="1em" />
+                <OpenInFullIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 <span>{t("quiz.openEditor")}</span>
               </button>
               <button
@@ -124,7 +124,7 @@ export function QuestionManagerTable({
                 disabled={!selectedRow}
                 onClick={onDuplicateSelected}
               >
-                <ContentCopyIcon className="h-4 w-4" size="1em" />
+                <ContentCopyIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 <span>{t("common.duplicate")}</span>
               </button>
               <button
@@ -133,7 +133,7 @@ export function QuestionManagerTable({
                 disabled={!selectedRow}
                 onClick={onRemoveSelected}
               >
-                <DeleteOutlinedIcon className="h-4 w-4" size="1em" />
+                <DeleteOutlinedIcon className="h-4 w-4" sx={{ fontSize: "1em" }} />
                 <span>{t("common.remove")}</span>
               </button>
             </div>

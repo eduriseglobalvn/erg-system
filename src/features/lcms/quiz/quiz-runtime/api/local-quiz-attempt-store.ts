@@ -1,14 +1,12 @@
-import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal, StartAttemptResult } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 import type { AnswerPayload } from "@/lib/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import {
-  getPersistedJsonValue,
-  removePersistedJsonValue,
-  setPersistedJsonValue,
-} from "@/stores/persisted-store";
+import { createOfflineScopedJsonStore } from "@/platform/offline/offline-scoped-json-store";
+import { offlineScopeKey } from "@/platform/offline/offline-outbox";
 
 const SESSION_VERSION = 1;
 const SESSION_PREFIX = "erg:local-quiz-attempt:v1:";
+const sessionStore = createOfflineScopedJsonStore("quiz-attempt-sessions-v2");
 
 type StoredSession = LocalQuizAttemptSession & {
   version: number;
@@ -22,7 +20,7 @@ export type LocalQuizAttemptScope = {
 
 export const localQuizAttemptStore = {
   async getSession(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope): Promise<LocalQuizAttemptSession | null> {
-    const stored = readStoredSession(assignmentId, quizId, scope);
+    const stored = await readStoredSession(assignmentId, quizId, scope);
     if (!stored || stored.version !== SESSION_VERSION) {
       return null;
     }
@@ -47,6 +45,10 @@ export const localQuizAttemptStore = {
       shuffleSeed: stored.shuffleSeed,
       startIdempotencyKey: stored.startIdempotencyKey,
       submitIdempotencyKey: stored.submitIdempotencyKey,
+      serverStartedAt: stored.serverStartedAt,
+      serverTimeAtStart: stored.serverTimeAtStart,
+      deadlineAt: stored.deadlineAt,
+      serverClockOffsetMs: stored.serverClockOffsetMs,
     };
   },
 
@@ -98,7 +100,7 @@ export const localQuizAttemptStore = {
   },
 
   async saveSession(session: LocalQuizAttemptSession): Promise<void> {
-    writeJson(getSessionKey(session.assignmentId, session.quizId, session), {
+    await sessionStore.set(getScopeKey(session), getSessionRecordKey(session.assignmentId, session.quizId), {
       ...session,
       version: SESSION_VERSION,
     });
@@ -196,21 +198,32 @@ export const localQuizAttemptStore = {
 
   async markServerStarted(
     session: LocalQuizAttemptSession,
-    attemptId: string,
+    result: StartAttemptResult,
   ): Promise<LocalQuizAttemptSession> {
     const now = new Date().toISOString();
+    const policy = result.policySnapshot;
+    const serverStartedAt = policy?.startedAt ?? result.startedAt;
+    const serverTimeAtStart = policy?.serverTimeAtStart ?? serverStartedAt;
+    const serverTimeMs = serverTimeAtStart ? Date.parse(serverTimeAtStart) : Number.NaN;
+    const serverClockOffsetMs = Number.isFinite(serverTimeMs) ? serverTimeMs - Date.now() : undefined;
     const nextSession: LocalQuizAttemptSession = {
       ...session,
-      attemptId,
+      attemptId: result.attemptId,
       serverStarted: true,
-      startedAt: now,
+      startedAt: serverStartedAt ?? session.startedAt,
       updatedAt: now,
+      ...(serverStartedAt ? { serverStartedAt } : {}),
+      ...(serverTimeAtStart ? { serverTimeAtStart } : {}),
+      ...(policy?.deadlineAt ? { deadlineAt: policy.deadlineAt } : {}),
+      ...(serverClockOffsetMs !== undefined ? { serverClockOffsetMs } : {}),
       clientEvents: [
         ...session.clientEvents,
         {
           id: createRuntimeKey("evt"),
           type: "server_attempt_started",
           createdAt: now,
+          serverStartedAt,
+          serverTimeAtStart,
         },
       ],
     };
@@ -220,32 +233,23 @@ export const localQuizAttemptStore = {
   },
 
   async clearSession(assignmentId: string, quizId: string): Promise<void> {
-    if (!canUseLocalStorage()) {
-      return;
-    }
-
-    removePersistedJsonValue(getSessionKey(assignmentId, quizId));
+    await sessionStore.remove(getScopeKey(), getSessionRecordKey(assignmentId, quizId));
+    removeLegacyLocalStorage(assignmentId, quizId);
   },
 
   async clearScopedSession(assignmentId: string, quizId: string, scope: LocalQuizAttemptScope): Promise<void> {
-    if (!canUseLocalStorage()) {
-      return;
-    }
-
-    removePersistedJsonValue(getSessionKey(assignmentId, quizId, scope));
+    await sessionStore.remove(getScopeKey(scope), getSessionRecordKey(assignmentId, quizId));
+    removeLegacyLocalStorage(assignmentId, quizId, scope);
   },
 
   async clearSessionsForQuiz(quizId: string): Promise<void> {
-    if (!canUseLocalStorage()) {
-      return;
-    }
+    await sessionStore.clearAll();
+    removeLegacyLocalStorage(undefined, quizId);
+  },
 
-    for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
-      const key = window.localStorage.key(index);
-      if (key?.startsWith(SESSION_PREFIX) && key.endsWith(`:${quizId}`)) {
-        removePersistedJsonValue(key);
-      }
-    }
+  async clearAllSessions(): Promise<void> {
+    await sessionStore.clearAll();
+    removeLegacyLocalStorage();
   },
 
   async saveWithStatus(
@@ -275,12 +279,19 @@ export const localQuizAttemptStore = {
   },
 };
 
-function readStoredSession(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
-  if (scope) {
-    return readJson<StoredSession>(getSessionKey(assignmentId, quizId, scope));
-  }
+async function readStoredSession(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
+  const scopeKey = getScopeKey(scope ?? {});
+  const recordKey = getSessionRecordKey(assignmentId, quizId);
+  const secureSession = await sessionStore.get<StoredSession>(scopeKey, recordKey);
+  if (secureSession) return secureSession;
 
-  return readJson<StoredSession>(getSessionKey(assignmentId, quizId, {})) ?? readJson<StoredSession>(getLegacySessionKey(assignmentId, quizId));
+  const legacySession = readLegacyJson<StoredSession>(getLegacySessionKey(assignmentId, quizId, scope));
+  if (!legacySession) return null;
+
+  // One-time migration: legacy localStorage is never used as the active store.
+  await sessionStore.set(scopeKey, recordKey, legacySession);
+  removeLegacyLocalStorage(assignmentId, quizId, scope);
+  return legacySession;
 }
 
 export function createRuntimeKey(prefix: string) {
@@ -292,15 +303,22 @@ export function createRuntimeKey(prefix: string) {
   return `${prefix}_${randomId}`;
 }
 
-function getSessionKey(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
-  if (!scope) {
-    return getLegacySessionKey(assignmentId, quizId);
-  }
-
-  return `${SESSION_PREFIX}${normalizeTenantId(scope.tenantId)}:${normalizePortal(scope.portal)}:${normalizeAccountId(scope.accountId)}:${assignmentId}:${quizId}`;
+function getScopeKey(scope?: { tenantId?: string | null; portal?: QuizRuntimePortal | null; accountId?: string | null }) {
+  return offlineScopeKey({
+    tenantId: normalizeTenantId(scope?.tenantId),
+    accountId: normalizeAccountId(scope?.accountId),
+    workspace: normalizePortal(scope?.portal),
+  });
 }
 
-function getLegacySessionKey(assignmentId: string, quizId: string) {
+function getSessionRecordKey(assignmentId: string, quizId: string) {
+  return `attempt:${assignmentId}:${quizId}`;
+}
+
+function getLegacySessionKey(assignmentId: string, quizId: string, scope?: LocalQuizAttemptScope) {
+  if (scope) {
+    return `${SESSION_PREFIX}${normalizeTenantId(scope.tenantId)}:${normalizePortal(scope.portal)}:${normalizeAccountId(scope.accountId)}:${assignmentId}:${quizId}`;
+  }
   return `${SESSION_PREFIX}${assignmentId}:${quizId}`;
 }
 
@@ -316,22 +334,35 @@ function normalizeAccountId(accountId: LocalQuizAttemptScope["accountId"]) {
   return accountId?.trim() || "anonymous";
 }
 
-function readJson<T>(key: string): T | null {
+function readLegacyJson<T>(key: string): T | null {
   if (!canUseLocalStorage()) {
     return null;
   }
 
-  return getPersistedJsonValue<T | null>(key, null);
-}
-
-function writeJson(key: string, value: unknown) {
-  if (!canUseLocalStorage()) {
-    return;
+  try {
+    const rawValue = window.localStorage.getItem(key);
+    return rawValue ? (JSON.parse(rawValue) as T) : null;
+  } catch {
+    return null;
   }
-
-  setPersistedJsonValue(key, value);
 }
 
 function canUseLocalStorage() {
   return typeof window !== "undefined" && Boolean(window.localStorage);
+}
+
+function removeLegacyLocalStorage(assignmentId?: string, quizId?: string, scope?: LocalQuizAttemptScope) {
+  if (!canUseLocalStorage()) return;
+  for (let index = window.localStorage.length - 1; index >= 0; index -= 1) {
+    const key = window.localStorage.key(index);
+    if (!key?.startsWith(SESSION_PREFIX)) continue;
+    if (assignmentId && quizId && scope) {
+      if (key !== getLegacySessionKey(assignmentId, quizId, scope)) continue;
+    } else if (assignmentId && quizId) {
+      if (key !== getLegacySessionKey(assignmentId, quizId)) continue;
+    } else if (quizId && !key.endsWith(`:${quizId}`)) {
+      continue;
+    }
+    window.localStorage.removeItem(key);
+  }
 }

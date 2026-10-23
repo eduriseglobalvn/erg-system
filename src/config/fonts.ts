@@ -1,16 +1,20 @@
 // ---------------------------------------------------------------------------
 // Font configuration for ERG system.
-// The app uses Public Sans for body/UI and Fraunces for editorial headings.
+// Operational UI uses the bundled Manrope family. Quiz content can still opt
+// into its explicit Public Sans/Fraunces choices through quizFontStacks.
 // font-display: swap ensures text is visible immediately during font load.
 // ---------------------------------------------------------------------------
 
-export const appFontStack = '"Public Sans", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-export const headingFontStack = '"Fraunces", "Public Sans", serif';
+export const appFontStack = '"Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+export const headingFontStack = '"Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", sans-serif';
 export const monoFontStack = '"JetBrains Mono", "SF Mono", ui-monospace, monospace';
 
 export const quizFontStacks = {
-  "Public Sans": appFontStack,
-  "Fraunces": headingFontStack,
+  "Plus Jakarta Sans": appFontStack,
+  "Be Vietnam Pro": '"Be Vietnam Pro", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  "Manrope": '"Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  "Public Sans": '"Public Sans", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  "Fraunces": '"Fraunces", "Public Sans", serif',
   "Arial": 'Arial, "Helvetica Neue", sans-serif',
   "Times New Roman": '"Times New Roman", Times, serif',
   "Calibri": 'Calibri, "Segoe UI", sans-serif',
@@ -19,7 +23,7 @@ export const quizFontStacks = {
   "Verdana": 'Verdana, Geneva, sans-serif',
   "Tahoma": 'Tahoma, Geneva, sans-serif',
   "Trebuchet MS": '"Trebuchet MS", Arial, sans-serif',
-  "Segoe UI": '"Segoe UI", "Public Sans", sans-serif',
+  "Segoe UI": '"Segoe UI", "Manrope", sans-serif',
   "Courier New": '"Courier New", Courier, monospace',
   "Default": appFontStack,
 } as const;

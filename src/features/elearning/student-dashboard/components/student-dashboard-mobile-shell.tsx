@@ -1,81 +1,252 @@
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import IosShareRoundedIcon from "@mui/icons-material/IosShareRounded";
+import LaptopChromebookRoundedIcon from "@mui/icons-material/LaptopChromebookRounded";
+import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import IconButton from "@mui/material/IconButton";
-import AccountCircleOutlinedIcon from "@mui/icons-material/AccountCircleOutlined";
-import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import type { ReactNode } from "react";
+import Typography from "@mui/material/Typography";
+import { useMemo, useState, type ReactNode } from "react";
 
+import { OfflineShellStatus } from "@/components/erg-mui/offline";
+import { ERG_ASSETS } from "@/config/seo";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
+import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
+import { useInstallPrompt } from "@/features/lms/mobile/hooks/use-install-prompt";
+import { usePwaNotifications } from "@/features/lms/mobile/hooks/use-pwa-notifications";
+import { useServiceWorkerUpdate } from "@/features/lms/mobile/hooks/use-service-worker-update";
+import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 
 export function StudentDashboardMobileShell({
   activePage,
-  announcementUnreadCount,
+  announcementUnreadCount = 0,
   children,
-  currentPageLabel,
+  currentPageLabel: _currentPageLabel,
   dockItems,
   studentName,
-  onAccountOpen,
-  onAnnouncementsOpen,
+  onAccountOpen: _onAccountOpen,
+  onAnnouncementsOpen: _onAnnouncementsOpen,
   onPageChange,
 }: {
   activePage: StudentPageKey;
-  announcementUnreadCount: number;
+  announcementUnreadCount?: number;
   children: ReactNode;
-  currentPageLabel: string;
+  currentPageLabel?: string;
   dockItems: Array<{ key: StudentDockPageKey; label: string; icon: ReactNode }>;
   studentName: string;
-  onAccountOpen: () => void;
-  onAnnouncementsOpen: () => void;
+  onAccountOpen?: () => void;
+  onAnnouncementsOpen?: () => void;
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
-  const initial = studentName.trim().slice(0, 1).toUpperCase();
+  const installPrompt = useInstallPrompt();
+  const notifications = usePwaNotifications("elearning");
+  const serviceWorkerUpdate = useServiceWorkerUpdate();
+  const network = useOfflineShellStatus();
+  const [pwaOpen, setPwaOpen] = useState(false);
+  const [dismissed, setDismissed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.sessionStorage?.getItem("erg_pwa_banner_dismissed") === "true";
+    } catch {
+      return false;
+    }
+  });
+
+  const isInstalled = installPrompt.installed;
+  const isIos = installPrompt.isIos;
+  const isAndroid = installPrompt.platform === "android";
+  const canDirectInstall = installPrompt.canInstall;
+
+  // Never offer install if already installed or dismissed by user in this session
+  const shouldOfferInstall =
+    !isInstalled && !dismissed && (canDirectInstall || isIos || isAndroid);
+
+  const bannerMeta = useMemo(() => {
+    if (isIos) {
+      return {
+        icon: <IosShareRoundedIcon sx={{ color: "#2563EB", fontSize: 18 }} />,
+        subtitle: 'Mở Safari, nhấn nút Chia sẻ và chọn "Thêm vào MH chính"',
+        title: "Thêm ERG Learning vào Màn hình chính",
+      };
+    }
+    if (isAndroid) {
+      return {
+        icon: <PhoneAndroidRoundedIcon sx={{ color: "#2563EB", fontSize: 18 }} />,
+        subtitle: "Cài ứng dụng nhanh trực tiếp từ trình duyệt Android",
+        title: "Cài đặt ERG Learning cho Android",
+      };
+    }
+    return {
+      icon: <LaptopChromebookRoundedIcon sx={{ color: "#2563EB", fontSize: 18 }} />,
+      subtitle: "Mở nhanh Student Workspace từ màn hình thiết bị",
+      title: "Cài đặt ứng dụng ERG Learning",
+    };
+  }, [isIos, isAndroid]);
+
+  const handleInstallClick = async () => {
+    if (canDirectInstall) {
+      const outcome = await installPrompt.promptInstall();
+      if (outcome === "accepted") return;
+    }
+    setPwaOpen(true);
+  };
+
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setDismissed(true);
+    try {
+      window.sessionStorage?.setItem("erg_pwa_banner_dismissed", "true");
+    } catch {}
+  };
 
   return (
-    <Box sx={{ bgcolor: "#f7f8fa", color: "text.primary", minHeight: "100vh", pb: 12 }}>
-      <Box component="header" sx={{ backdropFilter: "blur(8px)", bgcolor: "rgba(255,255,255,0.98)", borderBottom: "1px solid #d7e0ec", boxShadow: "0 1px 0 rgba(15,23,42,0.04)", pb: 1.5, pt: "calc(env(safe-area-inset-top, 0px) + 0.8rem)", px: 2, position: "sticky", top: 0, zIndex: 30 }}>
-        <Box sx={{ maxWidth: 448, mx: "auto" }}>
-          <Box sx={{ alignItems: "flex-start", display: "flex", gap: 1.5, justifyContent: "space-between" }}>
-            <Box sx={{ minWidth: 0 }}>
-              <Box sx={{ alignItems: "flex-end", display: "flex", fontSize: 30, fontWeight: 600, lineHeight: 1 }}>
-                <Box component="span" sx={{ color: "#696CFF" }}>ER</Box>
-                <Box component="span" sx={{ color: "#FF5630" }}>G</Box>
+    <Box
+      sx={{
+        background: "linear-gradient(180deg, #DCE6FF 0%, #EEF2FF 18%, #F8FAFC 45%, #E8F5F8 100%)",
+        color: "text.primary",
+        display: "flex",
+        flexDirection: "column",
+        height: "100dvh",
+        maxHeight: "100dvh",
+        minHeight: "100dvh",
+        minWidth: 0,
+        overflow: "hidden",
+        position: "relative",
+        width: "100%",
+      }}
+    >
+      {/* Brand logo reference for PWA shell branding & policy */}
+      <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ display: "none" }} />
+
+      {/* Floating service worker update banner */}
+      {serviceWorkerUpdate.updateAvailable ? (
+        <Box sx={{ flexShrink: 0, px: 2, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", zIndex: 1100 }}>
+          <ButtonBase
+            onClick={serviceWorkerUpdate.applyUpdate}
+            sx={{
+              alignItems: "center",
+              bgcolor: "rgba(37, 99, 235, 0.95)",
+              borderRadius: "999px",
+              boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
+              color: "#FFFFFF",
+              display: "flex",
+              gap: 1,
+              mx: "auto",
+              px: 2,
+              py: 0.75,
+            }}
+          >
+            <RefreshRoundedIcon sx={{ fontSize: 16 }} />
+            <Typography sx={{ fontSize: 12, fontWeight: 750 }}>Bản cập nhật mới có sẵn · Chạm để làm mới</Typography>
+          </ButtonBase>
+        </Box>
+      ) : null}
+
+      {/* Device-aware PWA install prompt banner */}
+      {shouldOfferInstall ? (
+        <Box sx={{ flexShrink: 0, px: 1.75, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", pb: 0.5, zIndex: 1050 }}>
+          <Box
+            sx={{
+              alignItems: "center",
+              backdropFilter: "blur(12px)",
+              bgcolor: "rgba(255, 255, 255, 0.94)",
+              border: "1px solid rgba(226, 232, 240, 0.85)",
+              borderRadius: "14px",
+              boxShadow: "0 2px 8px rgba(15, 23, 42, 0.05)",
+              display: "flex",
+              gap: 1,
+              minHeight: 48,
+              pl: 1.25,
+              pr: 0.75,
+              py: 0.75,
+              width: "100%",
+            }}
+          >
+            <ButtonBase
+              onClick={handleInstallClick}
+              sx={{
+                alignItems: "center",
+                display: "flex",
+                flex: 1,
+                gap: 1.25,
+                minWidth: 0,
+                textAlign: "left",
+              }}
+            >
+              <Box
+                alt="ERG"
+                component="img"
+                src={ERG_ASSETS.logo}
+                sx={{ bgcolor: "#FFFFFF", borderRadius: "8px", height: 28, objectFit: "contain", width: 28 }}
+              />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12.5, fontWeight: 750 }}>
+                  {bannerMeta.title}
+                </Typography>
+                <Typography noWrap sx={{ color: "#64748B", fontSize: 10.5, fontWeight: 550 }}>
+                  {bannerMeta.subtitle}
+                </Typography>
               </Box>
-              <Box sx={{ color: "text.secondary", fontSize: 11, fontWeight: 600, mt: 0.75 }}>Learning app</Box>
-              <Box sx={{ fontSize: 17, fontWeight: 600, lineHeight: 1, mt: 0.75 }}>{currentPageLabel}</Box>
-            </Box>
+              <Box sx={{ alignItems: "center", display: "flex", px: 0.5 }}>
+                {bannerMeta.icon}
+              </Box>
+            </ButtonBase>
 
-            <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-              <IconButton
-                aria-label="Open announcements"
-                sx={{ bgcolor: "background.paper", border: "1px solid #d1d9e6", borderRadius: 1, boxShadow: 1, color: "text.secondary", height: 40, position: "relative", width: 40 }}
-                onClick={onAnnouncementsOpen}
-              >
-                <NotificationsNoneOutlinedIcon sx={{ fontSize: 16 }} />
-                {announcementUnreadCount > 0 ? (
-                  <Box component="span" sx={{ bgcolor: "#FF5630", borderRadius: 999, color: "common.white", display: "grid", fontSize: 10, fontWeight: 500, height: 16, minWidth: 16, placeItems: "center", position: "absolute", px: 0.5, right: 5, top: 5 }}>
-                    {announcementUnreadCount}
-                  </Box>
-                ) : null}
-              </IconButton>
-
-              <IconButton
-                aria-label={studentName ? `Open account for ${studentName}` : "Open account"}
-                sx={{ bgcolor: "background.paper", border: "1px solid #d1d9e6", borderRadius: 1, boxShadow: activePage === "account" ? "0 0 0 1px rgba(105,108,255,0.24)" : 1, color: activePage === "account" ? "#696CFF" : "text.secondary", height: 40, position: "relative", width: 40 }}
-                onClick={onAccountOpen}
-              >
-                <Box component="span" sx={{ bgcolor: "#696CFF", borderRadius: "50%", boxShadow: 1, color: "common.white", display: "grid", fontSize: 12, fontWeight: 600, height: 32, placeItems: "center", width: 32 }}>
-                  {initial || <AccountCircleOutlinedIcon sx={{ fontSize: 16 }} />}
-                </Box>
-                <Box component="span" sx={{ bgcolor: "#22c55e", border: "2px solid white", borderRadius: "50%", bottom: 7, height: 10, position: "absolute", right: 7, width: 10 }} />
-              </IconButton>
-            </Box>
+            <IconButton
+              aria-label="Đóng gợi ý cài đặt"
+              onClick={handleDismiss}
+              size="small"
+              sx={{
+                color: "#94A3B8",
+                flexShrink: 0,
+                height: 28,
+                p: 0.5,
+                width: 28,
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "#0F172A" },
+              }}
+            >
+              <CloseRoundedIcon sx={{ fontSize: 16 }} />
+            </IconButton>
           </Box>
+        </Box>
+      ) : null}
+
+      <OfflineShellStatus network={network} />
+
+      <Box
+        component="main"
+        data-testid="student-mobile-scroll-region"
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overscrollBehavior: "contain",
+          pb: "calc(64px + env(safe-area-inset-bottom, 0px))",
+          pt: shouldOfferInstall ? 0.75 : "calc(env(safe-area-inset-top, 0px) + 12px)",
+        }}
+      >
+        <Box sx={{ maxWidth: 448, mx: "auto", px: { xs: 1.75, sm: 2.25 }, py: 1.5 }}>
+          {children}
         </Box>
       </Box>
 
-      <Box component="main" sx={{ maxWidth: 448, mx: "auto" }}>{children}</Box>
+      <StudentDashboardBottomDock
+        activePage={activePage}
+        announcementUnreadCount={announcementUnreadCount}
+        items={dockItems}
+        studentName={studentName}
+        onPageChange={onPageChange}
+      />
 
-      <StudentDashboardBottomDock activePage={activePage} items={dockItems} onPageChange={onPageChange} />
+      <LmsPwaSetupSheet
+        installPrompt={installPrompt}
+        notifications={notifications}
+        onOpenChange={setPwaOpen}
+        open={pwaOpen}
+        workspace="STUDENT"
+      />
     </Box>
   );
 }

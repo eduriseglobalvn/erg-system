@@ -1,5 +1,7 @@
 # Student Dashboard Mobile PWA Design
 
+> Status: completed — canonical implementation evidence is tracked in `D:/ERG/TASK/ERG_Task_Management_.xlsx` and the paired plan when present.
+
 **Goal**
 
 Refactor the Elearning student dashboard mobile experience so it feels like an installable learning app instead of a squeezed desktop page, while preserving the current desktop experience.

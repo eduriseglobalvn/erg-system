@@ -1,3 +1,4 @@
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest } from "@/lib/api-client";
 
 export type BulkStudentAccountRow = {
@@ -53,7 +54,7 @@ export type BulkStudentAccountResponse = {
 };
 
 export function bulkCreateStudentAccounts(input: BulkStudentAccountRequest) {
-  return apiRequest<BulkStudentAccountResponse>("/api/lms/students/bulk-accounts", {
+  return apiRequest<BulkStudentAccountResponse>(API_ENDPOINTS.legacy.lmsStudentAccounts, {
     method: "POST",
     body: JSON.stringify(input),
   });

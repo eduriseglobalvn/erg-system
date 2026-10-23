@@ -58,7 +58,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
       <DialogContent dividers sx={{ display: "grid", gap: 2, py: 2.5 }}>
         <TextField autoFocus fullWidth label="Tiêu đề" onChange={(event) => updateDraft("title", event.target.value)} value={draft.title} />
 
-        <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1 }}>
           <Chip color="primary" label="Sự kiện" />
           <Chip label="Việc cần làm" variant="outlined" />
           <Chip label="Lên lịch hẹn" variant="outlined" />
@@ -66,10 +66,10 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
 
         <ScheduleRow icon={<ScheduleRoundedIcon />}>
           <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}>
-            <TextField InputLabelProps={{ shrink: true }} label="Bắt đầu" onChange={(event) => updateDraft("start", event.target.value)} type="datetime-local" value={draft.start} />
-            <TextField InputLabelProps={{ shrink: true }} label="Kết thúc" onChange={(event) => updateDraft("end", event.target.value)} type="datetime-local" value={draft.end} />
+            <TextField slotProps={{ inputLabel: { shrink: true } }} label="Bắt đầu" onChange={(event) => updateDraft("start", event.target.value)} type="datetime-local" value={draft.start} />
+            <TextField slotProps={{ inputLabel: { shrink: true } }} label="Kết thúc" onChange={(event) => updateDraft("end", event.target.value)} type="datetime-local" value={draft.end} />
           </Box>
-          <Stack direction="row" flexWrap="wrap" gap={1} sx={{ mt: 1.25 }}><Chip label="Không lặp lại" size="small" variant="outlined" /><Chip label="Thêm thời gian" size="small" variant="outlined" /><Chip label="Không có giờ bận" size="small" variant="outlined" /></Stack>
+          <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 1.25 }}><Chip label="Không lặp lại" size="small" variant="outlined" /><Chip label="Thêm thời gian" size="small" variant="outlined" /><Chip label="Không có giờ bận" size="small" variant="outlined" /></Stack>
         </ScheduleRow>
 
         <ScheduleRow icon={<GroupsRoundedIcon />}><TextField fullWidth label="Lớp hoặc nhóm học sinh" onChange={(event) => updateDraft("className", event.target.value)} value={draft.className} /></ScheduleRow>
@@ -81,7 +81,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
           </Box>
         </ScheduleRow>
 
-        <ScheduleRow icon={<NotificationsNoneRoundedIcon />}><Stack alignItems="center" direction="row" flexWrap="wrap" gap={1}><Chip label="30 phút trước" variant="outlined" /><Chip label="Email" variant="outlined" /><Button variant="text">Thêm thông báo</Button></Stack></ScheduleRow>
+        <ScheduleRow icon={<NotificationsNoneRoundedIcon />}><Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}><Chip label="30 phút trước" variant="outlined" /><Chip label="Email" variant="outlined" /><Button variant="text">Thêm thông báo</Button></Stack></ScheduleRow>
         <ScheduleRow icon={<CalendarMonthRoundedIcon />}>
           <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", sm: "1fr 190px" } }}>
             <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", minHeight: 40, px: 1.5 }}><Typography sx={{ fontSize: 14, fontWeight: 700 }}>Lịch dạy của tôi</Typography></Box>

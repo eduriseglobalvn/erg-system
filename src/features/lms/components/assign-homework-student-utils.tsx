@@ -4,8 +4,6 @@ import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 
-/* eslint-disable react-refresh/only-export-components */
-
 export function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);
 }

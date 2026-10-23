@@ -2,8 +2,12 @@ import { ApiClientError, apiRequest } from "@/lib/api-client";
 import { getApiBase } from "@/lib/platform";
 import type { AccountRole, AuthProvider, TeacherAccount } from "@/platform/auth/types/auth-types";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
-
-const AUTH_V1_BASE = "/api/v1/auth";
+import { getOrCreateBrowserDeviceId } from "@/platform/auth/api/browser-device-id";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
+import { isNonEmptyString, isObject, validateResponse } from "@/lib/validate-response";
+import { AUTH_PORTAL_HOST, getSharedAuthUrl } from "@/config/portal-urls";
+import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
+import { WORKSPACES, type Workspace } from "@/platform/workspaces/workspace-domain";
 
 export type LoginRequestDTO = {
   identifier: string;
@@ -40,6 +44,7 @@ export type AuthSessionResponseDTO = {
   deniedPermissions?: string[];
   roles?: string[];
   portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
+  workspaces?: Workspace[];
   tenantId?: string;
 };
 
@@ -86,6 +91,7 @@ type BackendAuthSessionResponseDTO = {
   deniedPermissions?: string[];
   roles?: string[];
   portals?: Array<"admin" | "crm" | "lcms" | "lms" | "elearning" | "*">;
+  workspaces?: Workspace[];
   tenantId?: string;
   tenant_id?: string;
 };
@@ -105,22 +111,22 @@ type BackendTokenContainerDTO = {
 
 export const authApi = {
   async login(input: LoginRequestDTO) {
-    const result = await loginAtPath(`${AUTH_V1_BASE}/login`, input);
+    const result = await loginAtPath(API_ENDPOINTS.auth.login, input);
     return normalizeAuthSession(result);
   },
 
   logout() {
-    return apiRequest<void>(`${AUTH_V1_BASE}/logout`, {
+    return apiRequest<void>(API_ENDPOINTS.auth.logout, {
       method: "POST",
     });
   },
 
   logoutAll() {
-    return apiRequest<{ revokedSessions: number }>(`${AUTH_V1_BASE}/logout-all`, { method: "POST" });
+    return apiRequest<{ revokedSessions: number }>(API_ENDPOINTS.auth.logoutAll, { method: "POST" });
   },
 
   async bffSession(): Promise<AuthSessionResponseDTO> {
-    const session = await apiRequest<BackendBffSessionDTO>(`${AUTH_V1_BASE}/session`);
+    const session = await apiRequest<BackendBffSessionDTO>(API_ENDPOINTS.auth.session);
     const email = session.profile?.email ?? session.userId;
     return {
       account: {
@@ -145,29 +151,38 @@ export const authApi = {
       deniedPermissions: session.deniedPermissions ?? [],
       roles: session.roles ?? [],
       portals: session.portals ?? [],
+      workspaces: normalizeWorkspaces(session.workspaces),
     };
   },
 
   startOidcLogin(portal: LoginRequestDTO["portal"], returnTo?: string) {
     const apiBase = getApiBase();
     if (!apiBase) throw new Error("API base URL is not configured.");
-    const safeReturnTo = returnTo?.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/";
+    const safeReturnTo = sanitizeLocalRedirect(returnTo) ?? "/";
+    if (typeof window !== "undefined" && window.location.hostname.endsWith(".erg.edu.vn") && window.location.hostname !== AUTH_PORTAL_HOST) {
+      const authUrl = new URL(getSharedAuthUrl());
+      authUrl.searchParams.set("portal", portal ?? "lms");
+      authUrl.searchParams.set("returnTo", safeReturnTo);
+      authUrl.searchParams.set("redirect", safeReturnTo);
+      window.location.assign(authUrl.toString());
+      return;
+    }
     const query = new URLSearchParams({ portal: portal ?? "lms", returnTo: safeReturnTo });
-    window.location.assign(`${apiBase}${AUTH_V1_BASE}/login?${query.toString()}`);
+    window.location.assign(`${apiBase}${API_ENDPOINTS.auth.login}?${query.toString()}`);
   },
 
   async profile() {
-    const result = await apiRequest<BackendProfileResponseDTO | AuthAccountResponseDTO>("/api/v1/users/me");
+    const result = await apiRequest<BackendProfileResponseDTO | AuthAccountResponseDTO>(API_ENDPOINTS.account.me);
     return "role" in result ? result : mapProfileToAccount(result);
   },
 
   sessions() {
-    return apiRequest<{ items: AuthSessionResponseDTO[] }>("/api/v1/users/me/sessions");
+    return apiRequest<{ items: AuthSessionResponseDTO[] }>(API_ENDPOINTS.account.sessions);
   },
 
   async updateProfile(accountId: string, input: UpdateProfileRequestDTO) {
     void accountId;
-    const result = await apiRequest<BackendProfileResponseDTO>("/api/v1/users/me", {
+    const result = await apiRequest<BackendProfileResponseDTO>(API_ENDPOINTS.account.me, {
       method: "PATCH",
       body: JSON.stringify({
         full_name: input.fullName,
@@ -183,7 +198,7 @@ export const authApi = {
   async uploadAvatar(accountId: string, file: File) {
     const body = new FormData();
     body.append("file", file);
-    const result = await apiRequest<BackendProfileResponseDTO>(`/api/lms/auth/accounts/${accountId}/avatar`, {
+    const result = await apiRequest<BackendProfileResponseDTO>(API_ENDPOINTS.account.avatar(accountId), {
       method: "POST",
       body,
     });
@@ -192,7 +207,7 @@ export const authApi = {
 
   async updatePassword(accountId: string, input: UpdatePasswordRequestDTO) {
     void accountId;
-    await apiRequest<{ message: string }>("/api/v1/users/me/password", {
+    await apiRequest<{ message: string }>(API_ENDPOINTS.account.password, {
       method: "PUT",
       body: JSON.stringify({ old_password: input.currentPassword, new_password: input.nextPassword }),
     });
@@ -208,6 +223,7 @@ type BackendBffSessionDTO = {
   permissions?: string[];
   deniedPermissions?: string[];
   portals?: AuthSessionResponseDTO["portals"];
+  workspaces?: Workspace[];
   accountType?: string;
   accessLevel?: string;
   profile?: { email?: string; fullName?: string };
@@ -222,12 +238,38 @@ export function shouldRetrySharedAuthLogin(error: unknown) {
   return message.includes("missing authorization") || message.includes("authorization header");
 }
 
-function loginAtPath(path: string, input: LoginRequestDTO) {
-  return apiRequest<BackendAuthSessionResponseDTO>(path, {
+async function loginAtPath(path: string, input: LoginRequestDTO) {
+  const result = await apiRequest<BackendAuthSessionResponseDTO>(path, {
     portal: input.portal,
     method: "POST",
     body: JSON.stringify({ ...getLoginDeviceMetadata(), ...input }),
   });
+  return validateResponse(result, isBackendAuthSessionResponse, "auth.login");
+}
+
+/**
+ * A login response is only usable if it carries an account identity (an
+ * `account`, or a `user` with id + email) and some access token. Anything else
+ * would blow up in `normalizeAuthSession`/`mapProfileToAccount` with a vague
+ * error, so we reject it here at the boundary with a clear typed error.
+ */
+export function isBackendAuthSessionResponse(value: unknown): value is BackendAuthSessionResponseDTO {
+  if (!isObject(value)) return false;
+  const hasAccount = isObject(value.account) && isNonEmptyString((value.account as { id?: unknown }).id);
+  const user = value.user;
+  const hasUser = isObject(user) && isNonEmptyString(user.id) && isNonEmptyString(user.email);
+  if (!hasAccount && !hasUser) return false;
+
+  const tokenContainers = [value, value.session, value.tokens, value.auth];
+  const hasToken = tokenContainers.some(
+    (container) =>
+      isObject(container) &&
+      (isNonEmptyString(container.accessToken) ||
+        isNonEmptyString(container.access_token) ||
+        isNonEmptyString(container.token) ||
+        isNonEmptyString(container.jwt)),
+  );
+  return hasToken;
 }
 
 export function normalizeAuthSession(result: BackendAuthSessionResponseDTO): AuthSessionResponseDTO {
@@ -240,14 +282,23 @@ export function normalizeAuthSession(result: BackendAuthSessionResponseDTO): Aut
     expiresAt: readExpiresAt(result) ?? expiresInToDate(expiresIn),
     permissions: result.permissions,
     deniedPermissions: result.deniedPermissions,
-    roles: result.roles,
+    // The legacy login response keeps roles under `user`. Preserve them at
+    // the session boundary so workspace projection can recognize a verified
+    // system-super-admin + wildcard grant without trusting an email/hostname.
+    roles: result.roles ?? result.user?.roles,
     portals: result.portals,
+    workspaces: normalizeWorkspaces(result.workspaces),
     tenantId: result.tenantId ?? result.tenant_id,
   };
 }
 
 function readAccessToken(result: BackendAuthSessionResponseDTO) {
   return readTokenValue(result, "accessToken", "access_token", "token", "jwt");
+}
+
+function normalizeWorkspaces(value: readonly Workspace[] | undefined): Workspace[] | undefined {
+  if (value === undefined) return undefined;
+  return Array.from(new Set(value.filter((workspace): workspace is Workspace => WORKSPACES.includes(workspace))));
 }
 
 function readRefreshToken(result: BackendAuthSessionResponseDTO) {
@@ -287,6 +338,7 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
     bio: profile?.bio ?? "",
     role: mapRole(profile?.roles),
     provider: mapProvider(profile?.provider),
+    roles: profile.roles,
     department: profile?.accountType ?? profile?.account_type ?? "ERG",
     title: profile?.jobTitle ?? profile?.job_title ?? (mapRole(profile?.roles) === "admin" ? "Quản trị viên" : "Giáo viên"),
     features: ["LMS", "Kho học liệu", "Quiz bank", "Báo cáo"],
@@ -330,10 +382,8 @@ function expiresInToDate(expiresIn?: number) {
   return new Date(Date.now() + expiresIn * 1000).toISOString();
 }
 
-const DEVICE_ID_STORAGE_KEY = "erg-device-id";
-
 function getLoginDeviceMetadata() {
-  const deviceId = getOrCreateDeviceId();
+  const deviceId = getOrCreateBrowserDeviceId();
   const deviceName = getDeviceName();
 
   return {
@@ -341,15 +391,6 @@ function getLoginDeviceMetadata() {
     deviceName,
     deviceFingerprint: createDeviceFingerprint(deviceId, deviceName),
   };
-}
-
-function getOrCreateDeviceId() {
-  const existing = readLocalStorage(DEVICE_ID_STORAGE_KEY);
-  if (existing) return existing;
-
-  const next = createRandomId("device");
-  writeLocalStorage(DEVICE_ID_STORAGE_KEY, next);
-  return next;
 }
 
 function getDeviceName() {
@@ -374,30 +415,4 @@ function hashString(value: string) {
   }
   return `fp-${Math.abs(hash).toString(36)}`;
 }
-
-function createRandomId(prefix: string) {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return `${prefix}-${crypto.randomUUID()}`;
-  }
-
-  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function readLocalStorage(key: string) {
-  try {
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeLocalStorage(key: string, value: string) {
-  try {
-    window.localStorage.setItem(key, value);
-  } catch {
-    // Login still works if browser storage is blocked.
-  }
-}
-
-
 

@@ -1,16 +1,14 @@
 'use client';
 
 import { useMemo } from 'react';
-import {
-  AppBar,
-  Avatar,
-  Badge,
-  Box,
-  IconButton,
-  Toolbar,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import AppBar from '@mui/material/AppBar';
+import Avatar from '@mui/material/Avatar';
+import Badge from '@mui/material/Badge';
+import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Toolbar from '@mui/material/Toolbar';
+import Tooltip from '@mui/material/Tooltip';
+import Typography from '@mui/material/Typography';
 import ApartmentRoundedIcon from '@mui/icons-material/ApartmentRounded';
 import AssignmentRoundedIcon from '@mui/icons-material/AssignmentRounded';
 import CalculateRoundedIcon from '@mui/icons-material/CalculateRounded';
@@ -21,7 +19,7 @@ import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import SettingsRoundedIcon from '@mui/icons-material/SettingsRounded';
 import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import WifiRoundedIcon from '@mui/icons-material/WifiRounded';
-import { useLocation, useNavigate } from '@/routes/router-compat';
+import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuthSession } from '@/platform/auth/hooks/use-auth-session';
 import { defaultClassId, defaultSchoolId } from '@/features/lms/classroom/api/mock-classroom-data';
 import { DashboardContent } from '@/layouts/dashboard/components/dashboard-content';
@@ -165,7 +163,7 @@ const crmScope: ManagementScope = { level: 'global' };
 const globalContentScope: ContentScope = { type: 'global' };
 
 export function CrmPortalShell() {
-  const { account } = useAuthSession('crm');
+  const { account, session } = useAuthSession('crm');
   const navigate = useNavigate();
   const location = useLocation();
   const activeItem = resolveCrmItem(location.pathname);
@@ -180,13 +178,15 @@ export function CrmPortalShell() {
       centerName: 'ERG Education',
       userName: account?.fullName || 'CRM Admin',
       userEmail: account?.email || 'crm@erg.edu.vn',
+      workspaceCapabilities: session?.workspaces,
+      workspacePortals: session?.portals ?? ['crm'],
     }),
-    [account],
+    [account, session?.portals, session?.workspaces],
   );
 
   function openLeaf(leafId: string) {
     const target = crmNavItems.find((item) => item.id === leafId || item.variant === leafId);
-    navigate(target?.path ?? '/');
+    void navigate({ href: target?.path ?? '/' });
   }
 
   return (

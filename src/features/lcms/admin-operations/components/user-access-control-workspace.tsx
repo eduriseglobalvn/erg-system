@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, RefreshCw, Search } from "@/components/mui-icon-shim";
+import AlertTriangle from "@mui/icons-material/WarningAmber";
+import RefreshCw from "@mui/icons-material/Refresh";
+import Search from "@mui/icons-material/Search";
 import { queryKeys } from "@/lib/query-keys";
+import { getDefaultTenantId } from "@/lib/graphql-client";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 import Button from "@mui/material/Button";
 import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
@@ -56,6 +60,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
+import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 
 export function UserAccessControlWorkspace({
   defaultSection = "profile",
@@ -65,6 +70,8 @@ export function UserAccessControlWorkspace({
   scopeDescription?: string;
 }) {
   const queryClient = useQueryClient();
+  const tenantId = getDefaultTenantId();
+  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
   const [users, setUsers] = useState<AccessManagedUser[]>([]);
   const [options, setOptions] = useState<AccessManagementOptions | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");
@@ -112,7 +119,7 @@ export function UserAccessControlWorkspace({
     mutationFn: ({ userId, policies }: { userId: string; policies: UserAccessPolicy[] }) => saveUserAccess(userId, { policies }),
   });
   const provisionTeacherMutation = useMutation({
-    mutationKey: queryKeys.adminOperations.userAccess.provision(),
+    mutationKey: queryKeys.adminOperations.userAccess.provision(tenantId, accountId),
     mutationFn: createTeacherAccount,
   });
 
@@ -130,14 +137,14 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status),
-        queryFn: () => listAccessManagedUsers({ search: debouncedQuery, status, page: 1, limit: 100 }),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId),
+        queryFn: ({ signal }) => listAccessManagedUsers({ search: debouncedQuery, status, page: 1, limit: 100 }, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.options(),
-        queryFn: getAccessManagementOptions,
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.options(tenantId, accountId),
+        queryFn: ({ signal }) => getAccessManagementOptions(signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
     ])
       .then(([userList, accessOptions]) => {
@@ -159,7 +166,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [debouncedQuery, paceStateUpdate, queryClient, retryToken, status]);
+  }, [accountId, debouncedQuery, paceStateUpdate, queryClient, retryToken, status, tenantId]);
 
   useEffect(() => {
     if (!selectedUserId) {
@@ -183,14 +190,14 @@ export function UserAccessControlWorkspace({
 
     Promise.all([
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.detailAccess(selectedUserId),
-        queryFn: () => getUserAccess(selectedUserId),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.detailAccess(selectedUserId, tenantId, accountId),
+        queryFn: ({ signal }) => getUserAccess(selectedUserId, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
       queryClient.fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.detailUser(selectedUserId),
-        queryFn: () => getAdminUser(selectedUserId),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.detailUser(selectedUserId, tenantId, accountId),
+        queryFn: ({ signal }) => getAdminUser(selectedUserId, signal),
+        staleTime: QUERY_POLICIES.reference.staleTime,
       }),
     ])
       .then(([accessDetail, userDetail]) => {
@@ -211,7 +218,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [paceStateUpdate, queryClient, selectedUserId]);
+  }, [accountId, paceStateUpdate, queryClient, selectedUserId, tenantId]);
 
   useEffect(() => {
     if (!policies.length) {
@@ -225,9 +232,9 @@ export function UserAccessControlWorkspace({
     let cancelled = false;
     queryClient
       .fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.preview(policies),
-        queryFn: () => previewUserAccess({ policies }),
-        staleTime: 30_000,
+        queryKey: queryKeys.adminOperations.userAccess.preview(policies, tenantId, accountId),
+        queryFn: ({ signal }) => previewUserAccess({ policies }, signal),
+        staleTime: QUERY_POLICIES.realtime.staleTime,
       })
       .then((result) => {
         if (!cancelled) setEffective(result);
@@ -237,7 +244,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [options?.modules, paceStateUpdate, policies, queryClient, selectedUserDetail, selectedUserId, users]);
+  }, [accountId, options?.modules, paceStateUpdate, policies, queryClient, selectedUserDetail, selectedUserId, tenantId, users]);
 
   useEffect(() => {
     if (!draft.scopeType) {
@@ -254,9 +261,9 @@ export function UserAccessControlWorkspace({
     });
     queryClient
       .fetchQuery({
-        queryKey: queryKeys.adminOperations.userAccess.scopes(draft.scopeType, debouncedScopeSearch),
-        queryFn: () => listAccessScopes({ scopeType: draft.scopeType, search: debouncedScopeSearch, page: 1, limit: 20 }),
-        staleTime: 60_000,
+        queryKey: queryKeys.adminOperations.userAccess.scopes(draft.scopeType, debouncedScopeSearch, tenantId, accountId),
+        queryFn: ({ signal }) => listAccessScopes({ scopeType: draft.scopeType, search: debouncedScopeSearch, page: 1, limit: 20 }, signal),
+        staleTime: QUERY_POLICIES.transactional.staleTime,
       })
       .then((result) => {
         if (cancelled) return;
@@ -273,7 +280,7 @@ export function UserAccessControlWorkspace({
     return () => {
       cancelled = true;
     };
-  }, [debouncedScopeSearch, draft.scopeType, paceStateUpdate, queryClient]);
+  }, [accountId, debouncedScopeSearch, draft.scopeType, paceStateUpdate, queryClient, tenantId]);
 
   const selectedListUser = users.find((user) => user.id === selectedUserId);
   const selectedUser = selectedUserId ? mergeUser(selectedListUser, selectedUserDetail) : null;
@@ -287,15 +294,15 @@ export function UserAccessControlWorkspace({
   const hasLoadError = Boolean(error && !loadingUsers && users.length === 0);
 
   function retryLoadUsers() {
-    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status) });
-    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.options() });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.options(tenantId, accountId) });
     setRetryToken((current) => current + 1);
   }
 
   function handleTeacherCreated(response: CreateTeacherAccountResponse) {
     setSelectedUserId(response.user.id);
     setNotice("Tài khoản giáo viên đã được tạo. Trạng thái onboarding sẽ do backend quản lý.");
-    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.adminOperations.userAccess.users(debouncedQuery, status, tenantId, accountId) });
     setRetryToken((current) => current + 1);
   }
 
@@ -430,7 +437,7 @@ export function UserAccessControlWorkspace({
             <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--erg-blue)]">ERG Identity & Access Management</p>
             <h2 className="mt-1.5 text-base font-bold text-slate-800">Quản lý tài khoản & phân quyền hệ thống</h2>
             <p className="mt-1 text-xs text-slate-400">
-              Tập trung vào tài khoản nhân sự: chỉnh hồ sơ đăng nhập, active/deactive, gán vai trò và cấp quyền truy cập LMS/LCMS theo phạm vi hệ thống.
+              Tập trung vào tài khoản nhân sự: chỉnh hồ sơ đăng nhập, active/deactive, gán vai trò và cấp quyền truy cập LMS/Content theo phạm vi hệ thống.
             </p>
             {scopeDescription ? <p className="mt-2 text-[10px] font-bold text-[var(--erg-blue)]">Cơ sở thụ hưởng: {scopeDescription}</p> : null}
           </div>

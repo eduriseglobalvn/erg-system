@@ -13,7 +13,6 @@ import {
   LinearProgress,
   MenuItem,
   Select,
-  Switch,
   Tab,
   Tabs,
   TextField,
@@ -32,6 +31,7 @@ import StatusBadge from "@/components/shared/StatusBadge";
 import type { MenuItem as PortalMenuItem } from "@/components/portal/ErgPortalLayout";
 import LcmsGoogleCalendarWorkspace from "@/features/lcms/components/lcms-google-calendar-workspace";
 import { getMenuItemDescription } from "@/features/lcms/lcms-menu";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 type BadgeVariant = "success" | "warning" | "danger" | "info" | "neutral";
 
@@ -170,7 +170,7 @@ function LcmsListWorkspace({
     <Box>
       <PageHeader
         title={getTitle(activeItem, kind)}
-        breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: getTitle(activeItem, kind) }]}
+        breadcrumbs={[{ label: "Dashboard", href: adminPath("/") }, { label: getTitle(activeItem, kind) }]}
         actions={
           <Button variant="contained" startIcon={<AddRoundedIcon />} sx={{ minWidth: 116 }}>
             {meta.action}
@@ -339,7 +339,7 @@ function LcmsReportWorkspace({ activeItem }: { activeItem: PortalMenuItem | null
       <PageHeader
         title={activeItem?.label ?? "Báo cáo"}
         subtitle={getMenuItemDescription(activeItem ?? ({ label: "Báo cáo" } as PortalMenuItem))}
-        breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: activeItem?.label ?? "Báo cáo" }]}
+        breadcrumbs={[{ label: "Dashboard", href: adminPath("/") }, { label: activeItem?.label ?? "Báo cáo" }]}
         actions={<Button variant="contained">Xuất báo cáo</Button>}
       />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "repeat(4, 1fr)" }, mb: 2 }}>
@@ -363,17 +363,13 @@ function LcmsReportWorkspace({ activeItem }: { activeItem: PortalMenuItem | null
 }
 
 function LcmsSettingsWorkspace({ activeItem, pathname }: { activeItem: PortalMenuItem | null; pathname: string }) {
-  if (pathname.includes("setting-center-role")) {
-    return <LcmsRoleSettingsWorkspace />;
-  }
-
   const rows = buildRows("settings", activeItem?.label ?? "Thiết lập");
   return (
     <Box>
       <PageHeader
         title={activeItem?.label ?? "Thiết lập"}
         subtitle="Cấu hình quyền, vai trò, quy trình và tích hợp theo chuẩn vận hành ERG."
-        breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: activeItem?.label ?? "Thiết lập" }]}
+        breadcrumbs={[{ label: "Dashboard", href: adminPath("/") }, { label: activeItem?.label ?? "Thiết lập" }]}
         actions={<Button variant="contained">Lưu thay đổi</Button>}
       />
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", lg: "320px minmax(0, 1fr)" } }}>
@@ -414,77 +410,6 @@ function LcmsSettingsWorkspace({ activeItem, pathname }: { activeItem: PortalMen
   );
 }
 
-function LcmsRoleSettingsWorkspace() {
-  const [page, setPage] = useState(0);
-  const rows = useMemo(() => buildRoleRows(), []);
-
-  return (
-    <Box>
-      <PageHeader
-        title="Quản lý phân quyền"
-        breadcrumbs={[{ label: "Dashboard", href: "/" }, { label: "Quản lý phân quyền" }]}
-        actions={
-          <Button variant="contained" startIcon={<AddRoundedIcon />} sx={{ minWidth: 136 }}>
-            Nhóm quyền
-          </Button>
-        }
-      />
-      <Card>
-        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-          <Box
-            sx={{
-              display: "grid",
-              gap: 1,
-              gridTemplateColumns: { xs: "1fr", md: "200px minmax(280px, 1fr)" },
-              p: 1.5,
-            }}
-          >
-            <FormControl size="small">
-              <Select displayEmpty defaultValue="" sx={{ bgcolor: "#FFFFFF" }}>
-                <MenuItem value="">Trạng thái</MenuItem>
-                <MenuItem value="active">Đang hoạt động</MenuItem>
-                <MenuItem value="inactive">Dừng hoạt động</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              size="small"
-              placeholder="Tìm kiếm"
-              slotProps={{
-                input: {
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchRoundedIcon sx={{ color: "#637381", fontSize: 22 }} />
-                    </InputAdornment>
-                  ),
-                },
-              }}
-            />
-          </Box>
-          <DataTable
-            columns={buildRoleColumns()}
-            data={rows}
-            footerStart={<CollapseSwitch />}
-            getId={(row) => row.id}
-            page={page}
-            pageSize={10}
-            totalCount={13}
-            onPageChange={setPage}
-          />
-        </CardContent>
-      </Card>
-    </Box>
-  );
-}
-
-function CollapseSwitch() {
-  return (
-    <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-      <Switch defaultChecked size="small" />
-      <Typography sx={{ color: "#1C252E", fontSize: 14 }}>Thu gọn</Typography>
-    </Box>
-  );
-}
-
 function MetricCard({ delta, label, tone, value }: { delta: string; label: string; tone: BadgeVariant; value: string }) {
   return (
     <Card>
@@ -508,28 +433,6 @@ function ContextFunctionStrip({ kind, pathname }: { kind: WorkspaceKind; pathnam
       ))}
     </Box>
   );
-}
-
-function buildRoleColumns(): Column<TableRow>[] {
-  return [
-    { id: "index", label: "STT", render: (_, index) => index + 1, width: 72, align: "center" },
-    {
-      id: "title",
-      label: "Nhóm quyền",
-      render: (row) => (
-        <Box sx={{ alignItems: "flex-start", display: "flex", flexDirection: "column", gap: 0.5 }}>
-          <Typography sx={{ color: "#1C252E", fontSize: 14, fontWeight: 500 }}>{row.title}</Typography>
-          {row.secondary ? <StatusBadge variant="neutral" label={row.secondary} /> : null}
-        </Box>
-      ),
-      sortable: true,
-      width: 260,
-    },
-    { id: "status", label: "Trạng thái", render: (row) => <StatusBadge variant={row.statusTone} label={row.status} />, sortable: true },
-    { id: "date", label: "Ngày tạo", render: (row) => row.date ?? "-", sortable: true },
-    { id: "owner", label: "Người tạo", render: (row) => <CreatorCell variant={row.owner ?? "logo"} /> },
-    { id: "actions", label: "", render: () => <IconButton size="small"><MoreVertRoundedIcon sx={{ fontSize: 20 }} /></IconButton>, width: 56, align: "center" },
-  ];
 }
 
 function buildColumns(kind: WorkspaceKind): Column<TableRow>[] {
@@ -591,36 +494,6 @@ function buildColumns(kind: WorkspaceKind): Column<TableRow>[] {
   return common;
 }
 
-function CreatorCell({ variant }: { variant: string }) {
-  if (variant === "avatar") {
-    return (
-      <Avatar
-        src="https://api.dicebear.com/8.x/adventurer-neutral/svg?seed=ERG"
-        sx={{ height: 32, width: 32 }}
-      />
-    );
-  }
-
-  return (
-    <Box sx={{ height: 28, width: 28 }}>
-      <svg width="28" height="28" viewBox="0 0 93 79" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M74.4675 0.863037C65.6165 0.863037 51.3127 12.7529 51.3127 21.7259C51.3127 24.1612 53.2644 25.9075 57.1186 25.9075C60.9021 25.9075 70.0463 23.9515 70.0463 33.9089C70.0463 37.3565 68.101 40.5108 65.1799 40.5108C53.9492 40.5108 32.072 0.863037 17.7939 0.863037C9.2061 0.863037 0.795898 19.4917 0.795898 39.5564C0.795898 63.1392 7.82152 78.2497 18.5857 78.2497C27.4368 78.2497 41.7405 66.3599 41.7405 57.3868C41.7405 54.9515 39.7888 53.2053 35.9347 53.2053C32.1512 53.2053 23.007 55.1613 23.007 45.2038C23.007 41.7563 24.9522 38.6019 27.8733 38.6019C39.104 38.6019 60.9813 78.2497 75.2593 78.2497C83.8472 78.2497 92.2552 59.621 92.2552 39.5564C92.2574 15.9757 85.2317 0.863037 74.4675 0.863037Z"
-          fill="url(#role-creator-logo)"
-        />
-        <defs>
-          <linearGradient id="role-creator-logo" x1="0.800178" y1="39.5573" x2="92.2574" y2="39.5573" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stopColor="#FF7F4A" />
-            <stop offset="0.3045" stopColor="#FE3EA1" />
-            <stop offset="0.6173" stopColor="#883FFF" />
-            <stop offset="1" stopColor="#4ECAFE" />
-          </linearGradient>
-        </defs>
-      </svg>
-    </Box>
-  );
-}
-
 function ProgressCell({ value }: { value: string }) {
   const [done, total] = value.split("/").map((part) => Number(part) || 0);
   const percent = total ? Math.min(100, (done / total) * 100) : 0;
@@ -654,30 +527,6 @@ function buildRows(kind: WorkspaceKind, label: string): TableRow[] {
     date: `${String(10 - (index % 5)).padStart(2, "0")}/06/2026`,
     progress: `${(index % 9) + 1}/${index + 10}`,
     extra: "Theo dõi tự động",
-  }));
-}
-
-function buildRoleRows(): TableRow[] {
-  return [
-    ["Chăm sóc khách hàng", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["Chủ trung tâm", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["csa", undefined, "Dừng hoạt động", "neutral", "04/11/2025", "logo"],
-    ["Giáo viên", "Giáo viên", "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["Giáo vụ", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["Hành chính nhân sự", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["hh", undefined, "Dừng hoạt động", "neutral", "26/10/2025", "avatar"],
-    ["Kế toán", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["Marketing", undefined, "Đang hoạt động", "success", "03/02/2025", "logo"],
-    ["Quản lý", undefined, "Dừng hoạt động", "neutral", "03/02/2025", "avatar"],
-  ].map(([title, secondary, status, statusTone, date, owner], index) => ({
-    id: `role-${index + 1}`,
-    code: "",
-    title: title as string,
-    secondary: secondary as string | undefined,
-    status: status as string,
-    statusTone: statusTone as BadgeVariant,
-    date: date as string,
-    owner: owner as string,
   }));
 }
 

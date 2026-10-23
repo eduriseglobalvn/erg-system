@@ -2,10 +2,16 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const source = readFileSync(
-  resolve(process.cwd(), "src/features/lcms/admin-operations/components/user-access-control-sections.tsx"),
-  "utf8",
-);
+const source = [
+  "user-access-control-sections.tsx",
+  "user-access-control-section-config.tsx",
+  "user-access-control-member-sections.tsx",
+  "user-access-control-role-section.tsx",
+  "user-access-control-access-section.tsx",
+  "user-access-control-section-primitives.tsx",
+]
+  .map((fileName) => readFileSync(resolve(process.cwd(), "src/features/lcms/admin-operations/components", fileName), "utf8"))
+  .join("\n");
 
 describe("user access control sections MUI policy", () => {
   it("uses MUI path imports without legacy UI adapters", () => {

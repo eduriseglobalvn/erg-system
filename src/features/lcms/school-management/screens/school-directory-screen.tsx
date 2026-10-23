@@ -23,7 +23,8 @@ import { useSchoolManagementContext } from "@/features/lcms/school-management/co
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import type { SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
-import { useNavigate } from "@/routes/router-compat";
+import { useNavigate } from "@tanstack/react-router";
+import { adminPath } from "@/platform/workspaces/workspace-paths";
 
 const statusMeta = { active: { label: "Đang vận hành", color: "success" }, onboarding: { label: "Đang triển khai", color: "warning" }, paused: { label: "Tạm dừng", color: "default" } } as const;
 
@@ -33,8 +34,8 @@ export default function SchoolDirectoryScreen() {
   const [search, setSearch] = useState("");
   const [adding, setAdding] = useState(false);
   const filtered = useMemo(() => schools.filter((school) => `${school.name} ${school.id} ${school.district}`.toLowerCase().includes(search.toLowerCase())), [schools, search]);
-  function openSchool(id: string) { selectSchool(id); navigate(`/schools/detail?schoolId=${encodeURIComponent(id)}`); }
-  async function createSchool(draft: SchoolDraft) { const id = await saveSchool(draft); if (id) navigate(`/schools/detail?schoolId=${encodeURIComponent(id)}`); }
+  function openSchool(id: string) { selectSchool(id); void navigate({ href: `${adminPath("/schools/detail")}?schoolId=${encodeURIComponent(id)}` }); }
+  async function createSchool(draft: SchoolDraft) { const id = await saveSchool(draft); if (id) void navigate({ href: `${adminPath("/schools/detail")}?schoolId=${encodeURIComponent(id)}` }); }
 
   return <SchoolPageShell unscoped title="Danh sách trường liên kết" description="Quản lý toàn bộ trường, tình trạng triển khai và độ hoàn thiện dữ liệu." action={<Button onClick={() => setAdding(true)} startIcon={<AddRoundedIcon />} variant="contained">Thêm trường</Button>}>
     <Paper variant="outlined" sx={{ overflow: "hidden" }}>

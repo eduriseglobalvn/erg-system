@@ -7,11 +7,11 @@ export type StudentDashboardProfile = {
   gradeLabel: string;
   schoolName: string;
   homeroomTeacher: string;
-  averageScore: number;
-  completedAssignments: number;
-  totalAssignments: number;
-  motivationPoints: number;
-  weeklyGoalProgress: number;
+  averageScore: number | null;
+  completedAssignments: number | null;
+  totalAssignments: number | null;
+  motivationPoints: number | null;
+  weeklyGoalProgress: number | null;
 };
 
 export type StudentAssignmentAttempt = {
@@ -31,21 +31,22 @@ export type StudentDiscussionImageAttachment = {
 
 export type StudentDashboardAssignment = {
   id: string;
-  quizId: string;
+  /** Returned only when the dashboard contract resolves the assignment to a quiz. */
+  quizId?: string;
   title: string;
-  subtitle: string;
-  subjectLabel: string;
-  teacherName: string;
+  subtitle?: string;
+  subjectLabel?: string;
+  teacherName?: string;
   status: StudentAssignmentStatus;
-  progressRate: number;
-  answeredCount: number;
-  totalQuestions: number;
+  progressRate: number | null;
+  answeredCount: number | null;
+  totalQuestions: number | null;
   score: number | null;
-  maxScore: number;
+  maxScore: number | null;
   dueLabel: string;
   statusLabel: string;
-  lastActivityLabel: string;
-  focusNote: string;
+  lastActivityLabel?: string;
+  focusNote?: string;
   attempts: StudentAssignmentAttempt[];
 };
 
@@ -80,8 +81,8 @@ export type StudentTeacherAnnouncement = {
   id: string;
   title: string;
   content: string;
-  teacherName: string;
-  targetLabel: string;
+  teacherName?: string;
+  targetLabel?: string;
   createdAtLabel: string;
   isPinned?: boolean;
 };
