@@ -12,7 +12,6 @@ import { PortalHeaderIdentity } from "./portal-header-identity";
 import { PORTAL_NOTIFICATIONS, type PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { portalHeaderAppBarSx } from "./portal-header-styles";
-import { PortalWorkspaceSwitcher } from "./portal-workspace-switcher";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
 interface HeaderProps {
@@ -25,9 +24,11 @@ interface HeaderProps {
   notificationCount?: number;
   scrolled?: boolean;
   userName?: string;
+  userEmail?: string;
   workspaceCapabilities?: readonly Workspace[];
   workspacePortals?: string[];
   onMenuOpen?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function ErgPortalHeader({
@@ -40,9 +41,9 @@ export default function ErgPortalHeader({
   notificationCount = 0,
   scrolled = false,
   userName,
-  workspaceCapabilities,
-  workspacePortals,
+  userEmail,
   onMenuOpen,
+  onSignOut,
 }: HeaderProps) {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
@@ -53,14 +54,15 @@ export default function ErgPortalHeader({
   return (
     <>
       <AppBar position="sticky" sx={portalHeaderAppBarSx(scrolled)}>
-        <Toolbar sx={{ gap: { xs: 0.5, sm: 1 }, minHeight: { xs: "60px !important", md: "72px !important" }, px: { xs: "12px !important", sm: "20px !important", md: "32px !important" }, position: "relative", zIndex: 1 }}>
+        <Toolbar sx={{ gap: { xs: 0.5, sm: 1 }, minHeight: { xs: "46px !important", md: "50px !important" }, px: { xs: "12px !important", sm: "16px !important", md: "24px !important" }, position: "relative", zIndex: 1 }}>
           {onMenuOpen ? (
             <IconButton
               aria-label="Mở menu"
               onClick={onMenuOpen}
+              size="small"
               sx={{ display: { xs: "inline-flex", lg: "none" }, flexShrink: 0, mr: 0.25 }}
             >
-              <MenuRoundedIcon />
+              <MenuRoundedIcon sx={{ fontSize: 20 }} />
             </IconButton>
           ) : null}
           <PortalHeaderIdentity
@@ -72,12 +74,15 @@ export default function ErgPortalHeader({
             portalPlan={portalPlan}
           />
           <Box sx={{ flex: 1, minWidth: 8 }} />
-          <PortalWorkspaceSwitcher portals={workspacePortals} workspaces={workspaceCapabilities} />
-          <PortalHeaderActions
-            notificationCount={notificationCount}
-            onOpenNotifications={() => setNotificationOpen(true)}
-            userName={userName}
-          />
+          <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
+            <PortalHeaderActions
+              notificationCount={notificationCount}
+              onOpenNotifications={() => setNotificationOpen(true)}
+              userName={userName}
+              userEmail={userEmail}
+              onSignOut={onSignOut}
+            />
+          </Box>
         </Toolbar>
       </AppBar>
       <PortalHeaderNotifications

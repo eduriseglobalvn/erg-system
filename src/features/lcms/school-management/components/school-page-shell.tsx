@@ -23,11 +23,11 @@ export function SchoolPageShell({ action, children, description, title, unscoped
   return (
     <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 96px)" }}>
       <Box sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", position: "sticky", top: 0, zIndex: 4 }}>
-        <Box sx={{ alignItems: { xs: "flex-start", md: "center" }, display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 2, justifyContent: "space-between", px: { xs: 2, md: 3 }, py: 2 }}>
+        <Box sx={{ alignItems: { xs: "flex-start", md: "center" }, display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 1.5, justifyContent: "space-between", px: { xs: 2, md: 3 }, py: { xs: 1, md: 1.25 } }}>
           <Box sx={{ minWidth: 0 }}>
-            <Breadcrumbs separator="/" sx={{ mb: 0.5 }}><Typography color="text.secondary" variant="caption">Quản lý trường học</Typography><Typography color="text.primary" variant="caption">{title}</Typography></Breadcrumbs>
-            <Typography sx={{ fontSize: { xs: 22, md: 26 }, fontWeight: 900, lineHeight: 1.25 }}>{title}</Typography>
-            {description ? <Typography color="text.secondary" sx={{ mt: 0.4 }} variant="body2">{description}</Typography> : null}
+            <Breadcrumbs separator="/" sx={{ mb: 0.25 }}><Typography color="text.secondary" variant="caption">Quản lý trường học</Typography><Typography color="text.primary" variant="caption">{title}</Typography></Breadcrumbs>
+            <Typography sx={{ fontSize: { xs: 18, md: 21 }, fontWeight: 800, lineHeight: 1.2 }}>{title}</Typography>
+            {description ? <Typography color="text.secondary" sx={{ mt: 0.25, fontSize: "13px" }} variant="body2">{description}</Typography> : null}
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "flex-end" }}>
             {!unscoped && selectedSchool ? <>

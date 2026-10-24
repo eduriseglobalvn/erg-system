@@ -112,11 +112,11 @@ export function FormViewRibbon({
       if (!trigger) return;
 
       const rect = trigger.getBoundingClientRect();
-      const estimatedWidth = openMenu === "question" ? 624 : 372;
-      const viewportPadding = 8;
+      const estimatedWidth = openMenu === "question" ? 640 : 380;
+      const viewportPadding = 12;
 
       setMenuPosition({
-        top: rect.bottom + 6,
+        top: Math.max(viewportPadding, Math.min(rect.bottom + 6, window.innerHeight - 560)),
         left: Math.min(
           Math.max(viewportPadding, rect.left - 2),
           window.innerWidth - estimatedWidth - viewportPadding,
@@ -217,6 +217,7 @@ export function FormViewRibbon({
                     onAddQuestion(type, preset);
                     setOpenMenu(null);
                   }}
+                  onClose={() => setOpenMenu(null)}
                 />
               ) : (
                 <IntroductionMenu
@@ -224,6 +225,7 @@ export function FormViewRibbon({
                     onAddIntroduction(type);
                     setOpenMenu(null);
                   }}
+                  onClose={() => setOpenMenu(null)}
                 />
               )}
             </div>,

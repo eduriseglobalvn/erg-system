@@ -2,10 +2,10 @@ export const ERG_BRAND_NAME = "Trung Tam Ngoai Ngu Tin Hoc ERG";
 export const ERG_BRAND_SUFFIX = "Trung Tam Ngoai Ngu - Tin Hoc ERG";
 
 export const ERG_ASSETS = {
-  logo: "https://media.erg.edu.vn/logo/erg.png",
-  mobileLogo: "https://media.erg.edu.vn/logo/mobile-logo.png",
-  favicon: "https://media.erg.edu.vn/logo/erg.png",
-  appleTouchIcon: "/apple-touch-icon.png",
+  logo: "https://media.erg.edu.vn/logo/pwa.png",
+  mobileLogo: "https://media.erg.edu.vn/logo/pwa.png",
+  favicon: "https://media.erg.edu.vn/logo/pwa.png",
+  appleTouchIcon: "https://media.erg.edu.vn/logo/pwa.png",
   ogImage: "https://media.erg.edu.vn/logo/og-image.jpg",
 };
 
@@ -48,7 +48,10 @@ export function getSeoForLocation(hostname: string, pathname: string) {
   const siteSeo = SEO_DATA.elearning;
 
   return {
-    ...siteSeo,
     title: ELEARNING_ROUTE_TITLES[normalizedPathname] ?? siteSeo.title,
+    navName: siteSeo.navName,
+    description: siteSeo.description,
+    keywords: siteSeo.keywords,
+    ogImage: siteSeo.ogImage,
   };
 }

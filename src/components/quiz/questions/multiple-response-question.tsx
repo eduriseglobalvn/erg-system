@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import type { ReactNode } from "react";
 
 import { ChoiceOption, EditableChoiceOption } from "@/components/quiz/questions/choice-option";
@@ -42,7 +43,7 @@ export function MultipleResponseQuestion({
       ...choices,
       {
         id: createChoiceId("choice"),
-        label: `Option ${choices.length + 1}`,
+        label: `Phương án ${choices.length + 1}`,
         correct: false,
       },
     ]);
@@ -67,9 +68,31 @@ export function MultipleResponseQuestion({
             className="quiz-runtime-edit-add"
             variant="outlined"
             onClick={addChoice}
-            sx={{ alignSelf: "flex-start", bgcolor: "common.white", borderColor: "rgba(0,0,136,0.14)", borderRadius: 1.5, color: "#000088", fontSize: 14, fontWeight: 800, minHeight: 40, px: 2.5, "&:hover": { bgcolor: "#eef3ff", borderColor: "rgba(0,0,136,0.22)" } }}
+            startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              alignSelf: "flex-start",
+              bgcolor: "rgba(15, 108, 189, 0.05)",
+              borderColor: "#0F6CBD",
+              borderStyle: "dashed",
+              borderWidth: "1.5px",
+              borderRadius: "10px",
+              color: "#0F6CBD",
+              fontSize: 13.5,
+              fontWeight: 750,
+              minHeight: 42,
+              px: 2.5,
+              py: 0.75,
+              boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+              transition: "all 140ms ease",
+              "&:hover": {
+                bgcolor: "rgba(15, 108, 189, 0.12)",
+                borderColor: "#0B5CAB",
+                boxShadow: "0 4px 14px rgba(15, 108, 189, 0.14)",
+                transform: "translateY(-1px)",
+              },
+            }}
           >
-            Add option
+            Thêm phương án
           </Button>
         </Box>
       </QuestionChoiceLayout>

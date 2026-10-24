@@ -623,7 +623,8 @@ export function StudentDashboardWorkspaceRuntime() {
   }
 
   const handlePageChange = (page: StudentPageKey) => {
-    setActivePage(page);
+    const targetPage = page === "scores" ? "assignments" : page;
+    setActivePage(targetPage);
     setViewState({ type: "dashboard" });
   };
   const mobileDockItems = useMemo(() => [

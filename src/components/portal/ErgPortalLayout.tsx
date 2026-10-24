@@ -124,6 +124,7 @@ export default function ErgPortalLayout({
           }}
           open={mobileNavigationOpen}
           portalInfo={portalInfo}
+          notificationCount={notificationCount}
         />
       ) : (
         <ErgPortalSidebar
@@ -132,6 +133,7 @@ export default function ErgPortalLayout({
           onCollapsedChange={setSidebarCollapsed}
           onNavigate={(path) => void navigate({ href: path })}
           portalInfo={portalInfo}
+          notificationCount={notificationCount}
         />
       )}
       <Box
@@ -157,6 +159,7 @@ export default function ErgPortalLayout({
           notificationCount={notificationCount}
           scrolled={headerScrolled}
           userName={portalInfo?.userName}
+          userEmail={portalInfo?.userEmail}
           workspaceCapabilities={portalInfo?.workspaceCapabilities}
           workspacePortals={portalInfo?.workspacePortals}
         />

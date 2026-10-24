@@ -18024,25 +18024,28 @@
 
 .classic-editor__question-editor-dialog .quiz-runtime-edit-add {
   justify-self: start;
-  min-height: 40px;
-  border: 1px solid rgba(0, 0, 136, 0.14);
+  min-height: 44px;
+  border: 1.5px dashed #0F6CBD !important;
   border-radius: 12px;
-  background: #ffffff;
-  color: #000088;
-  padding: 0 18px;
+  background: rgba(15, 108, 189, 0.05) !important;
+  color: #0F6CBD !important;
+  padding: 8px 24px;
   font-size: 14px;
-  font-weight: 850;
-  box-shadow: 0 8px 18px rgba(0, 0, 136, 0.055);
-  transition:
-    background-color 140ms ease,
-    border-color 140ms ease,
-    box-shadow 140ms ease;
+  font-weight: 750;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 140ms ease;
+  cursor: pointer;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
 }
 
 .classic-editor__question-editor-dialog .quiz-runtime-edit-add:hover {
-  border-color: rgba(0, 0, 136, 0.22);
-  background: #eef3ff;
-  box-shadow: 0 12px 26px rgba(0, 0, 136, 0.08);
+  border-color: #0B5CAB !important;
+  background: rgba(15, 108, 189, 0.12) !important;
+  color: #0B5CAB !important;
+  box-shadow: 0 6px 18px rgba(15, 108, 189, 0.16);
+  transform: translateY(-1px);
 }
 
 /* Runtime question authoring uses the exact learner UI; keep long content readable inside the LCMS dialog. */
@@ -18276,16 +18279,20 @@
   transform: rotate(45deg);
 }
 
-.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-remove,
-.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-add {
+.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-remove {
   opacity: 0 !important;
 }
 
 .classic-editor__question-editor-dialog .classic-editor__learner-question-body :has(> .quiz-runtime-edit-remove):hover > .quiz-runtime-edit-remove,
 .classic-editor__question-editor-dialog .classic-editor__learner-question-body .matching-puzzle__response-card:hover .quiz-runtime-edit-remove,
-.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-remove:hover,
-.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-add:hover {
+.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-remove:hover {
   opacity: 1 !important;
+}
+
+.classic-editor__question-editor-dialog .classic-editor__learner-question-body .quiz-runtime-edit-add {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: inline-flex !important;
 }
 
 .classic-editor__question-editor-dialog .classic-editor__learner-footer,
@@ -20516,4 +20523,477 @@
   grid-column: 5 !important;
   justify-content: center !important;
   border-right: 0 !important;
+}
+
+
+/* Compact Single-Row Question Manager Strip */
+.classic-editor__manager-strip {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 48px !important;
+  height: 48px !important;
+  border-bottom: 1px solid var(--lcms-table-grid, #e2e8f0) !important;
+  background: #ffffff !important;
+  padding: 0 16px !important;
+  gap: 12px !important;
+}
+
+.classic-editor__manager-strip-left {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.classic-editor__manager-strip-dot {
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  background-color: #0F6CBD !important;
+  flex-shrink: 0 !important;
+}
+
+.classic-editor__manager-strip-title {
+  color: #0F172A !important;
+  font-size: 13.5px !important;
+  font-weight: 750 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.classic-editor__manager-strip-count {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 22px !important;
+  padding: 0 8px !important;
+  border-radius: 999px !important;
+  background: #F1F5F9 !important;
+  border: 1px solid #E2E8F0 !important;
+  color: #0F6CBD !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.classic-editor__manager-strip-divider {
+  color: #CBD5E1 !important;
+  font-size: 12px !important;
+  flex-shrink: 0 !important;
+}
+
+.classic-editor__manager-strip-scope {
+  color: #64748B !important;
+  font-size: 12.5px !important;
+  font-weight: 550 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.classic-editor__manager-toolbar {
+  grid-column: unset !important;
+  grid-row: unset !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+}
+
+.classic-editor__manager-action {
+  height: 32px !important;
+  padding: 0 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  background: #FFFFFF !important;
+  color: #334155 !important;
+  font-size: 12.5px !important;
+  font-weight: 650 !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
+}
+
+.classic-editor__manager-action:hover:not(:disabled) {
+  border-color: #CBD5E1 !important;
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+}
+
+.classic-editor__manager-action.is-primary {
+  border-color: #0F6CBD !important;
+  background: #0F6CBD !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 1px 3px rgba(15, 108, 189, 0.2) !important;
+}
+
+.classic-editor__manager-action.is-primary:hover:not(:disabled) {
+  border-color: #0B5CAB !important;
+  background: #0B5CAB !important;
+  color: #FFFFFF !important;
+}
+
+.classic-editor__manager-action:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+
+/* High-contrast text selection for question title and editor */
+.classic-editor__learner-title-input::selection,
+.classic-editor__learner-title-band ::selection,
+.classic-editor__learner-title-band *::selection {
+  background: #FFFFFF !important;
+  color: #0A255C !important;
+}
+
+.classic-editor__question-editor-dialog ::selection {
+  background: #B4D5FE !important;
+  color: #0F172A !important;
+}
+
+.classic-editor__learner-title-band {
+  cursor: pointer !important;
+}
+
+.classic-editor__learner-title-input {
+  cursor: text !important;
+  user-select: text !important;
+  -webkit-user-select: text !important;
+}
+
+
+/* Checkbox Column and Modern Selection Styles for Question Manager Table */
+.classic-editor__manager-list-head-check,
+.classic-editor__manager-list-check {
+  grid-column: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  border-right: 1px solid var(--lcms-table-grid, #e2e8f0) !important;
+  padding: 0 !important;
+}
+
+.classic-editor__manager-list-row {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  cursor: pointer !important;
+  background: #ffffff !important;
+  color: #1e293b !important;
+  border-bottom: 1px solid var(--lcms-table-grid, #e2e8f0) !important;
+  transition: background-color 100ms ease !important;
+}
+
+.classic-editor__manager-list-row:hover {
+  background: #f8fafc !important;
+}
+
+.classic-editor__manager-list-row.is-checked {
+  background: #f0f7ff !important;
+}
+
+.classic-editor__manager-list-row.is-active {
+  background: #e0effe !important;
+  color: #0f172a !important;
+  border-left: 3px solid #0F6CBD !important;
+}
+
+.classic-editor__manager-list-row.is-checked.is-active {
+  background: #e0effe !important;
+}
+
+.classic-editor__manager-action.is-publish {
+  border-color: #107C41 !important;
+  background: #107C41 !important;
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+  box-shadow: 0 1px 3px rgba(16, 124, 65, 0.25) !important;
+}
+
+.classic-editor__manager-action.is-publish:hover:not(:disabled) {
+  border-color: #0E6B37 !important;
+  background: #0E6B37 !important;
+  color: #FFFFFF !important;
+}
+
+.classic-editor__manager-action.is-publish:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+/* Question Manager Table Typography & Text Color Safety: Dark, crisp & legible in ALL states */
+.classic-editor__manager-list-head {
+  grid-template-columns: 48px 160px minmax(360px, 1fr) 180px 130px !important;
+  font-weight: 700 !important;
+  color: #64748B !important;
+  background: #F8FAFC !important;
+  border-bottom: 1px solid var(--lcms-table-grid, #E2E8F0) !important;
+  padding: 8px 0 !important;
+}
+
+.classic-editor__manager-list-head span:nth-child(5) {
+  grid-column: 5 !important;
+  justify-content: center !important;
+  text-align: center !important;
+  border-right: 0 !important;
+}
+
+.classic-editor__manager-list-row {
+  grid-template-columns: 48px 160px minmax(360px, 1fr) 180px 130px !important;
+}
+
+.classic-editor__manager-list-row .classic-editor__manager-list-type,
+.classic-editor__manager-list-row:hover .classic-editor__manager-list-type,
+.classic-editor__manager-list-row.is-active .classic-editor__manager-list-type,
+.classic-editor__manager-list-row.is-checked .classic-editor__manager-list-type {
+  color: #475569 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+.classic-editor__manager-list-row .classic-editor__manager-list-question,
+.classic-editor__manager-list-row:hover .classic-editor__manager-list-question,
+.classic-editor__manager-list-row.is-active .classic-editor__manager-list-question,
+.classic-editor__manager-list-row.is-checked .classic-editor__manager-list-question {
+  color: #0F172A !important;
+  font-size: 13.5px !important;
+  font-weight: 600 !important;
+}
+
+.classic-editor__manager-list-row .classic-editor__manager-list-topic,
+.classic-editor__manager-list-row:hover .classic-editor__manager-list-topic,
+.classic-editor__manager-list-row.is-active .classic-editor__manager-list-topic,
+.classic-editor__manager-list-row.is-checked .classic-editor__manager-list-topic {
+  color: #64748B !important;
+  font-size: 13px !important;
+}
+
+/* Status Column and Badges */
+.classic-editor__manager-list-status {
+  grid-column: 5 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 100% !important;
+  padding: 0 8px !important;
+  border-right: 0 !important;
+  text-align: center !important;
+}
+
+.classic-editor__status-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  padding: 3px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  white-space: nowrap !important;
+  user-select: none !important;
+}
+
+.classic-editor__status-badge.is-draft {
+  background: #FFFBEB !important;
+  color: #B45309 !important;
+  border: 1px solid #FDE68A !important;
+}
+
+.classic-editor__status-badge.is-draft .classic-editor__status-dot {
+  background: #F59E0B !important;
+}
+
+.classic-editor__status-badge.is-published {
+  background: #ECFDF5 !important;
+  color: #047857 !important;
+  border: 1px solid #A7F3D0 !important;
+}
+
+.classic-editor__status-badge.is-published .classic-editor__status-dot {
+  background: #10B981 !important;
+}
+
+.classic-editor__status-dot {
+  display: inline-block !important;
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+/* Action Button: Lưu nháp (Save Draft) */
+.classic-editor__manager-action.is-save-draft {
+  border-color: #0F6CBD !important;
+  background: #FFFFFF !important;
+  color: #0F6CBD !important;
+  font-weight: 600 !important;
+}
+
+.classic-editor__manager-action.is-save-draft:hover:not(:disabled) {
+  background: rgba(15, 108, 189, 0.08) !important;
+  color: #0B5CAB !important;
+  border-color: #0B5CAB !important;
+}
+
+.classic-editor__manager-action.is-save-draft:disabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Unsaved status badge */
+.classic-editor__status-badge.is-unsaved {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
+}
+
+.classic-editor__status-badge.is-unsaved .classic-editor__status-dot {
+  background: #EF4444 !important;
+}
+
+/* Cloud Sync Badge Indicator in Manager Strip */
+.classic-editor__sync-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+  padding: 2px 9px !important;
+  border-radius: 999px !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  user-select: none !important;
+  white-space: nowrap !important;
+}
+
+.classic-editor__sync-badge.is-unsaved {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  border: 1px solid #FECACA !important;
+}
+
+.classic-editor__sync-badge.is-saved {
+  background: #F0FDF4 !important;
+  color: #15803D !important;
+  border: 1px solid #BBF7D0 !important;
+}
+
+/* Status Filter Bar & Tabs */
+.classic-editor__manager-filter-bar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 8px 14px !important;
+  background: #FAFAFC !important;
+  border-bottom: 1px solid var(--lcms-table-grid, #E2E8F0) !important;
+}
+
+.classic-editor__manager-tabs {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.classic-editor__filter-tab {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 4px 11px !important;
+  border-radius: 6px !important;
+  border: 1px solid transparent !important;
+  background: transparent !important;
+  color: #475569 !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 120ms ease !important;
+  user-select: none !important;
+}
+
+.classic-editor__filter-tab:hover:not(.is-active) {
+  background: #F1F5F9 !important;
+  color: #1E293B !important;
+}
+
+.classic-editor__filter-tab.is-active {
+  background: #EFF6FF !important;
+  color: #0F6CBD !important;
+  border-color: #BFDBFE !important;
+  font-weight: 700 !important;
+}
+
+.classic-editor__filter-tab.is-unsaved-tab.is-active {
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  border-color: #FECACA !important;
+}
+
+.classic-editor__filter-tab-count {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  border-radius: 999px !important;
+  background: #E2E8F0 !important;
+  color: #475569 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.classic-editor__filter-tab.is-active .classic-editor__filter-tab-count {
+  background: #0F6CBD !important;
+  color: #FFFFFF !important;
+}
+
+.classic-editor__filter-tab.is-unsaved-tab.is-active .classic-editor__filter-tab-count {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+
+.classic-editor__filter-tab-count.is-unsaved {
+  background: #FEE2E2 !important;
+  color: #B91C1C !important;
+}
+
+.classic-editor__filter-tab-dot {
+  display: inline-block !important;
+  width: 7px !important;
+  height: 7px !important;
+  border-radius: 50% !important;
+  flex-shrink: 0 !important;
+}
+
+.classic-editor__filter-tab-dot.is-unsaved {
+  background: #EF4444 !important;
+}
+
+.classic-editor__filter-tab-dot.is-draft {
+  background: #F59E0B !important;
+}
+
+.classic-editor__filter-tab-dot.is-published {
+  background: #10B981 !important;
+}
+
+.classic-editor__manager-action.is-save-draft.has-unsaved {
+  border-color: #EF4444 !important;
+  background: #FEF2F2 !important;
+  color: #B91C1C !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
+}
+
+.classic-editor__manager-action.is-save-draft.has-unsaved:hover:not(:disabled) {
+  background: #FEE2E2 !important;
+  border-color: #B91C1C !important;
 }

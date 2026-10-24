@@ -1,7 +1,6 @@
 import { defaultQuizFontFamily, resolveQuizFontStack } from "@/config/fonts";
 import {
-  createElearningSampleQuizEditorGroups,
-  elearningSampleFirstSlideId,
+    elearningSampleFirstSlideId,
   elearningSampleGroupId,
 } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
@@ -177,13 +176,40 @@ export function createMockPlayerTemplate(): QuizPlayerTemplate {
   };
 }
 
-export function createMockQuizEditorGroups(): QuizEditorGroup[] {
-  const elearningGroups = createElearningSampleQuizEditorGroups();
-  if (elearningGroups.length) return elearningGroups;
-  return createLegacyMockQuizEditorGroups();
+export function createEmptyQuizEditorGroups(): QuizEditorGroup[] {
+  return [
+    {
+      id: "group-1",
+      title: tr("quiz.sampleGroupPrefix") ? `${tr("quiz.sampleGroupPrefix")} 1` : "Nhóm câu hỏi 1",
+      rule: "all",
+      randomCount: 0,
+      slides: [],
+    },
+  ];
 }
 
-function createLegacyMockQuizEditorGroups(): QuizEditorGroup[] {
+export function createNewQuizProjectSettings(title?: string): QuizProjectSettings {
+  const base = createMockQuizProjectSettings();
+  return {
+    ...base,
+    info: {
+      ...base.info,
+      title: title || "Bài kiểm tra mới",
+      introduction: "",
+      page: {
+        ...base.info.page,
+        lessonTitle: "",
+        testTitle: title || "Bài kiểm tra mới",
+      },
+    },
+  };
+}
+
+export function createMockQuizEditorGroups(): QuizEditorGroup[] {
+  return createEmptyQuizEditorGroups();
+}
+
+export function createLegacyMockQuizEditorGroups(): QuizEditorGroup[] {
   return [
     {
       id: "group-intro",

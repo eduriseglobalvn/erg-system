@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
@@ -8,15 +8,14 @@ import { createQuizSlideFromBankQuestion } from "@/features/lcms/quiz/question-b
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
+  createEmptyQuizEditorGroups,
+  createNewQuizProjectSettings,
   createMockChoice,
   createMockFeedbackRows,
   createMockFinalSlideOptions,
   createMockPlayerTemplate,
   createMockQuestionOptions,
-  createMockQuizEditorGroups,
-  createMockQuizProjectSettings,
   createMockResultSlide,
-  createMockSelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
 import type {
   IntroSlideKind,
@@ -56,16 +55,27 @@ function createFinalSlideOptions(): QuizEditorFinalSlideOptions {
   return createMockFinalSlideOptions();
 }
 
-const initialSelected: SelectedEditorNode = createMockSelectedEditorNode();
 
-export function useQuizEditorState() {
+export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocument | null) {
   const nextIdRef = useRef(1000);
-  const [groups, setGroups] = useState(createMockQuizEditorGroups);
+  const [groups, setGroups] = useState<QuizEditorGroup[]>(() => initialDraftDocument?.tree ?? createEmptyQuizEditorGroups());
   const [resultSlide, setResultSlide] = useState(createMockResultSlide);
-  const [quizProject, setQuizProject] = useState(createMockQuizProjectSettings);
-  const [playerTemplate, setPlayerTemplate] = useState(createMockPlayerTemplate);
+  const [quizProject, setQuizProject] = useState<QuizProjectSettings>(() => initialDraftDocument?.settings ?? createNewQuizProjectSettings());
+  const [playerTemplate, setPlayerTemplate] = useState<QuizPlayerTemplate>(() => initialDraftDocument?.playerTemplate ?? createMockPlayerTemplate());
   const [selectedThemeId, setSelectedThemeId] = useState(defaultQuizTheme.id);
-  const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(initialSelected);
+  const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(() => {
+    if (initialDraftDocument?.tree?.length) {
+      const firstGroup = initialDraftDocument.tree[0];
+      const firstSlide = firstGroup?.slides[0];
+      if (firstGroup && firstSlide) {
+        return { type: "slide", groupId: firstGroup.id, slideId: firstSlide.id };
+      }
+      if (firstGroup) {
+        return { type: "group", groupId: firstGroup.id };
+      }
+    }
+    return { type: "group", groupId: "group-1" };
+  });
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<string[]>([]);
@@ -133,14 +143,32 @@ export function useQuizEditorState() {
   }
 
   function insertSlide(nextSlide: QuizEditorSlide) {
-    const targetGroupId = resolveTargetGroupId();
+    let resolvedGroupId = resolveTargetGroupId();
+    const slideToInsert: QuizEditorSlide = {
+      ...nextSlide,
+      status: nextSlide.status ?? "unsaved",
+    };
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === targetGroupId ? { ...group, slides: [...group.slides, nextSlide] } : group,
-      ),
-    );
-    setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: nextSlide.id });
+    setGroups((currentGroups) => {
+      const targetGroup = currentGroups.find((g) => g.id === resolvedGroupId) ?? currentGroups[0];
+      if (!targetGroup) {
+        resolvedGroupId = "group-1";
+        return [
+          {
+            id: "group-1",
+            title: "Nhóm câu hỏi 1",
+            rule: "all",
+            randomCount: 0,
+            slides: [slideToInsert],
+          },
+        ];
+      }
+      resolvedGroupId = targetGroup.id;
+      return currentGroups.map((group) =>
+        group.id === targetGroup.id ? { ...group, slides: [...group.slides, slideToInsert] } : group,
+      );
+    });
+    setSelectedNode({ type: "slide", groupId: resolvedGroupId, slideId: slideToInsert.id });
   }
 
   function createSlidesFromQuestionBank(questions: QuestionBankQuestion[]) {
@@ -362,6 +390,60 @@ export function useQuizEditorState() {
       type: "slide",
       payload: { ...selectedSlide },
     });
+  }
+
+  function deleteSlides(slideIds: string[]) {
+    if (!slideIds.length) return;
+    setGroups((currentGroups) =>
+      currentGroups.map((group) => ({
+        ...group,
+        slides: group.slides.filter((slide) => !slideIds.includes(slide.id)),
+      })),
+    );
+  }
+
+  function duplicateSlides(slideIds: string[]) {
+    if (!slideIds.length) return;
+    setGroups((currentGroups) =>
+      currentGroups.map((group) => {
+        const slidesToDup = group.slides.filter((s) => slideIds.includes(s.id));
+        if (!slidesToDup.length) return group;
+        const copies = slidesToDup.map((s) => ({
+          ...s,
+          id: createId("slide"),
+          title: s.title ? `${s.title} (Bản sao)` : s.title,
+          status: "unsaved" as const,
+        }));
+        return {
+          ...group,
+          slides: [...group.slides, ...copies],
+        };
+      }),
+    );
+  }
+
+  function markAllAsSavedDraft() {
+    setGroups((currentGroups) =>
+      currentGroups.map((group) => ({
+        ...group,
+        slides: group.slides.map((slide) =>
+          slide.status === "unsaved" || !slide.status
+            ? { ...slide, status: "draft" as const }
+            : slide,
+        ),
+      })),
+    );
+  }
+
+  function setSlidesPublished(slideIds: string[]) {
+    setGroups((currentGroups) =>
+      currentGroups.map((group) => ({
+        ...group,
+        slides: group.slides.map((slide) =>
+          slideIds.includes(slide.id) ? { ...slide, status: "published" as const } : slide,
+        ),
+      })),
+    );
   }
 
   function deleteSelected() {
@@ -630,7 +712,14 @@ export function useQuizEditorState() {
         group.id === selectedGroup.id
           ? {
               ...group,
-              slides: group.slides.map((slide) => (slide.id === selectedSlide.id ? nextSlide : slide)),
+              slides: group.slides.map((slide) =>
+                slide.id === selectedSlide.id
+                  ? {
+                      ...nextSlide,
+                      status: nextSlide.status === "published" ? ("published" as const) : ("unsaved" as const),
+                    }
+                  : slide,
+              ),
             }
           : group,
       ),
@@ -645,7 +734,7 @@ export function useQuizEditorState() {
     setPlayerTemplate(nextPlayerTemplate);
   }
 
-  function hydrateDraftDocument(draft: QuizEditorDraftDocument) {
+  const hydrateDraftDocument = useCallback((draft: QuizEditorDraftDocument) => {
     const firstGroup = draft.tree[0] ?? null;
     const firstSlide = firstGroup?.slides[0] ?? null;
 
@@ -659,9 +748,9 @@ export function useQuizEditorState() {
         ? { type: "slide", groupId: firstGroup.id, slideId: firstSlide.id }
         : firstGroup
           ? { type: "group", groupId: firstGroup.id }
-          : createMockSelectedEditorNode(),
+          : { type: "group", groupId: "group-1" },
     );
-  }
+  }, []);
 
   function updateSelectedSlideTextStyle(patch: Partial<QuizEditorTextStyle>) {
     if (!selectedSlide) return;
@@ -914,6 +1003,10 @@ export function useQuizEditorState() {
     pasteIntoSelected,
     duplicateSelected,
     deleteSelected,
+    deleteSlides,
+    duplicateSlides,
+    markAllAsSavedDraft,
+    setSlidesPublished,
     moveSelected,
     changeSelectedQuestionType,
     updateSelectedGroupTitle,

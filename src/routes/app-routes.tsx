@@ -65,7 +65,7 @@ const CrmPage = lazy(() =>
     default: module.CrmPage,
   })),
 );
-const LcmsPage = lazy(() => import("@/app/pages/admin/admin-page"));
+const AdminPage = lazy(() => import("@/app/pages/admin/admin-page"));
 const ProfilePage = lazy(() =>
   import("@/app/pages/shared/profile-page").then((module) => ({
     default: module.ProfilePage,
@@ -412,7 +412,7 @@ const lcmsRoutes = lcmsWorkspacePaths
     component: () => (
       <PortalRoute
         allowedPortals={["lcms", "lms"]}
-        element={withPortalAuth("lcms", <LcmsPage />)}
+        element={withPortalAuth("lcms", <AdminPage />)}
         // Do not redirect here; requests from LMS/CRM should render 404.
       />
     ),
@@ -531,7 +531,7 @@ const adminWorkspaceRoute = createRoute({
     if (!isCanonicalLmsWorkspaceHost(window.location)) {
       return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath="/admin" />;
     }
-        return withPortalAuth("lcms", <LcmsPage />);
+        return withPortalAuth("lcms", <AdminPage />);
   },
 });
 
@@ -604,7 +604,7 @@ const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
       if (!isCanonicalLmsWorkspaceHost(window.location)) {
         return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={contentPath} />;
       }
-        return withPortalAuth("lcms", <LcmsPage />);
+        return withPortalAuth("lcms", <AdminPage />);
     },
   }),
 );

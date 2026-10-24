@@ -1,8 +1,8 @@
 import AssignmentTurnedInOutlinedIcon from "@mui/icons-material/AssignmentTurnedInOutlined";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import NotificationsNoneOutlinedIcon from "@mui/icons-material/NotificationsNoneOutlined";
-import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
-import TrackChangesRoundedIcon from "@mui/icons-material/TrackChangesRounded";
+import ForumOutlinedIcon from "@mui/icons-material/ForumOutlined";
+
 
 import type { StudentAssignmentStatus } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
@@ -10,9 +10,8 @@ import type { DashboardCopy } from "@/features/elearning/student-dashboard/types
 export const viCopy: DashboardCopy = {
   navItems: [
     { key: "overview", label: "Tổng quan", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "scores", label: "Khóa học", icon: <LayersOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Bài tập & thi", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Phòng luyện", icon: <TrackChangesRoundedIcon sx={{ fontSize: 18 }} /> },
+    { key: "assignments", label: "Bài tập", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "discussion", label: "Thảo luận", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
     { key: "announcements", label: "Thông báo", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
   ],
   heroEyebrow: "Bảng học tập",
@@ -36,7 +35,7 @@ export const viCopy: DashboardCopy = {
   todayTitle: "Bài cần xử lý hôm nay",
   assignmentsTitle: "Bài tập",
   assignmentsDescription: "Tất cả bài được giao, trạng thái quá hạn, tiến độ hoàn thành và điểm số.",
-  scoresTitle: "Khóa học của tôi",
+  scoresTitle: "Điểm bài tập",
   scoresDescription: "Theo dõi điểm cao nhất và 3 kết quả gần đây của từng bài tập đã được giao.",
   bestScoreLabel: "Điểm cao nhất",
   recentResultsTitle: "Kết quả gần đây",
@@ -106,9 +105,8 @@ export const viCopy: DashboardCopy = {
 export const enCopy: DashboardCopy = {
   navItems: [
     { key: "overview", label: "Overview", icon: <HomeOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "scores", label: "Courses", icon: <LayersOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "assignments", label: "Assignments & Exams", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
-    { key: "discussion", label: "Practice Room", icon: <TrackChangesRoundedIcon sx={{ fontSize: 18 }} /> },
+    { key: "assignments", label: "Assignments", icon: <AssignmentTurnedInOutlinedIcon sx={{ fontSize: 18 }} /> },
+    { key: "discussion", label: "Discussion", icon: <ForumOutlinedIcon sx={{ fontSize: 18 }} /> },
     { key: "announcements", label: "Notices", icon: <NotificationsNoneOutlinedIcon sx={{ fontSize: 18 }} /> },
   ],
   heroEyebrow: "Learning board",
@@ -132,7 +130,7 @@ export const enCopy: DashboardCopy = {
   todayTitle: "Tasks to handle today",
   assignmentsTitle: "Assignments",
   assignmentsDescription: "All assigned tasks, overdue status, completion progress, and score.",
-  scoresTitle: "My Courses",
+  scoresTitle: "Assignment scores",
   scoresDescription: "Review the best score and 3 most recent results for each assigned task.",
   bestScoreLabel: "Best score",
   recentResultsTitle: "Recent results",

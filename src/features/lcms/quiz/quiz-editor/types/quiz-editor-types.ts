@@ -201,6 +201,7 @@ export type QuizEditorSlide = {
   options?: QuizEditorSlideOptions;
   layers?: string[];
   infoPage?: QuizInformationPage;
+  status?: "unsaved" | "draft" | "published";
 };
 
 export type QuizProjectSettings = {
