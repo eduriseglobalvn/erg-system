@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type ReactNode } from "react";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
-import AltRouteIcon from "@mui/icons-material/AltRoute";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircle";
 import CloseIcon from "@mui/icons-material/Close";
 import ColorLensOutlinedIcon from "@mui/icons-material/ColorLensOutlined";
@@ -17,19 +16,20 @@ import OndemandVideoIcon from "@mui/icons-material/OndemandVideo";
 import PreviewIcon from "@mui/icons-material/Preview";
 import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
+import TuneRoundedIcon from "@mui/icons-material/TuneRounded";
+import ChatBubbleOutlineRoundedIcon from "@mui/icons-material/ChatBubbleOutlineRounded";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined";
 import {
   Box,
-  Accordion,
-  AccordionDetails,
-  AccordionSummary,
   Button,
-  Checkbox,
+  ButtonBase,
   Chip,
   Divider,
-  FormControlLabel,
   IconButton,
   MenuItem,
   Select,
+  Switch,
   TextField,
   ToggleButton,
   ToggleButtonGroup,
@@ -646,53 +646,6 @@ function VisualQuestionCanvas({
   );
 }
 
-function QuestionEditorInspector({
-  draftSlide,
-  onUpdateFeedbackRows,
-  onPickMedia,
-  onRemoveMedia,
-  onUpdateMediaAlt,
-  onUpdateOptions,
-  onUpdateFinalSlideOptions,
-}: {
-  draftSlide: QuizEditorSlide;
-  onUpdateFeedbackRows: (rows: QuizEditorFeedbackRow[]) => void;
-  onPickMedia: () => void;
-  onRemoveMedia: () => void;
-  onUpdateMediaAlt: (value: string) => void;
-  onUpdateOptions: (patch: Partial<NonNullable<QuizEditorSlide["options"]>>) => void;
-  onUpdateFinalSlideOptions: (patch: Partial<QuizEditorFinalSlideOptions>) => void;
-}) {
-  const { t } = useI18n();
-
-  return (
-    <Box className="classic-editor__mui-inspector">
-      {draftSlide.feedbackRows?.length ? (
-        <InspectorSection title={t("quiz.feedbackAndScoring")} defaultExpanded>
-          <MuiFeedbackAndScoring rows={draftSlide.feedbackRows} onChange={onUpdateFeedbackRows} />
-        </InspectorSection>
-      ) : null}
-
-      <InspectorSection title={t("quiz.questionSettings")} defaultExpanded>
-        {draftSlide.kind === "result-slide" ? (
-          <MuiFinalSlideSettings slide={draftSlide} onUpdateOptions={onUpdateFinalSlideOptions} />
-        ) : (
-          <MuiQuestionSettings slide={draftSlide} onUpdateOptions={onUpdateOptions} />
-        )}
-      </InspectorSection>
-
-      <InspectorSection title={t("quiz.mediaSettings")} defaultExpanded={Boolean(draftSlide.media?.src)}>
-        <MuiMediaSettings
-          slide={draftSlide}
-          onPickMedia={onPickMedia}
-          onRemoveMedia={onRemoveMedia}
-          onUpdateMediaAlt={onUpdateMediaAlt}
-        />
-      </InspectorSection>
-    </Box>
-  );
-}
-
 function updateSlideTextStyleTarget(
   slide: QuizEditorSlide,
   target: QuizEditorTextStyleTarget,
@@ -711,22 +664,164 @@ function updateSlideTextStyleTarget(
   };
 }
 
-function InspectorSection({
-  title,
-  defaultExpanded = false,
-  children,
+function QuestionEditorInspector({
+  draftSlide,
+  onUpdateFeedbackRows,
+  onPickMedia,
+  onRemoveMedia,
+  onUpdateMediaAlt,
+  onUpdateOptions,
+  onUpdateFinalSlideOptions,
 }: {
-  title: string;
-  defaultExpanded?: boolean;
-  children: ReactNode;
+  draftSlide: QuizEditorSlide;
+  onUpdateFeedbackRows: (rows: QuizEditorFeedbackRow[]) => void;
+  onPickMedia: () => void;
+  onRemoveMedia: () => void;
+  onUpdateMediaAlt: (value: string) => void;
+  onUpdateOptions: (patch: Partial<NonNullable<QuizEditorSlide["options"]>>) => void;
+  onUpdateFinalSlideOptions: (patch: Partial<QuizEditorFinalSlideOptions>) => void;
 }) {
+  const { t } = useI18n();
+  const [activeTab, setActiveTab] = useState<"settings" | "feedback" | "media">("settings");
+
+  const hasFeedback = Boolean(draftSlide.feedbackRows && draftSlide.feedbackRows.length > 0);
+  const hasCustomFeedback = draftSlide.feedbackRows?.some((r) => r.feedback?.trim());
+  const hasMedia = Boolean(draftSlide.media?.src);
+
+  const currentTab = !hasFeedback && activeTab === "feedback" ? "settings" : activeTab;
+
   return (
-    <Accordion disableGutters defaultExpanded={defaultExpanded} className="classic-editor__mui-inspector-section">
-      <AccordionSummary expandIcon={<ExpandMoreIcon fontSize="small" />}>
-        <Typography component="h3" variant="subtitle2">{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>{children}</AccordionDetails>
-    </Accordion>
+    <Box
+      className="classic-editor__mui-inspector"
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+        height: "100%",
+      }}
+    >
+      {/* Top Segmented Tabs */}
+      <Box
+        sx={{
+          display: "flex",
+          p: "4px",
+          borderRadius: "10px",
+          bgcolor: "#F1F5F9",
+          border: "1px solid #E2E8F0",
+          gap: "4px",
+        }}
+      >
+        <ButtonBase
+          onClick={() => setActiveTab("settings")}
+          sx={{
+            flex: 1,
+            py: "7px",
+            px: "8px",
+            borderRadius: "7px",
+            fontSize: "12px",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+            bgcolor: currentTab === "settings" ? "#FFFFFF" : "transparent",
+            color: currentTab === "settings" ? "#0F6CBD" : "#64748B",
+            boxShadow: currentTab === "settings" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+            transition: "all 0.15s ease",
+            "&:hover": {
+              color: "#0F6CBD",
+            },
+          }}
+        >
+          <TuneRoundedIcon sx={{ fontSize: 16 }} />
+          <span>{t("quiz.questionSettings") || "Cài đặt"}</span>
+        </ButtonBase>
+
+        {hasFeedback ? (
+          <ButtonBase
+            onClick={() => setActiveTab("feedback")}
+            sx={{
+              flex: 1,
+              py: "7px",
+              px: "8px",
+              borderRadius: "7px",
+              fontSize: "12px",
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+              bgcolor: currentTab === "feedback" ? "#FFFFFF" : "transparent",
+              color: currentTab === "feedback" ? "#0F6CBD" : "#64748B",
+              boxShadow: currentTab === "feedback" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+              transition: "all 0.15s ease",
+              "&:hover": {
+                color: "#0F6CBD",
+              },
+            }}
+          >
+            <ChatBubbleOutlineRoundedIcon sx={{ fontSize: 16 }} />
+            <span>{t("quiz.feedbackAndScoring") || "Phản hồi"}</span>
+            {hasCustomFeedback ? (
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#0F6CBD" }} />
+            ) : null}
+          </ButtonBase>
+        ) : null}
+
+        <ButtonBase
+          onClick={() => setActiveTab("media")}
+          sx={{
+            flex: 1,
+            py: "7px",
+            px: "8px",
+            borderRadius: "7px",
+            fontSize: "12px",
+            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+            bgcolor: currentTab === "media" ? "#FFFFFF" : "transparent",
+            color: currentTab === "media" ? "#0F6CBD" : "#64748B",
+            boxShadow: currentTab === "media" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
+            transition: "all 0.15s ease",
+            "&:hover": {
+              color: "#0F6CBD",
+            },
+          }}
+        >
+          <ImageOutlinedIcon sx={{ fontSize: 16 }} />
+          <span>{t("common.picture") || "Hình ảnh"}</span>
+          {hasMedia ? (
+            <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#10B981" }} />
+          ) : null}
+        </ButtonBase>
+      </Box>
+
+      {/* Tab Panels */}
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, flex: 1, overflowY: "auto", pr: 0.5 }}>
+        {currentTab === "settings" && (
+          draftSlide.kind === "result-slide" ? (
+            <MuiFinalSlideSettings slide={draftSlide} onUpdateOptions={onUpdateFinalSlideOptions} />
+          ) : (
+            <MuiQuestionSettings slide={draftSlide} onUpdateOptions={onUpdateOptions} />
+          )
+        )}
+
+        {currentTab === "feedback" && hasFeedback && (
+          <MuiFeedbackAndScoring rows={draftSlide.feedbackRows!} onChange={onUpdateFeedbackRows} />
+        )}
+
+        {currentTab === "media" && (
+          <MuiMediaSettings
+            slide={draftSlide}
+            onPickMedia={onPickMedia}
+            onRemoveMedia={onRemoveMedia}
+            onUpdateMediaAlt={onUpdateMediaAlt}
+          />
+        )}
+      </Box>
+    </Box>
   );
 }
 
@@ -745,53 +840,135 @@ function MuiMediaSettings({
   const media = slide.media;
 
   return (
-    <StackPanel>
-      <Box className="classic-editor__mui-media-head">
-        <Box>
-          <Typography variant="overline">{t("common.picture")}</Typography>
-        </Box>
-        <Button
-          size="small"
-          variant="contained"
-          startIcon={<AddPhotoAlternateIcon fontSize="small" />}
-          onClick={onPickMedia}
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {media?.src ? (
+        <Box
+          sx={{
+            p: 2,
+            borderRadius: "12px",
+            bgcolor: "#FFFFFF",
+            border: "1px solid #E2E8F0",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 1.5,
+          }}
         >
-          {t("quiz.addImage")}
-        </Button>
-      </Box>
-
-      <Box className={cn("classic-editor__mui-media-preview", media?.src ? "has-media" : "is-empty")}>
-        {media?.src ? (
-          <>
-            <img src={media.src} alt={media.alt || t("common.picture")} />
-            <IconButton size="small" color="error" onClick={onRemoveMedia} aria-label={t("common.remove")}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+              {t("common.picture") || "Hình ảnh câu hỏi"}
+            </Typography>
+            <IconButton size="small" color="error" onClick={onRemoveMedia} title={t("common.remove")}>
               <DeleteOutlineIcon fontSize="small" />
             </IconButton>
-          </>
-        ) : (
-          <Box component="button" type="button" className="classic-editor__mui-media-empty" onClick={onPickMedia}>
-            <AddPhotoAlternateIcon fontSize="small" />
-            <Typography variant="body2">{t("quiz.addImage")}</Typography>
           </Box>
-        )}
-      </Box>
 
-      <TextField
-        size="small"
-        fullWidth
-        label={t("quiz.imageAltText")}
-        value={media?.alt ?? ""}
-        onChange={(event) => onUpdateMediaAlt(event.target.value)}
-        placeholder={t("quiz.imageAltPlaceholder")}
-        disabled={!media}
-      />
-    </StackPanel>
+          <Box
+            sx={{
+              width: "100%",
+              height: 180,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              bgcolor: "#F8FAFC",
+              borderRadius: "8px",
+              border: "1px solid #E2E8F0",
+              overflow: "hidden",
+            }}
+          >
+            <img
+              src={media.src}
+              alt={media.alt || t("common.picture")}
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }}
+            />
+          </Box>
+
+          <Button
+            size="small"
+            variant="outlined"
+            fullWidth
+            startIcon={<AddPhotoAlternateIcon fontSize="small" />}
+            onClick={onPickMedia}
+            sx={{ borderRadius: "8px", fontWeight: 700 }}
+          >
+            Thay ảnh khác
+          </Button>
+
+          <TextField
+            size="small"
+            fullWidth
+            label={t("quiz.imageAltText") || "Văn bản thay thế (Alt text)"}
+            value={media.alt ?? ""}
+            onChange={(event) => onUpdateMediaAlt(event.target.value)}
+            placeholder={t("quiz.imageAltPlaceholder") || "Mô tả hình ảnh cho học sinh khiếm thị..."}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "8px",
+                fontSize: "13px",
+              },
+            }}
+          />
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            p: 3,
+            borderRadius: "12px",
+            bgcolor: "#FFFFFF",
+            border: "1.5px dashed #CBD5E1",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            gap: 1,
+            py: 4,
+          }}
+        >
+          <Box
+            sx={{
+              width: 48,
+              height: 48,
+              borderRadius: "50%",
+              bgcolor: "#F0F7FF",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              mb: 0.5,
+            }}
+          >
+            <CloudUploadOutlinedIcon sx={{ fontSize: 26, color: "#0F6CBD" }} />
+          </Box>
+          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1E293B", fontSize: "14px" }}>
+            Chưa có hình ảnh
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#64748B", maxWidth: 220, mb: 1 }}>
+            Thêm hình ảnh minh họa để câu hỏi trực quan và sinh động hơn
+          </Typography>
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<AddPhotoAlternateIcon fontSize="small" />}
+            onClick={onPickMedia}
+            sx={{
+              borderRadius: "8px",
+              fontWeight: 700,
+              bgcolor: "#0F6CBD",
+              "&:hover": { bgcolor: "#0D5CA0" },
+            }}
+          >
+            {t("quiz.addImage") || "Tải ảnh lên"}
+          </Button>
+        </Box>
+      )}
+    </Box>
   );
 }
 
 const branchingOptions: QuizEditorFeedbackBranching[] = ["By Result", "Next Question", "Finish Quiz"];
 const questionTypeOptions = ["Graded", "Survey", "Practice"] as const;
 const feedbackOptions = ["By Result", "None", "By choice"] as const;
+
 function MuiFeedbackAndScoring({
   rows,
   onChange,
@@ -806,29 +983,64 @@ function MuiFeedbackAndScoring({
   }
 
   return (
-    <StackPanel>
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       {rows.map((row) => {
         const isCorrect = row.kind === "correct";
         const isIncorrect = row.kind === "incorrect";
-        const label = isCorrect ? t("common.correct") : isIncorrect ? t("common.incorrect") : t("common.answered");
+        const label = isCorrect
+          ? "Khi trả lời Đúng"
+          : isIncorrect
+            ? "Khi trả lời Sai"
+            : t("common.answered");
+
         const icon = isCorrect ? (
-          <CheckCircleOutlineIcon fontSize="small" />
+          <CheckCircleOutlineIcon sx={{ fontSize: 16, color: "#16A34A" }} />
         ) : isIncorrect ? (
-          <ErrorOutlineIcon fontSize="small" />
+          <ErrorOutlineIcon sx={{ fontSize: 16, color: "#DC2626" }} />
         ) : (
-          <RateReviewOutlinedIcon fontSize="small" />
+          <RateReviewOutlinedIcon sx={{ fontSize: 16, color: "#0F6CBD" }} />
         );
 
+        const borderCol = isCorrect
+          ? "rgba(34, 197, 94, 0.35)"
+          : isIncorrect
+            ? "rgba(239, 68, 68, 0.3)"
+            : "#E2E8F0";
+
+        const bgCol = isCorrect
+          ? "#F0FDF4"
+          : isIncorrect
+            ? "#FEF2F2"
+            : "#FFFFFF";
+
         return (
-          <Box key={row.id} className="classic-editor__mui-feedback-row" data-state={row.kind}>
-            <Box className="classic-editor__mui-feedback-title">
-              <Chip
-                size="small"
-                variant="outlined"
-                icon={icon}
-                label={label}
-                color={isCorrect ? "success" : isIncorrect ? "error" : "primary"}
-              />
+          <Box
+            key={row.id}
+            sx={{
+              p: 2,
+              borderRadius: "12px",
+              bgcolor: bgCol,
+              border: `1px solid ${borderCol}`,
+              boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 1.5,
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                {icon}
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    color: isCorrect ? "#15803D" : isIncorrect ? "#B91C1C" : "#0F172A",
+                  }}
+                >
+                  {label}
+                </Typography>
+              </Box>
             </Box>
 
             <TextField
@@ -836,18 +1048,32 @@ function MuiFeedbackAndScoring({
               fullWidth
               multiline
               minRows={2}
-              placeholder={t("common.feedback")}
-              aria-label={t("common.feedback")}
+              placeholder={
+                isCorrect
+                  ? "Nhập lời khen hoặc giải thích khi thí sinh làm đúng..."
+                  : isIncorrect
+                    ? "Nhập giải thích đáp án đúng hoặc gợi ý khi làm sai..."
+                    : t("common.feedback")
+              }
               value={row.feedback}
               onChange={(event) => updateRow(row.id, { feedback: event.target.value })}
-              className="classic-editor__mui-feedback-input"
+              sx={{
+                bgcolor: "#FFFFFF",
+                borderRadius: "8px",
+                "& .MuiOutlinedInput-root": {
+                  fontSize: "13px",
+                  borderRadius: "8px",
+                },
+              }}
             />
 
-            <Box className="classic-editor__mui-feedback-meta">
-              <Box className="classic-editor__native-select-wrap classic-editor__native-select-wrap--feedback">
-                <AltRouteIcon fontSize="small" className="classic-editor__native-select-start-icon" aria-hidden="true" />
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 600, whiteSpace: "nowrap" }}>
+                Điều hướng:
+              </Typography>
+              <Box className="classic-editor__native-select-wrap" sx={{ flex: 1 }}>
                 <select
-                  className="classic-editor__native-select classic-editor__native-select--feedback"
+                  className="classic-editor__native-select"
                   aria-label={t("common.feedbackAndBranching")}
                   value={row.branching ?? "By Result"}
                   onChange={(event) =>
@@ -866,7 +1092,7 @@ function MuiFeedbackAndScoring({
           </Box>
         );
       })}
-    </StackPanel>
+    </Box>
   );
 }
 
@@ -880,9 +1106,181 @@ function MuiQuestionSettings({
   const { t } = useI18n();
   const options = slide.options ?? {};
 
+  const timePresets = [
+    { label: "30s", value: "00:30" },
+    { label: "1m", value: "01:00" },
+    { label: "2m", value: "02:00" },
+    { label: "5m", value: "05:00" },
+  ];
+
   return (
-    <StackPanel>
-      <Box className="classic-editor__mui-settings-grid">
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {/* Card 1: Question Behavior */}
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: "12px",
+          bgcolor: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+          Hành vi làm bài
+        </Typography>
+
+        {/* Shuffle Answers */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ pr: 1.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+              {t("quiz.shuffleAnswers")}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+              Tự động xáo trộn thứ tự các đáp án cho mỗi lượt làm
+            </Typography>
+          </Box>
+          <Switch
+            size="small"
+            checked={options.shuffleAnswers ?? false}
+            onChange={(event) => onUpdateOptions({ shuffleAnswers: event.target.checked })}
+            color="primary"
+          />
+        </Box>
+
+        <Divider sx={{ borderColor: "#F1F5F9" }} />
+
+        {/* Time Limit */}
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <Box sx={{ pr: 1.5 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+                {t("quiz.limitTimeToAnswer")}
+              </Typography>
+              <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+                Tự động kết thúc và nộp câu hỏi khi hết giờ
+              </Typography>
+            </Box>
+            <Switch
+              size="small"
+              checked={options.limitTime ?? false}
+              onChange={(event) => onUpdateOptions({ limitTime: event.target.checked })}
+              color="primary"
+            />
+          </Box>
+
+          {options.limitTime ? (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 0.5, pt: 0.5 }}>
+              <TextField
+                size="small"
+                value={options.timeLimit ?? "01:00"}
+                onChange={(event) => onUpdateOptions({ timeLimit: event.target.value })}
+                placeholder="mm:ss"
+                sx={{
+                  width: 90,
+                  "& input": { textAlign: "center", fontWeight: 700, fontSize: "13px", py: "6px" },
+                }}
+              />
+              <Box sx={{ display: "flex", gap: 0.5 }}>
+                {timePresets.map((preset) => (
+                  <Chip
+                    key={preset.value}
+                    label={preset.label}
+                    size="small"
+                    variant={options.timeLimit === preset.value ? "filled" : "outlined"}
+                    color={options.timeLimit === preset.value ? "primary" : "default"}
+                    onClick={() => onUpdateOptions({ timeLimit: preset.value })}
+                    sx={{ fontSize: "11px", fontWeight: 600, cursor: "pointer" }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          ) : null}
+        </Box>
+
+        <Divider sx={{ borderColor: "#F1F5F9" }} />
+
+        {/* Accept Partial */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ pr: 1.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+              {t("quiz.acceptPartial")}
+            </Typography>
+            <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+              Cộng điểm theo tỷ lệ các phương án đúng đã chọn
+            </Typography>
+          </Box>
+          <Switch
+            size="small"
+            checked={options.acceptPartial ?? false}
+            onChange={(event) => onUpdateOptions({ acceptPartial: event.target.checked })}
+            color="primary"
+          />
+        </Box>
+
+        {/* Multiple-response Limit Responses */}
+        {slide.kind === "multiple-response" ? (
+          <>
+            <Divider sx={{ borderColor: "#F1F5F9" }} />
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <Box sx={{ pr: 1.5 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+                    {t("quiz.limitResponses")}
+                  </Typography>
+                  <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+                    Khóa ô chọn khi học sinh đạt số lựa chọn tối đa
+                  </Typography>
+                </Box>
+                <Switch
+                  size="small"
+                  checked={options.limitResponses ?? false}
+                  onChange={(event) => onUpdateOptions({ limitResponses: event.target.checked })}
+                  color="primary"
+                />
+              </Box>
+              {options.limitResponses ? (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1, pl: 0.5 }}>
+                  <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 600 }}>
+                    Số lựa chọn:
+                  </Typography>
+                  {[1, 2, 3, 4, 5].map((num) => (
+                    <Chip
+                      key={num}
+                      label={num}
+                      size="small"
+                      variant={options.limitResponsesValue === num ? "filled" : "outlined"}
+                      color={options.limitResponsesValue === num ? "primary" : "default"}
+                      onClick={() => onUpdateOptions({ limitResponsesValue: num })}
+                      sx={{ minWidth: 28, fontWeight: 700, cursor: "pointer" }}
+                    />
+                  ))}
+                </Box>
+              ) : null}
+            </Box>
+          </>
+        ) : null}
+      </Box>
+
+      {/* Card 2: Question Type & Feedback Mode */}
+      <Box
+        sx={{
+          p: 2,
+          borderRadius: "12px",
+          bgcolor: "#FFFFFF",
+          border: "1px solid #E2E8F0",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 1.5,
+        }}
+      >
+        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+          {t("quiz.feedbackAndScoring")}
+        </Typography>
+
         <LabeledSelect
           label={t("common.questionType")}
           value={options.questionType ?? "Graded"}
@@ -898,6 +1296,7 @@ function MuiQuestionSettings({
           }))}
           onChange={(value) => onUpdateOptions({ questionType: value })}
         />
+
         <LabeledSelect
           label={t("common.feedback")}
           value={options.feedback ?? "By Result"}
@@ -909,45 +1308,7 @@ function MuiQuestionSettings({
           onChange={(value) => onUpdateOptions({ feedback: value })}
         />
       </Box>
-
-      <Box className="classic-editor__mui-check-list">
-        <FormControlLabel
-          control={<Checkbox size="small" checked={options.limitTime ?? false} onChange={(event) => onUpdateOptions({ limitTime: event.target.checked })} />}
-          label={t("quiz.limitTimeToAnswer")}
-        />
-        <TextField
-          size="small"
-          value={options.timeLimit ?? "01:00"}
-          onChange={(event) => onUpdateOptions({ timeLimit: event.target.value })}
-          disabled={!options.limitTime}
-          className="classic-editor__mui-time-field"
-        />
-        <FormControlLabel
-          control={<Checkbox size="small" checked={options.shuffleAnswers ?? false} onChange={(event) => onUpdateOptions({ shuffleAnswers: event.target.checked })} />}
-          label={t("quiz.shuffleAnswers")}
-        />
-        <FormControlLabel
-          control={<Checkbox size="small" checked={options.acceptPartial ?? false} onChange={(event) => onUpdateOptions({ acceptPartial: event.target.checked })} />}
-          label={t("quiz.acceptPartial")}
-        />
-      </Box>
-
-      {slide.kind === "multiple-response" ? (
-        <Box className="classic-editor__mui-inline-setting">
-          <FormControlLabel
-            control={<Checkbox size="small" checked={options.limitResponses ?? false} onChange={(event) => onUpdateOptions({ limitResponses: event.target.checked })} />}
-            label={t("quiz.limitResponses")}
-          />
-          <LabeledSelect
-            label=""
-            value={String(options.limitResponsesValue ?? 1)}
-            options={[1, 2, 3, 4].map((value) => ({ value: String(value), label: String(value) }))}
-            onChange={(value) => onUpdateOptions({ limitResponsesValue: Number(value) })}
-          />
-        </Box>
-      ) : null}
-
-    </StackPanel>
+    </Box>
   );
 }
 
@@ -962,19 +1323,76 @@ function MuiFinalSlideSettings({
   const options = slide.options?.finalSlide;
 
   return (
-    <Box className="classic-editor__mui-check-list">
-      <FormControlLabel
-        control={<Checkbox size="small" checked={options?.showUserScore ?? false} onChange={(event) => onUpdateOptions({ showUserScore: event.target.checked })} />}
-        label={t("quiz.showUsersScore")}
-      />
-      <FormControlLabel
-        control={<Checkbox size="small" checked={options?.allowReview ?? false} onChange={(event) => onUpdateOptions({ allowReview: event.target.checked })} />}
-        label={t("quiz.allowUserReviewQuiz")}
-      />
-      <FormControlLabel
-        control={<Checkbox size="small" checked={options?.allowRetry ?? false} onChange={(event) => onUpdateOptions({ allowRetry: event.target.checked })} />}
-        label={t("quiz.allowUserRetryQuiz")}
-      />
+    <Box
+      sx={{
+        p: 2,
+        borderRadius: "12px",
+        bgcolor: "#FFFFFF",
+        border: "1px solid #E2E8F0",
+        boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+        display: "flex",
+        flexDirection: "column",
+        gap: 1.5,
+      }}
+    >
+      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+        Cài đặt trang kết thúc
+      </Typography>
+
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ pr: 1.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+            {t("quiz.showUsersScore")}
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+            Hiển thị điểm tổng kết và tỷ lệ đúng sau khi nộp bài
+          </Typography>
+        </Box>
+        <Switch
+          size="small"
+          checked={options?.showUserScore ?? false}
+          onChange={(event) => onUpdateOptions({ showUserScore: event.target.checked })}
+          color="primary"
+        />
+      </Box>
+
+      <Divider sx={{ borderColor: "#F1F5F9" }} />
+
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ pr: 1.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+            {t("quiz.allowUserReviewQuiz")}
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+            Cho phép xem lại từng câu hỏi và đáp án chi tiết
+          </Typography>
+        </Box>
+        <Switch
+          size="small"
+          checked={options?.allowReview ?? false}
+          onChange={(event) => onUpdateOptions({ allowReview: event.target.checked })}
+          color="primary"
+        />
+      </Box>
+
+      <Divider sx={{ borderColor: "#F1F5F9" }} />
+
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Box sx={{ pr: 1.5 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "13px" }}>
+            {t("quiz.allowUserRetryQuiz")}
+          </Typography>
+          <Typography variant="caption" sx={{ color: "#64748B", display: "block", fontSize: "11px" }}>
+            Cho phép học sinh nhấn làm lại bài kiểm tra
+          </Typography>
+        </Box>
+        <Switch
+          size="small"
+          checked={options?.allowRetry ?? false}
+          onChange={(event) => onUpdateOptions({ allowRetry: event.target.checked })}
+          color="primary"
+        />
+      </Box>
     </Box>
   );
 }
@@ -1012,9 +1430,6 @@ function LabeledSelect({
   );
 }
 
-function StackPanel({ children }: { children: ReactNode }) {
-  return <Box className="classic-editor__mui-stack-panel">{children}</Box>;
-}
 
 function formatBranchingLabel(option: QuizEditorFeedbackBranching, t: ReturnType<typeof useI18n>["t"]) {
   if (option === "By Result") return t("common.byResult");

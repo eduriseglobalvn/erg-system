@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
-import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import MessageSquare from "@mui/icons-material/ForumOutlined";
 import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
 import Avatar from "@mui/material/Avatar";
@@ -50,12 +49,9 @@ export function TopMenuShell({
   const studentName = account?.name || dashboardProfile.name || "Trần Quốc Vương";
   const studentHandle = account?.email ? `@${account.email.split("@")[0]}` : "@vuong010100";
   const currentNav = copy.navItems.find((item) => item.key === activePage);
-  const currentPageLabel = currentNav?.label ?? (activePage === "account" ? copy.accountTitle : "Bài tập & thi");
+  const currentPageLabel = currentNav?.label ?? (activePage === "account" ? copy.accountTitle : "Bài tập");
 
-  // Keep the 4 primary operational menu items from Image 1, plus announcements if active
-  const visibleNavItems = copy.navItems.filter((item) =>
-    item.key === "overview" || item.key === "scores" || item.key === "assignments" || item.key === "discussion" || (item.key === "announcements" && activePage === "announcements")
-  );
+  const visibleNavItems = copy.navItems;
 
   return (
     <Box sx={{
@@ -81,6 +77,7 @@ export function TopMenuShell({
         <Stack spacing={0.5} sx={{ flex: 1, minHeight: 0, mt: 0.5 }}>
           {visibleNavItems.map((item) => {
             const isSelected = activePage === item.key;
+            const showBadge = item.key === "announcements" && totalUnread > 0;
             return (
               <Box
                 key={item.key}
@@ -98,9 +95,14 @@ export function TopMenuShell({
                 <Box component="span" sx={{ color: isSelected ? "#FFFFFF" : "#64748B", display: "inline-flex", lineHeight: 1, "& svg": { fontSize: 18 } }}>
                   {item.icon}
                 </Box>
-                <Typography variant="body2" sx={{ color: "inherit", fontSize: "13.5px", fontWeight: isSelected ? 650 : 500, letterSpacing: "-0.01em" }}>
+                <Typography variant="body2" sx={{ color: "inherit", flex: 1, fontSize: "13.5px", fontWeight: isSelected ? 650 : 500, letterSpacing: "-0.01em" }}>
                   {item.label}
                 </Typography>
+                {showBadge ? (
+                  <Box sx={{ bgcolor: isSelected ? "#FFFFFF" : "#EF4444", borderRadius: "99px", color: isSelected ? "#2563EB" : "#FFFFFF", fontSize: "11px", fontWeight: 800, px: 0.8, py: 0.1 }}>
+                    {totalUnread > 9 ? "9+" : totalUnread}
+                  </Box>
+                ) : null}
               </Box>
             );
           })}
@@ -129,21 +131,11 @@ export function TopMenuShell({
       {/* Main content right side */}
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: 2.25, lg: 3 } }}>
         <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", minHeight: 44, mb: 2, px: { xs: 0.5, md: 0 } }}>
-          <Stack direction="row" alignItems="center" spacing={1}>
-            <Box onClick={() => onPageChange("overview")} sx={{ alignItems: "center", color: "#64748B", cursor: "pointer", display: "flex", gap: 0.65, transition: "color 140ms ease", "&:hover": { color: "#2563EB" } }}>
-              <HomeOutlinedIcon sx={{ fontSize: 17 }} />
-              <Typography variant="body2" sx={{ fontSize: "13px", fontWeight: 550 }}>Trang chủ</Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: "#CBD5E1", fontSize: "13px" }}>/</Typography>
-            <Typography variant="body2" sx={{ color: "#0F172A", fontSize: "13px", fontWeight: 650 }}>{currentPageLabel}</Typography>
-          </Stack>
+          <Typography variant="h6" sx={{ color: "#0F172A", fontSize: "16.5px", fontWeight: 800, letterSpacing: "-0.015em" }}>
+            {currentPageLabel}
+          </Typography>
 
           <Stack direction="row" alignItems="center" spacing={1.15}>
-            <Box sx={{ alignItems: "center", bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "999px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)", display: "inline-flex", gap: 0.65, px: 1.15, py: 0.4 }}>
-              <Box component="span" sx={{ fontSize: "14px", lineHeight: 1 }}>🇻🇳</Box>
-              <Typography variant="caption" sx={{ color: "#0F172A", fontWeight: 700, fontSize: "11.5px" }}>VI</Typography>
-            </Box>
-
             <Tooltip title={copy.notificationTitle}>
               <IconButton aria-label={copy.notificationTitle} onClick={(e) => onNotificationOpen(e.currentTarget)} sx={{ bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "10px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)", color: "#334155", height: 34, width: 34, "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
                 <Badge color="error" badgeContent={totalUnread}>

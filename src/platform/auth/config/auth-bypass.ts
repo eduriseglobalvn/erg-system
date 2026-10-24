@@ -7,7 +7,7 @@ import type { StudentSession } from "@/platform/auth/api/student-auth-storage";
  * Set to true to allow immediate, unauthenticated access across all workspaces
  * (Admin, Teacher, Student, CRM) without being redirected to the login screen.
  */
-export const AUTH_BYPASS_ENABLED = true;
+export const AUTH_BYPASS_ENABLED = false;
 
 export const DEFAULT_BYPASS_ACCOUNT: TeacherAccount = {
   id: "dev-admin-id",

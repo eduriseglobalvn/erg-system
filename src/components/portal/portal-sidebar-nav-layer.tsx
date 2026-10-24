@@ -63,7 +63,9 @@ export function SidebarNavigationLayer({
   currentPath,
   hideSidebarBottom,
   menuGroups,
+  notificationCount = 0,
   onNavigate,
+  onSignOut,
   portalInfo,
 }: {
   active: boolean;
@@ -71,7 +73,9 @@ export function SidebarNavigationLayer({
   currentPath: string;
   hideSidebarBottom: boolean;
   menuGroups: MenuGroup[];
+  notificationCount?: number;
   onNavigate: (path: string) => void;
+  onSignOut?: () => void;
   portalInfo?: PortalInfo;
 }) {
   return (
@@ -80,26 +84,19 @@ export function SidebarNavigationLayer({
       inert={!active}
       sx={{
         boxSizing: "border-box",
+        display: "flex",
+        flexDirection: "column",
         height: "100%",
         inset: 0,
         opacity: active ? 1 : 0,
-        overflowX: "hidden",
-        overflowY: "auto",
+        overflow: "hidden",
         pointerEvents: active ? "auto" : "none",
         position: "absolute",
-        scrollbarColor: "#AAB3BE transparent",
-        scrollbarWidth: "thin",
         transform: active
           ? "translate3d(0, 0, 0)"
           : `translate3d(${collapsed ? -6 : 6}px, 0, 0)`,
         transition: `opacity ${SIDEBAR_FADE_EASING}, transform ${SIDEBAR_MOTION_CURVE}`,
         width: collapsed ? COLLAPSED_SIDEBAR_WIDTH : EXPANDED_SIDEBAR_WIDTH,
-        "&::-webkit-scrollbar": { width: 6 },
-        "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-        "&::-webkit-scrollbar-thumb": {
-          bgcolor: "#AAB3BE",
-          borderRadius: 8,
-        },
         "@media (prefers-reduced-motion: reduce)": {
           transition: "none",
         },
@@ -109,10 +106,22 @@ export function SidebarNavigationLayer({
         component="nav"
         sx={{
           display: "flex",
+          flex: 1,
           flexDirection: "column",
+          minHeight: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
           pb: 2,
           px: collapsed ? 0.45 : 1.15,
+          scrollbarColor: "#AAB3BE transparent",
+          scrollbarWidth: "thin",
           width: "100%",
+          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
+          "&::-webkit-scrollbar-thumb": {
+            bgcolor: "#AAB3BE",
+            borderRadius: 8,
+          },
           "& > .erg-nav-group + .erg-nav-group": {
             mt: collapsed ? 1 : 0.5,
           },
@@ -172,8 +181,10 @@ export function SidebarNavigationLayer({
       {!hideSidebarBottom ? (
         <SidebarBottom
           collapsed={collapsed}
-          portalInfo={portalInfo}
+          notificationCount={notificationCount}
           onNavigate={onNavigate}
+          onSignOut={onSignOut}
+          portalInfo={portalInfo}
         />
       ) : null}
     </Box>

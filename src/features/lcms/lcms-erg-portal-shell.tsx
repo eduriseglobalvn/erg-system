@@ -1,7 +1,7 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Box, LinearProgress } from "@mui/material";
+import { Box, LinearProgress, Typography } from "@mui/material";
 import { toast } from "sonner";
 import ErgPortalLayout, { type MenuItem } from "@/components/portal/ErgPortalLayout";
 import { defaultClassId, defaultSchoolId } from "@/features/lms/classroom/api/mock-classroom-data";
@@ -35,10 +35,10 @@ import { AdminContentOverview } from "@/features/lcms/admin-content/components/a
 import { LcmsErgPortalWorkspace } from "@/features/lcms/pages/lcms-erg-workspaces";
 
 const LcmsDashboard = lazy(() => import("./pages/lcms-dashboard"));
-const PermissionCatalogPage = lazy(() => import("@/app/pages/lcms/permission-catalog-page"));
-const RoleManagementPage = lazy(() => import("@/app/pages/lcms/role-management-page"));
-const EmployeeManagementPage = lazy(() => import("@/app/pages/lcms/employee-management-page"));
-const EmployeeAccessLogPage = lazy(() => import("@/app/pages/lcms/employee-access-log-page"));
+const PermissionCatalogPage = lazy(() => import("@/features/access-management/components/permission-catalog-workspace").then((m) => ({ default: m.PermissionCatalogWorkspace })));
+const RoleManagementPage = lazy(() => import("@/features/access-management/components/role-management-workspace").then((m) => ({ default: m.RoleManagementWorkspace })));
+const EmployeeManagementPage = lazy(() => import("@/features/employee-management/components/employee-list-workspace").then((m) => ({ default: m.EmployeeListWorkspace })));
+const EmployeeAccessLogPage = lazy(() => import("@/features/employee-management/components/employee-access-log-workspace").then((m) => ({ default: m.EmployeeAccessLogWorkspace })));
 const SchoolManagementApp = lazy(() =>
   import("@/features/lcms/school-management").then((module) => ({
     default: module.SchoolManagementApp,
@@ -77,6 +77,24 @@ export default function LcmsErgPortalShell() {
   }, [location.searchStr]);
   const activeItem = useMemo(() => resolveActiveMenuItem(pathname), [pathname]);
   const activeLeaf = useMemo(() => (activeItem ? toDashboardLeaf(activeItem) : null), [activeItem]);
+  const headerBreadcrumb = useMemo(() => {
+    if (!activeItem) return null;
+    return (
+      <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, minWidth: 0 }}>
+        {activeItem.section && activeItem.section !== activeItem.label ? (
+          <>
+            <Typography noWrap sx={{ color: "#64748B", fontSize: { xs: 12, sm: 13 }, fontWeight: 500 }}>
+              {activeItem.section}
+            </Typography>
+            <Typography sx={{ color: "#CBD5E1", fontSize: 12, lineHeight: 1 }}>/</Typography>
+          </>
+        ) : null}
+        <Typography noWrap sx={{ color: "#0F172A", fontSize: { xs: 12.5, sm: 13.5 }, fontWeight: 700 }}>
+          {activeItem.label}
+        </Typography>
+      </Box>
+    );
+  }, [activeItem]);
   const isPreservedWorkspace = Boolean(
     activeLeaf?.variant && PRESERVED_WORKSPACE_VARIANTS.has(activeLeaf.variant),
   );
@@ -200,6 +218,7 @@ export default function LcmsErgPortalShell() {
   return (
     <ErgPortalLayout
       contentMode={isPreservedWorkspace || isSchoolManagement ? "flush" : "padded"}
+      headerControls={headerBreadcrumb}
       hideHeaderIdentity
       menuGroups={ADMIN_MENU_GROUPS}
       portalInfo={portalInfo}
@@ -233,7 +252,7 @@ function toDashboardLeaf(menuItem: MenuItem): DashboardLeaf {
   return {
     id: menuItem.id ?? menuItem.path?.replace(/^\/+/, "").replaceAll("/", "-") ?? "placeholder",
     title: menuItem.label,
-    breadcrumb: ["Admin", menuItem.section ?? "Tổng quan", menuItem.label],
+    breadcrumb: ["Admin", menuItem.section ?? "Tá»•ng quan", menuItem.label],
     description: getMenuItemDescription(menuItem),
     variant: menuItem.variant ?? "placeholder",
   };

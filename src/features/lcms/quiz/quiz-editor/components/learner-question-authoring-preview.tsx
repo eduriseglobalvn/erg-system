@@ -232,13 +232,23 @@ function LearnerPreviewShell({
         </div>
 
         <div className="classic-editor__learner-canvas">
-          <div className="classic-editor__learner-title-band">
+          <div
+            className="classic-editor__learner-title-band"
+            onClick={(e) => {
+              const textarea = e.currentTarget.querySelector("textarea");
+              if (textarea) {
+                textarea.focus();
+                textarea.select();
+              }
+            }}
+          >
             {readOnly ? (
               <h2 className="classic-editor__learner-title-readonly">{slide.title}</h2>
             ) : (
               <BufferedTextarea
                 value={slide.title}
                 rows={2}
+                autoSelectOnFocus
                 className="classic-editor__learner-title-input"
                 style={titleTextStyle}
                 onCommit={onUpdateTitle}
@@ -586,6 +596,7 @@ type BufferedTextProps = {
     field?: "label" | "target";
   };
   onFocusTarget?: () => void;
+  autoSelectOnFocus?: boolean;
   "aria-label"?: string;
 };
 
@@ -598,6 +609,7 @@ function BufferedTextarea({
   placeholder,
   mediaTarget,
   onFocusTarget,
+  autoSelectOnFocus,
   "aria-label": ariaLabel,
 }: BufferedTextProps) {
   const { draft, handleBlur, handleChange, handleFocus } = useBufferedText(value, onCommit);
@@ -614,9 +626,26 @@ function BufferedTextarea({
       data-media-target-id={mediaTarget?.id}
       data-media-target-field={mediaTarget?.field}
       placeholder={placeholder}
-      onFocus={() => {
+      onFocus={(event) => {
         onFocusTarget?.();
         handleFocus();
+        if (autoSelectOnFocus) {
+          const val = event.currentTarget.value.trim();
+          if (val === "Tiêu đề câu hỏi" || val === "Câu hỏi mới" || val.startsWith("Tiêu đề")) {
+            event.currentTarget.select();
+          }
+        }
+      }}
+      onDoubleClick={(event) => {
+        event.currentTarget.select();
+      }}
+      onClick={(event) => {
+        if (autoSelectOnFocus) {
+          const val = event.currentTarget.value.trim();
+          if (val === "Tiêu đề câu hỏi" || val === "Câu hỏi mới" || val.startsWith("Tiêu đề")) {
+            event.currentTarget.select();
+          }
+        }
       }}
       onBlur={handleBlur}
       onChange={(event) => handleChange(event.target.value)}

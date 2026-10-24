@@ -52,6 +52,10 @@
   ],
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://api.erg.edu.vn/api/$1"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

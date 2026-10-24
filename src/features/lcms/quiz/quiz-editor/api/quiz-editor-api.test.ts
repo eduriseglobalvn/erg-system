@@ -90,6 +90,7 @@ test("normalizes backend groupId tree into editor groups without losing slides",
   expect(groups[0]?.id).toBe("group-question-types");
   expect(groups[0]?.slides[0]?.id).toBe("q1");
   expect(groups[0]?.slides[0]?.kind).toBe("multiple-choice");
+  expect(groups[0]?.slides[0]?.status).toBe("draft");
   expect(groups[0]?.slides[0]?.choices).toHaveLength(1);
 });
 

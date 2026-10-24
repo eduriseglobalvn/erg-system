@@ -117,6 +117,7 @@ function DashboardContentInner({
         <QuizEditorWorkspace
           activeLeaf={activeLeaf}
           quizId={quizEditorQuizId}
+          onQuizCreated={onOpenQuiz}
           pendingImportedQuestions={pendingQuestionImports}
           onImportedQuestionsHandled={onQuestionImportsHandled}
         />

@@ -26,8 +26,10 @@ interface SidebarProps {
   mobile?: boolean;
   onClose?: () => void;
   portalInfo?: PortalInfo;
+  notificationCount?: number;
   onCollapsedChange: (collapsed: boolean) => void;
   onNavigate: (path: string) => void;
+  onSignOut?: () => void;
   open?: boolean;
 }
 
@@ -37,16 +39,16 @@ export default function ErgPortalSidebar({
   mobile = false,
   onClose,
   portalInfo,
+  notificationCount = 0,
   onCollapsedChange,
   onNavigate,
+  onSignOut,
   open = true,
 }: SidebarProps) {
   const location = useLocation();
   const currentPath = location.pathname;
-  const normalizedPortalName = normalizedLabel(portalInfo?.name ?? "");
-  const hideSidebarBottom =
-    normalizedPortalName.includes("lms") ||
-    normalizedPortalName.includes("lcms");
+    const hideSidebarBottom = false;
+  void normalizedLabel(portalInfo?.name ?? "");
 
   return (
     <Drawer
@@ -158,7 +160,9 @@ export default function ErgPortalSidebar({
           currentPath={currentPath}
           hideSidebarBottom={hideSidebarBottom}
           menuGroups={menuGroups}
+          notificationCount={notificationCount}
           onNavigate={onNavigate}
+          onSignOut={onSignOut}
           portalInfo={portalInfo}
         />
         <SidebarNavigationLayer
@@ -167,7 +171,9 @@ export default function ErgPortalSidebar({
           currentPath={currentPath}
           hideSidebarBottom={hideSidebarBottom}
           menuGroups={menuGroups}
+          notificationCount={notificationCount}
           onNavigate={onNavigate}
+          onSignOut={onSignOut}
           portalInfo={portalInfo}
         />
       </Box>

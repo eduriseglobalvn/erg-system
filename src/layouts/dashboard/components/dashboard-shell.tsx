@@ -297,6 +297,12 @@ export function DashboardShell() {
     setManagementScope({ level: "center", centerId: unit.id });
   }
 
+  const [currentQuizId, setCurrentQuizId] = useState<string | null>(null);
+
+  const handleOpenQuiz = (quizId: string) => {
+    setCurrentQuizId(quizId);
+  };
+
   const dashboardContent = (
     <DashboardContent
       activeLeaf={activeLeaf}
@@ -307,6 +313,8 @@ export function DashboardShell() {
       deniedSchoolName={isSchoolDenied ? selectedSchool?.name : undefined}
       managementScope={managementScope}
       onOpenLeaf={openLeaf}
+      onOpenQuiz={handleOpenQuiz}
+      quizEditorQuizId={currentQuizId}
       pendingQuestionImports={pendingQuestionImports}
       selectedClassId={selectedClassId}
       selectedSchoolId={selectedSchoolId}

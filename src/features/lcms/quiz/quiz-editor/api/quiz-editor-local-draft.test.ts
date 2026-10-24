@@ -15,3 +15,18 @@ test("persists a tenant and quiz scoped recovery draft", () => {
   clearLocalQuizDraft("tenant-a", "quiz-1");
   expect(loadLocalQuizDraft("tenant-a", "quiz-1")).toBeNull();
 });
+
+test("supports default fallback draft key when quizId is empty", () => {
+  const defaultDraftKey = "default-quiz-draft";
+  saveLocalQuizDraft("erg", defaultDraftKey, {
+    quizId: defaultDraftKey,
+    docVersion: 1,
+    tree: [{ id: "group-1", title: "Custom Group", slides: [] }],
+  });
+
+  const draft = loadLocalQuizDraft<{ tree: Array<{ title: string }> }>("erg", defaultDraftKey);
+  expect(draft?.payload.tree[0]?.title).toBe("Custom Group");
+
+  clearLocalQuizDraft("erg", defaultDraftKey);
+  expect(loadLocalQuizDraft("erg", defaultDraftKey)).toBeNull();
+});

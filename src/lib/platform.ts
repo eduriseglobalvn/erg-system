@@ -16,7 +16,17 @@ export function shouldUseHashRouter() {
 }
 
 export function getApiBase() {
-  return import.meta.env.VITE_API_BASE?.trim() || (typeof window !== "undefined" ? window.location.origin : "");
+  const configured = import.meta.env.VITE_API_BASE?.trim();
+  if (configured) {
+    return configured;
+  }
+
+  // In production builds (e.g. Vercel deployment), default to production backend
+  if (import.meta.env.PROD) {
+    return "https://api.erg.edu.vn";
+  }
+
+  return typeof window !== "undefined" ? window.location.origin : "";
 }
 
 export function getGradingStrategy() {

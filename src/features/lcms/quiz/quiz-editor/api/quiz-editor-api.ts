@@ -4,7 +4,12 @@ import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/grap
 import { isObject, validateResponse } from "@/lib/validate-response";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type { PortableExamPackageEnvelope } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import { createMockPlayerTemplate, createMockQuizEditorGroups, createMockQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
+import {
+  createEmptyQuizEditorGroups,
+  createMockPlayerTemplate,
+  createMockQuizProjectSettings,
+  createNewQuizProjectSettings,
+} from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
 import type {
   QuizEditorGroup,
   QuizPlayerTemplate,
@@ -537,9 +542,9 @@ function mockDraft(quizId: string): QuizEditorDraftDocument {
     quizId,
     draftId: `draft-${quizId}`,
     docVersion: 0,
-    settings: createMockQuizProjectSettings(),
+    settings: createNewQuizProjectSettings(),
     playerTemplate: createMockPlayerTemplate(),
-    tree: createMockQuizEditorGroups(),
+    tree: createEmptyQuizEditorGroups(),
   };
 }
 
@@ -655,7 +660,7 @@ export function normalizeQuizEditorGroups(value: unknown): QuizEditorGroup[] {
     .map((group, index) => normalizeQuizEditorGroup(group, index))
     .filter((group): group is QuizEditorGroup => Boolean(group));
 
-  return normalized.length ? normalized : createMockQuizEditorGroups();
+  return normalized.length ? normalized : createEmptyQuizEditorGroups();
 }
 
 function normalizeQuizEditorGroup(value: unknown, index: number): QuizEditorGroup | null {
@@ -675,12 +680,14 @@ function normalizeQuizEditorGroup(value: unknown, index: number): QuizEditorGrou
 
 function normalizeQuizEditorSlide(value: unknown, index: number) {
   const source = asRecord(value);
+  const normalizedStatus = source.status === "published" ? "published" : source.status === "unsaved" ? "unsaved" : "draft";
 
   return {
     ...source,
     id: stringValue(source.id ?? source.slideId, `slide-${index + 1}`),
     title: stringValue(source.title, `Question ${index + 1}`),
     kind: stringValue(source.kind, "multiple-choice"),
+    status: normalizedStatus as "unsaved" | "draft" | "published",
   } as QuizEditorGroup["slides"][number];
 }
 
