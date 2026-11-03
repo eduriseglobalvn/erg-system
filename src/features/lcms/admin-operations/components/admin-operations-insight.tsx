@@ -3,7 +3,7 @@ import Button from "@mui/material/Button";
 import { type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
-import { LcmsStatusChip } from "@/features/lcms/components/lcms-ui";
+import { LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 
 export function UnitInsightRail({
   isSchool,

@@ -113,4 +113,50 @@ describe("teacher onboarding workspace", () => {
     await waitFor(() => expect(onChangePassword).toHaveBeenCalledWith({ currentPassword: "Temporary@123", newPassword: "NewPassword@123" }));
     expect(onComplete).toHaveBeenCalled();
   });
+
+  test("does not require entering a second recovery email for Google accounts but requires OTP verification", async () => {
+    const googleAccount = {
+      ...account,
+      email: "teacher@gmail.com",
+    };
+    const onRequestRecovery = vi.fn().mockResolvedValue({
+      challengeId: "challenge-google-1",
+      maskedEmail: "t***@gmail.com",
+      expiresAt: "2026-07-14T12:00:00Z",
+      retryAfterSeconds: 60,
+    });
+    const onVerifyRecovery = vi.fn().mockResolvedValue({
+      verified: true,
+      lifecycle: lifecycle(["CHANGE_PASSWORD"]),
+    });
+
+    render(
+      <TeacherOnboardingWorkspace
+        account={googleAccount}
+        lifecycle={lifecycle(["VERIFY_RECOVERY_EMAIL", "CHANGE_PASSWORD"])}
+        onChangePassword={vi.fn()}
+        onComplete={vi.fn()}
+        onLogout={vi.fn()}
+        onRequestRecovery={onRequestRecovery}
+        onUpdateProfile={vi.fn()}
+        onVerifyRecovery={onVerifyRecovery}
+      />,
+    );
+
+    // Shows Google account verification title and does NOT render an input for another recovery email
+    expect(screen.getByRole("heading", { name: "Xác minh tài khoản Google" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Email khôi phục")).not.toBeInTheDocument();
+    expect(screen.getByText("teacher@gmail.com")).toBeInTheDocument();
+
+    // Sends code directly to Google email
+    fireEvent.click(screen.getByRole("button", { name: "Gửi mã xác minh" }));
+    await waitFor(() => expect(onRequestRecovery).toHaveBeenCalledWith("teacher@gmail.com"));
+
+    // User must enter OTP code
+    await screen.findByLabelText("Mã xác minh");
+    fireEvent.change(screen.getByLabelText("Mã xác minh"), { target: { value: "654321" } });
+    fireEvent.click(screen.getByRole("button", { name: "Xác minh" }));
+
+    await waitFor(() => expect(onVerifyRecovery).toHaveBeenCalledWith({ challengeId: "challenge-google-1", otp: "654321" }));
+  });
 });

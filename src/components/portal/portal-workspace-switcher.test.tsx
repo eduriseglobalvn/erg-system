@@ -5,6 +5,7 @@ import { PortalWorkspaceSwitcher } from "./portal-workspace-switcher";
 
 vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname: "/teacher/classes" }),
+  useNavigate: () => vi.fn(),
 }));
 
 it("prefers canonical BFF workspaces over conflicting legacy portals", () => {

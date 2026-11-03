@@ -29,7 +29,7 @@ export function resolveTaxonomyMode(state: TaxonomyDialogState, option: ContentD
 }
 
 export function getCanSubmit({
-  draftLevelId,
+  draftLevelId: _draftLevelId,
   draftSubjectId,
   label,
   resourceUrl,
@@ -53,7 +53,7 @@ export function getCanSubmit({
   if (taxonomyMode) {
     if (!label.trim()) return false;
     if ((taxonomyMode === "level" || taxonomyMode === "topic") && !draftSubjectId) return false;
-    if (taxonomyMode === "topic" && !draftLevelId) return false;
+    // draftLevelId is optional for topic
     return true;
   }
   if (selectedOption === "lecture") return Boolean(label.trim() && slidesUrl.trim());
@@ -64,7 +64,7 @@ export function getCanSubmit({
 
 export function getSubmitHint({
   canSubmit,
-  draftLevelId,
+  draftLevelId: _draftLevelId,
   draftSubjectId,
   label,
   resourceUrl,
@@ -88,9 +88,9 @@ export function getSubmitHint({
   if (taxonomyMode === "level" && !draftSubjectId) return "Chọn môn học trước khi tạo level.";
   if (taxonomyMode === "level" && !label.trim()) return "Nhập tên level để bật nút tạo.";
   if (taxonomyMode === "topic" && !draftSubjectId) return "Chọn môn học trước khi tạo chủ đề.";
-  if (taxonomyMode === "topic" && !draftLevelId) return "Chọn level cha trước khi tạo chủ đề.";
+  // level is optional for topic
   if (taxonomyMode === "topic" && !label.trim()) return "Nhập tên chủ đề để bật nút tạo.";
-  if (selectedOption === "lecture" && !label.trim()) return "Nhập tên bài giảng.";
+  if (selectedOption === "lecture" && !label.trim()) return "Nhập tên bài học.";
   if (selectedOption === "lecture" && !slidesUrl.trim()) return "Dán link Google Slides để thêm bài giảng.";
   if (selectedOption === "resource" && !resourceUrl.trim()) return "Dán link tài liệu để gắn vào chủ đề.";
   if (selectedOption === "exercise" && !selectedExerciseIds.length) return "Chọn ít nhất một bài tập từ Quiz bank.";
@@ -99,30 +99,30 @@ export function getSubmitHint({
 
 export function getDialogTitle(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null) {
   if (mode === "subject") return "Tạo môn học";
-  if (mode === "level") return "Tạo level";
+  if (mode === "level") return "Tạo chặng học (Level)";
   if (mode === "topic") return "Tạo chủ đề";
-  if (option === "lecture") return "Thêm bài giảng";
+  if (option === "lecture") return "Thêm bài học";
   if (option === "exercise") return "Gắn bài tập từ Quiz bank";
   if (option === "resource") return "Gắn tài liệu";
-  return "Chọn loại nội dung";
+  return "Tạo mới";
 }
 
 export function getDialogSubtitle(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null) {
-  if (mode === "subject") return "Môn học là cấp cha cao nhất trong kho học liệu.";
-  if (mode === "level") return "Level luôn nằm dưới một môn học, ví dụ IC3 GS6 / Máy tính căn bản.";
-  if (mode === "topic") return "Chủ đề luôn nằm dưới một level và là nơi gắn bài giảng, tài liệu, bài tập.";
-  if (option === "lecture") return "Bài giảng dùng Google Slides hoặc PPTX để giáo viên mở trực tiếp.";
-  if (option === "exercise") return "Bài tập lấy từ Quiz bank, không nhập tay lại trong popup này.";
-  if (option === "resource") return "Tài liệu là PDF, Drive, Video, Audio hoặc file tham khảo.";
-  return "Chọn đúng loại nội dung cần thêm vào chủ đề hiện tại.";
+  if (mode === "subject") return "Môn học cấp cao nhất trong kho học liệu.";
+  if (mode === "level") return "Chặng học phân cấp theo trình độ.";
+  if (mode === "topic") return "Chủ đề học tập.";
+  if (option === "lecture") return "Bài học kèm bài giảng Google Slides.";
+  if (option === "exercise") return "Bài tập từ Quiz bank.";
+  if (option === "resource") return "Tài liệu đính kèm.";
+  return "";
 }
 
 export function getSubmitLabel(mode: ResolvedTaxonomyMode, option: ContentDialogOptionId | null, saving: boolean) {
   if (saving) return "Đang lưu...";
   if (mode === "subject") return "Tạo môn học";
-  if (mode === "level") return "Tạo level";
+  if (mode === "level") return "Tạo chặng học";
   if (mode === "topic") return "Tạo chủ đề";
-  if (option === "lecture") return "Thêm bài giảng";
+  if (option === "lecture") return "Thêm bài học";
   if (option === "exercise") return "Gắn bài tập";
   if (option === "resource") return "Gắn tài liệu";
   return "Tạo mới";

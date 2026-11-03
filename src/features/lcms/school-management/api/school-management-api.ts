@@ -408,21 +408,54 @@ export async function archiveSchoolStudent(schoolId: string, studentId: string, 
   return readMutationRecord(data, "archiveSchoolStudent", isOperationalStudentRecord, "lcms.archive-school-student");
 }
 
-export async function importSchoolStudents(schoolId: string, items: SchoolStudentInput[], idempotencyKey = createIdempotencyKey(), signal?: AbortSignal) {
-  const data = await graphQlRequest<{ importSchoolStudents: BulkStudentImportResult }, { input: Record<string, unknown> }>({
-    operationName: "LcmsImportSchoolStudents",
-    portal: "lcms",
-    query: IMPORT_STUDENTS_MUTATION,
-    signal,
-    variables: {
-      input: {
-        schoolId,
-        idempotencyKey,
-        items: items.map((item) => mapStudentInput(item, "studentCode", "fullName")),
+export const GRAPHQL_MAX_BATCH_SIZE = 50;
+
+export async function importSchoolStudents(schoolId: string, items: SchoolStudentInput[], idempotencyKey = createIdempotencyKey(), signal?: AbortSignal): Promise<BulkStudentImportResult> {
+  if (items.length <= GRAPHQL_MAX_BATCH_SIZE) {
+    const data = await graphQlRequest<{ importSchoolStudents: BulkStudentImportResult }, { input: Record<string, unknown> }>({
+      operationName: "LcmsImportSchoolStudents",
+      portal: "lcms",
+      query: IMPORT_STUDENTS_MUTATION,
+      signal,
+      variables: {
+        input: {
+          schoolId,
+          idempotencyKey,
+          items: items.map((item) => mapStudentInput(item, "studentCode", "fullName")),
+        },
       },
-    },
-  });
-  return readMutationRecord(data, "importSchoolStudents", isBulkStudentImportResult, "lcms.import-school-students");
+    });
+    return readMutationRecord(data, "importSchoolStudents", isBulkStudentImportResult, "lcms.import-school-students");
+  }
+
+  const results: BulkStudentImportResult[] = [];
+  for (let i = 0; i < items.length; i += GRAPHQL_MAX_BATCH_SIZE) {
+    const chunk = items.slice(i, i + GRAPHQL_MAX_BATCH_SIZE);
+    const chunkKey = `${idempotencyKey}-b${Math.floor(i / GRAPHQL_MAX_BATCH_SIZE)}`;
+    const data = await graphQlRequest<{ importSchoolStudents: BulkStudentImportResult }, { input: Record<string, unknown> }>({
+      operationName: "LcmsImportSchoolStudents",
+      portal: "lcms",
+      query: IMPORT_STUDENTS_MUTATION,
+      signal,
+      variables: {
+        input: {
+          schoolId,
+          idempotencyKey: chunkKey,
+          items: chunk.map((item) => mapStudentInput(item, "studentCode", "fullName")),
+        },
+      },
+    });
+    const res = readMutationRecord(data, "importSchoolStudents", isBulkStudentImportResult, "lcms.import-school-students");
+    results.push(res);
+  }
+
+  return {
+    idempotencyKey,
+    requested: items.length,
+    created: results.reduce((acc, r) => acc + (r.created || 0), 0),
+    replayed: results.reduce((acc, r) => acc + (r.replayed || 0), 0),
+    items: results.flatMap((r) => r.items || []),
+  };
 }
 
 export async function createSchoolSubject(input: SchoolSubjectInput, signal?: AbortSignal) {
@@ -469,15 +502,40 @@ export async function enrollSchoolStudent(item: SchoolEnrollmentItem, idempotenc
   return readMutationRecord(data, "enrollSchoolStudent", isOperationalEnrollmentRecord, "lcms.enroll-school-student");
 }
 
-export async function bulkEnrollSchoolStudents(items: SchoolEnrollmentItem[], idempotencyKey = createIdempotencyKey(), signal?: AbortSignal) {
-  const data = await graphQlRequest<{ bulkEnrollSchoolStudents: BulkEnrollmentResult }, { input: Record<string, unknown> }>({
-    operationName: "LcmsBulkEnrollSchoolStudents",
-    portal: "lcms",
-    query: BULK_ENROLL_STUDENTS_MUTATION,
-    signal,
-    variables: { input: { idempotencyKey, items: items.map((item) => compactInput(item, "studentId", "classId")) } },
-  });
-  return readMutationRecord(data, "bulkEnrollSchoolStudents", isBulkEnrollmentResult, "lcms.bulk-enroll-school-students");
+export async function bulkEnrollSchoolStudents(items: SchoolEnrollmentItem[], idempotencyKey = createIdempotencyKey(), signal?: AbortSignal): Promise<BulkEnrollmentResult> {
+  if (items.length <= GRAPHQL_MAX_BATCH_SIZE) {
+    const data = await graphQlRequest<{ bulkEnrollSchoolStudents: BulkEnrollmentResult }, { input: Record<string, unknown> }>({
+      operationName: "LcmsBulkEnrollSchoolStudents",
+      portal: "lcms",
+      query: BULK_ENROLL_STUDENTS_MUTATION,
+      signal,
+      variables: { input: { idempotencyKey, items: items.map((item) => compactInput(item, "studentId", "classId")) } },
+    });
+    return readMutationRecord(data, "bulkEnrollSchoolStudents", isBulkEnrollmentResult, "lcms.bulk-enroll-school-students");
+  }
+
+  const results: BulkEnrollmentResult[] = [];
+  for (let i = 0; i < items.length; i += GRAPHQL_MAX_BATCH_SIZE) {
+    const chunk = items.slice(i, i + GRAPHQL_MAX_BATCH_SIZE);
+    const chunkKey = `${idempotencyKey}-b${Math.floor(i / GRAPHQL_MAX_BATCH_SIZE)}`;
+    const data = await graphQlRequest<{ bulkEnrollSchoolStudents: BulkEnrollmentResult }, { input: Record<string, unknown> }>({
+      operationName: "LcmsBulkEnrollSchoolStudents",
+      portal: "lcms",
+      query: BULK_ENROLL_STUDENTS_MUTATION,
+      signal,
+      variables: { input: { idempotencyKey: chunkKey, items: chunk.map((item) => compactInput(item, "studentId", "classId")) } },
+    });
+    const res = readMutationRecord(data, "bulkEnrollSchoolStudents", isBulkEnrollmentResult, "lcms.bulk-enroll-school-students");
+    results.push(res);
+  }
+
+  return {
+    idempotencyKey,
+    requested: items.length,
+    enrolled: results.reduce((acc, r) => acc + (r.enrolled || 0), 0),
+    replayed: results.reduce((acc, r) => acc + (r.replayed || 0), 0),
+    items: results.flatMap((r) => r.items || []),
+  };
 }
 
 function compactInput(input: Record<string, unknown>, ...requiredKeys: string[]) {
@@ -488,11 +546,24 @@ function compactInput(input: Record<string, unknown>, ...requiredKeys: string[])
   return result;
 }
 
+function parseSafeIsoDate(val?: string | null): string | undefined {
+  if (!val || typeof val !== "string") return undefined;
+  const trimmed = val.trim();
+  if (!trimmed) return undefined;
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const [d, m, y] = trimmed.split("/").map(Number);
+    const date = new Date(Date.UTC(y, m - 1, d));
+    return !isNaN(date.getTime()) ? date.toISOString() : undefined;
+  }
+  const parsed = new Date(trimmed);
+  return !isNaN(parsed.getTime()) ? parsed.toISOString() : undefined;
+}
+
 function mapStudentInput(input: Partial<SchoolStudentInput>, ...requiredKeys: string[]) {
   const mapped = {
     ...input,
-    birthday: input.birthday ? new Date(input.birthday).toISOString() : undefined,
-    enrollmentDate: input.enrollmentDate ? new Date(input.enrollmentDate).toISOString() : undefined,
+    birthday: parseSafeIsoDate(input.birthday),
+    enrollmentDate: parseSafeIsoDate(input.enrollmentDate),
   };
   return compactInput(mapped, ...requiredKeys);
 }

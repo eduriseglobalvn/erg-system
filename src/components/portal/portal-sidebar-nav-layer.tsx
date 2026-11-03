@@ -112,37 +112,37 @@ export function SidebarNavigationLayer({
           overflowX: "hidden",
           overflowY: "auto",
           pb: 2,
-          px: collapsed ? 0.45 : 1.15,
-          scrollbarColor: "#AAB3BE transparent",
+          px: collapsed ? 0.5 : 1,
+          scrollbarColor: "rgba(0, 0, 0, 0.15) transparent",
           scrollbarWidth: "thin",
           width: "100%",
-          "&::-webkit-scrollbar": { width: 6 },
+          "&::-webkit-scrollbar": { width: 5 },
           "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
           "&::-webkit-scrollbar-thumb": {
-            bgcolor: "#AAB3BE",
+            bgcolor: "rgba(0, 0, 0, 0.14)",
             borderRadius: 8,
           },
           "& > .erg-nav-group + .erg-nav-group": {
-            mt: collapsed ? 1 : 0.5,
+            mt: collapsed ? 1 : 0.75,
           },
         }}
       >
         {menuGroups.map((group, groupIndex) => (
           <Box key={groupIndex} className="erg-nav-group" sx={{ width: "100%" }}>
             {group.label && !collapsed ? (
-              <Box sx={{ height: 42, overflow: "hidden" }}>
+              <Box sx={{ height: 36, overflow: "hidden" }}>
                 <Typography
                   component="div"
                   sx={{
                     alignItems: "center",
                     color: NAV_MUTED_COLOR,
                     display: "inline-flex",
-                    fontSize: 12,
-                    fontWeight: 800,
-                    height: 42,
-                    letterSpacing: 0,
-                    lineHeight: "18px",
-                    p: "16px 8px 8px 12px",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    height: 36,
+                    letterSpacing: "0.06em",
+                    lineHeight: "16px",
+                    p: "14px 8px 6px 12px",
                     textTransform: "uppercase",
                   }}
                 >
@@ -155,7 +155,7 @@ export function SidebarNavigationLayer({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                gap: collapsed ? 0.75 : 0.5,
+                gap: collapsed ? 0.75 : 0.4,
                 listStyle: "none",
                 m: 0,
                 overflow: "visible",

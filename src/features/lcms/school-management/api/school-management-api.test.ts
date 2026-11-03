@@ -136,4 +136,24 @@ describe("school management API", () => {
     expect(graphQlRequest.mock.calls[1][0].variables.input).toMatchObject({ studentId: "st1", classId: "c1", idempotencyKey: "enroll-1" });
     expect(graphQlRequest.mock.calls[2][0].variables.input.items).toEqual([{ studentId: "st1", classId: "c1" }]);
   });
+
+  it("chunks bulk student imports into batches of 50 to respect GraphQL cardinality limits", async () => {
+    const manyStudents = Array.from({ length: 120 }, (_, i) => ({
+      studentCode: `HS${i + 1}`,
+      fullName: `Học sinh ${i + 1}`,
+    }));
+
+    graphQlRequest
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b0", requested: 50, created: 50, replayed: 0, items: [] } })
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b1", requested: 50, created: 50, replayed: 0, items: [] } })
+      .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b2", requested: 20, created: 20, replayed: 0, items: [] } });
+
+    const result = await importSchoolStudents("s1", manyStudents, "key");
+    expect(result.created).toBe(120);
+    expect(result.requested).toBe(120);
+    expect(graphQlRequest).toHaveBeenCalledTimes(3);
+    expect(graphQlRequest.mock.calls[0][0].variables.input.items).toHaveLength(50);
+    expect(graphQlRequest.mock.calls[1][0].variables.input.items).toHaveLength(50);
+    expect(graphQlRequest.mock.calls[2][0].variables.input.items).toHaveLength(20);
+  });
 });

@@ -14,7 +14,7 @@ import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { AppSelect } from "@/components/ui/app-select";
-import { LcmsListSkeleton, LcmsMiniStat, LcmsPanel, LcmsPanelHeader, LcmsStatusChip } from "@/features/lcms/components/lcms-ui";
+import { LcmsListSkeleton, LcmsMiniStat, LcmsPanel, LcmsPanelHeader, LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 import { EducationUnitEditor } from "./admin-operations-education-editor";
 import { OperationalErrorState } from "./admin-operations-support";
 import { UnitAvatar, UnitTypeBadge, sortEducationUnits } from "./admin-operations-insight";

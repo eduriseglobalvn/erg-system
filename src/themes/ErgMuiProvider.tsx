@@ -7,7 +7,7 @@ import ergEnterpriseTheme from './erg-enterprise-theme';
 
 interface Props {
   children: ReactNode;
-  portal?: 'lms' | 'lcms' | 'crm' | 'elearning' | 'default';
+  portal?: 'admin' | 'teacher' | 'student' | 'crm' | 'lms' | 'lcms' | 'elearning' | 'default';
 }
 
 export function ErgMuiProvider({ children }: Props) {

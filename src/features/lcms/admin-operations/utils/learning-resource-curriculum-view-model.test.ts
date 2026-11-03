@@ -294,6 +294,259 @@ test("maps user-created sections as first-class topics when no taxonomyTopic is 
   expect(stages[0].topics).toHaveLength(1);
   expect(stages[0].topics[0].title).toBe("Chủ đề 1: Trái đất và bản đồ");
   expect(stages[0].topics[0].title).not.toBe("Chưa phân chủ đề");
-  expect(stages[0].topics[0].lessons).toHaveLength(1);
-  expect(stages[0].topics[0].lessons[0].folder.title).toBe("Chủ đề 1: Trái đất và bản đồ");
+  expect(stages[0].topics[0].lessons).toHaveLength(0);
+});
+
+test("maps each attached lecture to a lesson row under a topic", () => {
+  const customSectionNode: StudioNode = {
+    id: "lesson-topic-c1",
+    label: "Chủ đề 1: Trái đất",
+    kind: "lesson",
+    sourceKind: "section",
+    optionId: "topic-c1",
+    status: "active",
+    location: { categoryId: "custom-level-1", sectionId: "topic-c1" },
+    children: [],
+  };
+
+  const customLevelNode: StudioNode = {
+    id: "group-custom-level-1",
+    label: "Level 1",
+    kind: "group",
+    sourceKind: "category",
+    optionId: "custom-level-1",
+    status: "active",
+    location: { categoryId: "custom-level-1" },
+    children: [customSectionNode],
+  };
+
+  const customSubject: StudioSubject = {
+    id: "subject-geo",
+    label: "Địa Lý",
+    status: "active",
+    tree: [customLevelNode],
+    groupCount: 1,
+    lessonCount: 2,
+    resourceCount: 2,
+  };
+
+  const attachedLectures: AttachedResourceItem[] = [
+    {
+      id: "res-1",
+      title: "Bài 1: Xác định tọa độ",
+      subjectId: "subject-geo",
+      categoryId: "custom-level-1",
+      sectionId: "topic-c1",
+      selectedFileType: "PPTX",
+      status: "published",
+    },
+    {
+      id: "res-2",
+      title: "Bài 2: Kinh tuyến vĩ tuyến",
+      subjectId: "subject-geo",
+      categoryId: "custom-level-1",
+      sectionId: "topic-c1",
+      selectedFileType: "PPTX",
+      status: "published",
+    },
+  ];
+
+  const stages = buildCurriculumRoadmapStages({
+    subject: customSubject,
+    localContentItems: [],
+    resources: attachedLectures,
+    taxonomyTopics: [{ id: "topic-c1", label: "Chủ đề 1: Trái đất", subjectId: "subject-geo" }],
+    quizBankItems: [],
+  });
+
+  expect(stages[0].topics[0].lessons).toHaveLength(2);
+  expect(stages[0].topics[0].lessons[0].folder.title).toBe("Bài 1: Xác định tọa độ");
+  expect(stages[0].topics[0].lessons[1].folder.title).toBe("Bài 2: Kinh tuyến vĩ tuyến");
+});
+
+test("sorts lessons correctly even when backend returns them in reversed or scrambled order", () => {
+  const reversedLectures: AttachedResourceItem[] = [
+    { id: "r-6", title: "Ôn tập 6", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-5", title: "Bài 35: Tác động (2)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-4", title: "Bài 34: Tác động (1)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-3", title: "Bài 33: Đặt lại thiết bị", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-2", title: "Bài 32: Dấu hiệu (2)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-1", title: "Bài 31: Dấu hiệu (1)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+    { id: "r-0", title: "Bài 30: Bảo mật thiết bị", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
+  ];
+
+  const testSubject: StudioSubject = {
+    id: "sub-1",
+    label: "IC3 GS6",
+    status: "active",
+    tree: [
+      {
+        id: "lvl-1",
+        label: "Level 1",
+        kind: "group",
+        sourceKind: "category",
+        optionId: "lvl-1",
+        status: "active",
+        location: { categoryId: "lvl-1" },
+        children: [
+          {
+            id: "top-1",
+            label: "Chủ đề 1: An toàn và bảo mật",
+            kind: "lesson",
+            sourceKind: "section",
+            optionId: "top-1",
+            status: "active",
+            location: { categoryId: "lvl-1", sectionId: "top-1" },
+            children: [],
+          },
+        ],
+      },
+    ],
+    groupCount: 1,
+    lessonCount: 7,
+    resourceCount: 7,
+  };
+
+  const stages = buildCurriculumRoadmapStages({
+    subject: testSubject,
+    localContentItems: [],
+    resources: reversedLectures,
+    taxonomyTopics: [{ id: "top-1", label: "Chủ đề 1: An toàn và bảo mật", subjectId: "sub-1" }],
+    quizBankItems: [],
+  });
+
+  const titles = stages[0].topics[0].lessons.map((l) => l.folder.title);
+  expect(titles).toEqual([
+    "Bài 30: Bảo mật thiết bị",
+    "Bài 31: Dấu hiệu (1)",
+    "Bài 32: Dấu hiệu (2)",
+    "Bài 33: Đặt lại thiết bị",
+    "Bài 34: Tác động (1)",
+    "Bài 35: Tác động (2)",
+    "Ôn tập 6",
+  ]);
+});
+
+test("sorts topics correctly based on curriculum progression (Topic with Bài 1 before Topic with Bài 30)", () => {
+  const multiTopicLectures: AttachedResourceItem[] = [
+    { id: "r-sec-1", title: "Bài 30: An toàn", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-security", selectedFileType: "PDF", status: "published" },
+    { id: "r-bas-1", title: "Bài 1: Căn bản", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-basics", selectedFileType: "PDF", status: "published" },
+  ];
+
+  const testSubject: StudioSubject = {
+    id: "sub-1",
+    label: "IC3 GS6",
+    status: "active",
+    tree: [
+      {
+        id: "lvl-1",
+        label: "Level 1",
+        kind: "group",
+        sourceKind: "category",
+        optionId: "lvl-1",
+        status: "active",
+        location: { categoryId: "lvl-1" },
+        children: [
+          // Even if "An toàn" appears first in tree:
+          {
+            id: "top-security",
+            label: "An toàn và bảo mật",
+            kind: "lesson",
+            sourceKind: "section",
+            optionId: "top-security",
+            status: "active",
+            location: { categoryId: "lvl-1", sectionId: "top-security" },
+            children: [],
+          },
+          // And "Căn bản" appears second in tree:
+          {
+            id: "top-basics",
+            label: "Căn bản về công nghệ",
+            kind: "lesson",
+            sourceKind: "section",
+            optionId: "top-basics",
+            status: "active",
+            location: { categoryId: "lvl-1", sectionId: "top-basics" },
+            children: [],
+          },
+        ],
+      },
+    ],
+    groupCount: 1,
+    lessonCount: 2,
+    resourceCount: 2,
+  };
+
+  const stages = buildCurriculumRoadmapStages({
+    subject: testSubject,
+    localContentItems: [],
+    resources: multiTopicLectures,
+    taxonomyTopics: [
+      { id: "top-security", label: "An toàn và bảo mật", subjectId: "sub-1" },
+      { id: "top-basics", label: "Căn bản về công nghệ", subjectId: "sub-1" },
+    ],
+    quizBankItems: [],
+  });
+
+  // "Căn bản về công nghệ" (has Bài 1) MUST be sorted before "An toàn và bảo mật" (has Bài 30)
+  expect(stages[0].topics[0].title).toBe("Căn bản về công nghệ");
+  expect(stages[0].topics[1].title).toBe("An toàn và bảo mật");
+});
+
+test("sorts topics primarily by explicit sortOrder when provided", () => {
+  const testSubject: StudioSubject = {
+    id: "sub-2",
+    label: "IC3 GS6 SortOrder Test",
+    tree: [
+      {
+        id: "lvl-1",
+        label: "Level 1",
+        kind: "group",
+        sourceKind: "category",
+        optionId: "lvl-1",
+        status: "active",
+        location: { categoryId: "lvl-1" },
+        children: [
+          {
+            id: "topic-z",
+            label: "Zeta Topic",
+            kind: "lesson",
+            sourceKind: "section",
+            optionId: "topic-z",
+            status: "active",
+            location: { categoryId: "lvl-1", sectionId: "topic-z" },
+            children: [],
+          },
+          {
+            id: "topic-a",
+            label: "Alpha Topic",
+            kind: "lesson",
+            sourceKind: "section",
+            optionId: "topic-a",
+            status: "active",
+            location: { categoryId: "lvl-1", sectionId: "topic-a" },
+            children: [],
+          },
+        ],
+      },
+    ],
+    groupCount: 1,
+    lessonCount: 2,
+    resourceCount: 0,
+  };
+
+  const stages = buildCurriculumRoadmapStages({
+    subject: testSubject,
+    localContentItems: [],
+    resources: [],
+    taxonomyTopics: [
+      { id: "topic-z", label: "Zeta Topic", subjectId: "sub-2", sortOrder: 1 },
+      { id: "topic-a", label: "Alpha Topic", subjectId: "sub-2", sortOrder: 2 },
+    ],
+    quizBankItems: [],
+  });
+
+  // Zeta Topic has sortOrder: 1, Alpha Topic has sortOrder: 2
+  expect(stages[0].topics[0].title).toBe("Zeta Topic");
+  expect(stages[0].topics[1].title).toBe("Alpha Topic");
 });

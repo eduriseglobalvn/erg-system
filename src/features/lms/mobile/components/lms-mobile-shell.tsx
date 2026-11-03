@@ -1,6 +1,8 @@
 import { useState, type ReactNode } from "react";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import PhoneAndroidRoundedIcon from "@mui/icons-material/PhoneAndroidRounded";
@@ -20,6 +22,7 @@ import { useInstallPrompt } from "../hooks/use-install-prompt";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
 import { useServiceWorkerUpdate } from "../hooks/use-service-worker-update";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
+import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 
 export function LmsMobileShell<TSection extends string>({
   activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
@@ -41,6 +44,11 @@ export function LmsMobileShell<TSection extends string>({
   const [scopeOpen, setScopeOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const shouldOfferInstall = !installPrompt.installed && (installPrompt.canInstall || installPrompt.isIos);
+
+  const session = readStoredAuthSession("lms") ?? readStoredAuthSession();
+  const grantedWorkspaces = session?.workspaces ?? [];
+  const canSwitchAdmin = grantedWorkspaces.includes("ADMIN");
+  const canSwitchStudent = grantedWorkspaces.includes("STUDENT");
 
   function navigate(path: string) {
     setAccountOpen(false);
@@ -76,6 +84,20 @@ export function LmsMobileShell<TSection extends string>({
 
       <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
         <Stack spacing={1}>
+          {canSwitchAdmin ? (
+            <AccountActionButton
+              icon={<AdminPanelSettingsRoundedIcon sx={{ color: "primary.main" }} />}
+              label="Chuyển sang Admin LMS"
+              onClick={() => navigate("/admin")}
+            />
+          ) : null}
+          {canSwitchStudent ? (
+            <AccountActionButton
+              icon={<MenuBookRoundedIcon sx={{ color: "info.main" }} />}
+              label="Chuyển sang Học sinh"
+              onClick={() => navigate("/student")}
+            />
+          ) : null}
           <AccountActionButton icon={<PersonOutlineRoundedIcon />} label="Quản lý tài khoản" onClick={() => navigate(teacherPath("/account"))} />
           <AccountActionButton icon={<SecurityRoundedIcon />} label="Lịch sử đăng nhập" onClick={() => navigate(teacherPath("/account/login-logs"))} />
           {onOpenNotifications ? <AccountActionButton icon={<NotificationsNoneRoundedIcon />} label="Mở thông báo" onClick={() => { setAccountOpen(false); onOpenNotifications(); }} /> : null}

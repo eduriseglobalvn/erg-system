@@ -1,4 +1,8 @@
 export {
+  default as AdminErgPortalShell,
   default as LcmsErgPortalShell,
-} from "@/features/lcms/lcms-erg-portal-shell";
-export { LcmsPortalShell } from "@/features/lcms/components/lcms-portal-shell";
+} from "@/features/lcms/admin-erg-portal-shell";
+export {
+  AdminPortalShell,
+  LcmsPortalShell,
+} from "@/features/lcms/components/admin-portal-shell";

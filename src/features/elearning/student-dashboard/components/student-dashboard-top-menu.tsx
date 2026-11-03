@@ -12,6 +12,8 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
+import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER, LOGO_URL, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
@@ -67,12 +69,20 @@ export function TopMenuShell({
         m: { xs: 1.5, md: 2 }, mr: { md: 0 }, p: { xs: 1.25, md: 1.4 }, position: { md: "sticky" },
         top: { md: 16 }, width: { xs: "calc(100% - 24px)", md: 196, lg: 204 }, zIndex: 12,
       }}>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 0.5, py: 0.5, mb: 1.75 }}>
-          <Box sx={{ alignItems: "center", display: "flex", height: 32, overflow: "hidden", width: 88 }}>
-            <Box component="img" alt="ERG" src={LOGO_URL} onError={(e) => { e.currentTarget.style.display = "none"; }} sx={{ display: "block", height: "100%", objectFit: "contain", width: "100%" }} />
-          </Box>
-          <Box sx={{ bgcolor: "#2563EB", borderRadius: "50%", boxShadow: "0 0 0 3px rgba(37,99,235,0.18)", height: 7, width: 7 }} />
-        </Stack>
+        <Box sx={{ mb: 1.5 }}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ px: 0.5, py: 0.5, mb: 1.25 }}>
+            <Box sx={{ alignItems: "center", display: "flex", height: 28, overflow: "hidden", width: 84 }}>
+              <Box component="img" alt="ERG" src={LOGO_URL} onError={(e) => { e.currentTarget.style.display = "none"; }} sx={{ display: "block", height: "100%", objectFit: "contain", width: "100%" }} />
+            </Box>
+            <Box sx={{ bgcolor: "#2563EB", borderRadius: "50%", boxShadow: "0 0 0 3px rgba(37,99,235,0.18)", height: 7, width: 7 }} />
+          </Stack>
+          <PortalSidebarWorkspaceHeader
+            active
+            collapsed={false}
+            fluid
+            portalInfo={{ name: "Học sinh", workspaceCapabilities: readStoredAuthSession()?.workspaces }}
+          />
+        </Box>
 
         <Stack spacing={0.5} sx={{ flex: 1, minHeight: 0, mt: 0.5 }}>
           {visibleNavItems.map((item) => {

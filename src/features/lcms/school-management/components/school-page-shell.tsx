@@ -1,18 +1,23 @@
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
-import Box from "@mui/material/Box";
 import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Chip from "@mui/material/Chip";
 import MenuItem from "@mui/material/MenuItem";
-import TextField from "@mui/material/TextField";
 import Skeleton from "@mui/material/Skeleton";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
 
-export function SchoolPageShell({ action, children, description, title, unscoped = false }: {
+export function SchoolPageShell({
+  action,
+  children,
+  description,
+  title,
+  unscoped = false,
+}: {
   action?: ReactNode;
   children: ReactNode;
   description?: string;
@@ -20,30 +25,221 @@ export function SchoolPageShell({ action, children, description, title, unscoped
   unscoped?: boolean;
 }) {
   const { error, isLoading, refetch, schools, selectedSchool, selectSchool } = useSchoolManagementContext();
+
   return (
-    <Box sx={{ bgcolor: "background.default", minHeight: "calc(100vh - 96px)" }}>
-      <Box sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", position: "sticky", top: 0, zIndex: 4 }}>
-        <Box sx={{ alignItems: { xs: "flex-start", md: "center" }, display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 1.5, justifyContent: "space-between", px: { xs: 2, md: 3 }, py: { xs: 1, md: 1.25 } }}>
+    <Box sx={{ bgcolor: "#F5F5F7", minHeight: "calc(100vh - 80px)" }}>
+      {/* Apple Translucent Window Toolbar */}
+      <Box
+        sx={{
+          backdropFilter: "blur(20px)",
+          bgcolor: "rgba(255, 255, 255, 0.88)",
+          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          position: "sticky",
+          top: 0,
+          zIndex: 4,
+        }}
+      >
+        <Box
+          sx={{
+            alignItems: { xs: "flex-start", md: "center" },
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 1.5,
+            justifyContent: "space-between",
+            px: { xs: 2.5, md: 3.5 },
+            py: { xs: 1.5, md: 1.75 },
+          }}
+        >
           <Box sx={{ minWidth: 0 }}>
-            <Breadcrumbs separator="/" sx={{ mb: 0.25 }}><Typography color="text.secondary" variant="caption">Quản lý trường học</Typography><Typography color="text.primary" variant="caption">{title}</Typography></Breadcrumbs>
-            <Typography sx={{ fontSize: { xs: 18, md: 21 }, fontWeight: 800, lineHeight: 1.2 }}>{title}</Typography>
-            {description ? <Typography color="text.secondary" sx={{ mt: 0.25, fontSize: "13px" }} variant="body2">{description}</Typography> : null}
+            <Breadcrumbs
+              separator="/"
+              sx={{
+                mb: 0.5,
+                "& .MuiBreadcrumbs-separator": { color: "#C7C7CC", mx: 0.75 },
+              }}
+            >
+              <Typography sx={{ color: "#86868B", fontSize: "0.75rem", fontWeight: 600 }}>
+                Quản lý trường học
+              </Typography>
+              <Typography sx={{ color: "#1D1D1F", fontSize: "0.75rem", fontWeight: 700 }}>
+                {title}
+              </Typography>
+            </Breadcrumbs>
+            <Typography
+              sx={{
+                color: "#1D1D1F",
+                fontSize: { xs: "1.25rem", md: "1.45rem" },
+                fontWeight: 800,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.2,
+              }}
+            >
+              {title}
+            </Typography>
+            {description ? (
+              <Typography
+                sx={{
+                  color: "#6E6E73",
+                  fontSize: "0.825rem",
+                  fontWeight: 500,
+                  mt: 0.35,
+                }}
+              >
+                {description}
+              </Typography>
+            ) : null}
           </Box>
-          <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "flex-end" }}>
-            {!unscoped && selectedSchool ? <>
-              <TextField
-                select size="small" value={selectedSchool.id} onChange={(event) => selectSchool(event.target.value)}
-                slotProps={{ select: { IconComponent: ExpandMoreRoundedIcon } }}
-                sx={{ minWidth: 240, "& .MuiOutlinedInput-root": { bgcolor: "background.paper" } }}
-              >{schools.map((school) => <MenuItem key={school.id} value={school.id}>{school.name}</MenuItem>)}</TextField>
-              <Chip color="success" icon={<CheckCircleRoundedIcon />} label="Đồng bộ 10 phút trước" size="small" variant="outlined" />
-            </> : null}
+
+          <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1.25, justifyContent: "flex-end" }}>
+            {!unscoped && selectedSchool ? (
+              <>
+                <TextField
+                  select
+                  size="small"
+                  value={selectedSchool.id}
+                  onChange={(event) => selectSchool(event.target.value)}
+                  slotProps={{ select: { IconComponent: ExpandMoreRoundedIcon } }}
+                  sx={{
+                    minWidth: 240,
+                    "& .MuiOutlinedInput-root": {
+                      bgcolor: "#FFFFFF",
+                      borderRadius: "10px",
+                      boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
+                      fontSize: "0.85rem",
+                      fontWeight: 650,
+                      "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
+                      "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "#0071E3",
+                        boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                      },
+                    },
+                  }}
+                >
+                  {schools.map((school) => (
+                    <MenuItem key={school.id} value={school.id} sx={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                      {school.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+
+                <Box
+                  sx={{
+                    alignItems: "center",
+                    bgcolor: "rgba(52, 199, 89, 0.1)",
+                    border: "1px solid rgba(52, 199, 89, 0.22)",
+                    borderRadius: "9999px",
+                    color: "#15803D",
+                    display: "inline-flex",
+                    fontSize: "0.75rem",
+                    fontWeight: 650,
+                    gap: 0.65,
+                    px: 1.25,
+                    py: 0.5,
+                  }}
+                >
+                  <CheckCircleRoundedIcon sx={{ fontSize: 15 }} />
+                  Đồng bộ 10 phút trước
+                </Box>
+              </>
+            ) : null}
             {action}
           </Box>
         </Box>
-        {!unscoped && selectedSchool ? <Box sx={{ alignItems: "center", bgcolor: "primary.50", borderTop: "1px solid", borderColor: "divider", display: "flex", flexWrap: "wrap", gap: 1.5, px: { xs: 2, md: 3 }, py: 0.75 }}><Typography sx={{ fontFamily: "var(--font-mono)", fontWeight: 750 }} variant="caption">ID: {selectedSchool.id}</Typography><Chip color="primary" label={schoolTypeMeta[selectedSchool.schoolType].shortLabel} size="small" sx={{ height: 22 }} variant="outlined" /><Typography color="text.secondary" variant="caption">Năm học {selectedSchool.academicYear}</Typography>{selectedSchool.address ? <><Typography color="text.secondary" variant="caption">·</Typography><Typography color="text.secondary" noWrap variant="caption">{selectedSchool.address}</Typography></> : null}</Box> : null}
+
+        {/* Info Stripe */}
+        {!unscoped && selectedSchool ? (
+          <Box
+            sx={{
+              alignItems: "center",
+              bgcolor: "rgba(0, 113, 227, 0.025)",
+              borderTop: "1px solid rgba(0, 0, 0, 0.05)",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.5,
+              px: { xs: 2.5, md: 3.5 },
+              py: 0.85,
+            }}
+          >
+            <Box
+              sx={{
+                bgcolor: "rgba(0, 0, 0, 0.04)",
+                borderRadius: "6px",
+                color: "#3A3A3C",
+                fontFamily: "var(--font-mono)",
+                fontSize: "0.72rem",
+                fontWeight: 700,
+                px: 1,
+                py: 0.25,
+              }}
+            >
+              ID: {selectedSchool.id}
+            </Box>
+
+            <Box
+              sx={{
+                bgcolor: "rgba(0, 113, 227, 0.08)",
+                border: "1px solid rgba(0, 113, 227, 0.18)",
+                borderRadius: "6px",
+                color: "#0071E3",
+                fontSize: "0.72rem",
+                fontWeight: 750,
+                px: 1,
+                py: 0.25,
+              }}
+            >
+              {schoolTypeMeta[selectedSchool.schoolType].shortLabel}
+            </Box>
+
+            <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 550 }}>
+              Năm học {selectedSchool.academicYear}
+            </Typography>
+
+            {selectedSchool.address ? (
+              <>
+                <Typography sx={{ color: "#C7C7CC", fontSize: "0.78rem" }}>·</Typography>
+                <Typography noWrap sx={{ color: "#86868B", fontSize: "0.78rem", fontWeight: 500 }}>
+                  {selectedSchool.address}
+                </Typography>
+              </>
+            ) : null}
+          </Box>
+        ) : null}
       </Box>
-      <Box sx={{ p: { xs: 2, md: 3 } }}>{!unscoped && isLoading ? <Box sx={{ display: "grid", gap: 2 }}><Skeleton height={120} variant="rounded" /><Skeleton height={360} variant="rounded" /></Box> : !unscoped && error ? <Alert action={<Typography component="button" onClick={() => void refetch()} sx={{ bgcolor: "transparent", border: 0, color: "inherit", cursor: "pointer", fontWeight: 800 }}>Thử lại</Typography>} severity="error">Không thể tải dữ liệu trường: {error instanceof Error ? error.message : "Lỗi không xác định"}</Alert> : children}</Box>
+
+      {/* Main Content Area */}
+      <Box sx={{ p: { xs: 2, md: 3.5 } }}>
+        {!unscoped && isLoading ? (
+          <Box sx={{ display: "grid", gap: 2 }}>
+            <Skeleton height={120} sx={{ borderRadius: "16px" }} variant="rounded" />
+            <Skeleton height={360} sx={{ borderRadius: "16px" }} variant="rounded" />
+          </Box>
+        ) : !unscoped && error ? (
+          <Alert
+            action={
+              <Typography
+                component="button"
+                onClick={() => void refetch()}
+                sx={{
+                  bgcolor: "transparent",
+                  border: 0,
+                  color: "inherit",
+                  cursor: "pointer",
+                  fontWeight: 800,
+                }}
+              >
+                Thử lại
+              </Typography>
+            }
+            severity="error"
+            sx={{ borderRadius: "12px" }}
+          >
+            Không thể tải dữ liệu trường: {error instanceof Error ? error.message : "Lỗi không xác định"}
+          </Alert>
+        ) : (
+          children
+        )}
+      </Box>
     </Box>
   );
 }

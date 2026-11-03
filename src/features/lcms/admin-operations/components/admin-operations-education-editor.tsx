@@ -20,7 +20,7 @@ import { type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dash
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";
-import { LcmsStatusChip } from "@/features/lcms/components/lcms-ui";
+import { LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 import { ClassPreviewPanel, UnitAvatar, UnitInsightRail, UnitTypeBadge } from "./admin-operations-insight";
 
 export function EditorField({ children, label, wide = false }: { children: ReactNode; label: string; wide?: boolean }) {

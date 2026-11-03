@@ -11,14 +11,18 @@ type ErgPageSurfaceProps = PaperProps & {
 export function ErgPageSurface({ children, flush = false, sx, ...props }: ErgPageSurfaceProps) {
   return (
     <Paper
+      elevation={0}
       sx={[
         {
-          bgcolor: "background.paper",
-          borderColor: "divider",
-          borderRadius: 3,
+          bgcolor: "#FFFFFF",
+          border: "1px solid rgba(0, 0, 0, 0.06)",
+          borderColor: "rgba(0, 0, 0, 0.06)",
+          borderRadius: "16px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
           minHeight: 0,
           overflow: "hidden",
-          p: flush ? 0 : { xs: 2, md: 3 },
+          p: flush ? 0 : { xs: 2.5, md: 3 },
+          transition: "box-shadow 0.2s ease",
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
@@ -50,15 +54,42 @@ export function ErgSectionHeader({ action, description, eyebrow, title }: ErgSec
     >
       <Box sx={{ minWidth: 0 }}>
         {eyebrow ? (
-          <Typography color="text.secondary" sx={{ fontWeight: 800, mb: 0.5, textTransform: "uppercase" }} variant="caption">
+          <Typography
+            sx={{
+              color: "#86868B",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              mb: 0.5,
+              textTransform: "uppercase",
+            }}
+            variant="caption"
+          >
             {eyebrow}
           </Typography>
         ) : null}
-        <Typography color="text.primary" sx={{ fontWeight: 850 }} variant="h5">
+        <Typography
+          sx={{
+            color: "#1D1D1F",
+            fontSize: { xs: "1.25rem", md: "1.45rem" },
+            fontWeight: 800,
+            letterSpacing: "-0.025em",
+            lineHeight: 1.2,
+          }}
+          variant="h5"
+        >
           {title}
         </Typography>
         {description ? (
-          <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">
+          <Typography
+            sx={{
+              color: "#6E6E73",
+              fontSize: "0.85rem",
+              fontWeight: 500,
+              mt: 0.35,
+            }}
+            variant="body2"
+          >
             {description}
           </Typography>
         ) : null}
@@ -73,9 +104,9 @@ export function ErgContentBand({ sx, ...props }: BoxProps) {
     <Box
       sx={[
         {
-          bgcolor: "background.default",
+          bgcolor: "#F5F5F7",
           minHeight: "100%",
-          p: { xs: 2, md: 3 },
+          p: { xs: 2.5, md: 3.5 },
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
@@ -85,5 +116,5 @@ export function ErgContentBand({ sx, ...props }: BoxProps) {
 }
 
 export function ErgDivider() {
-  return <Divider sx={{ borderColor: "divider", my: 2 }} />;
+  return <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.06)", my: 2 }} />;
 }

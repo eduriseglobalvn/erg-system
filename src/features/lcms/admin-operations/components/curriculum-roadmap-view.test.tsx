@@ -29,7 +29,7 @@ describe("CurriculumRoadmapView", () => {
     );
 
     expect(screen.getByText("Chưa có chặng học nào trong Địa Lý")).toBeInTheDocument();
-    const createBtn = screen.getByRole("button", { name: /\+ Tạo Level đầu tiên cho Địa Lý/i });
+    const createBtn = screen.getByRole("button", { name: /Tạo Level đầu tiên cho Địa Lý/i });
     expect(createBtn).toBeInTheDocument();
 
     fireEvent.click(createBtn);
@@ -102,5 +102,72 @@ describe("CurriculumRoadmapView", () => {
     // Verify clicking add topic calls onCreateTopic with the level folder
     fireEvent.click(addTopicButtons[0]);
     expect(mockActions.onCreateTopic).toHaveBeenCalledWith(stages[0].level);
+  });
+
+  it("renders quick-add action buttons for exercises and resources when provided in actions", () => {
+    const onAddExercise = vi.fn();
+    const onAddResource = vi.fn();
+
+    const stages: CurriculumRoadmapStage[] = [
+      {
+        level: {
+          id: "group-category-lvl1",
+          title: "Level 1: Địa lý đại cương",
+          role: "level",
+          status: "published",
+          summary: { levels: 1, topics: 1, lectures: 0, documents: 0, exercises: 0, totalContent: 0 },
+          pathLabels: ["Địa Lý", "Level 1"],
+          target: { type: "node", id: "group-category-lvl1" },
+        },
+        topics: [
+          {
+            id: "topic-1",
+            title: "Chủ đề 1: Trái Đất",
+            lessons: [
+              {
+                folder: {
+                  id: "lesson-sec-1",
+                  title: "Bài 1: Khái niệm bản đồ",
+                  role: "topic",
+                  summary: { levels: 0, topics: 0, lectures: 0, documents: 0, exercises: 0, totalContent: 0 },
+                  pathLabels: ["Địa Lý", "Level 1", "Chủ đề 1"],
+                  target: { type: "node", id: "lesson-sec-1" },
+                },
+                content: [],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    render(
+      <CurriculumRoadmapView
+        stages={stages}
+        subjectTitle="Địa Lý"
+        query=""
+        selectedTarget={null}
+        onOpenFolder={vi.fn()}
+        actions={{
+          ...mockActions,
+          onAddExercise,
+          onAddResource,
+        }}
+      />,
+    );
+
+    const addExerciseBtn = screen.getByRole("button", { name: /Gắn bài tập từ Quiz bank/i });
+    const addResourceBtn = screen.getByRole("button", { name: /Gắn tài liệu/i });
+
+    expect(addExerciseBtn).toBeInTheDocument();
+    expect(addResourceBtn).toBeInTheDocument();
+    expect(screen.getByText("+ Bài tập")).toBeInTheDocument();
+    expect(screen.getByText("+ Tài liệu")).toBeInTheDocument();
+
+    fireEvent.click(addExerciseBtn);
+    expect(onAddExercise).toHaveBeenCalledWith(stages[0].topics[0].lessons[0].folder);
+
+    fireEvent.click(addResourceBtn);
+    expect(onAddResource).toHaveBeenCalledWith(stages[0].topics[0].lessons[0].folder);
   });
 });

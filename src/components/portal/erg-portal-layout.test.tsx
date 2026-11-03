@@ -12,7 +12,7 @@ it("coordinates sidebar and workspace movement through one shell column", () => 
   render(
     <ErgPortalLayout
       menuGroups={[]}
-      portalInfo={{ name: "LCMS" }}
+      portalInfo={{ name: "Admin" }}
     >
       <div>Lịch trung tâm</div>
     </ErgPortalLayout>,

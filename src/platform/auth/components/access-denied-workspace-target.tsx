@@ -17,29 +17,79 @@ export function AccessDeniedWorkspaceTargetCard({ target }: { target: AccessDeni
       href={workspaceHref(target)}
       sx={{
         alignItems: "center",
-        bgcolor: "common.white",
+        bgcolor: "#FFFFFF",
         border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 2,
+        borderColor: "rgba(0, 0, 0, 0.08)",
+        borderRadius: "16px",
         color: "text.primary",
         display: "flex",
-        gap: 1.25,
+        gap: 1.75,
         minHeight: 76,
-        p: 1.5,
+        p: 2,
         textDecoration: "none",
-        transition: "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
-        "&:hover": { borderColor: "primary.main", boxShadow: "0 8px 20px rgba(15,108,189,0.12)", transform: "translateY(-1px)" },
-        "&:focus-visible": { boxShadow: "0 0 0 3px rgba(15,108,189,0.18)", outline: "none" },
+        transition: "all 200ms cubic-bezier(0.16, 1, 0.3, 1)",
+        boxShadow: "0 2px 6px rgba(0, 0, 0, 0.02)",
+        "&:hover": {
+          borderColor: "#0071E3",
+          bgcolor: "rgba(240, 247, 255, 0.5)",
+          boxShadow: "0 8px 24px rgba(0, 113, 227, 0.1)",
+          transform: "translateY(-1px)",
+          "& .target-arrow": {
+            transform: "translateX(3px)",
+            color: "#0071E3",
+          },
+        },
+        "&:focus-visible": {
+          boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.25)",
+          outline: "none",
+        },
       }}
     >
-      <Avatar sx={{ bgcolor: "rgba(15,108,189,0.1)", color: "primary.main", height: 38, width: 38 }}><WorkspaceTargetIcon workspace={target.workspace} /></Avatar>
+      <Avatar
+        sx={{
+          bgcolor: workspaceBgColor(target.workspace),
+          color: workspaceIconColor(target.workspace),
+          height: 42,
+          width: 42,
+          borderRadius: "12px",
+          border: "1px solid rgba(0, 0, 0, 0.04)",
+        }}
+      >
+        <WorkspaceTargetIcon workspace={target.workspace} />
+      </Avatar>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: 13, fontWeight: 800 }}>{target.label}</Typography>
-        <Typography sx={{ color: "text.secondary", fontSize: 11, lineHeight: 1.4, mt: 0.25 }}>{target.description}</Typography>
+        <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#1D1D1F", letterSpacing: "-0.01em" }}>
+          {target.label}
+        </Typography>
+        <Typography sx={{ color: "#6E6E73", fontSize: 12, lineHeight: 1.45, mt: 0.25 }}>
+          {target.description}
+        </Typography>
       </Box>
-      <ArrowForwardRoundedIcon sx={{ color: "primary.main", fontSize: 19, ml: "auto" }} />
+      <ArrowForwardRoundedIcon
+        className="target-arrow"
+        sx={{
+          color: "#86868B",
+          fontSize: 18,
+          ml: "auto",
+          transition: "transform 180ms ease, color 180ms ease",
+        }}
+      />
     </Box>
   );
+}
+
+function workspaceBgColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
+  if (workspace === "ADMIN") return "rgba(105, 108, 255, 0.1)";
+  if (workspace === "TEACHER") return "rgba(0, 113, 227, 0.1)";
+  if (workspace === "STUDENT") return "rgba(52, 199, 89, 0.12)";
+  return "rgba(255, 149, 0, 0.12)";
+}
+
+function workspaceIconColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
+  if (workspace === "ADMIN") return "#696CFF";
+  if (workspace === "TEACHER") return "#0071E3";
+  if (workspace === "STUDENT") return "#248A3D";
+  return "#D97706";
 }
 
 function WorkspaceTargetIcon({ workspace }: { workspace: AccessDeniedWorkspaceTarget["workspace"] }) {

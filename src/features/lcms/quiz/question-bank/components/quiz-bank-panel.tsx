@@ -1,41 +1,48 @@
-import SearchIcon from "@mui/icons-material/Search";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import Inventory2RoundedIcon from "@mui/icons-material/Inventory2Rounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
 import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
 import InputAdornment from "@mui/material/InputAdornment";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
-import { alpha } from "@mui/material/styles";
+
 import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
-import { Badge, ERG_SHEET_COLORS, getScopeTone } from "./question-bank-primitives";
+import { Badge, getScopeTone } from "./question-bank-primitives";
 import type { QuizKindFilter } from "./question-bank-workspace-types";
 
 function QuizSheetSkeletonRows({ columnCount, rowCount }: { columnCount: number; rowCount: number }) {
   return (
     <>
-      {Array.from({ length: Math.min(Math.max(rowCount, 6), 12) }).map((_, rowIndex) => (
-        <tr key={`quiz-skeleton-${rowIndex}`}>
+      {Array.from({ length: Math.min(Math.max(rowCount, 4), 8) }).map((_, rowIndex) => (
+        <TableRow key={`quiz-skeleton-${rowIndex}`}>
           {Array.from({ length: columnCount }).map((__, columnIndex) => (
-            <td key={`quiz-skeleton-${rowIndex}-${columnIndex}`}>
+            <TableCell key={`quiz-skeleton-${rowIndex}-${columnIndex}`} sx={{ borderBottom: "1px solid rgba(0,0,0,0.04)", py: 1.5 }}>
               <Skeleton
                 variant={columnIndex === 0 ? "text" : "rounded"}
                 width={columnIndex === 0 ? "76%" : columnIndex === columnCount - 1 ? 48 : 84}
                 height={columnIndex === 0 ? 22 : 24}
-                sx={{ borderRadius: columnIndex === 0 ? 1 : 10 }}
+                sx={{ borderRadius: columnIndex === 0 ? 1 : "6px" }}
               />
-              {columnIndex === 0 ? <Skeleton variant="text" width="46%" height={16} /> : null}
-            </td>
+              {columnIndex === 0 ? <Skeleton variant="text" width="46%" height={16} sx={{ mt: 0.5 }} /> : null}
+            </TableCell>
           ))}
-        </tr>
+        </TableRow>
       ))}
     </>
   );
@@ -70,67 +77,73 @@ export function QuizBankPanel({
 }) {
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
-        bgcolor: "transparent",
-        borderColor: "transparent",
-        borderRadius: 0,
-        boxShadow: "none",
+        bgcolor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
         width: "100%",
       }}
     >
-      <Stack
-        direction={{ xs: "column", lg: "row" }}
-        spacing={2}
+      {/* Apple-styled Toolbar */}
+      <Box
         sx={{
           alignItems: { xs: "stretch", lg: "center" },
-          bgcolor: "#fff",
-          borderBottom: `1px solid ${alpha("#0f172a", 0.06)}`,
-          borderRadius: 3,
+          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          display: "flex",
+          flexDirection: { xs: "column", lg: "row" },
+          gap: 2,
           justifyContent: "space-between",
-          mb: 1.5,
-          px: 2.5,
-          py: 2,
+          p: { xs: 2, md: 2.25 },
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#111827", fontSize: 17, fontWeight: 850, lineHeight: 1.2 }}>
+          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
             {copy.quizBankTitle}
           </Typography>
-          <Typography sx={{ color: "#64748b", fontSize: 12.5, fontWeight: 650, mt: 0.35 }}>
+          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
             {copy.quizBankDescription(quizzes.length)}
           </Typography>
         </Box>
+
         <Stack
-          direction={{ xs: "column", md: "row" }}
-          spacing={1.25}
-          sx={{ alignItems: { xs: "stretch", md: "center" }, minWidth: { lg: 620 } }}
+          direction={{ xs: "column", sm: "row" }}
+          spacing={1.5}
+          sx={{ alignItems: { xs: "stretch", sm: "center" } }}
         >
+          {/* Apple Spotlight Search */}
           <TextField
             value={searchValue}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder={copy.searchQuizPlaceholder}
             size="small"
-            sx={{
-              flex: 1,
-              minWidth: { md: 320 },
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                bgcolor: "#fff",
-                boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-              },
-            }}
             slotProps={{
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchIcon style={{ color: "#94a3b8", height: 18, width: 18 }} />
+                    <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 19 }} />
                   </InputAdornment>
                 ),
+                sx: {
+                  bgcolor: "rgba(0, 0, 0, 0.03)",
+                  borderRadius: "11px",
+                  fontSize: "0.85rem",
+                  transition: "all 0.15s ease",
+                  width: { sm: 280, xs: "100%" },
+                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                  "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#0071E3",
+                    boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                  },
+                },
               },
             }}
           />
+
+          {/* Apple Segmented Control */}
           <ToggleButtonGroup
             exclusive
             value={quizKind}
@@ -139,35 +152,27 @@ export function QuizBankPanel({
             }}
             size="small"
             sx={{
-              alignSelf: { xs: "stretch", md: "center" },
-              bgcolor: "#f8fafc",
-              border: `1px solid ${alpha("#64748b", 0.16)}`,
-              borderRadius: 999,
-              boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-              gap: 0.5,
-              p: 0.35,
+              bgcolor: "rgba(0, 0, 0, 0.04)",
+              borderRadius: "10px",
+              p: "3px",
               "& .MuiToggleButtonGroup-grouped": {
                 border: 0,
-                borderRadius: "999px !important",
-                color: "#64748b",
-                fontSize: 13,
-                fontWeight: 800,
+                borderRadius: "8px !important",
+                color: "#6E6E73",
+                fontSize: "0.8rem",
+                fontWeight: 650,
                 minHeight: 32,
-                minWidth: 84,
                 px: 1.5,
                 textTransform: "none",
-                transition: "background-color 140ms ease, color 140ms ease, box-shadow 140ms ease",
+                transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                 "&:hover": {
-                  bgcolor: alpha("#0f6cbd", 0.07),
-                  color: "#0f5f9f",
+                  bgcolor: "rgba(0, 0, 0, 0.04)",
+                  color: "#1D1D1F",
                 },
                 "&.Mui-selected": {
-                  bgcolor: "#fff",
-                  boxShadow: "0 6px 16px rgba(15,23,42,0.08)",
-                  color: "#0f6cbd",
-                },
-                "&.Mui-selected:hover": {
-                  bgcolor: "#fff",
+                  bgcolor: "#FFFFFF",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
+                  color: "#0071E3",
                 },
               },
             }}
@@ -177,167 +182,191 @@ export function QuizBankPanel({
             <ToggleButton value="test">{copy.quizKind.test}</ToggleButton>
           </ToggleButtonGroup>
         </Stack>
-      </Stack>
+      </Box>
 
-      <Box sx={{ bgcolor: ERG_SHEET_COLORS.frame, overflowX: "auto" }}>
-        <Box
-          component="table"
-          sx={{
-            borderCollapse: "separate",
-            borderSpacing: 0,
-            minWidth: 980,
-            tableLayout: "fixed",
-            width: "100%",
-            "& th": {
-              bgcolor: ERG_SHEET_COLORS.header,
-              borderBottom: "2px solid #fff",
-              borderRight: "2px solid #fff",
-              color: "#64748b",
-              fontSize: 11,
-              fontWeight: 850,
-              height: 42,
-              letterSpacing: "0.08em",
-              px: 1.5,
-              textAlign: "left",
-              textTransform: "uppercase",
-            },
-            "& th:last-child, & td:last-child": { borderRight: 0 },
-            "& td": {
-              borderBottom: "2px solid #fff",
-              borderRight: "2px solid #fff",
-              color: "#334155",
-              fontSize: 13,
-              px: 1.5,
-              py: 1.2,
-              verticalAlign: "middle",
-            },
-            "& tbody tr": {
-              bgcolor: ERG_SHEET_COLORS.rowOdd,
-              cursor: "pointer",
-              transition: "background-color 140ms ease",
-            },
-            "& tbody tr:nth-of-type(even)": { bgcolor: ERG_SHEET_COLORS.rowEven },
-            "& tbody tr:hover": {
-              bgcolor: ERG_SHEET_COLORS.hover,
-              boxShadow: `inset 3px 0 0 ${ERG_SHEET_COLORS.hoverBorder}`,
-            },
-          }}
-        >
-          <Box component="colgroup">
-            <Box component="col" sx={{ width: "38%" }} />
-            <Box component="col" sx={{ width: "12%" }} />
-            <Box component="col" sx={{ width: "11%" }} />
-            <Box component="col" sx={{ width: "11%" }} />
-            <Box component="col" sx={{ width: "11%" }} />
-            <Box component="col" sx={{ width: "10%" }} />
-            <Box component="col" sx={{ width: "7%" }} />
-          </Box>
-          <thead>
-            <tr>
-              <th>{copy.quizTable.title}</th>
-              <th>{copy.quizTable.scope}</th>
-              <th>{copy.quizTable.kind}</th>
-              <th>{copy.quizTable.count}</th>
-              <th>{copy.quizTable.duration}</th>
-              <th>{copy.quizTable.status}</th>
-              <th>{copy.quizTable.actions}</th>
-            </tr>
-          </thead>
-          <tbody>
+      {/* Table Container */}
+      <TableContainer>
+        <Table size="small" stickyHeader>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.title}</TableCell>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.scope}</TableCell>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.kind}</TableCell>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.count}</TableCell>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.duration}</TableCell>
+              <TableCell sx={tableHeadCellSx}>{copy.quizTable.status}</TableCell>
+              <TableCell align="right" sx={tableHeadCellSx}>
+                {copy.quizTable.actions}
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {isLoading ? (
-              <QuizSheetSkeletonRows columnCount={7} rowCount={Math.max(quizzes.length || 0, 8)} />
-            ) : quizzes.map((quiz) => {
-              const isReady = quiz.status === "ready";
-              const isReviewing = quiz.status === "reviewing";
-              return (
-                <tr
-                  key={quiz.id}
-                  aria-label={`${copy.openQuiz}: ${quiz.title}`}
-                  onClick={() => onPreviewQuiz(quiz)}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Enter" && event.key !== " ") return;
-                    event.preventDefault();
-                    onPreviewQuiz(quiz);
-                  }}
-                  role="button"
-                  tabIndex={0}
-                >
-                  <td>
-                    <Typography sx={{ color: "#111827", fontSize: 13.5, fontWeight: 800, lineHeight: 1.35 }}>
-                      {quiz.title}
+              <QuizSheetSkeletonRows columnCount={7} rowCount={Math.max(quizzes.length || 0, 4)} />
+            ) : quizzes.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} sx={{ borderBottom: 0, py: 8 }}>
+                  <Box
+                    sx={{
+                      alignItems: "center",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1.25,
+                      justifyContent: "center",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        alignItems: "center",
+                        bgcolor: "rgba(0, 113, 227, 0.08)",
+                        borderRadius: "50%",
+                        color: "#0071E3",
+                        display: "flex",
+                        height: 56,
+                        justifyContent: "center",
+                        width: 56,
+                      }}
+                    >
+                      <Inventory2OutlinedIcon sx={{ fontSize: 28 }} />
+                    </Box>
+                    <Typography sx={{ color: "#1D1D1F", fontSize: "0.95rem", fontWeight: 750 }}>
+                      {copy.noQuizzes}
                     </Typography>
-                    <Typography noWrap sx={{ color: "#64748b", fontSize: 12, fontWeight: 550, mt: 0.4 }}>
-                      {quiz.topicLabels.join(", ") || copy.otherTopic}
+                    <Typography sx={{ color: "#86868B", fontSize: "0.825rem", maxWidth: 440, lineHeight: 1.45 }}>
+                      Hiện chưa có gói bài tập nào phù hợp với bộ lọc. Hãy tạo gói mới từ Ngân hàng câu hỏi hoặc thay đổi
+                      từ khóa tìm kiếm.
                     </Typography>
-                    <Typography sx={{ color: "#94a3b8", fontSize: 11.5, fontWeight: 600, mt: 0.3 }}>
-                      {quiz.subjectLabel} / {quiz.levelLabel}
-                    </Typography>
-                  </td>
-                  <td>
-                    <Badge tone={getScopeTone(quiz.scope, contentScope)}>
-                      {copy.scopeLabel(quiz.scope)}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Badge tone={quiz.kind === "test" ? "warning" : "secondary"}>
-                      {copy.quizKind[quiz.kind]}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Typography sx={{ color: "#111827", fontSize: 13, fontWeight: 800 }}>
-                      {copy.questionCount(quiz.questionCount)}
-                    </Typography>
-                  </td>
-                  <td>{quiz.durationLabel}</td>
-                  <td>
-                    <Badge tone={isReady ? "success" : isReviewing ? "warning" : "outline"}>
-                      {copy.quizStatus[quiz.status]}
-                    </Badge>
-                  </td>
-                  <td>
-                    <Stack direction="row" spacing={0.25} sx={{ alignItems: "center" }}>
-                      {isReady ? (
-                        <Tooltip title="Đóng gói portable">
+                  </Box>
+                </TableCell>
+              </TableRow>
+            ) : (
+              quizzes.map((quiz) => {
+                const isReady = quiz.status === "ready";
+                const isReviewing = quiz.status === "reviewing";
+                return (
+                  <TableRow
+                    hover
+                    key={quiz.id}
+                    aria-label={`${copy.openQuiz}: ${quiz.title}`}
+                    onClick={() => onPreviewQuiz(quiz)}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" && event.key !== " ") return;
+                      event.preventDefault();
+                      onPreviewQuiz(quiz);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    sx={{
+                      cursor: "pointer",
+                      transition: "background-color 0.12s ease",
+                      "&:hover": { bgcolor: "rgba(0, 113, 227, 0.035) !important" },
+                      "& td": { borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.4 },
+                    }}
+                  >
+                    <TableCell>
+                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 750, lineHeight: 1.35 }}>
+                        {quiz.title}
+                      </Typography>
+                      <Typography noWrap sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 550, mt: 0.3 }}>
+                        {quiz.topicLabels.join(", ") || copy.otherTopic}
+                      </Typography>
+                      <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600, mt: 0.2 }}>
+                        {quiz.subjectLabel} / {quiz.levelLabel}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge tone={getScopeTone(quiz.scope, contentScope)}>
+                        {copy.scopeLabel(quiz.scope)}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge tone={quiz.kind === "test" ? "warning" : "secondary"}>
+                        {copy.quizKind[quiz.kind]}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell>
+                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 750 }}>
+                        {copy.questionCount(quiz.questionCount)}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem" }}>
+                        {quiz.durationLabel}
+                      </Typography>
+                    </TableCell>
+
+                    <TableCell>
+                      <Badge tone={isReady ? "success" : isReviewing ? "warning" : "outline"}>
+                        {copy.quizStatus[quiz.status]}
+                      </Badge>
+                    </TableCell>
+
+                    <TableCell align="right">
+                      <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", justifyContent: "flex-end" }}>
+                        {isReady ? (
+                          <Tooltip title="Đóng gói portable">
+                            <IconButton
+                              aria-label={`Đóng gói portable: ${quiz.title}`}
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onExportPortable(quiz);
+                              }}
+                              size="small"
+                              sx={{
+                                bgcolor: "rgba(0, 113, 227, 0.08)",
+                                color: "#0071E3",
+                                "&:hover": { bgcolor: "rgba(0, 113, 227, 0.16)" },
+                              }}
+                            >
+                              <Inventory2RoundedIcon sx={{ fontSize: 17 }} />
+                            </IconButton>
+                          </Tooltip>
+                        ) : null}
+                        <Tooltip title={copy.deleteQuiz}>
                           <IconButton
-                            aria-label={`Đóng gói portable: ${quiz.title}`}
-                            color="primary"
-                            onClick={(event) => { event.stopPropagation(); onExportPortable(quiz); }}
+                            aria-label={copy.deleteQuiz}
+                            disabled={deletingQuizId === quiz.id}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onDeleteQuiz(quiz);
+                            }}
                             size="small"
+                            sx={{
+                              bgcolor: "rgba(255, 59, 48, 0.08)",
+                              color: "#FF3B30",
+                              "&:hover": { bgcolor: "rgba(255, 59, 48, 0.16)" },
+                            }}
                           >
-                            <Inventory2RoundedIcon fontSize="small" />
+                            <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
                           </IconButton>
                         </Tooltip>
-                      ) : null}
-                      <Button
-                        color="error"
-                        disabled={deletingQuizId === quiz.id}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onDeleteQuiz(quiz);
-                        }}
-                        size="small"
-                        variant="text"
-                        sx={{ borderRadius: 2, fontSize: 12, fontWeight: 800, minWidth: 0, px: 1 }}
-                      >
-                        {deletingQuizId === quiz.id ? copy.deletingQuiz : copy.deleteQuiz}
-                      </Button>
-                    </Stack>
-                  </td>
-                </tr>
-              );
-            })}
-            {!isLoading && quizzes.length === 0 ? (
-              <tr>
-                <td colSpan={7}>
-                  <Box sx={{ color: "#94a3b8", fontSize: 14, fontStyle: "italic", fontWeight: 650, py: 6, textAlign: "center" }}>
-                    {copy.noQuizzes}
-                  </Box>
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </Box>
-      </Box>
+                      </Stack>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </Paper>
   );
 }
+
+const tableHeadCellSx = {
+  bgcolor: "rgba(250, 250, 252, 0.95)",
+  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+  color: "#86868B",
+  fontSize: "0.72rem",
+  fontWeight: 700,
+  letterSpacing: "0.04em",
+  py: 1.25,
+  textTransform: "uppercase",
+  verticalAlign: "middle",
+  whiteSpace: "nowrap",
+};

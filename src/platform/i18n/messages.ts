@@ -647,7 +647,7 @@ export const messages = {
     "player.noAnswer": "Không",
     "player.lectureLabel": "Giảng viên",
     "player.version": "Phiên bản",
-    "player.brand": "ERG E-LEARNING",
+    "player.brand": "ERG STUDENT",
 
     "notFound.title": "Không tìm thấy màn hình",
     "notFound.description": "Route này chưa tồn tại trong bản React + Vite hiện tại.",
@@ -1301,7 +1301,7 @@ export const messages = {
     "player.noAnswer": "No",
     "player.lectureLabel": "Lecture",
     "player.version": "Version",
-    "player.brand": "ERG E-LEARNING",
+    "player.brand": "ERG STUDENT",
 
     "notFound.title": "Screen not found",
     "notFound.description": "This route does not exist in the current React + Vite app.",

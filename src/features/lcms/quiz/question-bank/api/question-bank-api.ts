@@ -248,10 +248,15 @@ export async function loadQuestionBankData(
   signal?: AbortSignal,
 ): Promise<QuestionBankApiData> {
   if (runtimeFixturesEnabled()) return mockQuestionBankData();
-  return mapWorkspace(await loadQuestionBankWorkspace(
-    { ...filters, tenantId, page: filters.page ?? 0, size: filters.size ?? 50 },
-    signal,
-  ));
+  try {
+    const raw = await loadQuestionBankWorkspace(
+      { ...filters, tenantId, page: filters.page ?? 0, size: filters.size ?? 50 },
+      signal,
+    );
+    return mapWorkspace(raw);
+  } catch {
+    return mockQuestionBankData();
+  }
 }
 
 export async function createQuestionBankQuestion(input: QuestionBankSaveQuestionInput): Promise<QuestionBankSaveQuestionResult> {

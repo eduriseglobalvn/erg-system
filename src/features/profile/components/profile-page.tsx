@@ -11,7 +11,10 @@ import UserRound from "@mui/icons-material/PersonRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
+import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
+import Typography from "@mui/material/Typography";
 import { Link, useLocation } from "@tanstack/react-router";
 import { AvatarCropDialog } from "@/features/profile/components/avatar-crop-dialog";
 import { ProfileFormPanel, SecurityPanel } from "@/features/profile/components/profile-panels";
@@ -29,125 +32,315 @@ export function ProfilePage() {
         ? teacherPath("/")
         : "/";
   const {
-    account, activeTab, avatarCrop, avatarInputRef, avatarUrl, canChangePassword, changePassword, closeAvatarCropper,
-    completionPercent, form, initials, isLoading, isSavingPassword, isSavingProfile, isUploadingAvatar,
-    openAvatarCropper, passwordForm, passwordScore, profileNotice, saveProfile, securityNotice, setActiveTab,
-    setAvatarCrop, setShowPasswords, showPasswords, update, updatePasswordField, uploadCroppedAvatar,
+    account,
+    activeTab,
+    avatarCrop,
+    avatarInputRef,
+    avatarUrl,
+    canChangePassword,
+    changePassword,
+    closeAvatarCropper,
+    completionPercent,
+    form,
+    initials,
+    isLoading,
+    isSavingPassword,
+    isSavingProfile,
+    isUploadingAvatar,
+    openAvatarCropper,
+    passwordForm,
+    passwordScore,
+    profileNotice,
+    saveProfile,
+    securityNotice,
+    setActiveTab,
+    setAvatarCrop,
+    setShowPasswords,
+    showPasswords,
+    update,
+    updatePasswordField,
+    uploadCroppedAvatar,
   } = useProfilePageController();
 
   const primaryAction = activeTab === "security" ? changePassword : saveProfile;
   const primaryDisabled = activeTab === "security" ? !canChangePassword || isSavingPassword : !account || isSavingProfile;
 
   return (
-    <Box component="main" sx={{"minHeight":"100vh","backgroundColor":"#f7f8fa","paddingInline":"calc(0.25rem * 4)","paddingBlock":"calc(0.25rem * 5)","color":"oklch(12.9% 0.042 264.695)","@media (min-width: 64rem)":{"paddingInline":"calc(0.25rem * 8)"}}}>
-      <Box component="div" sx={{"marginInline":"auto","display":"flex","width":"100%","maxWidth":"80rem","flexDirection":"column","gap":"calc(0.25rem * 5)"}}>
-        <Box component="header" sx={{"overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}><Box component="div" sx={{"height":"calc(0.25rem * 1.5)","backgroundColor":"var(--erg-blue)"}} /><Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 4)","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 4)","@media (min-width: 64rem)":{"flexDirection":"row","alignItems":"center","justifyContent":"space-between"}}}>
-          <Box component="div" sx={{"display":"flex","alignItems":"center","gap":"calc(0.25rem * 3)"}}>
-            <Button component={Link} to={workspaceHomePath} variant="outlined" startIcon={<ArrowLeft sx={{ fontSize: 16 }} />} sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.5rem","backgroundColor":"#fff"}}>
-              Quay lại LMS
-            </Button>
-            <Box component="div" sx={{"display":"none","height":"calc(0.25rem * 10)","width":"1px","backgroundColor":"oklch(92.9% 0.013 255.508)","@media (min-width: 40rem)":{"display":"block"}}} />
-            <div>
-              <Box component="p" sx={{"fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"600","color":"var(--erg-red)"}}>ERG account</Box>
-              <Box component="h1" sx={{"fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>Hồ sơ và bảo mật</Box>
-            </div>
-          </Box>
-          <Button
-            variant="contained"
-            onClick={() => void primaryAction()}
-            disabled={primaryDisabled}
-            startIcon={
-              activeTab === "security" ? (
-                isSavingPassword ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />
-              ) : isSavingProfile ? (
-                <CircularProgress color="inherit" size={16} />
-              ) : (
-                <Save sx={{ fontSize: 16 }} />
-              )
-            }
-            sx={{"height":"calc(0.25rem * 10)","borderRadius":"0.375rem","backgroundColor":"var(--erg-blue)","paddingInline":"calc(0.25rem * 4)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-hover)"}}}}
+    <Box component="main" sx={{ bgcolor: "#F5F5F7", color: "#1D1D1F", minHeight: "100vh", p: { xs: 2.5, md: 4 } }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, marginInline: "auto", maxWidth: "80rem", width: "100%" }}>
+        {/* Apple Translucent Window Header */}
+        <Paper
+          elevation={0}
+          sx={{
+            backdropFilter: "blur(20px)",
+            bgcolor: "rgba(255, 255, 255, 0.88)",
+            border: "1px solid rgba(0, 0, 0, 0.06)",
+            borderRadius: "16px",
+            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
+            overflow: "hidden",
+            p: { xs: 2, md: 2.5 },
+          }}
+        >
+          <Box
+            sx={{
+              alignItems: { xs: "flex-start", md: "center" },
+              display: "flex",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
+              justifyContent: "space-between",
+            }}
           >
-            {activeTab === "security" ? "Đổi mật khẩu" : "Lưu hồ sơ"}
-          </Button>
+            <Box sx={{ alignItems: "center", display: "flex", gap: 1.5 }}>
+              <Button
+                component={Link}
+                startIcon={<ArrowLeft sx={{ fontSize: 16 }} />}
+                to={workspaceHomePath}
+                variant="outlined"
+                sx={{
+                  bgcolor: "#FFFFFF",
+                  borderColor: "rgba(0, 0, 0, 0.12)",
+                  borderRadius: "10px",
+                  color: "#1D1D1F",
+                  fontSize: "0.825rem",
+                  fontWeight: 650,
+                  height: 38,
+                  px: 1.75,
+                  textTransform: "none",
+                  "&:hover": { bgcolor: "rgba(0, 0, 0, 0.03)", borderColor: "rgba(0, 0, 0, 0.22)" },
+                }}
+              >
+                Quay lại LMS
+              </Button>
+              <Box sx={{ bgcolor: "rgba(0, 0, 0, 0.06)", display: { xs: "none", sm: "block" }, height: 28, width: "1px" }} />
+              <Box>
+                <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                  ERG Account
+                </Typography>
+                <Typography sx={{ color: "#1D1D1F", fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                  Hồ sơ và bảo mật
+                </Typography>
+              </Box>
+            </Box>
+
+            <Button
+              disabled={primaryDisabled}
+              onClick={() => void primaryAction()}
+              startIcon={
+                activeTab === "security" ? (
+                  isSavingPassword ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />
+                ) : isSavingProfile ? (
+                  <CircularProgress color="inherit" size={16} />
+                ) : (
+                  <Save sx={{ fontSize: 16 }} />
+                )
+              }
+              variant="contained"
+              sx={{
+                bgcolor: "#0071E3",
+                borderRadius: "10px",
+                boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+                color: "#FFFFFF",
+                fontSize: "0.85rem",
+                fontWeight: 650,
+                height: 38,
+                px: 2.25,
+                textTransform: "none",
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  bgcolor: "#0077ED",
+                  boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+                },
+              }}
+            >
+              {activeTab === "security" ? "Đổi mật khẩu" : "Lưu hồ sơ"}
+            </Button>
           </Box>
-        </Box>
+        </Paper>
 
         {isLoading ? (
-          <Box component="div" sx={{"display":"grid","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"#b8d6fa","backgroundColor":"var(--erg-blue-light)","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 3)"}} aria-hidden="true">
-            <Skeleton variant="rounded" sx={{"height":"calc(0.25rem * 4)","width":"calc(0.25rem * 64)"}} />
-            <Skeleton variant="rounded" sx={{"height":"calc(0.25rem * 3)","width":"calc(0.25rem * 40)"}} />
+          <Box sx={{ bgcolor: "rgba(0, 113, 227, 0.05)", borderRadius: "12px", display: "grid", gap: 1, p: 2 }}>
+            <Skeleton height={20} sx={{ borderRadius: "6px" }} variant="rounded" width="50%" />
+            <Skeleton height={16} sx={{ borderRadius: "6px" }} variant="rounded" width="30%" />
           </Box>
         ) : null}
 
-        <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { lg: "340px minmax(0,1fr)" } }}>
-          <Box component="aside" sx={{"height":"fit-content","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"#e0e4ea","backgroundColor":"#fff","padding":"calc(0.25rem * 4)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","@media (min-width: 64rem)":{"position":"sticky","top":"calc(0.25rem * 5)"}}}>
-            <Box component="div" sx={{"borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"oklch(98.4% 0.003 247.858)","padding":"calc(0.25rem * 5)"}}>
-              <Box component="div" sx={{"display":"flex","alignItems":"flex-start","gap":"calc(0.25rem * 4)"}}>
-                <Box component="div" sx={{"position":"relative","flexShrink":"0"}}>
-                  <Box component="div" sx={{"width":"calc(0.25rem * 20)","height":"calc(0.25rem * 20)","overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"4px","borderColor":"#fff","backgroundColor":"var(--erg-blue-light)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+        <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: { lg: "340px minmax(0, 1fr)" } }}>
+          {/* Apple ID Profile Hero Sidebar */}
+          <Box component="aside" sx={{ height: "fit-content", position: { lg: "sticky" }, top: { lg: 32 } }}>
+            <Paper
+              elevation={0}
+              sx={{
+                bgcolor: "#FFFFFF",
+                border: "1px solid rgba(0, 0, 0, 0.06)",
+                borderRadius: "16px",
+                boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
+                p: 2.5,
+              }}
+            >
+              {/* Avatar & Hero Identity */}
+              <Box
+                sx={{
+                  bgcolor: "rgba(0, 0, 0, 0.02)",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(0, 0, 0, 0.04)",
+                  p: 2.5,
+                  textAlign: "center",
+                }}
+              >
+                <Box sx={{ display: "inline-block", position: "relative" }}>
+                  <Box
+                    sx={{
+                      bgcolor: "rgba(0, 113, 227, 0.08)",
+                      border: "3px solid #FFFFFF",
+                      borderRadius: "50%",
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+                      height: 76,
+                      overflow: "hidden",
+                      width: 76,
+                    }}
+                  >
                     {avatarUrl ? (
-                      <Box component="img" src={avatarUrl} alt={form.fullName || "Avatar"} sx={{"height":"100%","width":"100%","objectFit":"cover"}} />
+                      <Box component="img" alt={form.fullName || "Avatar"} src={avatarUrl} sx={{ height: "100%", objectFit: "cover", width: "100%" }} />
                     ) : (
-                      <Box component="div" sx={{"display":"grid","height":"100%","width":"100%","placeItems":"center","fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"var(--erg-blue)"}}>{initials}</Box>
+                      <Box sx={{ alignItems: "center", color: "#0071E3", display: "flex", fontSize: "1.4rem", fontWeight: 800, height: "100%", justifyContent: "center", width: "100%" }}>
+                        {initials}
+                      </Box>
                     )}
                   </Box>
-                  <Box component="button"
+
+                  <Box
+                    component="button"
                     aria-label="Upload avatar"
-                    sx={{"position":"absolute","bottom":"calc(0.25rem * -2)","right":"calc(0.25rem * -2)","display":"grid","width":"calc(0.25rem * 10)","height":"calc(0.25rem * 10)","placeItems":"center","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"4px","borderColor":"oklch(98.4% 0.003 247.858)","backgroundColor":"#fff","color":"var(--erg-blue)","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms","&:hover":{"@media (hover: hover)":{"backgroundColor":"var(--erg-blue-light)"}},"&:disabled":{"cursor":"not-allowed","opacity":"70%"}}}
-                    type="button"
                     disabled={!account || isUploadingAvatar}
                     onClick={() => avatarInputRef.current?.click()}
+                    type="button"
+                    sx={{
+                      alignItems: "center",
+                      bgcolor: "#FFFFFF",
+                      border: "2px solid rgba(0, 0, 0, 0.06)",
+                      borderRadius: "50%",
+                      bottom: -2,
+                      boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
+                      color: "#0071E3",
+                      cursor: "pointer",
+                      display: "flex",
+                      height: 28,
+                      justifyContent: "center",
+                      position: "absolute",
+                      right: -2,
+                      transition: "all 0.15s ease",
+                      width: 28,
+                      "&:hover": { bgcolor: "rgba(0, 113, 227, 0.08)", transform: "scale(1.1)" },
+                    }}
                   >
-                    {isUploadingAvatar ? <CircularProgress color="inherit" size={16} /> : <Camera sx={{ fontSize: 16 }} />}
+                    {isUploadingAvatar ? <CircularProgress color="inherit" size={14} /> : <Camera sx={{ fontSize: 15 }} />}
                   </Box>
-                  <Box component="input"
-                    ref={avatarInputRef}
-                    sx={{"position":"absolute","width":"1px","height":"1px","padding":"0","margin":"-1px","overflow":"hidden","clipPath":"inset(50%)","whiteSpace":"nowrap","borderWidth":"0"}}
-                    type="file"
+
+                  <Box
+                    component="input"
                     accept="image/png,image/jpeg,image/webp,image/gif"
                     onChange={(event) => {
                       const file = event.target.files?.[0] ?? null;
                       event.target.value = "";
                       openAvatarCropper(file);
                     }}
+                    ref={avatarInputRef}
+                    sx={{ clip: "rect(0 0 0 0)", clipPath: "inset(50%)", height: "1px", overflow: "hidden", position: "absolute", whiteSpace: "nowrap", width: "1px" }}
+                    type="file"
                   />
                 </Box>
-                <Box component="div" sx={{"minWidth":"calc(0.25rem * 0)","paddingTop":"calc(0.25rem * 1)"}}>
-                  <Box component="h2" sx={{"overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)","fontWeight":"600","color":"oklch(12.9% 0.042 264.695)"}}>{form.fullName || account?.email || "Tài khoản ERG"}</Box>
-                  <Box component="p" sx={{"marginTop":"calc(0.25rem * 1)","overflow":"hidden","textOverflow":"ellipsis","whiteSpace":"nowrap","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"500","color":"oklch(55.4% 0.046 257.417)"}}>{account?.email}</Box>
-                  <Box component="span" sx={{"marginTop":"calc(0.25rem * 3)","display":"inline-flex","alignItems":"center","gap":"calc(0.25rem * 1.5)","borderRadius":"9999px","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(90.5% 0.093 164.15)","backgroundColor":"oklch(97.9% 0.021 166.113)","paddingInline":"calc(0.25rem * 3)","paddingBlock":"calc(0.25rem * 1)","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"500","color":"oklch(50.8% 0.118 165.612)"}}>
-                    <CheckCircle2 sx={{ fontSize: 14 }} />
-                    {account?.status === "ACTIVE" ? "Đang hoạt động" : account?.status || "Chưa rõ"}
+
+                <Typography sx={{ color: "#1D1D1F", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.015em", mt: 1.5 }}>
+                  {form.fullName || account?.email || "Tài khoản ERG"}
+                </Typography>
+                <Typography noWrap sx={{ color: "#86868B", fontSize: "0.8rem", mt: 0.25 }}>
+                  {account?.email}
+                </Typography>
+
+                <Box
+                  sx={{
+                    alignItems: "center",
+                    bgcolor: "rgba(52, 199, 89, 0.12)",
+                    border: "1px solid rgba(52, 199, 89, 0.22)",
+                    borderRadius: "9999px",
+                    color: "#15803D",
+                    display: "inline-flex",
+                    fontSize: "0.72rem",
+                    fontWeight: 700,
+                    gap: 0.5,
+                    mt: 1.25,
+                    px: 1.25,
+                    py: 0.4,
+                  }}
+                >
+                  <CheckCircle2 sx={{ fontSize: 13 }} />
+                  {account?.status === "ACTIVE" ? "Đang hoạt động" : account?.status || "Chưa rõ"}
+                </Box>
+
+                {/* Profile Completion Bar */}
+                <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.04)", mt: 2, p: 1.5 }}>
+                  <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.75 }}>
+                    <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600 }}>
+                      Hoàn thiện hồ sơ
+                    </Typography>
+                    <Typography sx={{ color: "#0071E3", fontSize: "0.72rem", fontWeight: 750 }}>
+                      {completionPercent}%
+                    </Typography>
                   </Box>
+                  <LinearProgress
+                    value={completionPercent}
+                    variant="determinate"
+                    sx={{
+                      bgcolor: "rgba(0, 113, 227, 0.08)",
+                      borderRadius: 9999,
+                      height: 5,
+                      "& .MuiLinearProgress-bar": {
+                        bgcolor: "#0071E3",
+                        borderRadius: 9999,
+                      },
+                    }}
+                  />
                 </Box>
               </Box>
 
-              <Box component="div" sx={{"marginTop":"calc(0.25rem * 5)","borderRadius":"0.5rem","backgroundColor":"#fff","padding":"calc(0.25rem * 3)"}}>
-                <Box component="div" sx={{"display":"flex","alignItems":"center","justifyContent":"space-between","fontSize":"0.75rem","lineHeight":"calc(1 / 0.75)","fontWeight":"500","color":"oklch(55.4% 0.046 257.417)"}}>
-                  <span>Hoàn thiện hồ sơ</span>
-                  <span>{completionPercent}%</span>
-                </Box>
-                <Box component="div" sx={{"marginTop":"calc(0.25rem * 2)","height":"calc(0.25rem * 2)","overflow":"hidden","borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)"}}>
-                  <Box component="div" sx={{"height":"100%","borderRadius":"9999px","backgroundColor":"var(--erg-blue)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms"}} style={{ width: `${completionPercent}%` }} />
-                </Box>
+              {/* Navigation Tabs */}
+              <Box sx={{ display: "grid", gap: 1, mt: 2 }} aria-label="Cài đặt tài khoản">
+                <ProfileTabButton
+                  active={activeTab === "profile"}
+                  description="Tên, số điện thoại, avatar"
+                  icon={<UserRound sx={{ fontSize: 18 }} />}
+                  onClick={() => setActiveTab("profile")}
+                  title="Thông tin hồ sơ"
+                />
+                <ProfileTabButton
+                  active={activeTab === "security"}
+                  description="Đổi mật khẩu tài khoản"
+                  icon={<ShieldCheck sx={{ fontSize: 18 }} />}
+                  onClick={() => setActiveTab("security")}
+                  title="Bảo mật"
+                />
               </Box>
-            </Box>
 
-            <Box component="nav" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gap":"calc(0.25rem * 2)"}} aria-label="Cài đặt tài khoản">
-              <ProfileTabButton active={activeTab === "profile"} icon={<UserRound sx={{ fontSize: 16 }} />} onClick={() => setActiveTab("profile")} title="Thông tin hồ sơ" description="Tên, SĐT, avatar" />
-              <ProfileTabButton active={activeTab === "security"} icon={<ShieldCheck sx={{ fontSize: 16 }} />} onClick={() => setActiveTab("security")} title="Bảo mật" description="Đổi mật khẩu" />
-            </Box>
-
-            <Box component="div" sx={{"marginTop":"calc(0.25rem * 4)","display":"grid","gap":"calc(0.25rem * 2)","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"oklch(92.9% 0.013 255.508)","backgroundColor":"#fff","padding":"calc(0.25rem * 3)","fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)"}}>
-              <ProfileLine icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Vai trò" value={form.title || "Chưa cập nhật"} />
-              <ProfileLine icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận" value={form.department || "Chưa cập nhật"} />
-              <ProfileLine icon={<Phone sx={{ fontSize: 16 }} />} label="Điện thoại" value={form.phone || "Chưa cập nhật"} />
-            </Box>
+              {/* Quick Info Lines */}
+              <Box sx={{ display: "grid", gap: 1, mt: 2 }}>
+                <ProfileLine icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Vai trò" value={form.title || "Chưa cập nhật"} />
+                <ProfileLine icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận" value={form.department || "Chưa cập nhật"} />
+                <ProfileLine icon={<Phone sx={{ fontSize: 16 }} />} label="Điện thoại" value={form.phone || "Chưa cập nhật"} />
+              </Box>
+            </Paper>
           </Box>
 
-          <Box component="section" sx={{"minWidth":"calc(0.25rem * 0)"}}>
+          {/* Main Content Panel */}
+          <Box component="section" sx={{ minWidth: 0 }}>
             {activeTab === "profile" ? (
-              <ProfileFormPanel form={form} notice={profileNotice} onSave={saveProfile} onUpdate={update} isSaving={isSavingProfile} account={account} />
+              <ProfileFormPanel
+                account={account}
+                form={form}
+                isSaving={isSavingProfile}
+                notice={profileNotice}
+                onSave={saveProfile}
+                onUpdate={update}
+              />
             ) : (
               <SecurityPanel
                 account={account}
@@ -155,16 +348,17 @@ export function ProfilePage() {
                 form={passwordForm}
                 isSaving={isSavingPassword}
                 notice={securityNotice}
-                passwordScore={passwordScore}
-                showPasswords={showPasswords}
                 onChangePassword={changePassword}
                 onTogglePasswords={() => setShowPasswords((value) => !value)}
                 onUpdate={updatePasswordField}
+                passwordScore={passwordScore}
+                showPasswords={showPasswords}
               />
             )}
           </Box>
         </Box>
       </Box>
+
       <AvatarCropDialog
         crop={avatarCrop}
         isUploading={isUploadingAvatar}

@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { alpha } from "@mui/material/styles";
 
 export function QuestionBankCompactHeader({
   children,
@@ -16,11 +15,13 @@ export function QuestionBankCompactHeader({
 
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
-        borderColor: alpha("#0f172a", 0.08),
-        borderRadius: 3,
-        boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
+        bgcolor: "rgba(255, 255, 255, 0.88)",
+        backdropFilter: "blur(20px)",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
         overflow: "hidden",
         position: "sticky",
         top: 0,
@@ -35,20 +36,20 @@ export function QuestionBankCompactHeader({
         <Stack
           direction="row"
           spacing={2}
-          sx={{ alignItems: "center", justifyContent: "space-between", minWidth: { lg: 152 }, width: { lg: 152 } }}
+          sx={{ alignItems: "center", justifyContent: "space-between", minWidth: { lg: 160 }, width: { lg: 160 } }}
         >
           <Typography
             component="h1"
             sx={{
-              color: "#111827",
+              color: "#1D1D1F",
               fontSize: 16,
-              fontWeight: 900,
-              lineHeight: 1.12,
-              letterSpacing: 0,
+              fontWeight: 800,
+              lineHeight: 1.2,
+              letterSpacing: "-0.01em",
             }}
           >
             <Box component="span" sx={{ display: "block" }}>{titleLines[0]}</Box>
-            {titleLines[1] ? <Box component="span" sx={{ display: "block" }}>{titleLines[1]}</Box> : null}
+            {titleLines[1] ? <Box component="span" sx={{ display: "block", color: "#0071E3" }}>{titleLines[1]}</Box> : null}
           </Typography>
         </Stack>
         <Box sx={{ minWidth: 0, flex: 1 }}>{children}</Box>
@@ -63,4 +64,3 @@ function splitCompactTitle(title: string) {
   const splitIndex = Math.ceil(words.length / 2);
   return [words.slice(0, splitIndex).join(" "), words.slice(splitIndex).join(" ")];
 }
-

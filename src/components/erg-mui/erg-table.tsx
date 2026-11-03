@@ -13,10 +13,14 @@ type ErgDataTableShellProps = PaperProps & {
 export function ErgDataTableShell({ children, footer, toolbar, sx, ...props }: ErgDataTableShellProps) {
   return (
     <Paper
+      elevation={0}
       sx={[
         {
-          borderColor: "divider",
-          borderRadius: 3,
+          bgcolor: "#FFFFFF",
+          border: "1px solid rgba(0, 0, 0, 0.06)",
+          borderColor: "rgba(0, 0, 0, 0.06)",
+          borderRadius: "16px",
+          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
@@ -44,9 +48,8 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     <Box
       sx={{
         alignItems: { xs: "flex-start", sm: "center" },
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        bgcolor: "background.paper",
+        bgcolor: "#FFFFFF",
+        borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
         gap: 1.5,
@@ -56,21 +59,74 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     >
       <Box sx={{ minWidth: 0 }}>
         {title ? (
-          <Typography sx={{ fontWeight: 850 }} variant="subtitle1">
+          <Typography
+            sx={{
+              color: "#1D1D1F",
+              fontSize: "1.05rem",
+              fontWeight: 800,
+              letterSpacing: "-0.015em",
+            }}
+            variant="subtitle1"
+          >
             {title}
           </Typography>
         ) : null}
         {meta ? (
-          <Typography color="text.secondary" variant="body2">
+          <Typography
+            sx={{
+              color: "#86868B",
+              fontSize: "0.8rem",
+              fontWeight: 500,
+              mt: 0.25,
+            }}
+            variant="body2"
+          >
             {meta}
           </Typography>
         ) : null}
       </Box>
-      {actions ? <Box sx={{ display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 1 }}>{actions}</Box> : null}
+      {actions ? (
+        <Box sx={{ alignItems: "center", display: "flex", flexDirection: "row", flexWrap: "wrap", gap: 1 }}>
+          {actions}
+        </Box>
+      ) : null}
     </Box>
   );
 }
 
-export function ErgTable(props: TableProps) {
-  return <Table stickyHeader size="small" {...props} />;
+export function ErgTable({ sx, ...props }: TableProps) {
+  return (
+    <Table
+      size="small"
+      stickyHeader
+      sx={[
+        {
+          "& .MuiTableCell-head": {
+            bgcolor: "rgba(250, 250, 252, 0.96)",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            color: "#86868B",
+            fontSize: "0.72rem",
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            py: 1.35,
+            textTransform: "uppercase",
+          },
+          "& .MuiTableCell-body": {
+            borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
+            color: "#1D1D1F",
+            fontSize: "0.85rem",
+            py: 1.35,
+          },
+          "& .MuiTableRow-hover": {
+            transition: "background-color 0.12s ease",
+            "&:hover": {
+              bgcolor: "rgba(0, 113, 227, 0.035) !important",
+            },
+          },
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      {...props}
+    />
+  );
 }

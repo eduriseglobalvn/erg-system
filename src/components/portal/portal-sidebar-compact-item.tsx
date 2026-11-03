@@ -17,7 +17,6 @@ import {
   NAV_HOVER_BG,
   NAV_ITEM_COLOR,
   NAV_PRIMARY,
-  NAV_SURFACE_BG,
   NAV_TEXT_COLOR,
   SIDEBAR_FADE_EASING,
   SUBMENU_MOTION_EASING,
@@ -116,21 +115,25 @@ export function SidebarCompactItem({
           border: miniSelected
             ? `1px solid ${NAV_ACTIVE_BORDER}`
             : "1px solid transparent",
-          borderRadius: "12px",
+          borderRadius: "11px",
           color: miniSelected ? NAV_PRIMARY : NAV_ITEM_COLOR,
           boxShadow: miniSelected ? NAV_ACTIVE_SHADOW : "none",
           display: "flex",
           flexDirection: "column",
           gap: 0.625,
           justifyContent: "center",
-          minHeight: 58,
+          minHeight: 56,
           px: 0.5,
-          py: 1,
+          py: 0.85,
           position: "relative",
           textAlign: "center",
           transition:
-            "background 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+            "background 120ms cubic-bezier(0.16, 1, 0.3, 1), border-color 120ms cubic-bezier(0.16, 1, 0.3, 1), color 120ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 150ms cubic-bezier(0.16, 1, 0.3, 1), transform 80ms ease-out",
           width: "100%",
+          "&:active": {
+            transform: "scale(0.95)",
+            transition: "transform 80ms ease-out",
+          },
           "&.Mui-selected": {
             background: NAV_ACTIVE_BG,
             borderColor: NAV_ACTIVE_BORDER,
@@ -142,7 +145,7 @@ export function SidebarCompactItem({
             background: miniSelected ? NAV_ACTIVE_BG : NAV_HOVER_BG,
             borderColor: miniSelected
               ? NAV_ACTIVE_BORDER
-              : "rgba(145,158,171,0.18)",
+              : "transparent",
             color: miniSelected ? NAV_PRIMARY : NAV_TEXT_COLOR,
           },
         }}
@@ -181,7 +184,8 @@ export function SidebarCompactItem({
           sx={{
             color: "inherit",
             fontSize: 11,
-            fontWeight: miniSelected ? 600 : 500,
+            fontWeight: miniSelected ? 650 : 500,
+            letterSpacing: "-0.01em",
             lineHeight: "14px",
             maxWidth: "100%",
             overflow: "hidden",
@@ -201,7 +205,7 @@ export function SidebarCompactItem({
             {
               name: "offset",
               options: {
-                offset: [0, 20],
+                offset: [0, 16],
               },
             },
           ]}
@@ -215,25 +219,25 @@ export function SidebarCompactItem({
               onMouseEnter={flyout.cancelClose}
               onMouseLeave={flyout.scheduleClose}
               sx={{
-                backgroundColor: NAV_SURFACE_BG,
+                backgroundColor: "rgba(255, 255, 255, 0.92)",
                 backgroundImage: "none",
-                backdropFilter: "none",
-                WebkitBackdropFilter: "none",
-                border: `1px solid ${NAV_ACTIVE_BORDER}`,
+                backdropFilter: "blur(20px) saturate(190%)",
+                WebkitBackdropFilter: "blur(20px) saturate(190%)",
+                border: "1px solid rgba(0, 0, 0, 0.08)",
                 borderRadius: "14px",
                 boxShadow:
-                  "0 10px 24px rgba(103, 114, 182, 0.1), inset 0 1px 0 rgba(255,255,255,0.78)",
+                  "0 12px 32px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
                 marginLeft: 1.5,
-                maxWidth: 192,
-                minWidth: 192,
+                maxWidth: 196,
+                minWidth: 196,
                 overflow: "hidden",
-                py: 0.375,
+                p: 0.5,
                 transition: `opacity ${SIDEBAR_FADE_EASING}, transform ${SUBMENU_MOTION_EASING}`,
               }}
             >
               <List
                 disablePadding
-                sx={{ maxWidth: 192, minWidth: 192, p: 0 }}
+                sx={{ maxWidth: 196, minWidth: 196, p: 0 }}
               >
                 {item.children!.map((child, index) => {
                   const isChildActive = pathMatches(
@@ -261,12 +265,17 @@ export function SidebarCompactItem({
                         background: isChildActive
                           ? NAV_ACTIVE_BG
                           : "transparent",
+                        borderRadius: "8px",
                         color: isChildActive ? NAV_PRIMARY : NAV_ITEM_COLOR,
                         height: 36,
                         maxHeight: 36,
                         minHeight: 36,
-                        px: 1.5,
+                        px: 1.25,
                         py: 0,
+                        transition: "all 120ms cubic-bezier(0.16, 1, 0.3, 1)",
+                        "&:active": {
+                          transform: "scale(0.98)",
+                        },
                         "&:hover": {
                           background: isChildActive
                             ? NAV_ACTIVE_BG
@@ -280,9 +289,9 @@ export function SidebarCompactItem({
                         sx={{
                           color: "inherit",
                           display: "block",
-                          fontSize: 13.5,
-                          fontWeight: isChildActive ? 600 : 500,
-                          letterSpacing: 0,
+                          fontSize: 13,
+                          fontWeight: isChildActive ? 650 : 500,
+                          letterSpacing: "-0.01em",
                           lineHeight: "20px",
                           whiteSpace: "nowrap",
                         }}

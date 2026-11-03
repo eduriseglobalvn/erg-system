@@ -8,6 +8,7 @@ const hooks = vi.hoisted(() => ({
   useEmployeeSecurityFeed: vi.fn(),
   useEmployeeRoleOptions: vi.fn(),
   useEmployeeCommands: vi.fn(),
+  useEmployeeSchoolOptions: vi.fn(),
 }));
 
 vi.mock("@/features/employee-management/hooks/use-employee-management", () => hooks);
@@ -23,6 +24,7 @@ describe("employee management workspace", () => {
     hooks.useEmployeeSecurityEvents.mockReturnValue({ data: { items: [] }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeSecurityFeed.mockReturnValue({ data: { items: [], page: 1, limit: 50, total: 0, totalPages: 0 }, isPending: false, isError: false, refetch: vi.fn() });
     hooks.useEmployeeRoleOptions.mockReturnValue({ data: [{ id: "role-it", name: "it_operator" }], isPending: false, isError: false });
+    hooks.useEmployeeSchoolOptions.mockReturnValue({ schools: [], classes: [], isPending: false });
     const command = { mutateAsync: vi.fn(), isPending: false };
     hooks.useEmployeeCommands.mockReturnValue({ create: command, update: command, status: command, roles: command, resetCredential: command, revokeSession: command });
   });

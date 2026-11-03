@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
-import Chip from "@mui/material/Chip";
 import { cn } from "@/lib/utils";
 
 type DashboardPageShellProps = {
@@ -38,72 +37,97 @@ type DashboardSegmentOption = {
   label: string;
 };
 
-const toneClassMap = {
-  blue: {
-    bubble: "bg-[var(--accent-soft)] text-[var(--primary)] ring-1 ring-[#b8c8db]",
-    delta: "border-[#b8c8db] bg-[var(--accent-soft)] text-[var(--primary)]",
-  },
+const toneStyles = {
   amber: {
-    bubble: "bg-amber-50 text-amber-700 ring-1 ring-amber-100",
-    delta: "border-amber-200 bg-amber-50 text-amber-700",
+    bg: "rgba(255, 149, 0, 0.12)",
+    border: "rgba(255, 149, 0, 0.22)",
+    color: "#B45309",
+    dot: "#FF9500",
+  },
+  blue: {
+    bg: "rgba(0, 113, 227, 0.08)",
+    border: "rgba(0, 113, 227, 0.18)",
+    color: "#0071E3",
+    dot: "#0071E3",
   },
   emerald: {
-    bubble: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100",
-    delta: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    bg: "rgba(52, 199, 89, 0.12)",
+    border: "rgba(52, 199, 89, 0.22)",
+    color: "#15803D",
+    dot: "#34C759",
   },
   rose: {
-    bubble: "bg-rose-50 text-rose-700 ring-1 ring-rose-100",
-    delta: "border-rose-200 bg-rose-50 text-rose-700",
+    bg: "rgba(255, 59, 48, 0.1)",
+    border: "rgba(255, 59, 48, 0.22)",
+    color: "#DC2626",
+    dot: "#FF3B30",
   },
   violet: {
-    bubble: "bg-[var(--accent-soft)] text-[var(--primary)] ring-1 ring-[#b8c8db]",
-    delta: "border-[#b8c8db] bg-[var(--accent-soft)] text-[var(--primary)]",
+    bg: "rgba(175, 82, 222, 0.12)",
+    border: "rgba(175, 82, 222, 0.22)",
+    color: "#7E22CE",
+    dot: "#AF52DE",
   },
 } as const;
 
 export function DashboardPageShell({
-  badge,
-  title,
-  description,
-  breadcrumbs,
   actions,
+  badge,
+  breadcrumbs,
+  children,
+  contentClassName,
+  description,
   headerContent,
   hideHeader = false,
-  contentClassName,
-  children,
+  title,
 }: DashboardPageShellProps) {
   return (
-    <div className="h-full overflow-y-auto bg-[var(--background)]">
-      <div className={cn("mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6", contentClassName)}>
+    <div className="h-full overflow-y-auto bg-[#F5F5F7]">
+      <div className={cn("mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8", contentClassName)}>
         {!hideHeader ? (
-          <section className="rounded-xl border border-[#d9e2ef] bg-white p-4 shadow-[var(--shadow-xs)] sm:p-5">
+          <section className="rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white/90 p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02),0_8px_24px_-4px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-6">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
                 {breadcrumbs?.length ? (
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-slate-500">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-[#86868B]">
                     {breadcrumbs.map((item, index) => (
                       <div key={`${item}-${index}`} className="flex items-center gap-2">
-                        {index > 0 ? <span className="text-slate-300">/</span> : null}
+                        {index > 0 ? <span className="text-[#C7C7CC]">/</span> : null}
                         <span>{item}</span>
                       </div>
                     ))}
                   </div>
                 ) : null}
-                <div className={cn("flex flex-wrap items-center gap-3", breadcrumbs?.length ? "mt-3" : "")}>
-                  {badge ? <Chip label={badge} size="small" color="secondary" /> : null}
-                  <h1 className="text-lg font-semibold tracking-normal text-[var(--foreground)] sm:text-xl">
+                <div className={cn("flex flex-wrap items-center gap-3", breadcrumbs?.length ? "mt-2" : "")}>
+                  {badge ? (
+                    <Box
+                      sx={{
+                        bgcolor: "rgba(0, 113, 227, 0.08)",
+                        border: "1px solid rgba(0, 113, 227, 0.18)",
+                        borderRadius: "9999px",
+                        color: "#0071E3",
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        px: 1.25,
+                        py: 0.35,
+                      }}
+                    >
+                      {badge}
+                    </Box>
+                  ) : null}
+                  <h1 className="text-xl font-bold tracking-tight text-[#1D1D1F] sm:text-2xl">
                     {title}
                   </h1>
                 </div>
                 {description ? (
-                  <p className="mt-2 max-w-3xl text-[13px] leading-5 text-[var(--muted-foreground)]">
+                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#6E6E73]">
                     {description}
                   </p>
                 ) : null}
               </div>
-              {actions ? <div className="flex shrink-0 flex-wrap items-center gap-3">{actions}</div> : null}
+              {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div> : null}
             </div>
-            {headerContent ? <div className="mt-4 border-t border-slate-100 pt-4">{headerContent}</div> : null}
+            {headerContent ? <div className="mt-4 border-t border-[rgba(0,0,0,0.05)] pt-4">{headerContent}</div> : null}
           </section>
         ) : null}
         {children}
@@ -113,42 +137,74 @@ export function DashboardPageShell({
 }
 
 export function DashboardMetricCard({
-  label,
-  value,
-  detail,
   delta,
+  detail,
   icon,
+  label,
   tone = "blue",
+  value,
 }: DashboardMetricCardProps) {
-  const toneClass = toneClassMap[tone];
+  const toneStyle = toneStyles[tone];
 
   return (
     <Card
-      variant="outlined"
-      sx={{ overflow: "hidden", borderColor: "#d9e2ef", bgcolor: "#fff", boxShadow: "var(--shadow-xs)", borderRadius: 2 }}
+      elevation={0}
+      sx={{
+        bgcolor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02), 0 8px 18px -4px rgba(0, 0, 0, 0.03)",
+        overflow: "hidden",
+        transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
+        "&:hover": {
+          boxShadow: "0 4px 14px rgba(0, 0, 0, 0.04), 0 12px 24px -4px rgba(0, 0, 0, 0.06)",
+          transform: "translateY(-1px)",
+        },
+      }}
     >
-        <div className="flex items-start justify-between gap-4 p-4">
+      <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0">
-          <div className="text-xs font-semibold tracking-normal text-[var(--muted-foreground)]">{label}</div>
-          <div className="mt-2 text-xl font-semibold tracking-normal text-[var(--foreground)]">{value}</div>
-          <div className="mt-1.5 text-[13px] leading-5 text-[var(--muted-foreground)]">{detail}</div>
+          <div className="text-xs font-semibold tracking-normal text-[#6E6E73]">{label}</div>
+          <div className="mt-1.5 text-2xl font-extrabold tracking-tight text-[#1D1D1F] sm:text-[1.75rem]">{value}</div>
+          <div className="mt-1 text-xs text-[#86868B]">{detail}</div>
         </div>
         {icon ? (
-          <div
-            className={cn(
-              "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
-              toneClass.bubble,
-            )}
+          <Box
+            sx={{
+              alignItems: "center",
+              bgcolor: toneStyle.bg,
+              borderRadius: "10px",
+              color: toneStyle.color,
+              display: "flex",
+              flexShrink: 0,
+              height: 38,
+              justifyContent: "center",
+              width: 38,
+            }}
           >
             {icon}
-          </div>
+          </Box>
         ) : null}
       </div>
       {delta ? (
-        <div className="border-t border-[#d9e2ef] bg-[#f8fbff] px-4 py-3">
-          <span className={cn("inline-flex rounded-full border px-2.5 py-1 text-xs font-medium", toneClass.delta)}>
+        <div className="border-t border-[rgba(0,0,0,0.05)] bg-[#FBFBFD] px-5 py-2.5">
+          <Box
+            sx={{
+              alignItems: "center",
+              bgcolor: toneStyle.bg,
+              border: `1px solid ${toneStyle.border}`,
+              borderRadius: "9999px",
+              color: toneStyle.color,
+              display: "inline-flex",
+              fontSize: "0.72rem",
+              fontWeight: 700,
+              lineHeight: 1,
+              px: 1.25,
+              py: 0.4,
+            }}
+          >
             {delta}
-          </span>
+          </Box>
         </div>
       ) : null}
     </Card>
@@ -156,23 +212,28 @@ export function DashboardMetricCard({
 }
 
 export function DashboardSectionCard({
-  title,
-  description,
   action,
-  className,
   children,
+  className,
+  description,
+  title,
 }: DashboardSectionCardProps) {
   return (
     <Card
-      variant="outlined"
+      elevation={0}
       className={className}
-      sx={{ borderColor: "#d9e2ef", bgcolor: "#fff", boxShadow: "var(--shadow-xs)", borderRadius: 2 }}
+      sx={{
+        bgcolor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
+      }}
     >
-      <div className="flex flex-col gap-4 p-4">
+      <div className="flex flex-col gap-4 p-5 sm:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-sm font-semibold tracking-normal text-[var(--foreground)]">{title}</h2>
-            {description ? <p className="mt-1 text-[13px] leading-5 text-[var(--muted-foreground)]">{description}</p> : null}
+            <h2 className="text-base font-bold tracking-tight text-[#1D1D1F]">{title}</h2>
+            {description ? <p className="mt-1 text-xs text-[#86868B]">{description}</p> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </div>
@@ -183,16 +244,16 @@ export function DashboardSectionCard({
 }
 
 export function DashboardSegmentedControl({
+  onChange,
   options,
   value,
-  onChange,
 }: {
   options: DashboardSegmentOption[];
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1.5 rounded-lg border border-[rgba(145,158,171,0.22)] bg-white px-1.5 py-1 shadow-none">
+    <div className="inline-flex items-center gap-1 rounded-xl border border-[rgba(0,0,0,0.08)] bg-[#F5F5F7] p-1 shadow-none">
       {options.map((option) => {
         const active = option.value === value;
 
@@ -202,10 +263,10 @@ export function DashboardSegmentedControl({
             type="button"
             onClick={() => onChange(option.value)}
             className={cn(
-              "relative min-h-8 whitespace-nowrap rounded-md px-3 text-sm font-semibold leading-none transition after:absolute after:inset-x-3 after:bottom-0.5 after:h-0.5 after:rounded-full after:transition",
+              "relative min-h-7 whitespace-nowrap rounded-lg px-3 text-xs font-semibold transition-all",
               active
-                ? "bg-transparent text-[#696CFF] after:bg-[#696CFF]"
-                : "bg-transparent text-[#637381] after:bg-transparent hover:text-[#1C252E]",
+                ? "bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                : "text-[#6E6E73] hover:text-[#1D1D1F]",
             )}
           >
             {option.label}
@@ -218,19 +279,46 @@ export function DashboardSegmentedControl({
 
 type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
 
-function toChipProps(tone: BadgeTone) {
-  if (tone === "outline") {
-    return { variant: "outlined" as const, color: "default" as const };
-  }
-  const colorMap: Record<Exclude<BadgeTone, "outline">, "primary" | "secondary" | "success" | "warning" | "error"> = {
-    primary: "primary",
-    secondary: "secondary",
-    success: "success",
-    warning: "warning",
-    danger: "error",
-  };
-  return { variant: "filled" as const, color: colorMap[tone] };
-}
+const BADGE_STYLES: Record<
+  BadgeTone,
+  { bg: string; border: string; color: string; dot?: string }
+> = {
+  danger: {
+    bg: "rgba(255, 59, 48, 0.1)",
+    border: "rgba(255, 59, 48, 0.22)",
+    color: "#DC2626",
+    dot: "#FF3B30",
+  },
+  outline: {
+    bg: "rgba(0, 0, 0, 0.04)",
+    border: "rgba(0, 0, 0, 0.1)",
+    color: "#6E6E73",
+  },
+  primary: {
+    bg: "rgba(0, 113, 227, 0.08)",
+    border: "rgba(0, 113, 227, 0.18)",
+    color: "#0071E3",
+    dot: "#0071E3",
+  },
+  secondary: {
+    bg: "rgba(175, 82, 222, 0.1)",
+    border: "rgba(175, 82, 222, 0.2)",
+    color: "#7E22CE",
+    dot: "#AF52DE",
+  },
+  success: {
+    bg: "rgba(52, 199, 89, 0.12)",
+    border: "rgba(52, 199, 89, 0.22)",
+    color: "#15803D",
+    dot: "#34C759",
+  },
+  warning: {
+    bg: "rgba(255, 149, 0, 0.12)",
+    border: "rgba(255, 149, 0, 0.22)",
+    color: "#B45309",
+    dot: "#FF9500",
+  },
+};
 
 export function DashboardStatusBadge({
   label,
@@ -239,5 +327,29 @@ export function DashboardStatusBadge({
   label: string;
   tone: BadgeTone;
 }) {
-  return <Chip label={label} size="small" {...toChipProps(tone)} />;
+  const style = BADGE_STYLES[tone] ?? BADGE_STYLES.outline;
+
+  return (
+    <Box
+      sx={{
+        alignItems: "center",
+        bgcolor: style.bg,
+        border: `1px solid ${style.border}`,
+        borderRadius: "9999px",
+        color: style.color,
+        display: "inline-flex",
+        fontSize: "0.72rem",
+        fontWeight: 700,
+        gap: 0.6,
+        lineHeight: 1,
+        px: 1,
+        py: 0.35,
+      }}
+    >
+      {style.dot ? (
+        <Box sx={{ bgcolor: style.dot, borderRadius: "50%", height: 6, width: 6 }} />
+      ) : null}
+      {label}
+    </Box>
+  );
 }

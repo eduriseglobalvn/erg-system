@@ -4,7 +4,12 @@ import { defaultStatusForOption } from "@/features/lcms/admin-operations/compone
 import { cn } from "@/lib/utils";
 import { RESOURCE_BORDER } from "./learning-resource-authoring-create-dialog-config";
 import { ExerciseFields, LectureFields, ResourceFields, TaxonomyFields } from "./learning-resource-authoring-create-dialog-fields";
-import { ContentTypePicker, ContextBox, HierarchyStrip, ModeIcon, SelectedOptionHeader, StatusField } from "./learning-resource-authoring-create-dialog-presentation";
+import {
+  ContentTypePicker,
+  getContextBreadcrumbText,
+  ModeIcon,
+  StatusField,
+} from "./learning-resource-authoring-create-dialog-presentation";
 import type { useTaxonomyCreateDialogController } from "./learning-resource-authoring-create-dialog-controller";
 
 export function TaxonomyCreateDialogView({ controller }: { controller: ReturnType<typeof useTaxonomyCreateDialogController> }) {
@@ -17,6 +22,9 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
     draftLevelOptions,
     draftSubject,
     draftSubjectId,
+    draftTopicId,
+    draftTopicOptions,
+    effectiveOption,
     error,
     exerciseQuery,
     filteredExercises,
@@ -24,6 +32,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
     handleSubjectChange,
     handleSubmit,
     isTaxonomyMode,
+    itemType,
     label,
     onClose,
     open,
@@ -33,7 +42,6 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
     saving,
     selectedExerciseIds,
     selectedNode,
-    selectedOption,
     selectedSubject,
     setDescription,
     setDraftLevelId,
@@ -53,13 +61,24 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
     subjects,
     submitHint,
     submitLabel,
-    subtitle,
     taxonomyMode,
     taxonomyRole,
     title,
   } = controller;
 
   if (!open) return null;
+
+  const breadcrumbText = getContextBreadcrumbText({
+    contextLabel,
+    draftLevelId,
+    draftLevelOptions,
+    draftSubject,
+    draftTopicId,
+    draftTopicOptions,
+    itemType,
+    mode: taxonomyMode,
+    selectedNode,
+  });
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto px-4 py-10">
@@ -76,45 +95,32 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
         aria-modal="true"
         aria-labelledby="resource-create-title"
         className={cn(
-          "relative my-auto flex max-h-[min(820px,calc(100dvh-96px))] w-full flex-col overflow-hidden rounded-lg border bg-white shadow-[0_24px_72px_rgba(28,37,46,0.18)]",
-          selectedOption === "exercise" ? "max-w-[900px]" : selectedOption === "lecture" ? "max-w-[600px]" : "max-w-[680px]",
+          "relative my-auto flex max-h-[min(840px,calc(100dvh-80px))] w-full flex-col overflow-hidden rounded-lg border bg-white shadow-[0_24px_72px_rgba(28,37,46,0.18)]",
+          effectiveOption === "exercise" ? "max-w-[900px]" : "max-w-[680px]",
         )}
         style={{ borderColor: RESOURCE_BORDER }}
         onSubmit={handleSubmit}
       >
-        <header className="flex shrink-0 items-start justify-between gap-4 border-b px-5 py-4" style={{ borderColor: RESOURCE_BORDER }}>
-          <div className="flex min-w-0 items-start gap-3">
-            <ModeIcon taxonomyMode={taxonomyMode} option={selectedOption} />
+        <header className="flex shrink-0 items-center justify-between gap-4 border-b px-5 py-3" style={{ borderColor: RESOURCE_BORDER }}>
+          <div className="flex min-w-0 items-center gap-3">
+            <ModeIcon taxonomyMode={taxonomyMode} option={effectiveOption} />
             <div className="min-w-0">
-              <h2 id="resource-create-title" className="text-lg font-bold leading-7 text-[#1C252E]">
+              <h2 id="resource-create-title" className="truncate text-base font-bold text-[#1C252E]">
                 {title}
               </h2>
-              {selectedOption !== "lecture" ? <p className="mt-1 text-sm leading-5 text-[#637381]">{subtitle}</p> : null}
+              {breadcrumbText ? (
+                <div className="mt-0.5 truncate text-xs font-semibold text-[#637381]">
+                  Vị trí: <span className="text-[#0F6CBD]">{breadcrumbText}</span>
+                </div>
+              ) : null}
             </div>
           </div>
-          <ErgIconButton
-            label="Đóng"
-            size="small"
-            disabled={saving}
-            onClick={onClose}
-            sx={{ color: "text.secondary" }}
-          >
+          <ErgIconButton label="Đóng" size="small" disabled={saving} onClick={onClose} sx={{ color: "text.secondary" }}>
             <X className="h-4 w-4" />
           </ErgIconButton>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4 [scrollbar-gutter:stable]">
-          {selectedOption !== "lecture" ? <HierarchyStrip active={taxonomyMode ?? selectedOption ?? "subject"} /> : null}
-          <ContextBox
-            contextLabel={contextLabel}
-            draftLevelId={draftLevelId}
-            draftLevelOptions={draftLevelOptions}
-            draftSubject={draftSubject}
-            mode={taxonomyMode}
-            option={selectedOption}
-            selectedNode={selectedNode}
-          />
-
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3.5 space-y-3 [scrollbar-gutter:stable]">
           {step === "pick" ? (
             <ContentTypePicker
               options={availableOptions}
@@ -125,7 +131,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
               }}
             />
           ) : (
-            <div className="mt-5 space-y-5">
+            <div className="space-y-3">
               {isTaxonomyMode ? (
                 <TaxonomyFields
                   description={description}
@@ -144,18 +150,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
                 />
               ) : null}
 
-              {!isTaxonomyMode && selectedOption ? (
-                <SelectedOptionHeader
-                  option={selectedOption}
-                  canGoBack={availableOptions.length > 1}
-                  onBack={() => {
-                    setSelectedOption(null);
-                    setStep("pick");
-                  }}
-                />
-              ) : null}
-
-              {!isTaxonomyMode && selectedOption === "lecture" ? (
+              {!isTaxonomyMode && effectiveOption === "lecture" ? (
                 <LectureFields
                   label={label}
                   slidesUrl={slidesUrl}
@@ -164,7 +159,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
                 />
               ) : null}
 
-              {!isTaxonomyMode && selectedOption === "exercise" ? (
+              {!isTaxonomyMode && effectiveOption === "exercise" ? (
                 <ExerciseFields
                   description={description}
                   exerciseQuery={exerciseQuery}
@@ -182,7 +177,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
                 />
               ) : null}
 
-              {!isTaxonomyMode && selectedOption === "resource" ? (
+              {!isTaxonomyMode && effectiveOption === "resource" ? (
                 <ResourceFields
                   description={description}
                   label={label}
@@ -198,47 +193,31 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
                 />
               ) : null}
 
-              {step === "details" ? <StatusField taxonomy={isTaxonomyMode} value={status} onChange={setStatus} /> : null}
+              <StatusField taxonomy={isTaxonomyMode} value={status} onChange={setStatus} />
             </div>
           )}
 
           {error ? (
-            <div className="mt-5 rounded-lg border border-[#FFD0D6] bg-[#FFF1F3] px-4 py-3 text-sm font-semibold text-[#B71D18]">
+            <div className="mt-4 rounded-lg border border-[#FFD0D6] bg-[#FFF1F3] px-4 py-3 text-sm font-semibold text-[#B71D18]">
               {error}
             </div>
           ) : null}
         </div>
 
-        <footer className="flex shrink-0 flex-col items-stretch gap-3 border-t bg-[#FBFCFE] px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6" style={{ borderColor: RESOURCE_BORDER }}>
+        <footer className="flex shrink-0 flex-col items-stretch gap-3 border-t bg-[#FBFCFE] px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6" style={{ borderColor: RESOURCE_BORDER }}>
           <div className="min-w-0 flex-1 text-xs font-semibold text-[#637381]">
             {submitHint}
           </div>
           <div className="flex shrink-0 items-center justify-end gap-2">
-          <ErgButton
-            type="button"
-            variant="outlined"
-            size="medium"
-            disabled={saving}
-            onClick={onClose}
-          >
-            Hủy
-          </ErgButton>
-          {step === "details" ? (
-            <ErgButton
-              type="submit"
-              variant="contained"
-              size="medium"
-              loading={saving}
-              disabled={!canSubmit}
-              sx={{ minWidth: 132 }}
-            >
+            <ErgButton type="button" variant="outlined" size="medium" disabled={saving} onClick={onClose}>
+              Hủy
+            </ErgButton>
+            <ErgButton type="submit" variant="contained" size="medium" loading={saving} disabled={!canSubmit} sx={{ minWidth: 132 }}>
               {submitLabel}
             </ErgButton>
-          ) : null}
           </div>
         </footer>
       </form>
     </div>
   );
 }
-

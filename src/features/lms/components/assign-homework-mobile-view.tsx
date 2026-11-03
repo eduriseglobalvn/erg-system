@@ -35,7 +35,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
     setAttemptLimit,
     maxDurationMinutes,
     setMaxDurationMinutes,
-    setAssignmentClassId,
+    handleAssignmentClassChange,
     selectedGradeLabel,
     setSelectedGradeLabel,
     selectedGradeClassIds,
@@ -60,11 +60,11 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
     setResourceSearch,
     mobileValidationError,
     setMobileValidationError,
-    apiBacked,
+    isSubmitting,
+    isClassLoading,
     gradeOptions,
     assignmentClass,
     groupSourceOptions,
-    getFallbackStudentsForClass,
     students,
     gradeClasses,
     gradeStudentIdsByClass,
@@ -245,18 +245,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                   <div className="grid gap-2.5 p-3">
                     <AppSelect
                       value={assignmentClass?.id ?? ""}
-                      onChange={(event) => {
-                        setAssignmentClassId(event.target.value);
-                        const nextClass = classes.find((classroom) => classroom.id === event.target.value);
-                        setSelectedStudentIds(
-                          new Set(
-                            apiBacked
-                              ? []
-                              : getFallbackStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id),
-                          ),
-                        );
-                        setSearchQuery("");
-                      }}
+                      onChange={(event) => handleAssignmentClassChange(event.target.value)}
                       className="h-10 w-[122px] rounded-[13px] border border-[#cbd7e6] bg-white px-3 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
                     >
                       {classes.map((classroom) => (
@@ -288,6 +277,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                     </div>
                     <MobileStudentSelectionList
                       allSelected={allSelected}
+                      isLoading={isClassLoading}
                       onToggleAll={toggleSelectAll}
                       onToggleStudent={toggleStudent}
                       selectedIds={selectedStudentIds}
@@ -498,18 +488,20 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
             <div className="flex gap-2">
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={step === 1 ? onBack : () => setStep((currentStep) => Math.max(1, currentStep - 1))}
-                className="flex h-11 flex-1 items-center justify-center rounded-[14px] border border-[#d7e0ec] bg-white text-[14px] font-bold text-slate-700"
+                className="flex h-11 flex-1 items-center justify-center rounded-[14px] border border-[#d7e0ec] bg-white text-[14px] font-bold text-slate-700 disabled:opacity-50"
               >
                 {step === 1 ? "Hủy" : "Quay lại"}
               </button>
               <button
                 type="button"
+                disabled={isSubmitting}
                 onClick={step < 2 ? handleNext : handleFinish}
-                className="flex h-11 min-w-0 flex-[1.35] items-center justify-center rounded-[14px] px-4 text-center text-[14px] font-extrabold shadow-[0_10px_20px_rgba(15,108,189,0.28)] ring-1 ring-white/30 transition active:scale-[0.99]"
+                className="flex h-11 min-w-0 flex-[1.35] items-center justify-center rounded-[14px] px-4 text-center text-[14px] font-extrabold shadow-[0_10px_20px_rgba(15,108,189,0.28)] ring-1 ring-white/30 transition active:scale-[0.99] disabled:opacity-50"
                 style={{ backgroundColor: "#0f6cbd", color: "#ffffff" }}
               >
-                <span>{step < 2 ? "Tiếp theo" : "Giao bài"}</span>
+                <span>{step < 2 ? "Tiếp theo" : isSubmitting ? "Đang giao..." : "Giao bài"}</span>
               </button>
             </div>
           </div>

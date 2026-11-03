@@ -33,4 +33,31 @@ describe("class import preview", () => {
       ["A, nâng cao", "Nguyễn Văn A"],
     ]);
   });
+
+  it("automatically detects a Vietnamese school roster and extracts classes without error", () => {
+    const rosterMatrix = [
+      ["", "Trường THCS TRƯƠNG CÔNG ĐỊNH"],
+      ["", "Gv phụ trách: Trần Tường Tuấn"],
+      ["STT", "HỌ VÀ TÊN", "", "LỚP"],
+      ["1", "Lê Hoàng Ngọc", "Anh", "9A1"],
+      ["2", "Nguyễn Minh Trầm", "Anh", "9A1"],
+      ["3", "Lê Hà Hồng", "Ánh", "9A1"],
+    ];
+
+    const rows = buildClassImportPreview(rosterMatrix, {
+      existingClassNames: [],
+      grades: ["6", "7", "8", "9"],
+      usesGrades: true,
+    });
+
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      name: "9A1",
+      grade: "9",
+      homeroomTeacher: "Trần Tường Tuấn",
+      studentCount: 3,
+      valid: true,
+      issues: [],
+    });
+  });
 });

@@ -86,116 +86,364 @@ export function AccessDeniedPage() {
     <Box
       component="main"
       sx={{
-        bgcolor: "#F4F7FB",
-        color: "text.primary",
+        background: "radial-gradient(120% 120% at 50% 0%, #F8FAFD 0%, #EEF2F7 100%)",
+        color: "#1D1D1F",
         display: "flex",
         minHeight: "100svh",
-        px: { xs: 2, sm: 3, lg: 5 },
-        py: { xs: 3, sm: 5, lg: 7 },
+        px: { xs: 2, sm: 3, lg: 4 },
+        py: { xs: 4, sm: 6, lg: 8 },
+        fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Manrope', sans-serif",
       }}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, margin: "auto", maxWidth: 1120, width: "100%" }}>
-        <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: { xs: 0.5, sm: 1 } }}>
-          <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ height: 38, objectFit: "contain", objectPosition: "left center", width: 96 }} />
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 3, margin: "auto", maxWidth: 840, width: "100%" }}>
+        {/* Top Minimal Apple Header */}
+        <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", px: { xs: 1, sm: 1.5 } }}>
+          <Box sx={{ alignItems: "center", display: "flex", gap: 1.75 }}>
+            <Box
+              alt="ERG EduRise Global"
+              component="img"
+              src={ERG_ASSETS.logo}
+              sx={{
+                height: { xs: 46, sm: 54 },
+                width: { xs: 46, sm: 54 },
+                objectFit: "contain",
+                borderRadius: "14px",
+                filter: "drop-shadow(0 4px 12px rgba(15, 23, 42, 0.08))",
+              }}
+            />
+            <Box>
+              <Typography
+                sx={{
+                  color: "#1D1D1F",
+                  fontSize: { xs: 17, sm: 20 },
+                  fontWeight: 850,
+                  letterSpacing: "-0.03em",
+                  lineHeight: 1.15,
+                }}
+              >
+                ERG System
+              </Typography>
+              <Typography
+                sx={{
+                  color: "#86868B",
+                  fontSize: { xs: 11, sm: 12 },
+                  fontWeight: 600,
+                  letterSpacing: "0.02em",
+                  mt: 0.25,
+                }}
+              >
+                EduRise Global Platform
+              </Typography>
+            </Box>
+          </Box>
           <Chip
-            icon={<LockPersonRoundedIcon sx={{ fontSize: 16 }} />}
-            label="ERG · ACCESS POLICY"
-            sx={{ bgcolor: "rgba(15,108,189,0.08)", color: "primary.main", fontSize: 10, fontWeight: 800, letterSpacing: "0.08em" }}
+            icon={<LockPersonRoundedIcon sx={{ fontSize: "15px !important", color: "#6E6E73 !important" }} />}
+            label="CHÍNH SÁCH BẢO MẬT ERG"
+            sx={{
+              bgcolor: "rgba(255, 255, 255, 0.8)",
+              backdropFilter: "blur(12px)",
+              borderColor: "rgba(0, 0, 0, 0.08)",
+              color: "#6E6E73",
+              fontSize: 11,
+              fontWeight: 650,
+              letterSpacing: "0.06em",
+              height: 32,
+              borderRadius: "980px",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.03)",
+            }}
             variant="outlined"
           />
         </Box>
 
+        {/* Apple Style Main Card */}
         <Paper
           component="section"
           elevation={0}
-          sx={{ border: "1px solid", borderColor: "rgba(15,23,42,0.1)", borderRadius: 3, boxShadow: "0 22px 60px rgba(15,23,42,0.09)", overflow: "hidden" }}
+          sx={{
+            bgcolor: "#FFFFFF",
+            border: "1px solid rgba(0, 0, 0, 0.08)",
+            borderRadius: "24px",
+            boxShadow: "0 24px 60px -12px rgba(15, 23, 42, 0.08), 0 3px 12px rgba(15, 23, 42, 0.02)",
+            p: { xs: 3, sm: 5, md: 6 },
+            position: "relative",
+            overflow: "hidden",
+          }}
         >
-          <Box sx={{ display: "grid", gridTemplateColumns: { lg: "minmax(280px, 0.72fr) minmax(0, 1.28fr)" } }}>
-            <Box
-              component="aside"
-              sx={{
-                bgcolor: "#102B4E",
-                color: "common.white",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-between",
-                minHeight: { lg: 620 },
-                p: { xs: 3, sm: 4.5 },
-                position: "relative",
-              }}
-            >
-              <Box sx={{ position: "relative", zIndex: 1 }}>
-                <Box sx={{ alignItems: "center", display: "flex", gap: 1.5 }}>
-                  <Box component="img" alt="ERG" src={ERG_ASSETS.mobileLogo} sx={{ bgcolor: "common.white", borderRadius: 1.5, height: 34, objectFit: "contain", p: 0.6, width: 38 }} />
-                  <Typography sx={{ color: "rgba(255,255,255,0.72)", fontSize: 11, fontWeight: 800, letterSpacing: "0.12em" }}>SECURE WORKSPACE</Typography>
-                </Box>
+          {/* Subtle Apple Ambient Glow in Card Background */}
+          <Box
+            sx={{
+              position: "absolute",
+              top: -80,
+              right: -80,
+              width: 240,
+              height: 240,
+              borderRadius: "50%",
+              background: "radial-gradient(circle, rgba(239, 68, 68, 0.05) 0%, rgba(255,255,255,0) 70%)",
+              pointerEvents: "none",
+            }}
+          />
 
-                <Box sx={{ alignItems: "center", bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.18)", borderRadius: 2.5, display: "flex", height: 72, justifyContent: "center", mt: { xs: 7, sm: 10 }, width: 72 }}>
-                  <GppBadRoundedIcon sx={{ color: "#B8E5FF", fontSize: 38 }} />
+          <Stack spacing={4}>
+            {/* Hero Section */}
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2.25 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Box
+                  sx={{
+                    alignItems: "center",
+                    background: "linear-gradient(135deg, rgba(255, 59, 48, 0.12) 0%, rgba(255, 149, 0, 0.1) 100%)",
+                    border: "1px solid rgba(255, 59, 48, 0.16)",
+                    borderRadius: "18px",
+                    display: "flex",
+                    height: 58,
+                    justifyContent: "center",
+                    width: 58,
+                    boxShadow: "0 4px 14px rgba(255, 59, 48, 0.12)",
+                  }}
+                >
+                  <GppBadRoundedIcon sx={{ color: "#FF3B30", fontSize: 32 }} />
                 </Box>
-                <Typography sx={{ color: "#B8E5FF", fontSize: 11, fontWeight: 800, letterSpacing: "0.12em", mt: 3 }}>403 · ACCESS DENIED</Typography>
-                <Typography component="h1" sx={{ color: "common.white", fontSize: { xs: 27, sm: 32 }, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.15, mt: 1.5 }}>
-                  Quyền truy cập<br />
-                  đang được bảo vệ.
-                </Typography>
-                <Typography sx={{ color: "rgba(255,255,255,0.68)", fontSize: 14, lineHeight: 1.75, maxWidth: 300, mt: 2.5 }}>
-                  Bạn đã xác thực thành công. Workspace yêu cầu một capability riêng được quản trị bởi ERG.
-                </Typography>
-              </Box>
-              <Box sx={{ borderTop: "1px solid rgba(255,255,255,0.14)", mt: 7, pt: 2.5, position: "relative", zIndex: 1 }}>
-                <Typography sx={{ color: "rgba(255,255,255,0.48)", fontSize: 11, lineHeight: 1.6 }}>ERG Access Policy · Session được kiểm tra ở backend</Typography>
-              </Box>
-            </Box>
-
-            <Box sx={{ bgcolor: "common.white", p: { xs: 3, sm: 5, lg: 6 } }}>
-              <Stack spacing={3.25}>
                 <Box>
-                  <Typography sx={{ color: "error.main", fontSize: 12, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>Không đủ quyền</Typography>
-                  <Typography component="h2" sx={{ fontSize: { xs: 25, sm: 31 }, fontWeight: 800, letterSpacing: "-0.035em", lineHeight: 1.16, mt: 1.25 }}>
+                  <Typography
+                    sx={{
+                      color: "#FF3B30",
+                      fontSize: 11,
+                      fontWeight: 750,
+                      letterSpacing: "0.08em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    403 · Access Restricted
+                  </Typography>
+                  <Typography
+                    component="h1"
+                    sx={{
+                      fontSize: { xs: 24, sm: 28, md: 32 },
+                      fontWeight: 800,
+                      letterSpacing: "-0.03em",
+                      lineHeight: 1.2,
+                      color: "#1D1D1F",
+                      mt: 0.25,
+                    }}
+                  >
                     Không thể vào {workspaceLabel}
                   </Typography>
-                  <Typography sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.75, maxWidth: 650, mt: 1.75 }}>
-                    Tài khoản của bạn đã đăng nhập nhưng session hiện tại chưa có quyền cần thiết cho workspace này. Quyền được xác minh lại ở server, vì vậy không thể tự cấp quyền từ trình duyệt.
-                  </Typography>
                 </Box>
+              </Box>
 
-                <Paper sx={{ alignItems: "center", bgcolor: "#F8FAFC", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", gap: 1.5, p: 2 }} variant="outlined">
-                  <Avatar sx={{ bgcolor: "rgba(15,108,189,0.1)", color: "primary.main", fontWeight: 800, height: 40, width: 40 }}>{(accountEmail || "?").slice(0, 1).toUpperCase()}</Avatar>
-                  <Box sx={{ minWidth: 0 }}>
-                    <Typography sx={{ color: "text.secondary", fontSize: 11, fontWeight: 700 }}>Tài khoản hiện tại</Typography>
-                    <Typography sx={{ fontSize: 14, fontWeight: 800, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{accountEmail || "Phiên đăng nhập hiện tại"}</Typography>
-                  </Box>
-                  <CheckCircleRoundedIcon sx={{ color: "success.main", fontSize: 21, ml: "auto" }} />
-                </Paper>
-
-                {targets.length > 0 ? (
-                  <Box>
-                    <Typography sx={{ fontSize: 13, fontWeight: 800, mb: 1.25 }}>Bạn có thể mở workspace được cấp quyền</Typography>
-                    <Box sx={{ display: "grid", gap: 1.25, gridTemplateColumns: { sm: "repeat(2, minmax(0,1fr))" } }}>
-                      {targets.map((target) => <AccessDeniedWorkspaceTargetCard key={target.workspace} target={target} />)}
-                    </Box>
-                  </Box>
-                ) : (
-                  <Paper sx={{ bgcolor: "#FFF8F6", border: "1px solid", borderColor: "rgba(217,45,32,0.18)", borderRadius: 2, p: 2 }} variant="outlined">
-                    <Typography sx={{ color: "#8B241B", fontSize: 13, fontWeight: 800 }}>Chưa tìm thấy workspace khả dụng</Typography>
-                    <Typography sx={{ color: "text.secondary", fontSize: 13, lineHeight: 1.65, mt: 0.5 }}>Vui lòng liên hệ quản trị viên ERG để được gán đúng workspace và capability.</Typography>
-                  </Paper>
-                )}
-
-                <Divider />
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.25 }}>
-                  <Button onClick={loginAgain} startIcon={<PersonRoundedIcon />} sx={{ minHeight: 44, px: 2.25 }} variant="contained">Đăng nhập tài khoản khác</Button>
-                  <Button component={Link} startIcon={<HomeRoundedIcon />} sx={{ minHeight: 44, px: 2.25 }} to="/" variant="outlined">Về trang chủ</Button>
-                  <Button onClick={() => goBackFromAccessDenied(() => void navigate({ to: "/", replace: true }))} startIcon={<ArrowBackRoundedIcon />} sx={{ color: "text.secondary", minHeight: 44, ml: { sm: "auto" }, px: 1.25 }} variant="text">Quay lại</Button>
-                </Box>
-                <Typography sx={{ color: "text.disabled", fontSize: 11, lineHeight: 1.6 }}>Trang yêu cầu: {accessDeniedPathLabel(redirect)}</Typography>
-              </Stack>
+              <Typography
+                sx={{
+                  color: "#6E6E73",
+                  fontSize: 14.5,
+                  lineHeight: 1.65,
+                  maxWidth: 680,
+                }}
+              >
+                Tài khoản của bạn đã đăng nhập nhưng session hiện tại chưa có quyền cần thiết cho workspace này. Quyền được xác minh lại ở server, vì vậy không thể tự cấp quyền từ trình duyệt.
+              </Typography>
             </Box>
-          </Box>
+
+            {/* Current Account Capsule */}
+            <Paper
+              sx={{
+                alignItems: "center",
+                bgcolor: "rgba(245, 245, 247, 0.75)",
+                border: "1px solid rgba(0, 0, 0, 0.06)",
+                borderRadius: "16px",
+                display: "flex",
+                gap: 1.75,
+                p: 2,
+              }}
+              variant="outlined"
+            >
+              <Avatar
+                sx={{
+                  bgcolor: "rgba(0, 113, 227, 0.12)",
+                  color: "#0071E3",
+                  fontWeight: 700,
+                  fontSize: 15,
+                  height: 42,
+                  width: 42,
+                  borderRadius: "12px",
+                }}
+              >
+                {(accountEmail || "?").slice(0, 1).toUpperCase()}
+              </Avatar>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ color: "#86868B", fontSize: 11.5, fontWeight: 650, letterSpacing: "0.02em" }}>
+                  Tài khoản hiện tại
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "#1D1D1F",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {accountEmail || "Phiên đăng nhập hiện tại"}
+                </Typography>
+              </Box>
+              <Chip
+                icon={<CheckCircleRoundedIcon sx={{ fontSize: "16px !important", color: "#34C759 !important" }} />}
+                label="Đã xác thực"
+                size="small"
+                sx={{
+                  bgcolor: "rgba(52, 199, 89, 0.1)",
+                  border: "1px solid rgba(52, 199, 89, 0.2)",
+                  color: "#248A3D",
+                  fontSize: 11.5,
+                  fontWeight: 700,
+                  height: 26,
+                  ml: "auto",
+                  borderRadius: "980px",
+                }}
+              />
+            </Paper>
+
+            {/* Entitled Workspaces or Recovery Callout */}
+            {targets.length > 0 ? (
+              <Box>
+                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "#1D1D1F", mb: 1.75 }}>
+                  Bạn có thể mở workspace được cấp quyền
+                </Typography>
+                <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(2, minmax(0,1fr))" } }}>
+                  {targets.map((target) => (
+                    <AccessDeniedWorkspaceTargetCard key={target.workspace} target={target} />
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <Paper
+                sx={{
+                  bgcolor: "rgba(255, 149, 0, 0.06)",
+                  border: "1px solid rgba(255, 149, 0, 0.2)",
+                  borderRadius: "16px",
+                  p: 2.25,
+                }}
+                variant="outlined"
+              >
+                <Typography sx={{ color: "#B45309", fontSize: 13.5, fontWeight: 750 }}>
+                  Chưa tìm thấy workspace khả dụng
+                </Typography>
+                <Typography sx={{ color: "#78350F", fontSize: 13, lineHeight: 1.6, mt: 0.5 }}>
+                  Vui lòng liên hệ quản trị viên ERG để được gán đúng workspace và capability.
+                </Typography>
+              </Paper>
+            )}
+
+            <Divider sx={{ borderColor: "rgba(0, 0, 0, 0.07)" }} />
+
+            {/* Action Bar */}
+            <Box
+              sx={{
+                alignItems: { sm: "center" },
+                display: "flex",
+                flexDirection: { xs: "column", sm: "row" },
+                flexWrap: "wrap",
+                gap: 1.5,
+              }}
+            >
+              <Button
+                onClick={loginAgain}
+                startIcon={<PersonRoundedIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  bgcolor: "#1D1D1F",
+                  borderRadius: "980px",
+                  color: "#FFFFFF",
+                  fontSize: 14,
+                  fontWeight: 650,
+                  minHeight: 46,
+                  px: 3,
+                  textTransform: "none",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+                  transition: "all 180ms ease",
+                  "&:hover": {
+                    bgcolor: "#333336",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.16)",
+                    transform: "translateY(-1px)",
+                  },
+                  "&:active": {
+                    transform: "scale(0.98)",
+                  },
+                }}
+                variant="contained"
+              >
+                Đăng nhập tài khoản khác
+              </Button>
+
+              <Button
+                component={Link}
+                startIcon={<HomeRoundedIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  borderColor: "rgba(0, 0, 0, 0.14)",
+                  borderRadius: "980px",
+                  color: "#1D1D1F",
+                  fontSize: 14,
+                  fontWeight: 650,
+                  minHeight: 46,
+                  px: 2.75,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "rgba(0, 0, 0, 0.3)",
+                    bgcolor: "rgba(0, 0, 0, 0.03)",
+                  },
+                  "&:active": {
+                    transform: "scale(0.98)",
+                  },
+                }}
+                to="/"
+                variant="outlined"
+              >
+                Về trang chủ
+              </Button>
+
+              <Button
+                onClick={() => goBackFromAccessDenied(() => void navigate({ to: "/", replace: true }))}
+                startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 18 }} />}
+                sx={{
+                  color: "#6E6E73",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  minHeight: 46,
+                  ml: { sm: "auto" },
+                  px: 2,
+                  textTransform: "none",
+                  borderRadius: "980px",
+                  "&:hover": {
+                    color: "#1D1D1F",
+                    bgcolor: "rgba(0, 0, 0, 0.04)",
+                  },
+                }}
+                variant="text"
+              >
+                Quay lại
+              </Button>
+            </Box>
+
+            <Typography sx={{ color: "#86868B", fontSize: 11.5, lineHeight: 1.6, textAlign: "left" }}>
+              Trang yêu cầu: {accessDeniedPathLabel(redirect)}
+            </Typography>
+          </Stack>
         </Paper>
 
-        <Typography component="footer" sx={{ color: "text.disabled", fontSize: 11, textAlign: "center" }}>Nếu bạn cho rằng đây là nhầm lẫn, hãy gửi email tài khoản và workspace cần truy cập cho quản trị viên ERG.</Typography>
+        {/* Footer Notice */}
+        <Typography
+          component="footer"
+          sx={{
+            color: "#86868B",
+            fontSize: 12,
+            textAlign: "center",
+            lineHeight: 1.6,
+            px: 2,
+          }}
+        >
+          Nếu bạn cho rằng đây là nhầm lẫn, hãy gửi email tài khoản và workspace cần truy cập cho quản trị viên ERG.
+        </Typography>
       </Box>
     </Box>
   );
 }
+
+export default AccessDeniedPage;

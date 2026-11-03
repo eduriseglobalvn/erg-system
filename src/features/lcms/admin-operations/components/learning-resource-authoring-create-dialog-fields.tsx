@@ -38,11 +38,11 @@ export function TaxonomyFields({
   onLevelChange: (value: string) => void;
   onSubjectChange: (value: string) => void;
 }) {
-  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên level" : "Tên chủ đề";
-  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Máy tính căn bản" : "Ví dụ: 01. Quản lý thư mục và tệp";
+  const titleLabel = role === "subject" ? "Tên môn học" : role === "level" ? "Tên chặng học (Level)" : "Tên chủ đề";
+  const titlePlaceholder = role === "subject" ? "Ví dụ: IC3 GS6" : role === "level" ? "Ví dụ: Level 1" : "Ví dụ: Máy tính căn bản";
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-3">
       {showSubjectPicker ? (
         <Field label="Môn học">
           <AppSelect variant="native" className={inputClassName} value={draftSubjectId} onChange={(event) => onSubjectChange(event.target.value)}>
@@ -57,32 +57,107 @@ export function TaxonomyFields({
       ) : null}
 
       {showLevelPicker ? (
-        <Field label="Level cha">
+        <Field label="Level">
           <AppSelect variant="native" className={inputClassName} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
-            <option value="">Chọn level</option>
+            <option value="">Không phân level (trực tiếp dưới môn học)</option>
             {draftLevelOptions.map((level) => (
               <option key={level.optionId ?? level.id} value={level.optionId ?? ""}>
                 {level.label}
               </option>
             ))}
           </AppSelect>
-          {draftSubjectId && !draftLevelOptions.length ? (
-            <p className="text-xs leading-5 text-[#B76E00]">Môn học này chưa có level. Hãy tạo level trước khi tạo chủ đề.</p>
-          ) : null}
         </Field>
       ) : null}
 
       <TextField fullWidth size="small" label={titleLabel} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder={titlePlaceholder} autoFocus />
 
-      <Field label="Mô tả ngắn">
+      <Field label="Mô tả">
         <textarea
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
-          placeholder="Ghi chú ngắn để giáo viên nhận biết mục này."
-          className={cn(inputClassName, "min-h-20 resize-none py-3")}
+          placeholder="Mô tả (tùy chọn)..."
+          rows={2}
+          className={cn(inputClassName, "min-h-14 resize-none py-2")}
         />
       </Field>
+    </div>
+  );
+}
 
+export function LessonContainerFields({
+  draftSubjectId,
+  subjects,
+  onSubjectChange,
+  draftLevelId,
+  draftLevelOptions,
+  onLevelChange,
+  draftTopicId,
+  draftTopicOptions,
+  onTopicChange,
+}: {
+  draftSubjectId: string;
+  subjects: StudioSubject[];
+  onSubjectChange: (value: string) => void;
+  draftLevelId: string;
+  draftLevelOptions: StudioNode[];
+  onLevelChange: (value: string) => void;
+  draftTopicId: string;
+  draftTopicOptions: StudioNode[];
+  onTopicChange: (value: string) => void;
+}) {
+  return (
+    <div className="grid gap-2.5 rounded-lg border border-[#D9E2EF] bg-[#F8FAFC] p-2.5">
+      <div className="grid gap-2.5 md:grid-cols-3">
+        <Field label="Môn học">
+          <AppSelect
+            variant="native"
+            className={inputClassName}
+            value={draftSubjectId}
+            onChange={(event) => onSubjectChange(event.target.value)}
+          >
+            <option value="">Chọn môn học</option>
+            {subjects.map((subject) => (
+              <option key={subject.id} value={subject.id}>
+                {subject.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+
+        <Field label="Level">
+          <AppSelect
+            variant="native"
+            className={inputClassName}
+            value={draftLevelId}
+            onChange={(event) => onLevelChange(event.target.value)}
+            disabled={!draftSubjectId}
+          >
+            <option value="">Không phân level</option>
+            {draftLevelOptions.map((level) => (
+              <option key={level.optionId ?? level.id} value={level.optionId ?? level.id}>
+                {level.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+
+        <Field label="Chủ đề">
+          <AppSelect
+            variant="native"
+            className={inputClassName}
+            value={draftTopicId}
+            onChange={(event) => onTopicChange(event.target.value)}
+            disabled={!draftSubjectId}
+          >
+            <option value="">Chủ đề chung</option>
+            {draftTopicOptions.map((topic) => (
+              <option key={topic.optionId ?? topic.id} value={topic.optionId ?? topic.id}>
+                {topic.label}
+              </option>
+            ))}
+          </AppSelect>
+        </Field>
+      </div>
     </div>
   );
 }
@@ -99,11 +174,11 @@ export function LectureFields({
   onSlidesUrlChange: (value: string) => void;
 }) {
   return (
-    <div className="grid gap-4 pt-1">
-      <Field label="Tên bài giảng">
-        <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài giảng 01 - Quản lý thư mục" autoFocus />
+    <div className="grid gap-3 pt-1">
+      <Field label="Tên bài học">
+        <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài 01 - Khởi động và làm quen máy tính" autoFocus />
       </Field>
-      <Field label="Link Google Slides">
+      <Field label="Link bài giảng (Google Slides)">
         <input className={inputClassName} value={slidesUrl} onChange={(event) => onSlidesUrlChange(event.target.value)} placeholder="Dán link edit, publish hoặc embed của Google Slides" />
       </Field>
     </div>
@@ -302,4 +377,3 @@ export function QuickIconPicker({
     </Field>
   );
 }
-

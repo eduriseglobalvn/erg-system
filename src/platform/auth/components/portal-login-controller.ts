@@ -132,7 +132,7 @@ export function sanitizeRedirect(value: string | null, fallback = "/") {
 
 export function defaultPortalRedirect(portal: PortalKey) {
   if (portal === "lcms") return adminPath("/content/resources");
-  if (portal === "lms") return teacherPath("/");
+  if (portal === "lms") return teacherPath("/home");
   return "/";
 }
 

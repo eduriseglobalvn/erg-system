@@ -10,7 +10,7 @@ import Paper from "@mui/material/Paper";
 import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { alpha } from "@mui/material/styles";
+
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { cn } from "@/lib/utils";
 import type { QuestionBankCopy } from "./question-bank-copy";
@@ -44,42 +44,45 @@ export function QuizBuilderPanel({
 }) {
   const hasSelection = selectedQuestions.length > 0;
   const canAutoPick = autoTopicIds.length > 0 && autoPickedQuestions.length >= autoCount;
+
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
-        borderColor: alpha("#0f172a", 0.08),
-        borderRadius: 3,
-        boxShadow: "0 12px 32px rgba(15,23,42,0.045)",
+        bgcolor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         height: "fit-content",
         overflow: "visible",
-        p: 2,
+        p: 2.25,
         position: { xl: "sticky" },
         top: { xl: 16 },
       }}
     >
-      <Stack spacing={1.5}>
+      <Stack spacing={2}>
         <Box>
-          <Typography sx={{ color: "#111827", fontSize: 16, fontWeight: 850, lineHeight: 1.2 }}>
+          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
             {copy.builderTitle}
           </Typography>
-          <Typography sx={{ color: "#64748b", fontSize: 12.5, fontWeight: 550, mt: 0.5 }}>
+          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25, lineHeight: 1.4 }}>
             {copy.builderDescription}
           </Typography>
         </Box>
 
+        {/* Selected Counter Card */}
         <Box
           sx={{
-            bgcolor: alpha("#0f6cbd", 0.045),
-            border: `1px solid ${alpha("#0f6cbd", 0.14)}`,
-            borderRadius: 2.5,
+            bgcolor: "rgba(0, 113, 227, 0.04)",
+            border: "1px solid rgba(0, 113, 227, 0.16)",
+            borderRadius: "14px",
             p: 2,
           }}
         >
-          <Typography sx={{ color: "#111827", fontSize: 40, fontWeight: 900, lineHeight: 1 }}>
+          <Typography sx={{ color: "#0071E3", fontSize: 38, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1 }}>
             {selectedQuestions.length}
           </Typography>
-          <Typography sx={{ color: "#64748b", fontSize: 11, fontWeight: 850, mt: 1, textTransform: "uppercase" }}>
+          <Typography sx={{ color: "#6E6E73", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", mt: 0.75, textTransform: "uppercase" }}>
             {copy.selectedQuestionCount}
           </Typography>
           <Button
@@ -87,58 +90,81 @@ export function QuizBuilderPanel({
             variant="contained"
             onClick={onCreateQuiz}
             disabled={!hasSelection}
-            sx={{ borderRadius: 2, fontSize: 14, fontWeight: 850, mt: 2, py: 1.2 }}
+            sx={{
+              bgcolor: hasSelection ? "#0071E3 !important" : "rgba(0, 0, 0, 0.08) !important",
+              borderRadius: "10px",
+              boxShadow: hasSelection ? "0 2px 8px rgba(0, 113, 227, 0.28)" : "none",
+              color: hasSelection ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
+              fontSize: "0.875rem",
+              fontWeight: 700,
+              mt: 2,
+              py: 1.1,
+              textTransform: "none",
+              transition: "all 0.15s ease",
+              "&:hover": {
+                bgcolor: hasSelection ? "#0077ED !important" : "rgba(0, 0, 0, 0.08) !important",
+                boxShadow: hasSelection ? "0 4px 14px rgba(0, 113, 227, 0.38)" : "none",
+                transform: hasSelection ? "translateY(-1px)" : "none",
+              },
+              "&:active": {
+                transform: hasSelection ? "scale(0.985)" : "none",
+              },
+            }}
           >
             {copy.createQuizAction(selectedQuestions.length)}
           </Button>
         </Box>
 
+        {/* Auto Builder Section */}
         <Box
           sx={{
-            bgcolor: "#f8fafc",
-            border: `1px solid ${alpha("#0f172a", 0.07)}`,
-            borderRadius: 2.5,
-            p: 1.5,
+            bgcolor: "#FBFBFD",
+            border: "1px solid rgba(0, 0, 0, 0.06)",
+            borderRadius: "14px",
+            p: 1.75,
           }}
         >
-          <Typography sx={{ color: "#475569", fontSize: 11, fontWeight: 850, mb: 1.5, textTransform: "uppercase" }}>
+          <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", mb: 1.5, textTransform: "uppercase" }}>
             {copy.autoBuilderTitle}
           </Typography>
           <Stack spacing={1.5}>
-          <LabeledNumberField
-            label={copy.autoCountLabel}
-            value={autoCount}
-            onChange={onAutoCountChange}
-          />
-          
-          <AutoTopicDropdown
-            copy={copy}
-            getTopicQuestionCount={getTopicQuestionCount}
-            levelTopics={levelTopics}
-            selectedTopicIds={autoTopicIds}
-            onTopicToggle={onTopicToggle}
-          />
-          
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={onAutoPick}
-            disabled={!canAutoPick}
-            sx={{
-              bgcolor: canAutoPick ? "#111827" : "#e2e8f0",
-              borderRadius: 2,
-              boxShadow: "none",
-              color: canAutoPick ? "#fff" : "#94a3b8",
-              fontWeight: 800,
-              py: 1.1,
-              "&:hover": {
-                bgcolor: canAutoPick ? "#1f2937" : "#e2e8f0",
+            <LabeledNumberField
+              label={copy.autoCountLabel}
+              value={autoCount}
+              onChange={onAutoCountChange}
+            />
+
+            <AutoTopicDropdown
+              copy={copy}
+              getTopicQuestionCount={getTopicQuestionCount}
+              levelTopics={levelTopics}
+              selectedTopicIds={autoTopicIds}
+              onTopicToggle={onTopicToggle}
+            />
+
+            <Button
+              fullWidth
+              variant="contained"
+              onClick={onAutoPick}
+              disabled={!canAutoPick}
+              sx={{
+                bgcolor: canAutoPick ? "#1D1D1F !important" : "rgba(0, 0, 0, 0.08) !important",
+                borderRadius: "10px",
                 boxShadow: "none",
-              },
-            }}
-          >
-            {copy.autoPickAction}
-          </Button>
+                color: canAutoPick ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
+                fontSize: "0.85rem",
+                fontWeight: 700,
+                py: 1,
+                textTransform: "none",
+                transition: "all 0.15s ease",
+                "&:hover": {
+                  bgcolor: canAutoPick ? "#2C2C2E !important" : "rgba(0, 0, 0, 0.08) !important",
+                  boxShadow: canAutoPick ? "0 2px 8px rgba(0, 0, 0, 0.12)" : "none",
+                },
+              }}
+            >
+              {copy.autoPickAction}
+            </Button>
           </Stack>
         </Box>
       </Stack>
@@ -179,66 +205,91 @@ function AutoTopicDropdown({
   }
 
   return (
-    <div className="space-y-3">
-      <FormControl fullWidth size="small" className="bg-white">
-        <InputLabel id="auto-topic-select-label">{copy.autoTopicLabel}</InputLabel>
-        <Select
-          labelId="auto-topic-select-label"
-          multiple
-          value={selectedTopicIds}
-          MenuProps={QUESTION_BANK_SELECT_MENU_PROPS}
-          onChange={(event) => handleTopicChange(event.target.value)}
-          input={<OutlinedInput label={copy.autoTopicLabel} />}
-          renderValue={() => (
-            <span className={cn("font-bold", selectedTopics.length ? "text-slate-900" : "text-slate-400")}>
-              {summaryLabel}
-            </span>
-          )}
-          sx={{
-            borderRadius: "12px",
-            backgroundColor: "#fff",
-            boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
-            "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d7e0ec" },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#93c5fd" },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#1976d2", borderWidth: 2 },
-            "& .MuiSelect-select": {
-              minHeight: "28px",
-              display: "flex",
-              alignItems: "center",
-              paddingTop: "10px",
-              paddingBottom: "10px",
-              fontSize: "14px",
-            },
-          }}
-        >
-          {levelTopics.map((topic) => {
-            const checked = selectedTopicIdSet.has(topic.id);
-            const questionCount = getTopicQuestionCount(topic.id);
+    <FormControl fullWidth size="small">
+      <InputLabel id="auto-topic-select-label" sx={{ fontSize: "0.825rem", fontWeight: 600, color: "#6E6E73" }}>
+        {copy.autoTopicLabel}
+      </InputLabel>
+      <Select
+        labelId="auto-topic-select-label"
+        multiple
+        value={selectedTopicIds}
+        MenuProps={QUESTION_BANK_SELECT_MENU_PROPS}
+        onChange={(event) => handleTopicChange(event.target.value)}
+        input={<OutlinedInput label={copy.autoTopicLabel} />}
+        renderValue={() => (
+          <span className={cn("text-xs font-bold", selectedTopics.length ? "text-slate-900" : "text-slate-400")}>
+            {summaryLabel}
+          </span>
+        )}
+        sx={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: "10px",
+          fontSize: "0.85rem",
+          "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0, 0, 0, 0.12)" },
+          "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0, 0, 0, 0.24)" },
+          "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#0071E3",
+            boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+          },
+          "& .MuiSelect-select": {
+            alignItems: "center",
+            display: "flex",
+            minHeight: "24px",
+            paddingBottom: "8px",
+            paddingTop: "8px",
+          },
+        }}
+      >
+        {levelTopics.map((topic) => {
+          const checked = selectedTopicIdSet.has(topic.id);
+          const questionCount = getTopicQuestionCount(topic.id);
 
-            return (
-              <MenuItem key={topic.id} value={topic.id} className="gap-2 rounded-lg py-1.5">
-                <Checkbox checked={checked} size="small" />
-                <ListItemText
-                  primary={
-                    <span className={cn("block truncate", checked ? "font-bold text-blue-800" : "font-semibold text-slate-700")}>
-                      {topic.label}
-                    </span>
-                  }
-                />
-                <span
-                  className={cn(
-                    "ml-2 shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold",
-                    checked ? "bg-blue-50 text-blue-700 ring-1 ring-blue-100" : "bg-slate-100 text-slate-500",
-                  )}
-                >
-                  {copy.questionCount(questionCount)}
-                </span>
-              </MenuItem>
-            );
-          })}
-        </Select>
-      </FormControl>
-
-    </div>
+          return (
+            <MenuItem key={topic.id} value={topic.id} sx={{ borderRadius: "8px", gap: 1, mx: 0.5, my: 0.25, py: 1 }}>
+              <Checkbox
+                checked={checked}
+                size="small"
+                sx={{
+                  color: "rgba(0, 0, 0, 0.25)",
+                  p: 0.25,
+                  "&.Mui-checked": { color: "#0071E3" },
+                }}
+              />
+              <ListItemText
+                primary={
+                  <Typography
+                    sx={{
+                      color: checked ? "#0071E3" : "#1D1D1F",
+                      fontSize: "0.85rem",
+                      fontWeight: checked ? 700 : 550,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {topic.label}
+                  </Typography>
+                }
+              />
+              <Box
+                component="span"
+                sx={{
+                  bgcolor: checked ? "rgba(0, 113, 227, 0.08)" : "rgba(0, 0, 0, 0.05)",
+                  borderRadius: "9999px",
+                  color: checked ? "#0071E3" : "#86868B",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  ml: 1,
+                  px: 1,
+                  py: 0.2,
+                }}
+              >
+                {copy.questionCount(questionCount)}
+              </Box>
+            </MenuItem>
+          );
+        })}
+      </Select>
+    </FormControl>
   );
 }

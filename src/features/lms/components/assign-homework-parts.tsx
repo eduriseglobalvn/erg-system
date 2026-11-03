@@ -1,4 +1,6 @@
+import { memo } from "react";
 import LmsCheckbox from "@mui/material/Checkbox";
+import Skeleton from "@mui/material/Skeleton";
 
 import {
   getMockBirthDate,
@@ -42,9 +44,89 @@ function StudentProgressCell({ value }: { value: number }) {
   );
 }
 
+const SKELETON_ROWS = Array.from({ length: 8 }, (_, i) => i);
+
+function StudentSelectionSkeletonRow({ index }: { index: number }) {
+  return (
+    <tr className="bg-white">
+      <td className="sticky left-0 z-20 border-b border-r border-[#dbe4f0] bg-white px-3 py-2.5 text-center">
+        <Skeleton variant="rounded" width={18} height={18} sx={{ mx: "auto", borderRadius: "4px" }} />
+      </td>
+      <td className="sticky left-12 z-20 border-b border-r border-[#dbe4f0] bg-white px-3 py-2.5 text-center">
+        <Skeleton variant="text" width={20} height={18} sx={{ mx: "auto" }} />
+      </td>
+      <td className="sticky left-[104px] z-20 border-b border-r border-[#dbe4f0] bg-white px-3 py-2.5">
+        <Skeleton variant="text" width={110 + (index % 4) * 20} height={18} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="text" width={75} height={18} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="text" width={40} height={18} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="rounded" width={48} height={20} sx={{ borderRadius: "10px" }} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="text" width={140} height={18} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="rounded" width={120} height={10} sx={{ borderRadius: "5px" }} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
+        <Skeleton variant="text" width={85} height={18} />
+      </td>
+    </tr>
+  );
+}
+
+export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
+  student,
+  index,
+  isChecked,
+  onToggleStudent,
+}: {
+  student: ClassroomStudent;
+  index: number;
+  isChecked: boolean;
+  onToggleStudent: (studentId: string) => void;
+}) {
+  const level = getMockStudentLevel(student.status);
+  return (
+    <tr
+      onClick={() => onToggleStudent(student.id)}
+      className={cn(
+        "group transition-colors duration-100 cursor-pointer select-none",
+        isChecked ? "bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]"
+      )}
+    >
+      <td className="sticky left-0 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center">
+        <AssignmentCheckbox checked={isChecked} onChange={() => onToggleStudent(student.id)} label={`Chọn ${student.name}`} />
+      </td>
+      <td className="sticky left-12 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center text-[13px] font-semibold text-slate-600">
+        {index + 1}
+      </td>
+      <td className="sticky left-[104px] z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 font-bold text-[var(--erg-blue)] hover:underline">
+        {student.name}
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{getMockBirthDate(index)}</td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{student.className}</td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
+        <StudentLevelBadge level={level} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-800">{student.currentAssignment}</td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
+        <StudentProgressCell value={student.progressRate} />
+      </td>
+      <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">{student.lastActivity}</td>
+    </tr>
+  );
+});
+
 export function StudentSelectionTable({
   allSelected,
   className,
+  isLoading = false,
   onToggleAll,
   onToggleStudent,
   selectedIds,
@@ -52,13 +134,19 @@ export function StudentSelectionTable({
 }: {
   allSelected: boolean;
   className?: string;
+  isLoading?: boolean;
   onToggleAll: () => void;
   onToggleStudent: (studentId: string) => void;
   selectedIds: Set<string>;
   students: ClassroomStudent[];
 }) {
   return (
-    <div className={cn("min-h-0 flex-1 overflow-auto", className)}>
+    <div className={cn("min-h-0 flex-1 overflow-auto relative", className)}>
+      {isLoading && students.length > 0 ? (
+        <div className="sticky top-0 left-0 right-0 z-50 h-0.5 w-full overflow-hidden bg-blue-100">
+          <div className="h-full bg-[var(--erg-blue)] animate-pulse" />
+        </div>
+      ) : null}
       <table className="erg-data-table min-w-[1160px] w-full border-separate border-spacing-0 text-[14px]">
         <thead>
           <tr className="bg-[#F4F6F8] text-[13px] font-bold tracking-normal text-[#344054]">
@@ -75,34 +163,26 @@ export function StudentSelectionTable({
             <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Hoạt động gần nhất</th>
           </tr>
         </thead>
-        <tbody>
-          {students.map((student, index) => {
-            const isChecked = selectedIds.has(student.id);
-            const level = getMockStudentLevel(student.status);
-            return (
-              <tr key={student.id} className={cn("group transition-colors", isChecked ? "bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]")}>
-                <td className="sticky left-0 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center">
-                  <AssignmentCheckbox checked={isChecked} onChange={() => onToggleStudent(student.id)} label={`Chọn ${student.name}`} />
-                </td>
-                <td className="sticky left-12 z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 text-center text-[13px] font-semibold text-slate-600">
-                  {index + 1}
-                </td>
-                <td className="sticky left-[104px] z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 font-bold text-[var(--erg-blue)]">
-                  {student.name}
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{getMockBirthDate(index)}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{student.className}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-                  <StudentLevelBadge level={level} />
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-800">{student.currentAssignment}</td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-                  <StudentProgressCell value={student.progressRate} />
-                </td>
-                <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">{student.lastActivity}</td>
-              </tr>
-            );
-          })}
+        <tbody className={cn("transition-opacity duration-200", isLoading && students.length > 0 ? "opacity-60" : "opacity-100")}>
+          {isLoading && students.length === 0 ? (
+            SKELETON_ROWS.map((idx) => <StudentSelectionSkeletonRow key={idx} index={idx} />)
+          ) : students.length === 0 ? (
+            <tr>
+              <td colSpan={9} className="py-12 text-center text-[13px] font-medium text-slate-400">
+                Chưa có dữ liệu học sinh của lớp này
+              </td>
+            </tr>
+          ) : (
+            students.map((student, index) => (
+              <StudentSelectionTableRow
+                key={student.id}
+                student={student}
+                index={index}
+                isChecked={selectedIds.has(student.id)}
+                onToggleStudent={onToggleStudent}
+              />
+            ))
+          )}
         </tbody>
       </table>
     </div>
@@ -150,12 +230,14 @@ export function MobileAssignProgress({
 
 export function MobileStudentSelectionList({
   allSelected,
+  isLoading = false,
   onToggleAll,
   onToggleStudent,
   selectedIds,
   students,
 }: {
   allSelected: boolean;
+  isLoading?: boolean;
   onToggleAll: () => void;
   onToggleStudent: (studentId: string) => void;
   selectedIds: Set<string>;
@@ -172,7 +254,20 @@ export function MobileStudentSelectionList({
         <AssignmentCheckbox checked={allSelected} onChange={onToggleAll} label="Chọn tất cả học sinh trong danh sách lọc" />
       </button>
       <div className="grid max-h-[330px] gap-1.5 overflow-y-auto p-2">
-        {students.length === 0 ? (
+        {isLoading && students.length === 0 ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between gap-3 rounded-[14px] border border-white bg-white p-3 shadow-[0_4px_12px_rgba(15,23,42,0.03)]">
+              <div className="flex items-center gap-3">
+                <Skeleton variant="rounded" width={18} height={18} sx={{ borderRadius: "4px" }} />
+                <div className="grid gap-1">
+                  <Skeleton variant="text" width={120} height={16} />
+                  <Skeleton variant="text" width={60} height={12} />
+                </div>
+              </div>
+              <Skeleton variant="rounded" width={40} height={18} sx={{ borderRadius: "10px" }} />
+            </div>
+          ))
+        ) : students.length === 0 ? (
           <div className="rounded-[14px] border border-dashed border-[#cbd7e6] bg-white px-4 py-5 text-center">
             <div className="text-[14px] font-extrabold text-slate-900">Không có học sinh</div>
             <div className="mt-1 text-[12px] font-semibold leading-5 text-slate-500">Thử chọn lại lớp hoặc xóa bộ lọc tìm kiếm.</div>

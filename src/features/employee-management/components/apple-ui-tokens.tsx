@@ -1,0 +1,438 @@
+import LaptopMacRoundedIcon from "@mui/icons-material/LaptopMacRounded";
+import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
+import TabletMacRoundedIcon from "@mui/icons-material/TabletMacRounded";
+import Avatar, { type AvatarProps } from "@mui/material/Avatar";
+import Box, { type BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
+
+export const appleDesign = {
+  colors: {
+    blue: "#0071E3",
+    blueHover: "#0077ED",
+    bluePressed: "#005BB5",
+    blueSoft: "rgba(0, 113, 227, 0.08)",
+    blueSoftBorder: "rgba(0, 113, 227, 0.18)",
+    green: "#34C759",
+    greenSoft: "rgba(52, 199, 89, 0.12)",
+    greenText: "#15803D",
+    greenDot: "#34C759",
+    amber: "#FF9500",
+    amberSoft: "rgba(255, 149, 0, 0.12)",
+    amberText: "#B45309",
+    amberDot: "#FF9500",
+    red: "#FF3B30",
+    redSoft: "rgba(255, 59, 48, 0.1)",
+    redText: "#DC2626",
+    redDot: "#FF3B30",
+    danger: "#FF3B30",
+    dangerText: "#DC2626",
+    purple: "#AF52DE",
+    purpleSoft: "rgba(175, 82, 222, 0.12)",
+    purpleText: "#7E22CE",
+    surface: "#FFFFFF",
+    surfaceSubtle: "#F5F5F7",
+    surfaceGlass: "rgba(255, 255, 255, 0.88)",
+    border: "rgba(0, 0, 0, 0.06)",
+    borderMedium: "rgba(0, 0, 0, 0.1)",
+    borderHover: "rgba(0, 0, 0, 0.14)",
+    borderSubtle: "rgba(0, 0, 0, 0.04)",
+    textPrimary: "#1D1D1F",
+    textSecondary: "#6E6E73",
+    textTertiary: "#86868B",
+  },
+  shadows: {
+    card: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
+    cardElevated: "0 4px 16px rgba(0, 0, 0, 0.04), 0 16px 36px -4px rgba(0, 0, 0, 0.08)",
+    button: "0 2px 8px rgba(0, 113, 227, 0.28)",
+    buttonHover: "0 4px 14px rgba(0, 113, 227, 0.38)",
+    pill: "0 1px 3px rgba(0, 0, 0, 0.06)",
+    sheet: "0 20px 48px rgba(0, 0, 0, 0.12), 0 4px 16px rgba(0, 0, 0, 0.06)",
+    popover: "0 12px 36px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06)",
+  },
+  radius: {
+    sm: 8,
+    md: 12,
+    lg: 16,
+    xl: 20,
+    full: 9999,
+  },
+} as const;
+
+export const appleCleanInputSx = {
+  width: "100%",
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#FBFBFD",
+    borderRadius: "10px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    transition: "all 0.15s ease",
+    "& fieldset": {
+      borderColor: "rgba(0, 0, 0, 0.12)",
+      borderRadius: "10px",
+    },
+    "&:hover": {
+      backgroundColor: "#FFFFFF",
+      "& fieldset": {
+        borderColor: "rgba(0, 0, 0, 0.24)",
+      },
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#FFFFFF",
+      "& fieldset": {
+        borderColor: "#0071E3",
+        borderWidth: "1.5px",
+        boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+      },
+    },
+    "&.Mui-disabled": {
+      backgroundColor: "rgba(0, 0, 0, 0.03)",
+      "& fieldset": {
+        borderColor: "rgba(0, 0, 0, 0.08)",
+      },
+    },
+  },
+  "& .MuiOutlinedInput-input": {
+    padding: "9px 13px",
+    height: "22px",
+    color: "#1D1D1F",
+    "&::placeholder": {
+      color: "#86868B",
+      opacity: 1,
+    },
+  },
+  "& .MuiSelect-select": {
+    padding: "9px 13px !important",
+    height: "22px !important",
+    display: "flex",
+    alignItems: "center",
+  },
+};
+
+export function AppleFormField({
+  children,
+  label,
+  required,
+  helperText,
+  fullWidth = true,
+  sx,
+}: {
+  children: ReactNode;
+  fullWidth?: boolean;
+  helperText?: string;
+  label?: string;
+  required?: boolean;
+  sx?: BoxProps["sx"];
+}) {
+  return (
+    <Box
+      sx={[
+        {
+          display: "flex",
+          flexDirection: "column",
+          gap: 0.65,
+          width: fullWidth ? "100%" : "auto",
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+    >
+      {label && (
+        <Typography
+          sx={{
+            color: appleDesign.colors.textPrimary,
+            fontSize: "0.8125rem",
+            fontWeight: 650,
+            letterSpacing: "-0.01em",
+            userSelect: "none",
+          }}
+        >
+          {label}
+          {required && (
+            <Box component="span" sx={{ color: appleDesign.colors.red, ml: 0.4 }}>
+              *
+            </Box>
+          )}
+        </Typography>
+      )}
+      {children}
+      {helperText && (
+        <Typography
+          variant="caption"
+          sx={{
+            color: appleDesign.colors.textTertiary,
+            fontSize: "0.75rem",
+            lineHeight: 1.3,
+          }}
+        >
+          {helperText}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+export const appleInputSx = {
+  width: "100%",
+  "& .MuiInputLabel-root": {
+    color: "#6E6E73",
+    fontSize: "0.85rem",
+    fontWeight: 650,
+    letterSpacing: "-0.01em",
+    "&.Mui-focused": {
+      color: "#0071E3",
+    },
+  },
+  "& .MuiOutlinedInput-root": {
+    backgroundColor: "#FBFBFD",
+    borderRadius: "10px",
+    fontSize: "0.875rem",
+    fontWeight: 500,
+    transition: "all 0.15s ease",
+    "& fieldset": {
+      borderColor: "rgba(0, 0, 0, 0.12)",
+      borderRadius: "10px",
+    },
+    "&:hover": {
+      backgroundColor: "#FFFFFF",
+      "& fieldset": {
+        borderColor: "rgba(0, 0, 0, 0.24)",
+      },
+    },
+    "&.Mui-focused": {
+      backgroundColor: "#FFFFFF",
+      "& fieldset": {
+        borderColor: "#0071E3",
+        borderWidth: "1.5px",
+        boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+      },
+    },
+  },
+  "& .MuiOutlinedInput-input": {
+    padding: "10px 14px",
+    color: "#1D1D1F",
+    "&::placeholder": {
+      color: "#86868B",
+      opacity: 1,
+    },
+  },
+};
+
+const AVATAR_GRADIENTS = [
+  { bg: "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)", color: "#3730A3" },
+  { bg: "linear-gradient(135deg, #E0F2FE 0%, #BAE6FD 100%)", color: "#0369A1" },
+  { bg: "linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%)", color: "#92400E" },
+  { bg: "linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%)", color: "#166534" },
+  { bg: "linear-gradient(135deg, #FCE7F3 0%, #FBCFE8 100%)", color: "#9D174D" },
+  { bg: "linear-gradient(135deg, #EDE9FE 0%, #DDD6FE 100%)", color: "#5B21B6" },
+  { bg: "linear-gradient(135deg, #FFEDD5 0%, #FED7AA 100%)", color: "#C2410C" },
+];
+
+export function getInitials(name?: string | null) {
+  if (!name) return "ERG";
+  const trimmed = name.trim();
+  if (!trimmed) return "ERG";
+  const words = trimmed.split(/\s+/).filter(Boolean);
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
+export function getAvatarColorStyle(name?: string | null) {
+  const safeName = name || "ERG";
+  let hash = 0;
+  for (let i = 0; i < safeName.length; i++) {
+    hash = safeName.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const idx = Math.abs(hash) % AVATAR_GRADIENTS.length;
+  return AVATAR_GRADIENTS[idx];
+}
+
+export function AppleAvatar({
+  name,
+  size = 38,
+  sx,
+  ...props
+}: {
+  name?: string | null;
+  size?: number;
+} & AvatarProps) {
+  const style = getAvatarColorStyle(name);
+  const initials = getInitials(name);
+  return (
+    <Avatar
+      sx={[
+        {
+          background: style.bg,
+          border: `1.5px solid ${appleDesign.colors.surface}`,
+          boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+          color: style.color,
+          fontSize: size * 0.4,
+          fontWeight: 700,
+          height: size,
+          letterSpacing: "-0.01em",
+          width: size,
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+      {...props}
+    >
+      {initials}
+    </Avatar>
+  );
+}
+
+export type AppleTone = "success" | "warning" | "danger" | "info" | "neutral" | "purple";
+
+export function AppleStatusBadge({
+  label,
+  tone = "neutral",
+  dot = true,
+  sx,
+}: {
+  dot?: boolean;
+  label: ReactNode;
+  sx?: BoxProps["sx"];
+  tone?: AppleTone;
+}) {
+  const toneConfigs: Record<
+    AppleTone,
+    { bg: string; border: string; color: string; dotColor: string }
+  > = {
+    danger: {
+      bg: appleDesign.colors.redSoft,
+      border: "rgba(255, 59, 48, 0.2)",
+      color: appleDesign.colors.redText,
+      dotColor: appleDesign.colors.redDot,
+    },
+    info: {
+      bg: appleDesign.colors.blueSoft,
+      border: appleDesign.colors.blueSoftBorder,
+      color: appleDesign.colors.blue,
+      dotColor: appleDesign.colors.blue,
+    },
+    neutral: {
+      bg: "rgba(0, 0, 0, 0.05)",
+      border: "rgba(0, 0, 0, 0.08)",
+      color: appleDesign.colors.textSecondary,
+      dotColor: "#94a3b8",
+    },
+    purple: {
+      bg: appleDesign.colors.purpleSoft,
+      border: "rgba(175, 82, 222, 0.2)",
+      color: appleDesign.colors.purpleText,
+      dotColor: appleDesign.colors.purple,
+    },
+    success: {
+      bg: appleDesign.colors.greenSoft,
+      border: "rgba(52, 199, 89, 0.2)",
+      color: appleDesign.colors.greenText,
+      dotColor: appleDesign.colors.greenDot,
+    },
+    warning: {
+      bg: appleDesign.colors.amberSoft,
+      border: "rgba(255, 149, 0, 0.2)",
+      color: appleDesign.colors.amberText,
+      dotColor: appleDesign.colors.amberDot,
+    },
+  };
+
+  const config = toneConfigs[tone] ?? toneConfigs.neutral;
+
+  return (
+    <Box
+      sx={[
+        {
+          alignItems: "center",
+          bgcolor: config.bg,
+          border: `1px solid ${config.border}`,
+          borderRadius: "9999px",
+          color: config.color,
+          display: "inline-flex",
+          fontSize: "0.75rem",
+          fontWeight: 650,
+          gap: 0.65,
+          letterSpacing: "0.01em",
+          lineHeight: 1,
+          px: 1.15,
+          py: 0.45,
+          whiteSpace: "nowrap",
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+    >
+      {dot && (
+        <Box
+          component="span"
+          sx={{
+            bgcolor: config.dotColor,
+            borderRadius: "50%",
+            display: "inline-block",
+            height: 6,
+            width: 6,
+          }}
+        />
+      )}
+      <Typography component="span" sx={{ color: "inherit", fontSize: "inherit", fontWeight: "inherit" }}>
+        {label}
+      </Typography>
+    </Box>
+  );
+}
+
+export function parseDeviceString(rawString?: string, deviceType?: string) {
+  const str = rawString || "";
+  let os = "Thiết bị không xác định";
+  let browser = "";
+  let icon: "desktop" | "mobile" | "tablet" = "desktop";
+
+  if (/iPhone/i.test(str)) {
+    os = "iPhone";
+    icon = "mobile";
+    const match = str.match(/OS (\d+[_\d]*)/i);
+    if (match) os += ` (iOS ${match[1].replace(/_/g, ".")})`;
+  } else if (/iPad/i.test(str)) {
+    os = "iPad";
+    icon = "tablet";
+  } else if (/Android/i.test(str)) {
+    os = "Android";
+    icon = "mobile";
+  } else if (/Windows NT 10\.0/i.test(str) || /Windows/i.test(str)) {
+    os = "Windows";
+    icon = "desktop";
+  } else if (/Macintosh|Mac OS X/i.test(str)) {
+    os = "macOS";
+    icon = "desktop";
+  } else if (/Linux/i.test(str)) {
+    os = "Linux";
+    icon = "desktop";
+  }
+
+  if (deviceType?.toUpperCase() === "MOBILE" || deviceType?.toUpperCase() === "WEB_MOBILE") {
+    icon = "mobile";
+  }
+
+  if (/Edg\//i.test(str)) {
+    browser = "Microsoft Edge";
+  } else if (/Chrome\//i.test(str) && !/Edg\//i.test(str)) {
+    browser = "Chrome";
+  } else if (/Safari\//i.test(str) && !/Chrome\//i.test(str)) {
+    browser = "Safari";
+  } else if (/Firefox\//i.test(str)) {
+    browser = "Firefox";
+  }
+
+  const title = browser ? `${browser} trên ${os}` : os;
+  return { browser, icon, os, title };
+}
+
+export function DeviceIcon({ type, size = "medium" }: { size?: "small" | "medium"; type: "desktop" | "mobile" | "tablet" }) {
+  const fontSize = size === "small" ? "small" : "medium";
+  switch (type) {
+    case "mobile":
+      return <PhoneIphoneRoundedIcon fontSize={fontSize} sx={{ color: appleDesign.colors.textSecondary }} />;
+    case "tablet":
+      return <TabletMacRoundedIcon fontSize={fontSize} sx={{ color: appleDesign.colors.textSecondary }} />;
+    case "desktop":
+    default:
+      return <LaptopMacRoundedIcon fontSize={fontSize} sx={{ color: appleDesign.colors.textSecondary }} />;
+  }
+}

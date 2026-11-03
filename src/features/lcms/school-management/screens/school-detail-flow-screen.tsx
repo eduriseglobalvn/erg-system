@@ -6,6 +6,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
+import Skeleton from "@mui/material/Skeleton";
 import Step from "@mui/material/Step";
 import StepButton from "@mui/material/StepButton";
 import Stepper from "@mui/material/Stepper";
@@ -40,7 +41,20 @@ export default function SchoolDetailFlowScreen() {
   const compact = useMediaQuery(theme.breakpoints.down("md"));
   const parsedStep = Number(new URLSearchParams(location.searchStr).get("step") ?? 0);
   const activeStep = Number.isInteger(parsedStep) && parsedStep >= 0 && parsedStep < baseStepMeta.length ? parsedStep : 0;
-  if (!selectedSchool) return null;
+  if (!selectedSchool) {
+    return (
+      <SchoolPageShell
+        action={<Button onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button>}
+        description="Đang tải dữ liệu trường học..."
+        title="Thiết lập trường"
+      >
+        <Paper variant="outlined" sx={{ display: "grid", gap: 2, p: 3 }}>
+          <Skeleton height={40} variant="rounded" width="40%" />
+          <Skeleton height={240} variant="rounded" />
+        </Paper>
+      </SchoolPageShell>
+    );
+  }
 
   const usesGrades = schoolTypeUsesGrades(selectedSchool.schoolType);
   const labels = schoolTypeMeta[selectedSchool.schoolType];
@@ -59,12 +73,17 @@ export default function SchoolDetailFlowScreen() {
 
   return <SchoolPageShell
       action={<Button onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<ArrowBackRoundedIcon />} variant="outlined">Danh sách trường</Button>}
-    description="Chỉnh sửa theo một flow liên tục; cấu trúc tự thích ứng với loại hình trường."
     title={selectedSchool.name}
   >
-    <Paper variant="outlined" sx={{ alignItems: { xs: "flex-start", md: "center" }, display: "flex", flexDirection: { xs: "column", md: "row" }, gap: 2, justifyContent: "space-between", mb: 2, p: 2 }}>
-      <Box><Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}><Typography sx={{ fontSize: 18, fontWeight: 900 }}>Thiết lập trường</Typography><Chip color="primary" label={schoolTypeMeta[selectedSchool.schoolType].label} size="small" variant="outlined" /></Box><Typography color="text.secondary" variant="body2">Dữ liệu được giữ xuyên suốt giữa các bước. Bạn có thể quay lại chỉnh sửa bất cứ lúc nào.</Typography></Box>
-      <Box sx={{ minWidth: { xs: "100%", md: 250 } }}><Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.75 }}><Typography color="text.secondary" variant="caption">Tiến độ thiết lập</Typography><Typography sx={{ fontWeight: 850 }} variant="caption">{completedCount}/4 hạng mục</Typography></Box><LinearProgress color={completedCount === 4 ? "success" : "primary"} value={completedCount * 25} variant="determinate" /></Box>
+    <Paper variant="outlined" sx={{ alignItems: { xs: "flex-start", sm: "center" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between", mb: 2, px: 2, py: 1.25 }}>
+      <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}>
+        <Typography sx={{ fontSize: 16, fontWeight: 900 }}>Thiết lập trường</Typography>
+        <Chip color="primary" label={schoolTypeMeta[selectedSchool.schoolType].shortLabel} size="small" variant="outlined" />
+      </Box>
+      <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, minWidth: { xs: "100%", sm: 260 } }}>
+        <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>Tiến độ thiết lập: {completedCount}/4</Typography>
+        <LinearProgress color={completedCount === 4 ? "success" : "primary"} sx={{ flex: 1, height: 6, borderRadius: 3 }} value={completedCount * 25} variant="determinate" />
+      </Box>
     </Paper>
 
     <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "minmax(0, 1fr)", md: "244px minmax(0, 1fr)" } }}>

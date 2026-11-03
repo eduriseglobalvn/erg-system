@@ -1,7 +1,12 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
+import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import WifiOffRoundedIcon from "@mui/icons-material/WifiOffRounded";
 import Avatar from "@mui/material/Avatar";
@@ -19,27 +24,69 @@ import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
+import { useLocation } from "@tanstack/react-router";
 
 import { useInstallPrompt } from "@/features/lms/mobile/hooks/use-install-prompt";
 import { useOnlineStatus } from "@/features/lms/mobile/hooks/use-online-status";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
+import type { Workspace } from "@/platform/workspaces/workspace-domain";
+import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/workspaces/workspace-switcher";
 import { HEADER_ICON_BUTTON_SX } from "./portal-header-styles";
+
+function workspaceFromPath(pathname: string): Workspace {
+  const segment = pathname.split("/").filter(Boolean)[0];
+  if (segment === "admin") return "ADMIN";
+  if (segment === "student") return "STUDENT";
+  if (segment === "crm") return "CRM";
+  return "TEACHER";
+}
+
+const WORKSPACE_ICONS: Record<Workspace, ReactNode> = {
+  ADMIN: <AdminPanelSettingsRoundedIcon sx={{ fontSize: 17, color: "primary.main" }} />,
+  TEACHER: <SchoolRoundedIcon sx={{ fontSize: 17, color: "success.main" }} />,
+  STUDENT: <MenuBookRoundedIcon sx={{ fontSize: 17, color: "info.main" }} />,
+  CRM: <BusinessRoundedIcon sx={{ fontSize: 17, color: "warning.main" }} />,
+};
+
+const WORKSPACE_LOCAL_PATHS: Record<Workspace, string> = {
+  ADMIN: "/admin",
+  TEACHER: "/teacher/home",
+  STUDENT: "/student",
+  CRM: "/",
+};
 
 type PortalHeaderActionsProps = {
   notificationCount: number;
   onOpenNotifications: () => void;
   userName?: string;
   userEmail?: string;
+  workspaceCapabilities?: readonly Workspace[];
+  workspacePortals?: string[];
+  onNavigate?: (path: string) => void;
   onSignOut?: () => void;
 };
 
-export function PortalHeaderActions({ notificationCount, onOpenNotifications, userName, userEmail, onSignOut }: PortalHeaderActionsProps) {
+export function PortalHeaderActions({
+  notificationCount,
+  onOpenNotifications,
+  userName,
+  userEmail,
+  workspaceCapabilities: inputWorkspaces,
+  workspacePortals = [],
+  onNavigate,
+  onSignOut,
+}: PortalHeaderActionsProps) {
   const isOnline = useOnlineStatus();
+  const location = useLocation();
   const initial = userName?.charAt(0).toUpperCase() || "E";
   const { canInstall, installed, promptInstall } = useInstallPrompt();
   const [installInfoOpen, setInstallInfoOpen] = useState(false);
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
+
+  const current = workspaceFromPath(location?.pathname ?? "");
+  const granted = inputWorkspaces?.length ? [...inputWorkspaces] : workspacesFromLegacyPortals(workspacePortals, current);
+  const capabilities = workspaceCapabilities(granted, current, location?.pathname ?? "");
 
   const handleInstallClick = () => {
     if (canInstall) void promptInstall();
@@ -52,6 +99,12 @@ export function PortalHeaderActions({ notificationCount, onOpenNotifications, us
     logoutStudentSession();
     logoutAccount();
     window.location.reload();
+  };
+
+  const handleWorkspaceSelect = (path: string) => {
+    setMenuAnchor(null);
+    if (onNavigate) onNavigate(path);
+    else if (typeof window !== "undefined") window.location.assign(path);
   };
 
   return (
@@ -97,6 +150,32 @@ export function PortalHeaderActions({ notificationCount, onOpenNotifications, us
           <Typography variant="caption" sx={{ color: "#94A3B8", fontSize: 11 }}>{userEmail || "Tài khoản ERG"}</Typography>
         </Box>
         <Divider sx={{ my: 0.5 }} />
+
+        {capabilities.length >= 2 ? (
+          <>
+            <Box sx={{ px: 1.5, py: 0.5 }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
+                Không gian làm việc
+              </Typography>
+            </Box>
+            {capabilities.map((cap) => {
+              const isCurrent = cap.workspace === current;
+              return (
+                <MenuItem
+                  key={cap.workspace}
+                  onClick={() => handleWorkspaceSelect(WORKSPACE_LOCAL_PATHS[cap.workspace])}
+                  sx={{ bgcolor: isCurrent ? "action.selected" : "transparent", borderRadius: "6px", gap: 1, py: 0.75, fontWeight: isCurrent ? 700 : 500 }}
+                >
+                  {WORKSPACE_ICONS[cap.workspace]}
+                  <Typography variant="body2" sx={{ flex: 1, fontWeight: "inherit", fontSize: 13 }}>{cap.label}</Typography>
+                  {isCurrent ? <CheckRoundedIcon sx={{ color: "primary.main", fontSize: 16 }} /> : null}
+                </MenuItem>
+              );
+            })}
+            <Divider sx={{ my: 0.5 }} />
+          </>
+        ) : null}
+
         {!installed ? (
           <MenuItem onClick={() => { setMenuAnchor(null); handleInstallClick(); }} sx={{ borderRadius: "6px", gap: 1, py: 0.75 }}>
             <DownloadRoundedIcon sx={{ fontSize: 17, color: "#2563EB" }} />
@@ -113,16 +192,16 @@ export function PortalHeaderActions({ notificationCount, onOpenNotifications, us
         <DialogTitle sx={{ fontWeight: 800, fontSize: 17, pb: 1 }}>Cài đặt ứng dụng ERG</DialogTitle>
         <DialogContent>
           <Stack spacing={1.5} sx={{ mt: 0.5 }}>
-            <Typography variant="body2" color="text.secondary">Ứng dụng ERG có thể cài đặt về máy tính hoặc điện thoại để hoạt động độc lập toàn màn hình:</Typography>
-            <Box sx={{ bgcolor: "background.default", p: 1.5, borderRadius: 2, border: "1px solid", borderColor: "divider" }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>Trên Chrome / Edge (Máy tính):</Typography>
-              <Typography variant="body2" color="text.secondary">1. Nhấn biểu tượng <b>Cài đặt (Install)</b> trên thanh địa chỉ.<br />2. Hoặc mở menu <b>⋮</b> &gt; chọn <b>"Cài đặt ứng dụng..."</b>.</Typography>
-            </Box>
-            <Typography variant="caption" color="text.secondary">* Lưu ý: Trình duyệt yêu cầu kết nối HTTPS hợp lệ hoặc <b>localhost</b> để kích hoạt cài đặt tự động.</Typography>
+            <Typography variant="body2" color="text.secondary">
+              1. Nhấn biểu tượng <b>Cài đặt (Install)</b> trên thanh địa chỉ.<br />
+              2. Hoặc mở menu <b>⋮</b> &gt; chọn <b>"Cài đặt ứng dụng..."</b>.
+            </Typography>
           </Stack>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setInstallInfoOpen(false)} variant="contained" sx={{ borderRadius: 1.5, fontWeight: 700 }}>Đã hiểu</Button>
+        <DialogActions sx={{ pb: 1.5, px: 2 }}>
+          <Button onClick={() => setInstallInfoOpen(false)} variant="contained" size="small" sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 700 }}>
+            Đã hiểu
+          </Button>
         </DialogActions>
       </Dialog>
     </>

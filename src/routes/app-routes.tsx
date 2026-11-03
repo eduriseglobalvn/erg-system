@@ -241,15 +241,21 @@ function PortalIndexPage() {
   if (studentSession) return <Navigate to="/student" replace />;
   if (activePortal === "lcms") return <Navigate to="/admin" replace />;
   if (activePortal === "crm") return withPortalAuth("crm", <CrmPage />, "seo.manage");
-  if (activePortal === "lms") {
-    const isPlatformSuperAdmin = (auth.session?.roles ?? []).some((role) =>
-      ["super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin"].includes(role.trim().toLowerCase()),
-    ) && (auth.session?.permissions ?? []).some((permission) => permission.trim() === "*");
+  if (activePortal === "lms" || activePortal === null) {
+    if (auth.isHydratingProfile) return <RoutePendingSkeleton />;
+    const roles = [...(auth.session?.roles ?? []), ...(auth.account?.roles ?? [])].map((r) => r.trim().toLowerCase());
+    const isPlatformAdmin = auth.account?.role === "admin"
+      || roles.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))
+      || (auth.session?.permissions ?? []).some((permission) => permission.trim().toLowerCase() === "lms.admin" || permission.trim() === "*");
+    const storedWorkspace = typeof window !== "undefined" ? window.localStorage?.getItem("erg_last_workspace") : null;
+    const preferredWorkspace = storedWorkspace === "ADMIN" && isPlatformAdmin
+      ? "ADMIN"
+      : storedWorkspace === "TEACHER"
+        ? "TEACHER"
+        : (isPlatformAdmin ? "ADMIN" : undefined);
     const landingTarget = auth.account
       ? resolveWorkspaceLandingTarget({
-          // Let verified capabilities choose the default workspace. A plain
-          // lms host must not force every authenticated account into Teacher.
-          preferredWorkspace: isPlatformSuperAdmin ? "ADMIN" : undefined,
+          preferredWorkspace,
           workspaces: auth.session?.workspaces,
           roles: auth.session?.roles,
           portals: auth.session?.portals,
@@ -261,9 +267,8 @@ function PortalIndexPage() {
     if (landingTarget?.workspace === "CRM") {
       return <PortalHostRedirect targetHost={canonicalCrmWorkspaceHostForRuntime()} targetPath="/" />;
     }
-    const accountLooksAdmin = auth.account?.role === "admin"
-      || (auth.session?.permissions ?? []).some((permission) => permission.trim().toLowerCase() === "lms.admin");
-    return <Navigate to={landingTarget?.path ?? (accountLooksAdmin ? "/admin" : "/teacher")} replace />;
+    const fallbackPath = preferredWorkspace === "ADMIN" || isPlatformAdmin ? "/admin" : "/teacher/home";
+    return <Navigate to={landingTarget?.path ?? fallbackPath} replace />;
   }
   if (activePortal === "elearning") return withPortalAuth("elearning", <StudentPage />, "elearning.assignment.read_self");
   return (

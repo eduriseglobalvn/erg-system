@@ -1,20 +1,19 @@
-import SearchIcon from "@mui/icons-material/Search";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
+import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import Chip from "@mui/material/Chip";
 import InputAdornment from "@mui/material/InputAdornment";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { alpha } from "@mui/material/styles";
+
 import type { QuestionBankApiData } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
-import { ERG_SHEET_COLORS } from "./question-bank-primitives";
 
 export function QuestionLibrary({
   copy,
@@ -49,83 +48,91 @@ export function QuestionLibrary({
 
   return (
     <Paper
-      variant="outlined"
+      elevation={0}
       sx={{
-        bgcolor: "transparent",
-        borderColor: "transparent",
-        borderRadius: 0,
-        boxShadow: "none",
+        bgcolor: "#FFFFFF",
+        border: "1px solid rgba(0, 0, 0, 0.06)",
+        borderRadius: "16px",
+        boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
       }}
     >
-      <Stack
-        direction={{ xs: "column", md: "row" }}
-        spacing={2}
+      {/* Table Toolbar */}
+      <Box
         sx={{
           alignItems: { xs: "stretch", md: "center" },
-          borderBottom: `1px solid ${alpha("#0f172a", 0.06)}`,
+          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 2,
           justifyContent: "space-between",
-          px: 2.5,
-          py: 2,
+          p: { xs: 2, md: 2.25 },
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#111827", fontSize: 16, fontWeight: 850, lineHeight: 1.2 }}>
+          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
             {copy.libraryTitle}
           </Typography>
-          <Typography sx={{ color: "#64748b", fontSize: 12.5, fontWeight: 650, mt: 0.35 }}>
+          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
             {copy.libraryDescription(page.totalItems)}
           </Typography>
         </Box>
+
+        {/* Apple Spotlight Search */}
         <TextField
           value={searchValue}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder={copy.searchPlaceholder}
           size="small"
-          sx={{
-            width: { xs: "100%", md: 360 },
-            "& .MuiOutlinedInput-root": {
-              borderRadius: 2,
-              bgcolor: "#fff",
-              boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-            },
-          }}
           slotProps={{
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon style={{ color: "#94a3b8", height: 18, width: 18 }} />
+                  <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 19 }} />
                 </InputAdornment>
               ),
+              sx: {
+                bgcolor: "rgba(0, 0, 0, 0.03)",
+                borderRadius: "11px",
+                fontSize: "0.85rem",
+                transition: "all 0.15s ease",
+                width: { md: 320, xs: "100%" },
+                "& fieldset": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#0071E3",
+                  boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                },
+              },
             },
           }}
         />
-      </Stack>
+      </Box>
 
-      <Box sx={{ bgcolor: ERG_SHEET_COLORS.frame, p: 0 }}>
+      {/* Table Header Bar */}
+      <Box sx={{ overflowX: "auto" }}>
         <Box
           sx={{
             alignItems: "center",
-            bgcolor: ERG_SHEET_COLORS.header,
-            color: "#64748b",
+            bgcolor: "rgba(250, 250, 252, 0.95)",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            color: "#86868B",
             display: "grid",
-            fontSize: 11,
-            fontWeight: 850,
+            fontSize: "0.72rem",
+            fontWeight: 700,
             gap: 0,
             gridTemplateColumns: {
-              xs: "40px minmax(0,1fr) 70px",
-              md: "40px minmax(0,1fr) minmax(140px,190px) 78px",
+              xs: "44px minmax(0, 1fr) 80px",
+              md: "44px minmax(0, 1fr) minmax(140px, 190px) 84px",
             },
-            letterSpacing: "0.08em",
+            letterSpacing: "0.04em",
             textTransform: "uppercase",
             "& > *": {
               alignItems: "center",
-              borderRight: "2px solid #fff",
               display: "flex",
               minHeight: 40,
               px: 1.5,
             },
-            "& > *:last-child": { borderRight: 0 },
           }}
         >
           <Checkbox
@@ -135,7 +142,12 @@ export function QuestionLibrary({
             onChange={onQuestionSelectAll}
             slotProps={{ input: { "aria-label": copy.selectAllVisible } }}
             size="small"
-            sx={{ justifySelf: "center", p: 0.5 }}
+            sx={{
+              color: "rgba(0, 0, 0, 0.25)",
+              justifySelf: "center",
+              p: 0.5,
+              "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "#0071E3" },
+            }}
           />
           <span>{copy.table.question}</span>
           <Box
@@ -143,9 +155,7 @@ export function QuestionLibrary({
             sx={{
               alignItems: "center",
               display: { xs: "none", md: "flex" },
-              justifyContent: "center",
               minHeight: 40,
-              textAlign: "center",
             }}
           >
             {copy.table.topic}
@@ -157,187 +167,210 @@ export function QuestionLibrary({
               display: "flex",
               justifyContent: "center",
               minHeight: 40,
-              textAlign: "center",
             }}
           >
             {copy.table.actions}
           </Box>
         </Box>
 
+        {/* Rows or Empty State */}
         <Stack spacing={0}>
           {isLoading ? (
-            <QuestionSheetSkeletonRows rowCount={Math.max(visibleQuestions.length || 0, 8)} />
-          ) : visibleQuestions.map((question, index) => {
-            const selected = selectedIds.includes(question.id);
-
-            return (
+            <QuestionSheetSkeletonRows rowCount={Math.max(visibleQuestions.length || 0, 5)} />
+          ) : visibleQuestions.length === 0 ? (
+            <Box
+              sx={{
+                alignItems: "center",
+                display: "flex",
+                flexDirection: "column",
+                gap: 1.25,
+                justifyContent: "center",
+                py: 8,
+                textAlign: "center",
+              }}
+            >
               <Box
-                key={question.id}
-                role="button"
-                tabIndex={0}
-                onClick={() => onQuestionToggle(question.id)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    onQuestionToggle(question.id);
-                  }
-                }}
                 sx={{
                   alignItems: "center",
-                  bgcolor: selected ? ERG_SHEET_COLORS.selected : index % 2 === 0 ? ERG_SHEET_COLORS.rowOdd : ERG_SHEET_COLORS.rowEven,
-                  borderBottom: "2px solid #fff",
-                  boxShadow: selected ? "inset 3px 0 0 #0f6cbd" : "none",
-                  cursor: "pointer",
-                  display: "grid",
-                  gap: 0,
-                  gridTemplateColumns: {
-                    xs: "40px minmax(0,1fr) 70px",
-                    md: "40px minmax(0,1fr) minmax(140px,190px) 78px",
-                  },
-                  transition: "background-color 140ms ease, border-color 140ms ease, box-shadow 140ms ease",
-                  "& > *": {
-                    borderRight: "2px solid #fff",
-                    minHeight: 58,
-                    px: 1.5,
-                    py: 1.2,
-                  },
-                  "& > *:last-child": { borderRight: 0 },
-                  "&:hover": {
-                    bgcolor: selected ? ERG_SHEET_COLORS.selectedHover : ERG_SHEET_COLORS.hover,
-                    boxShadow: `inset 3px 0 0 ${ERG_SHEET_COLORS.hoverBorder}`,
-                  },
+                  bgcolor: "rgba(0, 113, 227, 0.08)",
+                  borderRadius: "50%",
+                  color: "#0071E3",
+                  display: "flex",
+                  height: 56,
+                  justifyContent: "center",
+                  width: 56,
                 }}
               >
-                <Box onClick={(event) => event.stopPropagation()} sx={{ justifySelf: "center" }}>
-                  <Checkbox
-                    checked={selected}
-                    onChange={() => onQuestionToggle(question.id)}
-                    slotProps={{ input: { "aria-label": copy.selectQuestionLabel(question.stem) } }}
-                    size="small"
-                    sx={{ p: 0.5 }}
-                  />
-                </Box>
+                <QuizOutlinedIcon sx={{ fontSize: 28 }} />
+              </Box>
+              <Typography sx={{ color: "#1D1D1F", fontSize: "0.95rem", fontWeight: 750 }}>
+                {copy.noResults}
+              </Typography>
+              <Typography sx={{ color: "#86868B", fontSize: "0.825rem", maxWidth: 420, lineHeight: 1.45 }}>
+                Không tìm thấy câu hỏi nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm. Hãy thử đổi môn học hoặc xóa từ khóa.
+              </Typography>
+            </Box>
+          ) : (
+            visibleQuestions.map((question) => {
+              const selected = selectedIds.includes(question.id);
 
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    title={question.stem}
-                    sx={{
-                      color: "#111827",
-                      display: "-webkit-box",
-                      fontSize: 14,
-                      fontWeight: 760,
-                      lineHeight: 1.45,
-                      overflow: "hidden",
-                      WebkitBoxOrient: "vertical",
-                      WebkitLineClamp: 2,
-                    }}
-                  >
-                    {question.stem}
-                  </Typography>
-                  <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mt: 0.5, minWidth: 0 }}>
-                    <Typography
+              return (
+                <Box
+                  key={question.id}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => onQuestionToggle(question.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      onQuestionToggle(question.id);
+                    }
+                  }}
+                  sx={{
+                    alignItems: "center",
+                    bgcolor: selected ? "rgba(0, 113, 227, 0.04)" : "#FFFFFF",
+                    borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
+                    cursor: "pointer",
+                    display: "grid",
+                    gap: 0,
+                    gridTemplateColumns: {
+                      xs: "44px minmax(0, 1fr) 80px",
+                      md: "44px minmax(0, 1fr) minmax(140px, 190px) 84px",
+                    },
+                    transition: "all 0.12s ease",
+                    "& > *": {
+                      minHeight: 56,
+                      px: 1.5,
+                      py: 1.2,
+                    },
+                    "&:hover": {
+                      bgcolor: selected ? "rgba(0, 113, 227, 0.07)" : "rgba(0, 113, 227, 0.025)",
+                    },
+                  }}
+                >
+                  <Box onClick={(event) => event.stopPropagation()} sx={{ display: "flex", justifyContent: "center" }}>
+                    <Checkbox
+                      checked={selected}
+                      onChange={() => onQuestionToggle(question.id)}
+                      slotProps={{ input: { "aria-label": copy.selectQuestionLabel(question.stem) } }}
+                      size="small"
                       sx={{
-                        color: "#64748b",
-                        flex: "0 1 auto",
-                        fontSize: 12.5,
-                        fontWeight: 550,
-                        minWidth: 0,
+                        color: "rgba(0, 0, 0, 0.25)",
+                        p: 0.5,
+                        "&.Mui-checked": { color: "#0071E3" },
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ minWidth: 0 }}>
+                    <Typography
+                      title={question.stem}
+                      sx={{
+                        color: "#1D1D1F",
+                        display: "-webkit-box",
+                        fontSize: "0.875rem",
+                        fontWeight: 650,
+                        lineHeight: 1.45,
                         overflow: "hidden",
+                        WebkitBoxOrient: "vertical",
+                        WebkitLineClamp: 2,
+                      }}
+                    >
+                      {question.stem}
+                    </Typography>
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mt: 0.4, minWidth: 0 }}>
+                      <Typography
+                        sx={{
+                          color: "#86868B",
+                          flex: "0 1 auto",
+                          fontSize: "0.76rem",
+                          fontWeight: 500,
+                          minWidth: 0,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {question.objective}
+                      </Typography>
+                      <Box
+                        component="span"
+                        sx={{
+                          bgcolor: "rgba(0, 113, 227, 0.08)",
+                          borderRadius: "4px",
+                          color: "#0071E3",
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          px: 0.75,
+                          py: 0.15,
+                        }}
+                      >
+                        {copy.scopeLabel(question.scope)}
+                      </Box>
+                    </Stack>
+                  </Box>
+
+                  <Box sx={{ alignItems: "center", display: { xs: "none", md: "flex" }, minWidth: 0 }}>
+                    <Box
+                      component="span"
+                      sx={{
+                        bgcolor: "rgba(0, 0, 0, 0.04)",
+                        borderRadius: "6px",
+                        color: "#48484A",
+                        fontSize: "0.76rem",
+                        fontWeight: 650,
+                        overflow: "hidden",
+                        px: 1,
+                        py: 0.35,
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {question.objective}
-                    </Typography>
-                    <Chip
-                      label={copy.scopeLabel(question.scope)}
-                      size="small"
-                      sx={{
-                        bgcolor: alpha("#0f6cbd", 0.08),
-                        color: "#0f5f9f",
-                        flexShrink: 0,
-                        fontSize: 11,
-                        fontWeight: 800,
-                        height: 22,
-                      }}
-                    />
-                    <Chip
-                      label={question.categoryLabel}
-                      size="small"
-                      sx={{
-                        display: { xs: "inline-flex", md: "none" },
-                        flexShrink: 0,
-                        fontSize: 11,
-                        fontWeight: 750,
-                        height: 22,
-                      }}
-                    />
-                  </Stack>
-                </Box>
+                      {question.categoryLabel}
+                    </Box>
+                  </Box>
 
-                <Box sx={{ alignItems: "center", display: { xs: "none", md: "flex" }, justifyContent: "center", minWidth: 0 }}>
-                  <Chip
-                    label={question.categoryLabel}
-                    size="small"
-                    sx={{
-                      bgcolor: "#fff",
-                      border: `1px solid ${alpha("#64748b", 0.16)}`,
-                      color: "#475569",
-                      fontSize: 12,
-                      fontWeight: 750,
-                      maxWidth: "100%",
-                    }}
-                  />
-                </Box>
-
-                <Box onClick={(event) => event.stopPropagation()} sx={{ alignItems: "center", display: "flex", justifyContent: "center" }}>
-                  <Button
-                    size="small"
-                    variant="text"
-                    onClick={() => onEditQuestion(question)}
-                    sx={{ borderRadius: 2, fontSize: 12, fontWeight: 800, minWidth: 0, px: 1 }}
+                  <Box
+                    onClick={(event) => event.stopPropagation()}
+                    sx={{ alignItems: "center", display: "flex", justifyContent: "center" }}
                   >
-                    {copy.editQuestion}
-                  </Button>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => onEditQuestion(question)}
+                      sx={{
+                        borderRadius: "8px",
+                        color: "#0071E3",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        minWidth: 0,
+                        px: 1,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "rgba(0, 113, 227, 0.08)" },
+                      }}
+                    >
+                      {copy.editQuestion}
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
-            );
-          })}
-          {!isLoading && visibleQuestions.length === 0 ? (
-            <Paper
-              variant="outlined"
-              sx={{
-                alignItems: "center",
-                borderColor: alpha("#64748b", 0.18),
-                borderRadius: 0,
-                borderStyle: "dashed",
-                color: "#94a3b8",
-                display: "flex",
-                fontSize: 14,
-                fontStyle: "italic",
-                fontWeight: 650,
-                justifyContent: "center",
-                minHeight: 116,
-              }}
-            >
-              {copy.noResults}
-            </Paper>
-          ) : null}
+              );
+            })
+          )}
         </Stack>
 
-        <Stack
-          direction={{ xs: "column", sm: "row" }}
-          spacing={1.5}
+        {/* Pagination Bar */}
+        <Box
           sx={{
             alignItems: { xs: "stretch", sm: "center" },
-            bgcolor: "#fff",
-            borderTop: "2px solid #fff",
+            borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+            display: "flex",
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1.5,
             justifyContent: "space-between",
-            px: 2,
-            py: 1.5,
+            p: 2,
           }}
         >
-          <Typography sx={{ color: "#64748b", fontSize: 12.5, fontWeight: 650 }}>
+          <Typography sx={{ color: "#86868B", fontSize: "0.8rem", fontWeight: 550 }}>
             {copy.pageSummary(page.page + 1, Math.max(page.totalPages, 1), page.totalItems)}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
@@ -346,7 +379,17 @@ export function QuestionLibrary({
               variant="outlined"
               disabled={!page.hasPrevious}
               onClick={() => onPageChange(Math.max(0, page.page - 1))}
-              sx={{ borderRadius: 2, fontWeight: 750 }}
+              sx={{
+                borderColor: "rgba(0, 0, 0, 0.12)",
+                borderRadius: "9px",
+                color: "#1D1D1F",
+                fontSize: "0.8rem",
+                fontWeight: 650,
+                px: 1.5,
+                textTransform: "none",
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
+                "&.Mui-disabled": { borderColor: "rgba(0, 0, 0, 0.06)" },
+              }}
             >
               {copy.previousPage}
             </Button>
@@ -355,12 +398,22 @@ export function QuestionLibrary({
               variant="outlined"
               disabled={!page.hasNext}
               onClick={() => onPageChange(page.page + 1)}
-              sx={{ borderRadius: 2, fontWeight: 750 }}
+              sx={{
+                borderColor: "rgba(0, 0, 0, 0.12)",
+                borderRadius: "9px",
+                color: "#1D1D1F",
+                fontSize: "0.8rem",
+                fontWeight: 650,
+                px: 1.5,
+                textTransform: "none",
+                "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
+                "&.Mui-disabled": { borderColor: "rgba(0, 0, 0, 0.06)" },
+              }}
             >
               {copy.nextPage}
             </Button>
           </Stack>
-        </Stack>
+        </Box>
       </Box>
     </Paper>
   );
@@ -369,40 +422,32 @@ export function QuestionLibrary({
 function QuestionSheetSkeletonRows({ rowCount }: { rowCount: number }) {
   return (
     <>
-      {Array.from({ length: Math.min(Math.max(rowCount, 6), 12) }).map((_, index) => (
+      {Array.from({ length: Math.min(Math.max(rowCount, 4), 6) }).map((_, index) => (
         <Box
           key={`question-skeleton-${index}`}
           sx={{
             alignItems: "center",
-            bgcolor: index % 2 === 0 ? ERG_SHEET_COLORS.rowOdd : ERG_SHEET_COLORS.rowEven,
-            borderBottom: "2px solid #fff",
+            borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
             display: "grid",
             gap: 0,
             gridTemplateColumns: {
-              xs: "40px minmax(0,1fr) 70px",
-              md: "40px minmax(0,1fr) minmax(140px,190px) 78px",
+              xs: "44px minmax(0, 1fr) 80px",
+              md: "44px minmax(0, 1fr) minmax(140px, 190px) 84px",
             },
-            "& > *": {
-              borderRight: "2px solid #fff",
-              minHeight: 58,
-              px: 1.5,
-              py: 1.2,
-            },
-            "& > *:last-child": { borderRight: 0 },
+            minHeight: 56,
+            px: 1.5,
+            py: 1.2,
           }}
         >
           <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center" }}>
-            <Skeleton variant="rounded" width={18} height={18} sx={{ borderRadius: 1 }} />
+            <Skeleton variant="rounded" width={18} height={18} sx={{ borderRadius: "4px" }} />
           </Box>
-          <Box sx={{ minWidth: 0 }}>
-            <Skeleton variant="text" width="62%" height={20} />
-            <Stack direction="row" spacing={0.75} sx={{ mt: 0.5 }}>
-              <Skeleton variant="text" width="38%" height={16} />
-              <Skeleton variant="rounded" width={56} height={20} sx={{ borderRadius: 10 }} />
-            </Stack>
+          <Box sx={{ minWidth: 0, pr: 2 }}>
+            <Skeleton variant="text" width="68%" height={20} />
+            <Skeleton variant="text" width="42%" height={16} sx={{ mt: 0.4 }} />
           </Box>
-          <Box sx={{ alignItems: "center", display: { xs: "none", md: "flex" }, justifyContent: "center" }}>
-            <Skeleton variant="rounded" width={92} height={24} sx={{ borderRadius: 10 }} />
+          <Box sx={{ alignItems: "center", display: { xs: "none", md: "flex" } }}>
+            <Skeleton variant="rounded" width={84} height={22} sx={{ borderRadius: "6px" }} />
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center" }}>
             <Skeleton variant="text" width={36} height={20} />

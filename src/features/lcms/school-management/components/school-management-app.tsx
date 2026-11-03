@@ -23,9 +23,18 @@ const screens: Record<string, LazyExoticComponent<ComponentType>> = {
   "/schools/audit-log": lazy(() => import("@/features/lcms/school-management/screens/school-audit-screen")),
 };
 
+function normalizeSchoolRoute(pathname: string) {
+  const path = pathname.split(/[?#]/)[0] ?? "";
+  if (path.startsWith("/admin/")) {
+    return path.slice("/admin".length);
+  }
+  return path;
+}
+
 export function SchoolManagementApp() {
   const location = useLocation();
-  const Screen = screens[location.pathname] ?? screens["/schools/list"];
+  const normalizedPath = normalizeSchoolRoute(location.pathname);
+  const Screen = screens[normalizedPath] ?? screens[location.pathname] ?? screens["/schools/list"];
   return <SchoolManagementProvider><Suspense fallback={<SchoolRouteSkeleton />}><Screen /></Suspense></SchoolManagementProvider>;
 }
 

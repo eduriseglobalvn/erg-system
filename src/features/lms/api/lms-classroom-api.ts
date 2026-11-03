@@ -201,9 +201,10 @@ function formatDateLabel(value: string) {
   return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
 }
 
-function gradeLabelFor(value?: string | null, fallback?: string) {
-  if (!value) return fallback ?? "ERG";
-  const grade = value.replace(/^grade[-_]?/i, "");
+function gradeLabelFor(value?: string | number | null, fallback?: string) {
+  if (value == null || value === "") return fallback ?? "ERG";
+  const str = String(value);
+  const grade = str.replace(/^grade[-_]?/i, "");
   return grade ? `Khoi ${grade}` : fallback ?? "ERG";
 }
 

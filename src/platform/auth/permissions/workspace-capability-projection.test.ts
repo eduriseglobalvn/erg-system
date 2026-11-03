@@ -33,6 +33,40 @@ describe("projectVerifiedWorkspaces", () => {
     ).toEqual(["ADMIN", "TEACHER", "STUDENT", "CRM"]);
   });
 
+  it("projects admin role and lms portal strictly into admin and teacher workspaces without student", () => {
+    expect(
+      projectVerifiedWorkspaces({
+        roles: ["admin"],
+        portals: ["lms"],
+      }),
+    ).toEqual(["ADMIN", "TEACHER"]);
+  });
+
+  it("projects workspace strictly by role matching", () => {
+    expect(projectVerifiedWorkspaces({ roles: ["admin"] })).toEqual(["ADMIN"]);
+    expect(projectVerifiedWorkspaces({ roles: ["teacher"] })).toEqual(["TEACHER"]);
+    expect(projectVerifiedWorkspaces({ roles: ["student"] })).toEqual(["STUDENT"]);
+    expect(projectVerifiedWorkspaces({ roles: ["sale"] })).toEqual(["CRM"]);
+    expect(projectVerifiedWorkspaces({ roles: ["crm"] })).toEqual(["CRM"]);
+    expect(projectVerifiedWorkspaces({ roles: ["teacher", "student"] })).toEqual(["TEACHER", "STUDENT"]);
+  });
+
+  it("prunes cached workspaces when role does not permit", () => {
+    expect(
+      projectVerifiedWorkspaces({
+        workspaces: ["ADMIN", "TEACHER", "STUDENT", "CRM"],
+        roles: ["student"],
+      }),
+    ).toEqual(["STUDENT"]);
+
+    expect(
+      projectVerifiedWorkspaces({
+        workspaces: ["ADMIN", "TEACHER", "STUDENT", "CRM"],
+        roles: ["teacher"],
+      }),
+    ).toEqual(["TEACHER"]);
+  });
+
   it("does not let a wildcard or legacy portal alone create workspace access", () => {
     expect(projectVerifiedWorkspaces({ permissions: ["*"], portals: ["*"] })).toEqual([]);
     expect(projectVerifiedWorkspaces({ portals: ["*"] })).toEqual([]);

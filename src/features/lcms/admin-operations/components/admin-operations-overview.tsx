@@ -10,7 +10,7 @@ import LibraryBig from "@mui/icons-material/LocalLibraryOutlined";
 import UsersRound from "@mui/icons-material/GroupsOutlined";
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import type { ClassroomSchool } from "@/features/lms/classroom/types/classroom-types";
-import { LcmsActionRow, LcmsMetricCard, LcmsStatusChip } from "@/features/lcms/components/lcms-ui";
+import { LcmsActionRow, LcmsMetricCard, LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 import { ActionItem, CenterRow } from "./admin-operations-support";
 
 export function AdminOverview({

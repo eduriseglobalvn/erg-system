@@ -1,10 +1,22 @@
 import { Box } from "@mui/material";
+import { useLocation } from "@tanstack/react-router";
 import { ERG_ASSETS } from "@/config/seo";
 import {
   COLLAPSED_SIDEBAR_WIDTH,
   EXPANDED_SIDEBAR_WIDTH,
 } from "./portal-sidebar-motion";
 import { SIDEBAR_FADE_EASING, SIDEBAR_MOTION_CURVE } from "./portal-sidebar-styles";
+
+function homePathForLocation(pathname?: string) {
+  if (!pathname) {
+    if (typeof window !== "undefined") {
+      pathname = window.location.pathname;
+    }
+  }
+  if (pathname === "/admin" || pathname?.startsWith("/admin/")) return "/admin";
+  if (pathname === "/student" || pathname?.startsWith("/student/")) return "/student";
+  return "/teacher/home";
+}
 
 export function SidebarLogo({
   active,
@@ -15,6 +27,19 @@ export function SidebarLogo({
   collapsed: boolean;
   onNavigate: (path: string) => void;
 }) {
+  let pathname = "";
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const location = useLocation();
+    pathname = location?.pathname || "";
+  } catch {
+    if (typeof window !== "undefined") {
+      pathname = window.location.pathname || "";
+    }
+  }
+
+  const targetHomePath = homePathForLocation(pathname);
+
   return (
     <Box
       aria-hidden={!active}
@@ -42,7 +67,7 @@ export function SidebarLogo({
       <Box
         component="button"
         aria-label="Logo"
-        onClick={() => onNavigate("/")}
+        onClick={() => onNavigate(targetHomePath)}
         sx={{
           alignItems: "center",
           appearance: "none",

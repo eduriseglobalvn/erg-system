@@ -20,7 +20,7 @@ export type SiteSeo = {
 export const SEO_DATA = {
   elearning: {
     title: `He thong on luyen truc tuyen MOS & IC3 | ${ERG_BRAND_SUFFIX}`,
-    navName: "E-learning",
+    navName: "Student",
     description:
       "Nen tang hoc va thi thu truc tuyen chuan quoc te MOS, IC3 GS6 va IC3 Spark danh cho hoc sinh.",
     keywords: [
@@ -28,7 +28,7 @@ export const SEO_DATA = {
       "luyen thi IC3 Spark",
       "kiem tra tin hoc truc tuyen",
       "on tap MOS online",
-      "he thong e-learning erg",
+      "he thong hoc tap hoc sinh erg",
       "hoc tin hoc truc tuyen",
     ],
     ogImage: ERG_ASSETS.ogImage,

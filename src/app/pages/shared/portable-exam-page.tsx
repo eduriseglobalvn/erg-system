@@ -32,6 +32,10 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
     };
   }, [viewer?.id, workspace]);
 
+  const studentPortalKind = "elearning" as const;
+  const teacherPortalKind = "lms" as const;
+  const activeRuntimePortal = workspace === "STUDENT" ? studentPortalKind : teacherPortalKind;
+
   if (quizPackage) {
     return (
       <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6ff", p: { xs: 0.5, md: 1 } }}>
@@ -52,7 +56,7 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
         <PlayerShellRuntime
           portableOffline={quizPackage.gradingMode === "client-first"}
           portablePackage={quizPackage}
-          runtimePortal={workspace === "STUDENT" ? "elearning" : "lms"}
+          runtimePortal={activeRuntimePortal}
           welcomeMeta={{
             courseLabel: quizPackage.quiz.title,
             reviewContent: quizPackage.quiz.description,

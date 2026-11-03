@@ -21,7 +21,7 @@ import {
   updateSchool,
 } from "@/features/lcms/school-management/api/school-management-api";
 import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/features/lcms/school-management/types/school-management-types";
-import type { SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
+import type { OperationalClassRecord, SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
@@ -38,6 +38,12 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
     gcTime: QUERY_POLICIES.transactional.gcTime,
   });
   const directorySchools = useMemo(() => directoryQuery.data?.items ?? [], [directoryQuery.data]);
+
+  useEffect(() => {
+    if (initialSchoolId && initialSchoolId !== selectedSchoolId) {
+      setSelectedSchoolId(initialSchoolId);
+    }
+  }, [initialSchoolId, selectedSchoolId]);
 
   useEffect(() => {
     if (!directorySchools.length) return;
@@ -141,9 +147,10 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [gradeUpdateMutation, refreshSchoolData, selectedSchoolId]);
 
   const addClasses = useCallback(async (rows: Array<Omit<SchoolClass, "id">>) => {
-    if (!selectedSchoolId) return;
+    if (!selectedSchoolId) return [];
+    const created: OperationalClassRecord[] = [];
     for (const row of rows) {
-      await classCreateMutation.mutateAsync({
+      const res = await classCreateMutation.mutateAsync({
         schoolId: selectedSchoolId,
         input: {
           name: row.name,
@@ -153,8 +160,10 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
           status: row.status || "ACTIVE",
         },
       });
+      created.push(res);
     }
     await refreshSchoolData(selectedSchoolId);
+    return created;
   }, [classCreateMutation, refreshSchoolData, selectedSchool, selectedSchoolId]);
 
   const addStudents = useCallback(async (rows: Array<Omit<SchoolStudent, "id">>) => {

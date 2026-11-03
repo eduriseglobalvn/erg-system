@@ -227,7 +227,7 @@ function LearnerPreviewShell({
     <QuizThemeSurface quiz={previewQuizTheme} className="classic-editor__learner-surface" style={questionThemeStyle}>
       <section className="classic-editor__learner-player">
         <div className="classic-editor__learner-player-top">
-          <span>ERG E-LEARNING</span>
+          <span>ERG STUDENT</span>
           <span>{t("quiz.learnerViewEditor")}</span>
         </div>
 

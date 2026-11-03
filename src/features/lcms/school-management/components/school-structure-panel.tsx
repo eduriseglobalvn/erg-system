@@ -35,7 +35,7 @@ export function SchoolStructurePanel({ school }: { school: PartnerSchool }) {
       <Paper variant="outlined" sx={{ overflow: "hidden" }}>
         <Box sx={{ alignItems: { xs: "flex-start", sm: "center" }, borderBottom: "1px solid", borderColor: "divider", display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between", p: 2 }}>
           <Box><Typography sx={{ fontWeight: 850 }}>Môn học trường đăng ký</Typography><Typography color="text.secondary" variant="body2">Quản lý môn và gán học sinh theo nhu cầu triển khai.</Typography></Box>
-          <Button startIcon={<AddRoundedIcon />} variant="contained">Thêm môn học</Button>
+          <Button startIcon={<AddRoundedIcon />} variant="contained">Đăng ký môn học</Button>
         </Box>
         <TableContainer>
           <Table size="small">

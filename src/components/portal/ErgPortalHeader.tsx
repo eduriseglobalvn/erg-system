@@ -12,6 +12,7 @@ import { PortalHeaderIdentity } from "./portal-header-identity";
 import { PORTAL_NOTIFICATIONS, type PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { portalHeaderAppBarSx } from "./portal-header-styles";
+
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
 interface HeaderProps {
@@ -28,6 +29,7 @@ interface HeaderProps {
   workspaceCapabilities?: readonly Workspace[];
   workspacePortals?: string[];
   onMenuOpen?: () => void;
+  onNavigate?: (path: string) => void;
   onSignOut?: () => void;
 }
 
@@ -42,7 +44,10 @@ export default function ErgPortalHeader({
   scrolled = false,
   userName,
   userEmail,
+  workspaceCapabilities,
+  workspacePortals,
   onMenuOpen,
+  onNavigate,
   onSignOut,
 }: HeaderProps) {
   const [notificationOpen, setNotificationOpen] = useState(false);
@@ -74,14 +79,19 @@ export default function ErgPortalHeader({
             portalPlan={portalPlan}
           />
           <Box sx={{ flex: 1, minWidth: 8 }} />
-          <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
-            <PortalHeaderActions
-              notificationCount={notificationCount}
-              onOpenNotifications={() => setNotificationOpen(true)}
-              userName={userName}
-              userEmail={userEmail}
-              onSignOut={onSignOut}
-            />
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+            <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
+              <PortalHeaderActions
+                notificationCount={notificationCount}
+                onOpenNotifications={() => setNotificationOpen(true)}
+                userName={userName}
+                userEmail={userEmail}
+                onNavigate={onNavigate}
+                onSignOut={onSignOut}
+                workspaceCapabilities={workspaceCapabilities}
+                workspacePortals={workspacePortals}
+              />
+            </Box>
           </Box>
         </Toolbar>
       </AppBar>

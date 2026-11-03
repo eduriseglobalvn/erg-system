@@ -162,6 +162,7 @@ export default function ErgPortalLayout({
           userEmail={portalInfo?.userEmail}
           workspaceCapabilities={portalInfo?.workspaceCapabilities}
           workspacePortals={portalInfo?.workspacePortals}
+          onNavigate={(path) => void navigate({ href: path })}
         />
         <Box
           component="main"

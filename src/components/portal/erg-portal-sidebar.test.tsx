@@ -27,7 +27,7 @@ function renderSidebar(collapsed = false) {
       menuGroups={menuGroups}
       onCollapsedChange={vi.fn()}
       onNavigate={vi.fn()}
-      portalInfo={{ name: "LCMS" }}
+      portalInfo={{ name: "Admin" }}
     />,
   );
 }
@@ -67,7 +67,7 @@ describe("ErgPortalSidebar submenu disclosure", () => {
         menuGroups={menuGroups}
         onCollapsedChange={vi.fn()}
         onNavigate={vi.fn()}
-        portalInfo={{ name: "LCMS" }}
+        portalInfo={{ name: "Admin" }}
       />,
     );
 

@@ -6,7 +6,11 @@ import Pencil from "@mui/icons-material/Edit";
 import Trash2 from "@mui/icons-material/DeleteOutlined";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
 import Tooltip from "@mui/material/Tooltip";
+import Refresh from "@mui/icons-material/Refresh";
+import Search from "@mui/icons-material/Search";
 
 import {
   deleteLearningResourceResource,
@@ -24,10 +28,7 @@ import type {
   StructureSelection,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import {
-  LearningResourceExplorerShell,
-  LearningResourceExplorerTopBar,
-} from "@/components/learning-resources/explorer-ui";
+// explorer-ui imports removed for streamlined modern layout
 import { COURSE_STRUCTURE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import {
   buildExplorerPathUrl,
@@ -55,12 +56,14 @@ function SubjectRail({
   query,
   onSelectSubject,
   onBackToSubjects,
+  onCreateSubject,
 }: {
   subjects: StudioSubject[];
   selectedSubjectId?: string;
   query: string;
   onSelectSubject: (id: string) => void;
   onBackToSubjects: () => void;
+  onCreateSubject?: () => void;
 }) {
   const normalizedQuery = query.trim().toLocaleLowerCase("vi");
   const visibleSubjects = normalizedQuery
@@ -71,9 +74,18 @@ function SubjectRail({
     <aside className="flex min-h-0 flex-col border-r border-[#D9E2EF] bg-white">
       <div className="flex h-12 shrink-0 items-center justify-between border-b border-[#D9E2EF] px-3">
         <span className="text-[12px] font-bold uppercase tracking-wide text-[#52606D]">Môn học</span>
-        <Button size="small" variant="text" onClick={onBackToSubjects} sx={{ minWidth: 0, px: 1, fontSize: 12 }}>
-          Quản lý
-        </Button>
+        <div className="flex items-center gap-1">
+          {onCreateSubject ? (
+            <Tooltip title="Tạo môn học mới">
+              <IconButton size="small" color="primary" onClick={onCreateSubject} sx={{ p: 0.5 }}>
+                <Add sx={{ fontSize: 18 }} />
+              </IconButton>
+            </Tooltip>
+          ) : null}
+          <Button size="small" variant="text" onClick={onBackToSubjects} sx={{ minWidth: 0, px: 0.75, fontSize: 12 }}>
+            Quản lý
+          </Button>
+        </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto p-2 [scrollbar-gutter:stable]">
         {visibleSubjects.map((subject) => {
@@ -100,6 +112,28 @@ function SubjectRail({
         })}
         {!visibleSubjects.length ? <p className="px-3 py-6 text-center text-xs text-[#637381]">Không tìm thấy môn học.</p> : null}
       </div>
+      {onCreateSubject ? (
+        <div className="border-t border-[#D9E2EF] p-2">
+          <Button
+            variant="outlined"
+            size="small"
+            fullWidth
+            startIcon={<Add fontSize="small" />}
+            onClick={onCreateSubject}
+            sx={{
+              textTransform: "none",
+              fontSize: 12,
+              fontWeight: 700,
+              borderRadius: 1.5,
+              borderColor: "#CBD5E1",
+              color: "#0F6CBD",
+              "&:hover": { borderColor: "#0F6CBD", bgcolor: "#F0F7FF" },
+            }}
+          >
+            Thêm môn học
+          </Button>
+        </div>
+      ) : null}
     </aside>
   );
 }
@@ -111,6 +145,9 @@ function CurriculumActionBar({
   canDelete,
   onOpenSchedule,
   onCommand,
+  searchValue,
+  onSearchChange,
+  onRefresh,
 }: {
   selectedKind: "none" | "subject" | "level" | "topic";
   selectedLabel: string;
@@ -118,35 +155,123 @@ function CurriculumActionBar({
   canDelete: boolean;
   onOpenSchedule: () => void;
   onCommand: (id: ResourceCommandId) => void;
+  searchValue: string;
+  onSearchChange: (value: string) => void;
+  onRefresh: () => void;
 }) {
   const createCommand = selectedKind === "none" ? "create-subject" : selectedKind === "subject" ? "create-level" : selectedKind === "level" ? "create-topic" : "create-lesson";
-  const createLabel = selectedKind === "none" ? "Tạo môn học" : selectedKind === "subject" ? "Tạo level" : selectedKind === "level" ? "Tạo chủ đề" : "Tạo bài học";
+  const createLabel = selectedKind === "none" ? "Tạo môn học" : selectedKind === "subject" ? "Thêm Level (Chặng học)" : selectedKind === "level" ? "Thêm chủ đề" : "Thêm bài học";
 
   return (
-    <div className="flex min-h-12 shrink-0 items-center justify-between gap-3 border-b border-[#D9E2EF] bg-white px-3 py-1.5">
+    <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#D9E2EF] bg-white px-4 py-2">
       <div className="min-w-0">
-        <div className="truncate text-[13px] font-bold text-[#172033]">{selectedLabel}</div>
-        <div className="text-[11px] text-[#637381]">{selectedKind === "topic" ? "Danh sách bài học trong chủ đề" : "Cấu trúc môn học: Level → Chủ đề → Bài học"}</div>
+        <div className="truncate text-sm font-bold text-[#172033]">{selectedLabel}</div>
+        <div className="text-[11.5px] text-[#637381]">
+          {selectedKind === "topic"
+            ? "Danh sách bài học trong chủ đề"
+            : "Cấu trúc môn học: Level (tùy chọn) → Chủ đề (tùy chọn) → Bài học"}
+        </div>
       </div>
-      <div className="flex shrink-0 items-center gap-1.5">
+      <div className="flex shrink-0 flex-wrap items-center gap-2">
+        <TextField
+          size="small"
+          placeholder="Tìm môn học, level, chủ đề…"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search sx={{ fontSize: 16, color: "#94A3B8" }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+          sx={{
+            width: { xs: 170, sm: 220, md: 250 },
+            "& .MuiOutlinedInput-root": {
+              height: 32,
+              fontSize: 12,
+              bgcolor: "#F8FAFC",
+              borderRadius: 1.5,
+              "& fieldset": { borderColor: "#E2E8F0" },
+              "&:hover fieldset": { borderColor: "#CBD5E1" },
+              "&.Mui-focused fieldset": { borderColor: "#0F6CBD" },
+            },
+          }}
+        />
+        <Tooltip title="Làm mới dữ liệu">
+          <IconButton size="small" onClick={onRefresh} sx={{ color: "#64748B", p: 0.6, "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}>
+            <Refresh sx={{ fontSize: 18 }} />
+          </IconButton>
+        </Tooltip>
         <Button
           variant="outlined"
           size="small"
-          startIcon={<CalendarMonth />}
+          startIcon={<CalendarMonth sx={{ fontSize: 16 }} />}
           disabled={selectedKind === "none"}
           onClick={onOpenSchedule}
           aria-label="Mở khung chương trình môn học"
           title={selectedKind === "none" ? "Chọn một môn học trước" : "Thiết lập khung chương trình và phân bổ số tiết môn học"}
-          sx={{ textTransform: "none" }}
+          sx={{
+            height: 32,
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: "none",
+            borderRadius: 1.5,
+            borderColor: "#E2E8F0",
+            color: "#1E293B",
+            "&:hover": { borderColor: "#0F6CBD", bgcolor: "#EFF6FF" },
+          }}
         >
           Khung chương trình
         </Button>
-        <Button variant="contained" size="small" startIcon={<Add />} onClick={() => onCommand(createCommand)} sx={{ boxShadow: "none", textTransform: "none" }}>
+        <Button
+          variant="contained"
+          size="small"
+          startIcon={<Add sx={{ fontSize: 16 }} />}
+          onClick={() => onCommand(createCommand)}
+          sx={{
+            height: 32,
+            fontSize: 12,
+            fontWeight: 700,
+            bgcolor: "#0F6CBD",
+            boxShadow: "none",
+            textTransform: "none",
+            borderRadius: 1.5,
+            "&:hover": { bgcolor: "#0B5594" },
+          }}
+        >
           {createLabel}
         </Button>
-        <span className="mx-1 h-6 w-px bg-[#D9E2EF]" />
-        <Tooltip title="Chỉnh sửa mục đang chọn"><span><IconButton size="small" disabled={!canEdit} onClick={() => onCommand("edit")} aria-label="Chỉnh sửa mục đang chọn"><Pencil fontSize="small" /></IconButton></span></Tooltip>
-        <Tooltip title="Xem tác động trước khi xóa"><span><IconButton size="small" color="error" disabled={!canDelete} onClick={() => onCommand("delete")} aria-label="Xem tác động trước khi xóa"><Trash2 fontSize="small" /></IconButton></span></Tooltip>
+        <span className="mx-0.5 h-5 w-px bg-[#D9E2EF]" />
+        <Tooltip title="Chỉnh sửa mục đang chọn">
+          <span>
+            <IconButton
+              size="small"
+              disabled={!canEdit}
+              onClick={() => onCommand("edit")}
+              aria-label="Chỉnh sửa mục đang chọn"
+              sx={{ p: 0.6, color: "#64748B", "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}
+            >
+              <Pencil sx={{ fontSize: 16 }} />
+            </IconButton>
+          </span>
+        </Tooltip>
+        <Tooltip title="Xem tác động trước khi xóa">
+          <span>
+            <IconButton
+              size="small"
+              color="error"
+              disabled={!canDelete}
+              onClick={() => onCommand("delete")}
+              aria-label="Xem tác động trước khi xóa"
+              sx={{ p: 0.6, "&:hover": { bgcolor: "#FEF2F2" } }}
+            >
+              <Trash2 sx={{ fontSize: 16 }} />
+            </IconButton>
+          </span>
+        </Tooltip>
       </div>
     </div>
   );
@@ -247,7 +372,7 @@ export function StructureScreen({
     [localContentItems, selectedNodeOptionId],
   );
 
-  const handleGoBack = useCallback(() => {
+  const _handleGoBack = useCallback(() => {
     if (!selectedNode) return;
     if (selectedPath.length > 1) {
       const parentNode = selectedPath[selectedPath.length - 2];
@@ -257,6 +382,7 @@ export function StructureScreen({
     }
     setSelection(null);
   }, [selectedNode, selectedPath, onSelectNode]);
+  void _handleGoBack;
 
   const selectedChildRow = useMemo(
     () => (selection?.type === "node" ? currentChildren.find((child) => child.id === selection.id) : undefined),
@@ -367,7 +493,8 @@ export function StructureScreen({
     onDeleteSelection();
   }, [handleDeleteResource, onDeleteLocalContent, onDeleteNodeSelection, onDeleteSelection, selectedAttachedResource, selectedChildRow, selectedLocalContent]);
 
-  const selectedExplorerUrl = buildExplorerPathUrl(selectedSubject, selectedPath);
+  const _selectedExplorerUrl = buildExplorerPathUrl(selectedSubject, selectedPath);
+  void _selectedExplorerUrl;
   const breadcrumbItems = useMemo(() => {
     const items: { label: string; onClick: () => void }[] = [];
     if (selectedSubject) {
@@ -392,7 +519,7 @@ export function StructureScreen({
     return items;
   }, [selectedSubject, selectedPath, onSelectSubject, onSelectNode]);
 
-  const explorerBreadcrumbItems = useMemo(
+  const _explorerBreadcrumbItems = useMemo(
     () => breadcrumbItems.length
       ? breadcrumbItems
       : [{
@@ -405,6 +532,7 @@ export function StructureScreen({
         }],
     [breadcrumbItems, onSelectNode, onSelectSubject],
   );
+  void _explorerBreadcrumbItems;
 
   const curriculumModel = useMemo(
     () =>
@@ -494,7 +622,7 @@ export function StructureScreen({
       return;
     }
     if (id === "create-lesson") {
-      onCreateChild("section");
+      onCreateChild("lecture");
       return;
     }
     if (id === "add-lecture") {
@@ -538,7 +666,19 @@ export function StructureScreen({
         if (topicFolder.target.type === "node") {
           onSelectNode(topicFolder.target.id);
         }
-        onCreateChild("section");
+        onCreateChild("lecture");
+      },
+      onAddExercise: (lessonFolder: CurriculumFolder) => {
+        if (lessonFolder.target.type === "node") {
+          onSelectNode(lessonFolder.target.id);
+        }
+        onCreateChild("exercise");
+      },
+      onAddResource: (lessonFolder: CurriculumFolder) => {
+        if (lessonFolder.target.type === "node") {
+          onSelectNode(lessonFolder.target.id);
+        }
+        onCreateChild("resource");
       },
       onEditFolder: (folder: CurriculumFolder) => {
         if (folder.target.type === "node") {
@@ -578,25 +718,15 @@ export function StructureScreen({
     ],
   );
 
-  const visibleItemCount = roadmapStages.reduce(
+  const _visibleItemCount = roadmapStages.reduce(
     (total, stage) => total + 1 + stage.topics.length + stage.topics.reduce((count, topic) => count + topic.lessons.length, 0),
     0,
   );
+  void _visibleItemCount;
   const selectedLabel = selectedNode?.label ?? selectedSubject?.label ?? COURSE_STRUCTURE_WORKSPACE_LABEL;
 
   return (
-    <LearningResourceExplorerShell className="border-[rgba(145,158,171,0.2)] shadow-none">
-      <LearningResourceExplorerTopBar
-        breadcrumbItems={explorerBreadcrumbItems}
-        canGoBack={Boolean(selectedNode)}
-        onBack={handleGoBack}
-        onRefresh={() => void onRefreshData()}
-        searchLabel="Tìm trong cấu trúc môn học"
-        searchPlaceholder={curriculumModel.searchPlaceholder}
-        searchValue={treeQuery}
-        title={selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}
-        onSearchChange={setTreeQuery}
-      />
+    <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-[#D9E2EF] bg-white shadow-sm">
       <CurriculumActionBar
         selectedKind={curriculumModel.selectedKind}
         selectedLabel={selectedLabel}
@@ -604,9 +734,12 @@ export function StructureScreen({
         canDelete={canDeleteSelection}
         onOpenSchedule={() => setTeachingPlanOpen(true)}
         onCommand={handleResourceCommand}
+        searchValue={treeQuery}
+        onSearchChange={setTreeQuery}
+        onRefresh={() => void onRefreshData()}
       />
 
-      <div className="grid h-[calc(100vh-220px)] min-h-[560px] min-w-0 grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)]">
+      <div className="grid h-[calc(100vh-140px)] min-h-[580px] min-w-0 grid-cols-1 overflow-hidden lg:grid-cols-[260px_minmax(0,1fr)]">
         <SubjectRail
           subjects={subjects}
           selectedSubjectId={selectedSubject?.id}
@@ -617,6 +750,7 @@ export function StructureScreen({
             setSelection(null);
           }}
           onBackToSubjects={onBackToSubjects}
+          onCreateSubject={onCreateSubject}
         />
 
         <section
@@ -663,11 +797,8 @@ export function StructureScreen({
         onClose={() => setTeachingPlanOpen(false)}
         subject={selectedSubject}
         stages={roadmapStages}
+        onRefreshStructure={onRefreshData}
       />
-      <div className="flex h-7 items-center justify-between border-t border-[rgba(145,158,171,0.2)] bg-white px-3 text-[12px] text-[#637381]">
-        <span>{visibleItemCount} mục hiển thị</span>
-        <span className="max-w-[60%] truncate" title={selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}>{selectedExplorerUrl || COURSE_STRUCTURE_WORKSPACE_LABEL}</span>
-      </div>
-    </LearningResourceExplorerShell>
+    </div>
   );
 }

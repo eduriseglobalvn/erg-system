@@ -45,12 +45,14 @@ export function LmsTeacherDesktopContent({ model }: WorkspaceProps) {
     classes,
     runs,
     selectedSchoolId,
+    selectedClassOptions,
     selectedClass,
     selectedSchoolName,
     teacherName,
     learningResourceScope,
     unreadNotificationCount,
     handleLocalAssignmentCreated,
+    handleClassChange,
   } = model;
   const localPathname = pathname.startsWith("/teacher") ? pathname.slice("/teacher".length) || "/" : pathname;
 
@@ -84,10 +86,11 @@ export function LmsTeacherDesktopContent({ model }: WorkspaceProps) {
       ) : localPathname === "/homework/assign" ? (
         <Suspense fallback={null}>
           <AssignHomeworkPage
-            classes={classes}
+            classes={selectedClassOptions.length > 0 ? selectedClassOptions : classes}
             selectedClass={selectedClass}
             onBack={() => void navigate({ href: teacherPath("/homework") })}
             onCreateAssignment={(title, subject) => handleLocalAssignmentCreated(title, subject, teacherPath("/homework"))}
+            onSelectClass={(classId) => handleClassChange({ target: { value: classId } })}
           />
         </Suspense>
       ) : localPathname === "/homework/student-groups" ? (
@@ -185,6 +188,7 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
     pathname,
     bootstrapQuery,
     classes,
+    selectedClassOptions,
     selectedClass,
     selectedSchoolName,
     learningResourceScope,
@@ -193,6 +197,7 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
     activeNav,
     teacherName,
     handleLocalAssignmentCreated,
+    handleClassChange,
   } = model;
   const localPathname = pathname.startsWith("/teacher") ? pathname.slice("/teacher".length) || "/" : pathname;
 
@@ -231,10 +236,11 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
       return (
         <Suspense fallback={null}>
           <AssignHomeworkPage
-            classes={classes}
+            classes={selectedClassOptions.length > 0 ? selectedClassOptions : classes}
             selectedClass={selectedClass}
             onBack={() => void navigate({ href: teacherPath("/homework") })}
             onCreateAssignment={(title, subject) => handleLocalAssignmentCreated(title, subject, teacherPath("/homework"))}
+            onSelectClass={(classId) => handleClassChange({ target: { value: classId } })}
           />
         </Suspense>
       );

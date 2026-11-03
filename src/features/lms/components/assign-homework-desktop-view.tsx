@@ -1,7 +1,6 @@
 import { Calendar, RefreshCw, Search } from "lucide-react";
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { AssignHomeworkFooter } from "@/features/lms/components/assign-homework-footer";
-import { assignmentSubjects } from "@/features/lms/classroom/components/class-students-workspace.constants";
 import { allGroupSourcesFilterValue } from "@/features/lms/components/assign-homework-groups";
 import { AppSelect } from "@/components/ui/app-select";
 import { cn } from "@/lib/utils";
@@ -39,7 +38,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
     setAttemptLimit,
     maxDurationMinutes,
     setMaxDurationMinutes,
-    setAssignmentClassId,
+    handleAssignmentClassChange,
     selectedGradeLabel,
     setSelectedGradeLabel,
     selectedGradeClassIds,
@@ -63,12 +62,14 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
     selectedResourceIds,
     resourceSearch,
     setResourceSearch,
+    validationError,
+    setValidationError,
+    isSubmitting,
+    isClassLoading,
     isMobile,
-    apiBacked,
     gradeOptions,
     assignmentClass,
     groupSourceOptions,
-    getFallbackStudentsForClass,
     students,
     gradeClasses,
     getGradeStudentsForClassId,
@@ -104,6 +105,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
     toggleAllGroupPreviewStudents,
     resetGroupPreviewStudents,
     handleNext,
+    availableSubjects,
     selectedSubject,
     selectedLevel,
     filteredResourceTopics,
@@ -123,6 +125,19 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
         ) : null}
         {step === 1 ? (
           <div className="w-full h-full px-4 py-4 space-y-4 flex flex-col min-h-0 md:px-8 md:py-6">
+            {validationError ? (
+              <div className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-700 flex items-center justify-between shadow-xs">
+                <span>{validationError}</span>
+                <button
+                  type="button"
+                  onClick={() => setValidationError("")}
+                  className="ml-3 font-bold text-rose-500 hover:text-rose-700 cursor-pointer text-sm"
+                  aria-label="Đóng thông báo"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : null}
 
             {/* Card: Assignment setup */}
             <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-4 py-3 shadow-[var(--shadow-xs)]">
@@ -256,18 +271,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                       <div className="relative">
                         <AppSelect
                           value={assignmentClass?.id ?? ""}
-                          onChange={(event) => {
-                            setAssignmentClassId(event.target.value);
-                            const nextClass = classes.find((classroom) => classroom.id === event.target.value);
-                            setSelectedStudentIds(
-                              new Set(
-                                apiBacked
-                                  ? []
-                                  : getFallbackStudentsForClass(event.target.value, nextClass?.className).map((student) => student.id),
-                              ),
-                            );
-                            setSearchQuery("");
-                          }}
+                          onChange={(event) => handleAssignmentClassChange(event.target.value)}
                           className="h-9 w-full rounded-lg border border-[#cbd7e6] bg-white px-3 pr-9 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                         >
                           {classes.map((classroom) => (
@@ -301,6 +305,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                 </div>
                 <MobileStudentSelectionList
                   allSelected={allSelected}
+                  isLoading={isClassLoading}
                   onToggleAll={toggleSelectAll}
                   onToggleStudent={toggleStudent}
                   selectedIds={selectedStudentIds}
@@ -308,7 +313,8 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                 />
                 <StudentSelectionTable
                   allSelected={allSelected}
-                  className="hidden md:flex"
+                  className="hidden md:block"
+                  isLoading={isClassLoading}
                   onToggleAll={toggleSelectAll}
                   onToggleStudent={toggleStudent}
                   selectedIds={selectedStudentIds}
@@ -376,11 +382,12 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                         return (
                           <tr
                             key={group.id}
+                            onClick={() => toggleAssignmentGroup(group.id)}
                             style={{
                               backgroundColor: isChecked ? group.color : undefined,
                               borderLeft: `4px solid ${group.color}`,
                             }}
-                            className={cn("transition-colors", isChecked ? "text-white" : "bg-white hover:bg-[#f8fbff]")}
+                            className={cn("transition-colors cursor-pointer select-none", isChecked ? "text-white" : "bg-white hover:bg-[#f8fbff]")}
                           >
                             <td className="py-3 px-5 text-center">
                               <AssignmentCheckbox checked={isChecked} onChange={() => toggleAssignmentGroup(group.id)} label={`Chọn nhóm ${group.name}`} />
@@ -389,7 +396,10 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                             <td className="py-3 px-4">
                               <button
                                 type="button"
-                                onClick={() => openAssignmentGroupPreview(group.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openAssignmentGroupPreview(group.id);
+                                }}
                                 className={cn(
                                   "inline-flex items-center gap-2 font-semibold hover:underline",
                                   isChecked ? "text-white hover:text-white" : "text-[var(--erg-blue)] hover:text-[var(--erg-blue)]",
@@ -535,8 +545,9 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                         return (
                           <tr
                             key={classroom.id}
+                            onClick={() => toggleGradeClass(classroom.id)}
                             className={cn(
-                              "transition-colors",
+                              "transition-colors cursor-pointer select-none",
                               isChecked ? "bg-[var(--erg-blue-light)] hover:bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]",
                             )}
                           >
@@ -623,6 +634,19 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
           </div>
         ) : (
           <div className="w-full h-full px-4 py-4 flex flex-col min-h-0 md:px-8 md:py-6">
+            {validationError ? (
+              <div className="shrink-0 mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-700 flex items-center justify-between shadow-xs">
+                <span>{validationError}</span>
+                <button
+                  type="button"
+                  onClick={() => setValidationError("")}
+                  className="ml-3 font-bold text-rose-500 hover:text-rose-700 cursor-pointer text-sm"
+                  aria-label="Đóng thông báo"
+                >
+                  ✕
+                </button>
+              </div>
+            ) : null}
             <section className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
               <div className="lms-modal-header shrink-0 border-b border-[#dbe4f0] px-5 py-3">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -647,7 +671,7 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                         onChange={(event) => handleSubjectChange(event.target.value)}
                         className="h-10 w-full rounded-lg border border-[#cbd7e6] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
                       >
-                        {assignmentSubjects.map((item) => (
+                        {availableSubjects.map((item) => (
                           <option key={item.id} value={item.id}>{item.label}</option>
                         ))}
                       </AppSelect>
@@ -761,6 +785,11 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
         onBack={onBack}
         onPreviousStep={() => setStep(1)}
         onNext={step === 1 ? handleNext : handleFinish}
+        onStepSelect={(targetStep) => {
+          if (targetStep === 1) setStep(1);
+          if (targetStep === 2) handleNext();
+        }}
+        isSubmitting={isSubmitting}
       />
     </div>
   );
