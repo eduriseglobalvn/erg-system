@@ -43,30 +43,11 @@ import type { CreateEmployeeRequest } from "@/features/employee-management/types
 
 const steps = ["Định danh", "Thông tin nhân sự", "Role & scope", "Credential", "Review"];
 
-const DEFAULT_SCHOOL_OPTIONS = [
-  { code: "TCD-01", district: "Quận 1", id: "THCS-TRUONG-CONG-DINH", name: "THCS Trương Công Định", schoolType: "THCS" },
-  { code: "VD-02", district: "Quận 4", id: "THCS-VAN-DON", name: "THCS Vân Đồn", schoolType: "THCS" },
-  { code: "ND-03", district: "Quận 1", id: "THCS-NGUYEN-DU", name: "THCS Nguyễn Du", schoolType: "THCS" },
-  { code: "LHP-04", district: "Quận 5", id: "THPT-LE-HONG-PHONG", name: "THPT Chuyên Lê Hồng Phong", schoolType: "THPT" },
-];
-
 const DEFAULT_CENTER_OPTIONS = [
   { code: "CS-01", id: "CS-QUAN-1", name: "Cơ sở Đào tạo ERG - Quận 1" },
   { code: "CS-02", id: "CS-TAN-BINH", name: "Cơ sở Đào tạo ERG - Tân Bình" },
   { code: "CS-03", id: "CS-THU-DUC", name: "Cơ sở Đào tạo ERG - Thủ Đức" },
   { code: "CTR-01", id: "CENTER-01", name: "Trung tâm Ngoại ngữ & Khảo thí ERG" },
-];
-
-const DEFAULT_CLASS_OPTIONS = [
-  { grade: "Khối 6", id: "6A1", name: "Lớp 6A1" },
-  { grade: "Khối 6", id: "6A2", name: "Lớp 6A2" },
-  { grade: "Khối 7", id: "7A1", name: "Lớp 7A1" },
-  { grade: "Khối 7", id: "7A2", name: "Lớp 7A2" },
-  { grade: "Khối 8", id: "8A1", name: "Lớp 8A1" },
-  { grade: "Khối 8", id: "8A2", name: "Lớp 8A2" },
-  { grade: "Khối 9", id: "9A1", name: "Lớp 9A1" },
-  { grade: "Khối 9", id: "9A2", name: "Lớp 9A2" },
-  { grade: "Khối 9", id: "9A3", name: "Lớp 9A3" },
 ];
 
 const STREAMLINED_ROLE_CATEGORIES: Record<string, string[]> = {
@@ -112,7 +93,7 @@ const initialForm = {
   scopeType: "TENANT",
   selectedCenterIds: [] as string[],
   selectedClassIds: [] as string[],
-  selectedSchoolForClass: "THCS-TRUONG-CONG-DINH",
+  selectedSchoolForClass: "",
   selectedSchoolIds: [] as string[],
   workLocation: "",
 };
@@ -134,8 +115,8 @@ export function CreateEmployeeWizard({
   const [error, setError] = useState<string | null>(null);
 
   const schoolMgmt = useEmployeeSchoolOptions(form.selectedSchoolForClass || undefined);
-  const dbSchools = schoolMgmt.schools.length > 0 ? schoolMgmt.schools : DEFAULT_SCHOOL_OPTIONS;
-  const dbClasses = schoolMgmt.classes.length > 0 ? schoolMgmt.classes : DEFAULT_CLASS_OPTIONS;
+  const dbSchools = schoolMgmt.schools;
+  const dbClasses = schoolMgmt.classes;
 
   const set = (name: keyof typeof form, value: string) => {
     setError(null);
