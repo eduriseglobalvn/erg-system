@@ -8,9 +8,6 @@ export {
   loadQuizEditorDraft,
   loadQuizEditorVersions,
   loadQuizEditorWorkspace,
-  normalizeQuizEditorGroups,
-  normalizeQuizPlayerTemplate,
-  normalizeQuizProjectSettings,
   presignQuizEditorMedia,
   publishQuizEditorDraft,
   reorderQuizEditorSlides,
@@ -18,6 +15,11 @@ export {
   upsertQuizEditorSlide,
   validateQuizEditorDraft,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+export {
+  normalizeQuizEditorGroups,
+  normalizeQuizPlayerTemplate,
+  normalizeQuizProjectSettings,
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-normalizers";
 export type {
   QuizEditorCreateInput,
   QuizEditorCreateResult,

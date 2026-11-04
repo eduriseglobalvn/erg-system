@@ -150,21 +150,6 @@ export function SchoolPageShell({
           >
             <Box
               sx={{
-                bgcolor: "rgba(0, 0, 0, 0.04)",
-                borderRadius: "6px",
-                color: "#3A3A3C",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.72rem",
-                fontWeight: 600,
-                px: 1,
-                py: 0.25,
-              }}
-            >
-              ID: {selectedSchool.id}
-            </Box>
-
-            <Box
-              sx={{
                 bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                 border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.18)}`,
                 borderRadius: "6px",

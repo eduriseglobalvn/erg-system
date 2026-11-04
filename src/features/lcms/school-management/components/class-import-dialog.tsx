@@ -15,7 +15,6 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import FormControlLabel from "@mui/material/FormControlLabel";
-import LinearProgress from "@mui/material/LinearProgress";
 import MenuItem from "@mui/material/MenuItem";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
@@ -257,7 +256,6 @@ export function ClassImportDialog({
       <Dialog fullWidth maxWidth="lg" onClose={importing ? undefined : onClose} open slotProps={{ paper: { sx: { maxHeight: "90dvh" } } }}>
         <DialogTitle>Tạo {classLabel.toLowerCase()}<Typography color="text.secondary" variant="body2">Dữ liệu chỉ được ghi vào trường sau khi bạn xem preview và xác nhận.</Typography></DialogTitle>
         <Box sx={{ borderBottom: "1px solid", borderColor: "divider", px: 3 }}><Tabs onChange={(_, value) => { setSource(value); setMessage(""); setPreview([]); }} value={source} variant="scrollable"><Tab icon={<AddRoundedIcon />} iconPosition="start" label="Tạo tay" /><Tab icon={<FileUploadRoundedIcon />} iconPosition="start" label="Từ Excel" /><Tab icon={<CloudDownloadRoundedIcon />} iconPosition="start" label="Google Sheets" /></Tabs></Box>
-        {loading || importing ? <LinearProgress /> : null}
         <DialogContent sx={{ display: "grid", gap: 2, minHeight: 260, overflow: "auto", pt: 3 }}>
           {source === 0 ? <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}><TextField label={`Tên ${classLabel.toLowerCase()}`} required value={manual.name} onChange={(event) => setManual({ ...manual, name: event.target.value })} />{usesGrades ? <TextField label="Khối" required select value={manual.grade} onChange={(event) => setManual({ ...manual, grade: event.target.value })}>{grades.map((grade) => <MenuItem key={grade} value={grade}>Khối {grade}</MenuItem>)}</TextField> : null}<TextField label="Giáo viên phụ trách" value={manual.homeroomTeacher} onChange={(event) => setManual({ ...manual, homeroomTeacher: event.target.value })} /><TextField label="Sĩ số dự kiến" type="number" value={manual.studentCount} onChange={(event) => setManual({ ...manual, studentCount: Number(event.target.value) || 0 })} /></Box> : null}
           {source === 1 ? <Paper sx={{ bgcolor: "background.default", borderStyle: "dashed", p: 3, textAlign: "center" }} variant="outlined"><input ref={fileRef} accept=".xlsx,.xls,.csv" hidden onChange={readExcel} type="file" /><FileUploadRoundedIcon color="primary" /><Typography sx={{ fontWeight: 600, mt: 1 }}>File gồm: {usesGrades ? "Tên lớp, Khối, Giáo viên phụ trách, Sĩ số" : "Tên lớp, Giáo viên phụ trách, Sĩ số"}</Typography><Typography color="text.secondary" variant="body2">Hệ thống tự nhận diện cột, hoặc tự động trích xuất các lớp từ sổ điểm danh nhiều sheet.</Typography><Button disabled={loading} onClick={() => fileRef.current?.click()} sx={{ mt: 2 }} variant="outlined">Chọn file lớp</Button></Paper> : null}

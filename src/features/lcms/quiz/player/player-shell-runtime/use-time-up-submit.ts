@@ -1,4 +1,4 @@
-import { useEffect, type Dispatch, type SetStateAction } from "react";
+import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 
 import type { PlayerLoadState } from "@/components/quiz/player-shell-runtime-model";
 import { createEmptyAttempt, localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
@@ -25,6 +25,13 @@ export type UseTimeUpSubmitArgs = {
   setSubmitting: Dispatch<SetStateAction<boolean>>;
 };
 
+export type TimeUpPhase = "idle" | "submitting" | "waiting-network" | "failed";
+
+/**
+ * Auto-submits once when the deadline passes (testing mode only). Guarded by a ref keyed on the
+ * attempt id so re-renders / StrictMode / refocus cannot double-fire; a failed offline submit
+ * is retried when the browser comes back online (answers stay in the local session store).
+ */
 export function useTimeUpSubmit({
   activeAttempt,
   activePackage,
@@ -40,15 +47,34 @@ export function useTimeUpSubmit({
   setSubmitError,
   setSubmitting,
 }: UseTimeUpSubmitArgs) {
+  const firedForRef = useRef<string | null>(null);
+  const [phase, setPhase] = useState<TimeUpPhase>("idle");
+  const [retryTick, setRetryTick] = useState(0);
+
+  const retry = useCallback(() => {
+    firedForRef.current = null;
+    setRetryTick((value) => value + 1);
+  }, []);
+
+  useEffect(() => {
+    if (phase !== "waiting-network") return;
+    window.addEventListener("online", retry);
+    return () => window.removeEventListener("online", retry);
+  }, [phase, retry]);
+
   useEffect(() => {
     if (!started || !isTestingMode || attemptCompleted || !timeUp || submitting || !activePackage || !activeSession) {
       return;
     }
+    if (firedForRef.current === activeSession.attemptId) return;
+    firedForRef.current = activeSession.attemptId;
 
     void (async () => {
+      setPhase("submitting");
       setSubmitting(true);
       try {
         await submitReadyAttempt(activePackage, activeSession, activeAttempt);
+        setPhase("idle");
       } catch (error) {
         const latestSession =
           (await localQuizAttemptStore.getSession(activeSession.assignmentId, activeSession.quizId, attemptScope)) ?? activeSession;
@@ -57,6 +83,7 @@ export function useTimeUpSubmit({
           error instanceof Error ? error.message : "Nộp bài không thành công.",
         );
         setSubmitError(error instanceof Error ? error.message : "Nộp bài không thành công. Vui lòng thử lại.");
+        setPhase(typeof navigator !== "undefined" && !navigator.onLine ? "waiting-network" : "failed");
         setLoadState({
           status: "ready",
           attempt: activeAttempt ? { ...activeAttempt, id: latestSession.attemptId } : createEmptyAttempt(activePackage, latestSession.attemptId),
@@ -68,5 +95,7 @@ export function useTimeUpSubmit({
         setSubmitting(false);
       }
     })();
-  }, [started, isTestingMode, attemptCompleted, timeUp, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt, setLoadState, setSubmitError, setSubmitting]);
+  }, [started, isTestingMode, attemptCompleted, timeUp, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt, retryTick, setLoadState, setSubmitError, setSubmitting]);
+
+  return { phase: attemptCompleted ? ("idle" as const) : phase, retry };
 }

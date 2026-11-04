@@ -49,3 +49,15 @@ describe("usePlayerKeyboard arrows", () => {
     expect(setCurrentIndex).not.toHaveBeenCalled();
   });
 });
+
+describe("usePlayerKeyboard arrows (modes)", () => {
+  it("also navigates in training mode and ignores textarea/contenteditable", () => {
+    const setCurrentIndex = mount({ isTestingMode: false, isTrainingMode: true });
+    const area = document.body.appendChild(document.createElement("textarea"));
+    area.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true }));
+    area.remove();
+    expect(setCurrentIndex).not.toHaveBeenCalled();
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+    expect(setCurrentIndex).toHaveBeenCalledOnce();
+  });
+});

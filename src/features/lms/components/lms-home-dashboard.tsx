@@ -7,10 +7,10 @@ import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
-import EventNoteRoundedIcon from "@mui/icons-material/EventNoteRounded";
 
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
 import type { AssignmentRun, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { TodayLessonsPanel } from "@/features/lms/components/lms-home-today-lessons";
 import { formatDateVi, todayInput } from "@/lib/format-date";
 
 export function greetingFor(hour: number) {
@@ -149,15 +149,7 @@ export function LmsHomeDashboard({
             )}
           </Panel>
 
-          <Panel>
-            <Typography component="h2" variant="subtitle1" sx={{ mb: 1.5 }}>Hôm nay{today ? ` · ${today}` : ""}</Typography>
-            <ErgEmptyState
-              action={<Button onClick={onOpenSchedule} variant="outlined">Xem lịch</Button>}
-              description="Mở lịch làm việc để xem các tiết dạy trong ngày."
-              icon={<EventNoteRoundedIcon />}
-              title="Chưa có tiết dạy được hiển thị"
-            />
-          </Panel>
+          <TodayLessonsPanel onOpenSchedule={onOpenSchedule} />
         </Box>
       </Box>
     </Box>

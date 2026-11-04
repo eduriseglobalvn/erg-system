@@ -22,10 +22,11 @@ export const surfaceSx = {
 export const CALENDAR_SHELL_HEIGHT = "calc(100dvh - 122px)";
 
 export const calendarToolbarGridSx = {
-  alignItems: { xs: "stretch", xl: "center" },
+  alignItems: { xs: "stretch", md: "center" },
   display: "grid",
   gap: 0.9,
-  gridTemplateColumns: { xs: "1fr", xl: "minmax(390px, 1fr) auto auto" },
+  // one row from md: date nav | filter popover | view switch
+  gridTemplateColumns: { xs: "1fr", md: "minmax(0, 1fr) auto auto" },
 };
 
 export const calendarWorkspaceSx = {

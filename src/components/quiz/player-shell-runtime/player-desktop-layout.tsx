@@ -2,7 +2,8 @@ import type { ComponentProps, CSSProperties, ReactNode, RefObject } from "react"
 import { Flag } from "lucide-react";
 
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
-import { FinalResultScreen, QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
+import { FinalResultScreen } from "@/components/quiz/final-result-screen";
+import { QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
 import { PlayerTimerText } from "@/components/quiz/player-status";
 import {
   navButtonClass,
@@ -43,6 +44,8 @@ export type PlayerDesktopLayoutProps = {
   submitting: boolean;
   handleRequestSubmit: () => void;
   handleReviewQuiz: () => void;
+  onBackToList: () => void;
+  onRetry?: () => void;
   handleToggleBookmark: () => Promise<void>;
   setCurrentIndex: (update: (value: number) => number) => void;
   submitCurrentTrainingQuestion: () => Promise<void>;
@@ -80,6 +83,8 @@ export function PlayerDesktopLayout({
   submitting,
   handleRequestSubmit,
   handleReviewQuiz,
+  onBackToList,
+  onRetry,
   handleToggleBookmark,
   setCurrentIndex,
   submitCurrentTrainingQuestion,
@@ -132,8 +137,12 @@ export function PlayerDesktopLayout({
               {attemptCompleted && !reviewingSubmittedAttempt ? (
                 <FinalResultScreen
                   attempt={readyAttempt}
+                  questions={questions}
                   resultDisplay={resultDisplay}
                   onReview={handleReviewQuiz}
+                  onReviewQuestion={(index) => { handleReviewQuiz(); setCurrentIndex(() => index); }}
+                  onRetry={onRetry}
+                  onBackToList={onBackToList}
                 />
               ) : null}
 

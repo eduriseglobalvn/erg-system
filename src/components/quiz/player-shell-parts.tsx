@@ -4,47 +4,9 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 
-import type { AnswerResult, Attempt, Question, QuizResultDisplay } from "@/lib/types";
+import type { AnswerResult, Question, QuizResultDisplay } from "@/lib/types";
 
 type SubmitDialogMode = "all-answered" | "confirm";
-
-export function FinalResultScreen({
-  attempt,
-  resultDisplay,
-  onReview,
-}: {
-  attempt: Attempt;
-  resultDisplay: QuizResultDisplay;
-  onReview: () => void;
-}) {
-  const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
-
-  return (
-    <Box sx={{ alignItems: "center", bgcolor: "common.white", display: "grid", justifyItems: "center", minHeight: 420, overflow: "hidden", px: 3, py: 4 }}>
-      <Box sx={{ display: "grid", gap: 2, justifyItems: "center", textAlign: "center" }}>
-        <Box sx={{ alignItems: "center", bgcolor: attempt.passed ? "success.main" : "error.main", borderRadius: 1, color: "common.white", display: "grid", fontSize: 20, fontWeight: 600, height: 64, placeItems: "center", width: 64 }}>
-          {attempt.passed ? "✓" : "×"}
-        </Box>
-        <Typography component="h2" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
-          {resultMessage}
-        </Typography>
-        <Box sx={{ display: "grid", gap: 1 }}>
-          <Typography component="span" sx={{ color: "text.secondary", fontSize: 14, fontWeight: 600 }}>Điểm</Typography>
-          <Typography component="strong" sx={{ color: "var(--erg-blue)", fontSize: 20, fontWeight: 600 }}>
-            {attempt.totalScore}/{attempt.maxScore}
-          </Typography>
-          <Typography component="span" sx={{ color: "text.disabled", fontSize: 14, fontWeight: 600 }}>{attempt.percent}%</Typography>
-        </Box>
-        {resultDisplay.showReviewButton ? (
-          <Button variant="contained" onClick={onReview} sx={{ minHeight: 40, px: 2 }}>
-            {resultDisplay.reviewButtonLabel}
-          </Button>
-        ) : null}
-        <Typography sx={{ color: "text.secondary", fontSize: 16, fontWeight: 500 }}>{resultDisplay.thankYouMessage}</Typography>
-      </Box>
-    </Box>
-  );
-}
 
 export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
   const title = result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";

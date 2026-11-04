@@ -1,5 +1,6 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import { ErgSkeleton } from "@/components/erg-mui/erg-feedback";
 import Typography from "@mui/material/Typography";
 
 export function CalendarErrorBanner({ message, onRetry }: { message: string; onRetry?: () => void }) {
@@ -11,12 +12,11 @@ export function CalendarErrorBanner({ message, onRetry }: { message: string; onR
   );
 }
 
+/** Inline (in-flow) loading hint: never fixed over content, disappears with isLoading. */
 export function CalendarLoadingOverlay() {
   return (
-    <Box aria-live="polite" role="status" sx={{ bottom: 10, pointerEvents: "none", position: "fixed", right: 18, zIndex: 15 }}>
-      <Box sx={{ backgroundColor: "rgba(28,37,46,0.82)", borderRadius: "999px", color: "#FFFFFF", fontSize: 12.5, fontWeight: 600, px: 1.45, py: 0.8 }}>
-        Đang tải lịch...
-      </Box>
+    <Box aria-label="Đang tải lịch" aria-live="polite" role="status">
+      <ErgSkeleton height={6} />
     </Box>
   );
 }

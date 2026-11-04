@@ -6,10 +6,18 @@ import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import type { CSSProperties } from "react";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
+import { useState, type CSSProperties } from "react";
 
 import { questionLabel } from "@/components/quiz/player-shell-utils";
 import type { Question } from "@/lib/types";
+
+export type NavigatorFilter = "all" | "unanswered" | "flagged";
+
+export function matchesNavigatorFilter(filter: NavigatorFilter, answered: boolean, flagged: boolean) {
+  return filter === "all" || (filter === "unanswered" ? !answered : flagged);
+}
 
 type QuestionNavigatorProps = {
   answeredQuestionIds: string[];
@@ -62,10 +70,13 @@ export function QuestionNavigator({
 }: QuestionNavigatorProps) {
   const answeredSet = new Set(answeredQuestionIds);
   const flaggedSet = new Set(flaggedQuestionIds);
+  const [filter, setFilter] = useState<NavigatorFilter>("all");
   const normalizedQuery = query.trim().toLowerCase();
-  const filteredQuestions = normalizedQuery
-    ? questions.filter((question, index) => `${index + 1}. ${question.title}`.toLowerCase().includes(normalizedQuery))
-    : questions;
+  const filteredQuestions = questions.filter(
+    (question, index) =>
+      matchesNavigatorFilter(filter, answeredSet.has(question.id), flaggedSet.has(question.id)) &&
+      (!normalizedQuery || `${index + 1}. ${question.title}`.toLowerCase().includes(normalizedQuery)),
+  );
 
   return (
     <Box
@@ -115,6 +126,20 @@ export function QuestionNavigator({
           />
         </Box>
       ) : null}
+
+      <ToggleButtonGroup
+        exclusive
+        fullWidth
+        size="small"
+        aria-label="Lọc câu hỏi"
+        value={filter}
+        onChange={(_event, next: NavigatorFilter | null) => next && setFilter(next)}
+        sx={{ p: 1 }}
+      >
+        <ToggleButton value="all">Tất cả</ToggleButton>
+        <ToggleButton value="unanswered">Chưa làm</ToggleButton>
+        <ToggleButton value="flagged">Đã đánh dấu</ToggleButton>
+      </ToggleButtonGroup>
 
       <Box sx={{ bgcolor: "rgba(247,248,255,0.76)", display: "flex", flex: 1, flexDirection: "column", gap: 0.75, overflow: "auto", p: 1 }}>
         {showIntro ? (

@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Paper from "@mui/material/Paper";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
@@ -23,7 +24,7 @@ export default function SchoolImportsScreen() {
     <SchoolPageShell
       title="Trung tâm nhập dữ liệu"
       description="Nhập, rà soát và theo dõi dữ liệu từ Excel, Google Sheets hoặc bảng nhập tay."
-      action={<Button disabled title="Backend chưa cung cấp import job và history ở phase hiện tại." startIcon={<AddRoundedIcon />} variant="contained">Tạo đợt nhập</Button>}
+      action={<Tooltip title="Backend chưa cung cấp import job và lịch sử nhập ở giai đoạn hiện tại."><span><Button disabled startIcon={<AddRoundedIcon />} variant="contained">Tạo đợt nhập</Button></span></Tooltip>}
     >
       <Alert severity="info" sx={{ mb: 2 }}>{unsupportedApiMessage} Không hiển thị lịch sử mẫu khi backend chưa có import contract.</Alert>
       <Box sx={{ display: "grid", gap: 2 }}>

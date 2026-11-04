@@ -1,7 +1,9 @@
 import { useState } from "react";
+import type { Dayjs } from "dayjs";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Popover from "@mui/material/Popover";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
@@ -11,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import FilterListRoundedIcon from "@mui/icons-material/FilterListRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import FormatListBulletedRoundedIcon from "@mui/icons-material/FormatListBulletedRounded";
 import ViewAgendaRoundedIcon from "@mui/icons-material/ViewAgendaRounded";
@@ -18,6 +21,7 @@ import ViewColumnRoundedIcon from "@mui/icons-material/ViewColumnRounded";
 import ViewWeekRoundedIcon from "@mui/icons-material/ViewWeekRounded";
 
 import { getEmptyScopeOptionLabel, getScopeOptionValue } from "./erg-calendar-formatters";
+import { CalendarMiniMonth } from "./erg-calendar-navigator";
 import { CalendarScopePicker } from "./erg-calendar-scope-picker";
 import type { CalendarMode, ErgCalendarLaneSummary } from "./erg-calendar-types";
 import {
@@ -37,6 +41,10 @@ import {
 } from "./erg-calendar-workspace-styles";
 
 type CalendarToolbarProps = {
+  eventDateSet: Set<string>;
+  onSelectDate: (value: Dayjs) => void;
+  selectedDate: Dayjs;
+  todayDate: string;
   allLaneLabel: string;
   calendarLane: string;
   calendarLanes: string[];
@@ -68,8 +76,10 @@ const viewOptions: Array<{ icon: typeof ViewAgendaRoundedIcon; label: string; va
 
 export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
   const [scopePickerOpen, setScopePickerOpen] = useState(false);
+  const [filterAnchor, setFilterAnchor] = useState<HTMLElement | null>(null);
+  const [dateAnchor, setDateAnchor] = useState<HTMLElement | null>(null);
   const {
-    allLaneLabel, calendarLane, calendarLanes, isAllLane, jumpToToday, miniCalendarOpen, mobileLayout,
+    eventDateSet, onSelectDate, selectedDate, todayDate, allLaneLabel, calendarLane, calendarLanes, isAllLane, jumpToToday, miniCalendarOpen, mobileLayout,
     mode, monthLabel, moveRange, onModeChange, onToggleMiniCalendar, rangeLabel, scopeOptions,
     scopeSelectLabel, selectedScopeId, selectedScopeLabel, selectScopeValue, setCalendarLane,
   } = props;
@@ -83,6 +93,45 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
     }
     if (mobileLayout) setScopePickerOpen(true);
   };
+
+  const laneControls = (
+    <Box sx={calendarToolbarLaneSx}>
+      <Stack direction="row" spacing={0.5} sx={laneToolbarSx}>
+        {calendarLanes.map((lane) => {
+          const active = lane === calendarLane;
+          const accessibleLabel = active && selectedScopeLabel ? `${lane}: ${selectedScopeLabel}` : lane;
+          return (
+            <Button
+              aria-haspopup={mobileLayout && lane !== allLaneLabel ? "dialog" : undefined}
+              aria-label={accessibleLabel}
+              aria-pressed={active}
+              endIcon={mobileLayout && lane !== allLaneLabel ? <ExpandMoreRoundedIcon sx={{ fontSize: 17 }} /> : undefined}
+              key={lane}
+              onClick={() => selectLane(lane)}
+              sx={laneButtonSx(active)}
+              variant="text"
+            >
+              {mobileLayout ? mobileLaneLabel(lane, allLaneLabel) : lane}
+              {mobileLayout && active && selectedScopeLabel ? (
+                <Box component="span" sx={{ color: "#0F6CBD", fontWeight: 600, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  · {selectedScopeLabel}
+                </Box>
+              ) : null}
+            </Button>
+          );
+        })}
+      </Stack>
+  
+      {!mobileLayout ? (
+        <Box sx={scopeSelectSlotSx(isAllLane)}>
+          <TextField aria-label={scopeSelectLabel} disabled={!scopeOptions.length} label={scopeSelectLabel} onChange={(event) => selectScopeValue(event.target.value)} select size="small" sx={scopeSelectSx} value={selectedScopeId}>
+            <MenuItem value="">{scopeOptions.length ? scopeSelectLabel : getEmptyScopeOptionLabel(scopeSelectLabel)}</MenuItem>
+            {scopeOptions.map((summary) => <MenuItem key={getScopeOptionValue(summary)} value={getScopeOptionValue(summary)}>{summary.label}</MenuItem>)}
+          </TextField>
+        </Box>
+      ) : null}
+    </Box>
+  );
 
   return (
     <Box sx={calendarToolbarShellSx}>
@@ -107,48 +156,55 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
               {monthLabel}
             </Button>
           ) : (
-            <Typography sx={{ color: "#1C252E", fontSize: { xs: 18, xl: 20 }, fontWeight: 600, lineHeight: 1.2, ml: 0.25, whiteSpace: "nowrap" }}>
-              {rangeLabel}
-            </Typography>
+            <>
+              <Typography sx={{ color: "#1C252E", fontSize: { xs: 18, xl: 20 }, fontWeight: 600, lineHeight: 1.2, ml: 0.25, whiteSpace: "nowrap" }}>
+                {rangeLabel}
+              </Typography>
+              <IconButton aria-label="Chọn ngày" aria-haspopup="dialog" onClick={(event) => setDateAnchor(event.currentTarget)} sx={toolbarIconButtonSx}>
+                <CalendarMonthRoundedIcon fontSize="small" />
+              </IconButton>
+              <Popover
+                anchorEl={dateAnchor}
+                anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+                onClose={() => setDateAnchor(null)}
+                open={Boolean(dateAnchor)}
+              >
+                <CalendarMiniMonth
+                  eventDateSet={eventDateSet}
+                  selectedDate={selectedDate}
+                  setSelectedDate={(value) => { onSelectDate(value); setDateAnchor(null); }}
+                  todayDate={todayDate}
+                />
+              </Popover>
+            </>
           )}
         </Stack>
 
-        <Box sx={calendarToolbarLaneSx}>
-          <Stack direction="row" spacing={0.5} sx={laneToolbarSx}>
-            {calendarLanes.map((lane) => {
-              const active = lane === calendarLane;
-              const accessibleLabel = active && selectedScopeLabel ? `${lane}: ${selectedScopeLabel}` : lane;
-              return (
-                <Button
-                  aria-haspopup={mobileLayout && lane !== allLaneLabel ? "dialog" : undefined}
-                  aria-label={accessibleLabel}
-                  aria-pressed={active}
-                  endIcon={mobileLayout && lane !== allLaneLabel ? <ExpandMoreRoundedIcon sx={{ fontSize: 17 }} /> : undefined}
-                  key={lane}
-                  onClick={() => selectLane(lane)}
-                  sx={laneButtonSx(active)}
-                  variant="text"
-                >
-                  {mobileLayout ? mobileLaneLabel(lane, allLaneLabel) : lane}
-                  {mobileLayout && active && selectedScopeLabel ? (
-                    <Box component="span" sx={{ color: "#0F6CBD", fontWeight: 600, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      · {selectedScopeLabel}
-                    </Box>
-                  ) : null}
-                </Button>
-              );
-            })}
-          </Stack>
-
-          {!mobileLayout ? (
-            <Box sx={scopeSelectSlotSx(isAllLane)}>
-              <TextField aria-label={scopeSelectLabel} disabled={!scopeOptions.length} label={scopeSelectLabel} onChange={(event) => selectScopeValue(event.target.value)} select size="small" sx={scopeSelectSx} value={selectedScopeId}>
-                <MenuItem value="">{scopeOptions.length ? scopeSelectLabel : getEmptyScopeOptionLabel(scopeSelectLabel)}</MenuItem>
-                {scopeOptions.map((summary) => <MenuItem key={getScopeOptionValue(summary)} value={getScopeOptionValue(summary)}>{summary.label}</MenuItem>)}
-              </TextField>
-            </Box>
-          ) : null}
-        </Box>
+        {mobileLayout ? (
+          laneControls
+        ) : (
+          <>
+            <Button
+              aria-expanded={Boolean(filterAnchor)}
+              aria-haspopup="dialog"
+              onClick={(event) => setFilterAnchor(event.currentTarget)}
+              startIcon={<FilterListRoundedIcon />}
+              sx={todayButtonSx}
+              variant="outlined"
+            >
+              Bộ lọc{!isAllLane ? ` · ${selectedScopeLabel || calendarLane}` : ""}
+            </Button>
+            <Popover
+              anchorEl={filterAnchor}
+              anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+              onClose={() => setFilterAnchor(null)}
+              open={Boolean(filterAnchor)}
+              slotProps={{ paper: { "aria-label": "Bộ lọc lịch", role: "dialog", sx: { mt: 0.5, p: 2 } } }}
+            >
+              {laneControls}
+            </Popover>
+          </>
+        )}
 
         <Box sx={calendarToolbarActionsSx}>
           <ToggleButtonGroup exclusive onChange={(_, value) => value && onModeChange(value as CalendarMode)} size="small" sx={viewToggleSx} value={mode}>

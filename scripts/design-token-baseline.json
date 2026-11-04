@@ -1220,8 +1220,12 @@
     "font": 6
   },
   "src/features/lms/components/student-groups-page.tsx": {
-    "hex": 42,
+    "hex": 15,
     "font": 3
+  },
+  "src/features/lms/components/student-groups-parts.tsx": {
+    "hex": 25,
+    "font": 0
   },
   "src/features/lms/components/teaching-schedule/lms-erg-calendar-workspace.tsx": {
     "hex": 51,

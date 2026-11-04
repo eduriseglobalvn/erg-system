@@ -10,7 +10,6 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import LinearProgress from "@mui/material/LinearProgress";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
@@ -180,7 +179,6 @@ export function StudentImportDialog({ onClose, onImport, school }: {
           <Tab icon={<GridOnRoundedIcon />} iconPosition="start" label="Nhập tay hàng loạt" />
         </Tabs>
       </Box>
-      {loading || importing ? <LinearProgress /> : null}
       <DialogContent sx={{ display: "flex", flexDirection: "column", gap: 2, minHeight: 0, p: 3, pt: 2.5, overflow: "auto" }}>
         {source === 0 ? (
           <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px dashed", borderColor: "divider", borderRadius: 2, display: "flex", gap: 2, p: 2 }}>

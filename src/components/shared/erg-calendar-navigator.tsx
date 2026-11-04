@@ -26,29 +26,21 @@ export function CalendarNavigatorPanel({
   calendarListTitle,
   canCreate,
   createButtonLabel,
-  eventDateSet,
   laneSummaries,
   monthCount,
   monthCountLabel,
   onCreateClick,
   selectedSummaryLabels,
-  selectedDate,
-  setSelectedDate,
-  todayDate,
   toggleSummaryLabel,
 }: {
   calendarListTitle: string;
   canCreate: boolean;
   createButtonLabel: string;
-  eventDateSet: Set<string>;
   laneSummaries: ErgCalendarLaneSummary[];
   monthCount: number;
   monthCountLabel: string;
   onCreateClick: () => void;
   selectedSummaryLabels: Set<string>;
-  selectedDate: Dayjs;
-  setSelectedDate: (value: Dayjs) => void;
-  todayDate: string;
   toggleSummaryLabel: (label: string) => void;
 }) {
   return (
@@ -60,8 +52,6 @@ export function CalendarNavigatorPanel({
           </Button>
         </Tooltip>
       ) : null}
-
-      <CalendarMiniMonth eventDateSet={eventDateSet} selectedDate={selectedDate} setSelectedDate={setSelectedDate} todayDate={todayDate} />
 
       <Divider sx={{ my: 0.75, borderColor: "#E0E3E7" }} />
       <Stack spacing={0.25} sx={miniCalendarListSx}>

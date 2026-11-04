@@ -154,7 +154,7 @@ export function LmsErgCalendarWorkspace({
       errorMessage={workspaceQuery.error instanceof Error ? workspaceQuery.error.message : referenceCatalogQuery.error instanceof Error ? referenceCatalogQuery.error.message : undefined}
       initialDate={initialRange.initialDate}
       initialMode={isMobile ? "schedule" : "week"}
-      isLoading={isBootstrapLoading || !tenantId || workspaceQuery.isPending || referenceCatalogQuery.isPending}
+      isLoading={isBootstrapLoading || workspaceQuery.isLoading || referenceCatalogQuery.isLoading}
       lanes={lmsCalendarLanes}
       mobileLayout={isMobile}
       monthCountLabel="lịch dạy"

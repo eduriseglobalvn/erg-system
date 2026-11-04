@@ -11,6 +11,8 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import type { CalendarMode, ErgCalendarEvent, ErgCalendarResolvedTone } from "./erg-calendar-types";
 import {
   buildHourRows,
+  CALENDAR_SCROLL_TIME,
+  scrollTopForTime,
   formatCompactEventLabel,
   formatScheduleClassLine,
   formatScheduleDateHeader,
@@ -148,7 +150,7 @@ function MultiDayView({
   dayCount,
   eventsByDate,
   getEventTone,
-  mobileLayout,
+  mobileLayout: _mobileLayout,
   onEventClick,
   setSelectedDate,
   todayDate,
@@ -174,7 +176,7 @@ function MultiDayView({
     };
   });
   const hasAllDayEvents = allDayEventsByDate.some((day) => day.events.length > 0);
-  const timeGridRef = useWorkdayScroll(mobileLayout, `${anchorDate.format("YYYY-MM-DD")}-${dayCount}`);
+  const timeGridRef = useWorkdayScroll(true, `${anchorDate.format("YYYY-MM-DD")}-${dayCount}`);
 
   return (
     <Box sx={weekTimeGridShellSx}>
@@ -234,7 +236,7 @@ function DayView({
   emptyDayLabel,
   eventsByDate,
   getEventTone,
-  mobileLayout,
+  mobileLayout: _mobileLayout,
   onEventClick,
 }: {
   anchorDate: Dayjs;
@@ -246,7 +248,7 @@ function DayView({
 }) {
   const events = eventsByDate.get(anchorDate.format("YYYY-MM-DD")) ?? [];
   const hourRows = buildHourRows();
-  const timeGridRef = useWorkdayScroll(mobileLayout, anchorDate.format("YYYY-MM-DD"));
+  const timeGridRef = useWorkdayScroll(true, anchorDate.format("YYYY-MM-DD"));
   return (
     <Box sx={dayTimeGridShellSx}>
       <Box sx={dayHeaderSx}>
@@ -300,7 +302,7 @@ function useWorkdayScroll(enabled: boolean, resetKey: string) {
       window.cancelAnimationFrame(frame);
       frame = window.requestAnimationFrame(() => {
         const maxScrollTop = Math.max(0, element.scrollHeight - element.clientHeight);
-        element.scrollTop = Math.min(6 * 52, maxScrollTop);
+        element.scrollTop = Math.min(scrollTopForTime(CALENDAR_SCROLL_TIME), maxScrollTop);
       });
     };
     const resizeObserver = typeof window.ResizeObserver === "function"

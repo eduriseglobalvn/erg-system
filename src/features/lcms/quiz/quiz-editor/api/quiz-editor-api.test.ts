@@ -6,12 +6,14 @@ import {
   exportQuizEditorBundle,
   loadQuizEditorDraft,
   loadQuizEditorWorkspace,
-  normalizeQuizEditorGroups,
-  normalizeQuizPlayerTemplate,
-  normalizeQuizProjectSettings,
   reorderQuizEditorSlides,
   upsertQuizEditorSlide,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import {
+  normalizeQuizEditorGroups,
+  normalizeQuizPlayerTemplate,
+  normalizeQuizProjectSettings,
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-normalizers";
 import { apiRequest } from "@/lib/api-client";
 import { graphQlRequest } from "@/lib/graphql-client";
 

@@ -67,23 +67,21 @@ export function usePlayerKeyboard({
         return;
       }
 
-      if (attemptCompleted || reviewingSubmittedAttempt || submitting) {
+      if (submitting || (attemptCompleted && !reviewingSubmittedAttempt)) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+        event.preventDefault();
+        setCurrentIndex((value) => (event.key === "ArrowLeft" ? Math.max(0, value - 1) : Math.min(questionsLength - 1, value + 1)));
+        return;
+      }
+
+      if (attemptCompleted || reviewingSubmittedAttempt) {
         return;
       }
 
       if (isTestingMode) {
-        if (event.key === "ArrowLeft") {
-          event.preventDefault();
-          setCurrentIndex((value) => Math.max(0, value - 1));
-          return;
-        }
-
-        if (event.key === "ArrowRight") {
-          event.preventDefault();
-          setCurrentIndex((value) => Math.min(questionsLength - 1, value + 1));
-          return;
-        }
-
         if (event.key === "Enter" && (allQuestionsAnswered || submitFailed)) {
           event.preventDefault();
           requestSubmit();

@@ -39,3 +39,18 @@ describe("QuestionNavigator MUI migration", () => {
     expect(onJumpToQuestion).toHaveBeenCalledWith(0);
   });
 });
+
+describe("QuestionNavigator filter", () => {
+  it("filters to unanswered and flagged questions", () => {
+    const qs = [1, 2, 3].map((n) => ({ ...question, id: `q${n}`, title: `Câu số ${n}` }));
+    render(
+      <QuestionNavigator answeredQuestionIds={["q1"]} currentIndex={0} flaggedQuestionIds={["q3"]} onJumpToQuestion={vi.fn()} questions={qs} started />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Chưa làm" }));
+    expect(screen.queryByText("Câu số 1")).toBeNull();
+    expect(screen.getByText("Câu số 2")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Đã đánh dấu" }));
+    expect(screen.queryByText("Câu số 2")).toBeNull();
+    expect(screen.getByText("Câu số 3")).toBeTruthy();
+  });
+});

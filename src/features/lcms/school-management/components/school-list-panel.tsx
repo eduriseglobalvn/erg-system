@@ -44,7 +44,7 @@ export function SchoolListPanel({ onAdd, onSelect, schools, selectedId }: {
           <ListItemButton key={school.id} onClick={() => onSelect(school.id)} selected={school.id === selectedId} sx={{ alignItems: "flex-start", borderLeft: "3px solid transparent", mx: 1, my: 0.5, borderRadius: 2, px: 1.5, py: 1.35, "&.Mui-selected": { bgcolor: "primary.50", borderLeftColor: "primary.main" } }}>
             <Box sx={{ minWidth: 0, width: "100%" }}>
               <Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>{school.name}</Typography>
-              <Typography color="text.secondary" noWrap sx={{ fontFamily: "var(--font-mono)", fontSize: 12.5, mt: 0.25 }}>{school.id} · {school.district}</Typography>
+              <Typography color="text.secondary" noWrap sx={{ fontFamily: "var(--font-mono)", fontSize: 12.5, mt: 0.25 }}>{school.district}</Typography>
               <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", mt: 1 }}>
                 <Chip color={statusColor[school.status]} label={statusLabel[school.status]} size="small" sx={{ height: 22, fontSize: 11 }} />
                 <Typography color="text.secondary" variant="caption">{school.students.length} HS</Typography>

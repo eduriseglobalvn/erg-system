@@ -1,9 +1,10 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { Search } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
+import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
@@ -59,39 +60,6 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   const [manualClassifications, setManualClassifications] = useState<Record<string, Classification>>({});
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const apiBacked = hasApiBase();
-  const selectedClassId = selectedClass?.id ?? classes[0]?.id ?? "";
-
-  const classWorkspaceQuery = useQuery({
-    queryKey: lmsAssignmentReadQueryKeys.classWorkspace({
-      classId: selectedClassId,
-      schoolId: selectedClass?.schoolId,
-      usage: "class-management",
-    }),
-    queryFn: ({ signal }) =>
-      loadLmsClassWorkspace({
-        assignmentPage: 0,
-        assignmentSize: 50,
-        assignmentStatus: "active",
-        classId: selectedClassId,
-        page: 0,
-        schoolId: selectedClass?.schoolId,
-        size: 50,
-        studentStatus: "active",
-      }, signal),
-    enabled: apiBacked && Boolean(selectedClassId),
-    staleTime: QUERY_POLICIES.transactional.staleTime,
-    gcTime: QUERY_POLICIES.offlineCore.gcTime,
-    meta: lmsReadPersistMeta(),
-    refetchOnWindowFocus: false,
-  });
-  const workspaceStudents = useMemo(
-    () => (classWorkspaceQuery.data ? mapClassWorkspaceToStudents(classWorkspaceQuery.data, selectedClass) : undefined),
-    [classWorkspaceQuery.data, selectedClass],
-  );
-  const students = useMemo(
-    () => resolveClassManagementStudents(workspaceStudents, fallbackStudents, apiBacked),
-    [apiBacked, fallbackStudents, workspaceStudents],
-  );
 
   const schoolClasses = useMemo(() => classes.filter((classroom) => !selectedClass || classroom.schoolId === selectedClass.schoolId), [classes, selectedClass]);
   const gradeLabels = useMemo(() => Array.from(new Set(schoolClasses.map((classroom) => classroom.gradeLabel))), [schoolClasses]);
@@ -105,6 +73,43 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
     return schoolClasses.map((classroom) => ({ label: classroom.className, value: classroom.id }));
   }, [gradeLabels, schoolClasses, scopeMode]);
   const resolvedScopeId = scopeOptions.some((option) => option.value === scopeId) ? scopeId : scopeOptions[0]?.value ?? "";
+  // One roster source (same loadLmsClassWorkspace as the assign page): load every class in the current scope.
+  const rosterClasses = useMemo(() => {
+    if (scopeMode === "grade") return schoolClasses.filter((classroom) => classroom.gradeLabel === resolvedScopeId);
+    if (scopeMode === "class") return schoolClasses.filter((classroom) => classroom.id === resolvedScopeId);
+    return selectedClass ? [selectedClass] : [];
+  }, [resolvedScopeId, schoolClasses, scopeMode, selectedClass]);
+  const rosterQueries = useQueries({
+    queries: rosterClasses.map((classroom) => ({
+      enabled: apiBacked && Boolean(classroom.id),
+      gcTime: QUERY_POLICIES.offlineCore.gcTime,
+      meta: lmsReadPersistMeta(),
+      queryFn: ({ signal }) =>
+        loadLmsClassWorkspace({
+          assignmentPage: 0,
+          assignmentSize: 20,
+          assignmentStatus: "active",
+          classId: classroom.id,
+          page: 0,
+          schoolId: classroom.schoolId,
+          size: 200,
+          studentStatus: "active",
+        }, signal),
+      queryKey: lmsAssignmentReadQueryKeys.classWorkspace({ classId: classroom.id, schoolId: classroom.schoolId, usage: "class-management" }),
+      refetchOnWindowFocus: false,
+      staleTime: QUERY_POLICIES.transactional.staleTime,
+    })),
+  });
+  const rosterLoading = apiBacked && rosterQueries.some((query) => query.isLoading);
+  const rosterError = apiBacked && rosterQueries.some((query) => query.isError);
+  const students = useMemo(() => {
+    const workspaceStudents = rosterClasses.flatMap((classroom, index) => {
+      const workspace = rosterQueries[index]?.data;
+      // Stamp the requested class id so scope filters match what the assign page shows.
+      return workspace ? mapClassWorkspaceToStudents(workspace, classroom).map((student) => ({ ...student, classId: classroom.id })) : [];
+    });
+    return resolveClassManagementStudents(workspaceStudents, fallbackStudents, apiBacked);
+  }, [apiBacked, fallbackStudents, rosterClasses, rosterQueries]);
   const scopeStudents = useMemo(() => {
     if (scopeMode === "grade") {
       const classIds = new Set(schoolClasses.filter((classroom) => classroom.gradeLabel === resolvedScopeId).map((classroom) => classroom.id));
@@ -242,6 +247,12 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
             <span className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2 py-1 text-slate-700">Theo lớp / khối / nhóm</span>
           </div>
         </div>
+
+        {rosterError ? (
+          <ErgErrorState description="Không tải được danh sách học sinh của lớp. Vui lòng thử lại sau." title="Chưa tải được học sinh" />
+        ) : !rosterLoading && scopeStudents.length === 0 ? (
+          <ErgEmptyState description="Lớp này chưa có học sinh đang học. Thêm học sinh vào lớp hoặc chọn lớp khác." title="Chưa có học sinh trong phạm vi này" />
+        ) : null}
 
         <ul className="divide-y divide-slate-200 xl:hidden">
           {visibleStudents.map((student) => (
