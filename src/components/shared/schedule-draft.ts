@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-import type { ErgScheduleCatalog, ErgScheduleDraft } from "@/components/shared/erg-calendar-workspace";
+import type { ErgScheduleCatalog, ErgScheduleDraft } from "./erg-calendar-types";
 
 export type ScheduleDraftFormRow = {
   assistantTeacherId?: string;

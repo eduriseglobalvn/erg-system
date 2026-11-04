@@ -1,7 +1,7 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { useInstallPrompt } from "@/features/lms/mobile/hooks/use-install-prompt";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 
 type MutableMediaQueryList = MediaQueryList & {
   matches: boolean;

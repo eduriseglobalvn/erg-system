@@ -25,8 +25,8 @@ import {
   calculateInclusiveRepeatWeeks,
   mapSessionValue,
   normalizePeriodStart,
-} from "@/features/teaching-calendar/model/schedule-draft";
-import { CreateTeachingRoomDialog } from "@/features/teaching-calendar/components/create-teaching-room-dialog";
+} from "./schedule-draft";
+import { CreateTeachingRoomDialog } from "./create-teaching-room-dialog";
 import type {
   ErgScheduleCatalog,
   ErgScheduleCreateResult,

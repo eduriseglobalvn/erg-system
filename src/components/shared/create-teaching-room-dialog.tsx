@@ -7,10 +7,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 
-import type {
-  CreateRoomInput,
-  TeachingScheduleRoomOption,
-} from "@/features/teaching-calendar/api/teaching-calendar-api";
+type CreateRoomInput = { roomName: string; schoolId: string; tenantId?: string };
+type TeachingScheduleRoomOption = { id: string; label: string; schoolId: string };
 
 type Props = {
   onClose: () => void;

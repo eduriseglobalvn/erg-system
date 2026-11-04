@@ -27,7 +27,7 @@ import { DashboardContent } from '@/layouts/dashboard/components/dashboard-conte
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
 import type { ContentScope, ManagementScope } from '@/types/scope-types';
 import ErgPortalLayout from '@/components/portal/ErgPortalLayout';
-import { usePortalNotifications } from '@/components/portal/use-portal-notifications';
+import { usePortalNotifications } from '@/features/notifications/hooks/use-portal-notifications';
 import type { MenuGroup, PortalInfo } from '@/components/portal/ErgPortalLayout';
 
 // =============================================================================

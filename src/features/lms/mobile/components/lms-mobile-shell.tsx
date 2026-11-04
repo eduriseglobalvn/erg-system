@@ -18,9 +18,9 @@ import { LmsScopeSheet, type LmsMobileClassOption, type LmsMobileSchoolOption } 
 import { MobileBottomSheet } from "./mobile-bottom-sheet";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
-import { useInstallPrompt } from "../hooks/use-install-prompt";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
-import { useServiceWorkerUpdate } from "../hooks/use-service-worker-update";
+import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 

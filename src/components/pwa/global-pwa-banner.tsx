@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { useServiceWorkerUpdate } from "@/features/lms/mobile/hooks/use-service-worker-update";
+import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 
 export const PWA_LAUNCH_FILE_EVENT = "erg:pwa:launch-file";
 

@@ -14,9 +14,9 @@ import { ERG_ASSETS } from "@/config/seo";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
-import { useInstallPrompt } from "@/features/lms/mobile/hooks/use-install-prompt";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { usePwaNotifications } from "@/features/lms/mobile/hooks/use-pwa-notifications";
-import { useServiceWorkerUpdate } from "@/features/lms/mobile/hooks/use-service-worker-update";
+import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 
 export function StudentDashboardMobileShell({

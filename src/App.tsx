@@ -5,6 +5,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 // Update banner is not needed for first paint.
 const GlobalPwaBanner = lazy(() => import("@/components/pwa/global-pwa-banner").then((m) => ({ default: m.GlobalPwaBanner })));
 
+import { PortalNotificationsSourceContext } from "@/components/portal/use-portal-notifications";
+import { usePortalNotifications } from "@/features/notifications/hooks/use-portal-notifications";
 import { I18nProvider } from "@/platform/i18n";
 import { appQueryClient } from "@/lib/query-client";
 import { createAppRouter } from "@/routes/app-routes";
@@ -62,7 +64,9 @@ export default function App() {
   return (
     <PersistQueryClientProvider client={appQueryClient} persistOptions={persistOptions}>
       <I18nProvider>
-        <AppRouterProvider router={router} />
+        <PortalNotificationsSourceContext.Provider value={usePortalNotifications}>
+          <AppRouterProvider router={router} />
+        </PortalNotificationsSourceContext.Provider>
         <Suspense fallback={null}><GlobalPwaBanner /></Suspense>
       </I18nProvider>
       {showQueryDevtools ? <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> : null}

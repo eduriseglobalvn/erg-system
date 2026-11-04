@@ -21,7 +21,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { useLocation } from "@tanstack/react-router";
 
-import { useInstallPrompt } from "@/features/lms/mobile/hooks/use-install-prompt";
+import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
