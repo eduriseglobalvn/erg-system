@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { todayInput } from "@/lib/format-date";
 import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { getPersistedJsonValue, setPersistedJsonValue } from "@/stores/persisted-store";
 import {
@@ -115,7 +116,7 @@ export function useExerciseBankController() {
     const created: Exercise = {
       ...newExercise,
       id: `ex-${Date.now()}`,
-      updatedAt: new Date().toISOString().split("T")[0]!,
+      updatedAt: todayInput(),
       assignedCount: 0,
       source: newExercise.source ?? "teacher",
       authorName: newExercise.authorName ?? "Giáo viên",
@@ -139,7 +140,7 @@ export function useExerciseBankController() {
           e.id === updated.id
             ? {
                 ...updated,
-                updatedAt: new Date().toISOString().split("T")[0]!,
+                updatedAt: todayInput(),
               }
             : e
         );
@@ -150,7 +151,7 @@ export function useExerciseBankController() {
             ...updated,
             source: "teacher",
             authorName: updated.authorName === "Hệ thống ERG" ? "Giáo viên tùy chỉnh" : updated.authorName,
-            updatedAt: new Date().toISOString().split("T")[0]!,
+            updatedAt: todayInput(),
           },
           ...prev,
         ];
@@ -173,7 +174,7 @@ export function useExerciseBankController() {
       status: "draft",
       source: "teacher",
       authorName: "Giáo viên",
-      updatedAt: new Date().toISOString().split("T")[0]!,
+      updatedAt: todayInput(),
       assignedCount: 0,
     };
     setCustomItems((prev) => {

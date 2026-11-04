@@ -20,3 +20,16 @@ export function inputDateToVi(value: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
   return m ? `${m[3]}/${m[2]}/${m[1]}` : "";
 }
+
+/** Today as yyyy-MM-dd in the user's local zone (toISOString would give the UTC day, off by one before 07:00 in GMT+7). */
+export function todayInput(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+/** dd/MM/yyyy HH:mm (vi-VN); "" when unparsable. */
+export function formatDateTimeVi(value: string | number | Date | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? "" : `${formatDateVi(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}

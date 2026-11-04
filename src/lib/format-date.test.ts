@@ -1,6 +1,6 @@
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
 
-import { formatDateVi, inputDateToVi, viDateToInput } from "@/lib/format-date";
+import { formatDateTimeVi, formatDateVi, inputDateToVi, todayInput, viDateToInput } from "@/lib/format-date";
 
 test("formats dd/MM/yyyy and never returns Invalid Date", () => {
   expect(formatDateVi("2026-11-03")).toBe("03/11/2026");
@@ -14,4 +14,17 @@ test("converts between dd/MM/yyyy and date-input ISO", () => {
   expect(viDateToInput("2026-11-03")).toBe("");
   expect(inputDateToVi("2026-11-03")).toBe("03/11/2026");
   expect(inputDateToVi("")).toBe("");
+});
+
+test("formatDateTimeVi is local dd/MM/yyyy HH:mm and empty when invalid", () => {
+  expect(formatDateTimeVi(new Date(2026, 10, 4, 6, 5))).toBe("04/11/2026 06:05");
+  expect(formatDateTimeVi("not-a-date")).toBe("");
+  expect(formatDateTimeVi(null)).toBe("");
+});
+
+test("todayInput uses the local day, not the UTC day", () => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(2026, 10, 4, 0, 30)); // 00:30 local; UTC may still be the previous day
+  expect(todayInput()).toBe("2026-11-04");
+  vi.useRealTimers();
 });

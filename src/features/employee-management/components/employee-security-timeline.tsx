@@ -1,3 +1,4 @@
+import { formatDateTimeVi } from "@/lib/format-date";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
@@ -154,7 +155,7 @@ export function EmployeeSecurityTimeline({ tenantId, userId }: { tenantId: strin
                   <Box sx={{ alignItems: "center", display: "inline-flex", gap: 0.4 }}>
                     <AccessTimeRoundedIcon sx={{ color: appleDesign.colors.textTertiary, fontSize: 13 }} />
                     <Typography variant="caption" sx={{ color: appleDesign.colors.textSecondary }}>
-                      {new Date(event.occurredAt).toLocaleString("vi-VN")}
+                      {formatDateTimeVi(event.occurredAt)}
                     </Typography>
                   </Box>
                 </Box>

@@ -1,3 +1,4 @@
+import { formatDateTimeVi } from "@/lib/format-date";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
@@ -536,7 +537,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
                           }}
                         >
                           {employee.last_login_at
-                            ? new Date(employee.last_login_at).toLocaleString("vi-VN")
+                            ? formatDateTimeVi(employee.last_login_at)
                             : "Chưa đăng nhập"}
                         </Typography>
                       </TableCell>

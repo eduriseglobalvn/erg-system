@@ -1,3 +1,4 @@
+import { formatDateTimeVi } from "@/lib/format-date";
 import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
@@ -256,7 +257,7 @@ function SecurityFeedRow({ event }: { event: SecurityFeedItem }) {
     >
       <TableCell sx={{ whiteSpace: "nowrap" }}>
         <Typography variant="body2" sx={{ color: appleDesign.colors.textPrimary, fontWeight: 700 }}>
-          {new Date(event.occurredAt).toLocaleString("vi-VN")}
+          {formatDateTimeVi(event.occurredAt)}
         </Typography>
         <Typography
           variant="caption"
