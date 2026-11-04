@@ -167,7 +167,7 @@ function ClassificationChangeDialog({
             onClick={onSave}
             disabled={!canSave}
             variant="contained"
-            sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600, backgroundColor: "#696CFF", "&:hover": { backgroundColor: "#5a5ce6" } }}
+            sx={{ textTransform: "none" }}
           >
             Lưu thay đổi
           </Button>

@@ -5,6 +5,7 @@ import { CheckCircle2, Clock3, FileCheck2, Search, UsersRound } from "lucide-rea
 
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
+import Tooltip from "@mui/material/Tooltip";
 import {
   loadLmsAssignmentProgressWorkspace,
   type LmsAssignmentProgressWorkspace,
@@ -135,6 +136,12 @@ export function HomeworkProgressPage({
   const completedPct = total ? Math.round((completed / total) * 100) : 0;
   const needsReviewCount = assignmentReportQuery.data?.needsReviewCount ?? progressQuery.data?.summary.needsReviewCount ?? selectedRun?.needsReviewCount ?? 0;
 
+  const exportDisabledReason = !selectedRunId
+    ? "Chọn một bài đã giao để xuất danh sách nộp bài."
+    : !apiBacked
+      ? "Cần kết nối máy chủ để xuất CSV."
+      : "";
+
   return (
     <div className="flex min-h-full flex-col gap-3 px-3 py-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:px-6 xl:py-4">
       <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 shadow-[var(--shadow-xs)]">
@@ -156,7 +163,11 @@ export function HomeworkProgressPage({
             <ProgressStat icon={FileCheck2} label="Chưa mở" value={String(notStarted)} />
           </div>
           <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 max-xl:justify-start">
-            <AssignmentProgressExportControl assignmentId={selectedRunId} classId={selectedClass?.id} />
+            <Tooltip title={exportDisabledReason} disableHoverListener={!exportDisabledReason}>
+              <span>
+                <AssignmentProgressExportControl assignmentId={selectedRunId} classId={selectedClass?.id} />
+              </span>
+            </Tooltip>
             <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onBack}>
               Về trang bài tập
             </Button>
@@ -168,6 +179,9 @@ export function HomeworkProgressPage({
         <aside className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
           <h2 className="mb-2 text-[13px] font-bold text-slate-600">Bài đã giao</h2>
           <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 max-xl:max-h-56">
+            {runs.length === 0 ? (
+              <p className="px-1 py-2 text-[13px] font-semibold text-slate-600">Chưa có bài nào được giao. Giao bài để theo dõi tiến độ tại đây.</p>
+            ) : null}
             {runs.map((run) => (
               <button
                 key={run.id}
@@ -291,21 +305,9 @@ export function HomeworkProgressPage({
                 </div>
               ) : null}
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2">
-              <ProgressQuickInfo label="Hoàn thành" value={`${completed}/${total}`} tone="text-emerald-600" />
-              <ProgressQuickInfo label="Đang làm" value={String(inProgress)} tone="text-amber-600" />
-              <ProgressQuickInfo label="Chưa mở" value={String(notStarted)} tone="text-slate-500" />
-              <ProgressQuickInfo label="Cần chấm" value={String(needsReviewCount)} tone="text-rose-500" />
-            </div>
-            <div className="mt-3 rounded-lg border border-[#dbe4f0] p-3">
-              <div className="mb-2 flex items-center justify-between text-[13px] font-bold text-slate-600">
-                <span>Tỷ lệ hoàn thành</span>
-                <span>{completedPct}%</span>
-              </div>
-              <div className="h-2 overflow-hidden rounded-md bg-slate-100">
-                <div className="h-full rounded-full bg-emerald-500" style={{ width: `${completedPct}%` }} />
-              </div>
-            </div>
+            {needsReviewCount > 0 ? (
+              <p className="mt-3 text-[13px] font-semibold text-rose-600">{needsReviewCount} bài cần chấm</p>
+            ) : null}
           </aside>
         </div>
       </section>
@@ -529,15 +531,6 @@ function ProgressStatusBadge({ status }: { status: ProgressStatus }) {
     >
       {progressStatusCopy[status]}
     </span>
-  );
-}
-
-function ProgressQuickInfo({ label, value, tone }: { label: string; value: string; tone: string }) {
-  return (
-    <div className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-3 py-2">
-      <div className="text-[13px] font-bold text-slate-600">{label}</div>
-      <div className={cn("mt-1 text-lg font-semibold", tone)}>{value}</div>
-    </div>
   );
 }
 

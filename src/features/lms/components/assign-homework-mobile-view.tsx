@@ -1,4 +1,6 @@
 import { Calendar, RefreshCw, Search } from "lucide-react";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
+import { parseAssignDateTime } from "@/features/lms/components/assign-homework-recipient";
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { allGroupSourcesFilterValue } from "@/features/lms/components/assign-homework-groups";
 import { AppSelect } from "@/components/ui/app-select";
@@ -189,7 +191,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                     <div className="relative">
                       <input
                         readOnly
-                        value={startDate}
+                        value={formatShortDateTimeVi(parseAssignDateTime(startDate)) || startDate}
                         onClick={() => setOpenDatePicker("start")}
                         className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
                       />
@@ -210,7 +212,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                     <div className="relative">
                       <input
                         readOnly
-                        value={endDate}
+                        value={formatShortDateTimeVi(parseAssignDateTime(endDate)) || endDate}
                         onClick={() => setOpenDatePicker("end")}
                         className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
                       />

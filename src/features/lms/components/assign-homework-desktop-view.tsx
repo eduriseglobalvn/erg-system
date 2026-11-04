@@ -1,3 +1,4 @@
+import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { AssignHomeworkFooter } from "@/features/lms/components/assign-homework-footer";
 import { MobileAssignProgress } from "@/features/lms/components/assign-homework-parts";
 import { AssignHomeworkSetupCard } from "@/features/lms/components/assign-homework-desktop-view/setup-card";
@@ -48,6 +49,10 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
                 </button>
               </div>
             ) : null}
+
+            {isMobile ? null : (
+              <ErgPageHeader description="Chọn đối tượng, thiết lập thời hạn rồi chọn bài tập để giao." title="Giao bài" />
+            )}
 
             {/* Card: Assignment setup */}
             <AssignHomeworkSetupCard model={model} />

@@ -1,10 +1,20 @@
 import { useMemo, useState } from "react";
-import { Download, Search, UserRound } from "lucide-react";
+import { Download, Search } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { AttendanceColumn, AttendanceStatus, CurriculumItem } from "@/features/lms/components/attendance/attendance-sheet-model";
+import {
+  attendanceLabel,
+  attendanceText,
+  bulkPresentTargets,
+  nextAttendanceStatus,
+  type AttendanceColumn,
+  type AttendanceStatus,
+  type CurriculumItem,
+} from "@/features/lms/components/attendance/attendance-sheet-model";
 import { cn } from "@/lib/utils";
+import { formatDateVi } from "@/lib/format-date";
+import { AttendanceDateField } from "./attendance-date-field";
 
 type MobileAttendanceMode = "today" | "week" | "program";
 
@@ -27,12 +37,6 @@ type MobileAttendanceSheetPanelProps = {
   visibleColumns: AttendanceColumn[];
 };
 
-const attendanceOptions: Array<{ label: string; short: string; value: Exclude<AttendanceStatus, ""> }> = [
-  { label: "Có mặt", short: "Có", value: "present" },
-  { label: "Muộn", short: "M", value: "late" },
-  { label: "Vắng", short: "V", value: "absent" },
-  { label: "Phép", short: "P", value: "excused" },
-];
 
 export function MobileAttendanceSheetPanel({
   attendanceSummary,
@@ -59,6 +63,11 @@ export function MobileAttendanceSheetPanel({
   const weekColumns = visibleColumns.slice(0, 7);
   const currentProgramItems = curriculumProgram.filter((item) => item.period >= Math.max(1, taughtLessonCount - 2) && item.period <= taughtLessonCount + 5);
 
+  function markAllPresent() {
+    // Fill only students without a status so exceptions already marked are kept.
+    bulkPresentTargets(filteredStudents, todayColumns, getStatus).forEach((target) => onSetAttendanceStatus(target.studentId, target.columnId, "present"));
+  }
+
   function setStatusForToday(student: ClassroomStudent, status: AttendanceStatus) {
     todayColumns.forEach((column) => onSetAttendanceStatus(student.id, column.id, status));
   }
@@ -70,7 +79,7 @@ export function MobileAttendanceSheetPanel({
           <div className="min-w-0 flex-1">
             <div className="truncate text-[15px] font-extrabold text-slate-950">{selectedClass?.className ?? "Lớp học"}</div>
             <div className="mt-0.5 truncate text-[12px] font-semibold text-slate-500">
-              {filteredStudents.length} học sinh · {primaryColumn?.fullDate ?? selectedDate} · {primaryColumn?.session ?? "Tiết"}
+              {filteredStudents.length} học sinh · {formatDateVi(selectedDate)} · {primaryColumn?.session ?? "Tiết"}
             </div>
           </div>
           <button
@@ -83,7 +92,7 @@ export function MobileAttendanceSheetPanel({
           </button>
         </div>
 
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_140px] gap-2">
+        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_160px] gap-2">
           <label className="relative block min-w-0">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
             <TextField
@@ -104,14 +113,7 @@ export function MobileAttendanceSheetPanel({
               }}
             />
           </label>
-          <TextField
-            type="date"
-            size="small"
-            value={selectedDate}
-            onChange={(event) => onSelectedDateChange(event.target.value)}
-            slotProps={{ htmlInput: { "aria-label": "Chọn ngày điểm danh", max: todayInputDate } }}
-            sx={{ "& input": { fontSize: 13, fontWeight: 600 } }}
-          />
+          <AttendanceDateField maxDate={todayInputDate} minHeight={44} onChange={onSelectedDateChange} value={selectedDate} />
         </div>
 
         {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
@@ -137,7 +139,7 @@ export function MobileAttendanceSheetPanel({
       {mode === "today" ? (
         <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
           <div className="mb-3 grid grid-cols-2 gap-2">
-            <button type="button" className="min-h-11 rounded-[14px] border border-emerald-200 bg-emerald-50 px-3 text-[13px] font-bold text-emerald-700 shadow-[0_1px_2px_rgba(16,185,129,0.08)]" onClick={() => filteredStudents.forEach((student) => setStatusForToday(student, "present"))}>
+            <button type="button" className="min-h-11 rounded-[14px] border border-emerald-200 bg-emerald-50 px-3 text-[13px] font-bold text-emerald-700 shadow-[0_1px_2px_rgba(16,185,129,0.08)]" onClick={markAllPresent}>
               Tất cả có mặt
             </button>
             <button type="button" className="min-h-11 rounded-[14px] border border-[#d9e2ef] bg-white px-3 text-[13px] font-bold text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)]" onClick={exportXlsx}>
@@ -150,40 +152,19 @@ export function MobileAttendanceSheetPanel({
               const summary = attendanceSummary(statuses);
               const currentStatus = statuses[0] ?? "";
               return (
-                <article key={student.id} className="rounded-[16px] border border-white bg-white p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-                  <div className="flex min-w-0 items-center gap-3">
-                    <button
-                      type="button"
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#eef6ff] text-[var(--erg-blue)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
-                      onClick={() => onOpenStudentDetail(student)}
-                      aria-label={`Mở hồ sơ ${student.name}`}
-                    >
-                      <UserRound className="h-5 w-5" />
-                    </button>
-                    <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpenStudentDetail(student)}>
-                      <span className="block truncate text-[15px] font-bold text-slate-950">{student.name}</span>
-                      <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">
-                        Có mặt {summary.present}/{summary.total} · Vắng {summary.absent}
-                      </span>
-                    </button>
-                  </div>
-                  <div className="mt-3 grid grid-cols-4 gap-1 rounded-[16px] bg-[#e9f0fb] p-1.5">
-                    {attendanceOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        type="button"
-                        className={cn(
-                          "min-h-11 rounded-[12px] px-1 text-[12px] font-bold transition",
-                          currentStatus === option.value ? attendanceActiveClass(option.value) : "bg-white text-slate-600",
-                        )}
-                        onClick={() => setStatusForToday(student, option.value)}
-                        aria-pressed={currentStatus === option.value}
-                      >
-                        <span className="block sm:hidden">{option.short}</span>
-                        <span className="hidden sm:block">{option.label}</span>
-                      </button>
-                    ))}
-                  </div>
+                <article key={student.id} className="flex min-h-14 items-center gap-2 rounded-[16px] border border-white bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
+                  <button type="button" className="min-h-11 min-w-0 flex-1 px-1 text-left" onClick={() => onOpenStudentDetail(student)} aria-label={`Mở hồ sơ ${student.name}`}>
+                    <span className="block truncate text-[15px] font-bold text-slate-950">{student.name}</span>
+                    <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">Có mặt {summary.present}/{summary.total} · Vắng {summary.absent}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className={cn("min-h-11 w-28 shrink-0 rounded-[12px] border px-2 text-[13px] font-bold transition", attendanceActiveClass(currentStatus))}
+                    onClick={() => setStatusForToday(student, nextAttendanceStatus(currentStatus))}
+                    aria-label={`${student.name}: ${attendanceText(currentStatus)}. Chạm để đổi trạng thái`}
+                  >
+                    {attendanceLabel(currentStatus)} {attendanceText(currentStatus)}
+                  </button>
                 </article>
               );
             })}
@@ -260,17 +241,3 @@ function attendanceActiveClass(status: AttendanceStatus) {
   return "border-slate-200 bg-white text-slate-400";
 }
 
-function nextAttendanceStatus(status: AttendanceStatus): AttendanceStatus {
-  if (status === "present") return "late";
-  if (status === "late") return "absent";
-  if (status === "absent") return "excused";
-  return "present";
-}
-
-function attendanceLabel(status: AttendanceStatus) {
-  if (status === "absent") return "V";
-  if (status === "late") return "M";
-  if (status === "excused") return "P";
-  if (status === "present") return "✓";
-  return "—";
-}

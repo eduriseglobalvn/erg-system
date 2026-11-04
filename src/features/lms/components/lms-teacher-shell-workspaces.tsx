@@ -178,7 +178,7 @@ export function LmsTeacherDesktopContent({ model }: WorkspaceProps) {
               selectedClass={selectedClass}
               selectedSchoolName={selectedSchoolName}
             >
-          {activeSection === "reports" ? <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} /> : null}
+          {activeSection === "reports" ? <ReportsPanel classes={classes} onClassChange={(classId) => handleClassChange({ target: { value: classId } })} runs={runs} selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} /> : null}
         </TeacherWorkspaceFrame>
       )}
     </>
@@ -377,7 +377,7 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
     if (localPathname === "/reports") {
       return (
         <TeacherWorkspaceFrame selectedClass={selectedClass} selectedSchoolName={selectedSchoolName}>
-          <ReportsPanel selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} />
+          <ReportsPanel classes={classes} onClassChange={(classId) => handleClassChange({ target: { value: classId } })} runs={runs} selectedClass={selectedClass} selectedSchoolName={selectedSchoolName} students={getClassStudents(selectedClass?.id)} />
         </TeacherWorkspaceFrame>
       );
     }

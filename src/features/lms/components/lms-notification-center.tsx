@@ -21,6 +21,8 @@ import Notifications from "@mui/icons-material/Notifications";
 import NotificationsNone from "@mui/icons-material/NotificationsNone";
 import Settings from "@mui/icons-material/Settings";
 import { toast } from "sonner";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 
 import {
   fetchNotificationFeed,
@@ -37,6 +39,7 @@ import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 
 const LMS_NOTIFICATION_PORTAL = "lms";
+const NOTIFICATION_LOAD_TIMEOUT_MS = 8000;
 
 export function LmsNotificationCenter() {
   const navigate = useNavigate();
@@ -114,10 +117,21 @@ export function LmsNotificationCenter() {
   }
 
   const open = Boolean(anchorEl);
+  const [timedOut, setTimedOut] = useState(false);
+  const stillLoading = open && notificationsQuery.isLoading;
+  useEffect(() => {
+    if (!stillLoading) {
+      setTimedOut(false);
+      return;
+    }
+    const id = window.setTimeout(() => setTimedOut(true), NOTIFICATION_LOAD_TIMEOUT_MS);
+    return () => window.clearTimeout(id);
+  }, [stillLoading]);
 
   return (
     <>
       <IconButton
+        aria-label="Thông báo"
         onClick={handleOpen}
         sx={{
           color: "text.secondary",
@@ -208,13 +222,17 @@ export function LmsNotificationCenter() {
 
         {/* Content */}
         <Box sx={{ maxHeight: 470, overflow: "auto" }}>
-          {notificationsQuery.isLoading ? (
-            <Box sx={{ py: 6, textAlign: "center" }}>
-              <Typography sx={{ color: "text.secondary", fontWeight: 500 }}>Đang tải thông báo...</Typography>
+          {(notificationsQuery.isLoading && !timedOut) ? (
+            <Box sx={{ px: 3, py: 3 }}>
+              <ErgLoadingSkeleton rows={3} />
             </Box>
-          ) : notificationsQuery.isError ? (
-            <Box sx={{ py: 6, textAlign: "center" }}>
-              <Typography sx={{ color: "error.main", fontWeight: 500 }}>Không tải được thông báo.</Typography>
+          ) : (notificationsQuery.isError || timedOut) ? (
+            <Box sx={{ p: 3 }}>
+              <ErgErrorState
+                action={<ErgButton onClick={() => void notificationsQuery.refetch()} size="small" variant="outlined">Thử lại</ErgButton>}
+                description="Kiểm tra kết nối mạng rồi thử lại."
+                title="Không tải được thông báo"
+              />
             </Box>
           ) : latestNotifications.length ? (
             <>

@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import { Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
-import { AppSelect } from "@/components/ui/app-select";
 import TextField from "@mui/material/TextField";
 import { ErgSelect } from "@/components/erg-mui";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
@@ -93,7 +92,7 @@ export function MobileScoreSheetPanel({
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f6fb]">
       <section className="shrink-0 border-b border-white bg-white px-3 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03),0_8px_24px_rgba(15,23,42,0.03)]">
         <div className="min-w-0">
-          <div className="truncate text-[15px] font-extrabold text-slate-950">{selectedClass?.className ?? "Lớp học"}</div>
+          <div className="truncate text-[15px] font-extrabold text-slate-950">Bảng điểm{selectedClass?.className ? ` · ${selectedClass.className}` : ""}</div>
           <div className="mt-0.5 truncate text-[12px] font-semibold text-slate-500">{classSummary}</div>
         </div>
 
@@ -113,21 +112,14 @@ export function MobileScoreSheetPanel({
               }}
             />
           </label>
-          <label className="flex h-11 min-w-0 items-center gap-1 rounded-[14px] border border-[#d9e2ef] bg-white px-2 text-[12px] font-semibold text-slate-500 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <span className="sr-only">Môn</span>
-            <AppSelect
-              aria-label="Chọn môn học"
-              value={selectedSubject}
-              onChange={(event) => onSelectedSubjectChange(event.target.value)}
-              className="h-9 min-w-0 flex-1 border-0 bg-transparent px-0 pr-5 text-[13px] font-bold text-slate-900 shadow-none outline-none"
-            >
-              {subjectOptions.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-            </AppSelect>
-          </label>
+          <ErgSelect
+            size="small"
+            value={selectedSubject}
+            onChange={(event) => onSelectedSubjectChange(String(event.target.value))}
+            options={subjectOptions.map((subject) => ({ value: subject, label: subject }))}
+            slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn môn học" } } }}
+            sx={{ "& .MuiInputBase-root": { minHeight: 44 } }}
+          />
         </div>
 
         {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
@@ -216,7 +208,7 @@ export function MobileScoreSheetPanel({
               value={activeColumn.id}
               onChange={(event) => setActiveColumnId(String(event.target.value))}
               options={scoreColumns.map((column) => ({ value: column.id, label: column.label }))}
-              slotProps={{ htmlInput: { "aria-label": "Chọn cột điểm" } }}
+              slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn cột điểm" } } }}
             />
           </div>
           <div className="min-h-0 flex-1 overflow-auto px-3 py-3">

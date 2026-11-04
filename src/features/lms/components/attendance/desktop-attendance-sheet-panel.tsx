@@ -1,17 +1,28 @@
+import { useState, type ReactNode } from "react";
+import DoneAll from "@mui/icons-material/DoneAll";
 import Download from "@mui/icons-material/Download";
-import Search from "@mui/icons-material/Search";
+import MenuBook from "@mui/icons-material/MenuBook";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
-import TextField from "@mui/material/TextField";
-import { ErgSelect } from "@/components/erg-mui";
-import { useRef, useState, type PointerEvent, type ReactNode } from "react";
+import Typography from "@mui/material/Typography";
+import { ErgDrawer, ErgSearchField, ErgSelect } from "@/components/erg-mui";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { AttendanceCurriculumTable } from "./attendance-curriculum-table";
+import { AttendanceDateField } from "./attendance-date-field";
 import { AttendanceStudentTable } from "./attendance-student-table";
 import type { AttendanceSheetController } from "./use-attendance-sheet-controller";
+
+const { statusTint } = ergEnterpriseTokens;
+const legend = [
+  { label: "Có mặt ✓", tint: statusTint.success },
+  { label: "Đi muộn M", tint: statusTint.warning },
+  { label: "Vắng V", tint: statusTint.error },
+  { label: "Có phép P", tint: statusTint.info },
+];
 
 export function DesktopAttendanceSheetPanel({
   controller,
@@ -22,55 +33,37 @@ export function DesktopAttendanceSheetPanel({
   overlays: ReactNode;
   selectedClass?: ClassroomSnapshot;
 }) {
-  const splitRef = useRef<HTMLDivElement | null>(null);
-  const [curriculumWidth, setCurriculumWidth] = useState(500);
-
-  function resizeCurriculum(event: PointerEvent<HTMLDivElement>) {
-    const bounds = splitRef.current?.getBoundingClientRect();
-    if (!bounds) return;
-    const nextWidth = bounds.right - event.clientX;
-    setCurriculumWidth(Math.max(360, Math.min(720, nextWidth)));
-  }
+  const [curriculumOpen, setCurriculumOpen] = useState(false);
+  // Only show the homeroom teacher when the data has one; an empty "Gv phụ trách:" label is noise.
+  const homeroomTeacher = selectedClass?.homeroomTeacher?.trim();
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, padding: 16, gap: 16 }}>
-      <div style={{ padding: 16, borderRadius: 8, backgroundColor: "white", border: "1px solid #e5e7eb" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16 }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 14, color: "#696CFF", fontStyle: "italic" }}>
-              Gv phụ trách: <strong>{selectedClass?.homeroomTeacher ?? ""}</strong>
-            </div>
-            <div style={{ fontSize: 13, color: "#6b7280" }}>
-              Số tiết đã dạy: <strong style={{ color: "#ef4444" }}>{controller.taughtLessonCount}</strong>
-            </div>
-          </div>
+    <Stack spacing={2} sx={{ height: "100%", minHeight: 0, p: 2 }}>
+      <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 2, p: 2 }}>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1.5 }}>
+          <Box sx={{ flex: 1, minWidth: 200 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: "fontWeightMedium" }}>
+              Điểm danh{selectedClass?.className ? ` · ${selectedClass.className}` : ""}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {homeroomTeacher ? <>Gv phụ trách: <strong>{homeroomTeacher}</strong> · </> : null}
+              Số tiết đã dạy: <strong>{controller.taughtLessonCount}</strong>
+            </Typography>
+          </Box>
 
-          {controller.notice && (
-            <div style={{ fontSize: 13, color: "#696CFF", fontWeight: 600, padding: "4px 12px", backgroundColor: "#EEF2FF", borderRadius: 4 }}>
-              {controller.notice}
-            </div>
-          )}
+          {controller.notice ? <Chip color="primary" label={controller.notice} size="small" variant="outlined" /> : null}
+          {controller.offlinePending ? <Chip label="Đang chờ đồng bộ" size="small" color="warning" /> : null}
 
-          {controller.offlinePending ? (
-            <Chip label="Đang chờ đồng bộ" size="small" color="warning" />
-          ) : null}
-
-          <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
-            <TextField
-              size="small"
+          <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", flexWrap: "wrap", rowGap: 1 }}>
+            <ErgSearchField
+              compact
+              fullWidth={false}
               placeholder="Tìm học sinh"
               value={controller.searchQuery}
               onChange={(event) => controller.setSearchQuery(event.target.value)}
-              slotProps={{ input: { startAdornment: <Search sx={{ fontSize: 18, color: "#696CFF" }} /> } }}
               sx={{ minWidth: 180 }}
             />
-            <TextField
-              size="small"
-              type="date"
-              value={controller.selectedDate}
-              onChange={(event) => controller.clampSelectedDate(event.target.value)}
-              sx={{ minWidth: 140 }}
-            />
+            <AttendanceDateField maxDate={controller.todayInputDate} onChange={controller.clampSelectedDate} value={controller.selectedDate} />
             <ErgSelect
               size="small"
               fullWidth={false}
@@ -79,80 +72,39 @@ export function DesktopAttendanceSheetPanel({
               options={controller.subjectOptions.map((subject) => ({ value: subject, label: subject }))}
               sx={{ minWidth: 140 }}
             />
-            <Button
-              variant="contained"
-              startIcon={<Download sx={{ fontSize: 18 }} />}
-              onClick={controller.exportXlsx}
-              sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600, backgroundColor: "#696CFF", "&:hover": { backgroundColor: "#5a5ce6" } }}
-            >
+            <Button variant="outlined" startIcon={<MenuBook />} onClick={() => setCurriculumOpen(true)}>
+              Khung chương trình
+            </Button>
+            <Button variant="outlined" startIcon={<Download />} onClick={controller.exportXlsx}>
               Xuất Excel
             </Button>
+            <Button variant="contained" startIcon={<DoneAll />} onClick={controller.markAllPresent}>
+              Tất cả có mặt
+            </Button>
           </Stack>
-        </div>
-      </div>
+        </Stack>
+      </Box>
 
-      <Stack direction="row" spacing={1} sx={{ px: 2 }}>
-        <Chip label="Có mặt ✓" size="small" sx={{ bgcolor: "#dcfce7", color: "#16a34a", fontSize: 11 }} />
-        <Chip label="Đi muộn M" size="small" sx={{ bgcolor: "#fef3c7", color: "#d97706", fontSize: 11 }} />
-        <Chip label="Vắng V" size="small" sx={{ bgcolor: "#fee2e2", color: "#dc2626", fontSize: 11 }} />
-        <Chip label="Có phép P" size="small" sx={{ bgcolor: "#EEF2FF", color: "#4f46e5", fontSize: 11 }} />
+      <Stack direction="row" spacing={1} sx={{ px: 1 }}>
+        {legend.map(({ label, tint }) => (
+          <Chip key={label} label={label} size="small" sx={{ bgcolor: tint.bg, color: tint.color }} />
+        ))}
       </Stack>
 
-      <Box
-        ref={splitRef}
-        sx={{
-          display: "grid",
-          flex: 1,
-          gap: 2,
-          gridTemplateColumns: { lg: `minmax(0, 1fr) 8px ${curriculumWidth}px`, xs: "1fr" },
-          minHeight: 0,
-        }}
-      >
+      <Box sx={{ display: "grid", flex: 1, gridTemplateColumns: "minmax(0, 1fr)", minHeight: 0 }}>
         <AttendanceStudentTable controller={controller} />
-        <Box
-          role="separator"
-          aria-label="Điều chỉnh độ rộng khung chương trình"
-          aria-orientation="vertical"
-          tabIndex={0}
-          onKeyDown={(event) => {
-            if (event.key === "ArrowLeft") setCurriculumWidth((current) => Math.min(720, current + 24));
-            if (event.key === "ArrowRight") setCurriculumWidth((current) => Math.max(360, current - 24));
-          }}
-          onPointerDown={(event) => {
-            event.currentTarget.setPointerCapture(event.pointerId);
-            resizeCurriculum(event);
-          }}
-          onPointerMove={(event) => {
-            if (event.currentTarget.hasPointerCapture(event.pointerId)) resizeCurriculum(event);
-          }}
-          sx={{
-            alignSelf: "stretch",
-            bgcolor: "#D9E2EF",
-            borderRadius: 1,
-            cursor: "col-resize",
-            display: { xs: "none", lg: "block" },
-            minWidth: 8,
-            outline: "none",
-            position: "relative",
-            "&::after": {
-              bgcolor: "#696CFF",
-              borderRadius: 1,
-              content: '""',
-              height: 44,
-              left: 2,
-              opacity: 0,
-              position: "absolute",
-              top: "50%",
-              transform: "translateY(-50%)",
-              transition: "opacity 140ms ease",
-              width: 4,
-            },
-            "&:hover::after, &:focus-visible::after": { opacity: 1 },
-          }}
-        />
-        <AttendanceCurriculumTable controller={controller} />
       </Box>
+
+      <ErgDrawer
+        description={controller.selectedSubject}
+        onClose={() => setCurriculumOpen(false)}
+        open={curriculumOpen}
+        slotProps={{ paper: { sx: { width: { sm: 640 } } } }}
+        title="Khung chương trình"
+      >
+        <AttendanceCurriculumTable controller={controller} />
+      </ErgDrawer>
       {overlays}
-    </div>
+    </Stack>
   );
 }

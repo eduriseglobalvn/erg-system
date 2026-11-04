@@ -3,9 +3,6 @@ import LmsCheckbox from "@mui/material/Checkbox";
 import Skeleton from "@mui/material/Skeleton";
 
 import {
-  getMockBirthDate,
-  getMockStudentLevel,
-  StudentLevelBadge,
   type AssignHomeworkGroupOption,
 } from "@/features/lms/components/assign-homework-student-utils";
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
@@ -61,13 +58,7 @@ function StudentSelectionSkeletonRow({ index }: { index: number }) {
         <Skeleton variant="text" width={110 + (index % 4) * 20} height={18} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
-        <Skeleton variant="text" width={75} height={18} />
-      </td>
-      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
         <Skeleton variant="text" width={40} height={18} />
-      </td>
-      <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
-        <Skeleton variant="rounded" width={48} height={20} sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px` }} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
         <Skeleton variant="text" width={140} height={18} />
@@ -93,7 +84,6 @@ export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
   isChecked: boolean;
   onToggleStudent: (studentId: string) => void;
 }) {
-  const level = getMockStudentLevel(student.status);
   return (
     <tr
       onClick={() => onToggleStudent(student.id)}
@@ -111,14 +101,10 @@ export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
       <td className="sticky left-[104px] z-20 border-b border-r border-[#dbe4f0] bg-inherit px-3 py-2 font-bold text-[var(--erg-blue)] hover:underline">
         {student.name}
       </td>
-      <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{getMockBirthDate(index)}</td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-700">{student.className}</td>
-      <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-        <StudentLevelBadge level={level} />
-      </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-800">{student.currentAssignment}</td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-        <StudentProgressCell available={student.hasProgressData !== false} value={student.progressRate} />
+        <StudentProgressCell available={student.hasProgressData === true} value={student.progressRate} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">{student.lastActivity}</td>
     </tr>
@@ -157,9 +143,7 @@ export function StudentSelectionTable({
             </th>
             <th className="sticky left-12 top-0 z-40 w-14 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-center">STT</th>
             <th className="sticky left-[104px] top-0 z-40 w-52 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Học sinh</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Ngày sinh</th>
             <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Lớp</th>
-            <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Xếp loại</th>
             <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Bài hiện tại</th>
             <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Tiến độ</th>
             <th className="sticky top-0 z-30 border-b border-r border-[#D9E2EF] bg-[#F4F6F8] px-3 py-3 text-left">Hoạt động gần nhất</th>
@@ -170,7 +154,7 @@ export function StudentSelectionTable({
             SKELETON_ROWS.map((idx) => <StudentSelectionSkeletonRow key={idx} index={idx} />)
           ) : students.length === 0 ? (
             <tr>
-              <td colSpan={9} className="py-12 text-center text-[13px] font-medium text-slate-400">
+              <td colSpan={7} className="py-12 text-center text-[13px] font-medium text-slate-400">
                 Chưa có dữ liệu học sinh của lớp này
               </td>
             </tr>

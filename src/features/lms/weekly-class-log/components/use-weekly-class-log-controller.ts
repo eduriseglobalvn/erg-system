@@ -3,8 +3,11 @@ import { useMemo, useState } from "react";
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import type { WeeklyClassLogPeriod, WeeklyClassLogWeek } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
 import {
+  WEEKLY_CLASS_LOG_SERVER_CONTRACT,
+  addWeeks,
+  buildBlankWeek,
   buildWeeklySummary,
-  loadStoredWeeks,
+  currentWeekStart,
   normalizeWeekSignatures,
 } from "./weekly-class-log-model";
 
@@ -13,27 +16,30 @@ export type WeeklyClassLogControllerOptions = {
   selectedSchoolId?: string | null;
 };
 
+const WEEK_OPTIONS_BEFORE = 8;
+const WEEK_OPTIONS_AFTER = 4;
+
 export function useWeeklyClassLogController(teacherName: string, options: WeeklyClassLogControllerOptions = {}) {
-  const [weeks, setWeeks] = useState<WeeklyClassLogWeek[]>(loadStoredWeeks);
-  const [selectedWeekId, setSelectedWeekId] = useState(weeks[0]?.id ?? "");
+  const [currentMonday] = useState(() => currentWeekStart());
+  const [weekStart, setWeekStart] = useState(currentMonday);
+  const [edits, setEdits] = useState<Record<string, WeeklyClassLogWeek>>({});
   const [selectedSubject, setSelectedSubject] = useState(lmsSubjectOptions[0] ?? "");
-  const selectedWeek = weeks.find((week) => week.id === selectedWeekId) ?? weeks[0];
-  const selectedWeekIndex = weeks.findIndex((week) => week.id === selectedWeek.id);
+  const blankWeek = useMemo(() => buildBlankWeek(weekStart), [weekStart]);
+  const selectedWeek = edits[blankWeek.id] ?? blankWeek;
   const computedSummary = useMemo(() => buildWeeklySummary(selectedWeek), [selectedWeek]);
   const isLocked = selectedWeek.status === "locked";
+  const weekOptions = useMemo(
+    () => Array.from({ length: WEEK_OPTIONS_BEFORE + WEEK_OPTIONS_AFTER + 1 }, (_, index) => {
+      const start = addWeeks(weekStart, index - WEEK_OPTIONS_BEFORE);
+      return { start, week: buildBlankWeek(start) };
+    }),
+    [weekStart],
+  );
 
   function patchSelectedWeek(updater: (week: WeeklyClassLogWeek) => WeeklyClassLogWeek) {
-    setWeeks((currentWeeks) => currentWeeks.map((week) => (
-      week.id === selectedWeek.id ? normalizeWeekSignatures(updater(week), teacherName) : week
-    )));
-  }
-
-  function updateDay(dayId: string, value: string) {
-    if (isLocked) return;
-    patchSelectedWeek((week) => ({
-      ...week,
-      status: "draft",
-      days: week.days.map((day) => day.id === dayId ? { ...day, date: value } : day),
+    setEdits((current) => ({
+      ...current,
+      [selectedWeek.id]: normalizeWeekSignatures(updater(current[selectedWeek.id] ?? blankWeek), teacherName),
     }));
   }
 
@@ -48,31 +54,29 @@ export function useWeeklyClassLogController(teacherName: string, options: Weekly
     }));
   }
 
-  function goToWeek(offset: number) {
-    const nextWeek = weeks[selectedWeekIndex + offset];
-    if (nextWeek) setSelectedWeekId(nextWeek.id);
-  }
-
   return {
     computedSummary,
-    goToWeek,
+    goToCurrentWeek: () => setWeekStart(currentMonday),
+    goToWeek: (offset: number) => setWeekStart((current) => addWeeks(current, offset)),
+    isCurrentWeek: weekStart.getTime() === currentMonday.getTime(),
     isLocked,
-    // No BE weekly-log read/write contract exists yet. Keep edits in memory
-    // only and make the absence visible instead of inventing local truth.
+    // No BE weekly-log read/write contract exists yet: edits stay in memory only
+    // and the page shows an empty state until WEEKLY_CLASS_LOG_SERVER_CONTRACT flips.
     offlineStatus: "session-only" as const,
     selectedSubject,
     selectedClassId: options.selectedClassId ?? null,
     selectedSchoolId: options.selectedSchoolId ?? null,
     selectedWeek,
-    selectedWeekId,
-    selectedWeekIndex,
+    serverContract: WEEKLY_CLASS_LOG_SERVER_CONTRACT,
     setSelectedSubject,
-    setSelectedWeekId,
+    setSelectedWeekId: (id: string) => {
+      const match = weekOptions.find((option) => option.week.id === id);
+      if (match) setWeekStart(match.start);
+    },
     subjectOptions: lmsSubjectOptions,
     teacherName,
-    updateDay,
     updatePeriod,
-    weeks,
+    weekOptions,
   };
 }
 

@@ -1,4 +1,3 @@
-import Chip from "@mui/material/Chip";
 
 import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-api";
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
@@ -55,36 +54,5 @@ export function resolveAssignHomeworkGradeStudentIds(
         .flatMap((classId) => selectedStudentIdsByClass[classId] ?? availableStudentIdsByClass[classId] ?? [])
         .filter(Boolean),
     ),
-  );
-}
-
-export function getMockBirthDate(index: number) {
-  const day = String((index % 27) + 1).padStart(2, "0");
-  const month = String((index % 12) + 1).padStart(2, "0");
-  const year = 2011 + (index % 3);
-  return `${day}/${month}/${year}`;
-}
-
-export function getMockStudentLevel(status: ClassroomStudent["status"]) {
-  if (status === "ahead") return "Khá";
-  if (status === "support") return "Cần hỗ trợ";
-  return "Đạt";
-}
-
-export function StudentLevelBadge({ level }: { level: string }) {
-  const palette =
-    level === "Khá"
-      ? { borderColor: "info.light", bgcolor: "info.50", color: "info.dark" }
-      : level === "Cần hỗ trợ"
-        ? { borderColor: "warning.light", bgcolor: "warning.50", color: "warning.dark" }
-        : { borderColor: "divider", bgcolor: "grey.50", color: "text.secondary" };
-
-  return (
-    <Chip
-      label={level}
-      size="small"
-      variant="outlined"
-      sx={{ ...palette, borderRadius: 1, fontSize: 13, fontWeight: 600 }}
-    />
   );
 }

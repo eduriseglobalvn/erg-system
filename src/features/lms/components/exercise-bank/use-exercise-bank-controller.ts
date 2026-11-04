@@ -67,6 +67,7 @@ export function useExerciseBankController() {
   const [portableCatalogOpen, setPortableCatalogOpen] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [exerciseToEdit, setExerciseToEdit] = useState<Exercise | null>(null);
+  const [quickAssignTitle, setQuickAssignTitle] = useState("");
 
   function openCreateDialog() {
     setExerciseToEdit(null);
@@ -100,6 +101,7 @@ export function useExerciseBankController() {
     () => items.find((exercise) => exercise.id === selectedExerciseId) || filteredExercises[0] || items[0],
     [filteredExercises, items, selectedExerciseId]
   );
+  const quickAssignExercise = items.find((exercise) => exercise.title === quickAssignTitle);
   const totals = useMemo(() => summarizeExercises(filteredExercises, items), [filteredExercises, items]);
 
   function clearFilters() {
@@ -197,6 +199,7 @@ export function useExerciseBankController() {
     openCreateDialog,
     openEditDialog,
     portableCatalogOpen,
+    quickAssignExercise,
     searchTerm,
     selectedExercise,
     selectedExerciseId,
@@ -205,6 +208,7 @@ export function useExerciseBankController() {
     setExerciseToEdit,
     setLevelFilter,
     setPortableCatalogOpen,
+    setQuickAssignTitle,
     setSearchTerm,
     setSelectedExerciseId,
     setSourceFilter,

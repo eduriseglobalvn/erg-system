@@ -1,15 +1,24 @@
-﻿import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, LogOut, MapPin, MonitorSmartphone, Search } from "lucide-react";
-
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
+import Box from "@mui/material/Box";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgEmptyState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { ErgSearchField } from "@/components/erg-mui/erg-form";
+import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
+import { describeIpAddress, describeUserAgent } from "@/features/lms/components/lms-user-agent";
 import { queryKeys } from "@/lib/query-keys";
+import { formatDateTimeVi } from "@/lib/format-date";
 import { listMyLoginSessions, type LoginSessionLog } from "@/platform/auth/api/account-api";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { cn } from "@/lib/utils";
 
 type LoginSessionRow = LoginSessionLog & {
   authMethod?: string;
@@ -118,231 +127,105 @@ export function LmsLoginLogsPage({ onManageAccount }: { onManageAccount: () => v
   });
   const logs: LoginSessionRow[] = resolveLoginSessionRows(logsQuery.data).map((log) =>
     revokedSessionIds.has(log.sessionId)
-      ? {
-          ...log,
-          current: false,
-          revoked: true,
-          revokedReason: log.current ? "Đã đăng xuất phiên hiện tại" : "Đăng xuất từ xa",
-        }
+      ? { ...log, current: false, revoked: true, revokedReason: log.current ? "Đã đăng xuất phiên hiện tại" : "Đăng xuất từ xa" }
       : log,
   );
   const filteredLogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     if (!query) return logs;
-
     return logs.filter((log) =>
-      [log.portal, log.ipAddress, log.deviceName, log.userAgent, log.deviceType, log.revokedReason, log.location, log.authMethod, log.riskLabel]
+      [describeUserAgent(log.userAgent), describeIpAddress(log.ipAddress), log.deviceName, log.deviceType, log.location]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(query)),
     );
   }, [logs, searchQuery]);
+  const revoke = (sessionId: string) => setRevokedSessionIds((current) => new Set(current).add(sessionId));
 
   return (
-    <section className="flex min-h-full flex-col gap-2 bg-[#f8fbff] px-2 py-2 text-slate-950 xl:px-3">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-sm">
-        <div className="mr-auto min-w-[260px]">
-          <h1 className="text-base font-semibold leading-5 text-slate-950">Lịch sử đăng nhập</h1>
-          <p className="mt-1 text-[13px] font-semibold text-slate-600">
-            Theo dõi phiên đăng nhập LMS, thiết bị, vị trí và mức độ tin cậy.
-          </p>
-        </div>
-        <div className="relative min-w-[260px] flex-1 xl:max-w-[460px]">
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-          <TextField
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Tìm theo IP, thiết bị, vị trí, phương thức"
-            size="small"
-            fullWidth
-            sx={{
-              "& .MuiInputBase-root": { height: 40, bgcolor: "white", borderRadius: "8px" },
-              "& .MuiInputBase-input": { pl: "36px", fontSize: "14px", fontWeight: 600 },
-            }}
-          />
-        </div>
-        <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onManageAccount} startIcon={<ArrowLeft data-icon="inline-start" />}>
-          Quản lý tài khoản
-        </Button>
-      </div>
-
-      <section className="overflow-hidden rounded-lg border border-[#cbd7e6] bg-white">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#cbd7e6] px-2.5 py-1.5">
-          <h2 className="text-sm font-semibold text-slate-950">Bảng log đăng nhập</h2>
-          <div className="flex items-center gap-1.5 text-[13px] font-bold">
-            <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-emerald-700">Đang hoạt động</span>
-            <span className="rounded bg-[var(--erg-blue-light)] px-1.5 py-0.5 text-[var(--erg-blue)]">Phiên hiện tại</span>
-            <span className="rounded bg-slate-100 px-1.5 py-0.5 text-slate-600">Đã đăng xuất</span>
-          </div>
-        </div>
-
-        <div className="overflow-auto">
-          <table className="erg-data-table min-w-[1650px] border-separate border-spacing-0 text-[13px]">
-            <thead>
-              <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
-                <LoginLogHeaderCell className="sticky left-0 top-0 z-40 w-[54px]">STT</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="sticky left-[54px] top-0 z-40 w-[170px] text-left">Thời gian</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="sticky left-[224px] top-0 z-40 w-[92px]">Portal</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[150px]">IP public</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[300px] text-left">Thiết bị / trình duyệt</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[190px] text-left">Vị trí</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[160px]">Phương thức</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[140px]">Trạng thái</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[120px]">Rủi ro</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[170px]">Lần cuối</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[170px]">Hết hạn</LoginLogHeaderCell>
-                <LoginLogHeaderCell className="top-0 w-[140px]">Thao tác</LoginLogHeaderCell>
-              </tr>
-            </thead>
-            <tbody>
-              {logsQuery.isLoading ? (
-                <LoginLogEmptyRow label="Đang tải log đăng nhập..." />
-              ) : filteredLogs.length ? (
-                filteredLogs.map((log, index) => (
-                  <LoginLogRow
-                    key={log.sessionId || `${log.createdAt}-${index}`}
-                    index={index}
-                    log={log}
-                    onRevoke={() => setRevokedSessionIds((current) => new Set(current).add(log.sessionId))}
-                  />
-                ))
-              ) : (
-                <LoginLogEmptyRow label="Không tìm thấy log phù hợp." />
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </section>
-  );
-}
-
-function LoginLogRow({ index, log, onRevoke }: { index: number; log: LoginSessionRow; onRevoke: () => void }) {
-  const status = getSessionStatus(log);
-
-  return (
-    <tr className="group">
-      <LoginLogStickyCell className="left-0 z-20 w-[54px] text-center text-slate-500">{index + 1}</LoginLogStickyCell>
-      <LoginLogStickyCell className="left-[54px] z-20 w-[170px] font-semibold text-slate-700">
-        {formatDate(log.createdAt)}
-      </LoginLogStickyCell>
-      <LoginLogStickyCell className="left-[224px] z-20 w-[92px] text-center">
-        <span className="rounded-lg border border-[#b8d6fa] bg-[#ebf3fc] px-2.5 py-1 text-[13px] font-bold text-[#0f5ea8]">{log.portal ?? "lms"}</span>
-      </LoginLogStickyCell>
-      <LoginLogCell className="w-[150px] text-center font-semibold text-slate-700">{log.ipAddress || "-"}</LoginLogCell>
-      <LoginLogCell className="w-[300px]">
-        <div className="flex items-center gap-2">
-          <span className="grid size-7 shrink-0 place-items-center rounded bg-slate-100 text-slate-500">
-            <MonitorSmartphone className="size-3.5" />
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate font-semibold text-[var(--erg-blue)]" title={log.userAgent}>
-              {log.deviceName || log.deviceType || "Thiết bị không xác định"}
-            </span>
-            <span className="mt-1 block truncate text-[13px] font-semibold text-slate-600" title={log.userAgent}>
-              {log.userAgent || "-"}
-            </span>
-          </span>
-        </div>
-      </LoginLogCell>
-      <LoginLogCell className="w-[190px]">
-        <span className="flex items-center gap-1.5 font-semibold text-slate-700">
-          <MapPin className="size-4 text-slate-500" />
-          {log.location || "Không xác định"}
-        </span>
-      </LoginLogCell>
-      <LoginLogCell className="w-[160px] text-center font-semibold text-slate-600">{log.authMethod || "Mật khẩu"}</LoginLogCell>
-      <LoginLogCell className="w-[140px] text-center">
-        <SessionStatusPill status={status} />
-      </LoginLogCell>
-      <LoginLogCell className="w-[120px] text-center">
-        <span className={cn("rounded-lg border px-2.5 py-1 text-[13px] font-bold", log.revoked ? "border-slate-200 bg-slate-100 text-slate-700" : "border-emerald-200 bg-emerald-50 text-emerald-700")}>
-          {log.riskLabel || "Bình thường"}
-        </span>
-      </LoginLogCell>
-      <LoginLogCell className="w-[170px] text-center font-semibold text-slate-600">{formatDate(log.lastSeenAt)}</LoginLogCell>
-      <LoginLogCell className="w-[170px] text-center font-semibold text-slate-600">{formatDate(log.expiresAt)}</LoginLogCell>
-      <LoginLogCell className="w-[140px] text-center">
-        {log.revoked ? (
-          <span className="text-[13px] font-bold text-slate-600">Đã đóng</span>
-        ) : (
-          <button
-            type="button"
-            onClick={onRevoke}
-            className="inline-flex h-8 items-center justify-center gap-1 rounded-lg border border-rose-200 bg-rose-50 px-2.5 text-[13px] font-bold text-rose-700 transition hover:bg-rose-100"
-          >
-            <LogOut className="size-3" />
-            Đăng xuất
-          </button>
-        )}
-      </LoginLogCell>
-    </tr>
-  );
-}
-
-function LoginLogHeaderCell({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <th className={cn("sticky h-10 border-b border-r border-[#cbd7e6] bg-[#eef4fb] px-2 text-center align-middle", className)}>
-      {children}
-    </th>
-  );
-}
-
-function LoginLogCell({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <td className={cn("h-11 border-b border-r border-[#dbe4f0] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>
-      {children}
-    </td>
-  );
-}
-
-function LoginLogStickyCell({ children, className }: { children: ReactNode; className?: string }) {
-  return (
-    <td className={cn("sticky h-11 border-b border-r border-[#dbe4f0] bg-white px-2 align-middle group-hover:bg-[#f8fbff]", className)}>
-      {children}
-    </td>
-  );
-}
-
-function LoginLogEmptyRow({ label }: { label: string }) {
-  return (
-    <tr>
-      <td className="h-28 border-b border-[#eef0f4] bg-white px-4 text-center text-sm font-semibold text-slate-500" colSpan={12}>
-        {label}
-      </td>
-    </tr>
-  );
-}
-
-function SessionStatusPill({ status }: { status: { label: string; tone: "success" | "secondary" | "outline" } }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-2.5 text-[13px] font-bold leading-none",
-        status.tone === "success" && "border-emerald-200 bg-emerald-50 text-emerald-700",
-        status.tone === "secondary" && "border-[#b8d6fa] bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-        status.tone === "outline" && "border-slate-200 bg-white text-slate-500",
-      )}
-    >
-      <span
-        className={cn(
-          "size-1.5 rounded-full",
-          status.tone === "success" && "bg-emerald-500",
-          status.tone === "secondary" && "bg-[var(--erg-blue)]",
-          status.tone === "outline" && "bg-slate-400",
-        )}
+    <Box component="section" sx={{ p: { xs: 2, md: 3 } }}>
+      <ErgPageHeader
+        description="Các lần đăng nhập gần đây vào tài khoản của bạn."
+        primaryAction={
+          <ErgButton leadingIcon={<ArrowBackIcon />} onClick={onManageAccount} variant="contained">
+            Quản lý tài khoản
+          </ErgButton>
+        }
+        title="Lịch sử đăng nhập"
       />
-      {status.label}
-    </span>
+      <Box sx={{ maxWidth: 460, mb: 2 }}>
+        <ErgSearchField
+          onChange={(event) => setSearchQuery(event.target.value)}
+          placeholder="Tìm theo thiết bị hoặc địa chỉ IP"
+          slotProps={{ htmlInput: { "aria-label": "Tìm phiên đăng nhập" } }}
+          value={searchQuery}
+        />
+      </Box>
+      {logsQuery.isLoading ? (
+        <Typography color="text.secondary" variant="body2">Đang tải...</Typography>
+      ) : filteredLogs.length === 0 ? (
+        <ErgEmptyState title="Không có phiên đăng nhập phù hợp" />
+      ) : (
+        <>
+          <Box sx={{ display: { xs: "grid", md: "none" }, gap: 1.5 }}>
+            {filteredLogs.map((log, index) => (
+              <Box component="article" key={log.sessionId || index} sx={{ border: 1, borderColor: "divider", borderRadius: 2, p: 2 }}>
+                <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
+                  <Typography variant="subtitle2">{describeUserAgent(log.userAgent)}</Typography>
+                  <SessionChip log={log} />
+                </Box>
+                <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">
+                  {describeIpAddress(log.ipAddress)} · {formatDateTimeVi(log.createdAt) || "—"}
+                </Typography>
+                {log.revoked ? null : (
+                  <ErgButton color="error" fullWidth onClick={() => revoke(log.sessionId)} sx={{ minHeight: 44, mt: 1.5 }} variant="outlined">
+                    Đăng xuất thiết bị
+                  </ErgButton>
+                )}
+              </Box>
+            ))}
+          </Box>
+          <Box sx={{ border: 1, borderColor: "divider", borderRadius: 2, display: { xs: "none", md: "block" }, overflowX: "auto" }}>
+            <Table size="small">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Thời gian</TableCell>
+                  <TableCell>Thiết bị</TableCell>
+                  <TableCell>Địa chỉ IP</TableCell>
+                  <TableCell>Trạng thái</TableCell>
+                  <TableCell>Hoạt động cuối</TableCell>
+                  <TableCell>Hết hạn</TableCell>
+                  <TableCell />
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {filteredLogs.map((log, index) => (
+                  <TableRow key={log.sessionId || index}>
+                    <TableCell>{formatDateTimeVi(log.createdAt) || "—"}</TableCell>
+                    <TableCell title={log.userAgent}>{describeUserAgent(log.userAgent)}</TableCell>
+                    <TableCell>{describeIpAddress(log.ipAddress)}</TableCell>
+                    <TableCell><SessionChip log={log} /></TableCell>
+                    <TableCell>{formatDateTimeVi(log.lastSeenAt) || "—"}</TableCell>
+                    <TableCell>{formatDateTimeVi(log.expiresAt) || "—"}</TableCell>
+                    <TableCell align="right">
+                      {log.revoked ? null : (
+                        <ErgButton color="error" onClick={() => revoke(log.sessionId)} size="small" variant="outlined">
+                          Đăng xuất
+                        </ErgButton>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        </>
+      )}
+    </Box>
   );
 }
 
-function getSessionStatus(log: LoginSessionLog): { label: string; tone: "success" | "secondary" | "outline" } {
-  if (log.revoked) return { label: "Đã đăng xuất", tone: "outline" };
-  if (log.current) return { label: "Hiện tại", tone: "secondary" };
-  return { label: "Hoạt động", tone: "success" };
-}
-
-function formatDate(value?: string) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(new Date(value));
+function SessionChip({ log }: { log: LoginSessionLog }) {
+  if (log.revoked) return <ErgStatusChip label="Đã đăng xuất" tone="neutral" />;
+  if (log.current) return <ErgStatusChip label="Thiết bị này" tone="info" />;
+  return <ErgStatusChip label="Đang hoạt động" tone="success" />;
 }

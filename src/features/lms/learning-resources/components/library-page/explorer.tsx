@@ -1,13 +1,9 @@
 import { useMemo, useState } from "react";
-import CommandClipboard from "@mui/icons-material/ContentPaste";
 import CommandCopy from "@mui/icons-material/ContentCopy";
 import CommandFileQuestion from "@mui/icons-material/HelpOutlineOutlined";
-import CommandFolder from "@mui/icons-material/Folder";
-import CommandMoreHorizontal from "@mui/icons-material/MoreHoriz";
-import CommandPencil from "@mui/icons-material/Edit";
+import CommandAssign from "@mui/icons-material/AssignmentTurnedInOutlined";
+import CommandDownload from "@mui/icons-material/FileDownloadOutlined";
 import CommandPresentation from "@mui/icons-material/Slideshow";
-import CommandScissors from "@mui/icons-material/ContentCut";
-import CommandTrash2 from "@mui/icons-material/DeleteOutlined";
 
 import {
   LearningResourceExplorerCardGrid,
@@ -115,26 +111,21 @@ export function LearningResourceExplorer({
   const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const commandActions = useMemo<LearningResourceExplorerCommand[]>(() => [
-    { disabled: true, icon: <CommandFolder className="h-4 w-4" />, label: "New folder" },
     { disabled: true, icon: <CommandPresentation className="h-4 w-4" />, label: "Thêm bài giảng" },
     { disabled: true, icon: <CommandFileQuestion className="h-4 w-4" />, label: "Thêm bài tập" },
     { icon: null, label: "separator-primary", variant: "separator" },
-    { disabled: true, icon: <CommandScissors className="h-4 w-4" />, label: "Cut", title: "Cut", variant: "icon" },
+    { disabled: true, icon: <CommandAssign className="h-4 w-4" />, label: "Giao cho lớp", title: "Mở một học liệu để giao cho lớp" },
+    { disabled: true, icon: <CommandDownload className="h-4 w-4" />, label: "Tải xuống", title: "Mở một học liệu để tải xuống" },
     {
       icon: <CommandCopy className="h-4 w-4" />,
-      label: "Copy URL",
+      label: "Sao chép liên kết",
       onClick: () => {
         if (typeof window !== "undefined" && navigator.clipboard) {
           void navigator.clipboard.writeText(window.location.href);
         }
       },
-      title: "Copy URL",
-      variant: "icon",
+      title: "Sao chép liên kết",
     },
-    { disabled: true, icon: <CommandClipboard className="h-4 w-4" />, label: "Paste", title: "Paste", variant: "icon" },
-    { disabled: true, icon: <CommandPencil className="h-4 w-4" />, label: "Rename", title: "Rename", variant: "icon" },
-    { disabled: true, icon: <CommandTrash2 className="h-4 w-4" />, label: "Delete", title: "Delete", variant: "icon" },
-    { icon: <CommandMoreHorizontal className="h-4 w-4" />, label: "More", title: "More", variant: "icon" },
   ], []);
 
   function openContextMenu(event: { preventDefault: () => void; stopPropagation: () => void }) {
@@ -173,7 +164,7 @@ export function LearningResourceExplorer({
         }}
         onRefresh={onRefresh}
         searchLabel={`Tìm trong ${LEARNING_RESOURCE_WORKSPACE_LABEL.toLocaleLowerCase("vi-VN")}`}
-        searchPlaceholder={`Search ${displayText(activeSubject?.label) || "Resources"}`}
+        searchPlaceholder={`Tìm trong ${displayText(activeSubject?.label) || "học liệu"}`}
         searchValue={keyword}
         title={selectedExplorerUrl}
         onSearchChange={onKeywordChange}
