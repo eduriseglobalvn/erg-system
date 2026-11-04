@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api-client";
+import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 
 export type CurriculumLevelCatalogItem = {
   id: string;
@@ -122,7 +123,7 @@ type ApiCurriculumTree = {
 
 export async function fetchCurriculumCatalog(signal?: AbortSignal): Promise<CurriculumSubjectCatalogItem[]> {
   try {
-    const res = await apiRequest<ApiCurriculumTree>("/api/v1/curriculum/tree?status=active", { signal });
+    const res = await apiRequest<ApiCurriculumTree>(API_ENDPOINTS.curriculum.activeTree, { signal });
     if (res && Array.isArray(res.subjects)) {
       const results: CurriculumSubjectCatalogItem[] = [];
 

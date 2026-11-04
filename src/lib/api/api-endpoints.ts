@@ -55,6 +55,7 @@ export const API_ENDPOINTS = {
     lifecycle: (resourceKind: string, resourceId: string) => path(`/api/v1/content/${encodeApiPathSegment(resourceKind)}/${encodeApiPathSegment(resourceId)}/lifecycle`),
   },
   curriculum: {
+    activeTree: `${curriculumRoot}/tree?status=active`,
     collection: (kind: string) => path(`${curriculumRoot}/${encodeApiPathSegment(kind)}`),
     subjectLevels: (subjectId: string) => path(`${curriculumRoot}/subjects/${encodeApiPathSegment(subjectId)}/levels`),
     levelTopics: (levelId: string) => path(`${curriculumRoot}/levels/${encodeApiPathSegment(levelId)}/topics`),

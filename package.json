@@ -25,7 +25,7 @@
     "governance:check": "node scripts/check-plan-status.mjs && node scripts/check-cross-repo-governance.mjs",
     "repository-drift:check": "node scripts/check-frontend-repository-drift.mjs",
     "graphql:operations:check": "node scripts/check-graphql-operation-names.mjs",
-    "verify": "node scripts/check-circular-dependencies.mjs && node scripts/check-data-boundary.mjs && node scripts/check-frontend-folder-boundary.mjs && node scripts/check-legacy-identifiers.mjs && node scripts/check-mui-barrel-imports.mjs",
+    "verify": "node scripts/check-circular-dependencies.mjs && node scripts/check-data-boundary.mjs && node scripts/check-frontend-folder-boundary.mjs && node scripts/check-legacy-identifiers.mjs && node scripts/check-mui-barrel-imports.mjs && node scripts/check-api-endpoint-literals.mjs && node scripts/check-workspace-route-ownership.mjs",
     "verify:api-contract": "bun run contract:check && bun run typecheck && vitest run src/lib/api-client.test.ts src/lib/api/create-api-client.test.ts src/features/employee-management/api/employee-management-api.test.ts src/features/access-management/api/access-management-api.test.ts",
     "audit:legacy-ui": "node scripts/check-legacy-ui.mjs --baseline",
     "budget:check": "node scripts/check-bundle-budget.mjs",

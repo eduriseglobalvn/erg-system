@@ -72,7 +72,7 @@ const ProfilePage = lazy(() =>
   })),
 );
 const StudentPage = lazy(() => import("@/app/pages/student/student-page"));
-const LearningOutcomesPage = lazy(() => import("@/app/pages/lms/learning-outcomes-page"));
+const LearningOutcomesPage = lazy(() => import("@/app/pages/shared/learning-outcomes-page"));
 const LearningStandardsPage = lazy(() => import("@/app/pages/admin/learning-standards-page"));
 const EnterpriseConnectorsPage = lazy(() => import("@/app/pages/admin/enterprise-connectors-page"));
 const QuestionTypeDemoPage = lazy(() =>

@@ -24,7 +24,8 @@ export function findEndpointLiterals(files) {
   for (const [file, source] of Object.entries(files)) {
     if (ignored(file)) continue;
     source.split(/\r?\n/).forEach((line, index) => {
-      if (/(?:["'`])\/api\//.test(line)) findings.push({ file: normalize(file), line: index + 1 });
+      // Type-level OpenAPI path keys (ApiResponseData<"/api/...">) are not runtime URLs.
+      if (/(?:["'`])\/api\//.test(line) && !/Api\w+<\s*["']\/api\//.test(line)) findings.push({ file: normalize(file), line: index + 1 });
     });
   }
   return findings;
