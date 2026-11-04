@@ -7,13 +7,9 @@ import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
 import {
   accessDeniedPath,
   defaultPortalRedirect,
-  googleEmailFromIdToken,
   handleLoginSubmit,
-  handleRegisterSubmit,
   handleStudentLoginSubmit,
-  redirectAfterAuth,
   resolveDefaultPostLoginRedirect,
-  safely,
   sanitizeRedirect,
 } from "@/platform/auth/components/portal-login-controller";
 import { getPortalLoginCopy, type PortalKey } from "@/platform/auth/components/portal-login-copy";
@@ -21,7 +17,6 @@ import { NoticeBanner, PortalLoginShell } from "@/platform/auth/components/porta
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { isBffAuthEnabled } from "@/lib/api-client";
 
 type AuthSession = ReturnType<typeof useAuthSession>;
@@ -37,7 +32,6 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const auth = useAuthSession(portal);
   const location = useLocation();
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [studentNotice, setStudentNotice] = useState<AuthSession["notice"] | null>(null);
   const requestedRedirect = new URLSearchParams(location.searchStr).get("redirect");
   const hasExplicitRedirect = Boolean(requestedRedirect && sanitizeLocalRedirect(requestedRedirect));
@@ -86,25 +80,20 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   if (redirectTarget) return null;
 
   return (
-    <PortalLoginShell copy={resolvedCopy}>
+    <PortalLoginShell>
       <NoticeBanner notice={portal === "elearning" ? studentNotice : auth.notice} />
       <AuthFormPanel
-        mode={auth.mode}
         rememberMe={auth.rememberMe}
         showPassword={auth.showPassword}
         loginForm={auth.loginForm}
-        registerForm={auth.registerForm}
-        onModeChange={auth.setMode}
         onRememberMeChange={auth.setRememberMe}
         onShowPasswordToggle={() => auth.setShowPassword((current) => !current)}
         onLoginFormChange={auth.setLoginForm}
-        onRegisterFormChange={auth.setRegisterForm}
         onLoginSubmit={(event) =>
           portal === "elearning"
             ? handleStudentLoginSubmit(event, auth, redirect, navigateTo, setStudentNotice)
             : handleLoginSubmit(event, auth, portal, redirect, navigateTo, { hasExplicitRedirect })
         }
-        onRegisterSubmit={(event) => handleRegisterSubmit(event, auth, portal, redirect, navigateTo, { hasExplicitRedirect })}
         onForgotPassword={() => {
           if (portal === "elearning") {
             setStudentNotice({
@@ -116,24 +105,7 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
           }
           auth.actions.forgotPassword();
         }}
-        onProviderLogin={(provider, idToken) =>
-          void safely(
-              auth,
-            async () => {
-              const account = await auth.actions.loginByProvider(provider, idToken, portal);
-              redirectAfterAuth(account ?? getCurrentAccount(portal), portal, redirect, navigateTo, { hasExplicitRedirect });
-            },
-            () => navigateTo(accessDeniedPath(portal, googleEmailFromIdToken(idToken) || auth.loginForm.email, redirect)),
-          )
-        }
-        allowGoogle={resolvedCopy.allowGoogle}
-        allowRegister={resolvedCopy.allowRegister}
-        credentialLabel={resolvedCopy.credentialLabel}
-        credentialPlaceholder={resolvedCopy.credentialPlaceholder}
-        loginFootnote={resolvedCopy.formFootnote}
-        loginSubtitle={resolvedCopy.formSubtitle}
         loginTitle={resolvedCopy.formTitle}
-        mobileVariant={isMobile}
       />
     </PortalLoginShell>
   );
