@@ -36,7 +36,6 @@ import {
 import { AdminContentOverview } from "@/features/lcms/admin-content/components/admin-content-overview";
 import { AdminErgPortalWorkspace } from "@/features/lcms/pages/admin-erg-workspaces";
 
-const AdminDashboard = lazy(() => import("./pages/admin-dashboard"));
 const PermissionCatalogPage = lazy(() => import("@/features/access-management/components/permission-catalog-workspace").then((m) => ({ default: m.PermissionCatalogWorkspace })));
 const RoleManagementPage = lazy(() => import("@/features/access-management/components/role-management-workspace").then((m) => ({ default: m.RoleManagementWorkspace })));
 const EmployeeManagementPage = lazy(() => import("@/features/employee-management/components/employee-list-workspace").then((m) => ({ default: m.EmployeeListWorkspace })));
@@ -100,6 +99,10 @@ export default function AdminErgPortalShell() {
   useEffect(() => {
     if (legacyPathname === "/setting/setting-center-role") {
       void navigate({ replace: true, href: "/admin/settings/roles" });
+    }
+    // The old home page showed hard-coded sample data; land on the first real workspace instead.
+    if (legacyPathname === "/" || legacyPathname === "") {
+      void navigate({ replace: true, href: adminContentPathForSection("resources") });
     }
   }, [legacyPathname, navigate]);
 
@@ -201,11 +204,7 @@ export default function AdminErgPortalShell() {
     }
 
     if (legacyPathname === "/" || legacyPathname === "") {
-      return (
-        <Suspense fallback={<PageFallback />}>
-          <AdminDashboard />
-        </Suspense>
-      );
+      return <PageFallback />;
     }
 
     return <AdminErgPortalWorkspace activeItem={activeItem ?? null} pathname={legacyPathname} />;
