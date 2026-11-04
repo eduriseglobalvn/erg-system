@@ -381,7 +381,10 @@ async function readJson<T>(response: Response): Promise<T> {
       success: false,
       error: {
         code: "INVALID_JSON",
-        message: text.substring(0, 100) // First 100 chars for context
+        // Never surface proxy/Tomcat HTML error pages to users.
+        message: /^s*</.test(text)
+          ? `Máy chủ trả về phản hồi không hợp lệ (HTTP ${response.status}).`
+          : text.substring(0, 100), // First 100 chars for context
       }
     } as T;
   }

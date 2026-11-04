@@ -2,7 +2,6 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
-import Breadcrumbs from "@mui/material/Breadcrumbs";
 import MenuItem from "@mui/material/MenuItem";
 import Skeleton from "@mui/material/Skeleton";
 import TextField from "@mui/material/TextField";
@@ -53,20 +52,6 @@ export function SchoolPageShell({
           }}
         >
           <Box sx={{ minWidth: 0 }}>
-            <Breadcrumbs
-              separator="/"
-              sx={{
-                mb: 0.5,
-                "& .MuiBreadcrumbs-separator": { color: "#C7C7CC", mx: 0.75 },
-              }}
-            >
-              <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", fontWeight: 600 }}>
-                Quản lý trường học
-              </Typography>
-              <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.75rem", fontWeight: 600 }}>
-                {title}
-              </Typography>
-            </Breadcrumbs>
             <Typography
               sx={{
                 color: ergEnterpriseTokens.color.text,

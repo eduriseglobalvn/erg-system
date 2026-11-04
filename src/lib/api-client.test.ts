@@ -489,3 +489,12 @@ test("rethrows an external abort reason without converting it to a network error
 
   await expect(apiRequest("/api/v1/auth/login", { signal: controller.signal, auth: "public" })).rejects.toBe(reason);
 });
+
+test("hides HTML error pages from proxies behind a friendly message", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response("<!doctype html><html><title>HTTP Status 500</title></html>", { status: 500, headers: { "Content-Type": "text/html" } })));
+
+  await expect(apiRequest("/api/v1/auth/login", { auth: "public" })).rejects.toMatchObject({
+    message: "Máy chủ trả về phản hồi không hợp lệ (HTTP 500).",
+  });
+});
