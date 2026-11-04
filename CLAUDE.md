@@ -100,5 +100,5 @@ CI: `.github/workflows/ci.yml`. Mọi GitHub Action phải ghim theo SHA.
 ## 🧹 Quy ước làm việc
 
 - Không để code chết: xoá file không còn import (đã dọn 7 file ở 11/2026). Không thêm re-export "cho êm" để tắt cảnh báo.
-- File nguồn dùng CRLF. Sửa bằng script cần giữ nguyên kiểu xuống dòng; khi dùng Git Bash, tránh `sed` với dấu `\` — viết script Node.
+- File nguồn dùng LF (kiểm bằng `git ls-files --eol`). Cảnh báo "LF will be replaced by CRLF" của git do `core.autocrlf=true`, bỏ qua được. Khi dùng Git Bash, tránh `sed` với dấu `` — viết script Node.
 - Kế hoạch tổng thể: `KE_HOACH_TRIEN_KHAI.md`. Mục 7.1 của kế hoạch đề xuất primary `#0F6CBD` + Be Vietnam Pro + card không shadow; chủ dự án đã chốt theo kế hoạch 7.1 (11/2026): primary `#0F6CBD`, Be Vietnam Pro, card chỉ viền. Phần chưa áp dụng hết trong code (nút mặc định `text`, bỏ shadow card, lint cấm hex) là việc đang làm.
