@@ -1,8 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { RouterProvider } from "@tanstack/react-router";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { GlobalPwaBanner } from "@/components/pwa/global-pwa-banner";
+// Update banner is not needed for first paint.
+const GlobalPwaBanner = lazy(() => import("@/components/pwa/global-pwa-banner").then((m) => ({ default: m.GlobalPwaBanner })));
 
 import { I18nProvider } from "@/platform/i18n";
 import { appQueryClient } from "@/lib/query-client";
@@ -62,7 +63,7 @@ export default function App() {
     <PersistQueryClientProvider client={appQueryClient} persistOptions={persistOptions}>
       <I18nProvider>
         <AppRouterProvider router={router} />
-        <GlobalPwaBanner />
+        <Suspense fallback={null}><GlobalPwaBanner /></Suspense>
       </I18nProvider>
       {showQueryDevtools ? <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> : null}
     </PersistQueryClientProvider>
