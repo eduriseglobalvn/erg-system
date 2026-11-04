@@ -29,7 +29,7 @@ export function SidebarLogo({
 }) {
   let pathname = "";
   try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+     
     const location = useLocation();
     pathname = location?.pathname || "";
   } catch {

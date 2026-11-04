@@ -133,7 +133,7 @@ export function PortalSidebarWorkspaceHeader({
   void mobile;
   let pathname = "";
   try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
+     
     const location = useLocation();
     pathname = location?.pathname || "";
   } catch {
@@ -240,7 +240,7 @@ export function PortalSidebarWorkspaceHeader({
           onClick={(e) => canSwitch && setAnchorEl(e.currentTarget)}
           sx={{
             alignItems: "center",
-            bgcolor: Boolean(anchorEl) ? "rgba(54, 89, 187, 0.08)" : (fluid ? "#F8FAFC" : "transparent"),
+            bgcolor: anchorEl ? "rgba(54, 89, 187, 0.08)" : (fluid ? "#F8FAFC" : "transparent"),
             border: fluid ? "1px solid #E2E8F0" : "none",
             borderRadius: fluid ? "12px" : "10px",
             boxSizing: "border-box",
@@ -309,10 +309,10 @@ export function PortalSidebarWorkspaceHeader({
           {canSwitch ? (
             <KeyboardArrowDownRoundedIcon
               sx={{
-                color: Boolean(anchorEl) ? meta.themeColor : "#8898AA",
+                color: anchorEl ? meta.themeColor : "#8898AA",
                 flexShrink: 0,
                 fontSize: 18,
-                transform: Boolean(anchorEl) ? "rotate(180deg)" : "rotate(0deg)",
+                transform: anchorEl ? "rotate(180deg)" : "rotate(0deg)",
                 transition: "transform 0.2s cubic-bezier(0.2, 0, 0, 1), color 0.15s ease",
               }}
             />

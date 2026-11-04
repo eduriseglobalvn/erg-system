@@ -47,7 +47,7 @@ type ErgStatusChipProps = Omit<ChipProps, "color"> & {
   tone?: ErgStatusTone;
 };
 
-export function ErgStatusChip({ label, status, sx, tone = "neutral", variant = "filled", ...props }: ErgStatusChipProps) {
+export function ErgStatusChip({ label, status, sx, tone = "neutral", variant: _variant, ...props }: ErgStatusChipProps) {
   const resolvedTone = status ?? tone;
   const style = APPLE_STATUS_STYLES[resolvedTone] ?? APPLE_STATUS_STYLES.neutral;
 

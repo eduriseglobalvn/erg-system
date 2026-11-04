@@ -98,7 +98,9 @@ export function StudentDashboardMobileShell({
     setDismissed(true);
     try {
       window.sessionStorage?.setItem("erg_pwa_banner_dismissed", "true");
-    } catch {}
+    } catch {
+      // storage unavailable (private mode); dismissal just won't persist
+    }
   };
 
   return (

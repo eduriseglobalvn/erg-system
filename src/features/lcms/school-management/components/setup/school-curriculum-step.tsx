@@ -15,6 +15,8 @@ import { SchoolEnrollmentDialog } from "@/features/lcms/school-management/compon
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
 import { SchoolSubjectAssignDialog } from "@/features/lcms/school-management/components/setup/school-subject-assign-dialog";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
+// Stable fallback so memo deps do not change every render.
+const NONE: never[] = [];
 
 type SubjectClassAllocation = Record<string, string[]>;
 
@@ -55,6 +57,25 @@ export function SchoolCurriculumStep() {
     [storageKey]
   );
 
+  const schoolClasses = selectedSchool?.classes ?? NONE;
+  const schoolSubjects = selectedSchool?.subjects ?? NONE;
+
+  // Derive class-to-subjects map. Hooks stay above the `!selectedSchool` guard so they run on every render.
+  const classSubjectsMap = useMemo(() => {
+    const map = new Map<string, Array<{ name: string; code: string }>>();
+    schoolClasses.forEach((cls) => map.set(cls.id, []));
+
+    schoolSubjects.forEach((subj) => {
+      const assignedClassIds = allocations[subj.code] || schoolClasses.map((c) => c.id);
+      assignedClassIds.forEach((clsId) => {
+        const list = map.get(clsId) || [];
+        list.push({ name: subj.name, code: subj.code });
+        map.set(clsId, list);
+      });
+    });
+    return map;
+  }, [allocations, schoolClasses, schoolSubjects]);
+
   if (!selectedSchool) return null;
   const meta = schoolTypeMeta[selectedSchool.schoolType];
 
@@ -80,22 +101,6 @@ export function SchoolCurriculumStep() {
     const next = { ...allocations, [payload.code]: payload.selectedClassIds };
     saveAllocations(next);
   }
-
-  // Derive class-to-subjects map
-  const classSubjectsMap = useMemo(() => {
-    const map = new Map<string, Array<{ name: string; code: string }>>();
-    selectedSchool.classes.forEach((cls) => map.set(cls.id, []));
-
-    selectedSchool.subjects.forEach((subj) => {
-      const assignedClassIds = allocations[subj.code] || selectedSchool.classes.map((c) => c.id);
-      assignedClassIds.forEach((clsId) => {
-        const list = map.get(clsId) || [];
-        list.push({ name: subj.name, code: subj.code });
-        map.set(clsId, list);
-      });
-    });
-    return map;
-  }, [allocations, selectedSchool.classes, selectedSchool.subjects]);
 
   const classesWithSubjects = selectedSchool.classes.filter(
     (cls) => (classSubjectsMap.get(cls.id) || []).length > 0

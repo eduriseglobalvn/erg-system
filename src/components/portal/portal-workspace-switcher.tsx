@@ -64,7 +64,7 @@ export function PortalWorkspaceSwitcher({
   onNavigate?: (path: string) => void;
 }) {
   const location = useLocation();
-  const navigate = typeof useNavigate === "function" ? useNavigate() : () => {};
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const current = workspaceFromPath(location.pathname);
   const granted = workspaces?.length ? [...workspaces] : workspacesFromLegacyPortals(portals, current);
@@ -78,7 +78,7 @@ export function PortalWorkspaceSwitcher({
         onClick={(event) => setAnchorEl(event.currentTarget)}
         startIcon={<AppsRoundedIcon sx={{ fontSize: 18 }} />}
         sx={{
-          bgcolor: Boolean(anchorEl) ? "action.selected" : "transparent",
+          bgcolor: anchorEl ? "action.selected" : "transparent",
           borderRadius: "8px",
           color: "text.primary",
           fontSize: 12.5,

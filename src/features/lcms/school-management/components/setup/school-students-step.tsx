@@ -19,12 +19,46 @@ import { SchoolStepSurface } from "@/features/lcms/school-management/components/
 import { StudentImportDialog } from "@/features/lcms/school-management/components/student-import-dialog";
 import { schoolTypeMeta, schoolTypeUsesGrades } from "@/features/lcms/school-management/types/school-type-config";
 import type { StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
+// Stable fallback so memo deps do not change every render.
+const NONE: never[] = [];
 
 export function SchoolStudentsStep() {
   const { addStudents, selectedSchool } = useSchoolManagementContext();
   const [importOpen, setImportOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const schoolClasses = selectedSchool?.classes ?? NONE;
+  const schoolStudents = selectedSchool?.students ?? NONE;
+
+  // Hooks stay above the `!selectedSchool` guard so they run on every render.
+  const classNames = useMemo(() => {
+    const set = new Set(schoolClasses.map((c) => c.name));
+    schoolStudents.forEach((s) => {
+      if (s.className) set.add(s.className);
+    });
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "vi", { numeric: true }));
+  }, [schoolClasses, schoolStudents]);
+
+  const filteredStudents = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    return schoolStudents.filter((student) => {
+      const matchClass = selectedClass === "all" || student.className === selectedClass;
+      const matchSearch =
+        !q ||
+        student.fullName.toLowerCase().includes(q) ||
+        (student.code && student.code.toLowerCase().includes(q)) ||
+        (student.className && student.className.toLowerCase().includes(q));
+      return matchClass && matchSearch;
+    });
+  }, [schoolStudents, selectedClass, searchQuery]);
+
+  const atRiskCount = useMemo(() => schoolStudents.filter((s) => s.status === "at-risk").length, [schoolStudents]);
+
+  const selectedClassInfo = useMemo(() => {
+    if (selectedClass === "all") return null;
+    return schoolClasses.find((c) => c.name === selectedClass) ?? null;
+  }, [selectedClass, schoolClasses]);
 
   if (!selectedSchool) return null;
   const meta = schoolTypeMeta[selectedSchool.schoolType];
@@ -44,40 +78,6 @@ export function SchoolStudentsStep() {
       }))
     );
   }
-
-  // Sorted unique class names
-  const classNames = useMemo(() => {
-    const fromClasses = selectedSchool.classes.map((c) => c.name);
-    const set = new Set(fromClasses);
-    selectedSchool.students.forEach((s) => {
-      if (s.className) set.add(s.className);
-    });
-    return Array.from(set).sort((a, b) => a.localeCompare(b, "vi", { numeric: true }));
-  }, [selectedSchool.classes, selectedSchool.students]);
-
-  // Filtered student list
-  const filteredStudents = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
-    return selectedSchool.students.filter((student) => {
-      const matchClass = selectedClass === "all" || student.className === selectedClass;
-      const matchSearch =
-        !q ||
-        student.fullName.toLowerCase().includes(q) ||
-        (student.code && student.code.toLowerCase().includes(q)) ||
-        (student.className && student.className.toLowerCase().includes(q));
-      return matchClass && matchSearch;
-    });
-  }, [selectedSchool.students, selectedClass, searchQuery]);
-
-  const atRiskCount = useMemo(
-    () => selectedSchool.students.filter((s) => s.status === "at-risk").length,
-    [selectedSchool.students]
-  );
-
-  const selectedClassInfo = useMemo(() => {
-    if (selectedClass === "all") return null;
-    return selectedSchool.classes.find((c) => c.name === selectedClass) ?? null;
-  }, [selectedClass, selectedSchool.classes]);
 
   return (
     <>

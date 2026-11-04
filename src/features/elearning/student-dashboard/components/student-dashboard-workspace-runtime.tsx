@@ -508,6 +508,11 @@ export function StudentDashboardWorkspaceRuntime() {
     setAnnouncementPopupOpen(false);
   }
 
+  const mobileDockItems = useMemo(() => [
+    ...copy.navItems.map((item) => ({ ...item, key: item.key as StudentDockPageKey, label: item.key === "scores" ? (locale === "vi" ? "Khóa học" : "Courses") : item.key === "assignments" ? (locale === "vi" ? "Bài tập" : "Tasks") : item.label })),
+    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", icon: null },
+  ], [copy.navItems, locale]);
+
   if (viewState.type === "quiz" && !currentAssignment) {
     return (
       <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: MUI_BG, p: 3 }}>
@@ -627,10 +632,6 @@ export function StudentDashboardWorkspaceRuntime() {
     setActivePage(targetPage);
     setViewState({ type: "dashboard" });
   };
-  const mobileDockItems = useMemo(() => [
-    ...copy.navItems.map((item) => ({ ...item, key: item.key as StudentDockPageKey, label: item.key === "scores" ? (locale === "vi" ? "Khóa học" : "Courses") : item.key === "assignments" ? (locale === "vi" ? "Bài tập" : "Tasks") : item.label })),
-    { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", icon: null },
-  ], [copy.navItems, locale]);
   const currentPageLabel = activePage === "account" ? copy.accountTitle : copy.navItems.find((item) => item.key === activePage)?.label ?? copy.heroEyebrow;
   const announcementToast = latestAnnouncement ? (
     <AnnouncementToast
