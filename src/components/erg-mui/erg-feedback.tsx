@@ -4,88 +4,46 @@ import Skeleton, { type SkeletonProps } from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+
 type ErgStatusTone = "success" | "warning" | "error" | "info" | "neutral";
 
-const APPLE_STATUS_STYLES: Record<
-  ErgStatusTone,
-  { bg: string; border: string; color: string; dot: string }
-> = {
-  error: {
-    bg: "rgba(255, 59, 48, 0.1)",
-    border: "rgba(255, 59, 48, 0.22)",
-    color: "#DC2626",
-    dot: "#FF3B30",
-  },
-  info: {
-    bg: "rgba(0, 113, 227, 0.08)",
-    border: "rgba(0, 113, 227, 0.18)",
-    color: "#0071E3",
-    dot: "#0071E3",
-  },
-  neutral: {
-    bg: "rgba(0, 0, 0, 0.05)",
-    border: "rgba(0, 0, 0, 0.1)",
-    color: "#6E6E73",
-    dot: "#86868B",
-  },
-  success: {
-    bg: "rgba(52, 199, 89, 0.12)",
-    border: "rgba(52, 199, 89, 0.22)",
-    color: "#15803D",
-    dot: "#34C759",
-  },
-  warning: {
-    bg: "rgba(255, 149, 0, 0.12)",
-    border: "rgba(255, 149, 0, 0.22)",
-    color: "#B45309",
-    dot: "#FF9500",
-  },
-};
-
 type ErgStatusChipProps = Omit<ChipProps, "color"> & {
+  dot?: boolean;
   status?: ErgStatusTone;
   tone?: ErgStatusTone;
 };
 
-export function ErgStatusChip({ label, status, sx, tone = "neutral", variant: _variant, ...props }: ErgStatusChipProps) {
+export function ErgStatusChip({ dot = true, label, status, sx, tone = "neutral", variant: _variant, ...props }: ErgStatusChipProps) {
   const resolvedTone = status ?? tone;
-  const style = APPLE_STATUS_STYLES[resolvedTone] ?? APPLE_STATUS_STYLES.neutral;
+  const style = ergEnterpriseTokens.statusTint[resolvedTone] ?? ergEnterpriseTokens.statusTint.neutral;
 
   return (
     <Chip
       icon={
-        <Box
-          component="span"
-          sx={{
-            bgcolor: style.dot,
-            borderRadius: "50%",
-            display: "inline-block",
-            height: 6,
-            ml: "6px !important",
-            mr: "-4px !important",
-            width: 6,
-          }}
-        />
+        dot ? (
+          <Box
+            component="span"
+            sx={{ bgcolor: style.dot, borderRadius: "50%", display: "inline-block", height: 6, ml: "6px !important", mr: "-4px !important", width: 6 }}
+          />
+        ) : undefined
       }
       label={label}
       size="small"
       sx={[
         {
           bgcolor: style.bg,
-          border: `1px solid ${style.border}`,
           borderRadius: "9999px",
           color: style.color,
-          fontSize: "0.72rem",
-          fontWeight: 700,
-          height: 24,
+          fontSize: 12,
+          fontWeight: 500,
+          height: 22,
           lineHeight: 1,
-          "& .MuiChip-label": {
-            px: 1,
-          },
+          "& .MuiChip-label": { px: 1 },
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
-      variant="outlined"
+      variant="filled"
       {...props}
     />
   );

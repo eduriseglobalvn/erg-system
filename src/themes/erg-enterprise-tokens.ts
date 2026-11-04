@@ -25,6 +25,14 @@ export const ergEnterpriseTokens = {
     info: "#0284C7",
     infoSoft: "rgba(2, 132, 199, 0.1)",
   },
+  // Tinted status badges: soft background + dark text of the same hue (plan 7.1).
+  statusTint: {
+    success: { bg: "#DCFAE5", color: "#04250E", dot: "#16A34A" },
+    warning: { bg: "#FFFBEB", color: "#92400E", dot: "#D97706" },
+    error: { bg: "#FFEDEA", color: "#831C1E", dot: "#D92D20" },
+    info: { bg: "#E6F0FA", color: "#0B4A86", dot: "#0F6CBD" },
+    neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
+  },
   font: {
     body: '"Be Vietnam Pro", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     mono: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',

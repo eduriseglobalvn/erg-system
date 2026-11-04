@@ -1,17 +1,11 @@
 /**
- * ERG StatusBadge — compact operational status chip
- *
- * Variants:
- *   success: bg rgba(34,197,94,0.12) #118D57 — Hoàn thành, Đã duyệt
- *   warning: bg rgba(255,171,0,0.16) #B76E00  — Chờ duyệt, Đang thực hiện
- *   danger:  bg rgba(255,86,48,0.12) #B71D18  — Quá hạn, Huỷ
- *   info:    bg rgba(0,184,217,0.12) #007A8C   — Mới
- *   neutral: bg #F4F6F8 #637381                 — Chưa cập nhật
+ * Thin alias kept for existing callers; the single badge implementation is ErgStatusChip (tinted, 22px, 12/500).
  */
 'use client';
 
-import { Chip, type ChipProps } from '@mui/material';
 import type { ReactNode } from 'react';
+
+import { ErgStatusChip } from '@/components/erg-mui/erg-feedback';
 
 type StatusVariant = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'default';
 
@@ -23,23 +17,9 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-const variantMap: Record<StatusVariant, ChipProps['color']> = {
-  success: 'success',
-  warning: 'warning',
-  danger: 'error',
-  info: 'info',
-  neutral: 'default',
-  default: 'default',
-};
+const toneByVariant = { success: 'success', warning: 'warning', danger: 'error', info: 'info', neutral: 'neutral', default: 'neutral' } as const;
 
-export default function StatusBadge({ variant, label, children, size = 'small', className }: StatusBadgeProps) {
+export default function StatusBadge({ variant, label, children, className }: StatusBadgeProps) {
   const text = label || (typeof children === 'string' ? children : undefined) || '';
-  return (
-    <Chip
-      label={text}
-      color={variantMap[variant]}
-      size={size}
-      className={className}
-    />
-  );
+  return <ErgStatusChip className={className} dot={false} label={text} tone={toneByVariant[variant]} />;
 }

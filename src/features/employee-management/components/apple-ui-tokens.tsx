@@ -3,6 +3,8 @@ import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 import TabletMacRoundedIcon from "@mui/icons-material/TabletMacRounded";
 import Avatar, { type AvatarProps } from "@mui/material/Avatar";
 import Box, { type BoxProps } from "@mui/material/Box";
+import type { ChipProps } from "@mui/material/Chip";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
@@ -282,6 +284,8 @@ export function AppleAvatar({
 
 export type AppleTone = "success" | "warning" | "danger" | "info" | "neutral" | "purple";
 
+const APPLE_TONE_TO_STATUS = { danger: "error", info: "info", neutral: "neutral", purple: "info", success: "success", warning: "warning" } as const;
+
 export function AppleStatusBadge({
   label,
   tone = "neutral",
@@ -293,89 +297,7 @@ export function AppleStatusBadge({
   sx?: BoxProps["sx"];
   tone?: AppleTone;
 }) {
-  const toneConfigs: Record<
-    AppleTone,
-    { bg: string; border: string; color: string; dotColor: string }
-  > = {
-    danger: {
-      bg: appleDesign.colors.redSoft,
-      border: "rgba(255, 59, 48, 0.2)",
-      color: appleDesign.colors.redText,
-      dotColor: appleDesign.colors.redDot,
-    },
-    info: {
-      bg: appleDesign.colors.blueSoft,
-      border: appleDesign.colors.blueSoftBorder,
-      color: appleDesign.colors.blue,
-      dotColor: appleDesign.colors.blue,
-    },
-    neutral: {
-      bg: "rgba(0, 0, 0, 0.05)",
-      border: "rgba(0, 0, 0, 0.08)",
-      color: appleDesign.colors.textSecondary,
-      dotColor: "#94a3b8",
-    },
-    purple: {
-      bg: appleDesign.colors.purpleSoft,
-      border: "rgba(175, 82, 222, 0.2)",
-      color: appleDesign.colors.purpleText,
-      dotColor: appleDesign.colors.purple,
-    },
-    success: {
-      bg: appleDesign.colors.greenSoft,
-      border: "rgba(52, 199, 89, 0.2)",
-      color: appleDesign.colors.greenText,
-      dotColor: appleDesign.colors.greenDot,
-    },
-    warning: {
-      bg: appleDesign.colors.amberSoft,
-      border: "rgba(255, 149, 0, 0.2)",
-      color: appleDesign.colors.amberText,
-      dotColor: appleDesign.colors.amberDot,
-    },
-  };
-
-  const config = toneConfigs[tone] ?? toneConfigs.neutral;
-
-  return (
-    <Box
-      sx={[
-        {
-          alignItems: "center",
-          bgcolor: config.bg,
-          border: `1px solid ${config.border}`,
-          borderRadius: "9999px",
-          color: config.color,
-          display: "inline-flex",
-          fontSize: "0.75rem",
-          fontWeight: 650,
-          gap: 0.65,
-          letterSpacing: "0.01em",
-          lineHeight: 1,
-          px: 1.15,
-          py: 0.45,
-          whiteSpace: "nowrap",
-        },
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
-    >
-      {dot && (
-        <Box
-          component="span"
-          sx={{
-            bgcolor: config.dotColor,
-            borderRadius: "50%",
-            display: "inline-block",
-            height: 6,
-            width: 6,
-          }}
-        />
-      )}
-      <Typography component="span" sx={{ color: "inherit", fontSize: "inherit", fontWeight: "inherit" }}>
-        {label}
-      </Typography>
-    </Box>
-  );
+  return <ErgStatusChip dot={dot} label={label} sx={sx as ChipProps["sx"]} tone={APPLE_TONE_TO_STATUS[tone] ?? "neutral"} />;
 }
 
 export function parseDeviceString(rawString?: string, deviceType?: string) {

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { cn } from "@/lib/utils";
 
 type DashboardPageShellProps = {
@@ -279,77 +280,15 @@ export function DashboardSegmentedControl({
 
 type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
 
-const BADGE_STYLES: Record<
-  BadgeTone,
-  { bg: string; border: string; color: string; dot?: string }
-> = {
-  danger: {
-    bg: "rgba(255, 59, 48, 0.1)",
-    border: "rgba(255, 59, 48, 0.22)",
-    color: "#DC2626",
-    dot: "#FF3B30",
-  },
-  outline: {
-    bg: "rgba(0, 0, 0, 0.04)",
-    border: "rgba(0, 0, 0, 0.1)",
-    color: "#6E6E73",
-  },
-  primary: {
-    bg: "rgba(0, 113, 227, 0.08)",
-    border: "rgba(0, 113, 227, 0.18)",
-    color: "#0071E3",
-    dot: "#0071E3",
-  },
-  secondary: {
-    bg: "rgba(175, 82, 222, 0.1)",
-    border: "rgba(175, 82, 222, 0.2)",
-    color: "#7E22CE",
-    dot: "#AF52DE",
-  },
-  success: {
-    bg: "rgba(52, 199, 89, 0.12)",
-    border: "rgba(52, 199, 89, 0.22)",
-    color: "#15803D",
-    dot: "#34C759",
-  },
-  warning: {
-    bg: "rgba(255, 149, 0, 0.12)",
-    border: "rgba(255, 149, 0, 0.22)",
-    color: "#B45309",
-    dot: "#FF9500",
-  },
-};
+const BADGE_TONE_TO_STATUS = {
+  danger: "error",
+  outline: "neutral",
+  primary: "info",
+  secondary: "neutral",
+  success: "success",
+  warning: "warning",
+} as const;
 
-export function DashboardStatusBadge({
-  label,
-  tone,
-}: {
-  label: string;
-  tone: BadgeTone;
-}) {
-  const style = BADGE_STYLES[tone] ?? BADGE_STYLES.outline;
-
-  return (
-    <Box
-      sx={{
-        alignItems: "center",
-        bgcolor: style.bg,
-        border: `1px solid ${style.border}`,
-        borderRadius: "9999px",
-        color: style.color,
-        display: "inline-flex",
-        fontSize: "0.72rem",
-        fontWeight: 700,
-        gap: 0.6,
-        lineHeight: 1,
-        px: 1,
-        py: 0.35,
-      }}
-    >
-      {style.dot ? (
-        <Box sx={{ bgcolor: style.dot, borderRadius: "50%", height: 6, width: 6 }} />
-      ) : null}
-      {label}
-    </Box>
-  );
+export function DashboardStatusBadge({ label, tone }: { label: string; tone: BadgeTone }) {
+  return <ErgStatusChip label={label} tone={BADGE_TONE_TO_STATUS[tone] ?? "neutral"} />;
 }
