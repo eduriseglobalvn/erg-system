@@ -35,7 +35,7 @@
 ### Design System: ERG operational UI tokens
 - **Primary:** `#0F6CBD` (xanh, token `primary` trong `erg-enterprise-tokens.ts`). Quyết định 11/2026 theo `KE_HOACH_TRIEN_KHAI.md` mục 7.1. `#696CFF` (tím) chỉ còn ở code cũ, đang thay dần bằng token — KHÔNG thêm mới.
 - **Typography:** MỘT họ duy nhất **Be Vietnam Pro** (weight 400/500/600/700, subset latin + vietnamese), JetBrains Mono (mono). KHÔNG thêm họ font khác vào theme.
-- **Sidebar:** Dark theme (#1C252E), 280px width, 5 nhóm menu
+- **Sidebar (admin/giáo viên):** thẻ sáng bo góc, viền 1px, không bóng; mục đang chọn là nút `primary` đặc chữ trắng; nhóm xổ xuống có mục con thụt vào; huy hiệu số nền nhạt; 280px. Học viên: menu phẳng + bottom nav trên mobile (hằng số màu trong `portal-sidebar-styles.ts`).
 - **Bảng:** Header bg neutral-50, cell padding 12px 16px, border neutral-200
 - **Button:** border-radius sm (6px). Mỗi trang đúng 1 nút `contained`; phụ `outlined`/`text`; nguy hiểm `color="error"`.
 - **Badge:** Pill shape, 4 status colors (success/warning/danger/info)
