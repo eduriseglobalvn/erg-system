@@ -32,7 +32,8 @@ const cases: Array<[string, Built, boolean]> = [
   ["student-dashboard anonymous", studentDashboardQueryOptions({ accountId: null, tenantId: T }), false],
   ["student-engagement feed", studentDiscussionFeedQueryOptions({ accountId: A, tenantId: T }), true],
   ["student-engagement feed anonymous", studentDiscussionFeedQueryOptions({ tenantId: T }), false],
-  ["crm workspace", seoCrmWorkspaceQueryOptions({ accountId: A, tenantId: T }), true],
+  // CRM leads (names, phones) must not reach the unencrypted IndexedDB cache (plan 4.4 #16).
+  ["crm workspace", seoCrmWorkspaceQueryOptions({ accountId: A, tenantId: T }), false],
   ["crm workspace anonymous", seoCrmWorkspaceQueryOptions({ accountId: "", tenantId: T }), false],
   ["lms attendance", attendance(A), true],
   ["lms attendance anonymous", attendance("anonymous"), false],

@@ -1,6 +1,7 @@
 import { CalendarClock, Handshake, LineChart, TrendingUp, UsersRound } from "lucide-react";
 
-import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import { calculateSeoPnlSummary } from "@/features/crm/seo/api/seo-crm-pnl";
 import type { SeoFollowUp, SeoOpportunity, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import {

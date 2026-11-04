@@ -34,7 +34,11 @@ export function CertificateRegistryWorkspace({ pathTitleById, scope }: { pathTit
 
   async function revoke() {
     if (!revokeTarget || !reason.trim()) return;
-    await revokeMutation.mutateAsync({ certificateId: revokeTarget.id, input: { expectedVersion: revokeTarget.recordVersion, reason: reason.trim() }, idempotencyKey: newIdempotencyKey(`revoke-${revokeTarget.id}`) });
+    try {
+      await revokeMutation.mutateAsync({ certificateId: revokeTarget.id, input: { expectedVersion: revokeTarget.recordVersion, reason: reason.trim() }, idempotencyKey: newIdempotencyKey(`revoke-${revokeTarget.id}`) });
+    } catch {
+      return; // global handler already toasted; keep the dialog open
+    }
     setRevokeTarget(undefined);
     setReason("");
   }

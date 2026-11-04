@@ -28,6 +28,7 @@ import { useLocation } from "@tanstack/react-router";
 
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { useIsStudentPreview } from "@/platform/auth/hooks/use-student-preview";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
@@ -79,6 +80,7 @@ export function PortalHeaderActions({
 }: PortalHeaderActionsProps) {
   const isOnline = useOnlineStatus();
   const location = useLocation();
+  const studentPreview = useIsStudentPreview();
   const initial = userName?.charAt(0).toUpperCase() || "E";
   const { canInstall, installed, promptInstall } = useInstallPrompt();
   const [installInfoOpen, setInstallInfoOpen] = useState(false);
@@ -167,7 +169,7 @@ export function PortalHeaderActions({
                   sx={{ bgcolor: isCurrent ? "action.selected" : "transparent", borderRadius: "6px", gap: 1, py: 0.75, fontWeight: isCurrent ? 700 : 500 }}
                 >
                   {WORKSPACE_ICONS[cap.workspace]}
-                  <Typography variant="body2" sx={{ flex: 1, fontWeight: "inherit", fontSize: 13 }}>{cap.label}</Typography>
+                  <Typography variant="body2" sx={{ flex: 1, fontWeight: "inherit", fontSize: 13 }}>{cap.workspace === "STUDENT" && studentPreview ? "Xem portal học viên" : cap.label}</Typography>
                   {isCurrent ? <CheckRoundedIcon sx={{ color: "primary.main", fontSize: 16 }} /> : null}
                 </MenuItem>
               );

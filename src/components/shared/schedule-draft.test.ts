@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildScheduleDraft, calculateInclusiveRepeatWeeks } from "./schedule-draft";
+import { buildScheduleDraft, calculateInclusiveRepeatWeeks, weekdaysOvershootingRange } from "./schedule-draft";
 
 describe("schedule draft model", () => {
   it("maps a valid authoring form to the backend draft contract", () => {
@@ -37,5 +37,14 @@ describe("schedule draft model", () => {
       assistantTeachers: [], classes: [], levels: [], rooms: [], schools: [], subjects: [], teachers: [],
     })).toThrow("Dữ liệu lịch chưa đầy đủ.");
     expect(calculateInclusiveRepeatWeeks("2026-07-13", "2026-07-26")).toBe(2);
+  });
+
+  it("flags weekdays whose last repeat falls past the end date", () => {
+    // Mon 13/07 → Tue 21/07 = 2 weeks; week 2 Wed (22/07) is past the end, Mon/Tue are not.
+    expect(weekdaysOvershootingRange("2026-07-13", "2026-07-21", [1, 2, 3])).toEqual([3]);
+    expect(weekdaysOvershootingRange("2026-07-13", "2026-07-26", [1, 3, 7])).toEqual([]);
+    // Range starting on Wednesday: Monday's first occurrence is 20/07.
+    expect(weekdaysOvershootingRange("2026-07-15", "2026-07-21", [1])).toEqual([]);
+    expect(weekdaysOvershootingRange("2026-07-15", "2026-07-23", [3, 6])).toEqual([6]);
   });
 });

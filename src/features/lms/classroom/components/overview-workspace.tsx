@@ -1,11 +1,7 @@
 import { useMemo, useState } from "react";
 
-import {
-  DashboardPageShell,
-  DashboardSectionCard,
-  DashboardSegmentedControl,
-  DashboardStatusBadge,
-} from "@/components/dashboard/dashboard-page-shell";
+import { DashboardPageShell, DashboardSectionCard, DashboardStatusBadge } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardSegmentedControl } from "@/components/dashboard/dashboard-segmented-control";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";

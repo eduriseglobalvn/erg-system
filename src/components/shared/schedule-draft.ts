@@ -77,6 +77,20 @@ export function calculateInclusiveRepeatWeeks(applyFrom: string, applyTo: string
   return Math.max(1, Math.floor(to.diff(from, "day") / 7) + 1);
 }
 
+// Weekdays (1 = Thứ 2 … 7 = CN) that occur fewer than repeatWeeks times in [applyFrom, applyTo]:
+// repeating them repeatWeeks times would create sessions past the end date (plan 4.4 #12).
+export function weekdaysOvershootingRange(applyFrom: string, applyTo: string, weekdays: number[]) {
+  const from = dayjs(applyFrom);
+  const to = dayjs(applyTo);
+  if (!from.isValid() || !to.isValid() || to.isBefore(from, "day")) return [];
+  const repeatWeeks = calculateInclusiveRepeatWeeks(applyFrom, applyTo);
+  return [...new Set(weekdays)].filter((weekday) => {
+    const offset = (weekday % 7 - from.day() + 7) % 7;
+    const lastSession = from.add(offset + 7 * (repeatWeeks - 1), "day");
+    return lastSession.isAfter(to, "day");
+  });
+}
+
 export function mapWeekdayValue(value: string) {
   const normalized = value.trim().toLowerCase();
   for (let day = 2; day <= 7; day += 1) {

@@ -14,14 +14,13 @@ describe("CRM query scope and cancellation", () => {
       .not.toEqual(seoCrmQueryKeys.workspace({ tenantId: "tenant-a", accountId: "seo-b" }));
   });
 
-  it("forwards AbortSignal and marks only authenticated CRM scopes persistable", async () => {
+  it("forwards AbortSignal and never marks the CRM workspace (lead PII) persistable", async () => {
     const scope = { tenantId: "tenant-a", accountId: "seo-a" };
     const options = seoCrmWorkspaceQueryOptions(scope);
     const controller = new AbortController();
     await options.queryFn?.({ signal: controller.signal } as never);
     const { loadSeoCrmWorkspace } = await import("@/features/crm/seo/api/seo-crm-transport");
     expect(loadSeoCrmWorkspace).toHaveBeenCalledWith(controller.signal);
-    expect(options.meta).toEqual({ persist: true });
-    expect(seoCrmWorkspaceQueryOptions({ tenantId: "tenant-a", accountId: "anonymous" }).meta).toBeUndefined();
+    expect(options.meta).toBeUndefined();
   });
 });

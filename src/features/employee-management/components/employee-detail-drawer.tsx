@@ -107,6 +107,7 @@ export function EmployeeDetailDrawer({
 
   const confirm = async () => {
     if (!userId || !account) return;
+    try {
     if (confirmAction === "STATUS") {
       await commands.status.mutateAsync({
         status: account.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
@@ -120,12 +121,19 @@ export function EmployeeDetailDrawer({
       });
       if (result.oneTimePassword) setTemporaryCredential(result.oneTimePassword);
     }
+    } catch {
+      return; // global handler already toasted; keep the dialog open
+    }
     setConfirmAction(null);
   };
 
   const revokeSession = async () => {
     if (!userId || !sessionToRevoke) return;
-    await commands.revokeSession.mutateAsync({ sessionId: sessionToRevoke, userId });
+    try {
+      await commands.revokeSession.mutateAsync({ sessionId: sessionToRevoke, userId });
+    } catch {
+      return; // global handler already toasted
+    }
     setSessionToRevoke(undefined);
   };
 

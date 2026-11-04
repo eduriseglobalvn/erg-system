@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { DashboardMetricCard, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
+import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";

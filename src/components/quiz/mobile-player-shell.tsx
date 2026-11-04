@@ -1,8 +1,9 @@
-import { useState, type CSSProperties, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Flag, List, X } from "lucide-react";
-import Drawer from "@mui/material/Drawer";
+import { Flag } from "lucide-react";
+import type { CSSProperties, ReactNode } from "react";
 
-import { QuestionNavigator } from "@/components/quiz/question-navigator";
+import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
+import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
+import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
 import type { Question, Quiz, QuizResultDisplay } from "@/lib/types";
 
 type MobilePlayerShellProps = {
@@ -55,6 +56,7 @@ export function MobilePlayerShell({
   attemptCompleted,
   bookmarkCount,
   bookmarkedQuestionIds,
+
   currentIndex,
   isBookmarked,
   isFirstQuestion,
@@ -86,46 +88,12 @@ export function MobilePlayerShell({
   body,
   resultBody,
 }: MobilePlayerShellProps) {
-  const showSubmitAction = !attemptCompleted;
-
   if (!started) {
     return (
-      <div className="md:hidden">
-        <section
-          className="min-h-[100svh] bg-[#f4f5f7]"
-          style={{ ...playerCardStyle, borderColor: "transparent" }}
-        >
-          <div className="border-b border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-slate-700">
-            {quiz.title}
-          </div>
-          <div className="px-4 py-5">
-            <div className="rounded-lg border border-slate-200 bg-white px-4 py-5 shadow-sm">
-              <div className="inline-flex rounded-md px-3 py-1 text-[11px] font-semibold" style={modeBadgeStyle}>
-                {quiz.settings.mode === "training" ? "Chế độ luyện tập" : "Chế độ kiểm tra"}
-              </div>
-              <p className="mt-4 text-sm leading-6 text-slate-600">
-                Bài làm trên mobile hiển thị theo dạng tối giản để dễ thao tác trên Android.
-              </p>
-              <div className="mt-5 grid grid-cols-2 gap-3 text-center">
-                <IntroStat label="Số câu" value={String(questions.length)} />
-                <IntroStat label="Chế độ" value={quiz.settings.mode === "training" ? "Luyện tập" : "Kiểm tra"} />
-                {quiz.settings.timeLimitMinutes ? (
-                  <IntroStat label="Thời lượng" value={`${quiz.settings.timeLimitMinutes} phút`} />
-                ) : null}
-              </div>
-              <button
-                type="button"
-                className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
-                onClick={onStart}
-              >
-                Bắt đầu làm bài
-              </button>
-            </div>
-          </div>
-        </section>
-      </div>
+      <MobilePlayerIntro modeBadgeStyle={modeBadgeStyle} playerCardStyle={playerCardStyle} questions={questions} quiz={quiz} onStart={onStart} />
     );
   }
+
 
   return (
     <div className="md:hidden">
@@ -149,7 +117,7 @@ export function MobilePlayerShell({
               >
                 <Flag className={`h-4 w-4 ${isBookmarked ? "fill-current text-[#FF5630]" : ""}`} />
               </button>
-              <QuestionSheet
+              <MobileQuestionSheet
                 answeredQuestionIds={answeredQuestionIds}
                 bookmarkCount={bookmarkCount}
                 bookmarkedQuestionIds={bookmarkedQuestionIds}
@@ -180,140 +148,15 @@ export function MobilePlayerShell({
           )}
         </div>
 
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.35rem)] pt-1.5">
-          <div className="mx-auto max-w-md">
-            {attemptCompleted && !reviewingSubmittedAttempt ? (
-              <button
-                type="button"
-                className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm"
-                onClick={onReview}
-              >
-                {resultDisplay.reviewButtonLabel}
-              </button>
-            ) : (
-              isTrainingMode ? (
-                <button
-                  type="button"
-                  className="inline-flex min-h-10 w-full items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-4 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={submitting || currentQuestionSubmitted || !currentAnswerComplete}
-                  onClick={onSubmitCurrentQuestion}
-                >
-                  {currentQuestionSubmitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
-                </button>
-              ) : (
-              <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={isFirstQuestion || submitting}
-                  onClick={onPrev}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Trước
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  disabled={isLastQuestion || submitting}
-                  onClick={onNext}
-                >
-                  Sau
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-                {showSubmitAction ? (
-                  <button
-                    type="button"
-                    className={isLastQuestion ? "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40" : "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"}
-                    disabled={submitting}
-                    onClick={onRequestSubmit}
-                  >
-                    {submitting ? "Đang nộp" : submitFailed ? "Thử lại" : "Nộp bài"}
-                  </button>
-                ) : null}
-              </div>
-              )
-            )}
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function QuestionSheet({
-  answeredQuestionIds,
-  bookmarkCount,
-  bookmarkedQuestionIds,
-  currentIndex,
-  questions,
-  onJumpToQuestion,
-}: {
-  answeredQuestionIds: string[];
-  bookmarkCount: number;
-  bookmarkedQuestionIds: string[];
-  currentIndex: number;
-  questions: Question[];
-  onJumpToQuestion: (index: number) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <>
-      <button
-        type="button"
-        aria-label="Mở mục lục câu hỏi"
-        className="grid h-11 w-11 place-items-center text-[var(--erg-blue)] transition"
-        onClick={() => setOpen(true)}
-      >
-        <List className="h-4 w-4" />
-      </button>
-      <Drawer
-        anchor="top"
-        open={open}
-        onClose={() => setOpen(false)}
-        slotProps={{ paper: { sx: { height: "100svh", maxHeight: "100svh", width: "100vw", maxWidth: "none", backgroundColor: "#f7f8fb" } } }}
-      >
-        <div className="relative border-b border-slate-200 bg-white px-4 py-3">
-          <button
-            type="button"
-            aria-label="Đóng mục lục câu hỏi"
-            className="absolute left-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            onClick={() => setOpen(false)}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div className="text-center text-base font-semibold text-slate-900">Mục lục</div>
-          <div className="text-center text-xs font-semibold text-slate-500">{bookmarkCount} câu đã đánh dấu</div>
-          <button
-            type="button"
-            aria-label="Đóng mục lục câu hỏi"
-            className="absolute right-4 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center text-[var(--erg-blue)]"
-            onClick={() => setOpen(false)}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <QuestionNavigator
-          answeredQuestionIds={answeredQuestionIds}
-          className="min-h-[calc(100svh-68px)] rounded-none border-0 shadow-none"
-          currentIndex={currentIndex}
-          flaggedQuestionIds={bookmarkedQuestionIds}
-          onJumpToQuestion={(index) => {
-            onJumpToQuestion(index);
-            setOpen(false);
-          }}
-          questions={questions}
-          started
+        <MobilePlayerFooter
+          attemptCompleted={attemptCompleted} currentAnswerComplete={currentAnswerComplete}
+          currentQuestionSubmitted={currentQuestionSubmitted} isFirstQuestion={isFirstQuestion}
+          isLastQuestion={isLastQuestion} isTrainingMode={isTrainingMode} resultDisplay={resultDisplay}
+          reviewingSubmittedAttempt={reviewingSubmittedAttempt} submitFailed={submitFailed} submitting={submitting}
+          onNext={onNext} onPrev={onPrev} onRequestSubmit={onRequestSubmit} onReview={onReview}
+          onSubmitCurrentQuestion={onSubmitCurrentQuestion}
         />
-      </Drawer>
-    </>
-  );
-}
-
-function IntroStat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-slate-200 bg-white px-3 py-3 text-center shadow-sm">
-      <div className="text-[11px] font-semibold text-slate-400">{label}</div>
-      <div className="mt-1 text-sm font-medium text-[var(--erg-blue)]">{value}</div>
+      </section>
     </div>
   );
 }

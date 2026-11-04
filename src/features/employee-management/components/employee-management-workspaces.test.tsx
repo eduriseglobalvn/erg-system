@@ -188,7 +188,7 @@ describe("employee management workspace", () => {
 
   test("row status toggle only fires after confirming", async () => {
     const status = vi.fn().mockResolvedValue({});
-    commandsWith({ status: { mutateAsync: status, isPending: false } });
+    commandsWith({ status: { mutate: status, mutateAsync: vi.fn(), isPending: false } });
     hooks.useEmployees.mockReturnValue({
       isPending: false, isError: false,
       data: { users: [{ id: "user-1", email: "teacher@erg.edu.vn", fullName: "Teacher One", status: "ACTIVE", roles: ["lms_teacher"], isProfileCompleted: true, createdAt: "2026-01-01T00:00:00Z" }], meta: { page: 1, limit: 25, total: 1, totalPages: 1 } },

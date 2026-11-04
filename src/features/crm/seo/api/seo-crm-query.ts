@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { loadSeoCrmWorkspace } from "@/features/crm/seo/api/seo-crm-transport";
-import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
+import { QUERY_POLICIES } from "@/lib/query-policy";
 
 export type SeoCrmQueryScope = { tenantId: string; accountId: string };
 
@@ -20,12 +20,12 @@ export const seoCrmQueryKeys = {
   ] as const,
 };
 
+// Lead names/phones: never persisted (the IndexedDB cache is unencrypted).
 export function seoCrmWorkspaceQueryOptions(scope: SeoCrmQueryScope) {
   return queryOptions({
     queryKey: seoCrmQueryKeys.workspace(scope),
-    meta: persistedQueryMeta(normalized(scope.tenantId, "default"), normalized(scope.accountId, "anonymous")),
     queryFn: ({ signal }) => loadSeoCrmWorkspace(signal),
-    staleTime: QUERY_POLICIES.offlineCore.staleTime,
-    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    staleTime: QUERY_POLICIES.transactional.staleTime,
+    gcTime: QUERY_POLICIES.transactional.gcTime,
   });
 }

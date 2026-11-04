@@ -60,8 +60,12 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 
   const persist = async () => {
     const payload = { name: name.trim(), description: description.trim(), permissions: selectedPermissions };
-    if (isCreate) await commands.create.mutateAsync(payload);
-    else await commands.update.mutateAsync({ roleId: roleId!, payload });
+    try {
+      if (isCreate) await commands.create.mutateAsync(payload);
+      else await commands.update.mutateAsync({ roleId: roleId!, payload });
+    } catch {
+      return; // keep the drawer open; the global MutationCache handler already toasted the error
+    }
     setConfirmOpen(false);
     onClose();
   };

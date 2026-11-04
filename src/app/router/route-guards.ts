@@ -2,7 +2,7 @@ import { redirect } from "@tanstack/react-router";
 import { resolveAuthRouteAccess, type AuthRouteState } from "@/platform/auth/router/auth-route-context";
 import { buildRedirectPath } from "@/platform/auth/utils/auth-redirects";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
-import { routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
+import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 import { getDesktopRuntime, isDesktopWorkspace } from "@/platform/desktop";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
 
@@ -47,12 +47,9 @@ export function enforceWorkspaceRoute(
     // to let a wildcard or platform role through an arbitrary route.
     throwAuthRedirect("access-denied", workspace, safeRedirect);
   }
-  const decision = resolveAuthRouteAccess(auth, {
-    workspace,
-    permission: entry.permission,
-  });
-  if (decision === "allow") return;
-  throwAuthRedirect(decision, workspace, safeRedirect);
+  const decisions = routeAcceptedPermissions(entry).map((permission) => resolveAuthRouteAccess(auth, { workspace, permission }));
+  if (decisions.includes("allow")) return;
+  throwAuthRedirect(decisions[0], workspace, safeRedirect);
 }
 
 function throwAuthRedirect(decision: ReturnType<typeof resolveAuthRouteAccess>, portal: string, safeRedirect: string): never {

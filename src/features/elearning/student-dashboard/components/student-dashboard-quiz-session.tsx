@@ -1,3 +1,6 @@
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { useIsStudentPreview } from "@/platform/auth/hooks/use-student-preview";
 import ArrowLeft from "@mui/icons-material/ArrowBackRounded";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -52,6 +55,11 @@ export function StudentQuizSession({
   onBack: () => void;
   runtimePortal: "lms" | "elearning";
 }) {
+  // Preview: reuse the offline player (local grading) so no server attempt is created or submitted.
+  const preview = useIsStudentPreview();
+  useEffect(() => {
+    if (preview) toast.info("Chế độ xem thử: bài làm không được nộp.");
+  }, [preview]);
   const subjectLabel = assignment.subjectLabel ?? "Chưa có môn học";
   const teacherName = assignment.teacherName ?? "Chưa có giáo viên";
   const subtitle = assignment.subtitle ?? "Chưa có mô tả";
@@ -118,6 +126,7 @@ export function StudentQuizSession({
         <PlayerShell
           assignmentId={assignment.id}
           quizId={assignment.quizId}
+          portableOffline={preview}
           runtimePortal={runtimePortal}
           welcomeMeta={{
             authorName: teacherName,

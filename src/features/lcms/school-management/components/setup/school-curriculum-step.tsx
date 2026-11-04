@@ -32,15 +32,15 @@ export function SchoolCurriculumStep() {
 
   // Load saved class-to-subject allocations
   useEffect(() => {
-    if (!storageKey) return;
+    // Always set (default {}) so another school's allocations never leak across a storageKey change.
+    let next: SubjectClassAllocation = {};
     try {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        setAllocations(JSON.parse(saved) as SubjectClassAllocation);
-      }
+      const saved = storageKey ? localStorage.getItem(storageKey) : null;
+      if (saved) next = JSON.parse(saved) as SubjectClassAllocation;
     } catch {
       // Ignore JSON error
     }
+    setAllocations(next);
   }, [storageKey]);
 
   const saveAllocations = useCallback(

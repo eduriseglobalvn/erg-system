@@ -1,11 +1,8 @@
 import { useMemo } from "react";
 import { BarChart3, TrendingUp, Trophy } from "lucide-react";
 
-import {
-  DashboardMetricCard,
-  DashboardPageShell,
-  DashboardSectionCard,
-} from "@/components/dashboard/dashboard-page-shell";
+import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
+import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";

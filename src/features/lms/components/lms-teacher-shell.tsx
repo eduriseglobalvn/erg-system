@@ -5,10 +5,8 @@ import {
   LmsHeaderClassControl,
   LmsHeaderSchoolControl,
 } from "@/features/lms/components/lms-teacher-shell-presentation";
-import {
-  LmsTeacherDesktopContent,
-  LmsTeacherMobileContent,
-} from "@/features/lms/components/lms-teacher-shell-workspaces";
+import { LmsTeacherDesktopContent } from "@/features/lms/components/lms-teacher-shell-desktop-content";
+import { LmsTeacherMobileContent } from "@/features/lms/components/lms-teacher-shell-workspaces";
 import { useLmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { LmsMobileShell } from "@/features/lms/mobile";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";

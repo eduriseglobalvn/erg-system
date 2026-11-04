@@ -1,18 +1,11 @@
 "use client";
 
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import ErgPortalLayout, { type MenuItem } from "@/components/portal/ErgPortalLayout";
+import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import { hasApiBase } from "@/lib/api-client";
-import { DashboardContent } from "@/layouts/dashboard/components/dashboard-content";
-import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { ContentPendingSkeleton } from "@/routes/route-feedback";
-import { ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH } from "@/platform/auth/permissions/portal-route-registry";
 import { useLocation, useNavigate } from "@tanstack/react-router";
-import type { ContentScope, ManagementScope } from "@/types/scope-types";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import {
   createQuizFromBankQuestions as runCreateQuizFromBankQuestions,
@@ -22,42 +15,22 @@ import {
   useCreateQuizEditorQuizMutation,
   useSaveQuizEditorDraftMutation,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
-import {
-  flattenMenuItems,
-  getMenuItemDescription,
-} from "@/features/lcms/admin-menu";
 import { ADMIN_MENU_GROUPS } from "@/features/lcms/admin-content/admin-content-menu";
 import {
-  ADMIN_CONTENT_HOME_PATH,
   adminContentPathForSection,
   canonicalAdminWorkspacePath,
   legacyAdminWorkspacePath,
 } from "@/features/lcms/admin-content/admin-content-route";
-import { AdminContentOverview } from "@/features/lcms/admin-content/components/admin-content-overview";
-import { AdminErgPortalWorkspace } from "@/features/lcms/pages/admin-erg-workspaces";
+import { AdminPortalContent } from "@/features/lcms/admin-portal-content";
+import {
+  AdminHeaderBreadcrumb,
+  createClientIdempotencyKey,
+  FLAT_MENU_ITEMS,
+  resolveActiveMenuItem,
+  toDashboardLeaf,
+} from "@/features/lcms/admin-portal-shell-helpers";
 
-const PermissionCatalogPage = lazy(() => import("@/features/access-management/components/permission-catalog-workspace").then((m) => ({ default: m.PermissionCatalogWorkspace })));
-const RoleManagementPage = lazy(() => import("@/features/access-management/components/role-management-workspace").then((m) => ({ default: m.RoleManagementWorkspace })));
-const EmployeeManagementPage = lazy(() => import("@/features/employee-management/components/employee-list-workspace").then((m) => ({ default: m.EmployeeListWorkspace })));
-const EmployeeAccessLogPage = lazy(() => import("@/features/employee-management/components/employee-access-log-workspace").then((m) => ({ default: m.EmployeeAccessLogWorkspace })));
-const LearningStandardsPage = lazy(() => import("@/features/lcms/integrations/learning-standards/components/learning-standards-workspace"));
-const EnterpriseConnectorsPage = lazy(() => import("@/features/integrations/components/enterprise-connectors-workspace"));
-const LearningOutcomesPage = lazy(() => import("@/features/lms/learning-paths").then((m) => ({ default: m.LearningOutcomesAdminWorkspace })));
-const AdminUiKitPage = lazy(() => import("@/features/lcms/pages/admin-ui-kit"));
-const SchoolManagementApp = lazy(() =>
-  import("@/features/lcms/school-management").then((module) => ({
-    default: module.SchoolManagementApp,
-  })),
-);
-
-const FLAT_MENU_ITEMS = flattenMenuItems(ADMIN_MENU_GROUPS);
 const PRESERVED_WORKSPACE_VARIANTS = new Set(["question-bank", "quiz-bank", "quiz-editor", "admin-internal-docs"]);
-const lcmsScope: ManagementScope = { level: "global" };
-const globalContentScope: ContentScope = { type: "global" };
-
-const PageFallback = ContentPendingSkeleton;
-
-const ADMIN_LEARNING_OUTCOMES_PATH = "/admin/learning-outcomes";
 
 export default function AdminErgPortalShell() {
   const location = useLocation();
@@ -78,24 +51,7 @@ export default function AdminErgPortalShell() {
   }, [location.searchStr]);
   const activeItem = useMemo(() => resolveActiveMenuItem(pathname), [pathname]);
   const activeLeaf = useMemo(() => (activeItem ? toDashboardLeaf(activeItem) : null), [activeItem]);
-  const headerBreadcrumb = useMemo(() => {
-    if (!activeItem) return null;
-    return (
-      <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, minWidth: 0 }}>
-        {activeItem.section && activeItem.section !== activeItem.label ? (
-          <>
-            <Typography noWrap sx={{ color: "#64748B", fontSize: { xs: 12, sm: 13 }, fontWeight: 500 }}>
-              {activeItem.section}
-            </Typography>
-            <Typography sx={{ color: "#CBD5E1", fontSize: 12, lineHeight: 1 }}>/</Typography>
-          </>
-        ) : null}
-        <Typography noWrap sx={{ color: "#0F172A", fontSize: { xs: 12.5, sm: 13.5 }, fontWeight: 600 }}>
-          {activeItem.label}
-        </Typography>
-      </Box>
-    );
-  }, [activeItem]);
+  const headerBreadcrumb = useMemo(() => (activeItem ? <AdminHeaderBreadcrumb activeItem={activeItem} /> : null), [activeItem]);
   const isPreservedWorkspace = Boolean(
     activeLeaf?.variant && PRESERVED_WORKSPACE_VARIANTS.has(activeLeaf.variant),
   );
@@ -153,86 +109,6 @@ export default function AdminErgPortalShell() {
     }, options);
   }
 
-  function renderContent() {
-    if (legacyPathname === "/setting/setting-center-role") {
-      return <PageFallback />;
-    }
-
-    if (legacyPathname === "/settings/permissions") {
-      return <Suspense fallback={<PageFallback />}><PermissionCatalogPage tenantId={tenantId} /></Suspense>;
-    }
-
-    if (legacyPathname === "/settings/roles") {
-      return <Suspense fallback={<PageFallback />}><RoleManagementPage tenantId={tenantId} /></Suspense>;
-    }
-
-    // Pages that used to render outside the shell (KE_HOACH 7.2 "Chuẩn đầu ra").
-    if (location.pathname === ADMIN_LEARNING_STANDARDS_PATH) {
-      return <Suspense fallback={<PageFallback />}><LearningStandardsPage /></Suspense>;
-    }
-
-    if (location.pathname === ADMIN_ENTERPRISE_CONNECTORS_PATH) {
-      return <Suspense fallback={<PageFallback />}><EnterpriseConnectorsPage /></Suspense>;
-    }
-
-    if (location.pathname === ADMIN_LEARNING_OUTCOMES_PATH) {
-      return <Suspense fallback={<PageFallback />}><LearningOutcomesPage /></Suspense>;
-    }
-
-    if (legacyPathname === "/ui-kit") {
-      return <Suspense fallback={<PageFallback />}><AdminUiKitPage /></Suspense>;
-    }
-
-    if (legacyPathname === "/employees") {
-      return <Suspense fallback={<PageFallback />}><EmployeeManagementPage tenantId={tenantId} /></Suspense>;
-    }
-
-    if (legacyPathname === "/employees/access-logs") {
-      return <Suspense fallback={<PageFallback />}><EmployeeAccessLogPage tenantId={tenantId} /></Suspense>;
-    }
-
-    if (pathname === ADMIN_CONTENT_HOME_PATH) {
-      return <AdminContentOverview />;
-    }
-
-    if (isSchoolManagement) {
-      return (
-        <Box sx={{ height: "100%", minHeight: 0, overflowX: "hidden", overflowY: "auto", overscrollBehavior: "contain" }}>
-          <Suspense fallback={<PageFallback />}>
-            <SchoolManagementApp />
-          </Suspense>
-        </Box>
-      );
-    }
-
-    if (isPreservedWorkspace && activeLeaf) {
-      return (
-        <Box sx={{ height: "100%", minHeight: 0, overflow: "hidden" }}>
-          <DashboardContent
-            activeLeaf={activeLeaf}
-            canAccessGlobalErg
-            contentScope={globalContentScope}
-            managementScope={lcmsScope}
-            onOpenLeaf={openLeaf}
-            onOpenQuiz={(quizId) => void navigate({ href: `${adminContentPathForSection("quiz-editor")}?quizId=${encodeURIComponent(quizId)}` })}
-            pendingQuestionImports={pendingQuestionImports}
-            quizEditorQuizId={quizEditorQuizId}
-            selectedClassId=""
-            selectedSchoolId=""
-            onQuestionImportsHandled={() => setPendingQuestionImports([])}
-            onCreateQuizFromBank={(questions, options) => void createQuizFromBankQuestions(questions, options)}
-          />
-        </Box>
-      );
-    }
-
-    if (legacyPathname === "/" || legacyPathname === "") {
-      return <PageFallback />;
-    }
-
-    return <AdminErgPortalWorkspace activeItem={activeItem ?? null} pathname={legacyPathname} />;
-  }
-
   return (
     <ErgPortalLayout
       contentMode={isPreservedWorkspace || isSchoolManagement ? "flush" : "padded"}
@@ -241,40 +117,23 @@ export default function AdminErgPortalShell() {
       menuGroups={ADMIN_MENU_GROUPS}
       portalInfo={portalInfo}
     >
-      {renderContent()}
+      <AdminPortalContent
+        activeItem={activeItem}
+        activeLeaf={activeLeaf}
+        isPreservedWorkspace={isPreservedWorkspace}
+        isSchoolManagement={isSchoolManagement}
+        legacyPathname={legacyPathname}
+        locationPathname={location.pathname}
+        pathname={pathname}
+        pendingQuestionImports={pendingQuestionImports}
+        quizEditorQuizId={quizEditorQuizId}
+        tenantId={tenantId}
+        onClearQuestionImports={() => setPendingQuestionImports([])}
+        onCreateQuizFromBank={(questions, options) => void createQuizFromBankQuestions(questions, options)}
+        onOpenLeaf={openLeaf}
+      />
     </ErgPortalLayout>
   );
-}
-
-function createClientIdempotencyKey(prefix: string) {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return `${prefix}:${crypto.randomUUID()}`;
-  }
-
-  return `${prefix}:${Date.now().toString(36)}:${Math.random().toString(36).slice(2, 10)}`;
-}
-
-function resolveActiveMenuItem(pathname: string) {
-  const normalized = pathname === "" ? "/" : pathname;
-  const exact = FLAT_MENU_ITEMS.find((item) => item.path === normalized);
-  if (exact) return exact;
-
-  return (
-    FLAT_MENU_ITEMS
-      .filter((item) => item.path && item.path !== "/" && normalized.startsWith(item.path))
-      .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))[0] ?? FLAT_MENU_ITEMS[0]
-  );
-}
-
-function toDashboardLeaf(menuItem: MenuItem): DashboardLeaf {
-  return {
-    id: menuItem.id ?? menuItem.path?.replace(/^\/+/, "").replaceAll("/", "-") ?? "placeholder",
-    title: menuItem.label,
-    breadcrumb: ["Admin", menuItem.section ?? "Tổng quan", menuItem.label],
-    description: getMenuItemDescription(menuItem),
-    variant: menuItem.variant ?? "placeholder",
-  };
-
 }
 
 export const LcmsErgPortalShell = AdminErgPortalShell;

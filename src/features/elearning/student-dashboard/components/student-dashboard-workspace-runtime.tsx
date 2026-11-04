@@ -76,6 +76,8 @@ import {
   StudentQuizNotReady,
   StudentQuizSession,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-quiz-session";
+import { StudentPreviewBanner } from "@/features/elearning/student-dashboard/components/student-preview-banner";
+import { useIsStudentPreview } from "@/platform/auth/hooks/use-student-preview";
 import { TopMenuShell } from "@/features/elearning/student-dashboard/components/student-dashboard-top-menu";
 import { StudentDashboardMobileShell } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-shell";
 import { StudentDashboardOverviewSurface } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-surface";
@@ -89,6 +91,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const queryClient = useQueryClient();
   const { locale } = useI18n();
   const surface = useDashboardSurface();
+  const studentPreview = useIsStudentPreview();
   const copy: DashboardCopy = locale === "vi" ? viCopy : enCopy;
   const [activePage, setActivePage] = useState<StudentPageKey>(() => {
     if (typeof window === "undefined") return "overview";
@@ -337,6 +340,7 @@ export function StudentDashboardWorkspaceRuntime() {
   if (surface === "mobile-web") {
     return (
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
+        <StudentPreviewBanner preview={studentPreview} />
         {announcementToast}
         <StudentDashboardMobileShell
           activePage={activePage} announcementUnreadCount={unreadAnnouncementCount} className={dashboardProfile.className}
@@ -351,6 +355,7 @@ export function StudentDashboardWorkspaceRuntime() {
 
   return (
     <Box sx={{ color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
+      <StudentPreviewBanner preview={studentPreview} />
       {announcementToast}
       <TopMenuShell
         account={account}

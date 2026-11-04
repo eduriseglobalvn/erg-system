@@ -2,7 +2,8 @@ import { useState } from "react";
 import Button from "@mui/material/Button";
 import { CalendarClock, CheckCircle2, PhoneCall } from "lucide-react";
 
-import { DashboardSectionCard, DashboardSegmentedControl } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import { DashboardSegmentedControl } from "@/components/dashboard/dashboard-segmented-control";
 import { calculateSeoPnlSummary } from "@/features/crm/seo/api/seo-crm-pnl";
 import type { SeoFollowUp, SeoHandoverRequest, SeoLeadStatus, SeoOpportunity, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import { formatDate, HandoverPermission, SeoBadge } from "@/features/crm/seo/components/seo-crm-workspace-shared";

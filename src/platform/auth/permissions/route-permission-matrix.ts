@@ -42,6 +42,7 @@ export type RoutePermission =
   | "crm.deal.manage"
   | "seo.manage"
   | "elearning.assignment.read_self"
+  | "elearning.student.preview"
   | "learning.outcomes.read"
   | "learning.outcomes.manage"
   | "learning.outcomes.issue_certificate"
@@ -58,7 +59,14 @@ export type RoutePermissionEntry = {
   readonly resource: string;
   readonly action: PermissionAction;
   readonly permission: RoutePermission;
+  /** Extra permissions that also open the route (any-of with `permission`). */
+  readonly alternatePermissions?: readonly RoutePermission[];
 };
+
+/** Every permission that opens the route: `permission` or any alternate. */
+export function routeAcceptedPermissions(entry: RoutePermissionEntry): readonly RoutePermission[] {
+  return [entry.permission, ...(entry.alternatePermissions ?? [])];
+}
 
 const ADMIN_CONTENT_PERMISSIONS: Record<string, Pick<RoutePermissionEntry, "resource" | "action" | "permission">> = {
   "/admin/content": { resource: "content", action: "manage", permission: "content.manage" },
@@ -141,6 +149,8 @@ function crmEntry(path: string): RoutePermissionEntry {
   };
 }
 
+const STUDENT_PREVIEW_ALTERNATES: readonly RoutePermission[] = ["elearning.student.preview"];
+
 export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/admin", workspace: "ADMIN", resource: "admin", action: "manage", permission: "lms.admin" },
   { path: "/admin/profile", workspace: "ADMIN", resource: "account.self", action: "read", permission: "lms.admin" },
@@ -155,9 +165,9 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher/exams/portable", workspace: "TEACHER", resource: "exam.portable", action: "launch", permission: "lms.quiz.read" },
   { path: "/teacher/downloads/desktop", workspace: "TEACHER", resource: "desktop.release", action: "read", permission: "lms.dashboard.read" },
   ...lmsPaths.map(teacherEntry),
-  { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self" },
-  { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self" },
-  { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self" },
+  { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
+  { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/admin/learning-outcomes", workspace: "ADMIN", resource: "learning-outcomes", action: "manage", permission: "learning.outcomes.manage" },
   { path: ADMIN_LEARNING_STANDARDS_PATH, workspace: "ADMIN", resource: "learning-standards", action: "read", permission: "learning.standards.read" },
   { path: ADMIN_ENTERPRISE_CONNECTORS_PATH, workspace: "ADMIN", resource: "enterprise-connectors", action: "read", permission: "enterprise.connectors.read" },

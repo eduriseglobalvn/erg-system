@@ -52,24 +52,41 @@ export function LearningOutcomesAdminWorkspace() {
   const pathTitleById = useMemo(() => new Map((pathsQuery.data ?? []).map((path) => [path.id, path.title])), [pathsQuery.data]);
 
   async function createPath(input: Parameters<typeof createPathMutation.mutateAsync>[0]["input"]) {
-    const created = await createPathMutation.mutateAsync({ input, idempotencyKey: newIdempotencyKey("learning-path") });
+    let created;
+    try {
+      created = await createPathMutation.mutateAsync({ input, idempotencyKey: newIdempotencyKey("learning-path") });
+    } catch {
+      return; // global handler toasted; the dialog shows mutation.error and stays open
+    }
     setSelectedPathId(created.id);
     setCreatePathOpen(false);
   }
 
   async function createCompetency(input: Parameters<typeof createCompetencyMutation.mutateAsync>[0]["input"]) {
-    await createCompetencyMutation.mutateAsync({ input, idempotencyKey: newIdempotencyKey("competency") });
+    try {
+      await createCompetencyMutation.mutateAsync({ input, idempotencyKey: newIdempotencyKey("competency") });
+    } catch {
+      return; // global handler toasted; keep the dialog open
+    }
     setCreateCompetencyOpen(false);
   }
 
   async function publishPath() {
     if (!detailQuery.data) return;
-    await publishMutation.mutateAsync({ pathId: detailQuery.data.path.id, input: { expectedVersion: detailQuery.data.path.recordVersion }, idempotencyKey: newIdempotencyKey(`publish-${detailQuery.data.path.id}`) });
+    try {
+      await publishMutation.mutateAsync({ pathId: detailQuery.data.path.id, input: { expectedVersion: detailQuery.data.path.recordVersion }, idempotencyKey: newIdempotencyKey(`publish-${detailQuery.data.path.id}`) });
+    } catch {
+      return; // global handler toasted; keep the dialog open
+    }
   }
 
   async function addNode(input: Parameters<typeof addNodeMutation.mutateAsync>[0]["input"]) {
     if (!selectedPathId) return;
-    await addNodeMutation.mutateAsync({ pathId: selectedPathId, input, idempotencyKey: newIdempotencyKey(`path-node-${selectedPathId}`) });
+    try {
+      await addNodeMutation.mutateAsync({ pathId: selectedPathId, input, idempotencyKey: newIdempotencyKey(`path-node-${selectedPathId}`) });
+    } catch {
+      return; // global handler toasted; keep the dialog open
+    }
     setAddNodeOpen(false);
   }
 

@@ -74,10 +74,14 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
 
   const assignRole = async () => {
     if (!actionEmployee || !roleName) return;
-    await commands.roles.mutateAsync({
-      roles: [...new Set([...actionEmployee.roles, roleName])],
-      userId: actionEmployee.id,
-    });
+    try {
+      await commands.roles.mutateAsync({
+        roles: [...new Set([...actionEmployee.roles, roleName])],
+        userId: actionEmployee.id,
+      });
+    } catch {
+      return; // global handler already toasted; keep the dialog open
+    }
     setRoleDialogOpen(false);
   };
 
@@ -164,7 +168,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
         onCancel={() => setStatusTarget(undefined)}
         onConfirm={() => {
           if (statusTarget) {
-            void commands.status.mutateAsync({
+            commands.status.mutate({
               status: locking ? "INACTIVE" : "ACTIVE",
               userId: statusTarget.id,
             });

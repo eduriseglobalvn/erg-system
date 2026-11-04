@@ -39,7 +39,11 @@ export function LearningOutcomesTeacherWorkspace() {
 
   async function recordAttainment() {
     if (!learnerId || !competencyId || !evidenceRef.trim()) return;
-    await attainmentMutation.mutateAsync({ input: { learnerId, competencyId, evidenceRef: evidenceRef.trim(), progressPercent: 100 }, idempotencyKey: newIdempotencyKey(`attainment-${learnerId}-${competencyId}`) });
+    try {
+      await attainmentMutation.mutateAsync({ input: { learnerId, competencyId, evidenceRef: evidenceRef.trim(), progressPercent: 100 }, idempotencyKey: newIdempotencyKey(`attainment-${learnerId}-${competencyId}`) });
+    } catch {
+      return; // global handler toasted; keep the dialog open
+    }
     setEvidenceRef("");
   }
 
