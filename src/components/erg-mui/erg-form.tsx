@@ -1,6 +1,7 @@
 import SearchIcon from "@mui/icons-material/Search";
 import MenuItem from "@mui/material/MenuItem";
 import TextField, { type TextFieldProps } from "@mui/material/TextField";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type ErgTextFieldProps = TextFieldProps & {
   compact?: boolean;
@@ -15,30 +16,30 @@ export function ErgTextField({ compact = false, size, sx, ...props }: ErgTextFie
         {
           "& .MuiOutlinedInput-root": {
             bgcolor: "#FFFFFF",
-            borderRadius: "10px",
+            borderRadius: 1.25,
             fontSize: "0.85rem",
             fontWeight: 550,
             transition: "all 0.15s ease",
             "& fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.12)",
-              borderRadius: "10px",
+              borderColor: "divider",
+              borderRadius: 1.25,
             },
             "&:hover fieldset": {
               borderColor: "rgba(0, 0, 0, 0.22)",
             },
             "&.Mui-focused": {
               "& fieldset": {
-                borderColor: "#0071E3",
-                boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                borderColor: "primary.main",
+                boxShadow: ergEnterpriseTokens.shadow.focus,
               },
             },
           },
           "& .MuiInputLabel-root": {
-            color: "#6E6E73",
+            color: "text.secondary",
             fontSize: "0.85rem",
-            fontWeight: 650,
+            fontWeight: 600,
             "&.Mui-focused": {
-              color: "#0071E3",
+              color: "primary.main",
             },
           },
         },
@@ -69,21 +70,21 @@ export function ErgSelect({ options, sx, ...props }: ErgSelectProps) {
         {
           "& .MuiOutlinedInput-root": {
             bgcolor: "#FFFFFF",
-            borderRadius: "10px",
+            borderRadius: 1.25,
             fontSize: "0.85rem",
             fontWeight: 550,
             transition: "all 0.15s ease",
             "& fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.12)",
-              borderRadius: "10px",
+              borderColor: "divider",
+              borderRadius: 1.25,
             },
             "&:hover fieldset": {
               borderColor: "rgba(0, 0, 0, 0.22)",
             },
             "&.Mui-focused": {
               "& fieldset": {
-                borderColor: "#0071E3",
-                boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                borderColor: "primary.main",
+                boxShadow: ergEnterpriseTokens.shadow.focus,
               },
             },
           },
@@ -114,17 +115,17 @@ export function ErgSearchField(props: ErgTextFieldProps) {
         ...slotProps,
         input: {
           ...(slotProps?.input as object | undefined),
-          startAdornment: <SearchIcon aria-hidden="true" sx={{ color: "#86868B", fontSize: 18, mr: 1 }} />,
+          startAdornment: <SearchIcon aria-hidden="true" sx={{ color: "text.secondary", fontSize: 18, mr: 1 }} />,
         },
       }}
       sx={[
         {
           "& .MuiOutlinedInput-root": {
-            bgcolor: "#F5F5F7",
-            borderRadius: "10px",
+            bgcolor: "background.default",
+            borderRadius: 1.25,
             fontSize: "0.85rem",
             "& fieldset": {
-              borderColor: "rgba(0, 0, 0, 0.08)",
+              borderColor: "divider",
             },
             "&:hover fieldset": {
               borderColor: "rgba(0, 0, 0, 0.18)",
@@ -132,8 +133,8 @@ export function ErgSearchField(props: ErgTextFieldProps) {
             "&.Mui-focused": {
               bgcolor: "#FFFFFF",
               "& fieldset": {
-                borderColor: "#0071E3",
-                boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                borderColor: "primary.main",
+                boxShadow: ergEnterpriseTokens.shadow.focus,
               },
             },
           },

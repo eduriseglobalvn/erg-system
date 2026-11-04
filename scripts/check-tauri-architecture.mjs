@@ -16,7 +16,7 @@ const config = JSON.parse(read("src-tauri/tauri.conf.json"));
 const capabilities = JSON.parse(read("src-tauri/capabilities/default.json"));
 const cargo = read("src-tauri/Cargo.toml");
 const runtime = read("src/platform/desktop/runtime.ts");
-const routes = read("src/routes/app-routes.tsx");
+const routes = ["teacher-routes", "student-routes", "route-shared"].map((name) => read(`src/routes/portals/${name}.tsx`)).join(";");
 const lib = read("src-tauri/src/lib.rs");
 
 assert.match(cargo, /tauri\s*=\s*\{\s*version\s*=\s*"2\./, "Rust shell must pin Tauri v2");

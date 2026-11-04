@@ -10,6 +10,8 @@ import { ErgTextField } from "@/components/erg-mui";
 import type { RecoveryEmailChallenge } from "@/platform/auth/api/account-security-api";
 import { formatExpiryTime } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
 import { OnboardingSection } from "@/platform/auth/components/teacher-onboarding/onboarding-section";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function RecoveryStep({
   accountEmail,
@@ -38,7 +40,7 @@ export function RecoveryStep({
 }) {
   return (
     <OnboardingSection
-      icon={<MarkEmailReadRoundedIcon sx={{ fontSize: 20, color: "#0071E3" }} />}
+      icon={<MarkEmailReadRoundedIcon sx={{ fontSize: 20, color: "primary.main" }} />}
       title={isGoogleAccount ? "Xác minh tài khoản Google" : "Xác minh email khôi phục"}
       description={
         isGoogleAccount
@@ -50,8 +52,8 @@ export function RecoveryStep({
         <Paper
           sx={{
             alignItems: "center",
-            bgcolor: "rgba(0, 113, 227, 0.05)",
-            border: "1px solid rgba(0, 113, 227, 0.16)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.05),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.16)}`,
             borderRadius: "16px",
             display: "flex",
             gap: 1.75,
@@ -62,9 +64,9 @@ export function RecoveryStep({
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "rgba(0, 113, 227, 0.12)",
+              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.12),
               borderRadius: "12px",
-              color: "#0071E3",
+              color: "primary.main",
               display: "flex",
               height: 42,
               justifyContent: "center",
@@ -74,14 +76,14 @@ export function RecoveryStep({
             <MarkEmailReadRoundedIcon sx={{ fontSize: 22 }} />
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography sx={{ color: "#6E6E73", fontSize: 11.5, fontWeight: 650 }}>
+            <Typography sx={{ color: "text.secondary", fontSize: 11.5, fontWeight: 600 }}>
               Email Google chính chủ
             </Typography>
             <Typography
               sx={{
-                color: "#1D1D1F",
+                color: "text.primary",
                 fontSize: 14,
-                fontWeight: 750,
+                fontWeight: 600,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
               }}
@@ -93,9 +95,9 @@ export function RecoveryStep({
             label={challenge ? "Đã gửi mã" : "Cần xác minh"}
             size="small"
             sx={{
-              bgcolor: challenge ? "rgba(52, 199, 89, 0.12)" : "rgba(0, 113, 227, 0.1)",
-              color: challenge ? "#248A3D" : "#0071E3",
-              fontWeight: 700,
+              bgcolor: challenge ? alpha(ergEnterpriseTokens.color.success, 0.12) : alpha(ergEnterpriseTokens.color.primary, 0.1),
+              color: challenge ? "success.main" : ergEnterpriseTokens.color.primary,
+              fontWeight: 600,
               fontSize: 11.5,
               height: 26,
               ml: "auto",
@@ -144,7 +146,7 @@ export function RecoveryStep({
                   textAlign: "center",
                   fontSize: "22px",
                   letterSpacing: "0.28em",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontFamily: "'JetBrains Mono', 'SF Pro Text', monospace",
                 },
               },
@@ -160,7 +162,7 @@ export function RecoveryStep({
                 fontWeight: 500,
                 mt: 0.75,
                 textAlign: "center",
-                color: fieldErrors.otp ? "#D70015" : "#6E6E73",
+                color: fieldErrors.otp ? "error.main" : ergEnterpriseTokens.color.textMuted,
               },
             }}
           />
@@ -169,16 +171,16 @@ export function RecoveryStep({
             variant="contained"
             onClick={verifyRecovery}
             sx={{
-              bgcolor: "#0071E3",
+              bgcolor: "primary.main",
               borderRadius: "14px",
               color: "#FFFFFF",
               fontSize: 15,
-              fontWeight: 650,
+              fontWeight: 600,
               minHeight: 48,
               textTransform: "none",
-              boxShadow: "0 4px 14px rgba(0, 113, 227, 0.25)",
+              boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
               "&:hover": {
-                bgcolor: "#0077ED",
+                bgcolor: "primary.dark",
                 transform: "translateY(-1px)",
               },
               "&:active": {
@@ -194,13 +196,13 @@ export function RecoveryStep({
             disabled={busy}
             onClick={requestRecovery}
             sx={{
-              color: "#0071E3",
+              color: "primary.main",
               fontSize: 13,
               fontWeight: 600,
               textTransform: "none",
               borderRadius: "980px",
               alignSelf: "center",
-              "&:hover": { bgcolor: "rgba(0, 113, 227, 0.06)" },
+              "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.06) },
             }}
           >
             Chưa nhận được mã? Gửi lại mã
@@ -212,16 +214,16 @@ export function RecoveryStep({
           variant="contained"
           onClick={requestRecovery}
           sx={{
-            bgcolor: "#0071E3",
+            bgcolor: "primary.main",
             borderRadius: "14px",
             color: "#FFFFFF",
             fontSize: 15,
-            fontWeight: 650,
+            fontWeight: 600,
             minHeight: 48,
             textTransform: "none",
-            boxShadow: "0 4px 14px rgba(0, 113, 227, 0.25)",
+            boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
             "&:hover": {
-              bgcolor: "#0077ED",
+              bgcolor: "primary.dark",
               transform: "translateY(-1px)",
             },
             "&:active": {

@@ -44,11 +44,11 @@ function AuditRow({ entry }: { entry: AuditEntry }) {
   const outcome = safe.outcome ? outcomeMeta[safe.outcome] : null;
   return (
     <TableRow hover>
-      <TableCell sx={{ fontWeight: 750 }}>{safe.action}</TableCell>
+      <TableCell sx={{ fontWeight: 600 }}>{safe.action}</TableCell>
       <TableCell sx={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>{safe.actorId ?? "Ẩn danh"}</TableCell>
       <TableCell>{outcome ? <Chip color={outcome.color} label={outcome.label} size="small" variant="outlined" /> : "-"}</TableCell>
       <TableCell>
-        <Typography sx={{ fontWeight: 700 }} variant="body2">{safe.resourceType ?? "-"}</Typography>
+        <Typography sx={{ fontWeight: 600 }} variant="body2">{safe.resourceType ?? "-"}</Typography>
         <Typography color="text.secondary" sx={{ fontFamily: "var(--font-mono)", fontSize: 11 }} variant="caption">{safe.resourceId ?? "-"}</Typography>
       </TableCell>
       <TableCell>

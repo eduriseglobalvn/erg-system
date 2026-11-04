@@ -35,6 +35,8 @@ import {
   workspaceFromAccessDeniedPortal,
 } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function AccessDeniedPage() {
   const auth = useAuthSession();
@@ -95,7 +97,7 @@ export function AccessDeniedPage() {
       component="main"
       sx={{
         background: "radial-gradient(120% 120% at 50% 0%, #F8FAFD 0%, #EEF2F7 100%)",
-        color: "#1D1D1F",
+        color: "text.primary",
         display: "flex",
         minHeight: "100svh",
         px: { xs: 2, sm: 3, lg: 4 },
@@ -122,7 +124,7 @@ export function AccessDeniedPage() {
             <Box>
               <Typography
                 sx={{
-                  color: "#1D1D1F",
+                  color: "text.primary",
                   fontSize: { xs: 17, sm: 20 },
                   fontWeight: 850,
                   letterSpacing: "-0.03em",
@@ -133,7 +135,7 @@ export function AccessDeniedPage() {
               </Typography>
               <Typography
                 sx={{
-                  color: "#86868B",
+                  color: "text.disabled",
                   fontSize: { xs: 11, sm: 12 },
                   fontWeight: 600,
                   letterSpacing: "0.02em",
@@ -145,15 +147,15 @@ export function AccessDeniedPage() {
             </Box>
           </Box>
           <Chip
-            icon={<LockPersonRoundedIcon sx={{ fontSize: "15px !important", color: "#6E6E73 !important" }} />}
+            icon={<LockPersonRoundedIcon sx={{ fontSize: "15px !important", color: `${ergEnterpriseTokens.color.textMuted} !important` }} />}
             label="CHÍNH SÁCH BẢO MẬT ERG"
             sx={{
               bgcolor: "rgba(255, 255, 255, 0.8)",
               backdropFilter: "blur(12px)",
-              borderColor: "rgba(0, 0, 0, 0.08)",
-              color: "#6E6E73",
+              borderColor: "divider",
+              color: "text.secondary",
               fontSize: 11,
-              fontWeight: 650,
+              fontWeight: 600,
               letterSpacing: "0.06em",
               height: 32,
               borderRadius: "980px",
@@ -169,7 +171,7 @@ export function AccessDeniedPage() {
           elevation={0}
           sx={{
             bgcolor: "#FFFFFF",
-            border: "1px solid rgba(0, 0, 0, 0.08)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             borderRadius: "24px",
             boxShadow: "0 24px 60px -12px rgba(15, 23, 42, 0.08), 0 3px 12px rgba(15, 23, 42, 0.02)",
             p: { xs: 3, sm: 5, md: 6 },
@@ -198,24 +200,24 @@ export function AccessDeniedPage() {
                 <Box
                   sx={{
                     alignItems: "center",
-                    background: "linear-gradient(135deg, rgba(255, 59, 48, 0.12) 0%, rgba(255, 149, 0, 0.1) 100%)",
-                    border: "1px solid rgba(255, 59, 48, 0.16)",
+                    background: `linear-gradient(135deg, ${alpha(ergEnterpriseTokens.color.danger, 0.12)} 0%, ${alpha(ergEnterpriseTokens.color.warning, 0.1)} 100%)`,
+                    border: `1px solid ${alpha(ergEnterpriseTokens.color.danger, 0.16)}`,
                     borderRadius: "18px",
                     display: "flex",
                     height: 58,
                     justifyContent: "center",
                     width: 58,
-                    boxShadow: "0 4px 14px rgba(255, 59, 48, 0.12)",
+                    boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.danger, 0.12)}`,
                   }}
                 >
-                  <GppBadRoundedIcon sx={{ color: "#FF3B30", fontSize: 32 }} />
+                  <GppBadRoundedIcon sx={{ color: "error.main", fontSize: 32 }} />
                 </Box>
                 <Box>
                   <Typography
                     sx={{
-                      color: "#FF3B30",
+                      color: "error.main",
                       fontSize: 11,
-                      fontWeight: 750,
+                      fontWeight: 600,
                       letterSpacing: "0.08em",
                       textTransform: "uppercase",
                     }}
@@ -226,10 +228,10 @@ export function AccessDeniedPage() {
                     component="h1"
                     sx={{
                       fontSize: { xs: 24, sm: 28, md: 32 },
-                      fontWeight: 800,
+                      fontWeight: 600,
                       letterSpacing: "-0.03em",
                       lineHeight: 1.2,
-                      color: "#1D1D1F",
+                      color: "text.primary",
                       mt: 0.25,
                     }}
                   >
@@ -240,7 +242,7 @@ export function AccessDeniedPage() {
 
               <Typography
                 sx={{
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: 14.5,
                   lineHeight: 1.65,
                   maxWidth: 680,
@@ -255,7 +257,7 @@ export function AccessDeniedPage() {
               sx={{
                 alignItems: "center",
                 bgcolor: "rgba(245, 245, 247, 0.75)",
-                border: "1px solid rgba(0, 0, 0, 0.06)",
+                border: `1px solid ${ergEnterpriseTokens.color.border}`,
                 borderRadius: "16px",
                 display: "flex",
                 gap: 1.75,
@@ -265,9 +267,9 @@ export function AccessDeniedPage() {
             >
               <Avatar
                 sx={{
-                  bgcolor: "rgba(0, 113, 227, 0.12)",
-                  color: "#0071E3",
-                  fontWeight: 700,
+                  bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.12),
+                  color: "primary.main",
+                  fontWeight: 600,
                   fontSize: 15,
                   height: 42,
                   width: 42,
@@ -277,14 +279,14 @@ export function AccessDeniedPage() {
                 {(accountEmail || "?").slice(0, 1).toUpperCase()}
               </Avatar>
               <Box sx={{ minWidth: 0 }}>
-                <Typography sx={{ color: "#86868B", fontSize: 11.5, fontWeight: 650, letterSpacing: "0.02em" }}>
+                <Typography sx={{ color: "text.disabled", fontSize: 11.5, fontWeight: 600, letterSpacing: "0.02em" }}>
                   Tài khoản hiện tại
                 </Typography>
                 <Typography
                   sx={{
                     fontSize: 14,
-                    fontWeight: 700,
-                    color: "#1D1D1F",
+                    fontWeight: 600,
+                    color: "text.primary",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -294,15 +296,15 @@ export function AccessDeniedPage() {
                 </Typography>
               </Box>
               <Chip
-                icon={<CheckCircleRoundedIcon sx={{ fontSize: "16px !important", color: "#34C759 !important" }} />}
+                icon={<CheckCircleRoundedIcon sx={{ fontSize: "16px !important", color: `${ergEnterpriseTokens.color.success} !important` }} />}
                 label="Đã xác thực"
                 size="small"
                 sx={{
-                  bgcolor: "rgba(52, 199, 89, 0.1)",
-                  border: "1px solid rgba(52, 199, 89, 0.2)",
-                  color: "#248A3D",
+                  bgcolor: alpha(ergEnterpriseTokens.color.success, 0.1),
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.2)}`,
+                  color: "success.main",
                   fontSize: 11.5,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   height: 26,
                   ml: "auto",
                   borderRadius: "980px",
@@ -313,7 +315,7 @@ export function AccessDeniedPage() {
             {/* Entitled Workspaces or Recovery Callout */}
             {targets.length > 0 ? (
               <Box>
-                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "#1D1D1F", mb: 1.75 }}>
+                <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: "text.primary", mb: 1.75 }}>
                   Bạn có thể mở workspace được cấp quyền
                 </Typography>
                 <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(2, minmax(0,1fr))" } }}>
@@ -325,14 +327,14 @@ export function AccessDeniedPage() {
             ) : (
               <Paper
                 sx={{
-                  bgcolor: "rgba(255, 149, 0, 0.06)",
-                  border: "1px solid rgba(255, 149, 0, 0.2)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.06),
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.warning, 0.2)}`,
                   borderRadius: "16px",
                   p: 2.25,
                 }}
                 variant="outlined"
               >
-                <Typography sx={{ color: "#B45309", fontSize: 13.5, fontWeight: 750 }}>
+                <Typography sx={{ color: "#B45309", fontSize: 13.5, fontWeight: 600 }}>
                   Chưa tìm thấy workspace khả dụng
                 </Typography>
                 <Typography sx={{ color: "#78350F", fontSize: 13, lineHeight: 1.6, mt: 0.5 }}>
@@ -357,11 +359,11 @@ export function AccessDeniedPage() {
                 onClick={loginAgain}
                 startIcon={<PersonRoundedIcon sx={{ fontSize: 18 }} />}
                 sx={{
-                  bgcolor: "#1D1D1F",
+                  bgcolor: "text.primary",
                   borderRadius: "980px",
                   color: "#FFFFFF",
                   fontSize: 14,
-                  fontWeight: 650,
+                  fontWeight: 600,
                   minHeight: 46,
                   px: 3,
                   textTransform: "none",
@@ -385,11 +387,11 @@ export function AccessDeniedPage() {
                 component={Link}
                 startIcon={<HomeRoundedIcon sx={{ fontSize: 18 }} />}
                 sx={{
-                  borderColor: "rgba(0, 0, 0, 0.14)",
+                  borderColor: "divider",
                   borderRadius: "980px",
-                  color: "#1D1D1F",
+                  color: "text.primary",
                   fontSize: 14,
-                  fontWeight: 650,
+                  fontWeight: 600,
                   minHeight: 46,
                   px: 2.75,
                   textTransform: "none",
@@ -411,7 +413,7 @@ export function AccessDeniedPage() {
                 onClick={() => goBackFromAccessDenied(() => void navigate({ to: "/", replace: true }))}
                 startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 18 }} />}
                 sx={{
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: 14,
                   fontWeight: 600,
                   minHeight: 46,
@@ -420,7 +422,7 @@ export function AccessDeniedPage() {
                   textTransform: "none",
                   borderRadius: "980px",
                   "&:hover": {
-                    color: "#1D1D1F",
+                    color: "text.primary",
                     bgcolor: "rgba(0, 0, 0, 0.04)",
                   },
                 }}
@@ -430,7 +432,7 @@ export function AccessDeniedPage() {
               </Button>
             </Box>
 
-            <Typography sx={{ color: "#86868B", fontSize: 11.5, lineHeight: 1.6, textAlign: "left" }}>
+            <Typography sx={{ color: "text.disabled", fontSize: 11.5, lineHeight: 1.6, textAlign: "left" }}>
               Trang yêu cầu: {accessDeniedPathLabel(redirect)}
             </Typography>
           </Stack>
@@ -440,7 +442,7 @@ export function AccessDeniedPage() {
         <Typography
           component="footer"
           sx={{
-            color: "#86868B",
+            color: "text.disabled",
             fontSize: 12,
             textAlign: "center",
             lineHeight: 1.6,

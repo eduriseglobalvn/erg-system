@@ -71,7 +71,7 @@ export function GlobalPwaBanner() {
             sx={{
               borderColor: "rgba(255, 255, 255, 0.6)",
               color: "#fff",
-              fontWeight: 700,
+              fontWeight: 600,
               ml: 1,
               "&:hover": {
                 borderColor: "#fff",
@@ -84,7 +84,7 @@ export function GlobalPwaBanner() {
         }
       >
         <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-          <Typography variant="body2" sx={{ fontWeight: 700 }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
             Đã có phiên bản mới của ERG
           </Typography>
         </Stack>

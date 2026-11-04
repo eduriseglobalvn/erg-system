@@ -40,7 +40,7 @@ export function MuiMediaSettings({
           }}
         >
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0F172A", fontSize: "13px" }}>
               {t("common.picture") || "Hình ảnh câu hỏi"}
             </Typography>
             <IconButton size="small" color="error" onClick={onRemoveMedia} title={t("common.remove")}>
@@ -74,7 +74,7 @@ export function MuiMediaSettings({
             fullWidth
             startIcon={<AddPhotoAlternateIcon fontSize="small" />}
             onClick={onPickMedia}
-            sx={{ borderRadius: "8px", fontWeight: 700 }}
+            sx={{ borderRadius: "8px", fontWeight: 600 }}
           >
             Thay ảnh khác
           </Button>
@@ -124,7 +124,7 @@ export function MuiMediaSettings({
           >
             <CloudUploadOutlinedIcon sx={{ fontSize: 26, color: "#0F6CBD" }} />
           </Box>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#1E293B", fontSize: "14px" }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "14px" }}>
             Chưa có hình ảnh
           </Typography>
           <Typography variant="caption" sx={{ color: "#64748B", maxWidth: 220, mb: 1 }}>
@@ -137,7 +137,7 @@ export function MuiMediaSettings({
             onClick={onPickMedia}
             sx={{
               borderRadius: "8px",
-              fontWeight: 700,
+              fontWeight: 600,
               bgcolor: "#0F6CBD",
               "&:hover": { bgcolor: "#0D5CA0" },
             }}

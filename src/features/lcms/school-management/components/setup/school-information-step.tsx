@@ -54,7 +54,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
       eyebrow="Bước 1"
       title="Thông tin & loại hình"
     >
-      <Typography sx={{ fontSize: 13, fontWeight: 850, mb: 1 }}>Loại hình đơn vị</Typography>
+      <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 1 }}>Loại hình đơn vị</Typography>
       <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(5, minmax(0, 1fr))" }, mb: 2.5 }}>
         {schoolTypeOrder.map((type) => {
           const meta = schoolTypeMeta[type];
@@ -67,7 +67,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
             variant="outlined"
             sx={{ bgcolor: selected ? "primary.50" : "background.paper", borderColor: selected ? "primary.main" : "divider", color: "text.primary", cursor: "pointer", minHeight: 104, p: 1.5, textAlign: "left", transition: "border-color 120ms ease, background-color 120ms ease", "&:hover": { borderColor: "primary.main" } }}
           >
-            <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}><Typography sx={{ fontWeight: 900 }} variant="body2">{meta.shortLabel}</Typography>{selected ? <CheckRoundedIcon color="primary" fontSize="small" /> : null}</Box>
+            <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}><Typography sx={{ fontWeight: 600 }} variant="body2">{meta.shortLabel}</Typography>{selected ? <CheckRoundedIcon color="primary" fontSize="small" /> : null}</Box>
             <Typography color="text.secondary" sx={{ display: "block", mt: 0.75, lineHeight: 1.4 }} variant="caption">{meta.description}</Typography>
           </Paper>;
         })}

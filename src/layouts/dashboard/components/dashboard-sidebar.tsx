@@ -45,7 +45,7 @@ export function DashboardSidebar({
                   bgcolor: "transparent",
                   color: "text.secondary",
                   fontSize: 12,
-                  fontWeight: 750,
+                  fontWeight: 600,
                   lineHeight: "28px",
                   px: 1,
                 }}

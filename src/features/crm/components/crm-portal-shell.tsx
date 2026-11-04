@@ -255,7 +255,7 @@ function CrmContent({
                 borderRadius: '6px',
                 color: '#006C9C',
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 height: 22,
                 lineHeight: '22px',
                 px: 1.5,
@@ -316,7 +316,7 @@ function CrmContent({
                   borderRadius: '6px',
                   color: '#1C252E',
                   fontSize: 12,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   height: 24,
                   lineHeight: '24px',
                   px: 0.75,
@@ -340,7 +340,7 @@ function CrmContent({
                 '&:hover': { bgcolor: '#DB1D22' },
               }}
             >
-              <Typography sx={{ color: 'inherit', fontSize: 10, fontWeight: 800, lineHeight: 1 }}>
+              <Typography sx={{ color: 'inherit', fontSize: 10, fontWeight: 600, lineHeight: 1 }}>
                 VN
               </Typography>
             </IconButton>
@@ -371,7 +371,7 @@ function CrmContent({
                   border: '2px solid #FFD666',
                   color: '#FFFFFF',
                   fontSize: 13,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   height: 32,
                   width: 32,
                 }}

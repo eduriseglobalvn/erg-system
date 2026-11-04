@@ -17,6 +17,8 @@ import {
 } from "@/features/employee-management/components/apple-ui-tokens";
 import { getRoleMeta } from "@/platform/auth/permissions/role-display-catalog";
 import type { EmployeeItem } from "@/features/employee-management/types/employee-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeTable({
   employees,
@@ -37,7 +39,7 @@ export function EmployeeTable({
               borderBottom: `1px solid ${appleDesign.colors.border}`,
               color: appleDesign.colors.textTertiary,
               fontSize: "0.725rem",
-              fontWeight: 650,
+              fontWeight: 600,
               letterSpacing: "0.06em",
               py: 1.5,
               textTransform: "uppercase",
@@ -68,7 +70,7 @@ export function EmployeeTable({
                 cursor: "pointer",
                 transition: "background-color 0.15s ease",
                 "&:hover": {
-                  bgcolor: "rgba(0, 113, 227, 0.03) !important",
+                  bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.03)} !important`,
                 },
                 "& td": {
                   borderColor: appleDesign.colors.border,
@@ -85,7 +87,7 @@ export function EmployeeTable({
                       variant="body2"
                       sx={{
                         color: appleDesign.colors.textPrimary,
-                        fontWeight: 700,
+                        fontWeight: 600,
                         letterSpacing: "-0.01em",
                       }}
                     >

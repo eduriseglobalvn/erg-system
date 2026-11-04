@@ -1,6 +1,6 @@
 import { useEffect, type Dispatch, type SetStateAction } from "react";
 
-import { createFreshLocalSession } from "@/components/quiz/player-shell-utils";
+import { createFreshLocalSession } from "@/features/lcms/quiz/player/player-shell-session";
 import type { PlayerLoadState, SubmitDialogMode } from "@/components/quiz/player-shell-runtime-model";
 import {
   createEmptyAttempt,

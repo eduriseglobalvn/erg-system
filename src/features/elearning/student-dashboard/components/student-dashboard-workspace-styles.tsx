@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import MuiStack from "@mui/material/Stack";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export const MUI_PRIMARY = "#2563EB";
 export const MUI_PRIMARY_DARK = "#1D4ED8";
@@ -32,8 +33,8 @@ export const primaryButtonSx = {
   bgcolor: MUI_PRIMARY,
   boxShadow: "0 2px 8px rgba(37,99,235,0.25)",
   color: "#fff",
-  fontWeight: 700,
-  borderRadius: "10px",
+  fontWeight: 600,
+  borderRadius: `${ergEnterpriseTokens.radius.md}px`,
   textTransform: "none",
   "&:hover": {
     bgcolor: MUI_PRIMARY_DARK,

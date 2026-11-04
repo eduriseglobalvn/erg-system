@@ -21,6 +21,8 @@ import { EmployeeInfoTab } from "@/features/employee-management/components/emplo
 import { EmployeeProfileHeader } from "@/features/employee-management/components/employee-detail/profile-header";
 import { EmployeeRolesTab } from "@/features/employee-management/components/employee-detail/roles-tab";
 import { EmployeeSessionsTab } from "@/features/employee-management/components/employee-detail/sessions-tab";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type ConfirmAction = "STATUS" | "RESET" | null;
 
@@ -166,7 +168,7 @@ export function EmployeeDetailDrawer({
               sx={{
                 color: appleDesign.colors.textTertiary,
                 fontSize: "0.72rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: "0.08em",
               }}
             >
@@ -176,7 +178,7 @@ export function EmployeeDetailDrawer({
               variant="h6"
               sx={{
                 color: appleDesign.colors.textPrimary,
-                fontWeight: 750,
+                fontWeight: 600,
                 letterSpacing: "-0.02em",
                 lineHeight: 1.25,
               }}
@@ -229,7 +231,7 @@ export function EmployeeDetailDrawer({
               {temporaryCredential ? (
                 <Box
                   sx={{
-                    bgcolor: "rgba(255, 149, 0, 0.08)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.08),
                     border: `1px solid rgba(255, 149, 0, 0.3)`,
                     borderRadius: "14px",
                     mb: 2.5,
@@ -241,7 +243,7 @@ export function EmployeeDetailDrawer({
                     sx={{
                       color: appleDesign.colors.amberText,
                       display: "block",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       mb: 0.5,
                     }}
                   >
@@ -252,7 +254,7 @@ export function EmployeeDetailDrawer({
                       color: appleDesign.colors.textPrimary,
                       fontFamily: "JetBrains Mono, monospace",
                       fontSize: "1.1rem",
-                      fontWeight: 800,
+                      fontWeight: 600,
                       letterSpacing: "0.05em",
                     }}
                   >

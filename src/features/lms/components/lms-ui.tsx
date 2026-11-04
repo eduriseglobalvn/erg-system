@@ -23,7 +23,7 @@ export function LmsPanel(props: PaperProps) {
 }
 
 export function LmsSectionTitle(props: TypographyProps) {
-  return <Typography component="h2" sx={{ fontSize: 14, fontWeight: 750, lineHeight: 1.45 }} {...props} />;
+  return <Typography component="h2" sx={{ fontSize: 14, fontWeight: 600, lineHeight: 1.45 }} {...props} />;
 }
 
 export function LmsSelect(props: NativeSelectProps) {
@@ -31,7 +31,7 @@ export function LmsSelect(props: NativeSelectProps) {
   return (
     <NativeSelect
       fullWidth
-      sx={{ bgcolor: "background.paper", borderRadius: 2, fontSize: 14, fontWeight: 700, minHeight: 40, px: 1.25 }}
+      sx={{ bgcolor: "background.paper", borderRadius: 2, fontSize: 14, fontWeight: 600, minHeight: 40, px: 1.25 }}
       inputProps={{ ...inputProps, "aria-label": nativeProps["aria-label"] ?? inputProps?.["aria-label"] }}
       {...nativeProps}
     />
@@ -79,5 +79,5 @@ export function LmsTable(props: TableProps) {
 }
 
 export function LmsTableHeadCell(props: TableCellProps) {
-  return <TableCell align="center" sx={{ bgcolor: "background.default", fontSize: 13, fontWeight: 750, height: 40 }} {...props} />;
+  return <TableCell align="center" sx={{ bgcolor: "background.default", fontSize: 13, fontWeight: 600, height: 40 }} {...props} />;
 }

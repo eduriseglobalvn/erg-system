@@ -184,7 +184,7 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
             <Avatar src={account.avatarUrl} sx={{ bgcolor: "primary.main", height: 52, width: 52 }}>{initials(account.fullName)}</Avatar>
             <Box sx={{ flex: 1 }}>
               <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-                <Typography component="h1" sx={{ fontWeight: 750 }} variant="h6">{account.fullName}</Typography>
+                <Typography component="h1" sx={{ fontWeight: 600 }} variant="h6">{account.fullName}</Typography>
                 <Chip color={account.status === "ACTIVE" ? "success" : "warning"} label={account.status ?? "UNKNOWN"} size="small" />
               </Stack>
               <Typography color="text.secondary" variant="body2">{account.email}</Typography>
@@ -220,7 +220,7 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
               <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
                 <LockIcon color="primary" />
                 <Box sx={{ flex: 1 }}>
-                  <Typography sx={{ fontWeight: 650 }} variant="body2">Mật khẩu</Typography>
+                  <Typography sx={{ fontWeight: 600 }} variant="body2">Mật khẩu</Typography>
                   <Typography color="text.secondary" variant="caption">Đổi mật khẩu sẽ thu hồi các phiên khác theo backend.</Typography>
                 </Box>
               </Stack>
@@ -230,7 +230,7 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
         </Box>
 
         <Paper variant="outlined" sx={{ p: 2.5 }}>
-          <Typography component="h2" sx={{ fontWeight: 700 }} variant="subtitle1">Quyền truy cập LMS</Typography>
+          <Typography component="h2" sx={{ fontWeight: 600 }} variant="subtitle1">Quyền truy cập LMS</Typography>
           <Typography color="text.secondary" variant="body2">Khả năng hiệu lực từ session; deny luôn thắng allow.</Typography>
           <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 2 }}>
             {effectiveCapabilities.length ? effectiveCapabilities.map(([label]) => <Chip color="info" key={label} label={label} variant="outlined" />) : (
@@ -273,11 +273,11 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
 }
 
 function SectionTitle({ description, title }: { description: string; title: string }) {
-  return <Box sx={{ borderBottom: 1, borderColor: "divider", p: 2.5 }}><Typography sx={{ fontWeight: 700 }}>{title}</Typography><Typography color="text.secondary" variant="body2">{description}</Typography></Box>;
+  return <Box sx={{ borderBottom: 1, borderColor: "divider", p: 2.5 }}><Typography sx={{ fontWeight: 600 }}>{title}</Typography><Typography color="text.secondary" variant="body2">{description}</Typography></Box>;
 }
 
 function AccountRow({ actionLabel, detail, label, onAction, value }: { actionLabel?: string; detail?: string; label: string; onAction?: () => void; value: string }) {
-  return <Stack direction="row" spacing={2} sx={{ alignItems: "center", p: 2.5 }}><Box sx={{ flex: 1 }}><Typography color="text.secondary" variant="caption">{label}</Typography><Typography sx={{ fontWeight: 650 }} variant="body2">{value}</Typography>{detail ? <Typography color="text.secondary" variant="caption">{detail}</Typography> : null}</Box>{actionLabel ? <Button variant="contained" size="small" onClick={onAction}>{actionLabel}</Button> : null}</Stack>;
+  return <Stack direction="row" spacing={2} sx={{ alignItems: "center", p: 2.5 }}><Box sx={{ flex: 1 }}><Typography color="text.secondary" variant="caption">{label}</Typography><Typography sx={{ fontWeight: 600 }} variant="body2">{value}</Typography>{detail ? <Typography color="text.secondary" variant="caption">{detail}</Typography> : null}</Box>{actionLabel ? <Button variant="contained" size="small" onClick={onAction}>{actionLabel}</Button> : null}</Stack>;
 }
 
 function dialogTitle(dialog: AccountDialog) {

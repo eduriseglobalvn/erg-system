@@ -27,11 +27,11 @@ import {
   playerViewportClass,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { usePlayerDerivedState } from "@/components/quiz/player-shell-runtime/use-player-derived-state";
-import { usePlayerActions } from "@/components/quiz/player-shell-runtime/use-player-actions";
+import { usePlayerActions } from "@/features/lcms/quiz/player/player-shell-runtime/use-player-actions";
 import { usePlayerKeyboard } from "@/components/quiz/player-shell-runtime/use-player-keyboard";
-import { usePlayerLoadEffect } from "@/components/quiz/player-shell-runtime/use-player-load-effect";
-import { usePlayerSyncEffects } from "@/components/quiz/player-shell-runtime/use-player-sync-effects";
-import { useTimeUpSubmit } from "@/components/quiz/player-shell-runtime/use-time-up-submit";
+import { usePlayerLoadEffect } from "@/features/lcms/quiz/player/player-shell-runtime/use-player-load-effect";
+import { usePlayerSyncEffects } from "@/features/lcms/quiz/player/player-shell-runtime/use-player-sync-effects";
+import { useTimeUpSubmit } from "@/features/lcms/quiz/player/player-shell-runtime/use-time-up-submit";
 import { useTrainingAdvanceEffects } from "@/components/quiz/player-shell-runtime/use-training-advance-effects";
 import {
   createRuntimeKey,

@@ -4,10 +4,11 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = resolve(process.cwd(), "src/components/quiz");
+const PLAYER = resolve(process.cwd(), "src/features/lcms/quiz/player");
 
 describe("Quiz Player Shell ownership", () => {
   it("keeps the public shell as a typed runtime boundary", () => {
-    const source = readFileSync(resolve(ROOT, "player-shell.tsx"), "utf8");
+    const source = readFileSync(resolve(PLAYER, "player-shell.tsx"), "utf8");
 
     expect(source.split(/\r?\n/).length).toBeLessThanOrEqual(80);
     expect(source).toContain("PlayerShellRuntime");
@@ -15,7 +16,7 @@ describe("Quiz Player Shell ownership", () => {
   });
 
   it("keeps runtime, navigation, mobile and result owners explicit", () => {
-    const runtime = readFileSync(resolve(ROOT, "player-shell-runtime.tsx"), "utf8");
+    const runtime = readFileSync(resolve(PLAYER, "player-shell-runtime.tsx"), "utf8");
 
     expect(runtime).toContain("QuestionNavigator");
     expect(runtime).toContain("MobilePlayerShell");
@@ -28,8 +29,8 @@ describe("Quiz Player Shell ownership", () => {
   });
 
   it("does not make protected matching implementations shell dependencies", () => {
-    for (const fileName of ["player-shell.tsx", "player-shell-runtime.tsx", "player-shell-runtime-model.ts"]) {
-      const source = readFileSync(resolve(ROOT, fileName), "utf8");
+    for (const file of [resolve(PLAYER, "player-shell.tsx"), resolve(PLAYER, "player-shell-runtime.tsx"), resolve(ROOT, "player-shell-runtime-model.ts")]) {
+      const source = readFileSync(file, "utf8");
       expect(source).not.toContain("matching-question");
       expect(source).not.toContain("classic-editor.css");
     }

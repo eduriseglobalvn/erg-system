@@ -148,7 +148,7 @@ export function SidebarBottom({
           </Tooltip>
           <Tooltip title={userName} placement="right">
             <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0, "&:hover": { opacity: 0.85 } }}>
-              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 700, height: 32, width: 32 }}>{initial}</Avatar>
+              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
             </IconButton>
           </Tooltip>
         </Box>
@@ -157,13 +157,13 @@ export function SidebarBottom({
           <Box component="button" type="button" onClick={handleSearchClick} sx={{ alignItems: "center", bgcolor: "rgba(145,158,171,0.06)", border: "1px solid rgba(145,158,171,0.14)", borderRadius: "8px", color: "#637381", cursor: "pointer", display: "flex", gap: 0.75, height: 32, px: 1, textAlign: "left", width: "100%", "&:hover": { bgcolor: "rgba(145,158,171,0.12)", color: "#1C252E" } }}>
             <SearchRoundedIcon sx={{ fontSize: 16 }} />
             <Typography sx={{ color: "#919EAB", flex: 1, fontSize: 11.5, fontWeight: 500 }}>Tìm kiếm...</Typography>
-            <Box component="span" sx={{ bgcolor: "#FFFFFF", border: "1px solid rgba(145,158,171,0.2)", borderRadius: "4px", color: "#637381", fontSize: 10, fontWeight: 700, px: 0.5, py: 0.05 }}>⌘K</Box>
+            <Box component="span" sx={{ bgcolor: "#FFFFFF", border: "1px solid rgba(145,158,171,0.2)", borderRadius: "4px", color: "#637381", fontSize: 10, fontWeight: 600, px: 0.5, py: 0.05 }}>⌘K</Box>
           </Box>
           <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, width: "100%" }}>
             <Box onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ alignItems: "center", borderRadius: "8px", cursor: "pointer", display: "flex", flex: 1, gap: 1, minWidth: 0, p: "3px 5px", transition: "background 140ms ease", "&:hover": { bgcolor: "rgba(145,158,171,0.08)" } }}>
-              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 700, height: 32, width: 32 }}>{initial}</Avatar>
+              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
               <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12, fontWeight: 700, lineHeight: 1.2 }}>{userName}</Typography>
+                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>{userName}</Typography>
                 <Typography noWrap sx={{ color: "#94A3B8", fontSize: 10, lineHeight: 1.2, mt: 0.2 }}>{userEmail}</Typography>
               </Box>
             </Box>
@@ -202,7 +202,7 @@ export function SidebarBottom({
         }}
       >
         <Box sx={{ px: 1.5, py: 0.75 }}>
-          <Typography variant="subtitle2" sx={{ color: "#0F172A", fontSize: 13, fontWeight: 700 }}>{userName}</Typography>
+          <Typography variant="subtitle2" sx={{ color: "#0F172A", fontSize: 13, fontWeight: 600 }}>{userName}</Typography>
           <Typography variant="caption" sx={{ color: "#94A3B8", fontSize: 11 }}>{userEmail}</Typography>
         </Box>
         <Divider sx={{ my: 0.5 }} />
@@ -210,7 +210,7 @@ export function SidebarBottom({
         {capabilities.length >= 2 ? (
           <>
             <Box sx={{ px: 1.5, py: 0.5 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
                 Không gian làm việc
               </Typography>
             </Box>

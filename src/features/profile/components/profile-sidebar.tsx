@@ -12,6 +12,8 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { ProfileLine, ProfileTabButton } from "@/features/profile/components/profile-primitives";
 import type { useProfilePageController } from "@/features/profile/hooks/use-profile-page-controller";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function ProfileSidebar({
   account,
@@ -31,7 +33,7 @@ export function ProfileSidebar({
           elevation={0}
           sx={{
             bgcolor: "#FFFFFF",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             borderRadius: "16px",
             boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
             p: 2.5,
@@ -42,7 +44,7 @@ export function ProfileSidebar({
             sx={{
               bgcolor: "rgba(0, 0, 0, 0.02)",
               borderRadius: "14px",
-              border: "1px solid rgba(0, 0, 0, 0.04)",
+              border: `1px solid ${ergEnterpriseTokens.color.border}`,
               p: 2.5,
               textAlign: "center",
             }}
@@ -50,7 +52,7 @@ export function ProfileSidebar({
             <Box sx={{ display: "inline-block", position: "relative" }}>
               <Box
                 sx={{
-                  bgcolor: "rgba(0, 113, 227, 0.08)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                   border: "3px solid #FFFFFF",
                   borderRadius: "50%",
                   boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
@@ -62,7 +64,7 @@ export function ProfileSidebar({
                 {avatarUrl ? (
                   <Box component="img" alt={form.fullName || "Avatar"} src={avatarUrl} sx={{ height: "100%", objectFit: "cover", width: "100%" }} />
                 ) : (
-                  <Box sx={{ alignItems: "center", color: "#0071E3", display: "flex", fontSize: "1.4rem", fontWeight: 800, height: "100%", justifyContent: "center", width: "100%" }}>
+                  <Box sx={{ alignItems: "center", color: "primary.main", display: "flex", fontSize: "1.4rem", fontWeight: 600, height: "100%", justifyContent: "center", width: "100%" }}>
                     {initials}
                   </Box>
                 )}
@@ -77,11 +79,11 @@ export function ProfileSidebar({
                 sx={{
                   alignItems: "center",
                   bgcolor: "#FFFFFF",
-                  border: "2px solid rgba(0, 0, 0, 0.06)",
+                  border: `2px solid ${ergEnterpriseTokens.color.border}`,
                   borderRadius: "50%",
                   bottom: -2,
                   boxShadow: "0 2px 6px rgba(0, 0, 0, 0.1)",
-                  color: "#0071E3",
+                  color: "primary.main",
                   cursor: "pointer",
                   display: "flex",
                   height: 28,
@@ -90,7 +92,7 @@ export function ProfileSidebar({
                   right: -2,
                   transition: "all 0.15s ease",
                   width: 28,
-                  "&:hover": { bgcolor: "rgba(0, 113, 227, 0.08)", transform: "scale(1.1)" },
+                  "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08), transform: "scale(1.1)" },
                 }}
               >
                 {isUploadingAvatar ? <CircularProgress color="inherit" size={14} /> : <Camera sx={{ fontSize: 15 }} />}
@@ -110,23 +112,23 @@ export function ProfileSidebar({
               />
             </Box>
   
-            <Typography sx={{ color: "#1D1D1F", fontSize: "1.1rem", fontWeight: 800, letterSpacing: "-0.015em", mt: 1.5 }}>
+            <Typography sx={{ color: "text.primary", fontSize: "1.1rem", fontWeight: 600, letterSpacing: "-0.015em", mt: 1.5 }}>
               {form.fullName || account?.email || "Tài khoản ERG"}
             </Typography>
-            <Typography noWrap sx={{ color: "#86868B", fontSize: "0.8rem", mt: 0.25 }}>
+            <Typography noWrap sx={{ color: "text.disabled", fontSize: "0.8rem", mt: 0.25 }}>
               {account?.email}
             </Typography>
   
             <Box
               sx={{
                 alignItems: "center",
-                bgcolor: "rgba(52, 199, 89, 0.12)",
-                border: "1px solid rgba(52, 199, 89, 0.22)",
+                bgcolor: alpha(ergEnterpriseTokens.color.success, 0.12),
+                border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.22)}`,
                 borderRadius: "9999px",
                 color: "#15803D",
                 display: "inline-flex",
                 fontSize: "0.72rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 gap: 0.5,
                 mt: 1.25,
                 px: 1.25,
@@ -138,12 +140,12 @@ export function ProfileSidebar({
             </Box>
   
             {/* Profile Completion Bar */}
-            <Box sx={{ bgcolor: "#FFFFFF", borderRadius: "10px", border: "1px solid rgba(0, 0, 0, 0.04)", mt: 2, p: 1.5 }}>
+            <Box sx={{ bgcolor: "#FFFFFF", borderRadius: `${ergEnterpriseTokens.radius.md}px`, border: `1px solid ${ergEnterpriseTokens.color.border}`, mt: 2, p: 1.5 }}>
               <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.75 }}>
-                <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600 }}>
+                <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600 }}>
                   Hoàn thiện hồ sơ
                 </Typography>
-                <Typography sx={{ color: "#0071E3", fontSize: "0.72rem", fontWeight: 750 }}>
+                <Typography sx={{ color: "primary.main", fontSize: "0.72rem", fontWeight: 600 }}>
                   {completionPercent}%
                 </Typography>
               </Box>
@@ -151,11 +153,11 @@ export function ProfileSidebar({
                 value={completionPercent}
                 variant="determinate"
                 sx={{
-                  bgcolor: "rgba(0, 113, 227, 0.08)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                   borderRadius: 9999,
                   height: 5,
                   "& .MuiLinearProgress-bar": {
-                    bgcolor: "#0071E3",
+                    bgcolor: "primary.main",
                     borderRadius: 9999,
                   },
                 }}

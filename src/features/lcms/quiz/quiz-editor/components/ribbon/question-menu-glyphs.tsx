@@ -37,7 +37,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
             >
               <path d="M3 8.5L6.5 12L13 4" />
             </Box>
-            <Typography sx={{ fontSize: "9px", fontWeight: 800, color: "#15803D" }}>Đúng</Typography>
+            <Typography sx={{ fontSize: "9px", fontWeight: 600, color: "#15803D" }}>Đúng</Typography>
           </Box>
           <Box
             sx={{
@@ -59,7 +59,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
             >
               <path d="M4 4L12 12M12 4L4 12" />
             </Box>
-            <Typography sx={{ fontSize: "9px", fontWeight: 800, color: "#B91C1C" }}>Sai</Typography>
+            <Typography sx={{ fontSize: "9px", fontWeight: 600, color: "#B91C1C" }}>Sai</Typography>
           </Box>
         </Box>
       </Box>
@@ -83,7 +83,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
               justifyContent: "center",
             }}
           >
-            <Typography sx={{ fontSize: "9.5px", fontWeight: 800, color: "#1D4ED8" }}>Có</Typography>
+            <Typography sx={{ fontSize: "9.5px", fontWeight: 600, color: "#1D4ED8" }}>Có</Typography>
           </Box>
           <Box
             sx={{
@@ -97,7 +97,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
               justifyContent: "center",
             }}
           >
-            <Typography sx={{ fontSize: "9.5px", fontWeight: 700, color: "#64748B" }}>Không</Typography>
+            <Typography sx={{ fontSize: "9.5px", fontWeight: 600, color: "#64748B" }}>Không</Typography>
           </Box>
         </Box>
       </Box>
@@ -262,7 +262,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
                 bgcolor: num === 1 ? "#2563EB" : "#E2E8F0",
                 color: num === 1 ? "#FFFFFF" : "#64748B",
                 fontSize: "8.5px",
-                fontWeight: 800,
+                fontWeight: 600,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

@@ -519,10 +519,10 @@ export function TeachingScheduleDialog({
       </DialogContent>
       <DialogActions sx={{ borderTop: "1px solid #EEF2F7", px: 3, py: 1.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 700 }}>
+          <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 600 }}>
             {scheduleRows.length} dòng · {totalPeriodCount} tiết
           </Typography>
-          {submitError ? <Typography sx={{ color: "#B42318", fontSize: 12.25, fontWeight: 750, mt: 0.35 }}>{submitError}</Typography> : null}
+          {submitError ? <Typography sx={{ color: "#B42318", fontSize: 12.25, fontWeight: 600, mt: 0.35 }}>{submitError}</Typography> : null}
         </Box>
         {createdBatchId ? (
           <>
@@ -578,7 +578,7 @@ function SchedulePreviewPanel({
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 950 }}>{title}</Typography>
-            <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 650, mt: 0.25 }}>
+            <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 600, mt: 0.25 }}>
               {result.previewEventCount} lịch · {result.teacherScheduleCount} phân công giáo viên · {result.totalPeriodCount} tiết
             </Typography>
           </Box>
@@ -622,7 +622,7 @@ function PreviewIssueRow({
       <Typography noWrap sx={{ color: "#253041", fontSize: 12.5, fontWeight: 850, minWidth: 0 }}>
         {rowLabel}
       </Typography>
-      <Typography sx={{ color, fontSize: 12.25, fontWeight: 700, lineHeight: 1.45 }}>
+      <Typography sx={{ color, fontSize: 12.25, fontWeight: 600, lineHeight: 1.45 }}>
         {message}
       </Typography>
     </Box>

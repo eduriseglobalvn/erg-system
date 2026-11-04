@@ -82,7 +82,7 @@ export function PortalWorkspaceSwitcher({
           borderRadius: "8px",
           color: "text.primary",
           fontSize: 12.5,
-          fontWeight: 700,
+          fontWeight: 600,
           minWidth: 0,
           px: { xs: 0.75, sm: 1.25 },
           py: 0.5,
@@ -109,7 +109,7 @@ export function PortalWorkspaceSwitcher({
         }}
       >
         <Box sx={{ px: 1.5, py: 0.75 }}>
-          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Không gian làm việc
           </Typography>
         </Box>

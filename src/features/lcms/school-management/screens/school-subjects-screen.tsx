@@ -12,6 +12,8 @@ import { SchoolPageShell } from "@/features/lcms/school-management/components/sc
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { useNavigate } from "@tanstack/react-router";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export default function SchoolSubjectsScreen() {
   const { selectedSchool, unsupportedApiMessage } = useSchoolManagementContext();
@@ -31,7 +33,7 @@ export default function SchoolSubjectsScreen() {
           sx={{
             borderRadius: "10px",
             fontSize: "0.85rem",
-            fontWeight: 650,
+            fontWeight: 600,
             textTransform: "none",
           }}
         >
@@ -43,12 +45,12 @@ export default function SchoolSubjectsScreen() {
         <Alert
           severity="info"
           sx={{
-            bgcolor: "rgba(0, 113, 227, 0.08)",
-            border: "1px solid rgba(0, 113, 227, 0.2)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.2)}`,
             borderRadius: "12px",
-            color: "#0071E3",
+            color: ergEnterpriseTokens.color.primary,
             mb: 2.5,
-            "& .MuiAlert-icon": { color: "#0071E3" },
+            "& .MuiAlert-icon": { color: ergEnterpriseTokens.color.primary },
           }}
         >
           {unsupportedApiMessage}
@@ -75,7 +77,7 @@ export default function SchoolSubjectsScreen() {
               sx={{
                 bgcolor: "#FFFFFF",
                 borderRadius: "16px",
-                border: "1px solid rgba(0, 0, 0, 0.06)",
+                border: `1px solid ${ergEnterpriseTokens.color.border}`,
                 boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 20px -4px rgba(0, 0, 0, 0.03)",
                 p: 2.75,
                 transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -96,7 +98,7 @@ export default function SchoolSubjectsScreen() {
                       display: "inline-block",
                       fontFamily: "var(--font-mono)",
                       fontSize: "0.72rem",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       mb: 0.5,
                       px: 0.85,
                       py: 0.25,
@@ -106,9 +108,9 @@ export default function SchoolSubjectsScreen() {
                   </Box>
                   <Typography
                     sx={{
-                      color: "#1D1D1F",
+                      color: ergEnterpriseTokens.color.text,
                       fontSize: "1.15rem",
-                      fontWeight: 800,
+                      fontWeight: 600,
                       letterSpacing: "-0.015em",
                     }}
                   >
@@ -119,20 +121,20 @@ export default function SchoolSubjectsScreen() {
                 <Box
                   sx={{
                     alignItems: "center",
-                    bgcolor: "rgba(52, 199, 89, 0.12)",
-                    border: "1px solid rgba(52, 199, 89, 0.22)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.success, 0.12),
+                    border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.22)}`,
                     borderRadius: "9999px",
                     color: "#15803D",
                     display: "inline-flex",
                     fontSize: "0.72rem",
-                    fontWeight: 700,
+                    fontWeight: 600,
                     gap: 0.65,
                     lineHeight: 1,
                     px: 1,
                     py: 0.4,
                   }}
                 >
-                  <Box sx={{ bgcolor: "#34C759", borderRadius: "50%", height: 6, width: 6 }} />
+                  <Box sx={{ bgcolor: ergEnterpriseTokens.color.success, borderRadius: "50%", height: 6, width: 6 }} />
                   Đang triển khai
                 </Box>
               </Box>
@@ -151,24 +153,24 @@ export default function SchoolSubjectsScreen() {
               >
                 <Box>
                   <Box sx={{ alignItems: "center", display: "flex", gap: 0.5, mb: 0.35 }}>
-                    <GroupsRoundedIcon sx={{ color: "#86868B", fontSize: 15 }} />
-                    <Typography sx={{ color: "#6E6E73", fontSize: "0.75rem", fontWeight: 600 }}>
+                    <GroupsRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 15 }} />
+                    <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", fontWeight: 600 }}>
                       Học sinh ghi danh
                     </Typography>
                   </Box>
-                  <Typography sx={{ color: "#1D1D1F", fontSize: "1.15rem", fontWeight: 800 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.15rem", fontWeight: 600 }}>
                     {subject.studentCount}
                   </Typography>
                 </Box>
 
                 <Box>
                   <Box sx={{ alignItems: "center", display: "flex", gap: 0.5, mb: 0.35 }}>
-                    <SchoolRoundedIcon sx={{ color: "#86868B", fontSize: 15 }} />
-                    <Typography sx={{ color: "#6E6E73", fontSize: "0.75rem", fontWeight: 600 }}>
+                    <SchoolRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 15 }} />
+                    <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", fontWeight: 600 }}>
                       Giáo viên phụ trách
                     </Typography>
                   </Box>
-                  <Typography sx={{ color: "#1D1D1F", fontSize: "1.15rem", fontWeight: 800 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.15rem", fontWeight: 600 }}>
                     {subject.teacherCount}
                   </Typography>
                 </Box>
@@ -177,10 +179,10 @@ export default function SchoolSubjectsScreen() {
               {/* Progress Bar */}
               <Box sx={{ mb: 2 }}>
                 <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.75 }}>
-                  <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 600 }}>
                     Tỷ lệ phủ toàn trường
                   </Typography>
-                  <Typography sx={{ color: "#1D1D1F", fontSize: "0.72rem", fontWeight: 750 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.72rem", fontWeight: 600 }}>
                     {percent}%
                   </Typography>
                 </Box>
@@ -188,11 +190,11 @@ export default function SchoolSubjectsScreen() {
                   value={percent}
                   variant="determinate"
                   sx={{
-                    bgcolor: "rgba(0, 113, 227, 0.08)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                     borderRadius: 9999,
                     height: 6,
                     "& .MuiLinearProgress-bar": {
-                      bgcolor: "#0071E3",
+                      bgcolor: ergEnterpriseTokens.color.primary,
                       borderRadius: 9999,
                     },
                   }}
@@ -210,18 +212,18 @@ export default function SchoolSubjectsScreen() {
                   startIcon={<GroupAddRoundedIcon sx={{ fontSize: 16 }} />}
                   size="small"
                   sx={{
-                    bgcolor: "rgba(0, 113, 227, 0.08)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                     borderRadius: "8px",
-                    color: "#0071E3",
+                    color: ergEnterpriseTokens.color.primary,
                     fontSize: "0.8rem",
-                    fontWeight: 650,
+                    fontWeight: 600,
                     letterSpacing: "-0.01em",
                     px: 1.5,
                     py: 0.6,
                     textTransform: "none",
                     transition: "all 0.15s ease",
                     "&:hover": {
-                      bgcolor: "rgba(0, 113, 227, 0.14)",
+                      bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.14),
                     },
                     "&:active": {
                       transform: "scale(0.985)",

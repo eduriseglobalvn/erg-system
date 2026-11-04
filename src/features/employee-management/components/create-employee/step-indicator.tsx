@@ -55,7 +55,7 @@ export function StepIndicator({ setStep, step }: { setStep: (step: number) => vo
                 display: "flex",
                 flexShrink: 0,
                 fontSize: "0.7rem",
-                fontWeight: 750,
+                fontWeight: 600,
                 height: 20,
                 justifyContent: "center",
                 width: 20,

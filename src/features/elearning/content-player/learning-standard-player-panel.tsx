@@ -41,7 +41,7 @@ export function LearningStandardPlayerPanel({ packageId, title = "Nội dung chu
   return (
     <Card variant="outlined">
       <CardContent sx={{ display: "grid", gap: 1.25 }}>
-        <Typography sx={{ fontWeight: 800 }} variant="subtitle1">{title}</Typography>
+        <Typography sx={{ fontWeight: 600 }} variant="subtitle1">{title}</Typography>
         <Typography color="text.secondary" variant="body2">SCORM package được kiểm tra quyền launch theo tài khoản học viên.</Typography>
         {error ? <Alert severity="error">{error}</Alert> : null}
         {resolved ? (

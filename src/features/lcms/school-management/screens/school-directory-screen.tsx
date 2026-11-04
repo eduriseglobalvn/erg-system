@@ -30,6 +30,8 @@ import { SchoolPageShell } from "@/features/lcms/school-management/components/sc
 import type { SchoolDraft } from "@/features/lcms/school-management/types/school-management-types";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 const AVATAR_GRADIENTS = [
   { bg: "linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%)", color: "#3730A3" },
@@ -58,24 +60,24 @@ function getSchoolAvatarStyle(name?: string | null) {
 
 const statusMeta = {
   active: {
-    bg: "rgba(52, 199, 89, 0.12)",
-    border: "rgba(52, 199, 89, 0.22)",
+    bg: alpha(ergEnterpriseTokens.color.success, 0.12),
+    border: alpha(ergEnterpriseTokens.color.success, 0.22),
     color: "#15803D",
-    dot: "#34C759",
+    dot: ergEnterpriseTokens.color.success,
     label: "Đang vận hành",
   },
   onboarding: {
-    bg: "rgba(255, 149, 0, 0.12)",
-    border: "rgba(255, 149, 0, 0.22)",
+    bg: alpha(ergEnterpriseTokens.color.warning, 0.12),
+    border: alpha(ergEnterpriseTokens.color.warning, 0.22),
     color: "#B45309",
-    dot: "#FF9500",
+    dot: ergEnterpriseTokens.color.warning,
     label: "Đang triển khai",
   },
   paused: {
     bg: "rgba(0, 0, 0, 0.05)",
     border: "rgba(0, 0, 0, 0.1)",
-    color: "#6E6E73",
-    dot: "#86868B",
+    color: ergEnterpriseTokens.color.textMuted,
+    dot: ergEnterpriseTokens.color.textMuted,
     label: "Tạm dừng",
   },
 } as const;
@@ -119,18 +121,18 @@ export default function SchoolDirectoryScreen() {
           startIcon={<AddRoundedIcon />}
           variant="contained"
           sx={{
-            bgcolor: "#0071E3",
+            bgcolor: ergEnterpriseTokens.color.primary,
             borderRadius: "11px",
-            boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+            boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
             fontSize: "0.875rem",
-            fontWeight: 650,
+            fontWeight: 600,
             px: 2.5,
             py: 1,
             textTransform: "none",
             transition: "all 0.15s ease",
             "&:hover": {
-              bgcolor: "#0077ED",
-              boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+              bgcolor: ergEnterpriseTokens.color.primaryHover,
+              boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
               transform: "translateY(-1px)",
             },
             "&:active": {
@@ -153,24 +155,24 @@ export default function SchoolDirectoryScreen() {
       >
         <MetricCard
           icon={<BusinessRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(0, 113, 227, 0.08)"
-          iconColor="#0071E3"
+          iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
+          iconColor={ergEnterpriseTokens.color.primary}
           label="Tổng số trường"
           value={schools.length}
           subtext="Đơn vị đào tạo liên kết"
         />
         <MetricCard
           icon={<CheckCircleRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(52, 199, 89, 0.1)"
-          iconColor="#34C759"
+          iconBg={alpha(ergEnterpriseTokens.color.success, 0.1)}
+          iconColor={ergEnterpriseTokens.color.success}
           label="Đang vận hành"
           value={activeCount}
           subtext="Hoạt động giảng dạy chính thức"
         />
         <MetricCard
           icon={<HourglassTopRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(255, 149, 0, 0.1)"
-          iconColor="#FF9500"
+          iconBg={alpha(ergEnterpriseTokens.color.warning, 0.1)}
+          iconColor={ergEnterpriseTokens.color.warning}
           label="Đang triển khai"
           value={onboardingCount}
           subtext="Đang hoàn thiện dữ liệu"
@@ -190,7 +192,7 @@ export default function SchoolDirectoryScreen() {
         elevation={0}
         sx={{
           bgcolor: "#FFFFFF",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           borderRadius: "16px",
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
           overflow: "hidden",
@@ -200,7 +202,7 @@ export default function SchoolDirectoryScreen() {
         <Box
           sx={{
             alignItems: { sm: "center", xs: "flex-start" },
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
             display: "flex",
             flexDirection: { sm: "row", xs: "column" },
             gap: 2,
@@ -209,10 +211,10 @@ export default function SchoolDirectoryScreen() {
           }}
         >
           <Box>
-            <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
               {schools.length} trường trong hệ thống
             </Typography>
-            <Typography sx={{ color: "#86868B", fontSize: "0.825rem", fontWeight: 500, mt: 0.25 }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", fontWeight: 500, mt: 0.25 }}>
               {activeCount} trường đang vận hành chính thức
             </Typography>
           </Box>
@@ -226,7 +228,7 @@ export default function SchoolDirectoryScreen() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 19 }} />
+                    <SearchRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 19 }} />
                   </InputAdornment>
                 ),
                 sx: {
@@ -235,11 +237,11 @@ export default function SchoolDirectoryScreen() {
                   fontSize: "0.85rem",
                   transition: "all 0.15s ease",
                   width: { sm: 320, xs: "100%" },
-                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                  "& fieldset": { borderColor: ergEnterpriseTokens.color.border },
                   "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#0071E3",
-                    boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                    borderColor: ergEnterpriseTokens.color.primary,
+                    boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                   },
                 },
               },
@@ -296,7 +298,7 @@ export default function SchoolDirectoryScreen() {
               ) : filtered.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} sx={{ py: 6, textAlign: "center" }}>
-                    <Typography sx={{ color: "#86868B", fontSize: "0.875rem", fontStyle: "italic" }}>
+                    <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.875rem", fontStyle: "italic" }}>
                       Không tìm thấy trường liên kết nào phù hợp với từ khóa.
                     </Typography>
                   </TableCell>
@@ -316,7 +318,7 @@ export default function SchoolDirectoryScreen() {
                       sx={{
                         cursor: "pointer",
                         transition: "background-color 0.12s ease",
-                        "&:hover": { bgcolor: "rgba(0, 113, 227, 0.035) !important" },
+                        "&:hover": { bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.035)} !important` },
                         "& td": { borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.4 },
                       }}
                     >
@@ -329,7 +331,7 @@ export default function SchoolDirectoryScreen() {
                               boxShadow: "0 1px 4px rgba(0, 0, 0, 0.08)",
                               color: avatarStyle.color,
                               fontSize: "0.78rem",
-                              fontWeight: 750,
+                              fontWeight: 600,
                               height: 36,
                               width: 36,
                             }}
@@ -339,9 +341,9 @@ export default function SchoolDirectoryScreen() {
                           <Box sx={{ minWidth: 0 }}>
                             <Typography
                               sx={{
-                                color: "#1D1D1F",
+                                color: ergEnterpriseTokens.color.text,
                                 fontSize: "0.875rem",
-                                fontWeight: 750,
+                                fontWeight: 600,
                                 letterSpacing: "-0.01em",
                               }}
                             >
@@ -350,7 +352,7 @@ export default function SchoolDirectoryScreen() {
                             <Box
                               component="span"
                               sx={{
-                                color: "#86868B",
+                                color: ergEnterpriseTokens.color.textMuted,
                                 display: "inline-block",
                                 fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
                                 fontSize: "0.72rem",
@@ -369,12 +371,12 @@ export default function SchoolDirectoryScreen() {
                         <Box
                           component="span"
                           sx={{
-                            bgcolor: "rgba(0, 113, 227, 0.07)",
-                            border: "1px solid rgba(0, 113, 227, 0.16)",
+                            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.07),
+                            border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.16)}`,
                             borderRadius: "6px",
-                            color: "#0071E3",
+                            color: ergEnterpriseTokens.color.primary,
                             fontSize: "0.76rem",
-                            fontWeight: 700,
+                            fontWeight: 600,
                             px: 1,
                             py: 0.3,
                           }}
@@ -385,18 +387,18 @@ export default function SchoolDirectoryScreen() {
 
                       {/* Địa phương */}
                       <TableCell>
-                        <Typography sx={{ color: school.district ? "#1D1D1F" : "#86868B", fontSize: "0.85rem" }}>
+                        <Typography sx={{ color: school.district ? ergEnterpriseTokens.color.text : ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem" }}>
                           {school.district || "Chưa cập nhật"}
                         </Typography>
                       </TableCell>
 
                       {/* Đầu mối */}
                       <TableCell>
-                        <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 600 }}>
+                        <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.85rem", fontWeight: 600 }}>
                           {school.principal || "Xem trong chi tiết"}
                         </Typography>
                         {school.contactPhone ? (
-                          <Typography sx={{ color: "#86868B", fontSize: "0.75rem", mt: 0.25 }}>
+                          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", mt: 0.25 }}>
                             {school.contactPhone}
                           </Typography>
                         ) : null}
@@ -404,21 +406,21 @@ export default function SchoolDirectoryScreen() {
 
                       {/* Người học */}
                       <TableCell align="right">
-                        <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 750 }}>
+                        <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600 }}>
                           {school.studentCount ?? school.students.length}
                         </Typography>
                       </TableCell>
 
                       {/* Lớp */}
                       <TableCell align="right">
-                        <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 650 }}>
+                        <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600 }}>
                           {school.classCount ?? school.classes.length}
                         </Typography>
                       </TableCell>
 
                       {/* Môn */}
                       <TableCell align="right">
-                        <Typography sx={{ color: school.subjects.length ? "#1D1D1F" : "#86868B", fontSize: "0.85rem", fontWeight: 600 }}>
+                        <Typography sx={{ color: school.subjects.length ? ergEnterpriseTokens.color.text : ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem", fontWeight: 600 }}>
                           {school.subjects.length || "—"}
                         </Typography>
                       </TableCell>
@@ -434,7 +436,7 @@ export default function SchoolDirectoryScreen() {
                             color: status.color,
                             display: "inline-flex",
                             fontSize: "0.75rem",
-                            fontWeight: 650,
+                            fontWeight: 600,
                             gap: 0.7,
                             px: 1.15,
                             py: 0.4,
@@ -462,11 +464,11 @@ export default function SchoolDirectoryScreen() {
                           size="small"
                           sx={{
                             bgcolor: "rgba(0, 0, 0, 0.03)",
-                            color: "#86868B",
+                            color: ergEnterpriseTokens.color.textMuted,
                             transition: "all 0.15s ease",
                             "&:hover": {
-                              bgcolor: "rgba(0, 113, 227, 0.1)",
-                              color: "#0071E3",
+                              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.1),
+                              color: ergEnterpriseTokens.color.primary,
                             },
                           }}
                         >
@@ -489,10 +491,10 @@ export default function SchoolDirectoryScreen() {
 
 const tableHeadCellSx = {
   bgcolor: "rgba(250, 250, 252, 0.95)",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-  color: "#86868B",
+  borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+  color: ergEnterpriseTokens.color.textMuted,
   fontSize: "0.72rem",
-  fontWeight: 700,
+  fontWeight: 600,
   letterSpacing: "0.04em",
   py: 1.25,
   textTransform: "uppercase",
@@ -520,7 +522,7 @@ function MetricCard({
       elevation={0}
       sx={{
         bgcolor: "#FFFFFF",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "14px",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
         display: "flex",
@@ -535,7 +537,7 @@ function MetricCard({
       }}
     >
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.5 }}>
-        <Typography sx={{ color: "#86868B", fontSize: "0.78rem", fontWeight: 650, letterSpacing: "-0.01em" }}>
+        <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
           {label}
         </Typography>
         <Box
@@ -553,10 +555,10 @@ function MetricCard({
           {icon}
         </Box>
       </Box>
-      <Typography sx={{ color: "#1D1D1F", fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.5rem", fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.1 }}>
         {value}
       </Typography>
-      <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 550, mt: 0.25 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 550, mt: 0.25 }}>
         {subtext}
       </Typography>
     </Paper>

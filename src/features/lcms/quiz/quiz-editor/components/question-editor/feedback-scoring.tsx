@@ -75,7 +75,7 @@ export function MuiFeedbackAndScoring({
                 <Typography
                   variant="subtitle2"
                   sx={{
-                    fontWeight: 700,
+                    fontWeight: 600,
                     fontSize: "13px",
                     color: isCorrect ? "#15803D" : isIncorrect ? "#B91C1C" : "#0F172A",
                   }}

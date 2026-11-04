@@ -10,6 +10,8 @@ import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-type-config";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export function SchoolPageShell({
   action,
@@ -27,13 +29,13 @@ export function SchoolPageShell({
   const { error, isLoading, refetch, schools, selectedSchool, selectSchool } = useSchoolManagementContext();
 
   return (
-    <Box sx={{ bgcolor: "#F5F5F7", minHeight: "calc(100vh - 80px)" }}>
+    <Box sx={{ bgcolor: ergEnterpriseTokens.color.surfaceMuted, minHeight: "calc(100vh - 80px)" }}>
       {/* Apple Translucent Window Toolbar */}
       <Box
         sx={{
           backdropFilter: "blur(20px)",
           bgcolor: "rgba(255, 255, 255, 0.88)",
-          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
           position: "sticky",
           top: 0,
           zIndex: 4,
@@ -58,18 +60,18 @@ export function SchoolPageShell({
                 "& .MuiBreadcrumbs-separator": { color: "#C7C7CC", mx: 0.75 },
               }}
             >
-              <Typography sx={{ color: "#86868B", fontSize: "0.75rem", fontWeight: 600 }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", fontWeight: 600 }}>
                 Quản lý trường học
               </Typography>
-              <Typography sx={{ color: "#1D1D1F", fontSize: "0.75rem", fontWeight: 700 }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.75rem", fontWeight: 600 }}>
                 {title}
               </Typography>
             </Breadcrumbs>
             <Typography
               sx={{
-                color: "#1D1D1F",
+                color: ergEnterpriseTokens.color.text,
                 fontSize: { xs: "1.25rem", md: "1.45rem" },
-                fontWeight: 800,
+                fontWeight: 600,
                 letterSpacing: "-0.025em",
                 lineHeight: 1.2,
               }}
@@ -79,7 +81,7 @@ export function SchoolPageShell({
             {description ? (
               <Typography
                 sx={{
-                  color: "#6E6E73",
+                  color: ergEnterpriseTokens.color.textMuted,
                   fontSize: "0.825rem",
                   fontWeight: 500,
                   mt: 0.35,
@@ -106,12 +108,12 @@ export function SchoolPageShell({
                       borderRadius: "10px",
                       boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
                       fontSize: "0.85rem",
-                      fontWeight: 650,
+                      fontWeight: 600,
                       "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
                       "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
                       "&.Mui-focused fieldset": {
-                        borderColor: "#0071E3",
-                        boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                        borderColor: ergEnterpriseTokens.color.primary,
+                        boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                       },
                     },
                   }}
@@ -126,13 +128,13 @@ export function SchoolPageShell({
                 <Box
                   sx={{
                     alignItems: "center",
-                    bgcolor: "rgba(52, 199, 89, 0.1)",
-                    border: "1px solid rgba(52, 199, 89, 0.22)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.success, 0.1),
+                    border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.22)}`,
                     borderRadius: "9999px",
                     color: "#15803D",
                     display: "inline-flex",
                     fontSize: "0.75rem",
-                    fontWeight: 650,
+                    fontWeight: 600,
                     gap: 0.65,
                     px: 1.25,
                     py: 0.5,
@@ -152,7 +154,7 @@ export function SchoolPageShell({
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "rgba(0, 113, 227, 0.025)",
+              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.025),
               borderTop: "1px solid rgba(0, 0, 0, 0.05)",
               display: "flex",
               flexWrap: "wrap",
@@ -168,7 +170,7 @@ export function SchoolPageShell({
                 color: "#3A3A3C",
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.72rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 px: 1,
                 py: 0.25,
               }}
@@ -178,12 +180,12 @@ export function SchoolPageShell({
 
             <Box
               sx={{
-                bgcolor: "rgba(0, 113, 227, 0.08)",
-                border: "1px solid rgba(0, 113, 227, 0.18)",
+                bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+                border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.18)}`,
                 borderRadius: "6px",
-                color: "#0071E3",
+                color: ergEnterpriseTokens.color.primary,
                 fontSize: "0.72rem",
-                fontWeight: 750,
+                fontWeight: 600,
                 px: 1,
                 py: 0.25,
               }}
@@ -191,14 +193,14 @@ export function SchoolPageShell({
               {schoolTypeMeta[selectedSchool.schoolType].shortLabel}
             </Box>
 
-            <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 550 }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 550 }}>
               Năm học {selectedSchool.academicYear}
             </Typography>
 
             {selectedSchool.address ? (
               <>
                 <Typography sx={{ color: "#C7C7CC", fontSize: "0.78rem" }}>·</Typography>
-                <Typography noWrap sx={{ color: "#86868B", fontSize: "0.78rem", fontWeight: 500 }}>
+                <Typography noWrap sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 500 }}>
                   {selectedSchool.address}
                 </Typography>
               </>
@@ -225,7 +227,7 @@ export function SchoolPageShell({
                   border: 0,
                   color: "inherit",
                   cursor: "pointer",
-                  fontWeight: 800,
+                  fontWeight: 600,
                 }}
               >
                 Thử lại

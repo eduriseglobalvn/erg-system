@@ -8,6 +8,8 @@ import {
   parseDeviceString,
 } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeSessions } from "@/features/employee-management/components/employee-detail/types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeSessionsTab({
   onRevoke,
@@ -53,7 +55,7 @@ export function EmployeeSessionsTab({
                   sx={{
                     alignItems: "center",
                     bgcolor: "rgba(0, 0, 0, 0.04)",
-                    borderRadius: "10px",
+                    borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                     display: "flex",
                     height: 38,
                     justifyContent: "center",
@@ -68,7 +70,7 @@ export function EmployeeSessionsTab({
                     variant="body2"
                     sx={{
                       color: appleDesign.colors.textPrimary,
-                      fontWeight: 750,
+                      fontWeight: 600,
                       letterSpacing: "-0.01em",
                     }}
                   >
@@ -104,20 +106,20 @@ export function EmployeeSessionsTab({
                     size="small"
                     onClick={() => onRevoke(session.sessionId)}
                     sx={{
-                      bgcolor: "rgba(255, 59, 48, 0.08)",
-                      border: "1px solid rgba(255, 59, 48, 0.16)",
+                      bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.08),
+                      border: `1px solid ${alpha(ergEnterpriseTokens.color.danger, 0.16)}`,
                       borderRadius: "9999px",
                       color: appleDesign.colors.redText,
                       fontSize: "0.78rem",
-                      fontWeight: 650,
+                      fontWeight: 600,
                       px: 1.5,
                       py: 0.45,
                       textTransform: "none",
                       whiteSpace: "nowrap",
                       transition: "all 0.15s ease",
                       "&:hover": {
-                        bgcolor: "rgba(255, 59, 48, 0.16)",
-                        borderColor: "rgba(255, 59, 48, 0.3)",
+                        bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.16),
+                        borderColor: alpha(ergEnterpriseTokens.color.danger, 0.3),
                       },
                     }}
                   >

@@ -477,7 +477,7 @@ export function QuestionManagerTable({
                   >
                     <QuizOutlinedIcon sx={{ fontSize: 28 }} />
                   </div>
-                  <div style={{ fontWeight: 700, fontSize: "15.5px", color: "#0F172A", marginBottom: 6 }}>
+                  <div style={{ fontWeight: 600, fontSize: "15.5px", color: "#0F172A", marginBottom: 6 }}>
                     {statusFilter === "all"
                       ? "Chưa có câu hỏi nào trong bài kiểm tra này"
                       : `Không có câu hỏi nào thuộc mục "${
@@ -501,7 +501,7 @@ export function QuestionManagerTable({
                       height: 38,
                       padding: "0 22px",
                       fontSize: "13.5px",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       borderRadius: "9px",
                       boxShadow: "0 4px 14px rgba(15, 108, 189, 0.22)",
                       cursor: "pointer",

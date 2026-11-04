@@ -147,7 +147,7 @@ const thStyle = (width?: string | number) => ({
   padding: "10px 8px",
   border: "1px solid #e5e7eb",
   fontSize: 11,
-  fontWeight: 700,
+  fontWeight: 600,
   textAlign: "center" as const,
   backgroundColor: "#f8fafc",
   whiteSpace: "nowrap" as const,

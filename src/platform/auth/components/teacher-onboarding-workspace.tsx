@@ -24,6 +24,8 @@ import { OnboardingStepper } from "@/platform/auth/components/teacher-onboarding
 import { PasswordStep } from "@/platform/auth/components/teacher-onboarding/password-step";
 import { ProfileStep } from "@/platform/auth/components/teacher-onboarding/profile-step";
 import { RecoveryStep } from "@/platform/auth/components/teacher-onboarding/recovery-step";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type TeacherOnboardingWorkspaceProps = {
   account: TeacherAccount;
@@ -147,7 +149,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
     <Box
       sx={{
         background: "radial-gradient(120% 120% at 50% 0%, #F8FAFD 0%, #EEF2F7 100%)",
-        color: "#1D1D1F",
+        color: "text.primary",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -175,7 +177,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
           <Box sx={{ textAlign: "left" }}>
             <Typography
               sx={{
-                color: "#1D1D1F",
+                color: "text.primary",
                 fontSize: { xs: 19, sm: 22 },
                 fontWeight: 850,
                 letterSpacing: "-0.03em",
@@ -186,7 +188,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
             </Typography>
             <Typography
               sx={{
-                color: "#6E6E73",
+                color: "text.secondary",
                 fontSize: { xs: 12, sm: 13 },
                 fontWeight: 600,
                 letterSpacing: "0.02em",
@@ -203,7 +205,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
           elevation={0}
           sx={{
             bgcolor: "#FFFFFF",
-            border: "1px solid rgba(0, 0, 0, 0.08)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             borderRadius: "24px",
             boxShadow: "0 24px 64px -12px rgba(15, 23, 42, 0.08), 0 3px 12px rgba(15, 23, 42, 0.02)",
             overflow: "hidden",
@@ -214,8 +216,8 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
             <LinearProgress
               aria-label="Đang lưu onboarding"
               sx={{
-                bgcolor: "rgba(0, 113, 227, 0.12)",
-                "& .MuiLinearProgress-bar": { bgcolor: "#0071E3" },
+                bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.12),
+                "& .MuiLinearProgress-bar": { bgcolor: "primary.main" },
               }}
             />
           ) : null}
@@ -226,8 +228,8 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               <Box
                 sx={{
                   alignItems: "center",
-                  background: "linear-gradient(135deg, rgba(0, 113, 227, 0.1) 0%, rgba(105, 108, 255, 0.08) 100%)",
-                  border: "1px solid rgba(0, 113, 227, 0.15)",
+                  background: `linear-gradient(135deg, ${alpha(ergEnterpriseTokens.color.primary, 0.1)} 0%, rgba(105, 108, 255, 0.08) 100%)`,
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                   borderRadius: "16px",
                   display: "inline-flex",
                   height: 48,
@@ -236,13 +238,13 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   width: 48,
                 }}
               >
-                <ShieldRoundedIcon sx={{ color: "#0071E3", fontSize: 26 }} />
+                <ShieldRoundedIcon sx={{ color: "primary.main", fontSize: 26 }} />
               </Box>
               <Typography
                 sx={{
-                  color: "#0071E3",
+                  color: "primary.main",
                   fontSize: 11,
-                  fontWeight: 750,
+                  fontWeight: 600,
                   letterSpacing: "0.08em",
                   textTransform: "uppercase",
                 }}
@@ -252,9 +254,9 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               <Typography
                 component="h1"
                 sx={{
-                  color: "#1D1D1F",
+                  color: "text.primary",
                   fontSize: { xs: 22, sm: 26 },
-                  fontWeight: 800,
+                  fontWeight: 600,
                   letterSpacing: "-0.025em",
                   mt: 0.5,
                 }}
@@ -263,7 +265,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               </Typography>
               <Typography
                 sx={{
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: 13.5,
                   lineHeight: 1.55,
                   mt: 0.75,
@@ -285,9 +287,9 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   borderRadius: "14px",
                   fontSize: 13,
                   fontWeight: 550,
-                  bgcolor: "rgba(255, 59, 48, 0.08)",
-                  border: "1px solid rgba(255, 59, 48, 0.2)",
-                  color: "#D70015",
+                  bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.08),
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.danger, 0.2)}`,
+                  color: "error.main",
                 }}
               >
                 {error}
@@ -302,9 +304,9 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   borderRadius: "14px",
                   fontSize: 13,
                   fontWeight: 550,
-                  bgcolor: "rgba(52, 199, 89, 0.08)",
-                  border: "1px solid rgba(52, 199, 89, 0.2)",
-                  color: "#248A3D",
+                  bgcolor: alpha(ergEnterpriseTokens.color.success, 0.08),
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.2)}`,
+                  color: "success.main",
                 }}
               >
                 {notice}
@@ -364,14 +366,14 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
               startIcon={<LogoutRoundedIcon sx={{ fontSize: 18 }} />}
               sx={{
                 borderRadius: "14px",
-                color: "#6E6E73",
+                color: "text.secondary",
                 fontSize: 13.5,
                 fontWeight: 600,
                 minHeight: 42,
                 textTransform: "none",
                 "&:hover": {
                   bgcolor: "rgba(0, 0, 0, 0.04)",
-                  color: "#1D1D1F",
+                  color: "text.primary",
                 },
               }}
             >

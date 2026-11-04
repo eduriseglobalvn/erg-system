@@ -54,12 +54,12 @@ export function SubmitSidebarCard({
 
       {submitResult && (
         <Paper variant="outlined" sx={{ borderColor: "success.light", borderRadius: 1.5, bgcolor: "success.50", color: "success.dark", px: 2, py: 1.75 }}>
-          <Typography sx={{ fontSize: 12, fontWeight: 700, lineHeight: 1.6 }}>
+          <Typography sx={{ fontSize: 12, fontWeight: 600, lineHeight: 1.6 }}>
             Hoàn tất: BE đã khởi tạo {submitResult.created} tài khoản, bỏ qua {submitResult.skipped}, trùng lặp {submitResult.duplicates}.
           </Typography>
           {submitResult.credentials.length > 0 && (
             <Box sx={{ borderRadius: 1, bgcolor: "background.paper", p: 1.25, mt: 1, fontFamily: "JetBrains Mono, monospace" }}>
-              <Typography sx={{ mb: 0.5, color: "text.primary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Tài khoản mẫu mới tạo</Typography>
+              <Typography sx={{ mb: 0.5, color: "text.primary", fontSize: 10, fontWeight: 600, textTransform: "uppercase" }}>Tài khoản mẫu mới tạo</Typography>
               <Stack spacing={0.5} sx={{ color: "text.secondary", fontSize: 10 }}>
                 {submitResult.credentials.slice(0, 5).map((item) => (
                   <Box component="span" key={item.rowId}>
@@ -75,7 +75,7 @@ export function SubmitSidebarCard({
       <Button
         variant="contained"
         fullWidth
-        sx={{ minHeight: 40, borderRadius: 1.5, fontSize: 12, fontWeight: 700, textTransform: "none" }}
+        sx={{ minHeight: 40, borderRadius: 1.5, fontSize: 12, fontWeight: 600, textTransform: "none" }}
         onClick={() => void submitAccounts()}
         disabled={!visibleStudents.length || !centerId || isSubmitting}
       >

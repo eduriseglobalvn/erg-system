@@ -73,12 +73,12 @@ export function DashboardAccountCard() {
           src={account?.avatarUrl}
           alt={displayName}
           variant="rounded"
-          sx={{ width: 44, height: 44, bgcolor: "primary.main", fontSize: 12, fontWeight: 700, color: "primary.contrastText" }}
+          sx={{ width: 44, height: 44, bgcolor: "primary.main", fontSize: 12, fontWeight: 600, color: "primary.contrastText" }}
         >
           {initials}
         </Avatar>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography noWrap sx={{ fontSize: 15, fontWeight: 700 }}>
+          <Typography noWrap sx={{ fontSize: 15, fontWeight: 600 }}>
             {displayName}
           </Typography>
           <Typography color="text.secondary" noWrap variant="body2">

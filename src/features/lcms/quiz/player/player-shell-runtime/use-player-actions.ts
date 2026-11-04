@@ -8,7 +8,8 @@ import {
   type SubmitDialogMode,
 } from "@/components/quiz/player-shell-runtime-model";
 import { offlineAttemptScope } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
-import { buildNormalizedAnswers, ensureServerAttempt, serverNowMs } from "@/components/quiz/player-shell-utils";
+import { buildNormalizedAnswers, serverNowMs } from "@/components/quiz/player-shell-utils";
+import { ensureServerAttempt } from "@/features/lcms/quiz/player/player-shell-session";
 import {
   buildClientSubmitPayload,
   createEmptyAttempt,

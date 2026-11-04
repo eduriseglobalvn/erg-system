@@ -19,7 +19,7 @@ export function RoadmapMetric({ value, label }: { value: number; label: string }
         boxShadow: "0 1px 2px rgba(0,0,0,0.02)",
       }}
     >
-      <Typography sx={{ color: "#0F172A", fontSize: 14, fontWeight: 800, fontFamily: "'JetBrains Mono', monospace" }}>
+      <Typography sx={{ color: "#0F172A", fontSize: 14, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
         {value}
       </Typography>
       <Typography sx={{ color: "#64748B", fontSize: 11, fontWeight: 600 }}>
@@ -74,7 +74,7 @@ export function EmptyRoadmapState({
         >
           <Layers sx={{ fontSize: 26 }} />
         </Box>
-        <Typography sx={{ mt: 2.5, color: "#0F172A", fontSize: 16, fontWeight: 800 }}>
+        <Typography sx={{ mt: 2.5, color: "#0F172A", fontSize: 16, fontWeight: 600 }}>
           {query ? "Không tìm thấy kết quả" : `Chưa có chặng học nào trong ${subjectTitle}`}
         </Typography>
         <Typography sx={{ mt: 1, color: "#64748B", fontSize: 13, lineHeight: 1.6 }}>
@@ -93,7 +93,7 @@ export function EmptyRoadmapState({
               bgcolor: "#0F6CBD",
               boxShadow: "0 2px 8px rgba(15, 108, 189, 0.25)",
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 600,
               textTransform: "none",
               px: 3,
               py: 1,

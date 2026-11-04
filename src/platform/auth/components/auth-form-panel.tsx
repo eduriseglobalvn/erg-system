@@ -147,7 +147,7 @@ export function AuthFormPanel({
                 hidden
                 onClick={() => undefined}
               />
-              <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", fontSize: 12, fontWeight: 700, gap: 1.5, mt: 2.5 }}>
+              <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", fontSize: 12, fontWeight: 600, gap: 1.5, mt: 2.5 }}>
                 <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.6)", flex: 1, height: 1 }} />
                 <Box component="span">Hoặc tiếp tục với</Box>
                 <Box component="span" sx={{ bgcolor: "rgba(255,255,255,0.6)", flex: 1, height: 1 }} />
@@ -224,7 +224,7 @@ export function AuthFormPanel({
             <Box sx={{ alignItems: "center", display: "flex", fontSize: 12, gap: 1.5, justifyContent: "space-between" }}>
               <FormControlLabel control={<Checkbox checked={rememberMe} onChange={(event) => onRememberMeChange(event.target.checked)} size="small" />} label={t("auth.rememberMe")} sx={{ color: "text.secondary", m: 0, minHeight: 32, "& .MuiFormControlLabel-label": { fontSize: 12, fontWeight: 500 } }} />
               <ButtonBase
-                sx={{ color: "#5558e8", fontSize: 12, fontWeight: 700, minHeight: 32, "&:hover": { color: "#3f42c8", textDecoration: "underline" } }}
+                sx={{ color: "#5558e8", fontSize: 12, fontWeight: 600, minHeight: 32, "&:hover": { color: "#3f42c8", textDecoration: "underline" } }}
                 onClick={onForgotPassword}
               >
                 {t("auth.forgotPassword")}
@@ -236,7 +236,7 @@ export function AuthFormPanel({
                 <Button
                   variant="contained"
                   fullWidth
-                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 800, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
+                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 600, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
                   type="submit"
@@ -251,7 +251,7 @@ export function AuthFormPanel({
             <Box component="p" sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
               {t("auth.noAccount")}
               <ButtonBase
-                sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
+                sx={{ color: "text.primary", fontSize: 14, fontWeight: 600, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
                 onClick={() => onModeChange("register")}
               >
                 {t("auth.registerNow")}
@@ -381,7 +381,7 @@ export function AuthFormPanel({
                 <Button
                   variant="contained"
                   fullWidth
-                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 800, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
+                  sx={{ bgcolor: "#696CFF", borderRadius: 1.5, boxShadow: "0 16px 34px rgba(105,108,255,0.3)", fontSize: 14, fontWeight: 600, height: 44, "&:hover": { bgcolor: "#585BE0" } }}
                   disabled={!canSubmit || isSubmitting}
                   style={{ backgroundColor: "#696CFF", boxShadow: "0 16px 34px rgba(105,108,255,0.30)", color: "#fff" }}
                   type="submit"
@@ -395,7 +395,7 @@ export function AuthFormPanel({
           <Box component="p" sx={{ color: "text.secondary", fontSize: 14, mt: 2.5, textAlign: "center" }}>
             {t("auth.hasAccount")}
             <ButtonBase
-              sx={{ color: "text.primary", fontSize: 14, fontWeight: 700, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
+              sx={{ color: "text.primary", fontSize: 14, fontWeight: 600, ml: 0.5, textDecoration: "underline", textUnderlineOffset: 4, "&:hover": { color: "#696CFF" } }}
               onClick={() => onModeChange("login")}
             >
               {t("auth.backToLogin")}
@@ -410,7 +410,7 @@ export function AuthFormPanel({
 function AuthHeading({ center, subtitle, title }: { center?: boolean; subtitle: string; title: string }) {
   return (
     <Box component="header" sx={{ textAlign: center ? "center" : "left" }}>
-      <Box component="h1" sx={{ color: "#1C252E", fontSize: 26, fontWeight: 700, lineHeight: 1.25, m: 0 }}>{title}</Box>
+      <Box component="h1" sx={{ color: "#1C252E", fontSize: 26, fontWeight: 600, lineHeight: 1.25, m: 0 }}>{title}</Box>
       <Box component="p" sx={{ color: "text.secondary", fontSize: 14, lineHeight: 1.5, m: 0, mt: 1, ...(center ? { mx: "auto", maxWidth: 360 } : {}) }}>{subtitle}</Box>
     </Box>
   );
@@ -427,7 +427,7 @@ function SegmentButton({
 }) {
   return (
     <ButtonBase
-      sx={{ borderRadius: 1, color: active ? "#1C252E" : "text.secondary", height: 40, fontSize: 14, fontWeight: 700, ...(active ? { bgcolor: "background.paper", boxShadow: "0 10px 22px rgba(105,108,255,0.12)" } : { "&:hover": { bgcolor: "rgba(255,255,255,0.4)", color: "#1C252E" } }), "&:focus-visible": { outline: "2px solid rgba(105,108,255,0.2)" } }}
+      sx={{ borderRadius: 1, color: active ? "#1C252E" : "text.secondary", height: 40, fontSize: 14, fontWeight: 600, ...(active ? { bgcolor: "background.paper", boxShadow: "0 10px 22px rgba(105,108,255,0.12)" } : { "&:hover": { bgcolor: "rgba(255,255,255,0.4)", color: "#1C252E" } }), "&:focus-visible": { outline: "2px solid rgba(105,108,255,0.2)" } }}
       onClick={onClick}
     >
       {children}
@@ -464,7 +464,7 @@ const GlassField = forwardRef<HTMLInputElement, {
 ) {
     return (
       <Box component="label" sx={{ display: "grid", gap: 1 }}>
-        <Box component="span" sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700 }}>{label}</Box>
+        <Box component="span" sx={{ color: "text.secondary", fontSize: 12, fontWeight: 600 }}>{label}</Box>
         <Box component="span" sx={{ alignItems: "center", backdropFilter: "blur(16px)", bgcolor: "rgba(255,255,255,0.55)", border: "1px solid", borderColor: error ? "error.light" : "rgba(255,255,255,0.6)", borderRadius: 1.5, boxShadow: error ? "0 0 0 4px rgba(244,63,94,0.1)" : "inset 0 1px 0 rgba(255,255,255,0.65)", color: "text.secondary", display: "flex", gap: 1, minHeight: 44, px: 1.5, transition: "border-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease", "&:focus-within": { bgcolor: "rgba(255,255,255,0.75)", borderColor: "rgba(105,108,255,0.55)", boxShadow: "0 0 0 4px rgba(105,108,255,0.1)" } }}>
           {icon}
           <InputBase
@@ -482,7 +482,7 @@ const GlassField = forwardRef<HTMLInputElement, {
           />
           {action}
         </Box>
-        <FormHelperText error sx={{ fontSize: 12, fontWeight: 700, m: 0 }}>{error}</FormHelperText>
+        <FormHelperText error sx={{ fontSize: 12, fontWeight: 600, m: 0 }}>{error}</FormHelperText>
       </Box>
     );
 });

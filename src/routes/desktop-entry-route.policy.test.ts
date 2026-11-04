@@ -3,7 +3,9 @@ import { resolve } from "node:path";
 import { expect, it } from "vitest";
 
 it("does not force every Tauri cold launch into Teacher Workspace", () => {
-  const routes = readFileSync(resolve("src/routes/app-routes.tsx"), "utf8");
+  const routes = ["public-routes.tsx", "auth-routes.tsx"]
+    .map((name) => readFileSync(resolve("src/routes/portals", name), "utf8"))
+    .join(";");
 
   expect(routes).toContain("DesktopWorkspaceEntryPage");
   expect(routes).toContain("resolveDesktopWorkspaceLanding");

@@ -76,7 +76,7 @@ export function CalendarNavigatorPanel({
               slotProps={{ input: { "aria-label": calendar.label } }}
               sx={calendarCheckboxSx(calendar.color)}
             />
-            <Typography noWrap sx={{ color: selectedSummaryLabels.has(calendar.label) ? "#425466" : "#98A2B3", fontSize: 13, fontWeight: 700, minWidth: 0 }}>
+            <Typography noWrap sx={{ color: selectedSummaryLabels.has(calendar.label) ? "#425466" : "#98A2B3", fontSize: 13, fontWeight: 600, minWidth: 0 }}>
               {calendar.label}
             </Typography>
           </Box>

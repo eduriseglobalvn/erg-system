@@ -50,7 +50,7 @@ export function StudentAttendanceContextMenu({
         sx={{ position: "fixed", zIndex: 80, left: menu.x, top: menu.y, width: 256, overflow: "hidden", py: 0.5, border: 1, borderColor: "divider", borderRadius: 1 }}
       >
         <Box sx={{ borderBottom: 1, borderColor: "divider", px: 1.5, py: 1.25 }}>
-          <Typography noWrap sx={{ fontSize: 14, fontWeight: 700 }}>{menu.student.name}</Typography>
+          <Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>{menu.student.name}</Typography>
           <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 13, fontWeight: 600 }}>{menu.student.className}</Typography>
         </Box>
         {actions.map((action) => (

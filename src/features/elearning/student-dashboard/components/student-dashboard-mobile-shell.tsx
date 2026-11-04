@@ -141,7 +141,7 @@ export function StudentDashboardMobileShell({
             }}
           >
             <RefreshRoundedIcon sx={{ fontSize: 16 }} />
-            <Typography sx={{ fontSize: 12, fontWeight: 750 }}>Bản cập nhật mới có sẵn · Chạm để làm mới</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 600 }}>Bản cập nhật mới có sẵn · Chạm để làm mới</Typography>
           </ButtonBase>
         </Box>
       ) : null}
@@ -184,7 +184,7 @@ export function StudentDashboardMobileShell({
                 sx={{ bgcolor: "#FFFFFF", borderRadius: "8px", height: 28, objectFit: "contain", width: 28 }}
               />
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12.5, fontWeight: 750 }}>
+                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12.5, fontWeight: 600 }}>
                   {bannerMeta.title}
                 </Typography>
                 <Typography noWrap sx={{ color: "#64748B", fontSize: 10.5, fontWeight: 550 }}>

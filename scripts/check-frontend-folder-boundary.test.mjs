@@ -30,11 +30,11 @@ test("allows lower-layer imports and other layers", () => {
   }), []);
 });
 
-test("rejects components importing features, except the pending quiz domain move", () => {
+test("rejects every component importing features (no exceptions)", () => {
   assert.equal(findLayerViolations({
     "src/components/portal/a.tsx": 'import x from "@/features/n/x";',
     "src/components/shared/b.tsx": 'export * from "../../features/y";',
     "src/components/quiz/c.tsx": 'import x from "@/features/lcms/quiz/x";',
     "src/components/shared/d.tsx": 'import x from "@/lib/x";',
-  }).length, 2);
+  }).length, 3);
 });

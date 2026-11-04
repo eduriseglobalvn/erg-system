@@ -5,7 +5,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { PlayerShellRuntime } from "@/components/quiz/player-shell-runtime";
+import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import { PortableExamVerificationError } from "@/features/elearning/portable-exam/types/portable-exam-types";
 import type { QuizPackage } from "@/lib/types";

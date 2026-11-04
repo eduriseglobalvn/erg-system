@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { ReauthDialog } from "@/platform/auth/components/reauth-dialog";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
@@ -45,7 +45,7 @@ function EnforcedPortalAuthGate({ children, portal, requiredPermission }: Portal
     .map((candidate) => getCurrentAccount(candidate))
     .find((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
   const storedTeacherSession = compatibilityPortals
-    .map((candidate) => readStoredAuthSession(candidate))
+    .map((candidate) => getAuthScope(candidate).session)
     .find((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate));
   const teacherAccount = isBffAuthEnabled()
     ? auth.account ?? null

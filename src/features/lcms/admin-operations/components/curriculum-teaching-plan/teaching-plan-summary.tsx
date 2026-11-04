@@ -32,7 +32,7 @@ export function TeachingPlanSummary({
           sx={{
             height: 22,
             fontSize: 11,
-            fontWeight: 700,
+            fontWeight: 600,
             bgcolor: "#FEF2F2",
             color: "#B91C1C",
             border: "1px solid #FECACA",

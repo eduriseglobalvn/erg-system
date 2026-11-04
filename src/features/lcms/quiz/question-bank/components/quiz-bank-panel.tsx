@@ -25,6 +25,8 @@ import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { Badge, getScopeTone } from "./question-bank-primitives";
 import type { QuizKindFilter } from "./question-bank-workspace-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 function QuizSheetSkeletonRows({ columnCount, rowCount }: { columnCount: number; rowCount: number }) {
   return (
@@ -80,7 +82,7 @@ export function QuizBankPanel({
       elevation={0}
       sx={{
         bgcolor: "#FFFFFF",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "16px",
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
@@ -91,7 +93,7 @@ export function QuizBankPanel({
       <Box
         sx={{
           alignItems: { xs: "stretch", lg: "center" },
-          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
           display: "flex",
           flexDirection: { xs: "column", lg: "row" },
           gap: 2,
@@ -100,10 +102,10 @@ export function QuizBankPanel({
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
             {copy.quizBankTitle}
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
             {copy.quizBankDescription(quizzes.length)}
           </Typography>
         </Box>
@@ -123,7 +125,7 @@ export function QuizBankPanel({
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 19 }} />
+                    <SearchRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 19 }} />
                   </InputAdornment>
                 ),
                 sx: {
@@ -132,11 +134,11 @@ export function QuizBankPanel({
                   fontSize: "0.85rem",
                   transition: "all 0.15s ease",
                   width: { sm: 280, xs: "100%" },
-                  "& fieldset": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                  "& fieldset": { borderColor: ergEnterpriseTokens.color.border },
                   "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
                   "&.Mui-focused fieldset": {
-                    borderColor: "#0071E3",
-                    boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                    borderColor: ergEnterpriseTokens.color.primary,
+                    boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                   },
                 },
               },
@@ -158,21 +160,21 @@ export function QuizBankPanel({
               "& .MuiToggleButtonGroup-grouped": {
                 border: 0,
                 borderRadius: "8px !important",
-                color: "#6E6E73",
+                color: ergEnterpriseTokens.color.textMuted,
                 fontSize: "0.8rem",
-                fontWeight: 650,
+                fontWeight: 600,
                 minHeight: 32,
                 px: 1.5,
                 textTransform: "none",
                 transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                 "&:hover": {
                   bgcolor: "rgba(0, 0, 0, 0.04)",
-                  color: "#1D1D1F",
+                  color: ergEnterpriseTokens.color.text,
                 },
                 "&.Mui-selected": {
                   bgcolor: "#FFFFFF",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                  color: "#0071E3",
+                  color: ergEnterpriseTokens.color.primary,
                 },
               },
             }}
@@ -219,9 +221,9 @@ export function QuizBankPanel({
                     <Box
                       sx={{
                         alignItems: "center",
-                        bgcolor: "rgba(0, 113, 227, 0.08)",
+                        bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                         borderRadius: "50%",
-                        color: "#0071E3",
+                        color: ergEnterpriseTokens.color.primary,
                         display: "flex",
                         height: 56,
                         justifyContent: "center",
@@ -230,10 +232,10 @@ export function QuizBankPanel({
                     >
                       <Inventory2OutlinedIcon sx={{ fontSize: 28 }} />
                     </Box>
-                    <Typography sx={{ color: "#1D1D1F", fontSize: "0.95rem", fontWeight: 750 }}>
+                    <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.95rem", fontWeight: 600 }}>
                       {copy.noQuizzes}
                     </Typography>
-                    <Typography sx={{ color: "#86868B", fontSize: "0.825rem", maxWidth: 440, lineHeight: 1.45 }}>
+                    <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", maxWidth: 440, lineHeight: 1.45 }}>
                       Hiện chưa có gói bài tập nào phù hợp với bộ lọc. Hãy tạo gói mới từ Ngân hàng câu hỏi hoặc thay đổi
                       từ khóa tìm kiếm.
                     </Typography>
@@ -260,18 +262,18 @@ export function QuizBankPanel({
                     sx={{
                       cursor: "pointer",
                       transition: "background-color 0.12s ease",
-                      "&:hover": { bgcolor: "rgba(0, 113, 227, 0.035) !important" },
+                      "&:hover": { bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.035)} !important` },
                       "& td": { borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.4 },
                     }}
                   >
                     <TableCell>
-                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 750, lineHeight: 1.35 }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.35 }}>
                         {quiz.title}
                       </Typography>
-                      <Typography noWrap sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 550, mt: 0.3 }}>
+                      <Typography noWrap sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 550, mt: 0.3 }}>
                         {quiz.topicLabels.join(", ") || copy.otherTopic}
                       </Typography>
-                      <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600, mt: 0.2 }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 600, mt: 0.2 }}>
                         {quiz.subjectLabel} / {quiz.levelLabel}
                       </Typography>
                     </TableCell>
@@ -289,13 +291,13 @@ export function QuizBankPanel({
                     </TableCell>
 
                     <TableCell>
-                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 750 }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.85rem", fontWeight: 600 }}>
                         {copy.questionCount(quiz.questionCount)}
                       </Typography>
                     </TableCell>
 
                     <TableCell>
-                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem" }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.85rem" }}>
                         {quiz.durationLabel}
                       </Typography>
                     </TableCell>
@@ -318,9 +320,9 @@ export function QuizBankPanel({
                               }}
                               size="small"
                               sx={{
-                                bgcolor: "rgba(0, 113, 227, 0.08)",
-                                color: "#0071E3",
-                                "&:hover": { bgcolor: "rgba(0, 113, 227, 0.16)" },
+                                bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+                                color: ergEnterpriseTokens.color.primary,
+                                "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.16) },
                               }}
                             >
                               <Inventory2RoundedIcon sx={{ fontSize: 17 }} />
@@ -337,9 +339,9 @@ export function QuizBankPanel({
                             }}
                             size="small"
                             sx={{
-                              bgcolor: "rgba(255, 59, 48, 0.08)",
-                              color: "#FF3B30",
-                              "&:hover": { bgcolor: "rgba(255, 59, 48, 0.16)" },
+                              bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.08),
+                              color: ergEnterpriseTokens.color.danger,
+                              "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.16) },
                             }}
                           >
                             <DeleteOutlineRoundedIcon sx={{ fontSize: 17 }} />
@@ -360,10 +362,10 @@ export function QuizBankPanel({
 
 const tableHeadCellSx = {
   bgcolor: "rgba(250, 250, 252, 0.95)",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-  color: "#86868B",
+  borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+  color: ergEnterpriseTokens.color.textMuted,
   fontSize: "0.72rem",
-  fontWeight: 700,
+  fontWeight: 600,
   letterSpacing: "0.04em",
   py: 1.25,
   textTransform: "uppercase",

@@ -41,7 +41,7 @@ export function LmsScopeSheet({
       <Stack spacing={2}>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary" }}>
           <BusinessRoundedIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Trường</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Trường</Typography>
         </Stack>
         <FormControl fullWidth>
           <InputLabel id="lms-mobile-school-label">Chọn trường</InputLabel>
@@ -57,7 +57,7 @@ export function LmsScopeSheet({
 
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary", pt: 0.5 }}>
           <SchoolRoundedIcon sx={{ fontSize: 18 }} />
-          <Typography sx={{ fontSize: 12, fontWeight: 800, textTransform: "uppercase" }}>Lớp đang dạy</Typography>
+          <Typography sx={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>Lớp đang dạy</Typography>
         </Stack>
         <Stack spacing={1}>
           {selectedClassOptions.length ? selectedClassOptions.map((classroom) => {
@@ -85,7 +85,7 @@ export function LmsScopeSheet({
                 }}
               >
                 <Box sx={{ minWidth: 0 }}>
-                  <Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>{classroom.className}</Typography>
+                  <Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>{classroom.className}</Typography>
                   <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, mt: 0.25 }}>{selectedSchool?.name ?? "ERG"}</Typography>
                 </Box>
                 {active ? <CheckRoundedIcon sx={{ flexShrink: 0 }} /> : null}

@@ -20,7 +20,7 @@ export function SheetUrlCard({
   return (
     <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
       <Box component="label" sx={{ display: "block" }}>
-        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", color: "text.secondary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", color: "text.secondary", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>
           <TableViewOutlinedIcon sx={{ color: "success.main", fontSize: 18 }} /> Đường dẫn Google Sheet
         </Stack>
         <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 12 }}>Sheet cần bật quyền xem bằng liên kết.</Typography>
@@ -43,7 +43,7 @@ export function SheetUrlCard({
             variant="contained"
             onClick={() => void loadSheet(sheetUrl)}
             disabled={isLoading}
-            sx={{ minHeight: 40, flexShrink: 0, borderRadius: 1.25, px: 2.5, fontSize: 12, fontWeight: 700, textTransform: "none" }}
+            sx={{ minHeight: 40, flexShrink: 0, borderRadius: 1.25, px: 2.5, fontSize: 12, fontWeight: 600, textTransform: "none" }}
           >
             {isLoading ? "Đang xử lý..." : "Đồng bộ dữ liệu"}
           </Button>

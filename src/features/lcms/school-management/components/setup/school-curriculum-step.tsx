@@ -153,15 +153,15 @@ export function SchoolCurriculumStep() {
           }}
         >
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, alignItems: "center" }}>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               Tổng môn học: <Box component="span" sx={{ color: "primary.main" }}>{selectedSchool.subjects.length}</Box>
             </Typography>
             <Typography color="text.secondary" variant="body2">·</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               Lớp đã phân môn: <Box component="span" sx={{ color: "success.main" }}>{classesWithSubjects}/{selectedSchool.classes.length}</Box> lớp
             </Typography>
             <Typography color="text.secondary" variant="body2">·</Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
               Tổng học sinh: <Box component="span" sx={{ color: "text.primary" }}>{selectedSchool.students.length}</Box>
             </Typography>
           </Box>
@@ -192,7 +192,7 @@ export function SchoolCurriculumStep() {
                 >
                   <Box sx={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 1 }}>
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography noWrap sx={{ fontWeight: 800, fontSize: 15 }}>
+                      <Typography noWrap sx={{ fontWeight: 600, fontSize: 15 }}>
                         {subject.name}
                       </Typography>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, mt: 0.5 }}>
@@ -266,7 +266,7 @@ export function SchoolCurriculumStep() {
                   <Box>
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 1 }}>
                       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                        <Typography sx={{ fontWeight: 800, fontSize: 15 }}>{cls.name}</Typography>
+                        <Typography sx={{ fontWeight: 600, fontSize: 15 }}>{cls.name}</Typography>
                         {cls.grade ? <Chip label={`Khối ${cls.grade}`} size="small" sx={{ fontSize: 11 }} /> : null}
                       </Box>
                       <Typography color="text.secondary" variant="caption" sx={{ fontWeight: 600 }}>
@@ -274,7 +274,7 @@ export function SchoolCurriculumStep() {
                       </Typography>
                     </Box>
 
-                    <Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 700, mb: 0.5 }}>
+                    <Typography color="text.secondary" sx={{ fontSize: 11, fontWeight: 600, mb: 0.5 }}>
                       Môn học & Level đang học:
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, minHeight: 28 }}>
@@ -315,7 +315,7 @@ export function SchoolCurriculumStep() {
 
         {!selectedSchool.subjects.length && viewMode === "by-subject" ? (
           <Paper sx={{ bgcolor: "background.default", mt: 1, p: 4, textAlign: "center", borderRadius: 2 }} variant="outlined">
-            <Typography sx={{ fontWeight: 850 }}>Chưa đăng ký {meta.subjectLabel.toLowerCase()}</Typography>
+            <Typography sx={{ fontWeight: 600 }}>Chưa đăng ký {meta.subjectLabel.toLowerCase()}</Typography>
             <Typography color="text.secondary" variant="body2" sx={{ mt: 0.5 }}>
               Chọn môn học và cấp độ/level từ danh mục chuẩn để bắt đầu phân lớp và ghi danh.
             </Typography>

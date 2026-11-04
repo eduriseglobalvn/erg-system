@@ -63,13 +63,13 @@ export function ErgErrorState({ action, description, title }: ErgErrorStateProps
         bgcolor: "rgba(255, 59, 48, 0.08)",
         border: "1px solid rgba(255, 59, 48, 0.2)",
         borderRadius: "14px",
-        color: "#DC2626",
+        color: "error.main",
         display: "grid",
         gap: 0.75,
         p: 2.25,
       }}
     >
-      <Typography sx={{ color: "#DC2626", fontSize: "0.95rem", fontWeight: 800 }} variant="subtitle2">
+      <Typography sx={{ color: "#DC2626", fontSize: "0.95rem", fontWeight: 600 }} variant="subtitle2">
         {title}
       </Typography>
       <Typography color="inherit" sx={{ fontSize: "0.85rem", opacity: 0.9 }} variant="body2">
@@ -81,7 +81,7 @@ export function ErgErrorState({ action, description, title }: ErgErrorStateProps
 }
 
 export function ErgSkeleton(props: SkeletonProps) {
-  return <Skeleton sx={{ borderRadius: "10px" }} variant="rounded" {...props} />;
+  return <Skeleton sx={{ borderRadius: 1.25 }} variant="rounded" {...props} />;
 }
 
 type ErgEmptyStateProps = {
@@ -108,12 +108,12 @@ export function ErgEmptyState({ action, description, icon, title }: ErgEmptyStat
         textAlign: "center",
       }}
     >
-      {icon ? <Box sx={{ color: "#0071E3", display: "flex" }}>{icon}</Box> : null}
-      <Typography sx={{ color: "#1D1D1F", fontSize: "1.05rem", fontWeight: 800 }}>
+      {icon ? <Box sx={{ color: "primary.main", display: "flex" }}>{icon}</Box> : null}
+      <Typography sx={{ color: "text.primary", fontSize: "1.05rem", fontWeight: 600 }}>
         {title}
       </Typography>
       {description ? (
-        <Typography sx={{ color: "#86868B", fontSize: "0.85rem", maxWidth: 460 }} variant="body2">
+        <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", maxWidth: 460 }} variant="body2">
           {description}
         </Typography>
       ) : null}

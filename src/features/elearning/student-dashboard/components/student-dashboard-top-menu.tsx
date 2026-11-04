@@ -12,11 +12,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import { type ElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { PortalSidebarWorkspaceHeader } from "@/components/portal/portal-sidebar-workspace-header";
 import type { DashboardCopy, StudentDiscussionNotification, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { MUI_TEXT, MUI_MUTED, MUI_BORDER, MUI_DIVIDER, LOGO_URL, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -80,7 +81,7 @@ export function TopMenuShell({
             active
             collapsed={false}
             fluid
-            portalInfo={{ name: "Học sinh", workspaceCapabilities: readStoredAuthSession()?.workspaces }}
+            portalInfo={{ name: "Học sinh", workspaceCapabilities: getAuthScope().session?.workspaces }}
           />
         </Box>
 
@@ -95,7 +96,7 @@ export function TopMenuShell({
                 onClick={() => onPageChange(item.key)}
                 sx={{
                   alignItems: "center", bgcolor: isSelected ? "#2563EB" : "transparent", border: "none",
-                  borderRadius: "10px", boxShadow: isSelected ? "0 4px 12px rgba(37,99,235,0.22)" : "none",
+                  borderRadius: `${ergEnterpriseTokens.radius.md}px`, boxShadow: isSelected ? "0 4px 12px rgba(37,99,235,0.22)" : "none",
                   color: isSelected ? "#FFFFFF" : "#475569", cursor: "pointer", display: "flex",
                   fontFamily: "inherit", fontSize: "13.5px", gap: 1.15, outline: "none", px: 1.35, py: 0.85,
                   textAlign: "left", transition: "all 140ms ease", width: "100%",
@@ -109,7 +110,7 @@ export function TopMenuShell({
                   {item.label}
                 </Typography>
                 {showBadge ? (
-                  <Box sx={{ bgcolor: isSelected ? "#FFFFFF" : "#EF4444", borderRadius: "99px", color: isSelected ? "#2563EB" : "#FFFFFF", fontSize: "11px", fontWeight: 800, px: 0.8, py: 0.1 }}>
+                  <Box sx={{ bgcolor: isSelected ? "#FFFFFF" : "#EF4444", borderRadius: "99px", color: isSelected ? "#2563EB" : "#FFFFFF", fontSize: "11px", fontWeight: 600, px: 0.8, py: 0.1 }}>
                     {totalUnread > 9 ? "9+" : totalUnread}
                   </Box>
                 ) : null}
@@ -123,11 +124,11 @@ export function TopMenuShell({
           cursor: "pointer", display: "flex", gap: 0.9, mt: "auto", p: 0.85, transition: "all 140ms ease",
           "&:hover": { bgcolor: "#F1F5F9", borderColor: "#CBD5E1" },
         }}>
-          <Avatar sx={{ bgcolor: "#F97316", color: "#FFFFFF", fontSize: "12px", fontWeight: 700, height: 32, width: 32 }}>
+          <Avatar sx={{ bgcolor: "#F97316", color: "#FFFFFF", fontSize: "12px", fontWeight: 600, height: 32, width: 32 }}>
             {getInitials(studentName)}
           </Avatar>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            <Typography variant="body2" noWrap sx={{ color: "#0F172A", fontSize: "12px", fontWeight: 650, lineHeight: 1.25 }}>
+            <Typography variant="body2" noWrap sx={{ color: "#0F172A", fontSize: "12px", fontWeight: 600, lineHeight: 1.25 }}>
               {studentName}
             </Typography>
             <Typography variant="caption" noWrap sx={{ color: "#94A3B8", display: "block", fontSize: "10.5px", fontWeight: 500, lineHeight: 1.2 }}>
@@ -141,13 +142,13 @@ export function TopMenuShell({
       {/* Main content right side */}
       <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minWidth: 0, p: { xs: 1.5, md: 2.25, lg: 3 } }}>
         <Box component="header" sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", minHeight: 44, mb: 2, px: { xs: 0.5, md: 0 } }}>
-          <Typography variant="h6" sx={{ color: "#0F172A", fontSize: "16.5px", fontWeight: 800, letterSpacing: "-0.015em" }}>
+          <Typography variant="h6" sx={{ color: "#0F172A", fontSize: "16.5px", fontWeight: 600, letterSpacing: "-0.015em" }}>
             {currentPageLabel}
           </Typography>
 
           <Stack direction="row" alignItems="center" spacing={1.15}>
             <Tooltip title={copy.notificationTitle}>
-              <IconButton aria-label={copy.notificationTitle} onClick={(e) => onNotificationOpen(e.currentTarget)} sx={{ bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: "10px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)", color: "#334155", height: 34, width: 34, "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
+              <IconButton aria-label={copy.notificationTitle} onClick={(e) => onNotificationOpen(e.currentTarget)} sx={{ bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", borderRadius: `${ergEnterpriseTokens.radius.md}px`, boxShadow: "0 1px 2px rgba(15,23,42,0.04)", color: "#334155", height: 34, width: 34, "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
                 <Badge color="error" badgeContent={totalUnread}>
                   <MoreHorizRoundedIcon sx={{ fontSize: 19 }} />
                 </Badge>
@@ -172,7 +173,7 @@ export function TopMenuShell({
         }}
       >
         <Box sx={{ px: 2, py: 1.5 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{copy.notificationTitle}</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{copy.notificationTitle}</Typography>
           <Typography variant="caption" color="text.secondary">{totalUnread ? `${totalUnread} unread updates` : copy.notificationEmpty}</Typography>
         </Box>
         <Divider />
@@ -183,7 +184,7 @@ export function TopMenuShell({
                 <MessageSquare sx={{ fontSize: 16 }} />
               </Box>
               <Box sx={{ minWidth: 0 }}>
-                <Typography variant="body2" sx={{ color: MUI_TEXT, fontWeight: 700, lineHeight: 1.35 }}>{notification.primaryText}</Typography>
+                <Typography variant="body2" sx={{ color: MUI_TEXT, fontWeight: 600, lineHeight: 1.35 }}>{notification.primaryText}</Typography>
                 <Typography variant="caption" color="text.secondary" sx={{ display: "block", mt: 0.25 }}>{notification.secondaryText}</Typography>
               </Box>
             </MenuItem>

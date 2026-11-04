@@ -152,7 +152,7 @@ export function EditableChoiceOption({
         rows={1}
         onChange={(event) => onLabelChange(event.target.value)}
         onInput={(event) => resizeTextArea(event.currentTarget)}
-        sx={{ bgcolor: "common.white", border: "1px solid #f1f5f9", borderRadius: 1, color: correct ? successColor : "#172033", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 700, lineHeight: 1.38, minHeight: "calc(var(--quiz-control-height) - 6px)", minWidth: 0, overflow: "hidden", overflowWrap: "anywhere", p: "8px 12px", resize: "none", width: "100%", "&:focus": { borderColor: "rgba(0,0,136,0.24)", boxShadow: "0 0 0 2px rgba(95,143,230,0.16)", outline: "none" } }}
+        sx={{ bgcolor: "common.white", border: "1px solid #f1f5f9", borderRadius: 1, color: correct ? successColor : "#172033", fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minHeight: "calc(var(--quiz-control-height) - 6px)", minWidth: 0, overflow: "hidden", overflowWrap: "anywhere", p: "8px 12px", resize: "none", width: "100%", "&:focus": { borderColor: "rgba(0,0,136,0.24)", boxShadow: "0 0 0 2px rgba(95,143,230,0.16)", outline: "none" } }}
       />
 
       {onRemove ? <ButtonBase type="button" className="quiz-runtime-edit-remove matching-puzzle__remove-button" onClick={onRemove} aria-label="Remove option" sx={{ minWidth: 28, minHeight: 28 }}><CloseIcon sx={{ fontSize: 14 }} /></ButtonBase> : null}

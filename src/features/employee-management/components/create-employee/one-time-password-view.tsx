@@ -6,6 +6,8 @@ import Typography from "@mui/material/Typography";
 import { toast } from "sonner";
 
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function OneTimePasswordView({ email, oneTimePassword }: { email: string; oneTimePassword: string }) {
   return (
@@ -13,12 +15,12 @@ export function OneTimePasswordView({ email, oneTimePassword }: { email: string;
       <Alert
         severity="success"
         sx={{
-          bgcolor: "rgba(52, 199, 89, 0.08)",
-          border: "1px solid rgba(52, 199, 89, 0.25)",
+          bgcolor: alpha(ergEnterpriseTokens.color.success, 0.08),
+          border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.25)}`,
           borderRadius: "12px",
           color: appleDesign.colors.greenText,
           fontSize: "0.825rem",
-          fontWeight: 650,
+          fontWeight: 600,
         }}
       >
         Tạo tài khoản nhân sự thành công! Mật khẩu tạm thời đã được tạo và đồng thời gửi đến email <b>{email}</b>.
@@ -26,8 +28,8 @@ export function OneTimePasswordView({ email, oneTimePassword }: { email: string;
       <Alert
         severity="warning"
         sx={{
-          bgcolor: "rgba(255, 149, 0, 0.08)",
-          border: "1px solid rgba(255, 149, 0, 0.25)",
+          bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.08),
+          border: `1px solid ${alpha(ergEnterpriseTokens.color.warning, 0.25)}`,
           borderRadius: "12px",
           color: appleDesign.colors.amberText,
         }}
@@ -51,7 +53,7 @@ export function OneTimePasswordView({ email, oneTimePassword }: { email: string;
             flex: 1,
             fontFamily: '"SF Mono", "JetBrains Mono", Menlo, Consolas, monospace',
             fontSize: 20,
-            fontWeight: 800,
+            fontWeight: 600,
             letterSpacing: "0.06em",
           }}
         >
@@ -67,10 +69,10 @@ export function OneTimePasswordView({ email, oneTimePassword }: { email: string;
             bgcolor: appleDesign.colors.blueSoft,
             borderRadius: "8px",
             color: appleDesign.colors.blue,
-            fontWeight: 650,
+            fontWeight: 600,
             textTransform: "none",
             "&:hover": {
-              bgcolor: "rgba(0, 113, 227, 0.16)",
+              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.16),
             },
           }}
         >

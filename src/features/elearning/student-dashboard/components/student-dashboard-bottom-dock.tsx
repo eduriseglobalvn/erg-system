@@ -8,6 +8,7 @@ import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 
 import type { StudentDockPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { getInitials } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function StudentDashboardBottomDock({
   activePage,
@@ -68,7 +69,7 @@ export function StudentDashboardBottomDock({
               onClick={() => onPageChange(item.key)}
               sx={{
                 alignItems: "center",
-                borderRadius: "10px",
+                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                 color: active ? "#2563EB" : "#8E8E93",
                 display: "flex",
                 flexDirection: "column",
@@ -124,7 +125,7 @@ export function StudentDashboardBottomDock({
                         : "0 1px 2px rgba(15, 23, 42, 0.12)",
                       color: "#FFFFFF",
                       fontSize: 10,
-                      fontWeight: 800,
+                      fontWeight: 600,
                       height: 24,
                       letterSpacing: "0.02em",
                       transition: "box-shadow 0.15s ease",
@@ -141,7 +142,7 @@ export function StudentDashboardBottomDock({
                       "& .MuiBadge-badge": {
                         bgcolor: "#EF4444",
                         fontSize: 9.5,
-                        fontWeight: 800,
+                        fontWeight: 600,
                         height: 16,
                         minWidth: 16,
                         padding: "0 3.5px",

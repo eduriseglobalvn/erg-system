@@ -1,5 +1,4 @@
-import { getCurrentAccount, logoutAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount, logoutAccount } from "@/platform/auth/api/auth-storage";
 import { getCurrentStudentSession, logoutStudentSession, type StudentSession } from "@/platform/auth/api/student-auth-storage";
 
 export type ElearningViewerSession = StudentSession & {
@@ -20,7 +19,7 @@ export function getCurrentElearningViewerSession(): ElearningViewerSession | nul
   const teacherAccount = getCurrentAccount();
   if (!teacherAccount) return null;
 
-  const teacherSession = readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession();
+  const teacherSession = getAuthScope("lms").session ?? getAuthScope("lcms").session ?? getAuthScope().session;
 
   return {
     accessToken: teacherSession?.accessToken,

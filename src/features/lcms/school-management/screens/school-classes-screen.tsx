@@ -20,6 +20,8 @@ import { ClassImportDialog } from "@/features/lcms/school-management/components/
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import type { SchoolClass, StudentImportRow } from "@/features/lcms/school-management/types/school-management-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export default function SchoolClassesScreen() {
   const { addClasses, addStudents, selectedSchool } = useSchoolManagementContext();
@@ -66,23 +68,23 @@ export default function SchoolClassesScreen() {
           startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
           variant="contained"
           sx={{
-            bgcolor: "#0071E3",
+            bgcolor: ergEnterpriseTokens.color.primary,
             borderRadius: "10px",
-            boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+            boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
             color: "#FFFFFF",
             fontSize: "0.85rem",
-            fontWeight: 650,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
             px: 2,
             py: 0.85,
             textTransform: "none",
             transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
             "&:hover": {
-              bgcolor: "#0077ED",
-              boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+              bgcolor: ergEnterpriseTokens.color.primaryHover,
+              boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
             },
             "&:active": {
-              bgcolor: "#005BB5",
+              bgcolor: ergEnterpriseTokens.color.primaryHover,
               transform: "scale(0.985)",
             },
           }}
@@ -95,15 +97,15 @@ export default function SchoolClassesScreen() {
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, 1fr)" }, mb: 2.5 }}>
         <ClassMetricCard
           icon={<ClassRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(0, 113, 227, 0.08)"
-          iconColor="#0071E3"
+          iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
+          iconColor={ergEnterpriseTokens.color.primary}
           label="Tổng số lớp"
           value={selectedSchool.classes.length}
           subtext={`Thuộc ${selectedSchool.grades.length} khối đào tạo`}
         />
         <ClassMetricCard
           icon={<GroupsRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(52, 199, 89, 0.12)"
+          iconBg={alpha(ergEnterpriseTokens.color.success, 0.12)}
           iconColor="#15803D"
           label="Tổng sĩ số"
           value={totalStudents}
@@ -125,7 +127,7 @@ export default function SchoolClassesScreen() {
         sx={{
           bgcolor: "#FFFFFF",
           borderRadius: "16px",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
           overflow: "hidden",
         }}
@@ -134,7 +136,7 @@ export default function SchoolClassesScreen() {
         <Box
           sx={{
             alignItems: { xs: "stretch", sm: "center" },
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: 1.5,
@@ -143,10 +145,10 @@ export default function SchoolClassesScreen() {
           }}
         >
           <Box>
-            <Typography sx={{ color: "#1D1D1F", fontSize: "1.05rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.05rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
               Danh sách lớp học
             </Typography>
-            <Typography sx={{ color: "#86868B", fontSize: "0.78rem", mt: 0.25 }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", mt: 0.25 }}>
               Hiển thị {classes.length} lớp học trong niên khóa {selectedSchool.academicYear}
             </Typography>
           </Box>
@@ -160,7 +162,7 @@ export default function SchoolClassesScreen() {
               input: {
                 startAdornment: (
                   <InputAdornment position="start">
-                    <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 18 }} />
+                    <SearchRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 18 }} />
                   </InputAdornment>
                 ),
               },
@@ -168,16 +170,16 @@ export default function SchoolClassesScreen() {
             sx={{
               width: { xs: "100%", sm: 300 },
               "& .MuiOutlinedInput-root": {
-                bgcolor: "#F5F5F7",
+                bgcolor: ergEnterpriseTokens.color.surfaceMuted,
                 borderRadius: "10px",
                 fontSize: "0.85rem",
-                "& fieldset": { borderColor: "rgba(0, 0, 0, 0.08)" },
+                "& fieldset": { borderColor: ergEnterpriseTokens.color.border },
                 "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
                 "&.Mui-focused": {
                   bgcolor: "#FFFFFF",
                   "& fieldset": {
-                    borderColor: "#0071E3",
-                    boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                    borderColor: ergEnterpriseTokens.color.primary,
+                    boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                   },
                 },
               },
@@ -209,7 +211,7 @@ export default function SchoolClassesScreen() {
                     key={item.id}
                     sx={{
                       transition: "background-color 0.12s ease",
-                      "&:hover": { bgcolor: "rgba(0, 113, 227, 0.035) !important" },
+                      "&:hover": { bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.035)} !important` },
                     }}
                   >
                     {/* Class Name */}
@@ -217,18 +219,18 @@ export default function SchoolClassesScreen() {
                       <Box sx={{ alignItems: "center", display: "inline-flex", gap: 1 }}>
                         <Box
                           sx={{
-                            bgcolor: "rgba(0, 113, 227, 0.08)",
+                            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                             borderRadius: "7px",
-                            color: "#0071E3",
+                            color: ergEnterpriseTokens.color.primary,
                             fontSize: "0.825rem",
-                            fontWeight: 750,
+                            fontWeight: 600,
                             px: 1,
                             py: 0.35,
                           }}
                         >
                           {item.name}
                         </Box>
-                        <Typography sx={{ color: "#86868B", fontSize: "0.75rem", fontWeight: 500 }}>
+                        <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.75rem", fontWeight: 500 }}>
                           {item.academicYear || selectedSchool.academicYear}
                         </Typography>
                       </Box>
@@ -236,7 +238,7 @@ export default function SchoolClassesScreen() {
 
                     {/* Grade */}
                     <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.5 }}>
-                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.825rem", fontWeight: 650 }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.825rem", fontWeight: 600 }}>
                         {item.grade ? `Khối ${item.grade}` : "Chưa gán"}
                       </Typography>
                     </TableCell>
@@ -244,10 +246,10 @@ export default function SchoolClassesScreen() {
                     {/* Homeroom Teacher */}
                     <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.5 }}>
                       <Box sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }}>
-                        <PersonRoundedIcon sx={{ color: item.homeroomTeacher ? "#0071E3" : "#C7C7CC", fontSize: 16 }} />
+                        <PersonRoundedIcon sx={{ color: item.homeroomTeacher ? ergEnterpriseTokens.color.primary : "#C7C7CC", fontSize: 16 }} />
                         <Typography
                           sx={{
-                            color: item.homeroomTeacher ? "#1D1D1F" : "#86868B",
+                            color: item.homeroomTeacher ? ergEnterpriseTokens.color.text : ergEnterpriseTokens.color.textMuted,
                             fontSize: "0.825rem",
                             fontWeight: item.homeroomTeacher ? 650 : 500,
                             fontStyle: item.homeroomTeacher ? "normal" : "italic",
@@ -264,11 +266,11 @@ export default function SchoolClassesScreen() {
                         sx={{
                           bgcolor: "rgba(0, 0, 0, 0.04)",
                           borderRadius: "9999px",
-                          color: "#1D1D1F",
+                          color: ergEnterpriseTokens.color.text,
                           display: "inline-block",
                           fontFamily: "var(--font-mono)",
                           fontSize: "0.75rem",
-                          fontWeight: 700,
+                          fontWeight: 600,
                           lineHeight: 1,
                           px: 1.25,
                           py: 0.4,
@@ -283,13 +285,13 @@ export default function SchoolClassesScreen() {
                       <Box
                         sx={{
                           alignItems: "center",
-                          bgcolor: isActive ? "rgba(52, 199, 89, 0.12)" : "rgba(0, 0, 0, 0.05)",
-                          border: `1px solid ${isActive ? "rgba(52, 199, 89, 0.22)" : "rgba(0, 0, 0, 0.1)"}`,
+                          bgcolor: isActive ? alpha(ergEnterpriseTokens.color.success, 0.12) : "rgba(0, 0, 0, 0.05)",
+                          border: `1px solid ${isActive ? "${alpha(ergEnterpriseTokens.color.success, 0.22)}" : "rgba(0, 0, 0, 0.1)"}`,
                           borderRadius: "9999px",
-                          color: isActive ? "#15803D" : "#6E6E73",
+                          color: isActive ? "#15803D" : ergEnterpriseTokens.color.textMuted,
                           display: "inline-flex",
                           fontSize: "0.72rem",
-                          fontWeight: 700,
+                          fontWeight: 600,
                           gap: 0.65,
                           lineHeight: 1,
                           px: 1,
@@ -298,7 +300,7 @@ export default function SchoolClassesScreen() {
                       >
                         <Box
                           sx={{
-                            bgcolor: isActive ? "#34C759" : "#86868B",
+                            bgcolor: isActive ? ergEnterpriseTokens.color.success : ergEnterpriseTokens.color.textMuted,
                             borderRadius: "50%",
                             height: 6,
                             width: 6,
@@ -316,7 +318,7 @@ export default function SchoolClassesScreen() {
 
         {!classes.length ? (
           <Box sx={{ p: 5, textAlign: "center" }}>
-            <Typography sx={{ color: "#86868B", fontSize: "0.85rem" }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem" }}>
               Không tìm thấy lớp học phù hợp với từ khóa tìm kiếm.
             </Typography>
           </Box>
@@ -339,10 +341,10 @@ export default function SchoolClassesScreen() {
 
 const headerCellSx = {
   bgcolor: "rgba(250, 250, 252, 0.96)",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-  color: "#86868B",
+  borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+  color: ergEnterpriseTokens.color.textMuted,
   fontSize: "0.72rem",
-  fontWeight: 700,
+  fontWeight: 600,
   letterSpacing: "0.04em",
   py: 1.35,
   textTransform: "uppercase",
@@ -369,7 +371,7 @@ function ClassMetricCard({
       sx={{
         bgcolor: "#FFFFFF",
         borderRadius: "16px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02), 0 8px 18px -4px rgba(0, 0, 0, 0.03)",
         p: 2.25,
         transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -380,7 +382,7 @@ function ClassMetricCard({
       }}
     >
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 650 }}>
+        <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 600 }}>
           {label}
         </Typography>
         <Box
@@ -398,10 +400,10 @@ function ClassMetricCard({
           {icon}
         </Box>
       </Box>
-      <Typography sx={{ color: "#1D1D1F", fontSize: "1.65rem", fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.65rem", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
         {value}
       </Typography>
-      <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 500, mt: 0.5 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 500, mt: 0.5 }}>
         {subtext}
       </Typography>
     </Paper>

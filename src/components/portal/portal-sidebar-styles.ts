@@ -1,25 +1,27 @@
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import {
   PORTAL_SIDEBAR_MOTION_MS,
   PORTAL_SIDEBAR_TRANSITION,
 } from "./portal-sidebar-motion";
 
-export const NAV_BLUE = "#0071E3";
-export const NAV_RED = "#FF3B30";
+export const NAV_BLUE = ergEnterpriseTokens.color.primary;
+export const NAV_RED = ergEnterpriseTokens.color.danger;
 export const NAV_ITEM_COLOR = "#4B5563";
-export const NAV_TEXT_COLOR = "#1D1D1F";
-export const NAV_MUTED_COLOR = "#86868B";
-export const NAV_PRIMARY = "#0071E3";
+export const NAV_TEXT_COLOR = ergEnterpriseTokens.color.text;
+export const NAV_MUTED_COLOR = ergEnterpriseTokens.color.textMuted;
+export const NAV_PRIMARY = ergEnterpriseTokens.color.primary;
 
 // Apple Translucent Vibrancy Material (Emil Kowalski's apple-design specs)
 export const NAV_SURFACE_BG = "rgba(248, 249, 252, 0.88)";
 export const NAV_SUBTLE_GLASS_BG = "rgba(255, 255, 255, 0.75)";
 export const NAV_PREVIEW_BG = "rgba(0, 0, 0, 0.03)";
 export const NAV_HOVER_BG = "rgba(0, 0, 0, 0.045)";
-export const NAV_ACTIVE_BG = "rgba(0, 113, 227, 0.09)";
-export const NAV_ACTIVE_BORDER = "rgba(0, 113, 227, 0.22)";
+export const NAV_ACTIVE_BG = ergEnterpriseTokens.color.primarySoft;
+export const NAV_ACTIVE_BORDER = alpha(ergEnterpriseTokens.color.primary, 0.22);
 export const NAV_PREVIEW_BORDER = "rgba(0, 0, 0, 0.06)";
 export const NAV_ACTIVE_SHADOW =
-  "0 1px 2px rgba(0, 113, 227, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6)";
+  `0 1px 2px ${alpha(ergEnterpriseTokens.color.primary, 0.08)}, inset 0 1px 0 rgba(255, 255, 255, 0.6)`;
 export const NAV_PANEL_BG = "rgba(248, 249, 252, 0.88)";
 export const NAV_PANEL_BORDER = "rgba(0, 0, 0, 0.08)";
 export const NAV_PANEL_SHADOW =

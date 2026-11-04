@@ -48,7 +48,7 @@ export function LearningPathTable({ paths, selectedId, onSelect }: { paths: Lear
       <TableBody>
         {paths.map((path) => (
           <TableRow hover key={path.id} onClick={() => onSelect?.(path.id)} selected={path.id === selectedId} sx={{ cursor: onSelect ? "pointer" : "default" }}>
-            <TableCell><Typography sx={{ fontWeight: 750 }}>{path.title}</Typography><Typography color="text.secondary" sx={{ maxWidth: 300 }} variant="caption">{path.description || "Chưa có mô tả"}</Typography></TableCell>
+            <TableCell><Typography sx={{ fontWeight: 600 }}>{path.title}</Typography><Typography color="text.secondary" sx={{ maxWidth: 300 }} variant="caption">{path.description || "Chưa có mô tả"}</Typography></TableCell>
             <TableCell>{path.classId || path.educationUnitId || "Toàn đơn vị"}</TableCell>
             <TableCell><OutcomeStatusChip status={path.status} /></TableCell>
             <TableCell align="right">{path.nodeCount}</TableCell>
@@ -66,7 +66,7 @@ export function CompetencyTable({ competencies }: { competencies: CompetencyReco
       <TableHead><TableRow><TableCell>Mã năng lực</TableCell><TableCell>Năng lực</TableCell><TableCell>Đơn vị giáo dục</TableCell><TableCell>Trạng thái</TableCell></TableRow></TableHead>
       <TableBody>
         {competencies.map((competency) => (
-          <TableRow key={competency.id} hover><TableCell sx={{ fontFamily: "monospace", fontWeight: 750 }}>{competency.code}</TableCell><TableCell><Typography sx={{ fontWeight: 700 }}>{competency.name}</Typography><Typography color="text.secondary" variant="caption">{competency.description || "Chưa có mô tả"}</Typography></TableCell><TableCell>{competency.educationUnitId || "Toàn đơn vị"}</TableCell><TableCell><OutcomeStatusChip status={competency.status} /></TableCell></TableRow>
+          <TableRow key={competency.id} hover><TableCell sx={{ fontFamily: "monospace", fontWeight: 600 }}>{competency.code}</TableCell><TableCell><Typography sx={{ fontWeight: 600 }}>{competency.name}</Typography><Typography color="text.secondary" variant="caption">{competency.description || "Chưa có mô tả"}</Typography></TableCell><TableCell>{competency.educationUnitId || "Toàn đơn vị"}</TableCell><TableCell><OutcomeStatusChip status={competency.status} /></TableCell></TableRow>
         ))}
       </TableBody>
     </OutcomeTableShell>
@@ -92,7 +92,7 @@ export function CertificateTable({ certificates, pathTitleById, onRevoke }: { ce
       <TableHead><TableRow><TableCell>Số chứng chỉ</TableCell><TableCell>Lộ trình</TableCell><TableCell>Người học</TableCell><TableCell>Trạng thái</TableCell><TableCell>Phát hành</TableCell><TableCell align="right">Thao tác</TableCell></TableRow></TableHead>
       <TableBody>
         {certificates.map((certificate) => (
-          <TableRow key={certificate.id}><TableCell sx={{ fontFamily: "monospace", fontWeight: 750 }}>{certificate.certificateNumber}</TableCell><TableCell>{pathTitleById?.get(certificate.learningPathId) ?? certificate.learningPathId}</TableCell><TableCell>{certificate.learnerId}</TableCell><TableCell><OutcomeStatusChip status={certificate.status} /></TableCell><TableCell>{formatDate(certificate.issuedAt)}</TableCell><TableCell align="right">{onRevoke && certificate.status === "ISSUED" ? <Typography color="error.main" onClick={() => onRevoke(certificate)} sx={{ cursor: "pointer", fontWeight: 750 }} variant="body2">Thu hồi</Typography> : "-"}</TableCell></TableRow>
+          <TableRow key={certificate.id}><TableCell sx={{ fontFamily: "monospace", fontWeight: 600 }}>{certificate.certificateNumber}</TableCell><TableCell>{pathTitleById?.get(certificate.learningPathId) ?? certificate.learningPathId}</TableCell><TableCell>{certificate.learnerId}</TableCell><TableCell><OutcomeStatusChip status={certificate.status} /></TableCell><TableCell>{formatDate(certificate.issuedAt)}</TableCell><TableCell align="right">{onRevoke && certificate.status === "ISSUED" ? <Typography color="error.main" onClick={() => onRevoke(certificate)} sx={{ cursor: "pointer", fontWeight: 600 }} variant="body2">Thu hồi</Typography> : "-"}</TableCell></TableRow>
         ))}
       </TableBody>
     </OutcomeTableShell>
@@ -108,7 +108,7 @@ export function OutcomeErrorState({ message = "Không thể tải dữ liệu k�
 }
 
 export function OutcomeEmptyState({ title, description }: { title: string; description: string }) {
-  return <Box sx={{ alignItems: "center", border: "1px dashed", borderColor: "divider", borderRadius: 2, display: "flex", flexDirection: "column", gap: 0.75, p: 4, textAlign: "center" }}><HourglassEmptyRoundedIcon color="disabled" /><Typography sx={{ fontWeight: 750 }}>{title}</Typography><Typography color="text.secondary" variant="body2">{description}</Typography></Box>;
+  return <Box sx={{ alignItems: "center", border: "1px dashed", borderColor: "divider", borderRadius: 2, display: "flex", flexDirection: "column", gap: 0.75, p: 4, textAlign: "center" }}><HourglassEmptyRoundedIcon color="disabled" /><Typography sx={{ fontWeight: 600 }}>{title}</Typography><Typography color="text.secondary" variant="body2">{description}</Typography></Box>;
 }
 
 export function OutcomeConfirmedBadge() {

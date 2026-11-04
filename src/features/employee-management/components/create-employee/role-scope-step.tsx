@@ -15,6 +15,8 @@ import {
 } from "@/features/employee-management/components/create-employee/constants";
 import type { EmployeeForm, SetEmployeeField, SetEmployeeForm } from "@/features/employee-management/components/create-employee/constants";
 import { getRoleMeta, SCOPE_DISPLAY_CATALOG } from "@/platform/auth/permissions/role-display-catalog";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function RoleScopeStep({
   dbClasses,
@@ -66,11 +68,11 @@ export function RoleScopeStep({
                         size="small"
                         label={getRoleMeta(roleKey).label}
                         sx={{
-                          bgcolor: "rgba(0, 113, 227, 0.08)",
+                          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                           borderRadius: "6px",
                           color: appleDesign.colors.blue,
                           fontSize: "0.75rem",
-                          fontWeight: 650,
+                          fontWeight: 600,
                           height: 24,
                         }}
                       />
@@ -86,10 +88,10 @@ export function RoleScopeStep({
             <ListSubheader
               key={`sub-${category}`}
               sx={{
-                bgcolor: "#F5F5F7",
+                bgcolor: "background.default",
                 color: appleDesign.colors.textSecondary,
                 fontSize: "0.72rem",
-                fontWeight: 750,
+                fontWeight: 600,
                 letterSpacing: "0.04em",
                 lineHeight: "28px",
                 textTransform: "uppercase",
@@ -219,11 +221,11 @@ export function RoleScopeStep({
                             size="small"
                             label={s ? s.name : id}
                             sx={{
-                              bgcolor: "rgba(0, 113, 227, 0.08)",
+                              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                               borderRadius: "6px",
                               color: appleDesign.colors.blue,
                               fontSize: "0.75rem",
-                              fontWeight: 650,
+                              fontWeight: 600,
                               height: 24,
                             }}
                           />
@@ -242,7 +244,7 @@ export function RoleScopeStep({
                 <ListItemText
                   primary={
                     <Box sx={{ alignItems: "center", display: "flex", gap: 1, width: "100%" }}>
-                      <Typography sx={{ fontSize: "0.85rem", fontWeight: 650 }}>{school.name}</Typography>
+                      <Typography sx={{ fontSize: "0.85rem", fontWeight: 600 }}>{school.name}</Typography>
                       {school.schoolType && (
                         <Typography sx={{ color: "text.secondary", fontSize: "0.72rem", ml: "auto" }}>
                           {school.schoolType} {school.district ? `· ${school.district}` : ""}
@@ -302,11 +304,11 @@ export function RoleScopeStep({
                             size="small"
                             label={`Lớp ${id}`}
                             sx={{
-                              bgcolor: "rgba(0, 113, 227, 0.08)",
+                              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                               borderRadius: "6px",
                               color: appleDesign.colors.blue,
                               fontSize: "0.75rem",
-                              fontWeight: 650,
+                              fontWeight: 600,
                               height: 24,
                             }}
                           />
@@ -321,7 +323,7 @@ export function RoleScopeStep({
               {(dbClasses as Array<{ id: string; name: string }>).map((cls) => (
                 <MenuItem key={cls.id} value={cls.id} sx={{ py: 0.5 }}>
                   <Checkbox size="small" checked={form.selectedClassIds.includes(cls.id)} sx={{ mr: 1, p: 0.5 }} />
-                  <ListItemText primary={<Typography sx={{ fontSize: "0.85rem", fontWeight: 650 }}>{cls.name}</Typography>} />
+                  <ListItemText primary={<Typography sx={{ fontSize: "0.85rem", fontWeight: 600 }}>{cls.name}</Typography>} />
                 </MenuItem>
               ))}
             </TextField>
@@ -359,11 +361,11 @@ export function RoleScopeStep({
                             size="small"
                             label={c ? c.name : id}
                             sx={{
-                              bgcolor: "rgba(0, 113, 227, 0.08)",
+                              bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                               borderRadius: "6px",
                               color: appleDesign.colors.blue,
                               fontSize: "0.75rem",
-                              fontWeight: 650,
+                              fontWeight: 600,
                               height: 24,
                             }}
                           />
@@ -379,7 +381,7 @@ export function RoleScopeStep({
             {DEFAULT_CENTER_OPTIONS.map((center) => (
               <MenuItem key={center.id} value={center.id} sx={{ py: 0.5 }}>
                 <Checkbox size="small" checked={form.selectedCenterIds.includes(center.id)} sx={{ mr: 1, p: 0.5 }} />
-                <ListItemText primary={<Typography sx={{ fontSize: "0.85rem", fontWeight: 650 }}>{center.name}</Typography>} />
+                <ListItemText primary={<Typography sx={{ fontSize: "0.85rem", fontWeight: 600 }}>{center.name}</Typography>} />
               </MenuItem>
             ))}
           </TextField>
@@ -391,8 +393,8 @@ export function RoleScopeStep({
         <Box
           sx={{
             alignItems: "flex-start",
-            bgcolor: "rgba(0, 113, 227, 0.04)",
-            border: "1px solid rgba(0, 113, 227, 0.15)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.04),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
             borderRadius: "12px",
             display: "flex",
             gap: 1.5,
@@ -401,7 +403,7 @@ export function RoleScopeStep({
         >
           <CheckCircleRoundedIcon sx={{ color: appleDesign.colors.blue, fontSize: 20, mt: 0.25 }} />
           <Box>
-            <Typography sx={{ color: appleDesign.colors.blue, fontSize: "0.825rem", fontWeight: 700 }}>
+            <Typography sx={{ color: appleDesign.colors.blue, fontSize: "0.825rem", fontWeight: 600 }}>
               {form.scopeType === "SYSTEM" ? "Toàn bộ hệ thống ERG" : `Toàn tổ chức (${tenantId})`}
             </Typography>
             <Typography sx={{ color: appleDesign.colors.textSecondary, fontSize: "0.76rem", lineHeight: 1.45, mt: 0.25 }}>

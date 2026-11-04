@@ -35,7 +35,7 @@ export function TargetUnitCard({
     <Paper variant="outlined" sx={{ borderRadius: 1.5, bgcolor: "action.hover", p: 2 }}>
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
         <Box>
-          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</Typography>
+          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 600 }}>{lockedCenter ? "Trường đang import" : "Đơn vị đích"}</Typography>
           <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>
             {lockedCenter ? "Import được thực hiện trong phạm vi trường này." : "Tài khoản được gắn vào trường/lớp đã chọn."}
           </Typography>
@@ -45,8 +45,8 @@ export function TargetUnitCard({
       <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 2 }}>
         {lockedCenter ? (
           <Paper variant="outlined" sx={{ borderRadius: 1.25, px: 1.5, py: 1.25 }}>
-            <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700 }}>Trường</Typography>
-            <Typography noWrap sx={{ mt: 0.5, color: "text.primary", fontSize: 14, fontWeight: 700 }}>{lockedCenter.name}</Typography>
+            <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 600 }}>Trường</Typography>
+            <Typography noWrap sx={{ mt: 0.5, color: "text.primary", fontSize: 14, fontWeight: 600 }}>{lockedCenter.name}</Typography>
           </Paper>
         ) : (
           <ImportField label="Trường / Trung tâm">

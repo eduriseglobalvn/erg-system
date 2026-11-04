@@ -132,7 +132,7 @@ function MonthView({
             <Box key={iso} onClick={() => setSelectedDate(day)} sx={calendarDayCellSx(isCurrentMonth, isSelected)}>
               <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.65 }}>
                 <Box sx={calendarDayNumberSx(isToday, isSelected, isCurrentMonth)}>{day.date()}</Box>
-                {dayEvents.length > 2 ? <Typography sx={{ color: "#5F6B7A", fontSize: 11, fontWeight: 700 }}>+{dayEvents.length - 2}</Typography> : null}
+                {dayEvents.length > 2 ? <Typography sx={{ color: "#5F6B7A", fontSize: 11, fontWeight: 600 }}>+{dayEvents.length - 2}</Typography> : null}
               </Box>
               <Stack spacing={0.4}>{dayEvents.slice(0, 2).map((event) => <EventChip key={event.id} compact event={event} onEventClick={onEventClick} tone={getEventTone(event)} />)}</Stack>
             </Box>
@@ -185,7 +185,7 @@ function MultiDayView({
           const isToday = iso === todayDate;
           return (
             <Box key={iso} sx={weekTimeDayHeaderSx}>
-              <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 650, textTransform: "uppercase" }}>
+              <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>
                 {weekLabels[day.day() === 0 ? 6 : day.day() - 1]}
               </Typography>
               <Button variant="contained" onClick={() => setSelectedDate(day)} sx={weekDateButtonSx(isToday)}>
@@ -252,7 +252,7 @@ function DayView({
       <Box sx={dayHeaderSx}>
         <Box sx={timeZoneCellSx}>GMT+07</Box>
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 650, textTransform: "uppercase" }}>
+          <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>
             {anchorDate.format("dddd")}
           </Typography>
           <Typography sx={{ color: "#202124", fontSize: 22, fontWeight: 450, lineHeight: 1.05 }}>
@@ -339,7 +339,7 @@ function ScheduleView({
     return (
       <Box sx={scheduleEmptySx}>
         <FormatListBulletedRoundedIcon sx={{ color: "#8A94A6", fontSize: 24 }} />
-        <Typography sx={{ color: "#425466", fontSize: 13.5, fontWeight: 800 }}>Chưa có lịch trình trong khoảng thời gian này.</Typography>
+        <Typography sx={{ color: "#425466", fontSize: 13.5, fontWeight: 600 }}>Chưa có lịch trình trong khoảng thời gian này.</Typography>
       </Box>
     );
   }
@@ -381,7 +381,7 @@ function ScheduleView({
                       tabIndex={0}
                     >
                       <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 900, lineHeight: 1.3 }}>{event.title}</Typography>
-                      <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 700, lineHeight: 1.45, mt: 0.2 }}>
+                      <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 600, lineHeight: 1.45, mt: 0.2 }}>
                         {formatScheduleTimeRange(event)} · {event.className || event.attendees}
                       </Typography>
                       {event.location ? <Typography sx={{ color: "#667085", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
@@ -436,7 +436,7 @@ function ScheduleView({
                       <Typography noWrap sx={{ color: "#172033", fontSize: 13.5, fontWeight: 900, lineHeight: 1.35 }}>
                         {event.title}
                       </Typography>
-                      <Typography noWrap sx={{ color: "#667085", fontSize: 12.25, fontWeight: 650, lineHeight: 1.55, mt: 0.15 }}>
+                      <Typography noWrap sx={{ color: "#667085", fontSize: 12.25, fontWeight: 600, lineHeight: 1.55, mt: 0.15 }}>
                         {formatScheduleClassLine(event)}
                       </Typography>
                       {event.location ? (
@@ -444,7 +444,7 @@ function ScheduleView({
                           phòng: {event.location}
                         </Typography>
                       ) : null}
-                      <Typography noWrap sx={{ color: tone.text, fontSize: 12.25, fontWeight: 800, lineHeight: 1.5 }}>
+                      <Typography noWrap sx={{ color: tone.text, fontSize: 12.25, fontWeight: 600, lineHeight: 1.5 }}>
                         {formatScheduleTimeRange(event)}
                       </Typography>
                     </Box>

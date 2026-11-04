@@ -74,7 +74,7 @@ export function TeachingScheduleBatchPanel({ canCreate = false, onCreate, permis
     <Paper variant="outlined" sx={{ borderRadius: 2, boxShadow: "none", overflow: "hidden" }}>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{ alignItems: { sm: "center" }, justifyContent: "space-between", p: 2 }}>
         <div>
-          <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>Đợt lịch giảng dạy</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>Đợt lịch giảng dạy</Typography>
           <Typography variant="body2" color="text.secondary">Xuất bản bản nháp để giáo viên nhận lịch trên LMS.</Typography>
         </div>
         <Stack direction="row" spacing={1} sx={{ alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>

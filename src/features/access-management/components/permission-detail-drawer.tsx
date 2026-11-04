@@ -7,6 +7,8 @@ import IconButton from "@mui/material/IconButton";
 import Typography from "@mui/material/Typography";
 import { usePermissionDetail } from "@/features/access-management/hooks/use-access-management";
 import { ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function PermissionDetailDrawer({
   onClose,
@@ -40,9 +42,9 @@ export function PermissionDetailDrawer({
         <Box>
           <Typography
             sx={{
-              color: "#86868B",
+              color: "text.disabled",
               fontSize: "0.72rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.04em",
               textTransform: "uppercase",
             }}
@@ -51,9 +53,9 @@ export function PermissionDetailDrawer({
           </Typography>
           <Typography
             sx={{
-              color: "#1D1D1F",
+              color: "text.primary",
               fontSize: "1.2rem",
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: "-0.015em",
             }}
           >
@@ -65,7 +67,7 @@ export function PermissionDetailDrawer({
           onClick={onClose}
           sx={{
             bgcolor: "rgba(0, 0, 0, 0.05)",
-            color: "#1D1D1F",
+            color: "text.primary",
             height: 32,
             width: 32,
             "&:hover": { bgcolor: "rgba(0, 0, 0, 0.09)", transform: "scale(1.05)" },
@@ -92,26 +94,26 @@ export function PermissionDetailDrawer({
             sx={{
               bgcolor: "#FFFFFF",
               borderRadius: "14px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
+              border: `1px solid ${ergEnterpriseTokens.color.border}`,
               p: 2.25,
             }}
           >
-            <Typography sx={{ color: "#86868B", fontSize: "0.75rem", fontWeight: 600 }}>
+            <Typography sx={{ color: "text.disabled", fontSize: "0.75rem", fontWeight: 600 }}>
               Permission Key
             </Typography>
             <Typography
               sx={{
-                color: "#1D1D1F",
+                color: "text.primary",
                 fontFamily: "var(--font-mono)",
                 fontSize: "0.95rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 mt: 0.25,
               }}
             >
               {query.data.name}
             </Typography>
             {query.data.description ? (
-              <Typography sx={{ color: "#6E6E73", fontSize: "0.825rem", mt: 0.5 }}>
+              <Typography sx={{ color: "text.secondary", fontSize: "0.825rem", mt: 0.5 }}>
                 {query.data.description}
               </Typography>
             ) : null}
@@ -120,13 +122,13 @@ export function PermissionDetailDrawer({
               <Box
                 sx={{
                   alignItems: "center",
-                  bgcolor: query.data.status === "ACTIVE" ? "rgba(52, 199, 89, 0.12)" : "rgba(255, 149, 0, 0.12)",
-                  border: `1px solid ${query.data.status === "ACTIVE" ? "rgba(52, 199, 89, 0.22)" : "rgba(255, 149, 0, 0.22)"}`,
+                  bgcolor: query.data.status === "ACTIVE" ? alpha(ergEnterpriseTokens.color.success, 0.12) : alpha(ergEnterpriseTokens.color.warning, 0.12),
+                  border: `1px solid ${query.data.status === "ACTIVE" ? alpha(ergEnterpriseTokens.color.success, 0.22) : alpha(ergEnterpriseTokens.color.warning, 0.22)}`,
                   borderRadius: "9999px",
                   color: query.data.status === "ACTIVE" ? "#15803D" : "#B45309",
                   display: "inline-flex",
                   fontSize: "0.72rem",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   gap: 0.5,
                   px: 1,
                   py: 0.35,
@@ -134,7 +136,7 @@ export function PermissionDetailDrawer({
               >
                 <Box
                   sx={{
-                    bgcolor: query.data.status === "ACTIVE" ? "#34C759" : "#FF9500",
+                    bgcolor: query.data.status === "ACTIVE" ? "success.main" : ergEnterpriseTokens.color.warning,
                     borderRadius: "50%",
                     height: 6,
                     width: 6,
@@ -147,9 +149,9 @@ export function PermissionDetailDrawer({
                 sx={{
                   bgcolor: "rgba(0, 0, 0, 0.04)",
                   borderRadius: "9999px",
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: "0.72rem",
-                  fontWeight: 650,
+                  fontWeight: 600,
                   px: 1,
                   py: 0.35,
                 }}
@@ -159,11 +161,11 @@ export function PermissionDetailDrawer({
 
               <Box
                 sx={{
-                  bgcolor: "rgba(0, 113, 227, 0.08)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                   borderRadius: "9999px",
-                  color: "#0071E3",
+                  color: "primary.main",
                   fontSize: "0.72rem",
-                  fontWeight: 650,
+                  fontWeight: 600,
                   px: 1,
                   py: 0.35,
                 }}
@@ -175,9 +177,9 @@ export function PermissionDetailDrawer({
                 sx={{
                   bgcolor: "rgba(0, 0, 0, 0.04)",
                   borderRadius: "9999px",
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: "0.72rem",
-                  fontWeight: 650,
+                  fontWeight: 600,
                   px: 1,
                   py: 0.35,
                 }}
@@ -192,11 +194,11 @@ export function PermissionDetailDrawer({
             sx={{
               bgcolor: "#FFFFFF",
               borderRadius: "14px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
+              border: `1px solid ${ergEnterpriseTokens.color.border}`,
               p: 2.25,
             }}
           >
-            <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 750, mb: 1.25 }}>
+            <Typography sx={{ color: "text.primary", fontSize: "0.85rem", fontWeight: 600, mb: 1.25 }}>
               Nhóm quyền đang sử dụng
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.75 }}>
@@ -205,12 +207,12 @@ export function PermissionDetailDrawer({
                   <Box
                     key={role}
                     sx={{
-                      bgcolor: "rgba(0, 113, 227, 0.08)",
-                      border: "1px solid rgba(0, 113, 227, 0.18)",
+                      bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+                      border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.18)}`,
                       borderRadius: "8px",
-                      color: "#0071E3",
+                      color: "primary.main",
                       fontSize: "0.78rem",
-                      fontWeight: 650,
+                      fontWeight: 600,
                       px: 1.25,
                       py: 0.45,
                     }}
@@ -231,11 +233,11 @@ export function PermissionDetailDrawer({
             sx={{
               bgcolor: "#FFFFFF",
               borderRadius: "14px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
+              border: `1px solid ${ergEnterpriseTokens.color.border}`,
               p: 2.25,
             }}
           >
-            <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 750, mb: 1.25 }}>
+            <Typography sx={{ color: "text.primary", fontSize: "0.85rem", fontWeight: 600, mb: 1.25 }}>
               Binding đang bảo vệ ({query.data.bindings.length})
             </Typography>
             <Box sx={{ display: "grid", gap: 1 }}>
@@ -244,21 +246,21 @@ export function PermissionDetailDrawer({
                   key={binding.id}
                   sx={{
                     bgcolor: "rgba(0, 0, 0, 0.02)",
-                    borderRadius: "10px",
-                    border: "1px solid rgba(0, 0, 0, 0.04)",
+                    borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+                    border: `1px solid ${ergEnterpriseTokens.color.border}`,
                     p: 1.5,
                   }}
                 >
                   <Box sx={{ alignItems: "center", display: "flex", gap: 0.5, mb: 0.25 }}>
-                    <ShieldRoundedIcon sx={{ color: "#0071E3", fontSize: 14 }} />
-                    <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600 }}>
+                    <ShieldRoundedIcon sx={{ color: "primary.main", fontSize: 14 }} />
+                    <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600 }}>
                       {binding.surfaceType}
                     </Typography>
                   </Box>
-                  <Typography sx={{ color: "#1D1D1F", fontFamily: "var(--font-mono)", fontSize: "0.82rem", fontWeight: 650 }}>
+                  <Typography sx={{ color: "text.primary", fontFamily: "var(--font-mono)", fontSize: "0.82rem", fontWeight: 600 }}>
                     {binding.surfaceIdentifier}
                   </Typography>
-                  <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", mt: 0.25 }}>
+                  <Typography sx={{ color: "text.secondary", fontSize: "0.78rem", mt: 0.25 }}>
                     {binding.description || "Binding runtime"}
                   </Typography>
                 </Box>
@@ -266,7 +268,7 @@ export function PermissionDetailDrawer({
             </Box>
           </Box>
 
-          <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontStyle: "italic", lineHeight: 1.4 }}>
+          <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontStyle: "italic", lineHeight: 1.4 }}>
             Mọi thay đổi membership của quyền trong role được ghi vào activity/security feed cùng actor, request ID và authz version.
           </Typography>
         </Box>

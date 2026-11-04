@@ -3,6 +3,7 @@ import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function QuestionBankCompactHeader({
   children,
@@ -19,7 +20,7 @@ export function QuestionBankCompactHeader({
       sx={{
         bgcolor: "rgba(255, 255, 255, 0.88)",
         backdropFilter: "blur(20px)",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "16px",
         boxShadow: "0 2px 12px rgba(0, 0, 0, 0.03)",
         overflow: "hidden",
@@ -41,15 +42,15 @@ export function QuestionBankCompactHeader({
           <Typography
             component="h1"
             sx={{
-              color: "#1D1D1F",
+              color: ergEnterpriseTokens.color.text,
               fontSize: 16,
-              fontWeight: 800,
+              fontWeight: 600,
               lineHeight: 1.2,
               letterSpacing: "-0.01em",
             }}
           >
             <Box component="span" sx={{ display: "block" }}>{titleLines[0]}</Box>
-            {titleLines[1] ? <Box component="span" sx={{ display: "block", color: "#0071E3" }}>{titleLines[1]}</Box> : null}
+            {titleLines[1] ? <Box component="span" sx={{ display: "block", color: ergEnterpriseTokens.color.primary }}>{titleLines[1]}</Box> : null}
           </Typography>
         </Stack>
         <Box sx={{ minWidth: 0, flex: 1 }}>{children}</Box>

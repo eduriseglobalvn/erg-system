@@ -28,10 +28,10 @@ export default function SchoolImportsScreen() {
       <Alert severity="info" sx={{ mb: 2 }}>{unsupportedApiMessage} Không hiển thị lịch sử mẫu khi backend chưa có import contract.</Alert>
       <Box sx={{ display: "grid", gap: 2 }}>
         <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", md: "repeat(3,1fr)" } }}>
-          {importCapabilities.map((item) => <Paper key={item.title} variant="outlined" sx={{ p: 2.25 }}><Box sx={{ color: "primary.main" }}>{item.icon}</Box><Typography sx={{ fontWeight: 850, mt: 1 }}>{item.title}</Typography><Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">{item.text}</Typography><Chip label="Chờ backend contract" size="small" sx={{ mt: 1.5 }} variant="outlined" /></Paper>)}
+          {importCapabilities.map((item) => <Paper key={item.title} variant="outlined" sx={{ p: 2.25 }}><Box sx={{ color: "primary.main" }}>{item.icon}</Box><Typography sx={{ fontWeight: 600, mt: 1 }}>{item.title}</Typography><Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">{item.text}</Typography><Chip label="Chờ backend contract" size="small" sx={{ mt: 1.5 }} variant="outlined" /></Paper>)}
         </Box>
         <Paper variant="outlined" sx={{ p: 3 }}>
-          <Typography sx={{ fontWeight: 850 }}>Lịch sử nhập gần đây</Typography>
+          <Typography sx={{ fontWeight: 600 }}>Lịch sử nhập gần đây</Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }} variant="body2">Chưa có API truy vấn import history cho trường {selectedSchool.name}. Khi backend phát hành job/history contract, màn hình này sẽ hiển thị pagination, lỗi từng dòng và audit reference.</Typography>
         </Paper>
       </Box>

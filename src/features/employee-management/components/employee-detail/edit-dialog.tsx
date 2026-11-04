@@ -13,6 +13,7 @@ import {
   appleInputSx,
 } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeEditForm } from "@/features/employee-management/components/employee-detail/types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeEditDialog({
   form,
@@ -51,7 +52,7 @@ export function EmployeeEditDialog({
           alignItems: "center",
           borderBottom: `1px solid ${appleDesign.colors.border}`,
           display: "flex",
-          fontWeight: 750,
+          fontWeight: 600,
           justifyContent: "space-between",
           letterSpacing: "-0.02em",
           px: { sm: 3, xs: 2.5 },
@@ -64,7 +65,7 @@ export function EmployeeEditDialog({
             sx={{
               color: appleDesign.colors.blue,
               fontSize: "0.7rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
@@ -74,7 +75,7 @@ export function EmployeeEditDialog({
             variant="h6"
             sx={{
               color: appleDesign.colors.textPrimary,
-              fontWeight: 750,
+              fontWeight: 600,
               letterSpacing: "-0.02em",
               lineHeight: 1.25,
             }}
@@ -204,9 +205,9 @@ export function EmployeeEditDialog({
           variant="text"
           onClick={() => onClose()}
           sx={{
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             color: `${appleDesign.colors.textSecondary} !important`,
-            fontWeight: 650,
+            fontWeight: 600,
             px: 2.5,
             textTransform: "none",
             "&:hover": {
@@ -223,10 +224,10 @@ export function EmployeeEditDialog({
           disabled={saving || !form.fullName.trim() || !form.employeeCode.trim()}
           sx={{
             bgcolor: `${appleDesign.colors.blue} !important`,
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             boxShadow: appleDesign.shadows.button,
             color: "#FFFFFF !important",
-            fontWeight: 650,
+            fontWeight: 600,
             px: 3,
             textTransform: "none",
             transition: "all 0.15s ease",

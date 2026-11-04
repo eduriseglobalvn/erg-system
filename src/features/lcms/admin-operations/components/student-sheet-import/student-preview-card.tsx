@@ -50,7 +50,7 @@ export function StudentPreviewCard({
   <TableContainer component={Paper} variant="outlined" sx={{ mt: 2, maxHeight: 580, borderRadius: 1.5 }}>
       <Table stickyHeader size="small" sx={{ minWidth: 1200 }}>
         <TableHead>
-          <TableRow sx={{ "& th": { bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" } }}>
+          <TableRow sx={{ "& th": { bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 600, textTransform: "uppercase" } }}>
             <TableCell align="center" sx={{ width: 64 }}>STT</TableCell>
             <TableCell sx={{ width: 288 }}>Họ & Tên học sinh</TableCell>
             <TableCell sx={{ width: 128 }}>Lớp</TableCell>
@@ -72,13 +72,13 @@ export function StudentPreviewCard({
                 sx={{ bgcolor: isValid ? "background.paper" : "warning.50", "& td": { py: 1.25, fontSize: 12 } }}
               >
                 <TableCell align="center">
-                  <Box component="span" sx={{ display: "inline-flex", width: 24, height: 24, alignItems: "center", justifyContent: "center", borderRadius: 0.75, bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 700 }}>
+                  <Box component="span" sx={{ display: "inline-flex", width: 24, height: 24, alignItems: "center", justifyContent: "center", borderRadius: 0.75, bgcolor: "action.hover", color: "text.secondary", fontSize: 10, fontWeight: 600 }}>
                     {student.rowNumber || student.sourceIndex}
                   </Box>
                 </TableCell>
                 <TableCell>
                   <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
-                    <Avatar variant="rounded" sx={{ width: 32, height: 32, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 10, fontWeight: 700 }}>
+                    <Avatar variant="rounded" sx={{ width: 32, height: 32, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 10, fontWeight: 600 }}>
                       {getInitials(student.fullName)}
                     </Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -127,7 +127,7 @@ export function StudentPreviewCard({
                   />
                 </TableCell>
                 <TableCell align="center">
-                  <Chip size="small" variant="outlined" color={isValid ? "success" : "warning"} label={student.note} sx={{ height: 22, fontSize: 10, fontWeight: 700 }} />
+                  <Chip size="small" variant="outlined" color={isValid ? "success" : "warning"} label={student.note} sx={{ height: 22, fontSize: 10, fontWeight: 600 }} />
                 </TableCell>
                 <TableCell align="center">
                   <Button
@@ -155,7 +155,7 @@ export function StudentPreviewCard({
 
           {!result && !isLoading && (
             <TableRow>
-              <TableCell colSpan={9} align="center" sx={{ py: 6, color: "text.secondary", fontWeight: 700 }}>
+              <TableCell colSpan={9} align="center" sx={{ py: 6, color: "text.secondary", fontWeight: 600 }}>
                 Vui lòng nhập đường dẫn Google Sheet phía trên để tải và cấu hình dữ liệu.
               </TableCell>
             </TableRow>

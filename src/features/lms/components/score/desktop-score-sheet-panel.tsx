@@ -45,7 +45,7 @@ export function DesktopScoreSheetPanel({
       <div style={{ padding: 16, borderRadius: 8, backgroundColor: "white", border: "1px solid #e5e7eb" }}>
         <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 16 }}>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <Typography sx={{ fontSize: 18, fontWeight: 700 }}>{selectedClass?.className ?? "Lớp học"}</Typography>
+            <Typography sx={{ fontSize: 18, fontWeight: 600 }}>{selectedClass?.className ?? "Lớp học"}</Typography>
             <Typography sx={{ fontSize: 13, color: "#6b7280" }}>
               {selectedSchoolName} · {students.length} học sinh · {controller.scoreColumns.length} cột điểm
             </Typography>
@@ -217,7 +217,7 @@ export function DesktopScoreSheetPanel({
                         minWidth: 72,
                         "& .MuiOutlinedInput-root": { borderRadius: 4, bgcolor: getClassificationBg(classification) },
                         "& .MuiOutlinedInput-root fieldset": { borderColor: getClassificationBorder(classification) },
-                        "& .MuiSelect-select": { fontSize: 12, fontWeight: 700, py: 0.5, color: getClassificationColor(classification) },
+                        "& .MuiSelect-select": { fontSize: 12, fontWeight: 600, py: 0.5, color: getClassificationColor(classification) },
                       }}
                     />
                   </td>
@@ -273,7 +273,7 @@ const thStyle = (width?: string | number) => ({
   border: "1px solid #e5e7eb",
   borderTop: "none",
   fontSize: 11,
-  fontWeight: 700,
+  fontWeight: 600,
   textAlign: "center" as const,
   position: "sticky" as const,
   top: 0,

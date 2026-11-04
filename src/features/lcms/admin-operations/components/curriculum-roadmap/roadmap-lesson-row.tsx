@@ -86,7 +86,7 @@ export function CurriculumLessonRow({
             display: "grid",
             placeItems: "center",
             fontSize: 11.5,
-            fontWeight: 700,
+            fontWeight: 600,
             fontFamily: "'JetBrains Mono', monospace",
             flexShrink: 0,
             border: "1px solid",
@@ -104,7 +104,7 @@ export function CurriculumLessonRow({
             sx={{
               height: 20,
               fontSize: 10.5,
-              fontWeight: 700,
+              fontWeight: 600,
               bgcolor: "#DBEAFE",
               color: "#1E40AF",
               flexShrink: 0,
@@ -117,7 +117,7 @@ export function CurriculumLessonRow({
             sx={{
               height: 20,
               fontSize: 10.5,
-              fontWeight: 700,
+              fontWeight: 600,
               bgcolor: "#F3E8FF",
               color: "#6B21A8",
               flexShrink: 0,

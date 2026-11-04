@@ -84,7 +84,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
   const riskCount = employees.filter((e) => Boolean(e.riskCode)).length;
 
   return (
-    <ErgContentBand sx={{ bgcolor: "#F5F5F7", py: { md: 4, xs: 2.5 } }}>
+    <ErgContentBand sx={{ bgcolor: "background.default", py: { md: 4, xs: 2.5 } }}>
       {/* Apple-styled Page Header */}
       <EmployeeListHeader onCreate={() => setCreateOpen(true)} />
 

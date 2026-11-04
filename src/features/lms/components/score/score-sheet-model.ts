@@ -116,7 +116,7 @@ export function getClassificationChipSx(classification: Classification) {
   return {
     backgroundColor: getClassificationBg(classification),
     color: getClassificationColor(classification),
-    fontWeight: 700,
+    fontWeight: 600,
     fontSize: 14,
   };
 }

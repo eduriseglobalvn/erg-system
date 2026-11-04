@@ -1,7 +1,7 @@
 import {
   PlayerShellRuntime,
   type PlayerShellProps,
-} from "@/components/quiz/player-shell-runtime";
+} from "@/features/lcms/quiz/player/player-shell-runtime";
 
 export function PlayerShell(props: PlayerShellProps) {
   return <PlayerShellRuntime {...props} />;

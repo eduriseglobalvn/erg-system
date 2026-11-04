@@ -45,12 +45,12 @@ export function EventDetailPopover({
               <Typography noWrap sx={{ color: "#FFFFFF", fontSize: 14.5, fontWeight: 900 }}>
                 {event.title}
               </Typography>
-              <Typography sx={{ color: "rgba(255,255,255,0.86)", fontSize: 12.5, fontWeight: 700, mt: 0.4 }}>
+              <Typography sx={{ color: "rgba(255,255,255,0.86)", fontSize: 12.5, fontWeight: 600, mt: 0.4 }}>
                 {event.className ?? event.grade ?? "Lịch giảng dạy"} · {event.location}
               </Typography>
             </Box>
             <Box sx={{ color: "#FFFFFF", flexShrink: 0, textAlign: "right" }}>
-              <Typography sx={{ fontSize: 11.5, fontWeight: 700, opacity: 0.82 }}>Phòng học</Typography>
+              <Typography sx={{ fontSize: 11.5, fontWeight: 600, opacity: 0.82 }}>Phòng học</Typography>
               <Typography sx={{ fontSize: 15, fontWeight: 900 }}>{event.location}</Typography>
             </Box>
           </Box>
@@ -69,7 +69,7 @@ export function EventDetailPopover({
           <Divider />
           <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", p: 2 }}>
             <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ color: "#172033", fontSize: 13, fontWeight: 800 }}>{event.attendees}</Typography>
+              <Typography sx={{ color: "#172033", fontSize: 13, fontWeight: 600 }}>{event.attendees}</Typography>
               <Typography sx={{ color: "#6B778C", fontSize: 12.25, mt: 0.25 }}>
                 {renderActions ? "Quản lý phòng học, ghi chú hoặc hủy sự kiện." : "Lịch đã được trung tâm xuất bản và chỉ đọc trên LMS."}
               </Typography>

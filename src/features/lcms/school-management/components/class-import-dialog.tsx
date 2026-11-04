@@ -260,7 +260,7 @@ export function ClassImportDialog({
         {loading || importing ? <LinearProgress /> : null}
         <DialogContent sx={{ display: "grid", gap: 2, minHeight: 260, overflow: "auto", pt: 3 }}>
           {source === 0 ? <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" } }}><TextField label={`Tên ${classLabel.toLowerCase()}`} required value={manual.name} onChange={(event) => setManual({ ...manual, name: event.target.value })} />{usesGrades ? <TextField label="Khối" required select value={manual.grade} onChange={(event) => setManual({ ...manual, grade: event.target.value })}>{grades.map((grade) => <MenuItem key={grade} value={grade}>Khối {grade}</MenuItem>)}</TextField> : null}<TextField label="Giáo viên phụ trách" value={manual.homeroomTeacher} onChange={(event) => setManual({ ...manual, homeroomTeacher: event.target.value })} /><TextField label="Sĩ số dự kiến" type="number" value={manual.studentCount} onChange={(event) => setManual({ ...manual, studentCount: Number(event.target.value) || 0 })} /></Box> : null}
-          {source === 1 ? <Paper sx={{ bgcolor: "background.default", borderStyle: "dashed", p: 3, textAlign: "center" }} variant="outlined"><input ref={fileRef} accept=".xlsx,.xls,.csv" hidden onChange={readExcel} type="file" /><FileUploadRoundedIcon color="primary" /><Typography sx={{ fontWeight: 850, mt: 1 }}>File gồm: {usesGrades ? "Tên lớp, Khối, Giáo viên phụ trách, Sĩ số" : "Tên lớp, Giáo viên phụ trách, Sĩ số"}</Typography><Typography color="text.secondary" variant="body2">Hệ thống tự nhận diện cột, hoặc tự động trích xuất các lớp từ sổ điểm danh nhiều sheet.</Typography><Button disabled={loading} onClick={() => fileRef.current?.click()} sx={{ mt: 2 }} variant="outlined">Chọn file lớp</Button></Paper> : null}
+          {source === 1 ? <Paper sx={{ bgcolor: "background.default", borderStyle: "dashed", p: 3, textAlign: "center" }} variant="outlined"><input ref={fileRef} accept=".xlsx,.xls,.csv" hidden onChange={readExcel} type="file" /><FileUploadRoundedIcon color="primary" /><Typography sx={{ fontWeight: 600, mt: 1 }}>File gồm: {usesGrades ? "Tên lớp, Khối, Giáo viên phụ trách, Sĩ số" : "Tên lớp, Giáo viên phụ trách, Sĩ số"}</Typography><Typography color="text.secondary" variant="body2">Hệ thống tự nhận diện cột, hoặc tự động trích xuất các lớp từ sổ điểm danh nhiều sheet.</Typography><Button disabled={loading} onClick={() => fileRef.current?.click()} sx={{ mt: 2 }} variant="outlined">Chọn file lớp</Button></Paper> : null}
           {source === 2 ? <Box sx={{ alignItems: { xs: "stretch", sm: "center" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5 }}><TextField fullWidth label="Đường dẫn Google Sheets" value={url} onChange={(event) => setUrl(event.target.value)} /><Button disabled={loading || !url.trim()} onClick={readSheet} sx={{ minWidth: 150 }} variant="contained">Đọc dữ liệu</Button></Box> : null}
           {loading ? <PreviewSkeleton /> : null}
           {!loading && message ? (
@@ -294,7 +294,7 @@ export function ClassImportDialog({
                 }
                 label={
                   <Box>
-                    <Typography sx={{ color: "primary.900", fontSize: 13, fontWeight: 850 }}>
+                    <Typography sx={{ color: "primary.900", fontSize: 13, fontWeight: 600 }}>
                       Đồng thời nạp luôn danh sách {selectedStudents.length} học sinh vào các lớp đã chọn
                     </Typography>
                     <Typography color="text.secondary" variant="caption">
@@ -308,7 +308,7 @@ export function ClassImportDialog({
                 icon={<CheckCircleRoundedIcon />}
                 label={`${selectedStudents.length} học sinh đã chọn`}
                 size="small"
-                sx={{ fontWeight: 800 }}
+                sx={{ fontWeight: 600 }}
               />
             </Paper>
           ) : null}
@@ -330,7 +330,7 @@ export function ClassImportDialog({
           ) : null}
         </DialogContent>
         <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 3, py: 2 }}>
-          <Typography color={canConfirm ? "text.primary" : "text.secondary"} variant="body2" sx={{ fontWeight: 700 }}>
+          <Typography color={canConfirm ? "text.primary" : "text.secondary"} variant="body2" sx={{ fontWeight: 600 }}>
             {source === 0
               ? "Tạo một lớp thủ công"
               : canConfirm
@@ -406,11 +406,11 @@ function PreviewTable({
       <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, mb: 1.5 }}>
         <Chip color="primary" label={`${rows.length} lớp`} size="small" />
         {usesGrades ? <Chip label={`${detectedGrades.length} khối: ${detectedGrades.join(", ") || "—"}`} size="small" variant="outlined" /> : null}
-        <Chip color="primary" label={`Đã chọn ${selectedIndices.size}/${rows.length} lớp`} size="small" variant="outlined" sx={{ fontWeight: 800 }} />
+        <Chip color="primary" label={`Đã chọn ${selectedIndices.size}/${rows.length} lớp`} size="small" variant="outlined" sx={{ fontWeight: 600 }} />
         {invalidCount ? <Chip color="warning" label={`${invalidCount} lớp trùng/lỗi`} size="small" /> : <Chip color="success" label="Tất cả hợp lệ" size="small" />}
         <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, ml: "auto" }}>
           {onSelectAllToImportStudents ? (
-            <Button color="primary" onClick={onSelectAllToImportStudents} size="small" sx={{ fontSize: 12, fontWeight: 700, textTransform: "none" }} variant="outlined">
+            <Button color="primary" onClick={onSelectAllToImportStudents} size="small" sx={{ fontSize: 12, fontWeight: 600, textTransform: "none" }} variant="outlined">
               Chọn tất cả để nạp HS
             </Button>
           ) : null}
@@ -470,18 +470,18 @@ function PreviewTable({
                     />
                   </TableCell>
                   <TableCell>{row.sourceRow}</TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>{row.name || "—"}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{row.name || "—"}</TableCell>
                   {usesGrades ? <TableCell>{row.grade || "—"}</TableCell> : null}
                   <TableCell>{row.homeroomTeacher || "Chưa gán"}</TableCell>
                   <TableCell align="right">
                     <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "flex-end" }}>
-                      <Typography sx={{ fontWeight: 850 }}>{row.studentCount}</Typography>
+                      <Typography sx={{ fontWeight: 600 }}>{row.studentCount}</Typography>
                       {row.students && row.students.length > 0 ? (
                         <Button
                           onClick={() => onViewStudents(row)}
                           size="small"
                           startIcon={<PeopleAltRoundedIcon fontSize="small" />}
-                          sx={{ fontSize: 11, fontWeight: 700, minHeight: 24, px: 1, py: 0.25, textTransform: "none" }}
+                          sx={{ fontSize: 11, fontWeight: 600, minHeight: 24, px: 1, py: 0.25, textTransform: "none" }}
                           variant="outlined"
                         >
                           Xem {row.students.length} HS
@@ -587,7 +587,7 @@ function ClassStudentsViewerDialog({
       <DialogTitle sx={{ borderBottom: "1px solid", borderColor: "divider", pb: 1.5 }}>
         <Box sx={{ alignItems: { xs: "flex-start", sm: "center" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between" }}>
           <Box>
-            <Typography sx={{ fontSize: 19, fontWeight: 900 }}>
+            <Typography sx={{ fontSize: 19, fontWeight: 600 }}>
               Danh sách học sinh lớp {classRow.name}
             </Typography>
             <Typography color="text.secondary" variant="body2">
@@ -598,7 +598,7 @@ function ClassStudentsViewerDialog({
             color="primary"
             label={`Đã chọn ${selectedIds.size} / ${allStudents.length} HS`}
             size="medium"
-            sx={{ fontWeight: 850, px: 0.5 }}
+            sx={{ fontWeight: 600, px: 0.5 }}
           />
         </Box>
       </DialogTitle>
@@ -612,13 +612,13 @@ function ClassStudentsViewerDialog({
             value={filterText}
           />
           <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}>
-            <Button onClick={handleSelectAll} size="small" sx={{ fontSize: 12, fontWeight: 700, textTransform: "none" }} variant="text">
+            <Button onClick={handleSelectAll} size="small" sx={{ fontSize: 12, fontWeight: 600, textTransform: "none" }} variant="text">
               Chọn tất cả ({allStudents.length})
             </Button>
             <Button color="inherit" onClick={handleDeselectAll} size="small" sx={{ fontSize: 12, textTransform: "none" }} variant="text">
               Bỏ chọn
             </Button>
-            <Button color="success" onClick={handleSelectOnlyValid} size="small" sx={{ fontSize: 12, fontWeight: 700, textTransform: "none" }} variant="outlined">
+            <Button color="success" onClick={handleSelectOnlyValid} size="small" sx={{ fontSize: 12, fontWeight: 600, textTransform: "none" }} variant="outlined">
               Chỉ chọn hợp lệ
             </Button>
           </Box>
@@ -666,7 +666,7 @@ function ClassStudentsViewerDialog({
                       />
                     </TableCell>
                     <TableCell>{idx + 1}</TableCell>
-                    <TableCell sx={{ fontSize: 14, fontWeight: 800 }}>{student.fullName}</TableCell>
+                    <TableCell sx={{ fontSize: 14, fontWeight: 600 }}>{student.fullName}</TableCell>
                     <TableCell>{student.grade || classRow.grade || "—"}</TableCell>
                     <TableCell>{student.className || classRow.name}</TableCell>
                     <TableCell sx={{ color: "text.secondary", fontFamily: "var(--font-mono)", fontSize: 12 }}>

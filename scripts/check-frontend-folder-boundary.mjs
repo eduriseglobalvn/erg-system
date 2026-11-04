@@ -7,7 +7,7 @@ import { execFileSync } from "node:child_process";
 export const LAYER_RULES = [
   { from: "src/platform/", forbidden: "app", message: "platform must not import from app" },
   { from: "src/lib/", forbidden: "features", message: "lib must not import from features" },
-  { from: "src/components/", forbidden: "features", message: "components must not import from features", exceptFrom: "src/components/quiz/" }, // quiz: pending quiz domain move
+  { from: "src/components/", forbidden: "features", message: "components must not import from features" },
 ];
 // Known exceptions as "file -> imported specifier". Keep empty; add a comment with the reason for each entry.
 export const LAYER_ALLOWLIST = new Set([]);
@@ -25,7 +25,7 @@ export function findLayerViolations(sources) {
   const violations = [];
   for (const [rawFile, text] of Object.entries(sources)) {
     const file = rawFile.replaceAll("\\", "/");
-    for (const rule of LAYER_RULES.filter((item) => file.startsWith(item.from) && !(item.exceptFrom && file.startsWith(item.exceptFrom)))) {
+    for (const rule of LAYER_RULES.filter((item) => file.startsWith(item.from))) {
       for (const match of text.matchAll(importSpecifierPattern)) {
         const specifier = match[2];
         if (!resolvesToLayer(file, specifier, rule.forbidden) || LAYER_ALLOWLIST.has(`${file} -> ${specifier}`)) continue;

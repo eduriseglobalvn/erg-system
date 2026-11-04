@@ -6,6 +6,7 @@ import TextField from "@mui/material/TextField";
 import { appleCleanInputSx, appleDesign, AppleFormField } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeForm, SetEmployeeField } from "@/features/employee-management/components/create-employee/constants";
 import { FormGrid } from "@/features/employee-management/components/create-employee/form-grid";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function ProfileStep({ form, set }: { form: EmployeeForm; set: SetEmployeeField }) {
   return (
@@ -23,10 +24,10 @@ export function ProfileStep({ form, set }: { form: EmployeeForm; set: SetEmploye
             onClick={() => set("employeeCode", `NV-${Math.floor(1000 + Math.random() * 9000)}`)}
             sx={{
               borderColor: appleDesign.colors.borderMedium,
-              borderRadius: "10px",
+              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
               color: appleDesign.colors.textSecondary,
               fontSize: "0.76rem",
-              fontWeight: 650,
+              fontWeight: 600,
               px: 1.5,
               textTransform: "none",
               whiteSpace: "nowrap",

@@ -14,6 +14,7 @@ import FileText from "@mui/icons-material/Description";
 
 import { classroomSchools, classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { AssignmentRun, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function LmsHomeDashboard({
   runs,
@@ -45,7 +46,7 @@ export function LmsHomeDashboard({
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2.5, maxWidth: 1440, mx: "auto" }}>
         <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "space-between" }}>
           <Box>
-            <Typography sx={{ color: "#1C252E", fontSize: 22, fontWeight: 800, lineHeight: "30px" }}>
+            <Typography sx={{ color: "#1C252E", fontSize: 22, fontWeight: 600, lineHeight: "30px" }}>
               Chào buổi tốt, {teacherName}
             </Typography>
             <Typography sx={{ color: "#637381", fontSize: 13, fontWeight: 600, mt: 0.5 }}>
@@ -72,25 +73,25 @@ export function LmsHomeDashboard({
         <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", xl: "minmax(0, 1.35fr) minmax(360px, 0.65fr)" } }}>
           <Box sx={homePanelSx}>
             <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1.5 }}>
-              <Typography sx={{ color: "#1C252E", fontSize: 15, fontWeight: 800 }}>Bài tập cần theo dõi</Typography>
-              <Button variant="contained" onClick={onOpenHomework} size="small" sx={{ borderRadius: "8px", color: "#0F6CBD", fontSize: 13, fontWeight: 700, textTransform: "none" }}>
+              <Typography sx={{ color: "#1C252E", fontSize: 15, fontWeight: 600 }}>Bài tập cần theo dõi</Typography>
+              <Button variant="contained" onClick={onOpenHomework} size="small" sx={{ borderRadius: "8px", color: "#0F6CBD", fontSize: 13, fontWeight: 600, textTransform: "none" }}>
                 Xem tất cả
               </Button>
             </Box>
             <Stack spacing={1}>
               {activeRuns.map((run) => (
-                <Box key={run.id} sx={{ alignItems: { xs: "stretch", sm: "center" }, bgcolor: "#FFFFFF", border: "1px solid #D9E2EF", borderRadius: "10px", display: "grid", gap: { xs: 1, sm: 2 }, gridTemplateColumns: { xs: "1fr", sm: "minmax(0, 1fr) 150px 110px" }, px: 2, py: 1.5 }}>
+                <Box key={run.id} sx={{ alignItems: { xs: "stretch", sm: "center" }, bgcolor: "#FFFFFF", border: "1px solid #D9E2EF", borderRadius: `${ergEnterpriseTokens.radius.md}px`, display: "grid", gap: { xs: 1, sm: 2 }, gridTemplateColumns: { xs: "1fr", sm: "minmax(0, 1fr) 150px 110px" }, px: 2, py: 1.5 }}>
                   <Box sx={{ minWidth: 0 }}>
-                    <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 800 }}>{run.title}</Typography>
+                    <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 600 }}>{run.title}</Typography>
                     <Typography noWrap sx={{ color: "#637381", fontSize: 12.5, fontWeight: 600, mt: 0.25 }}>{run.subjectLabel} · {run.targetLevel}</Typography>
                   </Box>
                   <Box>
-                    <Typography sx={{ color: "#637381", fontSize: 12, fontWeight: 700 }}>{run.completionRate}% hoàn thành</Typography>
+                    <Typography sx={{ color: "#637381", fontSize: 12, fontWeight: 600 }}>{run.completionRate}% hoàn thành</Typography>
                     <Box sx={{ bgcolor: "#EEF2F7", borderRadius: "999px", height: 6, mt: 0.75, overflow: "hidden" }}>
                       <Box sx={{ bgcolor: "#22C55E", height: "100%", width: `${run.completionRate}%` }} />
                     </Box>
                   </Box>
-                  <Typography sx={{ color: run.needsReviewCount ? "#B76E00" : "#637381", fontSize: 12.5, fontWeight: 800, textAlign: { xs: "left", sm: "right" } }}>
+                  <Typography sx={{ color: run.needsReviewCount ? "#B76E00" : "#637381", fontSize: 12.5, fontWeight: 600, textAlign: { xs: "left", sm: "right" } }}>
                     {run.needsReviewCount} cần xem
                   </Typography>
                 </Box>
@@ -99,10 +100,10 @@ export function LmsHomeDashboard({
           </Box>
 
           <Box sx={homePanelSx}>
-            <Typography sx={{ color: "#1C252E", fontSize: 15, fontWeight: 800, mb: 1.5 }}>Hôm nay</Typography>
+            <Typography sx={{ color: "#1C252E", fontSize: 15, fontWeight: 600, mb: 1.5 }}>Hôm nay</Typography>
             <Stack spacing={1}>
               {["08:00 · IC3 GS6 Level 1", "10:15 · Chấm bài lớp 6A1", "14:00 · Chuẩn bị học liệu"].map((item) => (
-                <Box key={item} sx={{ bgcolor: "#FFFFFF", border: "1px solid #D9E2EF", borderRadius: "10px", color: "#334155", fontSize: 13, fontWeight: 700, px: 2, py: 1.4 }}>
+                <Box key={item} sx={{ bgcolor: "#FFFFFF", border: "1px solid #D9E2EF", borderRadius: `${ergEnterpriseTokens.radius.md}px`, color: "#334155", fontSize: 13, fontWeight: 600, px: 2, py: 1.4 }}>
                   {item}
                 </Box>
               ))}
@@ -125,7 +126,7 @@ function HomeMetricCard({ label, value, tone }: { label: string; value: string; 
 
   return (
     <Box sx={{ bgcolor: "#FFFFFF", border: "1px solid #D9E2EF", borderRadius: "12px", boxShadow: "0 10px 26px rgba(15,23,42,0.04)", p: 2 }}>
-      <Box sx={{ bgcolor: bg, borderRadius: "10px", color, display: "inline-flex", fontSize: 12, fontWeight: 800, px: 1.25, py: 0.5 }}>
+      <Box sx={{ bgcolor: bg, borderRadius: `${ergEnterpriseTokens.radius.md}px`, color, display: "inline-flex", fontSize: 12, fontWeight: 600, px: 1.25, py: 0.5 }}>
         {label}
       </Box>
       <Typography sx={{ color: "#1C252E", fontSize: 26, fontWeight: 850, lineHeight: "34px", mt: 1.4 }}>
@@ -146,20 +147,20 @@ const homePanelSx = {
 
 const homeButtonSx = {
   borderColor: "#D7E0EC",
-  borderRadius: "10px",
+  borderRadius: `${ergEnterpriseTokens.radius.md}px`,
   color: "#334155",
   fontSize: 13,
-  fontWeight: 800,
+  fontWeight: 600,
   height: 38,
   textTransform: "none",
 };
 
 const homePrimaryButtonSx = {
   bgcolor: "#0F6CBD",
-  borderRadius: "10px",
+  borderRadius: `${ergEnterpriseTokens.radius.md}px`,
   boxShadow: "0 8px 18px rgba(15,108,189,0.22)",
   fontSize: 13,
-  fontWeight: 800,
+  fontWeight: 600,
   height: 38,
   textTransform: "none",
   "&:hover": { bgcolor: "#0B5CAB" },
@@ -187,7 +188,7 @@ export function LmsHeaderSchoolControl({
             return (
               <Stack direction="row" spacing={0.85} sx={{ alignItems: "center", minWidth: 0 }}>
                 <SchoolLogo school={school} />
-                <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 700, lineHeight: "22px" }}>
+                <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 600, lineHeight: "22px" }}>
                   {school?.name ?? "Trường"}
                 </Typography>
               </Stack>
@@ -197,7 +198,7 @@ export function LmsHeaderSchoolControl({
           {schools.map((school) => (
             <MenuItem key={school.id} value={school.id} sx={scopeMenuItemSx}>
               <SchoolLogo school={school} />
-              <Typography noWrap sx={{ color: "#1C252E", flex: 1, fontSize: 14, fontWeight: 700, minWidth: 0 }}>
+              <Typography noWrap sx={{ color: "#1C252E", flex: 1, fontSize: 14, fontWeight: 600, minWidth: 0 }}>
                 {school.name}
               </Typography>
             </MenuItem>
@@ -230,7 +231,7 @@ export function LmsHeaderClassControl({
             <Box sx={scopeClassIconSx}>
               <Class sx={{ color: "#0F6CBD", fontSize: 16 }} />
             </Box>
-            <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 700, lineHeight: "22px" }}>
+            <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 600, lineHeight: "22px" }}>
               {classroom?.className ?? "Lớp"}
             </Typography>
           </Stack>
@@ -242,7 +243,7 @@ export function LmsHeaderClassControl({
           <Box sx={scopeClassIconSx}>
             <Class sx={{ color: "#0F6CBD", fontSize: 16 }} />
           </Box>
-          <Typography noWrap sx={{ color: "#1C252E", flex: 1, fontSize: 14, fontWeight: 700, minWidth: 0 }}>
+          <Typography noWrap sx={{ color: "#1C252E", flex: 1, fontSize: 14, fontWeight: 600, minWidth: 0 }}>
             {classroom.className}
           </Typography>
         </MenuItem>
@@ -343,7 +344,7 @@ const scopeMenuProps = {
 
 const scopeMenuItemSx = {
   alignItems: "center",
-  borderRadius: "9px",
+  borderRadius: `${ergEnterpriseTokens.radius.sm}px`,
   display: "flex",
   gap: 1.25,
   minHeight: 44,
@@ -365,7 +366,7 @@ const scopeMenuLogoSx = {
   display: "flex",
   flexShrink: 0,
   fontSize: 9,
-  fontWeight: 900,
+  fontWeight: 600,
   height: 28,
   justifyContent: "center",
   width: 28,
@@ -407,7 +408,7 @@ export function TeacherWorkspaceFrame({
       >
         <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
           <Box>
-            <Typography sx={{ fontSize: 20, fontWeight: 700, color: "text.primary" }}>
+            <Typography sx={{ fontSize: 20, fontWeight: 600, color: "text.primary" }}>
               {selectedClass?.className ?? "Lớp học"}
             </Typography>
             <Typography sx={{ mt: 0.5, fontSize: 14, color: "text.secondary" }}>
@@ -506,7 +507,7 @@ export function MobileUnsupportedScreen({ activeLabel, onGoHome }: { activeLabel
         >
           <FileText sx={{ fontSize: 28 }} />
         </Box>
-        <Typography sx={{ mt: 3, fontSize: 20, fontWeight: 700 }}>
+        <Typography sx={{ mt: 3, fontSize: 20, fontWeight: 600 }}>
           {activeLabel} dùng trên web
         </Typography>
         <Typography sx={{ mt: 1, fontSize: 14, color: "text.secondary", lineHeight: 1.6 }}>

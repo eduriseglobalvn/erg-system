@@ -4,6 +4,8 @@ import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 
 import { ErgTextField } from "@/components/erg-mui";
 import { OnboardingSection } from "@/platform/auth/components/teacher-onboarding/onboarding-section";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function ProfileStep({
   busy,
@@ -24,7 +26,7 @@ export function ProfileStep({
 }) {
   return (
     <OnboardingSection
-      icon={<PersonOutlineRoundedIcon sx={{ fontSize: 20, color: "#0071E3" }} />}
+      icon={<PersonOutlineRoundedIcon sx={{ fontSize: 20, color: "primary.main" }} />}
       title="Bổ sung hồ sơ giáo viên"
       description="Xác nhận tên hiển thị và số điện thoại liên hệ."
     >
@@ -51,18 +53,18 @@ export function ProfileStep({
         variant="contained"
         onClick={saveProfile}
         sx={{
-          bgcolor: "#0071E3",
+          bgcolor: "primary.main",
           borderRadius: "14px",
           color: "#FFFFFF",
           fontSize: 15,
-          fontWeight: 650,
+          fontWeight: 600,
           minHeight: 48,
           textTransform: "none",
-          boxShadow: "0 4px 14px rgba(0, 113, 227, 0.25)",
+          boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
           transition: "all 180ms ease",
           "&:hover": {
-            bgcolor: "#0077ED",
-            boxShadow: "0 6px 18px rgba(0, 113, 227, 0.35)",
+            bgcolor: "primary.dark",
+            boxShadow: `0 6px 18px ${alpha(ergEnterpriseTokens.color.primary, 0.35)}`,
             transform: "translateY(-1px)",
           },
           "&:active": {

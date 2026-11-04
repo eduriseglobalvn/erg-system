@@ -11,6 +11,8 @@ import Typography from "@mui/material/Typography";
 import { ErgEmptyState, ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 import { appleDesign, AppleStatusBadge } from "@/features/employee-management/components/apple-ui-tokens";
 import { useEmployeeSecurityEvents } from "@/features/employee-management/hooks/use-employee-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const EVENT_TITLES: Record<string, string> = {
   CREDENTIAL_RESET: "Đặt lại thông tin xác thực",
@@ -67,15 +69,15 @@ export function EmployeeSecurityTimeline({ tenantId, userId }: { tenantId: strin
             key={event.id}
             sx={{
               bgcolor: isWarning
-                ? "rgba(255, 149, 0, 0.03)"
+                ? alpha(ergEnterpriseTokens.color.warning, 0.03)
                 : isFailed
-                  ? "rgba(255, 59, 48, 0.03)"
+                  ? alpha(ergEnterpriseTokens.color.danger, 0.03)
                   : "#FFFFFF",
               border: `1px solid ${
                 isWarning
-                  ? "rgba(255, 149, 0, 0.25)"
+                  ? alpha(ergEnterpriseTokens.color.warning, 0.25)
                   : isFailed
-                    ? "rgba(255, 59, 48, 0.2)"
+                    ? alpha(ergEnterpriseTokens.color.danger, 0.2)
                     : appleDesign.colors.border
               }`,
               borderRadius: "14px",
@@ -99,7 +101,7 @@ export function EmployeeSecurityTimeline({ tenantId, userId }: { tenantId: strin
                     : isFailed
                       ? appleDesign.colors.redSoft
                       : appleDesign.colors.blueSoft,
-                  borderRadius: "10px",
+                  borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                   color: isWarning
                     ? appleDesign.colors.amberText
                     : isFailed
@@ -126,7 +128,7 @@ export function EmployeeSecurityTimeline({ tenantId, userId }: { tenantId: strin
                   sx={{
                     color: appleDesign.colors.textPrimary,
                     fontFamily: "inherit",
-                    fontWeight: 700,
+                    fontWeight: 600,
                     letterSpacing: "-0.01em",
                   }}
                 >

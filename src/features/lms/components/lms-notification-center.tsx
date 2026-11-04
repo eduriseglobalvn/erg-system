@@ -154,7 +154,7 @@ export function LmsNotificationCenter() {
         {/* Header */}
         <Box sx={{ px: 3, py: 2, borderBottom: "1px solid", borderColor: "divider" }}>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
-            <Typography sx={{ fontSize: 16, fontWeight: 700 }}>Thông báo</Typography>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>Thông báo</Typography>
             <Stack direction="row" spacing={0.5}>
               <Button variant="contained"
                 size="small"
@@ -184,7 +184,7 @@ export function LmsNotificationCenter() {
               onClick={() => setTab("all")}
               variant={tab === "all" ? "filled" : "outlined"}
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 borderRadius: 2,
                 bgcolor: tab === "all" ? "primary.light" : "transparent",
                 color: tab === "all" ? "primary.main" : "text.secondary",
@@ -196,7 +196,7 @@ export function LmsNotificationCenter() {
               onClick={() => setTab("unread")}
               variant={tab === "unread" ? "filled" : "outlined"}
               sx={{
-                fontWeight: 700,
+                fontWeight: 600,
                 borderRadius: 2,
                 bgcolor: tab === "unread" ? "primary.light" : "transparent",
                 color: tab === "unread" ? "primary.main" : "text.secondary",
@@ -221,7 +221,7 @@ export function LmsNotificationCenter() {
               {/* Important */}
               <Box sx={{ px: 3, py: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
-                  <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Quan trọng</Typography>
+                  <Typography sx={{ fontSize: 13, fontWeight: 600 }}>Quan trọng</Typography>
                   <Button variant="contained"
                     size="small"
                     onClick={() => void navigate({ href: teacherPath("/notifications") })}
@@ -245,7 +245,7 @@ export function LmsNotificationCenter() {
 
               {/* Others */}
               <Box sx={{ px: 3, py: 2 }}>
-                <Typography sx={{ fontSize: 13, fontWeight: 700, mb: 1.5 }}>Các thông báo khác</Typography>
+                <Typography sx={{ fontSize: 13, fontWeight: 600, mb: 1.5 }}>Các thông báo khác</Typography>
                 {latestNotifications.slice(1).map((notification) => (
                   <NotificationFeedCard
                     key={notification.id}
@@ -274,7 +274,7 @@ export function LmsNotificationCenter() {
             onClick={() => void navigate({ href: teacherPath("/notifications") })}
             sx={{
               fontSize: 13,
-              fontWeight: 700,
+              fontWeight: 600,
               color: "primary.main",
               textTransform: "none",
               borderRadius: 2,

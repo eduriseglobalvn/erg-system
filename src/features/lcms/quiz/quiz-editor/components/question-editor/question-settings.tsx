@@ -44,7 +44,7 @@ export function MuiQuestionSettings({
           gap: 1.5,
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0F172A", fontSize: "13px" }}>
           Hành vi làm bài
         </Typography>
 
@@ -96,7 +96,7 @@ export function MuiQuestionSettings({
                 placeholder="mm:ss"
                 sx={{
                   width: 90,
-                  "& input": { textAlign: "center", fontWeight: 700, fontSize: "13px", py: "6px" },
+                  "& input": { textAlign: "center", fontWeight: 600, fontSize: "13px", py: "6px" },
                 }}
               />
               <Box sx={{ display: "flex", gap: 0.5 }}>
@@ -170,7 +170,7 @@ export function MuiQuestionSettings({
                       variant={options.limitResponsesValue === num ? "filled" : "outlined"}
                       color={options.limitResponsesValue === num ? "primary" : "default"}
                       onClick={() => onUpdateOptions({ limitResponsesValue: num })}
-                      sx={{ minWidth: 28, fontWeight: 700, cursor: "pointer" }}
+                      sx={{ minWidth: 28, fontWeight: 600, cursor: "pointer" }}
                     />
                   ))}
                 </Box>
@@ -193,7 +193,7 @@ export function MuiQuestionSettings({
           gap: 1.5,
         }}
       >
-        <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0F172A", fontSize: "13px" }}>
           {t("quiz.feedbackAndScoring")}
         </Typography>
 

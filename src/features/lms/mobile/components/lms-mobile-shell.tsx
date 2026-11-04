@@ -22,7 +22,7 @@ import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { usePwaNotifications } from "../hooks/use-pwa-notifications";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 export function LmsMobileShell<TSection extends string>({
   activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
@@ -45,7 +45,7 @@ export function LmsMobileShell<TSection extends string>({
   const [accountOpen, setAccountOpen] = useState(false);
   const shouldOfferInstall = !installPrompt.installed && (installPrompt.canInstall || installPrompt.isIos);
 
-  const session = readStoredAuthSession("lms") ?? readStoredAuthSession();
+  const session = getAuthScope("lms").session ?? getAuthScope().session;
   const grantedWorkspaces = session?.workspaces ?? [];
   const canSwitchAdmin = grantedWorkspaces.includes("ADMIN");
   const canSwitchStudent = grantedWorkspaces.includes("STUDENT");
@@ -70,7 +70,7 @@ export function LmsMobileShell<TSection extends string>({
         <Box sx={{ bgcolor: "info.light", px: 1.5, py: 1 }}>
           <ButtonBase onClick={() => setPwaOpen(true)} sx={{ bgcolor: "background.paper", border: "1px solid", borderColor: "divider", borderRadius: 2, display: "flex", gap: 1.5, minHeight: 56, px: 1.5, py: 1, textAlign: "left", width: "100%" }}>
             <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 1.5, color: "primary.contrastText", display: "flex", flexShrink: 0, height: 40, justifyContent: "center", width: 40 }}><PhoneAndroidRoundedIcon /></Box>
-            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
+            <Box sx={{ flex: 1, minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>Thêm LMS vào màn hình chính</Typography><Typography color="text.secondary" noWrap sx={{ fontSize: 12, fontWeight: 600 }}>Mở nhanh như ứng dụng với biểu tượng riêng.</Typography></Box>
             <DownloadRoundedIcon color="primary" />
           </ButtonBase>
         </Box>
@@ -113,7 +113,7 @@ export function LmsMobileShell<TSection extends string>({
 function AccountActionButton({ danger = false, icon, label, onClick }: { danger?: boolean; icon: ReactNode; label: string; onClick: () => void }) {
   return (
     <ButtonBase onClick={onClick} sx={{ border: "1px solid", borderColor: danger ? "error.light" : "divider", borderRadius: 1.5, color: danger ? "error.main" : "text.primary", display: "flex", gap: 1.5, justifyContent: "flex-start", minHeight: 48, px: 1.5, textAlign: "left", width: "100%", "&:hover": { bgcolor: danger ? "error.light" : "action.hover" }, "& .MuiSvgIcon-root": { flexShrink: 0, fontSize: 20 } }}>
-      {icon}<Typography sx={{ fontSize: 14, fontWeight: 800 }}>{label}</Typography>
+      {icon}<Typography sx={{ fontSize: 14, fontWeight: 600 }}>{label}</Typography>
     </ButtonBase>
   );
 }

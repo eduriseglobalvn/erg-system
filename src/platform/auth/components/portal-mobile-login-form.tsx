@@ -528,7 +528,7 @@ const styles = {
   label: {
     color: "#243246",
     fontSize: 11,
-    fontWeight: 700,
+    fontWeight: 600,
     lineHeight: 1.35,
   },
   metaRow: {
@@ -615,7 +615,7 @@ const styles = {
     display: "inline-flex",
     fontFamily: "Arial, sans-serif",
     fontSize: 21,
-    fontWeight: 700,
+    fontWeight: 600,
     height: 22,
     justifyContent: "center",
     lineHeight: 1,
@@ -631,7 +631,7 @@ const styles = {
     color: "#ffffff",
     display: "inline-flex",
     fontSize: 13,
-    fontWeight: 800,
+    fontWeight: 600,
     height: 48,
     justifyContent: "center",
     marginTop: 8,

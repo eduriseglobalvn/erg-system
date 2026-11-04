@@ -32,9 +32,9 @@ export function OfflineShellStatus({ conflictCount = 0, failedCount = 0, network
       aria-live="polite"
       role="status"
       severity={copy.severity}
-      sx={{ borderRadius: 0, fontSize: 12, fontWeight: 700, py: 0.25 }}
+      sx={{ borderRadius: 0, fontSize: 12, fontWeight: 600, py: 0.25 }}
     >
-      <AlertTitle sx={{ fontSize: 12, fontWeight: 800, mb: 0 }}>{copy.title}</AlertTitle>
+      <AlertTitle sx={{ fontSize: 12, fontWeight: 600, mb: 0 }}>{copy.title}</AlertTitle>
       {copy.description}
     </Alert>
   );

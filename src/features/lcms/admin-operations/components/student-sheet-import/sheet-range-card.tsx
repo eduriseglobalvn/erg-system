@@ -37,7 +37,7 @@ export function SheetRangeCard({
     <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2, boxShadow: "0 1px 3px rgba(15, 23, 42, 0.06)" }}>
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
         <Box>
-          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 700 }}>Khoảng dữ liệu</Typography>
+          <Typography sx={{ color: "text.primary", fontSize: 14, fontWeight: 600 }}>Khoảng dữ liệu</Typography>
           <Typography sx={{ mt: 0.25, color: "text.secondary", fontSize: 12 }}>Chọn tab và vùng ô cần đọc.</Typography>
         </Box>
         <Chip size="small" variant="outlined" label={selectedSheetLabel} />
@@ -67,7 +67,7 @@ export function SheetRangeCard({
 
       {sheetTabs.length > 0 && (
         <Box sx={{ pt: 2 }}>
-          <Typography sx={{ mb: 1, color: "text.secondary", fontSize: 10, fontWeight: 700, textTransform: "uppercase" }}>Chuyển đổi nhanh các tab lớp</Typography>
+          <Typography sx={{ mb: 1, color: "text.secondary", fontSize: 10, fontWeight: 600, textTransform: "uppercase" }}>Chuyển đổi nhanh các tab lớp</Typography>
           <Stack direction="row" sx={{ flexWrap: "wrap", gap: 0.75 }}>
             {sheetTabs.slice(0, 10).map((tab) => (
               <Button

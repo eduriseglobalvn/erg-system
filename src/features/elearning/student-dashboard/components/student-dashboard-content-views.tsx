@@ -29,12 +29,12 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         <CardContent sx={{ p: { xs: 2.4, md: 3 } }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} justifyContent="space-between">
             <Box sx={{ minWidth: 0, maxWidth: 840 }}>
-              <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.16)", color: MUI_PRIMARY, fontWeight: 700 }} />
-              <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 900, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(profile.name)}</Typography>
+              <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
+              <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(profile.name)}</Typography>
               <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{copy.heroDescription(priorityAssignment?.title ?? "Bài tập tuần")}</Typography>
               <Stack direction="row" spacing={1.25} sx={{ mt: 2.5, flexWrap: "wrap", rowGap: 1 }}>
                 <Button variant="contained" disabled={!priorityAssignment?.quizId} onClick={() => { if (priorityAssignment?.quizId) onOpenAssignment(priorityAssignment.id); }} sx={{ ...primaryButtonSx, borderRadius: 2.5, px: 2.6, py: 1 }}>{copy.primaryAction}</Button>
-                <Button variant="outlined" onClick={() => onPageChange("assignments")} sx={{ borderRadius: 2.5, borderColor: MUI_DIVIDER, color: MUI_TEXT, fontWeight: 800, px: 2.2, "&:hover": { borderColor: MUI_PRIMARY, bgcolor: "rgba(37,99,235,0.04)" } }}>{copy.secondaryAction}</Button>
+                <Button variant="outlined" onClick={() => onPageChange("assignments")} sx={{ borderRadius: 2.5, borderColor: MUI_DIVIDER, color: MUI_TEXT, fontWeight: 600, px: 2.2, "&:hover": { borderColor: MUI_PRIMARY, bgcolor: "rgba(37,99,235,0.04)" } }}>{copy.secondaryAction}</Button>
               </Stack>
             </Box>
             {priorityAssignment ? <PriorityPanel assignment={priorityAssignment} copy={copy} onOpenAssignment={onOpenAssignment} /> : null}
@@ -48,7 +48,7 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         <MetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${profile.totalAssignments}`} />
       </Box>
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
-        <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("assignments")} size="small" sx={{ fontWeight: 800 }}>Xem tất cả</Button>} title={copy.todayTitle}>
+        <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("assignments")} size="small" sx={{ fontWeight: 600 }}>Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
             {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
             {!assignmentsLoading && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
@@ -56,18 +56,18 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         </SectionCard>
         <Stack spacing={2.5}>
           {announcement ? (
-            <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("announcements")} size="small" sx={{ fontWeight: 800 }}>Xem thêm</Button>} title={copy.announcementTitle}>
+            <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("announcements")} size="small" sx={{ fontWeight: 600 }}>Xem thêm</Button>} title={copy.announcementTitle}>
               <AnnouncementCard announcement={announcement} selected={false} />
             </SectionCard>
           ) : null}
-          <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("discussion")} size="small" sx={{ fontWeight: 800 }}>Mở diễn đàn</Button>} title={copy.discussionTitle}>
+          <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("discussion")} size="small" sx={{ fontWeight: 600 }}>Mở diễn đàn</Button>} title={copy.discussionTitle}>
             <Stack spacing={1}>
               {discussionPreview.map((post) => (
                 <Paper key={post.id} sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
-                    <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 800 }}>{post.authorName.slice(0, 1)}</Avatar>
+                    <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{post.authorName.slice(0, 1)}</Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography noWrap variant="body2" sx={{ fontWeight: 700 }}>{post.authorName}</Typography>
+                      <Typography noWrap variant="body2" sx={{ fontWeight: 600 }}>{post.authorName}</Typography>
                       <Typography noWrap variant="caption" color="text.secondary">{post.commentCount} replies</Typography>
                     </Box>
                   </Stack>
@@ -103,7 +103,7 @@ export function AssignmentsView({ assignments, completedAssignments, copy, openA
   return (
     <Box sx={{ width: "100%" }}>
       <Box sx={{ mb: 2.5 }}>
-        <Typography variant="h5" sx={{ fontWeight: 800, color: "#0F172A", letterSpacing: "-0.02em" }}>Bài tập & thi</Typography>
+        <Typography variant="h5" sx={{ fontWeight: 600, color: "#0F172A", letterSpacing: "-0.02em" }}>Bài tập & thi</Typography>
         <Typography variant="body2" sx={{ color: "#64748B", mt: 0.5 }}>Theo dõi bài tập và lịch thi sắp tới của bạn.</Typography>
       </Box>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 1.5, mb: 2.5 }}>
@@ -147,7 +147,7 @@ export function AssignmentsView({ assignments, completedAssignments, copy, openA
                     borderRadius: "99px",
                     color: active ? "#FFFFFF" : "#64748B",
                     fontSize: 11,
-                    fontWeight: 700,
+                    fontWeight: 600,
                     ml: 0.8,
                     px: 0.9,
                     py: 0.15,
@@ -193,8 +193,8 @@ export function AssignmentsView({ assignments, completedAssignments, copy, openA
         </Box>
       </Box>
       <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 2 }}>
-        <Typography variant="subtitle1" sx={{ fontWeight: 800, color: "#0F172A", fontSize: 15 }}>{activeSectionTitle}</Typography>
-        <Box sx={{ bgcolor: "#F1F5F9", color: "#475569", borderRadius: "99px", px: 1, py: 0.1, fontSize: 12, fontWeight: 700 }}>{filteredList.length}</Box>
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "#0F172A", fontSize: 15 }}>{activeSectionTitle}</Typography>
+        <Box sx={{ bgcolor: "#F1F5F9", color: "#475569", borderRadius: "99px", px: 1, py: 0.1, fontSize: 12, fontWeight: 600 }}>{filteredList.length}</Box>
       </Stack>
       <Stack spacing={1.5}>
         {filteredList.map((assignment) => (
@@ -231,11 +231,11 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", md: "1.2fr 1fr" } }}>
         <Card sx={elevatedCardSx}>
           <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{copy.learningProfileTitle}</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{copy.learningProfileTitle}</Typography>
             <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2 }}>
-              <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 56, width: 56, fontSize: 20, fontWeight: 900 }}>{(account?.name ?? profile.name).slice(0, 1)}</Avatar>
+              <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 56, width: 56, fontSize: 20, fontWeight: 600 }}>{(account?.name ?? profile.name).slice(0, 1)}</Avatar>
               <Box>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>{account?.name ?? profile.name}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{account?.name ?? profile.name}</Typography>
                 <Typography variant="body2" color="text.secondary">{account?.email ?? profile.className}</Typography>
               </Box>
             </Stack>
@@ -243,23 +243,23 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
             <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, 1fr)" }}>
               <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.average}</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>{averageAssignmentScore === null ? "—" : `${averageAssignmentScore}%`}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{averageAssignmentScore === null ? "—" : `${averageAssignmentScore}%`}</Typography>
               </Paper>
               <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.open}</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 800 }}>{openAssignments.length}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{openAssignments.length}</Typography>
               </Paper>
             </Box>
           </CardContent>
         </Card>
         <Card sx={elevatedCardSx}>
           <CardContent sx={{ p: 2.5 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>{copy.accountActionsTitle}</Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>{copy.accountActionsTitle}</Typography>
             <Stack spacing={1.5} sx={{ mt: 2 }}>
               {isGuest ? (
                 <Button fullWidth variant="contained" startIcon={<LogIn />} onClick={onSignIn} sx={{ ...primaryButtonSx, borderRadius: 2 }}>{copy.signIn}</Button>
               ) : (
-                <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: 2, fontWeight: 700 }}>{copy.signOut}</Button>
+                <Button fullWidth variant="outlined" color="error" startIcon={<LogOut />} onClick={onSignOut} sx={{ borderRadius: 2, fontWeight: 600 }}>{copy.signOut}</Button>
               )}
             </Stack>
           </CardContent>

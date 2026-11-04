@@ -8,7 +8,7 @@ export const HEADER_ICON_BUTTON_SX: SxProps<Theme> = {
   border: 0,
   borderRadius: "10px",
   boxShadow: "none",
-  color: "#6E6E73",
+  color: "text.secondary",
   height: 38,
   ml: 0.5,
   transition: "all 120ms cubic-bezier(0.16, 1, 0.3, 1)",
@@ -19,7 +19,7 @@ export const HEADER_ICON_BUTTON_SX: SxProps<Theme> = {
   },
   "&:hover": {
     bgcolor: "rgba(0, 0, 0, 0.05)",
-    color: "#1D1D1F",
+    color: "text.primary",
   },
 };
 
@@ -35,7 +35,7 @@ export function portalHeaderAppBarSx(scrolled: boolean): SxProps<Theme> {
       : "1px solid rgba(0, 0, 0, 0.06)",
     borderRadius: 0,
     boxShadow: scrolled ? "0 4px 16px rgba(0, 0, 0, 0.04)" : "none",
-    color: "#1D1D1F",
+    color: "text.primary",
     overflow: "hidden",
     transition:
       "box-shadow 160ms cubic-bezier(0.16, 1, 0.3, 1), border-color 160ms cubic-bezier(0.16, 1, 0.3, 1)",

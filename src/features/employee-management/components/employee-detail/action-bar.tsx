@@ -6,6 +6,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeAccount } from "@/features/employee-management/components/employee-detail/types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeActionBar({
   account,
@@ -27,10 +29,10 @@ export function EmployeeActionBar({
         onClick={() => onEdit()}
         sx={{
           borderColor: appleDesign.colors.borderMedium,
-          borderRadius: "10px",
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
           color: appleDesign.colors.textPrimary,
           fontSize: "0.825rem",
-          fontWeight: 650,
+          fontWeight: 600,
           textTransform: "none",
           "&:hover": {
             bgcolor: "rgba(0, 0, 0, 0.04)",
@@ -47,10 +49,10 @@ export function EmployeeActionBar({
         onClick={() => onToggleStatus()}
         sx={{
           borderColor: appleDesign.colors.borderMedium,
-          borderRadius: "10px",
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
           color: account?.status === "ACTIVE" ? appleDesign.colors.textSecondary : appleDesign.colors.greenText,
           fontSize: "0.825rem",
-          fontWeight: 650,
+          fontWeight: 600,
           textTransform: "none",
           "&:hover": {
             bgcolor: "rgba(0, 0, 0, 0.04)",
@@ -66,11 +68,11 @@ export function EmployeeActionBar({
         startIcon={<LockResetRoundedIcon fontSize="small" />}
         onClick={() => onResetCredential()}
         sx={{
-          borderColor: "rgba(255, 149, 0, 0.3)",
-          borderRadius: "10px",
+          borderColor: alpha(ergEnterpriseTokens.color.warning, 0.3),
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
           color: appleDesign.colors.amberText,
           fontSize: "0.825rem",
-          fontWeight: 650,
+          fontWeight: 600,
           textTransform: "none",
           "&:hover": {
             bgcolor: appleDesign.colors.amberSoft,

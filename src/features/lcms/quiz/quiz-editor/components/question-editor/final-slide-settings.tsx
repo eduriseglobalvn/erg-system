@@ -29,7 +29,7 @@ export function MuiFinalSlideSettings({
         gap: 1.5,
       }}
     >
-      <Typography variant="subtitle2" sx={{ fontWeight: 800, color: "#0F172A", fontSize: "13px" }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0F172A", fontSize: "13px" }}>
         Cài đặt trang kết thúc
       </Typography>
 

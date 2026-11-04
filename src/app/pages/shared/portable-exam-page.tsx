@@ -6,7 +6,7 @@ import Container from "@mui/material/Container";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { PlayerShellRuntime } from "@/components/quiz/player-shell-runtime";
+import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import {
   PortableExamLauncher,
   type PortableExamScope,
@@ -45,7 +45,7 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
             startIcon={<ArrowBack />}
             variant="outlined"
             onClick={() => setQuizPackage(null)}
-            sx={{ borderRadius: 1.5, fontWeight: 800 }}
+            sx={{ borderRadius: 1.5, fontWeight: 600 }}
           >
             Chọn bài khác
           </Button>
@@ -72,10 +72,10 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
       <Container maxWidth="sm">
         <Stack spacing={2}>
           <Stack spacing={0.5}>
-            <Typography variant="overline" color="primary" sx={{ fontWeight: 900, letterSpacing: 1 }}>
+            <Typography variant="overline" color="primary" sx={{ fontWeight: 600, letterSpacing: 1 }}>
               ERG · {workspace === "STUDENT" ? "Student" : "Teacher"}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: -1 }}>
+            <Typography variant="h4" sx={{ fontWeight: 600, letterSpacing: -1 }}>
               Portable exam runtime
             </Typography>
             <Typography color="text.secondary">

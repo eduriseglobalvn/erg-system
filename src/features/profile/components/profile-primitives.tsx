@@ -6,6 +6,8 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { ProfileNotice as Notice } from "@/features/profile/types/profile-types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function SectionHeader({
   action,
@@ -24,7 +26,7 @@ export function SectionHeader({
     <Box
       sx={{
         alignItems: { xs: "flex-start", md: "center" },
-        borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+        borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
         display: "flex",
         flexDirection: { xs: "column", md: "row" },
         gap: 2,
@@ -36,9 +38,9 @@ export function SectionHeader({
         <Box
           sx={{
             alignItems: "center",
-            bgcolor: "rgba(0, 113, 227, 0.08)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
             borderRadius: "12px",
-            color: "#0071E3",
+            color: "primary.main",
             display: "flex",
             flexShrink: 0,
             height: 44,
@@ -51,9 +53,9 @@ export function SectionHeader({
         <Box>
           <Typography
             sx={{
-              color: "#86868B",
+              color: "text.disabled",
               fontSize: "0.72rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.05em",
               textTransform: "uppercase",
             }}
@@ -62,16 +64,16 @@ export function SectionHeader({
           </Typography>
           <Typography
             sx={{
-              color: "#1D1D1F",
+              color: "text.primary",
               fontSize: "1.15rem",
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: "-0.015em",
               mt: 0.25,
             }}
           >
             {title}
           </Typography>
-          <Typography sx={{ color: "#6E6E73", fontSize: "0.825rem", mt: 0.35 }}>
+          <Typography sx={{ color: "text.secondary", fontSize: "0.825rem", mt: 0.35 }}>
             {description}
           </Typography>
         </Box>
@@ -94,9 +96,9 @@ export function Field({
 }) {
   return (
     <Box sx={{ gridColumn: fullWidth ? { md: "1 / -1" } : undefined }}>
-      <Box sx={{ alignItems: "center", color: "#6E6E73", display: "flex", gap: 0.75, mb: 1 }}>
-        <Box sx={{ color: "#86868B", display: "flex" }}>{icon}</Box>
-        <Typography sx={{ color: "#4B5563", fontSize: "0.825rem", fontWeight: 650 }}>
+      <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", gap: 0.75, mb: 1 }}>
+        <Box sx={{ color: "text.disabled", display: "flex" }}>{icon}</Box>
+        <Typography sx={{ color: "#4B5563", fontSize: "0.825rem", fontWeight: 600 }}>
           {label}
         </Typography>
       </Box>
@@ -135,15 +137,15 @@ export function PasswordInput({
         sx={{
           "& .MuiOutlinedInput-root": {
             bgcolor: "#FFFFFF",
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             fontSize: "0.85rem",
             fontWeight: 550,
             pr: 5,
-            "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
+            "& fieldset": { borderColor: "divider" },
             "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
             "&.Mui-focused fieldset": {
-              borderColor: "#0071E3",
-              boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+              borderColor: "primary.main",
+              boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
             },
           },
         }}
@@ -153,13 +155,13 @@ export function PasswordInput({
         onClick={onToggle}
         size="small"
         sx={{
-          color: "#86868B",
+          color: "text.disabled",
           position: "absolute",
           right: 8,
           top: "50%",
           transform: "translateY(-50%)",
           transition: "all 0.15s ease",
-          "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "#1D1D1F" },
+          "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "text.primary" },
         }}
       >
         {show ? <EyeOff sx={{ fontSize: 16 }} /> : <Eye sx={{ fontSize: 16 }} />}
@@ -188,11 +190,11 @@ export function ProfileTabButton({
       type="button"
       sx={{
         alignItems: "center",
-        bgcolor: active ? "rgba(0, 113, 227, 0.08)" : "#FFFFFF",
-        border: `1px solid ${active ? "rgba(0, 113, 227, 0.18)" : "rgba(0, 0, 0, 0.06)"}`,
+        bgcolor: active ? alpha(ergEnterpriseTokens.color.primary, 0.08) : "#FFFFFF",
+        border: `1px solid ${active ? alpha(ergEnterpriseTokens.color.primary, 0.18) : "rgba(0, 0, 0, 0.06)"}`,
         borderRadius: "14px",
-        boxShadow: active ? "0 2px 8px rgba(0, 113, 227, 0.08)" : "0 1px 3px rgba(0, 0, 0, 0.02)",
-        color: active ? "#0071E3" : "#6E6E73",
+        boxShadow: active ? `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.08)}` : "0 1px 3px rgba(0, 0, 0, 0.02)",
+        color: active ? "primary.main" : ergEnterpriseTokens.color.textMuted,
         cursor: "pointer",
         display: "flex",
         gap: 1.5,
@@ -201,7 +203,7 @@ export function ProfileTabButton({
         transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
         width: "100%",
         "&:hover": {
-          bgcolor: active ? "rgba(0, 113, 227, 0.12)" : "rgba(0, 0, 0, 0.03)",
+          bgcolor: active ? alpha(ergEnterpriseTokens.color.primary, 0.12) : "rgba(0, 0, 0, 0.03)",
         },
         "&:active": {
           transform: "scale(0.985)",
@@ -211,9 +213,9 @@ export function ProfileTabButton({
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: active ? "#0071E3" : "rgba(0, 0, 0, 0.05)",
-          borderRadius: "10px",
-          color: active ? "#FFFFFF" : "#6E6E73",
+          bgcolor: active ? "primary.main" : "rgba(0, 0, 0, 0.05)",
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+          color: active ? "#FFFFFF" : ergEnterpriseTokens.color.textMuted,
           display: "flex",
           flexShrink: 0,
           height: 38,
@@ -227,7 +229,7 @@ export function ProfileTabButton({
       <Box sx={{ minWidth: 0 }}>
         <Typography
           sx={{
-            color: active ? "#0071E3" : "#1D1D1F",
+            color: active ? "primary.main" : ergEnterpriseTokens.color.text,
             fontSize: "0.85rem",
             fontWeight: active ? 750 : 650,
           }}
@@ -237,7 +239,7 @@ export function ProfileTabButton({
         <Typography
           noWrap
           sx={{
-            color: active ? "rgba(0, 113, 227, 0.75)" : "#86868B",
+            color: active ? alpha(ergEnterpriseTokens.color.primary, 0.75) : ergEnterpriseTokens.color.textSoft,
             fontSize: "0.72rem",
             fontWeight: 500,
             mt: 0.25,
@@ -258,13 +260,13 @@ export function NoticeBox({ notice }: { notice: Notice | null }) {
     <Box
       sx={{
         alignItems: "center",
-        bgcolor: isSuccess ? "rgba(52, 199, 89, 0.1)" : "rgba(255, 59, 48, 0.1)",
-        border: `1px solid ${isSuccess ? "rgba(52, 199, 89, 0.22)" : "rgba(255, 59, 48, 0.22)"}`,
+        bgcolor: isSuccess ? alpha(ergEnterpriseTokens.color.success, 0.1) : alpha(ergEnterpriseTokens.color.danger, 0.1),
+        border: `1px solid ${isSuccess ? alpha(ergEnterpriseTokens.color.success, 0.22) : alpha(ergEnterpriseTokens.color.danger, 0.22)}`,
         borderRadius: "12px",
         color: isSuccess ? "#15803D" : "#DC2626",
         display: "flex",
         fontSize: "0.85rem",
-        fontWeight: 650,
+        fontWeight: 600,
         gap: 1,
         mt: 2.5,
         p: 1.75,
@@ -272,7 +274,7 @@ export function NoticeBox({ notice }: { notice: Notice | null }) {
     >
       <Box
         sx={{
-          bgcolor: isSuccess ? "#34C759" : "#FF3B30",
+          bgcolor: isSuccess ? "success.main" : ergEnterpriseTokens.color.danger,
           borderRadius: "50%",
           flexShrink: 0,
           height: 6,
@@ -290,19 +292,19 @@ export function ProfileLine({ icon, label, value }: { icon: ReactNode; label: st
       sx={{
         alignItems: "center",
         bgcolor: "rgba(0, 0, 0, 0.025)",
-        borderRadius: "10px",
-        border: "1px solid rgba(0, 0, 0, 0.04)",
+        borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         display: "flex",
         gap: 1.25,
         p: 1.25,
       }}
     >
-      <Box sx={{ color: "#0071E3", display: "flex" }}>{icon}</Box>
+      <Box sx={{ color: "primary.main", display: "flex" }}>{icon}</Box>
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography sx={{ color: "#86868B", fontSize: "0.7rem", fontWeight: 600 }}>
+        <Typography sx={{ color: "text.disabled", fontSize: "0.7rem", fontWeight: 600 }}>
           {label}
         </Typography>
-        <Typography noWrap sx={{ color: "#1D1D1F", fontSize: "0.825rem", fontWeight: 650 }}>
+        <Typography noWrap sx={{ color: "text.primary", fontSize: "0.825rem", fontWeight: 600 }}>
           {value}
         </Typography>
       </Box>
@@ -320,10 +322,10 @@ export function InfoTile({ label, value }: { label: string; value: string }) {
         p: 1.75,
       }}
     >
-      <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 600 }}>
+      <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600 }}>
         {label}
       </Typography>
-      <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 700, mt: 0.5 }}>
+      <Typography sx={{ color: "text.primary", fontSize: "0.875rem", fontWeight: 600, mt: 0.5 }}>
         {value}
       </Typography>
     </Box>

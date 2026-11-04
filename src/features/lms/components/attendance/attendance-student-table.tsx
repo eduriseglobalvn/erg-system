@@ -27,7 +27,7 @@ export function AttendanceStudentTable({ controller }: { controller: AttendanceS
                   borderLeft: column.isFocusDate ? "2px solid #696CFF" : "none",
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 700 }}>{column.day}</div>
+                <div style={{ fontSize: 11, fontWeight: 600 }}>{column.day}</div>
                 <div style={{ fontSize: 10, fontWeight: 500, color: "#6b7280" }}>{column.date}</div>
               </th>
             ))}
@@ -68,7 +68,7 @@ export function AttendanceStudentTable({ controller }: { controller: AttendanceS
                       padding: "2px 8px",
                       borderRadius: 12,
                       fontSize: 12,
-                      fontWeight: 700,
+                      fontWeight: 600,
                       backgroundColor: summary.absent ? "#fee2e2" : "#dcfce7",
                       color: summary.absent ? "#dc2626" : "#16a34a",
                     }}
@@ -99,7 +99,7 @@ export function AttendanceStudentTable({ controller }: { controller: AttendanceS
                           backgroundColor: "transparent",
                           cursor: column.isFutureDate ? "not-allowed" : "pointer",
                           fontSize: 13,
-                          fontWeight: 700,
+                          fontWeight: 600,
                           color: getAttendanceTextColor(status),
                         }}
                       >
@@ -130,7 +130,7 @@ const thStyle = (width?: string | number) => ({
   border: "1px solid #e5e7eb",
   borderTop: "none",
   fontSize: 11,
-  fontWeight: 700,
+  fontWeight: 600,
   textAlign: "center" as const,
   position: "sticky" as const,
   top: 0,

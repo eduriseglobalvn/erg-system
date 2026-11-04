@@ -46,7 +46,7 @@ export function EnterpriseConnectorTable({ connectors, isLoading, isError, canSy
             {connectors.map((connector) => (
               <TableRow hover key={connector.id}>
                 <TableCell>
-                  <Typography sx={{ fontWeight: 800 }} variant="body2">{connector.displayName}</Typography>
+                  <Typography sx={{ fontWeight: 600 }} variant="body2">{connector.displayName}</Typography>
                   <Typography color="text.secondary" variant="caption">{connector.providerKey} · v{connector.recordVersion}</Typography>
                   {connector.endpoint ? <Typography color="text.secondary" variant="caption">{connector.endpoint}</Typography> : null}
                 </TableCell>

@@ -313,7 +313,7 @@ export function CreateTeacherAccountDialog({
 function OptionPanel({ children, error, title }: { children: React.ReactNode; error?: string; title: string }) {
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography sx={{ fontWeight: 700 }} variant="subtitle2">{title}</Typography>
+      <Typography sx={{ fontWeight: 600 }} variant="subtitle2">{title}</Typography>
       <Stack sx={{ mt: 1 }}>{children}</Stack>
       {error ? <FormHelperText error>{error}</FormHelperText> : null}
     </Paper>
@@ -333,14 +333,14 @@ function SuccessResult({ result }: { result: CreateTeacherAccountResponse }) {
   return (
     <Stack spacing={2} aria-live="polite">
       <Alert severity={result.deliveryStatus === "FAILED" ? "warning" : "success"}>
-        <Typography sx={{ fontWeight: 700 }}>Đã tạo tài khoản giáo viên</Typography>
+        <Typography sx={{ fontWeight: 600 }}>Đã tạo tài khoản giáo viên</Typography>
         <Typography variant="body2">{result.user.fullName} · {result.user.primaryEmail}</Typography>
       </Alert>
       {result.oneTimePassword ? (
         <Paper variant="outlined" sx={{ alignItems: "center", display: "flex", gap: 1.5, p: 2 }}>
           <Box sx={{ flex: 1 }}>
             <Typography color="text.secondary" variant="caption">Mật khẩu dùng một lần — chỉ hiển thị trong lần này</Typography>
-            <Typography sx={{ fontFamily: "JetBrains Mono, monospace", fontWeight: 700 }}>{result.oneTimePassword}</Typography>
+            <Typography sx={{ fontFamily: "JetBrains Mono, monospace", fontWeight: 600 }}>{result.oneTimePassword}</Typography>
           </Box>
           <IconButton
             aria-label="Sao chép mật khẩu dùng một lần"

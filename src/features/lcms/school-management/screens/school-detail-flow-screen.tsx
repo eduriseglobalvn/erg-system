@@ -77,11 +77,11 @@ export default function SchoolDetailFlowScreen() {
   >
     <Paper variant="outlined" sx={{ alignItems: { xs: "flex-start", sm: "center" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 1.5, justifyContent: "space-between", mb: 2, px: 2, py: 1.25 }}>
       <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}>
-        <Typography sx={{ fontSize: 16, fontWeight: 900 }}>Thiết lập trường</Typography>
+        <Typography sx={{ fontSize: 16, fontWeight: 600 }}>Thiết lập trường</Typography>
         <Chip color="primary" label={schoolTypeMeta[selectedSchool.schoolType].shortLabel} size="small" variant="outlined" />
       </Box>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1.5, minWidth: { xs: "100%", sm: 260 } }}>
-        <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 700, whiteSpace: "nowrap" }}>Tiến độ thiết lập: {completedCount}/4</Typography>
+        <Typography color="text.secondary" sx={{ fontSize: 12, fontWeight: 600, whiteSpace: "nowrap" }}>Tiến độ thiết lập: {completedCount}/4</Typography>
         <LinearProgress color={completedCount === 4 ? "success" : "primary"} sx={{ flex: 1, height: 6, borderRadius: 3 }} value={completedCount * 25} variant="determinate" />
       </Box>
     </Paper>
@@ -134,7 +134,7 @@ export default function SchoolDetailFlowScreen() {
                         color="primary"
                         label="Đang chọn"
                         size="small"
-                        sx={{ flexShrink: 0, fontSize: 10, fontWeight: 800, height: 20, "& .MuiChip-label": { px: 0.75 } }}
+                        sx={{ flexShrink: 0, fontSize: 10, fontWeight: 600, height: 20, "& .MuiChip-label": { px: 0.75 } }}
                       />
                     ) : null}
                   </Box>

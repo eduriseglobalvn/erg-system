@@ -40,7 +40,7 @@ import { DeleteTeacherScheduleDialog } from "@/features/teaching-calendar/compon
 import { TeachingScheduleBatchPanel } from "@/features/teaching-calendar/components/teaching-schedule-batch-panel";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 
 const lcmsCalendarLanes = ["Lịch theo trường", "Lịch theo giáo viên"];
@@ -83,7 +83,7 @@ export default function AdminGoogleCalendarWorkspace({
   // Legacy login stores the shared admin session under lms even when the
   // current route is /admin. Keep the calendar capability fallback aligned
   // with PortalAuthGate until the BFF session is hydrated for lcms.
-  const session = lcmsSession ?? readStoredAuthSession("lms");
+  const session = lcmsSession ?? getAuthScope("lms").session;
   const tenantId = session?.tenantId?.trim() || getDefaultTenantId();
   const [initialRange] = useState(() => createInitialCalendarRange("month"));
   const [createDialogOpen, setCreateDialogOpen] = useState(false);

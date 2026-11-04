@@ -29,7 +29,7 @@ export function EmployeeProfileHeader({ account, profile }: { account: EmployeeA
             variant="h6"
             sx={{
               color: appleDesign.colors.textPrimary,
-              fontWeight: 750,
+              fontWeight: 600,
               letterSpacing: "-0.02em",
             }}
           >

@@ -15,6 +15,8 @@ import {
 } from "@/features/employee-management/components/apple-ui-tokens";
 import { getRoleMeta } from "@/platform/auth/permissions/role-display-catalog";
 import type { useEmployeeRoleOptions } from "@/features/employee-management/hooks/use-employee-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function RoleAssignDialog({
   onClose,
@@ -49,7 +51,7 @@ export function RoleAssignDialog({
         },
       }}
     >
-      <DialogTitle sx={{ fontWeight: 750, letterSpacing: "-0.01em" }}>
+      <DialogTitle sx={{ fontWeight: 600, letterSpacing: "-0.01em" }}>
         Gán nhóm quyền nhân sự
       </DialogTitle>
       <DialogContent>
@@ -77,7 +79,7 @@ export function RoleAssignDialog({
                 const meta = getRoleMeta(String(selected));
                 return (
                   <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
-                    <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 700 }}>
+                    <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
                       {meta.label}
                     </Typography>
                     <Typography
@@ -117,12 +119,12 @@ export function RoleAssignDialog({
                   my: 0.35,
                   py: 1,
                   "&.Mui-selected": {
-                    bgcolor: "rgba(0, 113, 227, 0.08) !important",
+                    bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.08)} !important`,
                   },
                 }}
               >
                 <Box sx={{ alignItems: "center", display: "flex", gap: 1, width: "100%" }}>
-                  <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.85rem", fontWeight: 700 }}>
+                  <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.85rem", fontWeight: 600 }}>
                     {meta.label}
                   </Typography>
                   <Typography
@@ -170,7 +172,7 @@ export function RoleAssignDialog({
             >
               <Box sx={{ alignItems: "center", display: "flex", gap: 1, mb: 1 }}>
                 <AppleStatusBadge label={meta.category} tone={meta.badgeTone} />
-                <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 750 }}>
+                <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
                   {meta.label}
                 </Typography>
               </Box>
@@ -210,9 +212,9 @@ export function RoleAssignDialog({
           onClick={() => onClose()}
           sx={{
             bgcolor: "transparent !important",
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             color: `${appleDesign.colors.textSecondary} !important`,
-            fontWeight: 650,
+            fontWeight: 600,
             px: 2,
             textTransform: "none",
             "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05) !important" },
@@ -226,10 +228,10 @@ export function RoleAssignDialog({
           disabled={!roleName || pending}
           sx={{
             bgcolor: `${appleDesign.colors.blue} !important`,
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             boxShadow: appleDesign.shadows.button,
             color: "#FFFFFF !important",
-            fontWeight: 650,
+            fontWeight: 600,
             px: 2.5,
             textTransform: "none",
             "&:hover": {

@@ -14,8 +14,8 @@ import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { createAuthRouteState } from "@/platform/auth/router/auth-route-context";
 import { clearPersistedQueryScope, createQueryPersister, QUERY_CACHE_BUSTER, shouldDehydratePersistedQuery, queryCacheScopeKey } from "@/lib/query-persistence";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { AUTH_ACCOUNT_CHANGED_EVENT } from "@/platform/auth/api/auth-storage";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { canonicalWorkspaceForPath } from "@/platform/workspaces/workspace-route";
@@ -23,7 +23,7 @@ import { workspaceFromLegacyPortal } from "@/platform/workspaces/legacy-portal-c
 
 function currentQueryScopeKey() {
   const portal = resolveCurrentPortal();
-  const session = readStoredAuthSession(portal);
+  const session = getAuthScope(portal).session;
   const account = getCurrentAccount(portal);
   const workspace = typeof window === "undefined"
     ? workspaceFromLegacyPortal(portal)
@@ -83,7 +83,7 @@ function AppRouterProvider({ router }: { router: ReturnType<typeof createAppRout
   // valid login cannot be redirected through the public index first.
   const currentPortal = resolveCurrentPortal();
   const persistedAuth = useMemo(
-    () => ({ account: getCurrentAccount(currentPortal), session: readStoredAuthSession(currentPortal) }),
+    () => ({ account: getCurrentAccount(currentPortal), session: getAuthScope(currentPortal).session }),
     [currentPortal],
   );
   const effectiveAccount = authSession.account ?? persistedAuth.account;

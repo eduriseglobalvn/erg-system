@@ -48,16 +48,16 @@ export function MemberRow({ active, user, onClick }: { active: boolean; user: Ac
         src={user.avatarUrl}
         alt={user.fullName}
         variant="rounded"
-        sx={{ width: 40, height: 40, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 12, fontWeight: 700, border: 1, borderColor: "divider" }}
+        sx={{ width: 40, height: 40, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 12, fontWeight: 600, border: 1, borderColor: "divider" }}
       >
         {initials(user.fullName || user.email)}
       </Avatar>
       <Box sx={{ minWidth: 0, flex: 1 }}>
         <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
-          <Typography noWrap sx={{ minWidth: 0, color: "text.primary", fontSize: 12, fontWeight: 700 }}>
+          <Typography noWrap sx={{ minWidth: 0, color: "text.primary", fontSize: 12, fontWeight: 600 }}>
             {user.fullName || user.email}
           </Typography>
-          {superAdmin ? <Chip label="SUPER" size="small" color="warning" sx={{ height: 18, fontSize: 9, fontWeight: 700 }} /> : null}
+          {superAdmin ? <Chip label="SUPER" size="small" color="warning" sx={{ height: 18, fontSize: 9, fontWeight: 600 }} /> : null}
         </Stack>
         <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", mt: 1, minWidth: 0, color: "text.secondary" }}>
           <MailOutlineIcon sx={{ width: 12, height: 12, flexShrink: 0 }} />
@@ -94,14 +94,14 @@ export function MemberDetailHeader({ effective, loading, rootAdmin, superAdmin, 
     <Paper component="section" variant="outlined" sx={{ ...panelSx, p: 2.5 }}>
       <Stack direction={{ xs: "column", xl: "row" }} spacing={2.5} sx={{ alignItems: { xs: "stretch", xl: "center" }, justifyContent: "space-between" }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", minWidth: 0 }}>
-          <Avatar src={user.avatarUrl} alt={user.fullName} variant="rounded" sx={{ width: 56, height: 56, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 16, fontWeight: 700, border: 1, borderColor: "divider" }}>
+          <Avatar src={user.avatarUrl} alt={user.fullName} variant="rounded" sx={{ width: 56, height: 56, flexShrink: 0, bgcolor: "primary.50", color: "primary.main", fontSize: 16, fontWeight: 600, border: 1, borderColor: "divider" }}>
             {initials(user.fullName || user.email)}
           </Avatar>
           <Box sx={{ minWidth: 0 }}>
             <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-              <Typography noWrap sx={{ color: "text.primary", fontSize: 16, fontWeight: 700 }}>{user.fullName || user.email}</Typography>
-              {superAdmin ? <Chip label="Super Admin" size="small" color="warning" sx={{ fontSize: 10, fontWeight: 700 }} /> : null}
-              <Chip label={statusLabel(user.status)} size="small" color={statusColor} variant="outlined" sx={{ fontSize: 10, fontWeight: 700 }} />
+              <Typography noWrap sx={{ color: "text.primary", fontSize: 16, fontWeight: 600 }}>{user.fullName || user.email}</Typography>
+              {superAdmin ? <Chip label="Super Admin" size="small" color="warning" sx={{ fontSize: 10, fontWeight: 600 }} /> : null}
+              <Chip label={statusLabel(user.status)} size="small" color={statusColor} variant="outlined" sx={{ fontSize: 10, fontWeight: 600 }} />
             </Stack>
             <Typography sx={{ mt: 0.5, color: "text.secondary", fontSize: 12, fontWeight: 600 }}>{user.email}</Typography>
             <Stack direction="row" sx={{ flexWrap: "wrap", gap: 1, mt: 1.5 }}>
@@ -188,8 +188,8 @@ export function ProfileSection({ user, draft, onChange, onSave, saving }: {
   );
 }
 
-export function DetailPill({ children, icon: Icon }: { children: ReactNode; icon: ElementType }) { return <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "action.hover", px: 1.25, py: 0.5, color: "text.secondary", fontSize: 10, fontWeight: 700 }}><Icon sx={{ fontSize: 14 }} />{children}</Stack>; }
-export function Field({ children, label, wide = false }: { children: ReactNode; label: string; wide?: boolean }) { return <Box component="label" sx={{ display: "grid", gridColumn: wide ? { md: "1 / -1" } : undefined, gap: 0.75, color: "text.secondary", fontSize: 11, fontWeight: 700, textTransform: "uppercase" }}>{label}{children}</Box>; }
-export function InfoLine({ label, value }: { label: string; value: string }) { return <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", border: 1, borderColor: "divider", borderRadius: 1.5, bgcolor: "action.hover", px: 1.75, py: 1.25 }}><Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700 }}>{label}</Typography><Typography noWrap sx={{ maxWidth: 160, color: "text.primary", fontSize: 12, fontWeight: 700 }}>{value}</Typography></Stack>; }
-export function MiniBadge({ active, children }: { active: boolean; children: ReactNode }) { return <Box component="span" sx={{ border: active ? 0 : 1, borderColor: "divider", borderRadius: 1, bgcolor: active ? "primary.main" : "action.hover", color: active ? "primary.contrastText" : "text.secondary", px: 1.25, py: 0.25, fontSize: 9, fontWeight: 700, textTransform: "uppercase" }}>{children}</Box>; }
+export function DetailPill({ children, icon: Icon }: { children: ReactNode; icon: ElementType }) { return <Stack direction="row" spacing={0.5} sx={{ alignItems: "center", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "action.hover", px: 1.25, py: 0.5, color: "text.secondary", fontSize: 10, fontWeight: 600 }}><Icon sx={{ fontSize: 14 }} />{children}</Stack>; }
+export function Field({ children, label, wide = false }: { children: ReactNode; label: string; wide?: boolean }) { return <Box component="label" sx={{ display: "grid", gridColumn: wide ? { md: "1 / -1" } : undefined, gap: 0.75, color: "text.secondary", fontSize: 11, fontWeight: 600, textTransform: "uppercase" }}>{label}{children}</Box>; }
+export function InfoLine({ label, value }: { label: string; value: string }) { return <Stack direction="row" spacing={2} sx={{ alignItems: "center", justifyContent: "space-between", border: 1, borderColor: "divider", borderRadius: 1.5, bgcolor: "action.hover", px: 1.75, py: 1.25 }}><Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 600 }}>{label}</Typography><Typography noWrap sx={{ maxWidth: 160, color: "text.primary", fontSize: 12, fontWeight: 600 }}>{value}</Typography></Stack>; }
+export function MiniBadge({ active, children }: { active: boolean; children: ReactNode }) { return <Box component="span" sx={{ border: active ? 0 : 1, borderColor: "divider", borderRadius: 1, bgcolor: active ? "primary.main" : "action.hover", color: active ? "primary.contrastText" : "text.secondary", px: 1.25, py: 0.25, fontSize: 9, fontWeight: 600, textTransform: "uppercase" }}>{children}</Box>; }
 

@@ -56,9 +56,9 @@ export function ErgSectionHeader({ action, description, eyebrow, title }: ErgSec
         {eyebrow ? (
           <Typography
             sx={{
-              color: "#86868B",
+              color: "text.secondary",
               fontSize: "0.72rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.06em",
               mb: 0.5,
               textTransform: "uppercase",
@@ -70,9 +70,9 @@ export function ErgSectionHeader({ action, description, eyebrow, title }: ErgSec
         ) : null}
         <Typography
           sx={{
-            color: "#1D1D1F",
+            color: "text.primary",
             fontSize: { xs: "1.25rem", md: "1.45rem" },
-            fontWeight: 800,
+            fontWeight: 600,
             letterSpacing: "-0.025em",
             lineHeight: 1.2,
           }}
@@ -83,7 +83,7 @@ export function ErgSectionHeader({ action, description, eyebrow, title }: ErgSec
         {description ? (
           <Typography
             sx={{
-              color: "#6E6E73",
+              color: "text.secondary",
               fontSize: "0.85rem",
               fontWeight: 500,
               mt: 0.35,
@@ -104,7 +104,7 @@ export function ErgContentBand({ sx, ...props }: BoxProps) {
     <Box
       sx={[
         {
-          bgcolor: "#F5F5F7",
+          bgcolor: "background.default",
           minHeight: "100%",
           p: { xs: 2.5, md: 3.5 },
         },

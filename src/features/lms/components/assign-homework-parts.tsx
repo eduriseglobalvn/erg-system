@@ -11,6 +11,7 @@ import {
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { cn } from "@/lib/utils";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export type AssignmentGroupItem = AssignHomeworkGroupOption;
 
@@ -65,7 +66,7 @@ function StudentSelectionSkeletonRow({ index }: { index: number }) {
         <Skeleton variant="text" width={40} height={18} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
-        <Skeleton variant="rounded" width={48} height={20} sx={{ borderRadius: "10px" }} />
+        <Skeleton variant="rounded" width={48} height={20} sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px` }} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2.5">
         <Skeleton variant="text" width={140} height={18} />
@@ -264,7 +265,7 @@ export function MobileStudentSelectionList({
                   <Skeleton variant="text" width={60} height={12} />
                 </div>
               </div>
-              <Skeleton variant="rounded" width={40} height={18} sx={{ borderRadius: "10px" }} />
+              <Skeleton variant="rounded" width={40} height={18} sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px` }} />
             </div>
           ))
         ) : students.length === 0 ? (

@@ -175,7 +175,7 @@ export function ReactionInsertButton({ onPick }: { onPick: (reaction: StudentDis
 
   return (
     <Box onMouseEnter={openPicker} onMouseLeave={scheduleClose} sx={{ position: "relative" }}>
-      <Button startIcon={<Smile sx={{ fontSize: 16 }} />} size="small" variant="text" sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 800 }}>
+      <Button startIcon={<Smile sx={{ fontSize: 16 }} />} size="small" variant="text" sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 600 }}>
         Cảm xúc
       </Button>
       <ReactionPicker
@@ -254,7 +254,7 @@ export function EngagementStatButton({ icon, onClick, value }: { icon: ReactNode
     >
       <Stack direction="row" spacing={0.65} alignItems="center">
         <Box sx={{ display: "inline-flex", lineHeight: 0 }}>{icon}</Box>
-        <Typography variant="body2" sx={{ color: "inherit", fontSize: 14, fontWeight: 750, lineHeight: 1 }}>
+        <Typography variant="body2" sx={{ color: "inherit", fontSize: 14, fontWeight: 600, lineHeight: 1 }}>
           {value}
         </Typography>
       </Stack>
@@ -309,7 +309,7 @@ export function ReactionStatButton({
           <Box sx={{ display: "inline-flex", fontSize: active ? 16 : 0, lineHeight: 0 }}>
             {active ? active.icon : <ThumbsUp sx={{ fontSize: 19 }} />}
           </Box>
-          <Typography variant="body2" sx={{ color: "inherit", fontSize: 14, fontWeight: 750, lineHeight: 1 }}>
+          <Typography variant="body2" sx={{ color: "inherit", fontSize: 14, fontWeight: 600, lineHeight: 1 }}>
             {formatCompactCount(count)}
           </Typography>
         </Stack>

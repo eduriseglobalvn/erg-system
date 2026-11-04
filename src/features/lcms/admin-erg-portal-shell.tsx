@@ -85,7 +85,7 @@ export default function AdminErgPortalShell() {
             <Typography sx={{ color: "#CBD5E1", fontSize: 12, lineHeight: 1 }}>/</Typography>
           </>
         ) : null}
-        <Typography noWrap sx={{ color: "#0F172A", fontSize: { xs: 12.5, sm: 13.5 }, fontWeight: 700 }}>
+        <Typography noWrap sx={{ color: "#0F172A", fontSize: { xs: 12.5, sm: 13.5 }, fontWeight: 600 }}>
           {activeItem.label}
         </Typography>
       </Box>

@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { getCurrentStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { AuthFormPanel } from "@/platform/auth/components/auth-form-panel";
 import {
@@ -44,7 +43,7 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const hasExplicitRedirect = Boolean(requestedRedirect && sanitizeLocalRedirect(requestedRedirect));
   const redirect = sanitizeRedirect(
     requestedRedirect,
-    resolveDefaultPostLoginRedirect(auth.account, portal, auth.session ?? readStoredAuthSession(portal)) || defaultPortalRedirect(portal),
+    resolveDefaultPostLoginRedirect(auth.account, portal, auth.session ?? getAuthScope(portal).session) || defaultPortalRedirect(portal),
   );
   const copy = getPortalLoginCopy(portal);
   const resolvedCopy = {
@@ -62,8 +61,8 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
   const teacherSession = isBffAuthEnabled()
     ? auth.session
     : portal === "elearning"
-      ? readStoredAuthSession("lms") ?? readStoredAuthSession("lcms") ?? readStoredAuthSession(portal)
-      : readStoredAuthSession(portal);
+      ? getAuthScope("lms").session ?? getAuthScope("lcms").session ?? getAuthScope(portal).session
+      : getAuthScope(portal).session;
   const navigateTo = (path: string) => {
     // Let the auth/account storage event render once before TanStack Router
     // evaluates the destination's workspace guard. This matters for a direct

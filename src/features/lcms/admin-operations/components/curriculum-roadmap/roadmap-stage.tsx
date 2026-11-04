@@ -92,7 +92,7 @@ export function RoadmapStage({
           transition: "all 150ms ease",
         }}
       >
-        <Typography sx={{ fontSize: 14, fontWeight: 900, fontFamily: "'JetBrains Mono', monospace" }}>
+        <Typography sx={{ fontSize: 14, fontWeight: 600, fontFamily: "'JetBrains Mono', monospace" }}>
           {String(index + 1).padStart(2, "0")}
         </Typography>
       </Box>
@@ -150,7 +150,7 @@ export function RoadmapStage({
                 <Layers sx={{ fontSize: 20 }} />
               </Box>
               <Box sx={{ minWidth: 0 }}>
-                <Typography noWrap sx={{ color: "#0F172A", fontSize: 15.5, fontWeight: 800 }}>
+                <Typography noWrap sx={{ color: "#0F172A", fontSize: 15.5, fontWeight: 600 }}>
                   {stage.level.title}
                 </Typography>
                 <Typography noWrap sx={{ mt: 0.25, color: "#64748B", fontSize: 12 }}>
@@ -184,7 +184,7 @@ export function RoadmapStage({
                 borderColor: "#BFDBFE",
                 bgcolor: "#EFF6FF",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: "none",
                 borderRadius: 1.5,
                 px: 1.25,
@@ -247,7 +247,7 @@ export function RoadmapStage({
                 borderColor: "#BFDBFE",
                 bgcolor: "#FFFFFF",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: "none",
                 borderRadius: 1.5,
                 px: 1.75,
@@ -272,7 +272,7 @@ export function RoadmapStage({
               textAlign: "center",
             }}
           >
-            <Typography sx={{ color: "#1E293B", fontSize: 13, fontWeight: 700 }}>
+            <Typography sx={{ color: "#1E293B", fontSize: 13, fontWeight: 600 }}>
               Chặng này chưa có chủ đề học tập
             </Typography>
             <Typography sx={{ color: "#64748B", fontSize: 12, maxWidth: 360, lineHeight: 1.5 }}>
@@ -286,7 +286,7 @@ export function RoadmapStage({
               sx={{
                 bgcolor: "#0F6CBD",
                 fontSize: 12,
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: "none",
                 mt: 0.5,
                 boxShadow: "none",

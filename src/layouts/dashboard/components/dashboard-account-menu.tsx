@@ -38,13 +38,13 @@ export function DashboardAccountMenu({ onLogout }: { onLogout: () => void }) {
     <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
       <IconButton aria-label="Thông báo"><NotificationsNoneRoundedIcon /></IconButton>
       <IconButton aria-label={`Mở tài khoản ${accountName}`} onClick={(event) => setAnchor(event.currentTarget)} sx={{ p: 0.5 }}>
-        <Badge color="success" overlap="circular" variant="dot"><Avatar src={accountAvatar} sx={{ bgcolor: "primary.main", fontSize: 11, fontWeight: 700, height: 34, width: 34 }}>{getInitials(accountName)}</Avatar></Badge>
+        <Badge color="success" overlap="circular" variant="dot"><Avatar src={accountAvatar} sx={{ bgcolor: "primary.main", fontSize: 11, fontWeight: 600, height: 34, width: 34 }}>{getInitials(accountName)}</Avatar></Badge>
       </IconButton>
       <Menu anchorEl={anchor} onClose={() => setAnchor(null)} open={Boolean(anchor)} slotProps={{ paper: { sx: { mt: 1, p: 1, width: 288 } } }}>
         <Box sx={{ bgcolor: "background.default", borderRadius: 2, p: 1.5 }}>
           <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
             <Avatar src={accountAvatar} variant="rounded" sx={{ bgcolor: "primary.main", height: 48, width: 48 }}>{getInitials(accountName)}</Avatar>
-            <Box sx={{ minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 750 }}>{accountName}</Typography><Typography color="text.secondary" noWrap variant="caption">{accountEmail}</Typography><Typography color="success.main" sx={{ fontSize: 11, mt: 0.5 }}>Online</Typography></Box>
+            <Box sx={{ minWidth: 0 }}><Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>{accountName}</Typography><Typography color="text.secondary" noWrap variant="caption">{accountEmail}</Typography><Typography color="success.main" sx={{ fontSize: 11, mt: 0.5 }}>Online</Typography></Box>
           </Stack>
         </Box>
         <Divider sx={{ my: 1 }} />

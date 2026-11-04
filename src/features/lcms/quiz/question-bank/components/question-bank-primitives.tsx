@@ -79,7 +79,7 @@ export function SelectControl({
             borderRadius: 2,
             bgcolor: "#fff",
             fontSize: 14,
-            fontWeight: 750,
+            fontWeight: 600,
             boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
             "& .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#64748b", 0.22) },
             "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#0f6cbd", 0.45) },
@@ -89,7 +89,7 @@ export function SelectControl({
           {options.map((option) => (
             <MenuItem key={option.value} value={option.value}>
               <Stack spacing={0.25}>
-                <Typography sx={{ fontSize: 14, fontWeight: 750 }}>{option.label}</Typography>
+                <Typography sx={{ fontSize: 14, fontWeight: 600 }}>{option.label}</Typography>
                 {!hideDescription && option.description ? (
                   <Typography sx={{ color: "#64748b", fontSize: 12 }}>{option.description}</Typography>
                 ) : null}

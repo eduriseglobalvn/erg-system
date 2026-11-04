@@ -38,7 +38,7 @@ export function TeachingPlanSyncConfirmDialog({
     maxWidth="sm"
     fullWidth
   >
-    <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: 700, fontSize: 17 }}>
+    <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: 600, fontSize: 17 }}>
       <Sync color="primary" /> Đồng bộ sang Cấu trúc môn học
     </DialogTitle>
     <DialogContent dividers sx={{ display: "grid", gap: 2 }}>
@@ -69,7 +69,7 @@ export function TeachingPlanSyncConfirmDialog({
             control={<Radio size="small" />}
             label={
               <Box>
-                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "#1E293B" }}>
+                <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: "#1E293B" }}>
                   Thêm tiếp vào sau cấu trúc hiện có (Khuyên dùng)
                 </Typography>
                 <Typography sx={{ fontSize: 12, color: "#64748B", mt: 0.25 }}>
@@ -97,7 +97,7 @@ export function TeachingPlanSyncConfirmDialog({
             control={<Radio size="small" color="error" />}
             label={
               <Box>
-                <Typography sx={{ fontSize: 13.5, fontWeight: 700, color: "#991B1B" }}>
+                <Typography sx={{ fontSize: 13.5, fontWeight: 600, color: "#991B1B" }}>
                   Xóa cấu trúc cũ và tạo mới toàn bộ theo khung chương trình
                 </Typography>
                 <Typography sx={{ fontSize: 12, color: "#64748B", mt: 0.25 }}>
@@ -120,7 +120,7 @@ export function TeachingPlanSyncConfirmDialog({
           setSyncConfirmOpen(false);
           void executeSync(syncMode);
         }}
-        sx={{ textTransform: "none", fontWeight: 700 }}
+        sx={{ textTransform: "none", fontWeight: 600 }}
       >
         {syncMode === "overwrite" ? "Xóa & Tạo mới toàn bộ" : "Tiến hành đồng bộ"}
       </Button>

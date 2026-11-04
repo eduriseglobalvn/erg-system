@@ -1,6 +1,8 @@
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeActionMenu({
   anchorEl,
@@ -41,7 +43,7 @@ export function EmployeeActionMenu({
               py: 0.75,
               transition: "all 0.12s ease",
               "&:hover": {
-                bgcolor: "rgba(0, 113, 227, 0.08)",
+                bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                 color: appleDesign.colors.blue,
               },
             },

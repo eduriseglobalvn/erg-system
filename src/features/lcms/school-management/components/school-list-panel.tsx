@@ -28,7 +28,7 @@ export function SchoolListPanel({ onAdd, onSelect, schools, selectedId }: {
       <Box sx={{ borderBottom: "1px solid", borderColor: "divider", p: 2 }}>
         <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1.5 }}>
           <Box>
-            <Typography sx={{ fontWeight: 850 }} variant="subtitle1">Trường liên kết</Typography>
+            <Typography sx={{ fontWeight: 600 }} variant="subtitle1">Trường liên kết</Typography>
             <Typography color="text.secondary" variant="caption">{schools.length} trường trong hệ thống</Typography>
           </Box>
           <Button aria-label="Thêm trường" onClick={onAdd} size="small" sx={{ minWidth: 36, px: 1 }} variant="contained"><AddRoundedIcon fontSize="small" /></Button>
@@ -43,7 +43,7 @@ export function SchoolListPanel({ onAdd, onSelect, schools, selectedId }: {
         {filtered.map((school) => (
           <ListItemButton key={school.id} onClick={() => onSelect(school.id)} selected={school.id === selectedId} sx={{ alignItems: "flex-start", borderLeft: "3px solid transparent", mx: 1, my: 0.5, borderRadius: 2, px: 1.5, py: 1.35, "&.Mui-selected": { bgcolor: "primary.50", borderLeftColor: "primary.main" } }}>
             <Box sx={{ minWidth: 0, width: "100%" }}>
-              <Typography noWrap sx={{ fontSize: 14, fontWeight: 800 }}>{school.name}</Typography>
+              <Typography noWrap sx={{ fontSize: 14, fontWeight: 600 }}>{school.name}</Typography>
               <Typography color="text.secondary" noWrap sx={{ fontFamily: "var(--font-mono)", fontSize: 12.5, mt: 0.25 }}>{school.id} · {school.district}</Typography>
               <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", mt: 1 }}>
                 <Chip color={statusColor[school.status]} label={statusLabel[school.status]} size="small" sx={{ height: 22, fontSize: 11 }} />

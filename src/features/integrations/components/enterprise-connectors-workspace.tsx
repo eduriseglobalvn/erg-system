@@ -123,7 +123,7 @@ function RunCard({ canSync, isRetrying, onRetry, run }: { canSync: boolean; isRe
 }
 
 function BoxCopy({ run }: { run: EnterpriseConnectorSyncRun }) {
-  return <Box sx={{ display: "grid", gap: 0.5 }}><Typography sx={{ fontWeight: 800 }} variant="subtitle2">Run {run.runId}</Typography><Box sx={{ alignItems: "center", display: "flex", gap: 1 }}><EnterpriseConnectorStatusChip status={run.status} /><Typography color="text.secondary" variant="body2">{run.processed} processed · {run.failed} failed · retry {run.retryCount}</Typography></Box>{run.errorCode ? <Typography color="error.main" variant="caption">Error: {run.errorCode}</Typography> : null}</Box>;
+  return <Box sx={{ display: "grid", gap: 0.5 }}><Typography sx={{ fontWeight: 600 }} variant="subtitle2">Run {run.runId}</Typography><Box sx={{ alignItems: "center", display: "flex", gap: 1 }}><EnterpriseConnectorStatusChip status={run.status} /><Typography color="text.secondary" variant="body2">{run.processed} processed · {run.failed} failed · retry {run.retryCount}</Typography></Box>{run.errorCode ? <Typography color="error.main" variant="caption">Error: {run.errorCode}</Typography> : null}</Box>;
 }
 
 function createIdempotencyKey(prefix: string) {

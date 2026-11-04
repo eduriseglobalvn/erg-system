@@ -87,7 +87,7 @@ export function DiscussionView({
         <CardContent sx={{ p: { xs: 1.1, md: 1.25 } }}>
           <Stack spacing={0.85}>
             <Stack direction="row" spacing={1} alignItems="center">
-              <Avatar sx={{ bgcolor: MUI_PRIMARY, color: "#fff", fontSize: 14, fontWeight: 900, height: 34, width: 34 }}>{studentClass.slice(0, 1)}</Avatar>
+              <Avatar sx={{ bgcolor: MUI_PRIMARY, color: "#fff", fontSize: 14, fontWeight: 600, height: 34, width: 34 }}>{studentClass.slice(0, 1)}</Avatar>
               <TextField
                 fullWidth
                 multiline
@@ -122,7 +122,7 @@ export function DiscussionView({
                   size="small"
                   variant="text"
                   onClick={() => fileInputRef.current?.click()}
-                  sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 800 }}
+                  sx={{ borderRadius: 999, color: MUI_MUTED, fontWeight: 600 }}
                 >
                   Ảnh
                 </Button>
@@ -147,7 +147,7 @@ export function DiscussionView({
                   bgcolor: MUI_PRIMARY,
                   borderRadius: 999,
                   boxShadow: "0 8px 18px rgba(15,108,189,0.16)",
-                  fontWeight: 900,
+                  fontWeight: 600,
                   minHeight: 36,
                   px: 2.1,
                   "&:hover": { bgcolor: "#0B4F8A" },

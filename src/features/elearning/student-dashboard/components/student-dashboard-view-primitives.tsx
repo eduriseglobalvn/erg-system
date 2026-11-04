@@ -29,6 +29,7 @@ import {
   primaryButtonSx,
   Stack,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function PageHeader({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {
   return (
@@ -39,7 +40,7 @@ export function PageHeader({ description, icon, title }: { description: string; 
             {icon}
           </Box>
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="h6" sx={{ color: MUI_TEXT, fontWeight: 900, lineHeight: 1.15 }}>{title}</Typography>
+            <Typography variant="h6" sx={{ color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15 }}>{title}</Typography>
             <Typography variant="body2" sx={{ color: MUI_MUTED, mt: 0.25 }}>{description}</Typography>
           </Box>
         </Stack>
@@ -52,7 +53,7 @@ export function SectionCard({ action, children, title }: { action?: ReactNode; c
   return (
     <Card sx={elevatedCardSx}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ borderBottom: `1px solid ${MUI_DIVIDER}`, px: 2.5, py: 1.75 }}>
-        <Typography variant="subtitle1" sx={{ color: MUI_TEXT, fontWeight: 900 }}>{title}</Typography>
+        <Typography variant="subtitle1" sx={{ color: MUI_TEXT, fontWeight: 600 }}>{title}</Typography>
         {action}
       </Stack>
       <CardContent sx={{ p: { xs: 2, md: 2.5 } }}>{children}</CardContent>
@@ -63,8 +64,8 @@ export function SectionCard({ action, children, title }: { action?: ReactNode; c
 export function PriorityPanel({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
   return (
     <Paper sx={{ alignSelf: "stretch", bgcolor: MUI_NAVY, border: "1px solid rgba(255,255,255,0.08)", borderRadius: 3, boxShadow: "0 18px 38px rgba(16,24,40,0.16)", color: "#fff", minWidth: { md: 360 }, overflow: "hidden", p: 2.2, position: "relative" }}>
-      <Chip label={copy.priority.title} size="small" sx={{ bgcolor: "rgba(255,255,255,0.14)", color: "#fff", fontWeight: 700 }} />
-      <Typography variant="subtitle1" sx={{ mt: 1.5, color: "#fff", fontWeight: 800 }}>{assignment.title}</Typography>
+      <Chip label={copy.priority.title} size="small" sx={{ bgcolor: "rgba(255,255,255,0.14)", color: "#fff", fontWeight: 600 }} />
+      <Typography variant="subtitle1" sx={{ mt: 1.5, color: "#fff", fontWeight: 600 }}>{assignment.title}</Typography>
       <Typography variant="body2" sx={{ mt: 0.75, color: "rgba(255,255,255,0.72)", lineHeight: 1.55 }}>{copy.priority.detail(assignment.dueLabel)}</Typography>
       {assignment.progressRate === null ? (
         <Typography variant="caption" sx={{ color: "rgba(255,255,255,0.72)", display: "block", mt: 2 }}>Chưa có dữ liệu tiến độ</Typography>
@@ -83,8 +84,8 @@ export function MetricCard({ icon, label, tone = "primary", value }: { icon?: Re
       <CardContent sx={{ p: 2.2 }}>
         <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 700 }}>{label}</Typography>
-            <Typography variant="h5" sx={{ mt: 0.5, color: MUI_TEXT, fontWeight: 800 }}>{value}</Typography>
+            <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 600 }}>{label}</Typography>
+            <Typography variant="h5" sx={{ mt: 0.5, color: MUI_TEXT, fontWeight: 600 }}>{value}</Typography>
           </Box>
           {icon ? <Box sx={{ bgcolor: `${color}1A`, border: `1px solid ${color}22`, borderRadius: 3, color, display: "grid", height: 40, placeItems: "center", width: 40 }}>{icon}</Box> : null}
         </Stack>
@@ -104,24 +105,24 @@ export function AssignmentListItem({ assignment, copy, onOpenAssignment }: { ass
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ xs: "stretch", md: "center" }} justifyContent="space-between">
         <Box sx={{ minWidth: 0, flex: 1 }}>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.8, flexWrap: "wrap", rowGap: 0.5 }}>
-            <Box sx={{ bgcolor: "#FFF7ED", color: "#EA580C", border: "1px solid #FFEDD5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 700 }}>Bài thi</Box>
-            {isHigh ? <Box sx={{ bgcolor: "#ECFDF5", color: "#059669", border: "1px solid #D1FAE5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 700 }}>Điểm cao</Box> : null}
+            <Box sx={{ bgcolor: "#FFF7ED", color: "#EA580C", border: "1px solid #FFEDD5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 600 }}>Bài thi</Box>
+            {isHigh ? <Box sx={{ bgcolor: "#ECFDF5", color: "#059669", border: "1px solid #D1FAE5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 600 }}>Điểm cao</Box> : null}
             <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, fontSize: 13 }}>{courseTag}</Typography>
           </Stack>
-          <Typography variant="subtitle1" sx={{ color: "#0F172A", fontWeight: 800, fontSize: 16 }}>{assignment.title}</Typography>
+          <Typography variant="subtitle1" sx={{ color: "#0F172A", fontWeight: 600, fontSize: 16 }}>{assignment.title}</Typography>
           <Typography variant="body2" sx={{ color: "#64748B", mt: 0.4, fontSize: 13 }}>{isCompleted ? `Đỗ · ${scoreVal}/50` : assignment.dueLabel}</Typography>
         </Box>
         <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexShrink: 0, alignSelf: { xs: "flex-end", md: "center" } }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "50%", border: "2.5px solid #10B981", color: "#10B981", fontWeight: 800, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Box sx={{ width: 44, height: 44, borderRadius: "50%", border: "2.5px solid #10B981", color: "#10B981", fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
             {scoreVal}
           </Box>
           <IconButton size="small" onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ color: "#64748B", bgcolor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "50%", p: 0.9, "&:hover": { bgcolor: "#F1F5F9" } }}>
             <HistoryRounded sx={{ fontSize: 18 }} />
           </IconButton>
-          <Button variant="contained" disabled={!assignment.quizId} startIcon={<ReplayRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ bgcolor: "#2563EB", color: "#fff", borderRadius: "10px", px: 2.2, py: 0.85, fontWeight: 700, fontSize: 13, textTransform: "none", boxShadow: "0 2px 8px rgba(37,99,235,0.25)", "&:hover": { bgcolor: "#1D4ED8" } }}>
+          <Button variant="contained" disabled={!assignment.quizId} startIcon={<ReplayRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ bgcolor: "#2563EB", color: "#fff", borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 2.2, py: 0.85, fontWeight: 600, fontSize: 13, textTransform: "none", boxShadow: "0 2px 8px rgba(37,99,235,0.25)", "&:hover": { bgcolor: "#1D4ED8" } }}>
             {isCompleted ? "Làm lại" : copy.assignmentAction(assignment.status)}
           </Button>
-          <Button variant="outlined" startIcon={<BarChartRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ borderColor: "#E2E8F0", color: "#475569", borderRadius: "10px", px: 2, py: 0.85, fontWeight: 600, fontSize: 13, textTransform: "none", bgcolor: "#FFFFFF", "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
+          <Button variant="outlined" startIcon={<BarChartRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ borderColor: "#E2E8F0", color: "#475569", borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 2, py: 0.85, fontWeight: 600, fontSize: 13, textTransform: "none", bgcolor: "#FFFFFF", "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
             Xem kết quả
           </Button>
         </Stack>
@@ -139,11 +140,11 @@ export function AnnouncementCard({ announcement, selected }: { announcement: Stu
             {announcement.isPinned ? <Chip label="Pinned" size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", color: MUI_PRIMARY, fontWeight: 850 }} /> : null}
             {announcement.targetLabel ? <Chip label={announcement.targetLabel} size="small" variant="outlined" /> : null}
           </Stack>
-          <Typography variant="subtitle2" sx={{ mt: 1, color: MUI_TEXT, fontWeight: 900 }}>{announcement.title}</Typography>
+          <Typography variant="subtitle2" sx={{ mt: 1, color: MUI_TEXT, fontWeight: 600 }}>{announcement.title}</Typography>
           <Typography variant="body2" sx={{ mt: 0.75, color: MUI_MUTED, lineHeight: 1.7 }}>{announcement.content}</Typography>
         </Box>
         <Box sx={{ flexShrink: 0, textAlign: { xs: "left", sm: "right" } }}>
-          {announcement.teacherName ? <Typography variant="body2" sx={{ fontWeight: 800 }}>{announcement.teacherName}</Typography> : null}
+          {announcement.teacherName ? <Typography variant="body2" sx={{ fontWeight: 600 }}>{announcement.teacherName}</Typography> : null}
           <Typography variant="caption" color="text.secondary">{announcement.createdAtLabel}</Typography>
         </Box>
       </Stack>
@@ -161,11 +162,11 @@ export function AnnouncementToast({ announcement, copy, open, onClose, onOpenDet
             <Chip label={copy.announcementPinnedLabel} color="warning" size="small" />
             <Typography variant="caption" color="text.secondary">{copy.announcementPopupAutoDismiss}</Typography>
           </Stack>
-          <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{announcement.title}</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{announcement.title}</Typography>
           <Typography variant="body2" sx={{ color: MUI_MUTED, display: "-webkit-box", lineHeight: 1.55, overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: { xs: 2, sm: 4 } }}>{announcement.content}</Typography>
           <Stack direction="row" spacing={1} justifyContent="flex-end" sx={{ flexWrap: "wrap", rowGap: 1 }}>
-            <Button size="small" variant="text" onClick={() => onSnooze(announcement.id)} sx={{ borderRadius: 999, display: { xs: "none", sm: "inline-flex" }, fontWeight: 800 }}>{copy.announcementPopupSnooze}</Button>
-            <Button size="small" variant="outlined" onClick={onClose} sx={{ borderRadius: 999, fontWeight: 800 }}>{copy.announcementPopupDismiss}</Button>
+            <Button size="small" variant="text" onClick={() => onSnooze(announcement.id)} sx={{ borderRadius: 999, display: { xs: "none", sm: "inline-flex" }, fontWeight: 600 }}>{copy.announcementPopupSnooze}</Button>
+            <Button size="small" variant="outlined" onClick={onClose} sx={{ borderRadius: 999, fontWeight: 600 }}>{copy.announcementPopupDismiss}</Button>
             <Button size="small" variant="contained" onClick={() => onOpenDetail(announcement.id)} sx={{ ...primaryButtonSx, borderRadius: 999 }}>{copy.announcementPopupAction}</Button>
           </Stack>
         </Stack>
@@ -176,13 +177,13 @@ export function AnnouncementToast({ announcement, copy, open, onClose, onOpenDet
 
 export function StatusChip({ label, status }: { label: string; status: StudentAssignmentStatus }) {
   const color = status === "submitted" ? "success" : status === "overdue" ? "error" : status === "in_progress" ? "info" : "default";
-  return <Chip color={color} label={label} size="small" sx={{ borderRadius: 2, fontWeight: 800 }} />;
+  return <Chip color={color} label={label} size="small" sx={{ borderRadius: 2, fontWeight: 600 }} />;
 }
 
 export function EmptyPanel({ description, title }: { description: string; title: string }) {
   return (
     <Paper sx={{ ...elevatedPaperSx, p: 2.2, bgcolor: "#F9FAFD" }}>
-      <Typography variant="subtitle2" sx={{ fontWeight: 800 }}>{title}</Typography>
+      <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>{title}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{description}</Typography>
     </Paper>
   );

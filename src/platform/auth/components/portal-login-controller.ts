@@ -1,7 +1,7 @@
 import type { FormEvent } from "react";
 
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession, type StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import type { StoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { loginStudent } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
@@ -85,12 +85,12 @@ export function redirectAfterAuth(
   navigateTo: (path: string) => void,
   options: LoginRedirectOptions = {},
 ) {
-  const session = options.session ?? readStoredAuthSession(portal);
+  const session = options.session ?? getAuthScope(portal).session;
   const destination = options.hasExplicitRedirect === false
     ? resolveDefaultPostLoginRedirect(account, portal, session)
     : redirect;
   const targetPortal = portalForRedirect(destination, portal);
-  const teacherSession = readStoredAuthSession(targetPortal) ?? session;
+  const teacherSession = getAuthScope(targetPortal).session ?? session;
   const canAccessTarget = canAccessPortal({ portal: targetPortal, teacherAccount: account, teacherSession });
   navigateTo(canAccessTarget || isAuthOnlyRedirect(targetPortal, destination)
     ? destination
@@ -140,7 +140,7 @@ export function defaultPortalRedirect(portal: PortalKey) {
 export function resolveDefaultPostLoginRedirect(
   account: TeacherAccount | null | undefined,
   portal: PortalKey,
-  session: StoredAuthSession | null = readStoredAuthSession(portal),
+  session: StoredAuthSession | null = getAuthScope(portal).session,
 ) {
   // Keep the dedicated portal defaults for an explicit Admin/Student login;
   // workspace inference is needed for the shared LMS login only.

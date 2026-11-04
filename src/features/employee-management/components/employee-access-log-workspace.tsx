@@ -23,6 +23,8 @@ import {
 } from "@/features/employee-management/components/apple-ui-tokens";
 import { useEmployeeSecurityFeed } from "@/features/employee-management/hooks/use-employee-management";
 import type { SecurityFeedFilters, SecurityFeedItem } from "@/features/employee-management/types/employee-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const sourceOptions: Array<{ label: string; value: SecurityFeedFilters["sourceType"] | "" }> = [
   { label: "Tất cả nguồn", value: "" },
@@ -40,7 +42,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
   const rows = query.data?.items ?? [];
 
   return (
-    <ErgContentBand sx={{ bgcolor: "#F5F5F7", py: { md: 4, xs: 2.5 } }}>
+    <ErgContentBand sx={{ bgcolor: "background.default", py: { md: 4, xs: 2.5 } }}>
       {/* Apple Section Header */}
       <Box sx={{ mb: 3 }}>
         <Box sx={{ alignItems: "center", display: "inline-flex", gap: 0.6, mb: 0.5 }}>
@@ -49,7 +51,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
             sx={{
               color: appleDesign.colors.blue,
               fontSize: "0.725rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
@@ -60,7 +62,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
           variant="h4"
           sx={{
             color: appleDesign.colors.textPrimary,
-            fontWeight: 750,
+            fontWeight: 600,
             letterSpacing: "-0.03em",
             lineHeight: 1.2,
           }}
@@ -109,7 +111,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
                   variant="subtitle1"
                   sx={{
                     color: appleDesign.colors.textPrimary,
-                    fontWeight: 750,
+                    fontWeight: 600,
                     letterSpacing: "-0.01em",
                   }}
                 >
@@ -189,7 +191,7 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
                         borderBottom: `1px solid ${appleDesign.colors.border}`,
                         color: appleDesign.colors.textTertiary,
                         fontSize: "0.725rem",
-                        fontWeight: 650,
+                        fontWeight: 600,
                         letterSpacing: "0.06em",
                         py: 1.5,
                         textTransform: "uppercase",
@@ -247,7 +249,7 @@ function SecurityFeedRow({ event }: { event: SecurityFeedItem }) {
     <TableRow
       hover
       sx={{
-        bgcolor: warning ? "rgba(255, 149, 0, 0.03)" : undefined,
+        bgcolor: warning ? alpha(ergEnterpriseTokens.color.warning, 0.03) : undefined,
         transition: "background-color 0.15s ease",
         "& td": {
           borderColor: appleDesign.colors.border,
@@ -256,7 +258,7 @@ function SecurityFeedRow({ event }: { event: SecurityFeedItem }) {
       }}
     >
       <TableCell sx={{ whiteSpace: "nowrap" }}>
-        <Typography variant="body2" sx={{ color: appleDesign.colors.textPrimary, fontWeight: 700 }}>
+        <Typography variant="body2" sx={{ color: appleDesign.colors.textPrimary, fontWeight: 600 }}>
           {formatDateTimeVi(event.occurredAt)}
         </Typography>
         <Typography
@@ -275,7 +277,7 @@ function SecurityFeedRow({ event }: { event: SecurityFeedItem }) {
         <Box sx={{ alignItems: "center", display: "flex", gap: 1.25 }}>
           <AppleAvatar name={event.userName || event.userId} size={32} />
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="body2" sx={{ color: appleDesign.colors.textPrimary, fontWeight: 750 }}>
+            <Typography variant="body2" sx={{ color: appleDesign.colors.textPrimary, fontWeight: 600 }}>
               {event.userName || "Không xác định"}
             </Typography>
             <Typography variant="caption" sx={{ color: appleDesign.colors.textSecondary, display: "block" }}>
@@ -293,7 +295,7 @@ function SecurityFeedRow({ event }: { event: SecurityFeedItem }) {
             sx={{
               color: warning ? appleDesign.colors.amberText : appleDesign.colors.textPrimary,
               fontFamily: "JetBrains Mono, monospace",
-              fontWeight: 700,
+              fontWeight: 600,
             }}
           >
             {event.riskCode || event.eventType}

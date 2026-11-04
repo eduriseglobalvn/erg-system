@@ -25,7 +25,7 @@ import {
   workspaceCapabilities,
   workspacesFromLegacyPortals,
 } from "@/platform/workspaces/workspace-switcher";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { ERG_ASSETS } from "@/config/seo";
 import type { PortalInfo } from "./ErgPortalLayout";
 import {
@@ -145,7 +145,7 @@ export function PortalSidebarWorkspaceHeader({
   const current = workspaceFromPath(pathname);
   const meta = WORKSPACE_META[current] ?? WORKSPACE_META.TEACHER;
 
-  const sessionWorkspaces = typeof window !== "undefined" ? readStoredAuthSession()?.workspaces : undefined;
+  const sessionWorkspaces = typeof window !== "undefined" ? getAuthScope().session?.workspaces : undefined;
   const granted = portalInfo?.workspaceCapabilities?.length
     ? [...portalInfo.workspaceCapabilities]
     : sessionWorkspaces?.length
@@ -285,7 +285,7 @@ export function PortalSidebarWorkspaceHeader({
                 sx={{
                   color: "#1C252E",
                   fontSize: 13.5,
-                  fontWeight: 750,
+                  fontWeight: 600,
                   letterSpacing: "-0.015em",
                   lineHeight: 1.25,
                 }}
@@ -352,7 +352,7 @@ export function PortalSidebarWorkspaceHeader({
               sx={{
                 color: "#8898AA",
                 fontSize: 10.5,
-                fontWeight: 700,
+                fontWeight: 600,
                 letterSpacing: "0.06em",
                 textTransform: "uppercase",
               }}

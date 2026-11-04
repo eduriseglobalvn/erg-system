@@ -16,6 +16,8 @@ import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) {
   const summary = summarizeSchool(school);
@@ -28,7 +30,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         sx={{
           alignItems: { xs: "flex-start", md: "center" },
           bgcolor: "#FFFFFF",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           borderRadius: "16px",
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
           display: "flex",
@@ -39,10 +41,10 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         }}
       >
         <Box>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1.15rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.15rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
             Báo cáo vận hành theo trường
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.825rem", mt: 0.35 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", mt: 0.35 }}>
             Các chỉ số dưới đây lấy trực tiếp từ schoolOperations và chịu scope của phiên quản trị backend.
           </Typography>
         </Box>
@@ -55,9 +57,9 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
             borderColor: "rgba(0, 0, 0, 0.12)",
             borderRadius: "10px",
             boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
-            color: "#1D1D1F",
+            color: ergEnterpriseTokens.color.text,
             fontSize: "0.85rem",
-            fontWeight: 650,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
             px: 2,
             py: 0.85,
@@ -81,8 +83,8 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         <AnalyticsMetricCard
           detail="Số lượng do backend trả về"
           icon={<GroupsRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(0, 113, 227, 0.08)"
-          iconColor="#0071E3"
+          iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
+          iconColor={ergEnterpriseTokens.color.primary}
           label="Học sinh"
           value={summary.studentCount}
         />
@@ -97,7 +99,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         <AnalyticsMetricCard
           detail="Môn đã được cấu hình"
           icon={<MenuBookRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(52, 199, 89, 0.12)"
+          iconBg={alpha(ergEnterpriseTokens.color.success, 0.12)}
           iconColor="#15803D"
           label="Môn học"
           value={summary.subjectCount}
@@ -105,7 +107,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         <AnalyticsMetricCard
           detail={summary.averageScore === null ? "Backend chưa trả điểm" : `${summary.scoredStudentCount} học sinh có điểm`}
           icon={<ScoreboardRoundedIcon sx={{ fontSize: 20 }} />}
-          iconBg="rgba(255, 149, 0, 0.12)"
+          iconBg={alpha(ergEnterpriseTokens.color.warning, 0.12)}
           iconColor="#B45309"
           label="Điểm trung bình"
           value={summary.averageScore === null ? "-" : `${summary.averageScore}%`}
@@ -117,12 +119,12 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         <Alert
           severity="warning"
           sx={{
-            bgcolor: "rgba(255, 149, 0, 0.09)",
-            border: "1px solid rgba(255, 149, 0, 0.22)",
+            bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.09),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.warning, 0.22)}`,
             borderRadius: "12px",
             color: "#B45309",
             fontWeight: 550,
-            "& .MuiAlert-icon": { color: "#FF9500" },
+            "& .MuiAlert-icon": { color: ergEnterpriseTokens.color.warning },
           }}
         >
           Có {summary.atRiskCount} học sinh đang có trạng thái cần theo dõi theo dữ liệu backend. Hãy mở workspace học sinh để xử lý.
@@ -131,12 +133,12 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         <Alert
           severity="success"
           sx={{
-            bgcolor: "rgba(52, 199, 89, 0.09)",
-            border: "1px solid rgba(52, 199, 89, 0.22)",
+            bgcolor: alpha(ergEnterpriseTokens.color.success, 0.09),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.success, 0.22)}`,
             borderRadius: "12px",
             color: "#15803D",
             fontWeight: 550,
-            "& .MuiAlert-icon": { color: "#34C759" },
+            "& .MuiAlert-icon": { color: ergEnterpriseTokens.color.success },
           }}
         >
           Không có học sinh ở trạng thái cần theo dõi trong dữ liệu đã tải.
@@ -149,16 +151,16 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         sx={{
           bgcolor: "#FFFFFF",
           borderRadius: "16px",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
           overflow: "hidden",
         }}
       >
-        <Box sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.06)", p: 2 }}>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1.05rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+        <Box sx={{ borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`, p: 2 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.05rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
             Phân bổ lớp học
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.78rem", mt: 0.25 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", mt: 0.25 }}>
             Sĩ số và giáo viên chủ nhiệm của từng lớp theo dữ liệu hệ thống
           </Typography>
         </Box>
@@ -179,18 +181,18 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
                   key={classroom.id}
                   sx={{
                     transition: "background-color 0.12s ease",
-                    "&:hover": { bgcolor: "rgba(0, 113, 227, 0.035) !important" },
+                    "&:hover": { bgcolor: `${alpha(ergEnterpriseTokens.color.primary, 0.035)} !important` },
                   }}
                 >
                   <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.4 }}>
                     <Box
                       sx={{
-                        bgcolor: "rgba(0, 113, 227, 0.08)",
+                        bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                         borderRadius: "6px",
-                        color: "#0071E3",
+                        color: ergEnterpriseTokens.color.primary,
                         display: "inline-block",
                         fontSize: "0.825rem",
-                        fontWeight: 750,
+                        fontWeight: 600,
                         px: 1,
                         py: 0.3,
                       }}
@@ -198,7 +200,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
                       {classroom.name}
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", color: "#1D1D1F", fontSize: "0.825rem", fontWeight: 650, py: 1.4 }}>
+                  <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", color: ergEnterpriseTokens.color.text, fontSize: "0.825rem", fontWeight: 600, py: 1.4 }}>
                     {classroom.grade ? `Khối ${classroom.grade}` : "-"}
                   </TableCell>
                   <TableCell align="right" sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", py: 1.4 }}>
@@ -206,11 +208,11 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
                       sx={{
                         bgcolor: "rgba(0, 0, 0, 0.04)",
                         borderRadius: "9999px",
-                        color: "#1D1D1F",
+                        color: ergEnterpriseTokens.color.text,
                         display: "inline-block",
                         fontFamily: "var(--font-mono)",
                         fontSize: "0.75rem",
-                        fontWeight: 700,
+                        fontWeight: 600,
                         lineHeight: 1,
                         px: 1.25,
                         py: 0.4,
@@ -219,7 +221,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
                       {classroom.studentCount}
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", color: classroom.homeroomTeacher ? "#1D1D1F" : "#86868B", fontSize: "0.825rem", fontWeight: classroom.homeroomTeacher ? 600 : 400, fontStyle: classroom.homeroomTeacher ? "normal" : "italic", py: 1.4 }}>
+                  <TableCell sx={{ borderBottom: "1px solid rgba(0, 0, 0, 0.04)", color: classroom.homeroomTeacher ? ergEnterpriseTokens.color.text : ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", fontWeight: classroom.homeroomTeacher ? 600 : 400, fontStyle: classroom.homeroomTeacher ? "normal" : "italic", py: 1.4 }}>
                     {classroom.homeroomTeacher || "Chưa gán"}
                   </TableCell>
                 </TableRow>
@@ -239,10 +241,10 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
 
 const headerCellSx = {
   bgcolor: "rgba(250, 250, 252, 0.96)",
-  borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-  color: "#86868B",
+  borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+  color: ergEnterpriseTokens.color.textMuted,
   fontSize: "0.72rem",
-  fontWeight: 700,
+  fontWeight: 600,
   letterSpacing: "0.04em",
   py: 1.35,
   textTransform: "uppercase",
@@ -316,7 +318,7 @@ function AnalyticsMetricCard({
       sx={{
         bgcolor: "#FFFFFF",
         borderRadius: "16px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02), 0 8px 18px -4px rgba(0, 0, 0, 0.03)",
         p: 2.25,
         transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -327,7 +329,7 @@ function AnalyticsMetricCard({
       }}
     >
       <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1 }}>
-        <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 650 }}>
+        <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 600 }}>
           {label}
         </Typography>
         <Box
@@ -345,14 +347,14 @@ function AnalyticsMetricCard({
           {icon}
         </Box>
       </Box>
-      <Typography sx={{ color: "#1D1D1F", fontSize: "1.75rem", fontWeight: 800, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.75rem", fontWeight: 600, letterSpacing: "-0.025em", lineHeight: 1.1 }}>
         {value}
       </Typography>
       <Box
         sx={{
           bgcolor: "rgba(0, 0, 0, 0.04)",
           borderRadius: "6px",
-          color: "#6E6E73",
+          color: ergEnterpriseTokens.color.textMuted,
           display: "inline-block",
           fontSize: "0.7rem",
           fontWeight: 600,

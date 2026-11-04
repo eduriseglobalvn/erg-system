@@ -140,7 +140,7 @@ export function SidebarNavigationLayer({
                     color: NAV_MUTED_COLOR,
                     display: "inline-flex",
                     fontSize: 11,
-                    fontWeight: 700,
+                    fontWeight: 600,
                     height: 36,
                     letterSpacing: "0.06em",
                     lineHeight: "16px",

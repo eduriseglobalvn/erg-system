@@ -166,7 +166,7 @@ export function SchoolSubjectAssignDialog({
         },
       }}
     >
-      <DialogTitle sx={{ pb: 1, fontWeight: 800 }}>
+      <DialogTitle sx={{ pb: 1, fontWeight: 600 }}>
         Đăng ký môn học & phân bổ lớp
         <Typography color="text.secondary" variant="body2">
           Chọn môn học và cấp độ từ danh mục chuẩn, sau đó chọn danh sách lớp áp dụng.
@@ -227,7 +227,7 @@ export function SchoolSubjectAssignDialog({
         {/* Step 3: Phân bổ cho các lớp học */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography sx={{ fontWeight: 700 }} variant="subtitle2">
+            <Typography sx={{ fontWeight: 600 }} variant="subtitle2">
               3. Chọn lớp học áp dụng ({selectedClassIds.length}/{school.classes.length} lớp · {selectedStudentCount} HS)
             </Typography>
             <Box sx={{ display: "flex", gap: 0.5 }}>
@@ -281,7 +281,7 @@ export function SchoolSubjectAssignDialog({
                   variant="text"
                 >
                   <Box sx={{ textAlign: "left", lineHeight: 1.2 }}>
-                    <Typography sx={{ fontWeight: 700, fontSize: 13 }}>{cls.name}</Typography>
+                    <Typography sx={{ fontWeight: 600, fontSize: 13 }}>{cls.name}</Typography>
                     <Typography color="text.secondary" sx={{ fontSize: 11 }}>
                       {cls.studentCount || 0} HS
                     </Typography>

@@ -107,7 +107,7 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
               {monthLabel}
             </Button>
           ) : (
-            <Typography sx={{ color: "#1C252E", fontSize: { xs: 18, xl: 20 }, fontWeight: 800, lineHeight: 1.2, ml: 0.25, whiteSpace: "nowrap" }}>
+            <Typography sx={{ color: "#1C252E", fontSize: { xs: 18, xl: 20 }, fontWeight: 600, lineHeight: 1.2, ml: 0.25, whiteSpace: "nowrap" }}>
               {rangeLabel}
             </Typography>
           )}
@@ -131,7 +131,7 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
                 >
                   {mobileLayout ? mobileLaneLabel(lane, allLaneLabel) : lane}
                   {mobileLayout && active && selectedScopeLabel ? (
-                    <Box component="span" sx={{ color: "#0F6CBD", fontWeight: 800, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <Box component="span" sx={{ color: "#0F6CBD", fontWeight: 600, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       · {selectedScopeLabel}
                     </Box>
                   ) : null}

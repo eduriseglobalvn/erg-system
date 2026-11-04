@@ -506,7 +506,7 @@ function RibbonAction({
         color: isPrimaryTone ? "#ffffff" : active ? "var(--erg-blue, #0f6cbd)" : "#263445",
         px: 1.25,
         fontSize: 12.5,
-        fontWeight: 750,
+        fontWeight: 600,
         lineHeight: 1,
         boxShadow: isPrimaryTone
           ? "0 8px 18px rgba(15, 108, 189, 0.16)"

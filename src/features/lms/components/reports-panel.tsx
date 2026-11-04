@@ -24,7 +24,7 @@ const Metric = memo(function Metric({ detail, label, value }: { detail: string; 
   return (
     <Paper component="article" sx={{ border: "1px solid", borderColor: "divider", p: 2.5 }}>
       <Typography color="text.secondary" variant="caption">{label}</Typography>
-      <Typography sx={{ fontSize: 20, fontWeight: 750, mt: 1.5 }}>{value}</Typography>
+      <Typography sx={{ fontSize: 20, fontWeight: 600, mt: 1.5 }}>{value}</Typography>
       <Typography color="text.secondary" sx={{ mt: 1 }} variant="body2">{detail}</Typography>
     </Paper>
   );

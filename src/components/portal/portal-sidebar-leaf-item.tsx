@@ -130,7 +130,7 @@ export function SidebarLeafItem({
                     color: NAV_PRIMARY,
                     flexShrink: 0,
                     fontSize: 10.5,
-                    fontWeight: 650,
+                    fontWeight: 600,
                     letterSpacing: "0.02em",
                     lineHeight: "16px",
                     px: 0.85,

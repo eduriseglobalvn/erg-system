@@ -1,6 +1,8 @@
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function MetricCard({
   icon,
@@ -20,7 +22,7 @@ export function MetricCard({
       sx={{
         bgcolor: "#FFFFFF",
         border: `1px solid ${
-          tone === "warning" ? "rgba(255, 149, 0, 0.3)" : appleDesign.colors.border
+          tone === "warning" ? alpha(ergEnterpriseTokens.color.warning, 0.3) : appleDesign.colors.border
         }`,
         borderRadius: "16px",
         boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02)",
@@ -40,7 +42,7 @@ export function MetricCard({
           variant="caption"
           sx={{
             color: appleDesign.colors.textTertiary,
-            fontWeight: 650,
+            fontWeight: 600,
             letterSpacing: "0.03em",
           }}
         >
@@ -64,7 +66,7 @@ export function MetricCard({
         variant="h6"
         sx={{
           color: tone === "warning" ? appleDesign.colors.amberText : appleDesign.colors.textPrimary,
-          fontWeight: 750,
+          fontWeight: 600,
           letterSpacing: "-0.02em",
         }}
       >

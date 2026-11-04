@@ -9,6 +9,8 @@ import { styled } from "@mui/material/styles";
 
 import type { TeacherOnboardingStep } from "@/platform/auth/types/account-lifecycle";
 import { stepLabels } from "@/platform/auth/components/teacher-onboarding/onboarding-helpers";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 // Apple-style connector between stepper nodes
 const AppleStepConnector = styled(StepConnector)(() => ({
@@ -18,16 +20,16 @@ const AppleStepConnector = styled(StepConnector)(() => ({
     right: "calc(50% + 20px)",
   },
   [`& .${stepConnectorClasses.line}`]: {
-    borderColor: "rgba(0, 0, 0, 0.08)",
+    borderColor: "divider",
     borderTopWidth: 2,
     borderRadius: 1,
     transition: "border-color 300ms ease",
   },
   [`&.${stepConnectorClasses.completed} .${stepConnectorClasses.line}`]: {
-    borderColor: "#34C759",
+    borderColor: "success.main",
   },
   [`&.${stepConnectorClasses.active} .${stepConnectorClasses.line}`]: {
-    borderColor: "#0071E3",
+    borderColor: "primary.main",
   },
 }));
 
@@ -39,14 +41,14 @@ function AppleStepIcon(props: StepIconProps) {
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: "#34C759",
+          bgcolor: "success.main",
           borderRadius: "50%",
           color: "#FFFFFF",
           display: "flex",
           height: 36,
           justifyContent: "center",
           width: 36,
-          boxShadow: "0 2px 8px rgba(52, 199, 89, 0.3)",
+          boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.success, 0.3)}`,
           zIndex: 1,
         }}
       >
@@ -60,16 +62,16 @@ function AppleStepIcon(props: StepIconProps) {
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: "#0071E3",
+          bgcolor: "primary.main",
           borderRadius: "50%",
           color: "#FFFFFF",
           display: "flex",
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 14,
           height: 36,
           justifyContent: "center",
           width: 36,
-          boxShadow: "0 0 0 4px rgba(0, 113, 227, 0.18), 0 4px 12px rgba(0, 113, 227, 0.3)",
+          boxShadow: `0 0 0 4px ${alpha(ergEnterpriseTokens.color.primary, 0.18)}, 0 4px 12px ${alpha(ergEnterpriseTokens.color.primary, 0.3)}`,
           zIndex: 1,
         }}
       >
@@ -83,11 +85,11 @@ function AppleStepIcon(props: StepIconProps) {
       sx={{
         alignItems: "center",
         bgcolor: "#F2F2F7",
-        border: "1.5px solid rgba(0, 0, 0, 0.1)",
+        border: `1.5px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "50%",
         color: "#8E8E93",
         display: "flex",
-        fontWeight: 650,
+        fontWeight: 600,
         fontSize: 13,
         height: 36,
         justifyContent: "center",
@@ -121,17 +123,17 @@ export function OnboardingStepper({ activeStep, nextSteps }: { activeStep: numbe
               slots={{ stepIcon: AppleStepIcon }}
               sx={{
                 "& .MuiStepLabel-label": {
-                  color: "#6E6E73",
+                  color: "text.secondary",
                   fontSize: 12,
-                  fontWeight: 650,
+                  fontWeight: 600,
                   mt: 1,
                   "&.Mui-active": {
-                    color: "#0071E3",
-                    fontWeight: 750,
+                    color: "primary.main",
+                    fontWeight: 600,
                   },
                   "&.Mui-completed": {
-                    color: "#1D1D1F",
-                    fontWeight: 650,
+                    color: "text.primary",
+                    fontWeight: 600,
                   },
                 },
               }}

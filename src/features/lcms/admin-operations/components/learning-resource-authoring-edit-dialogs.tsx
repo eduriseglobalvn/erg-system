@@ -55,7 +55,7 @@ const RESOURCE_DIALOG_TITLE_SX = {
   pt: 2.5,
   pb: 1,
   fontSize: 18,
-  fontWeight: 800,
+  fontWeight: 600,
   color: "#172033",
 };
 
@@ -75,7 +75,7 @@ const RESOURCE_DIALOG_ACTIONS_SX = {
   "& .MuiButton-root": {
     minHeight: 36,
     minWidth: 92,
-    fontWeight: 700,
+    fontWeight: 600,
   },
 };
 

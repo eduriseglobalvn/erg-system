@@ -110,7 +110,7 @@ export function MobileAttendanceSheetPanel({
             value={selectedDate}
             onChange={(event) => onSelectedDateChange(event.target.value)}
             slotProps={{ htmlInput: { "aria-label": "Chọn ngày điểm danh", max: todayInputDate } }}
-            sx={{ "& input": { fontSize: 13, fontWeight: 700 } }}
+            sx={{ "& input": { fontSize: 13, fontWeight: 600 } }}
           />
         </div>
 

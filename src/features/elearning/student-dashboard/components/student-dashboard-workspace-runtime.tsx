@@ -17,7 +17,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import {
   PlayerShell,
-} from "@/components/quiz/player-shell";
+} from "@/features/lcms/quiz/player/player-shell";
 import {
   getCurrentElearningViewerSession,
   logoutElearningViewerSession,
@@ -517,7 +517,7 @@ export function StudentDashboardWorkspaceRuntime() {
     return (
       <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: MUI_BG, p: 3 }}>
         <Box sx={{ maxWidth: 520, width: "100%", bgcolor: "#fff", border: "1px solid rgba(16,24,40,0.1)", borderRadius: 3, p: 3, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 900 }}>Không tìm thấy bài được giao</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Không tìm thấy bài được giao</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Bài này không còn trong dữ liệu tài khoản hiện tại. Không thể mở bằng một bài khác.
           </Typography>
@@ -533,7 +533,7 @@ export function StudentDashboardWorkspaceRuntime() {
     return (
       <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: MUI_BG, p: 3 }}>
         <Box sx={{ maxWidth: 560, width: "100%", bgcolor: "#fff", border: "1px solid rgba(16,24,40,0.1)", borderRadius: 3, p: 3, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 900 }}>Assessment chưa sẵn sàng</Typography>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>Assessment chưa sẵn sàng</Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             Backend chưa trả về quiz gắn với “{currentAssignment.title}”. Hệ thống không tự suy đoán quiz từ assignment id.
           </Typography>
@@ -586,7 +586,7 @@ export function StudentDashboardWorkspaceRuntime() {
                 borderColor: "rgba(0,0,136,0.14)",
                 borderRadius: 2,
                 color: "#000088",
-                fontWeight: 800,
+                fontWeight: 600,
                 minHeight: 34,
                 px: 1.35,
                 whiteSpace: "nowrap",
@@ -599,7 +599,7 @@ export function StudentDashboardWorkspaceRuntime() {
               {copy.backToDashboard}
             </Button>
             <Box sx={{ minWidth: 0, flex: 1, textAlign: "right" }}>
-              <Typography noWrap variant="subtitle2" sx={{ color: "#000088", fontSize: { xs: 12, md: 13 }, fontWeight: 900, lineHeight: 1.2 }}>
+              <Typography noWrap variant="subtitle2" sx={{ color: "#000088", fontSize: { xs: 12, md: 13 }, fontWeight: 600, lineHeight: 1.2 }}>
                 {currentAssignment.title}
               </Typography>
               <Typography noWrap variant="caption" sx={{ color: "rgba(28,37,46,0.62)", display: { xs: "none", md: "block" }, lineHeight: 1.15 }}>
@@ -642,7 +642,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const dashboardViews = (
     <>
       {studentDashboardQuery.isError ? (
-        <Alert action={<Button variant="contained" color="inherit" onClick={() => void studentDashboardQuery.refetch()} size="small" sx={{ color: "error.dark", fontWeight: 800 }}>Thử lại</Button>} severity="error" sx={{ borderRadius: 2.5, color: "error.dark", mb: 2 }}>Không thể tải bảng học tập từ máy chủ.</Alert>
+        <Alert action={<Button variant="contained" color="inherit" onClick={() => void studentDashboardQuery.refetch()} size="small" sx={{ color: "error.dark", fontWeight: 600 }}>Thử lại</Button>} severity="error" sx={{ borderRadius: 2.5, color: "error.dark", mb: 2 }}>Không thể tải bảng học tập từ máy chủ.</Alert>
       ) : null}
       {activePage === "overview" ? (
         <StudentDashboardOverviewSurface

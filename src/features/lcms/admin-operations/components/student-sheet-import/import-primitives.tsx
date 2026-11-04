@@ -6,7 +6,7 @@ import Typography from "@mui/material/Typography";
 
 export function ImportField({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <Box component="label" sx={{ display: "grid", gap: 1, color: "text.secondary", fontSize: 12, fontWeight: 700 }}>
+    <Box component="label" sx={{ display: "grid", gap: 1, color: "text.secondary", fontSize: 12, fontWeight: 600 }}>
       {label}
       {children}
     </Box>
@@ -53,7 +53,7 @@ export function RuleLine({ label, value }: { label: string; value: string }) {
   return (
     <Stack direction="row" spacing={2} sx={{ alignItems: "flex-start", justifyContent: "space-between", borderRadius: 1, bgcolor: "action.hover", px: 1.5, py: 1 }}>
       <Typography sx={{ color: "text.primary", fontSize: 12, fontWeight: 600 }}>{label}</Typography>
-      <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, textAlign: "right" }}>{value}</Typography>
+      <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 600, textAlign: "right" }}>{value}</Typography>
     </Stack>
   );
 }

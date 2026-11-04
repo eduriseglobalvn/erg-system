@@ -54,9 +54,9 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
         <DialogTitle
           id={titleId}
           sx={{
-            color: "#1D1D1F",
+            color: "text.primary",
             fontSize: "1.2rem",
-            fontWeight: 800,
+            fontWeight: 600,
             letterSpacing: "-0.02em",
             p: 0,
           }}
@@ -70,7 +70,7 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
             size="small"
             sx={{
               bgcolor: "rgba(0, 0, 0, 0.05)",
-              color: "#1D1D1F",
+              color: "text.primary",
               height: 30,
               width: 30,
               "&:hover": { bgcolor: "rgba(0, 0, 0, 0.09)", transform: "scale(1.05)" },
@@ -86,7 +86,7 @@ export function ErgDialog({ actions, children, description, onClose, slotProps, 
           <DialogContentText
             id={descriptionId}
             sx={{
-              color: "#6E6E73",
+              color: "text.secondary",
               fontSize: "0.85rem",
               fontWeight: 500,
               mb: children ? 2.5 : 0,
@@ -158,9 +158,9 @@ export function ErgDrawer({ children, description, onClose, slotProps, title, ..
           <Typography
             id={titleId}
             sx={{
-              color: "#1D1D1F",
+              color: "text.primary",
               fontSize: "1.15rem",
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: "-0.015em",
             }}
             variant="h6"
@@ -171,7 +171,7 @@ export function ErgDrawer({ children, description, onClose, slotProps, title, ..
             <Typography
               color="text.secondary"
               id={descriptionId}
-              sx={{ color: "#86868B", fontSize: "0.8rem", fontWeight: 500 }}
+              sx={{ color: "text.secondary", fontSize: "0.8rem", fontWeight: 500 }}
               variant="body2"
             >
               {description}
@@ -186,7 +186,7 @@ export function ErgDrawer({ children, description, onClose, slotProps, title, ..
             size="small"
             sx={{
               bgcolor: "rgba(0, 0, 0, 0.05)",
-              color: "#1D1D1F",
+              color: "text.primary",
               height: 30,
               width: 30,
               "&:hover": { bgcolor: "rgba(0, 0, 0, 0.09)", transform: "scale(1.05)" },

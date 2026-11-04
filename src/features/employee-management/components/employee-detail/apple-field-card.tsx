@@ -54,7 +54,7 @@ export function AppleFieldCard({
           sx={{
             color: appleDesign.colors.textTertiary,
             fontSize: "0.72rem",
-            fontWeight: 650,
+            fontWeight: 600,
             letterSpacing: "0.04em",
             textTransform: "uppercase",
           }}

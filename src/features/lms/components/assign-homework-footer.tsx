@@ -52,7 +52,7 @@ export function AssignHomeworkFooter({
           }}
         >
           <StepNumber active={step === 1} completed={step > 1}>1</StepNumber>
-          <Typography sx={{ color: step === 1 ? "primary.main" : "success.main", fontSize: 15, fontWeight: 700 }}>
+          <Typography sx={{ color: step === 1 ? "primary.main" : "success.main", fontSize: 15, fontWeight: 600 }}>
             Thiết lập bài tập
           </Typography>
         </Stack>
@@ -71,7 +71,7 @@ export function AssignHomeworkFooter({
           }}
         >
           <StepNumber active={step === 2}>2</StepNumber>
-          <Typography sx={{ color: step === 2 ? "primary.main" : "text.secondary", fontSize: 15, fontWeight: 700 }}>
+          <Typography sx={{ color: step === 2 ? "primary.main" : "text.secondary", fontSize: 15, fontWeight: 600 }}>
             Chọn tài nguyên
           </Typography>
         </Stack>
@@ -82,7 +82,7 @@ export function AssignHomeworkFooter({
           variant="outlined"
           disabled={isSubmitting}
           onClick={step === 1 ? onBack : onPreviousStep}
-          sx={{ height: 40, minWidth: 88, fontWeight: 700, textTransform: "none" }}
+          sx={{ height: 40, minWidth: 88, fontWeight: 600, textTransform: "none" }}
         >
           {step === 1 ? "Hủy" : "Quay lại"}
         </Button>
@@ -90,7 +90,7 @@ export function AssignHomeworkFooter({
           variant="contained"
           disabled={isSubmitting}
           onClick={onNext}
-          sx={{ height: 40, minWidth: 116, px: 3, fontWeight: 700, textTransform: "none" }}
+          sx={{ height: 40, minWidth: 116, px: 3, fontWeight: 600, textTransform: "none" }}
         >
           {step === 1 ? "Tiếp theo" : isSubmitting ? "Đang giao..." : "Giao bài"}
         </Button>
@@ -114,7 +114,7 @@ function StepNumber({ active, children, completed = false }: { active: boolean; 
         bgcolor: active ? "primary.main" : completed ? "success.main" : "background.paper",
         color: active || completed ? "common.white" : "text.secondary",
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 600,
         transition: "all 160ms ease",
       }}
     >

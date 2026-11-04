@@ -157,7 +157,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
       }}
     >
       <DialogTitle sx={{ px: 3, pt: 2.5, pb: 1.5 }}>
-        <Typography sx={{ fontSize: 19, fontWeight: 900 }}>
+        <Typography sx={{ fontSize: 19, fontWeight: 600 }}>
           Nhập danh sách {meta.learnerLabel.toLowerCase()} · {school.name}
         </Typography>
         <Typography color="text.secondary" variant="body2" sx={{ mt: 0.25 }}>
@@ -186,7 +186,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
           <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px dashed", borderColor: "divider", borderRadius: 2, display: "flex", gap: 2, p: 2 }}>
             <input ref={fileRef} accept=".xlsx,.xls,.csv" hidden onChange={readExcel} type="file" />
             <Box sx={{ flex: 1 }}>
-              <Typography sx={{ fontWeight: 800 }}>Tải file danh sách {meta.learnerLabel.toLowerCase()}</Typography>
+              <Typography sx={{ fontWeight: 600 }}>Tải file danh sách {meta.learnerLabel.toLowerCase()}</Typography>
               <Typography color="text.secondary" variant="body2">Hỗ trợ file Excel thông thường hoặc sổ điểm danh có nhiều sheet theo lớp (9A1, 9A2...).</Typography>
             </Box>
             <Button onClick={() => fileRef.current?.click()} startIcon={<FileUploadRoundedIcon />} variant="outlined">
@@ -218,7 +218,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
             </Box>
             {sheetTabs.length > 1 ? (
               <Box sx={{ alignItems: "center", bgcolor: "background.default", border: "1px solid", borderColor: "divider", borderRadius: 1.5, display: "flex", flexWrap: "wrap", gap: 1, p: 1.5 }}>
-                <Typography sx={{ color: "text.primary", fontSize: 13, fontWeight: 700, mr: 0.5 }}>
+                <Typography sx={{ color: "text.primary", fontSize: 13, fontWeight: 600, mr: 0.5 }}>
                   Chọn lớp:
                 </Typography>
                 <Chip
@@ -262,7 +262,7 @@ export function StudentImportDialog({ onClose, onImport, school }: {
         <StudentSpreadsheetGrid onChange={setRows} rows={rows} usesGrades={usesGrades} />
       </DialogContent>
       <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 3, py: 1.5 }}>
-        <Typography color="text.secondary" variant="body2" sx={{ fontWeight: 700 }}>
+        <Typography color="text.secondary" variant="body2" sx={{ fontWeight: 600 }}>
           {validRows.length} hợp lệ · {rows.length - validRows.length} cần kiểm tra
         </Typography>
         <Box sx={{ display: "flex", gap: 1 }}>

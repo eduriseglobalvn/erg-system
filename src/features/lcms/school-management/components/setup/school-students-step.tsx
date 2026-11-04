@@ -97,7 +97,7 @@ export function SchoolStudentsStep() {
       >
         {!selectedSchool.classes.length ? (
           <Paper sx={{ bgcolor: "warning.50", borderColor: "warning.200", mb: 2, p: 2 }} variant="outlined">
-            <Typography sx={{ fontWeight: 800 }}>Chưa thể nhập {meta.learnerLabel.toLowerCase()}</Typography>
+            <Typography sx={{ fontWeight: 600 }}>Chưa thể nhập {meta.learnerLabel.toLowerCase()}</Typography>
             <Typography color="text.secondary" variant="body2">
               Hãy quay lại bước Cơ cấu đào tạo và tạo ít nhất một {meta.classLabel.toLowerCase()}.
             </Typography>
@@ -122,7 +122,7 @@ export function SchoolStudentsStep() {
             <Typography color="text.secondary" sx={{ fontSize: 13 }}>
               Tổng {meta.learnerLabel.toLowerCase()}:
             </Typography>
-            <Typography sx={{ fontSize: 16, fontWeight: 900 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
               {selectedSchool.students.length}
             </Typography>
           </Box>
@@ -130,7 +130,7 @@ export function SchoolStudentsStep() {
             <Typography color="text.secondary" sx={{ fontSize: 13 }}>
               {meta.classLabel}:
             </Typography>
-            <Typography sx={{ fontSize: 16, fontWeight: 900 }}>
+            <Typography sx={{ fontSize: 16, fontWeight: 600 }}>
               {selectedSchool.classes.length}
             </Typography>
           </Box>
@@ -142,7 +142,7 @@ export function SchoolStudentsStep() {
               sx={{
                 color: atRiskCount ? "warning.main" : "text.secondary",
                 fontSize: 16,
-                fontWeight: 900,
+                fontWeight: 600,
               }}
             >
               {atRiskCount}
@@ -157,7 +157,7 @@ export function SchoolStudentsStep() {
                 color="primary"
                 label={`Lớp ${selectedClassInfo.name} · Sĩ số ${filteredStudents.length}`}
                 size="small"
-                sx={{ fontWeight: 800 }}
+                sx={{ fontWeight: 600 }}
               />
               {selectedClassInfo.homeroomTeacher ? (
                 <Typography color="text.secondary" sx={{ fontSize: 12.5 }}>
@@ -187,7 +187,7 @@ export function SchoolStudentsStep() {
                 gap: 0.75,
               }}
             >
-              <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 700, mr: 0.5 }}>
+              <Typography sx={{ color: "text.secondary", fontSize: 12, fontWeight: 600, mr: 0.5 }}>
                 Xem theo lớp:
               </Typography>
               <Chip
@@ -265,7 +265,7 @@ export function SchoolStudentsStep() {
                   <TableCell sx={{ fontFamily: "var(--font-mono)", fontSize: 12 }}>
                     {student.code || "—"}
                   </TableCell>
-                  <TableCell sx={{ fontWeight: 800 }}>{student.fullName}</TableCell>
+                  <TableCell sx={{ fontWeight: 600 }}>{student.fullName}</TableCell>
                   {usesGrades ? <TableCell>{student.grade || "Chưa gán"}</TableCell> : null}
                   <TableCell>
                     <Chip label={student.className || "Chưa gán"} size="small" variant="outlined" />

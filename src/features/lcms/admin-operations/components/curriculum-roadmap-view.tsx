@@ -93,7 +93,7 @@ export function CurriculumRoadmapView({
                   borderColor: "#93C5FD",
                   bgcolor: "#FFFFFF",
                   color: "#0F6CBD",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   fontSize: 13,
                   textTransform: "none",
                   borderRadius: 2,

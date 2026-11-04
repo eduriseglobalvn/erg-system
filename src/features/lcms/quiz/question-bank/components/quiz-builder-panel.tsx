@@ -16,6 +16,8 @@ import { cn } from "@/lib/utils";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { LabeledNumberField } from "./question-form-dialog";
 import { QUESTION_BANK_SELECT_MENU_PROPS } from "./question-bank-primitives";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export function QuizBuilderPanel({
   autoCount,
@@ -50,7 +52,7 @@ export function QuizBuilderPanel({
       elevation={0}
       sx={{
         bgcolor: "#FFFFFF",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "16px",
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         height: "fit-content",
@@ -62,10 +64,10 @@ export function QuizBuilderPanel({
     >
       <Stack spacing={2}>
         <Box>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
             {copy.builderTitle}
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25, lineHeight: 1.4 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", fontWeight: 500, mt: 0.25, lineHeight: 1.4 }}>
             {copy.builderDescription}
           </Typography>
         </Box>
@@ -73,16 +75,16 @@ export function QuizBuilderPanel({
         {/* Selected Counter Card */}
         <Box
           sx={{
-            bgcolor: "rgba(0, 113, 227, 0.04)",
-            border: "1px solid rgba(0, 113, 227, 0.16)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.04),
+            border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.16)}`,
             borderRadius: "14px",
             p: 2,
           }}
         >
-          <Typography sx={{ color: "#0071E3", fontSize: 38, fontWeight: 800, letterSpacing: "-0.02em", lineHeight: 1 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.primary, fontSize: 38, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1 }}>
             {selectedQuestions.length}
           </Typography>
-          <Typography sx={{ color: "#6E6E73", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", mt: 0.75, textTransform: "uppercase" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.06em", mt: 0.75, textTransform: "uppercase" }}>
             {copy.selectedQuestionCount}
           </Typography>
           <Button
@@ -91,19 +93,19 @@ export function QuizBuilderPanel({
             onClick={onCreateQuiz}
             disabled={!hasSelection}
             sx={{
-              bgcolor: hasSelection ? "#0071E3 !important" : "rgba(0, 0, 0, 0.08) !important",
+              bgcolor: hasSelection ? `${ergEnterpriseTokens.color.primary} !important` : "rgba(0, 0, 0, 0.08) !important",
               borderRadius: "10px",
-              boxShadow: hasSelection ? "0 2px 8px rgba(0, 113, 227, 0.28)" : "none",
+              boxShadow: hasSelection ? `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}` : "none",
               color: hasSelection ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
               fontSize: "0.875rem",
-              fontWeight: 700,
+              fontWeight: 600,
               mt: 2,
               py: 1.1,
               textTransform: "none",
               transition: "all 0.15s ease",
               "&:hover": {
-                bgcolor: hasSelection ? "#0077ED !important" : "rgba(0, 0, 0, 0.08) !important",
-                boxShadow: hasSelection ? "0 4px 14px rgba(0, 113, 227, 0.38)" : "none",
+                bgcolor: hasSelection ? `${ergEnterpriseTokens.color.primaryHover} !important` : "rgba(0, 0, 0, 0.08) !important",
+                boxShadow: hasSelection ? `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}` : "none",
                 transform: hasSelection ? "translateY(-1px)" : "none",
               },
               "&:active": {
@@ -119,12 +121,12 @@ export function QuizBuilderPanel({
         <Box
           sx={{
             bgcolor: "#FBFBFD",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             borderRadius: "14px",
             p: 1.75,
           }}
         >
-          <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", mb: 1.5, textTransform: "uppercase" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.06em", mb: 1.5, textTransform: "uppercase" }}>
             {copy.autoBuilderTitle}
           </Typography>
           <Stack spacing={1.5}>
@@ -148,12 +150,12 @@ export function QuizBuilderPanel({
               onClick={onAutoPick}
               disabled={!canAutoPick}
               sx={{
-                bgcolor: canAutoPick ? "#1D1D1F !important" : "rgba(0, 0, 0, 0.08) !important",
+                bgcolor: canAutoPick ? `${ergEnterpriseTokens.color.text} !important` : "rgba(0, 0, 0, 0.08) !important",
                 borderRadius: "10px",
                 boxShadow: "none",
                 color: canAutoPick ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
                 fontSize: "0.85rem",
-                fontWeight: 700,
+                fontWeight: 600,
                 py: 1,
                 textTransform: "none",
                 transition: "all 0.15s ease",
@@ -206,7 +208,7 @@ function AutoTopicDropdown({
 
   return (
     <FormControl fullWidth size="small">
-      <InputLabel id="auto-topic-select-label" sx={{ fontSize: "0.825rem", fontWeight: 600, color: "#6E6E73" }}>
+      <InputLabel id="auto-topic-select-label" sx={{ fontSize: "0.825rem", fontWeight: 600, color: ergEnterpriseTokens.color.textMuted }}>
         {copy.autoTopicLabel}
       </InputLabel>
       <Select
@@ -228,8 +230,8 @@ function AutoTopicDropdown({
           "& .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0, 0, 0, 0.12)" },
           "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "rgba(0, 0, 0, 0.24)" },
           "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#0071E3",
-            boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+            borderColor: ergEnterpriseTokens.color.primary,
+            boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
           },
           "& .MuiSelect-select": {
             alignItems: "center",
@@ -252,14 +254,14 @@ function AutoTopicDropdown({
                 sx={{
                   color: "rgba(0, 0, 0, 0.25)",
                   p: 0.25,
-                  "&.Mui-checked": { color: "#0071E3" },
+                  "&.Mui-checked": { color: ergEnterpriseTokens.color.primary },
                 }}
               />
               <ListItemText
                 primary={
                   <Typography
                     sx={{
-                      color: checked ? "#0071E3" : "#1D1D1F",
+                      color: checked ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
                       fontSize: "0.85rem",
                       fontWeight: checked ? 700 : 550,
                       overflow: "hidden",
@@ -274,11 +276,11 @@ function AutoTopicDropdown({
               <Box
                 component="span"
                 sx={{
-                  bgcolor: checked ? "rgba(0, 113, 227, 0.08)" : "rgba(0, 0, 0, 0.05)",
+                  bgcolor: checked ? alpha(ergEnterpriseTokens.color.primary, 0.08) : "rgba(0, 0, 0, 0.05)",
                   borderRadius: "9999px",
-                  color: checked ? "#0071E3" : "#86868B",
+                  color: checked ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted,
                   fontSize: "0.7rem",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   ml: 1,
                   px: 1,
                   py: 0.2,

@@ -2,7 +2,9 @@ import type { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { alpha } from "@mui/material/styles";
 import { cn } from "@/lib/utils";
+import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
 type DashboardPageShellProps = {
   badge?: string;
@@ -40,28 +42,28 @@ type DashboardSegmentOption = {
 
 const toneStyles = {
   amber: {
-    bg: "rgba(255, 149, 0, 0.12)",
-    border: "rgba(255, 149, 0, 0.22)",
-    color: "#B45309",
-    dot: "#FF9500",
+    bg: alpha(tk.color.warning, 0.12),
+    border: alpha(tk.color.warning, 0.22),
+    color: tk.statusTint.warning.color,
+    dot: tk.statusTint.warning.dot,
   },
   blue: {
-    bg: "rgba(0, 113, 227, 0.08)",
-    border: "rgba(0, 113, 227, 0.18)",
-    color: "#0071E3",
-    dot: "#0071E3",
+    bg: tk.color.primarySoft,
+    border: alpha(tk.color.primary, 0.18),
+    color: tk.color.primary,
+    dot: tk.color.primary,
   },
   emerald: {
-    bg: "rgba(52, 199, 89, 0.12)",
-    border: "rgba(52, 199, 89, 0.22)",
-    color: "#15803D",
-    dot: "#34C759",
+    bg: alpha(tk.color.success, 0.12),
+    border: alpha(tk.color.success, 0.22),
+    color: tk.statusTint.success.color,
+    dot: tk.statusTint.success.dot,
   },
   rose: {
-    bg: "rgba(255, 59, 48, 0.1)",
-    border: "rgba(255, 59, 48, 0.22)",
-    color: "#DC2626",
-    dot: "#FF3B30",
+    bg: alpha(tk.color.danger, 0.12),
+    border: alpha(tk.color.danger, 0.22),
+    color: tk.statusTint.error.color,
+    dot: tk.statusTint.error.dot,
   },
   violet: {
     bg: "rgba(175, 82, 222, 0.12)",
@@ -83,32 +85,32 @@ export function DashboardPageShell({
   title,
 }: DashboardPageShellProps) {
   return (
-    <div className="h-full overflow-y-auto bg-[#F5F5F7]">
+    <Box className="h-full overflow-y-auto" sx={{ bgcolor: "background.default" }}>
       <div className={cn("mx-auto flex max-w-[1560px] flex-col gap-4 px-4 py-4 sm:px-6 lg:px-8", contentClassName)}>
         {!hideHeader ? (
           <section className="rounded-2xl border border-[rgba(0,0,0,0.06)] bg-white/90 p-5 shadow-[0_2px_10px_rgba(0,0,0,0.02),0_8px_24px_-4px_rgba(0,0,0,0.04)] backdrop-blur-xl sm:p-6">
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
                 {breadcrumbs?.length ? (
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal text-[#86868B]">
+                  <Box className="flex flex-wrap items-center gap-2 text-xs font-semibold tracking-normal" sx={{ color: "text.secondary" }}>
                     {breadcrumbs.map((item, index) => (
                       <div key={`${item}-${index}`} className="flex items-center gap-2">
-                        {index > 0 ? <span className="text-[#C7C7CC]">/</span> : null}
+                        {index > 0 ? <Box component="span" sx={{ color: "text.disabled" }}>/</Box> : null}
                         <span>{item}</span>
                       </div>
                     ))}
-                  </div>
+                  </Box>
                 ) : null}
                 <div className={cn("flex flex-wrap items-center gap-3", breadcrumbs?.length ? "mt-2" : "")}>
                   {badge ? (
                     <Box
                       sx={{
-                        bgcolor: "rgba(0, 113, 227, 0.08)",
-                        border: "1px solid rgba(0, 113, 227, 0.18)",
+                        bgcolor: "action.hover",
+                        border: 1, borderColor: "divider",
                         borderRadius: "9999px",
-                        color: "#0071E3",
+                        color: "primary.main",
                         fontSize: "0.72rem",
-                        fontWeight: 700,
+                        fontWeight: 600,
                         px: 1.25,
                         py: 0.35,
                       }}
@@ -116,14 +118,14 @@ export function DashboardPageShell({
                       {badge}
                     </Box>
                   ) : null}
-                  <h1 className="text-xl font-bold tracking-tight text-[#1D1D1F] sm:text-2xl">
+                  <Box component="h1" className="text-xl font-semibold tracking-tight sm:text-2xl" sx={{ color: "text.primary" }}>
                     {title}
-                  </h1>
+                  </Box>
                 </div>
                 {description ? (
-                  <p className="mt-1.5 max-w-3xl text-sm leading-relaxed text-[#6E6E73]">
+                  <Box component="p" className="mt-1.5 max-w-3xl text-sm leading-relaxed" sx={{ color: "text.secondary" }}>
                     {description}
-                  </p>
+                  </Box>
                 ) : null}
               </div>
               {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div> : null}
@@ -133,7 +135,7 @@ export function DashboardPageShell({
         ) : null}
         {children}
       </div>
-    </div>
+    </Box>
   );
 }
 
@@ -165,9 +167,9 @@ export function DashboardMetricCard({
     >
       <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0">
-          <div className="text-xs font-semibold tracking-normal text-[#6E6E73]">{label}</div>
-          <div className="mt-1.5 text-2xl font-extrabold tracking-tight text-[#1D1D1F] sm:text-[1.75rem]">{value}</div>
-          <div className="mt-1 text-xs text-[#86868B]">{detail}</div>
+          <Box className="text-xs font-semibold tracking-normal" sx={{ color: "text.secondary" }}>{label}</Box>
+          <Box className="mt-1.5 text-2xl font-semibold tracking-tight sm:text-[1.75rem]" sx={{ color: "text.primary" }}>{value}</Box>
+          <Box className="mt-1 text-xs" sx={{ color: "text.secondary" }}>{detail}</Box>
         </div>
         {icon ? (
           <Box
@@ -198,7 +200,7 @@ export function DashboardMetricCard({
               color: toneStyle.color,
               display: "inline-flex",
               fontSize: "0.72rem",
-              fontWeight: 700,
+              fontWeight: 600,
               lineHeight: 1,
               px: 1.25,
               py: 0.4,
@@ -233,8 +235,8 @@ export function DashboardSectionCard({
       <div className="flex flex-col gap-4 p-5 sm:p-6">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <h2 className="text-base font-bold tracking-tight text-[#1D1D1F]">{title}</h2>
-            {description ? <p className="mt-1 text-xs text-[#86868B]">{description}</p> : null}
+            <Box component="h2" className="text-base font-semibold tracking-tight" sx={{ color: "text.primary" }}>{title}</Box>
+            {description ? <Box component="p" className="mt-1 text-xs" sx={{ color: "text.secondary" }}>{description}</Box> : null}
           </div>
           {action ? <div className="shrink-0">{action}</div> : null}
         </div>
@@ -254,7 +256,7 @@ export function DashboardSegmentedControl({
   onChange: (value: string) => void;
 }) {
   return (
-    <div className="inline-flex items-center gap-1 rounded-xl border border-[rgba(0,0,0,0.08)] bg-[#F5F5F7] p-1 shadow-none">
+    <Box className="inline-flex items-center gap-1 rounded-xl border p-1 shadow-none" sx={{ bgcolor: "background.default", borderColor: "divider" }}>
       {options.map((option) => {
         const active = option.value === value;
 
@@ -266,15 +268,15 @@ export function DashboardSegmentedControl({
             className={cn(
               "relative min-h-7 whitespace-nowrap rounded-lg px-3 text-xs font-semibold transition-all",
               active
-                ? "bg-white text-[#1D1D1F] shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-                : "text-[#6E6E73] hover:text-[#1D1D1F]",
+                ? "bg-white text-foreground shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {option.label}
           </button>
         );
       })}
-    </div>
+    </Box>
   );
 }
 

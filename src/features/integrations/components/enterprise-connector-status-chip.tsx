@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
 import type { EnterpriseConnectorStatus, EnterpriseConnectorRunStatus } from "@/features/integrations/api/enterprise-connectors-api";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EnterpriseConnectorStatusChip({
   status,
@@ -15,30 +17,30 @@ export function EnterpriseConnectorStatusChip({
 
   const config = isSuccess
     ? {
-        bg: "rgba(52, 199, 89, 0.12)",
-        border: "rgba(52, 199, 89, 0.22)",
+        bg: alpha(ergEnterpriseTokens.color.success, 0.12),
+        border: alpha(ergEnterpriseTokens.color.success, 0.22),
         color: "#15803D",
-        dot: "#34C759",
+        dot: ergEnterpriseTokens.color.success,
       }
     : isError
       ? {
-          bg: "rgba(255, 59, 48, 0.1)",
-          border: "rgba(255, 59, 48, 0.22)",
+          bg: alpha(ergEnterpriseTokens.color.danger, 0.1),
+          border: alpha(ergEnterpriseTokens.color.danger, 0.22),
           color: "#DC2626",
-          dot: "#FF3B30",
+          dot: ergEnterpriseTokens.color.danger,
         }
       : isWarning
         ? {
-            bg: "rgba(255, 149, 0, 0.12)",
-            border: "rgba(255, 149, 0, 0.22)",
+            bg: alpha(ergEnterpriseTokens.color.warning, 0.12),
+            border: alpha(ergEnterpriseTokens.color.warning, 0.22),
             color: "#B45309",
-            dot: "#FF9500",
+            dot: ergEnterpriseTokens.color.warning,
           }
         : {
-            bg: "rgba(0, 113, 227, 0.08)",
-            border: "rgba(0, 113, 227, 0.18)",
-            color: "#0071E3",
-            dot: "#0071E3",
+            bg: alpha(ergEnterpriseTokens.color.primary, 0.08),
+            border: alpha(ergEnterpriseTokens.color.primary, 0.18),
+            color: "primary.main",
+            dot: ergEnterpriseTokens.color.primary,
           };
 
   return (
@@ -51,7 +53,7 @@ export function EnterpriseConnectorStatusChip({
         color: config.color,
         display: "inline-flex",
         fontSize: "0.72rem",
-        fontWeight: 700,
+        fontWeight: 600,
         gap: 0.6,
         lineHeight: 1,
         px: 1,

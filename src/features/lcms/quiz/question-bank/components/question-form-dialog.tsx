@@ -154,7 +154,7 @@ export function LabeledNumberField({
         },
         "& .MuiInputLabel-root": {
           fontSize: 12,
-          fontWeight: 800,
+          fontWeight: 600,
         },
       }}
     />

@@ -81,7 +81,7 @@ export function CurriculumExcelImportDialog({
       <DialogTitle sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pb: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <ContentPaste color="primary" />
-          <Typography variant="h6" sx={{ fontSize: 18, fontWeight: 700 }}>
+          <Typography variant="h6" sx={{ fontSize: 18, fontWeight: 600 }}>
             Nhập nhanh từ Excel / Bảng tính
           </Typography>
         </Box>
@@ -132,7 +132,7 @@ export function CurriculumExcelImportDialog({
           <Box sx={{ p: 1.5, borderRadius: 1.5, bgcolor: "#F0FDF4", border: "1px solid #BBF7D0", display: "grid", gap: 1 }}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <CheckCircle sx={{ color: "#16A34A", fontSize: 18 }} />
-              <Typography variant="subtitle2" sx={{ color: "#15803D", fontWeight: 700 }}>
+              <Typography variant="subtitle2" sx={{ color: "#15803D", fontWeight: 600 }}>
                 Đã nhận diện thành công: {parseResult.stats.totalLessons} dòng
               </Typography>
             </Box>

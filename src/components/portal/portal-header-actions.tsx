@@ -113,7 +113,7 @@ export function PortalHeaderActions({
         <Tooltip title="Mất kết nối mạng - Đang ở chế độ offline">
           <Box sx={{ alignItems: "center", bgcolor: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: "6px", color: "#EF4444", display: "inline-flex", gap: 0.6, height: 28, px: 0.85 }}>
             <WifiOffRoundedIcon sx={{ fontSize: 15 }} />
-            <Typography sx={{ color: "#EF4444", fontSize: 11.5, fontWeight: 700 }}>Mất kết nối</Typography>
+            <Typography sx={{ color: "#EF4444", fontSize: 11.5, fontWeight: 600 }}>Mất kết nối</Typography>
           </Box>
         </Tooltip>
       ) : null}
@@ -122,7 +122,7 @@ export function PortalHeaderActions({
         <Box component="button" type="button" sx={{ alignItems: "center", bgcolor: "rgba(145,158,171,0.06)", border: "1px solid rgba(145,158,171,0.14)", borderRadius: "8px", color: "#637381", cursor: "pointer", display: { xs: "none", md: "inline-flex" }, gap: 0.75, height: 32, ml: 0.5, px: 1, transition: "all 140ms ease", "&:hover": { bgcolor: "rgba(145,158,171,0.12)", color: "#1C252E" } }}>
           <SearchRoundedIcon sx={{ fontSize: 16 }} />
           <Box component="span" sx={{ color: "#919EAB", fontSize: 11.5, fontWeight: 500 }}>Tìm kiếm...</Box>
-          <Box component="span" sx={{ bgcolor: "#FFFFFF", border: "1px solid rgba(145,158,171,0.2)", borderRadius: "4px", color: "#637381", fontSize: 10, fontWeight: 700, px: 0.5, py: 0.05 }}>⌘K</Box>
+          <Box component="span" sx={{ bgcolor: "#FFFFFF", border: "1px solid rgba(145,158,171,0.2)", borderRadius: "4px", color: "#637381", fontSize: 10, fontWeight: 600, px: 0.5, py: 0.05 }}>⌘K</Box>
         </Box>
       </Tooltip>
 
@@ -140,13 +140,13 @@ export function PortalHeaderActions({
 
       <Tooltip title={userName || "Tài khoản"}>
         <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ bgcolor: "transparent", border: 0, borderRadius: "50%", boxShadow: "none", height: 32, ml: 0.5, p: 0, width: 32, "&:hover": { opacity: 0.88 } }}>
-          <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 700, height: 30, width: 30 }}>{initial}</Avatar>
+          <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 30, width: 30 }}>{initial}</Avatar>
         </IconButton>
       </Tooltip>
 
       <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)} slotProps={{ paper: { sx: { borderRadius: "12px", boxShadow: "0 10px 30px rgba(15,23,42,0.12)", minWidth: 200, mt: 0.75, p: 0.5 } } }}>
         <Box sx={{ px: 1.5, py: 0.75 }}>
-          <Typography variant="subtitle2" sx={{ fontWeight: 700, color: "#0F172A", fontSize: 13 }}>{userName || "Người dùng"}</Typography>
+          <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#0F172A", fontSize: 13 }}>{userName || "Người dùng"}</Typography>
           <Typography variant="caption" sx={{ color: "#94A3B8", fontSize: 11 }}>{userEmail || "Tài khoản ERG"}</Typography>
         </Box>
         <Divider sx={{ my: 0.5 }} />
@@ -154,7 +154,7 @@ export function PortalHeaderActions({
         {capabilities.length >= 2 ? (
           <>
             <Box sx={{ px: 1.5, py: 0.5 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 700, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
+              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
                 Không gian làm việc
               </Typography>
             </Box>
@@ -189,7 +189,7 @@ export function PortalHeaderActions({
       </Menu>
 
       <Dialog open={installInfoOpen} onClose={() => setInstallInfoOpen(false)} maxWidth="xs" fullWidth slotProps={{ paper: { sx: { borderRadius: 2.5, p: 1 } } }}>
-        <DialogTitle sx={{ fontWeight: 800, fontSize: 17, pb: 1 }}>Cài đặt ứng dụng ERG</DialogTitle>
+        <DialogTitle sx={{ fontWeight: 600, fontSize: 17, pb: 1 }}>Cài đặt ứng dụng ERG</DialogTitle>
         <DialogContent>
           <Stack spacing={1.5} sx={{ mt: 0.5 }}>
             <Typography variant="body2" color="text.secondary">
@@ -199,7 +199,7 @@ export function PortalHeaderActions({
           </Stack>
         </DialogContent>
         <DialogActions sx={{ pb: 1.5, px: 2 }}>
-          <Button onClick={() => setInstallInfoOpen(false)} variant="contained" size="small" sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 700 }}>
+          <Button onClick={() => setInstallInfoOpen(false)} variant="contained" size="small" sx={{ borderRadius: 1.5, textTransform: "none", fontWeight: 600 }}>
             Đã hiểu
           </Button>
         </DialogActions>

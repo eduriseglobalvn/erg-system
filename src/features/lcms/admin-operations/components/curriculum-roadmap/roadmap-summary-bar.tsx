@@ -45,7 +45,7 @@ export function RoadmapSummaryBar({
               sx={{
                 color: "#0F6CBD",
                 fontSize: 11,
-                fontWeight: 800,
+                fontWeight: 600,
                 letterSpacing: ".06em",
                 textTransform: "uppercase",
               }}
@@ -57,7 +57,7 @@ export function RoadmapSummaryBar({
               Level (Chặng học) → Chủ đề → Bài học
             </Typography>
           </Box>
-          <Typography noWrap sx={{ mt: 0.25, color: "#0F172A", fontSize: 17, fontWeight: 800 }}>
+          <Typography noWrap sx={{ mt: 0.25, color: "#0F172A", fontSize: 17, fontWeight: 600 }}>
             {subjectTitle}
           </Typography>
         </Box>

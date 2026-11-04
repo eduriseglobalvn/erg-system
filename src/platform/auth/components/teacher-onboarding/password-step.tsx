@@ -4,6 +4,8 @@ import LockResetRoundedIcon from "@mui/icons-material/LockResetRounded";
 
 import { ErgTextField } from "@/components/erg-mui";
 import { OnboardingSection } from "@/platform/auth/components/teacher-onboarding/onboarding-section";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function PasswordStep({
   busy,
@@ -28,7 +30,7 @@ export function PasswordStep({
 }) {
   return (
     <OnboardingSection
-      icon={<LockResetRoundedIcon sx={{ fontSize: 20, color: "#0071E3" }} />}
+      icon={<LockResetRoundedIcon sx={{ fontSize: 20, color: "primary.main" }} />}
       title="Đổi mật khẩu lần đầu"
       description="Mật khẩu mới cần tối thiểu 12 ký tự và khác mật khẩu tạm thời."
     >
@@ -67,16 +69,16 @@ export function PasswordStep({
         variant="contained"
         onClick={changePassword}
         sx={{
-          bgcolor: "#0071E3",
+          bgcolor: "primary.main",
           borderRadius: "14px",
           color: "#FFFFFF",
           fontSize: 15,
-          fontWeight: 650,
+          fontWeight: 600,
           minHeight: 48,
           textTransform: "none",
-          boxShadow: "0 4px 14px rgba(0, 113, 227, 0.25)",
+          boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.25)}`,
           "&:hover": {
-            bgcolor: "#0077ED",
+            bgcolor: "primary.dark",
             transform: "translateY(-1px)",
           },
           "&:active": {

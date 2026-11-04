@@ -19,7 +19,7 @@ describe("portal auth component ownership", () => {
   });
 
   test("routes import the login page directly instead of through the gate owner", () => {
-    const routes = fs.readFileSync(path.resolve(process.cwd(), "src/routes/app-routes.tsx"), "utf8");
+    const routes = fs.readFileSync(path.resolve(process.cwd(), "src/routes/portals/auth-routes.tsx"), "utf8");
 
     expect(routes).toContain('from "@/platform/auth/components/portal-login-page"');
   });

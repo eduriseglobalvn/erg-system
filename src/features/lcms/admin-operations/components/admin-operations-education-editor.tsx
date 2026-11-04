@@ -33,7 +33,7 @@ export function EditorField({ children, label, wide = false }: { children: React
         gap: 0.75,
         color: "text.secondary",
         fontSize: 12,
-        fontWeight: 700,
+        fontWeight: 600,
       }}
     >
       {label}
@@ -97,7 +97,7 @@ export function EducationUnitEditor({
         <UnitAvatar unit={draft} />
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" sx={{ alignItems: "center", flexWrap: "wrap", gap: 1 }}>
-            <Typography noWrap sx={{ color: "text.primary", fontSize: 16, fontWeight: 700 }}>{draft.name || "Cơ sở giáo dục"}</Typography>
+            <Typography noWrap sx={{ color: "text.primary", fontSize: 16, fontWeight: 600 }}>{draft.name || "Cơ sở giáo dục"}</Typography>
             <UnitTypeBadge type={draft.type} />
           </Stack>
           <Typography noWrap sx={{ mt: 0.25, color: "text.secondary", fontSize: 12, fontWeight: 600 }}>{detailHint}</Typography>
@@ -181,7 +181,7 @@ export function EducationUnitEditor({
 
             <Paper variant="outlined" sx={{ borderRadius: 2, p: 2, boxShadow: "0 8px 24px -22px rgba(15, 23, 42, 0.6)" }}>
               <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between", borderBottom: 1, borderColor: "divider", pb: 1.5 }}>
-                <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+                <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.primary", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>
                   <Box sx={{ display: "grid", width: 32, height: 32, placeItems: "center", border: 1, borderColor: "primary.light", borderRadius: 1, bgcolor: "primary.50", color: "primary.main" }}>
                     <Building2 sx={{ fontSize: 16 }} />
                   </Box>
@@ -224,7 +224,7 @@ export function EducationUnitEditor({
         {showAdvanced ? (
           <>
             <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 1.5 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>
                 <Mail sx={{ color: "primary.main", fontSize: 16 }} /> Thông tin liên hệ
               </Stack>
               <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" }, gap: 1.5, mt: 1.5 }}>
@@ -236,7 +236,7 @@ export function EducationUnitEditor({
               </Box>
             </Paper>
             <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 1.5 }}>
-              <Stack direction="row" spacing={1} sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 700, textTransform: "uppercase" }}>
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", borderBottom: 1, borderColor: "divider", pb: 1, color: "text.primary", fontSize: 12, fontWeight: 600, textTransform: "uppercase" }}>
                 <Layers sx={{ color: "primary.main", fontSize: 16 }} /> Cấu hình liên kết
               </Stack>
               <Box sx={{ mt: 1.5 }}>

@@ -26,6 +26,8 @@ import {
   useEmployeeRoleOptions,
   useEmployeeSchoolOptions,
 } from "@/features/employee-management/hooks/use-employee-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function CreateEmployeeWizard({
   tenantId,
@@ -209,7 +211,7 @@ export function CreateEmployeeWizard({
           alignItems: "center",
           borderBottom: `1px solid ${appleDesign.colors.border}`,
           display: "flex",
-          fontWeight: 750,
+          fontWeight: 600,
           justifyContent: "space-between",
           letterSpacing: "-0.02em",
           px: { sm: 3, xs: 2.5 },
@@ -222,7 +224,7 @@ export function CreateEmployeeWizard({
             sx={{
               color: appleDesign.colors.blue,
               fontSize: "0.7rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
@@ -232,7 +234,7 @@ export function CreateEmployeeWizard({
             variant="h6"
             sx={{
               color: appleDesign.colors.textPrimary,
-              fontWeight: 750,
+              fontWeight: 600,
               letterSpacing: "-0.02em",
               lineHeight: 1.25,
             }}
@@ -265,8 +267,8 @@ export function CreateEmployeeWizard({
             severity="error"
             onClose={() => setError(null)}
             sx={{
-              bgcolor: "rgba(255, 59, 48, 0.08)",
-              border: "1px solid rgba(255, 59, 48, 0.25)",
+              bgcolor: alpha(ergEnterpriseTokens.color.danger, 0.08),
+              border: `1px solid ${alpha(ergEnterpriseTokens.color.danger, 0.25)}`,
               borderRadius: "12px",
               color: appleDesign.colors.dangerText,
               fontSize: "0.825rem",

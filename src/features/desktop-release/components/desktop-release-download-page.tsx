@@ -49,10 +49,10 @@ export function DesktopReleaseDownloadPage({ workspace }: { workspace: DesktopRe
       <Container maxWidth="lg">
         <Stack spacing={3}>
           <Stack spacing={1}>
-            <Typography variant="overline" color="primary" sx={{ fontWeight: 900, letterSpacing: 1.2 }}>
+            <Typography variant="overline" color="primary" sx={{ fontWeight: 600, letterSpacing: 1.2 }}>
               ERG · {workspace === "TEACHER" ? "Teacher" : "Student"} workspace
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 900, letterSpacing: -1 }}>
+            <Typography variant="h4" sx={{ fontWeight: 600, letterSpacing: -1 }}>
               Tải ERG LMS Desktop
             </Typography>
             <Typography color="text.secondary" sx={{ maxWidth: 780 }}>
@@ -108,7 +108,7 @@ function ReleaseArtifactCard({ artifact }: { artifact: DesktopReleaseArtifact })
           rel="noopener noreferrer"
           variant="contained"
           startIcon={<Download />}
-          sx={{ borderRadius: 1.5, fontWeight: 800, flexShrink: 0 }}
+          sx={{ borderRadius: 1.5, fontWeight: 600, flexShrink: 0 }}
         >
           Tải xuống
         </Button>

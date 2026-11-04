@@ -9,6 +9,8 @@ import {
 import { getRoleMeta } from "@/platform/auth/permissions/role-display-catalog";
 import { AppleFieldCard } from "@/features/employee-management/components/employee-detail/apple-field-card";
 import type { EmployeeAccount, EmployeeProfile } from "@/features/employee-management/components/employee-detail/types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeRolesTab({
   account,
@@ -31,7 +33,7 @@ export function EmployeeRolesTab({
         sx={{
           color: appleDesign.colors.textSecondary,
           fontSize: "0.75rem",
-          fontWeight: 700,
+          fontWeight: 600,
           letterSpacing: "0.06em",
           mt: 1,
           textTransform: "uppercase",
@@ -56,7 +58,7 @@ export function EmployeeRolesTab({
             >
               <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, mb: 1 }}>
                 <AppleStatusBadge label={meta.category} tone={meta.badgeTone} />
-                <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 750 }}>
+                <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
                   {meta.label}
                 </Typography>
                 <Typography
@@ -124,8 +126,8 @@ export function EmployeeRolesTab({
       <Box
         sx={{
           alignItems: "flex-start",
-          bgcolor: "rgba(0, 113, 227, 0.04)",
-          border: "1px solid rgba(0, 113, 227, 0.15)",
+          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.04),
+          border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
           borderRadius: "12px",
           display: "flex",
           gap: 1.25,
@@ -135,7 +137,7 @@ export function EmployeeRolesTab({
       >
         <SecurityRoundedIcon sx={{ color: appleDesign.colors.blue, fontSize: 20, mt: 0.2 }} />
         <Box>
-          <Typography sx={{ color: appleDesign.colors.blue, fontSize: "0.8rem", fontWeight: 700 }}>
+          <Typography sx={{ color: appleDesign.colors.blue, fontSize: "0.8rem", fontWeight: 600 }}>
             Kiểm soát quyền & Quản trị Scope
           </Typography>
           <Typography

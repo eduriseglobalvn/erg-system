@@ -71,15 +71,15 @@ export function DateTimePickerPopover({ open, value, onChange, onClose, mode = "
             <IconButton size="small" onClick={() => moveMonth(1)} aria-label="Tháng sau"><ChevronRightIcon fontSize="small" /></IconButton>
           </Stack>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, textAlign: "center" }}>
-            {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => <Typography key={day} sx={{ py: 0.5, color: "text.secondary", fontSize: 13, fontWeight: 700 }}>{day}</Typography>)}
+            {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => <Typography key={day} sx={{ py: 0.5, color: "text.secondary", fontSize: 13, fontWeight: 600 }}>{day}</Typography>)}
             {days.map((day, index) => day ? <Button variant="contained" key={dateKey(day)} onClick={() => selectDate(day)} sx={{ minWidth: 0, height: 36, borderRadius: 1, bgcolor: dateKey(day) === selectedKey ? "primary.main" : "transparent", color: dateKey(day) === selectedKey ? "common.white" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none", "&:hover": { bgcolor: dateKey(day) === selectedKey ? "primary.dark" : "primary.light" } }}>{day.getDate()}</Button> : <Box key={`blank-${index}`} />)}
           </Box>
         </Box>
       ) : (
         <Box sx={{ p: 2 }}>
-          <Box sx={{ borderRadius: 1, bgcolor: "grey.50", px: 2, py: 1.5, textAlign: "center" }}><Typography sx={{ color: "text.secondary", fontSize: 13, fontWeight: 700 }}>Ngày đã chọn</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: 600 }}>{formatDateOnlyValue(selectedDate)}</Typography></Box>
-          <TextField label="Giờ làm bài" type="time" fullWidth value={timeValue} onChange={(event) => setTimeValue(normalizeTimeValue(event.target.value))} slotProps={{ inputLabel: { shrink: true } }} sx={{ mt: 2, "& input": { textAlign: "center", fontWeight: 700 } }} />
-          <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end", mt: 2 }}><Button size="small" variant="outlined" onClick={() => setStep("date")} sx={{ textTransform: "none", fontWeight: 600 }}>Chọn lại ngày</Button><Button size="small" variant="contained" onClick={applyValue} sx={{ textTransform: "none", fontWeight: 700 }}>Áp dụng</Button></Stack>
+          <Box sx={{ borderRadius: 1, bgcolor: "grey.50", px: 2, py: 1.5, textAlign: "center" }}><Typography sx={{ color: "text.secondary", fontSize: 13, fontWeight: 600 }}>Ngày đã chọn</Typography><Typography sx={{ mt: 0.5, fontSize: 14, fontWeight: 600 }}>{formatDateOnlyValue(selectedDate)}</Typography></Box>
+          <TextField label="Giờ làm bài" type="time" fullWidth value={timeValue} onChange={(event) => setTimeValue(normalizeTimeValue(event.target.value))} slotProps={{ inputLabel: { shrink: true } }} sx={{ mt: 2, "& input": { textAlign: "center", fontWeight: 600 } }} />
+          <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end", mt: 2 }}><Button size="small" variant="outlined" onClick={() => setStep("date")} sx={{ textTransform: "none", fontWeight: 600 }}>Chọn lại ngày</Button><Button size="small" variant="contained" onClick={applyValue} sx={{ textTransform: "none", fontWeight: 600 }}>Áp dụng</Button></Stack>
         </Box>
       )}
     </Box>

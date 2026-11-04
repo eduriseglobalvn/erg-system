@@ -18,6 +18,8 @@ import { Field, InfoTile, NoticeBox, PasswordInput, SectionHeader } from "@/feat
 import type { PasswordFormState, ProfileFormState, ProfileNotice as Notice } from "@/features/profile/types/profile-types";
 import { passwordScoreLabel } from "@/features/profile/utils/profile-utils";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function ProfileFormPanel({
   account,
@@ -40,7 +42,7 @@ export function ProfileFormPanel({
       sx={{
         bgcolor: "#FFFFFF",
         borderRadius: "16px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
         p: { xs: 3, md: 3.5 },
       }}
@@ -57,19 +59,19 @@ export function ProfileFormPanel({
             startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <Save sx={{ fontSize: 16 }} />}
             variant="contained"
             sx={{
-              bgcolor: "#0071E3",
-              borderRadius: "10px",
-              boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+              bgcolor: "primary.main",
+              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+              boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
               color: "#FFFFFF",
               fontSize: "0.85rem",
-              fontWeight: 650,
+              fontWeight: 600,
               minHeight: 38,
               px: 2,
               textTransform: "none",
               transition: "all 0.15s ease",
               "&:hover": {
-                bgcolor: "#0077ED",
-                boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+                bgcolor: "primary.dark",
+                boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
               },
             }}
           >
@@ -187,7 +189,7 @@ export function SecurityPanel({
         sx={{
           bgcolor: "#FFFFFF",
           borderRadius: "16px",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
           p: { xs: 3, md: 3.5 },
         }}
@@ -204,19 +206,19 @@ export function SecurityPanel({
               startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />}
               variant="contained"
               sx={{
-                bgcolor: "#0071E3",
-                borderRadius: "10px",
-                boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+                bgcolor: "primary.main",
+                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+                boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
                 color: "#FFFFFF",
                 fontSize: "0.85rem",
-                fontWeight: 650,
+                fontWeight: 600,
                 minHeight: 38,
                 px: 2,
                 textTransform: "none",
                 transition: "all 0.15s ease",
                 "&:hover": {
-                  bgcolor: "#0077ED",
-                  boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+                  bgcolor: "primary.dark",
+                  boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
                 },
               }}
             >
@@ -231,8 +233,8 @@ export function SecurityPanel({
           <Box
             sx={{
               alignItems: "center",
-              bgcolor: "rgba(255, 149, 0, 0.09)",
-              border: "1px solid rgba(255, 149, 0, 0.22)",
+              bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.09),
+              border: `1px solid ${alpha(ergEnterpriseTokens.color.warning, 0.22)}`,
               borderRadius: "12px",
               color: "#B45309",
               display: "flex",
@@ -297,20 +299,20 @@ export function SecurityPanel({
           sx={{
             bgcolor: "rgba(0, 0, 0, 0.02)",
             borderRadius: "12px",
-            border: "1px solid rgba(0, 0, 0, 0.04)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             mt: 3,
             p: 2,
           }}
         >
           <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.75 }}>
-            <Typography sx={{ color: "#6E6E73", fontSize: "0.8rem", fontWeight: 600 }}>
+            <Typography sx={{ color: "text.secondary", fontSize: "0.8rem", fontWeight: 600 }}>
               Độ mạnh mật khẩu mới
             </Typography>
             <Typography
               sx={{
                 color: passwordScore >= 3 ? "#15803D" : passwordScore >= 2 ? "#B45309" : "#DC2626",
                 fontSize: "0.8rem",
-                fontWeight: 750,
+                fontWeight: 600,
               }}
             >
               {passwordScoreLabel(passwordScore)}
@@ -324,12 +326,12 @@ export function SecurityPanel({
               borderRadius: 9999,
               height: 6,
               "& .MuiLinearProgress-bar": {
-                bgcolor: passwordScore >= 3 ? "#34C759" : passwordScore >= 2 ? "#FF9500" : "#FF3B30",
+                bgcolor: passwordScore >= 3 ? "success.main" : passwordScore >= 2 ? "warning.main" : ergEnterpriseTokens.color.danger,
                 borderRadius: 9999,
               },
             }}
           />
-          <Typography sx={{ color: "#86868B", fontSize: "0.75rem", mt: 1 }}>
+          <Typography sx={{ color: "text.disabled", fontSize: "0.75rem", mt: 1 }}>
             Gợi ý: Dùng tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt để an toàn nhất.
           </Typography>
         </Box>
@@ -341,7 +343,7 @@ export function SecurityPanel({
         sx={{
           bgcolor: "#FFFFFF",
           borderRadius: "16px",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
           p: { xs: 3, md: 3.5 },
         }}
@@ -372,14 +374,14 @@ export function SecurityPanel({
 const appleInputSx = {
   "& .MuiOutlinedInput-root": {
     bgcolor: "#FFFFFF",
-    borderRadius: "10px",
+    borderRadius: `${ergEnterpriseTokens.radius.md}px`,
     fontSize: "0.85rem",
     fontWeight: 550,
-    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
+    "& fieldset": { borderColor: "divider" },
     "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
     "&.Mui-focused fieldset": {
-      borderColor: "#0071E3",
-      boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+      borderColor: "primary.main",
+      boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
     },
   },
 };

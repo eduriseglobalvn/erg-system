@@ -10,6 +10,8 @@ import Paper from "@mui/material/Paper";
 import Rating from "@mui/material/Rating";
 import Typography from "@mui/material/Typography";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
   const totalStudents = school.students.length;
@@ -25,8 +27,8 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
     {
       helper: "Tài khoản đã đồng bộ",
       icon: <GroupsRoundedIcon sx={{ fontSize: 20 }} />,
-      iconBg: "rgba(0, 113, 227, 0.08)",
-      iconColor: "#0071E3",
+      iconBg: alpha(ergEnterpriseTokens.color.primary, 0.08),
+      iconColor: ergEnterpriseTokens.color.primary,
       label: "Học sinh",
       value: school.students.length,
     },
@@ -41,7 +43,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
     {
       helper: "Trong năm học hiện tại",
       icon: <MenuBookRoundedIcon sx={{ fontSize: 20 }} />,
-      iconBg: "rgba(52, 199, 89, 0.12)",
+      iconBg: alpha(ergEnterpriseTokens.color.success, 0.12),
       iconColor: "#15803D",
       label: "Môn đăng ký",
       value: school.subjects.length,
@@ -49,7 +51,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
     {
       helper: atRisk ? "Cần giáo viên lưu ý" : "Tất cả học sinh ổn định",
       icon: <WarningAmberRoundedIcon sx={{ fontSize: 20 }} />,
-      iconBg: atRisk ? "rgba(255, 149, 0, 0.12)" : "rgba(52, 199, 89, 0.12)",
+      iconBg: atRisk ? alpha(ergEnterpriseTokens.color.warning, 0.12) : alpha(ergEnterpriseTokens.color.success, 0.12),
       iconColor: atRisk ? "#B45309" : "#15803D",
       label: "Cần hỗ trợ",
       value: atRisk,
@@ -58,22 +60,22 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
 
   const healthItems = [
     {
-      barColor: "#34C759",
-      bgBar: "rgba(52, 199, 89, 0.12)",
+      barColor: ergEnterpriseTokens.color.success,
+      bgBar: alpha(ergEnterpriseTokens.color.success, 0.12),
       label: "Đang học ổn định",
       percent: percentOf(activeStudents),
       value: activeStudents,
     },
     {
-      barColor: "#FF9500",
-      bgBar: "rgba(255, 149, 0, 0.12)",
+      barColor: ergEnterpriseTokens.color.warning,
+      bgBar: alpha(ergEnterpriseTokens.color.warning, 0.12),
       label: "Cần giáo viên hỗ trợ",
       percent: percentOf(atRisk),
       value: atRisk,
     },
     {
-      barColor: "#0071E3",
-      bgBar: "rgba(0, 113, 227, 0.12)",
+      barColor: ergEnterpriseTokens.color.primary,
+      bgBar: alpha(ergEnterpriseTokens.color.primary, 0.12),
       label: "Đã đủ hồ sơ học vụ",
       percent: percentOf(profileComplete),
       value: profileComplete,
@@ -91,7 +93,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
             sx={{
               bgcolor: "#FFFFFF",
               borderRadius: "16px",
-              border: "1px solid rgba(0, 0, 0, 0.06)",
+              border: `1px solid ${ergEnterpriseTokens.color.border}`,
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.02), 0 8px 18px -4px rgba(0, 0, 0, 0.03)",
               p: 2.25,
               transition: "all 0.18s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -102,7 +104,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
             }}
           >
             <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1 }}>
-              <Typography sx={{ color: "#6E6E73", fontSize: "0.78rem", fontWeight: 650 }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.78rem", fontWeight: 600 }}>
                 {metric.label}
               </Typography>
               <Box
@@ -122,16 +124,16 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
             </Box>
             <Typography
               sx={{
-                color: "#1D1D1F",
+                color: ergEnterpriseTokens.color.text,
                 fontSize: "1.75rem",
-                fontWeight: 800,
+                fontWeight: 600,
                 letterSpacing: "-0.025em",
                 lineHeight: 1.1,
               }}
             >
               {metric.value}
             </Typography>
-            <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 500, mt: 0.5 }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.72rem", fontWeight: 500, mt: 0.5 }}>
               {metric.helper}
             </Typography>
           </Paper>
@@ -152,15 +154,15 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
           sx={{
             bgcolor: "#FFFFFF",
             borderRadius: "16px",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
             p: 3,
           }}
         >
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1.05rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.05rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
             Tình trạng học sinh
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.8rem", mt: 0.25 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8rem", mt: 0.25 }}>
             Tỷ lệ được tính từ dữ liệu học sinh thực tế mà backend trả về cho trường này.
           </Typography>
 
@@ -168,10 +170,10 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
             {healthItems.map((item) => (
               <Box key={item.label} sx={{ mb: 2.5, "&:last-child": { mb: 0 } }}>
                 <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 0.75 }}>
-                  <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 650 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.85rem", fontWeight: 600 }}>
                     {item.label}
                   </Typography>
-                  <Typography sx={{ color: "#6E6E73", fontSize: "0.825rem", fontWeight: 750 }}>
+                  <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", fontWeight: 600 }}>
                     {item.value} học sinh · {item.percent}%
                   </Typography>
                 </Box>
@@ -199,15 +201,15 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
           sx={{
             bgcolor: "#FFFFFF",
             borderRadius: "16px",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
             p: 3,
           }}
         >
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1.05rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.05rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
             Đánh giá gần đây
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.8rem", mt: 0.25 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8rem", mt: 0.25 }}>
             Phản hồi từ phụ huynh và học viên về cơ sở đào tạo.
           </Typography>
 
@@ -217,7 +219,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
                 <Box
                   key={review.id}
                   sx={{
-                    borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+                    borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
                     py: 1.75,
                     "&:last-child": { borderBottom: 0, pb: 0 },
                   }}
@@ -226,23 +228,23 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
                     <Box sx={{ alignItems: "center", display: "flex", gap: 1 }}>
                       <Avatar
                         sx={{
-                          bgcolor: "rgba(0, 113, 227, 0.08)",
-                          color: "#0071E3",
+                          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+                          color: ergEnterpriseTokens.color.primary,
                           fontSize: "0.75rem",
-                          fontWeight: 750,
+                          fontWeight: 600,
                           height: 28,
                           width: 28,
                         }}
                       >
                         {review.author?.slice(0, 2).toUpperCase() || "PH"}
                       </Avatar>
-                      <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 700 }}>
+                      <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.85rem", fontWeight: 600 }}>
                         {review.author}
                       </Typography>
                     </Box>
                     <Rating
                       emptyIcon={<StarRoundedIcon sx={{ color: "#E5E5EA", fontSize: 16 }} />}
-                      icon={<StarRoundedIcon sx={{ color: "#FF9500", fontSize: 16 }} />}
+                      icon={<StarRoundedIcon sx={{ color: ergEnterpriseTokens.color.warning, fontSize: 16 }} />}
                       precision={0.5}
                       readOnly
                       size="small"
@@ -251,7 +253,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
                   </Box>
                   <Typography
                     sx={{
-                      color: "#6E6E73",
+                      color: ergEnterpriseTokens.color.textMuted,
                       display: "-webkit-box",
                       fontSize: "0.8rem",
                       mt: 1,
@@ -266,7 +268,7 @@ export function SchoolOverviewPanel({ school }: { school: PartnerSchool }) {
               ))
             ) : (
               <Box sx={{ p: 3, textAlign: "center" }}>
-                <Typography sx={{ color: "#86868B", fontSize: "0.85rem" }}>
+                <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem" }}>
                   Chưa có đánh giá nào cho trường này.
                 </Typography>
               </Box>

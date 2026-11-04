@@ -92,7 +92,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
       <CardContent>
         <Stack spacing={1.5}>
           <Stack spacing={0.5}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 800 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
               Mở bài kiểm tra portable
             </Typography>
             <Typography variant="body2" color="text.secondary">
@@ -103,7 +103,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
             component="label"
             variant="contained"
             disabled={state === "loading"}
-            sx={{ alignSelf: "flex-start", borderRadius: 1.5, fontWeight: 800 }}
+            sx={{ alignSelf: "flex-start", borderRadius: 1.5, fontWeight: 600 }}
           >
             Chọn tệp bài thi
             <input

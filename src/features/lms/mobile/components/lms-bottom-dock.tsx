@@ -115,12 +115,12 @@ function DockButton({ active, badgeCount, icon: Icon, label, onClick }: {
       >
         <Icon sx={{ fontSize: 20 }} />
         {badgeCount ? (
-          <Box sx={{ alignItems: "center", bgcolor: "error.main", border: "2px solid", borderColor: "background.paper", borderRadius: 8, color: "error.contrastText", display: "flex", fontSize: 10, fontWeight: 800, justifyContent: "center", minHeight: 18, minWidth: 18, px: 0.25, position: "absolute", right: -6, top: -6 }}>
+          <Box sx={{ alignItems: "center", bgcolor: "error.main", border: "2px solid", borderColor: "background.paper", borderRadius: 8, color: "error.contrastText", display: "flex", fontSize: 10, fontWeight: 600, justifyContent: "center", minHeight: 18, minWidth: 18, px: 0.25, position: "absolute", right: -6, top: -6 }}>
             {badgeCount > 9 ? "9+" : badgeCount}
           </Box>
         ) : null}
       </Box>
-      <Typography color="inherit" noWrap sx={{ fontSize: 11, fontWeight: 800, lineHeight: 1, maxWidth: "100%", px: 0.25 }}>
+      <Typography color="inherit" noWrap sx={{ fontSize: 11, fontWeight: 600, lineHeight: 1, maxWidth: "100%", px: 0.25 }}>
         {label}
       </Typography>
     </ButtonBase>

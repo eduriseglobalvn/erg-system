@@ -84,7 +84,7 @@ export function StudentLevelBadge({ level }: { level: string }) {
       label={level}
       size="small"
       variant="outlined"
-      sx={{ ...palette, borderRadius: 1, fontSize: 13, fontWeight: 700 }}
+      sx={{ ...palette, borderRadius: 1, fontSize: 13, fontWeight: 600 }}
     />
   );
 }

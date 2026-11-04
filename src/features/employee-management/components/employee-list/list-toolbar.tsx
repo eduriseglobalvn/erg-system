@@ -4,6 +4,8 @@ import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function EmployeeListToolbar({
   onSearchChange,
@@ -31,7 +33,7 @@ export function EmployeeListToolbar({
           variant="subtitle1"
           sx={{
             color: appleDesign.colors.textPrimary,
-            fontWeight: 750,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
           }}
         >
@@ -76,7 +78,7 @@ export function EmployeeListToolbar({
               },
               "&.Mui-focused fieldset": {
                 borderColor: appleDesign.colors.blue,
-                boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
               },
             },
           },

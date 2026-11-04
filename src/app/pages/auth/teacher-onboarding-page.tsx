@@ -60,7 +60,7 @@ export function TeacherOnboardingPage() {
       >
         <Box sx={{ maxWidth: 540, width: "100%" }}>
           <Alert
-            action={<Button variant="contained" color="inherit" onClick={auth.actions.signOut} sx={{ fontWeight: 650, borderRadius: "980px" }}>Đăng xuất</Button>}
+            action={<Button variant="contained" color="inherit" onClick={auth.actions.signOut} sx={{ fontWeight: 600, borderRadius: "980px" }}>Đăng xuất</Button>}
             severity="warning"
             sx={{
               borderRadius: "18px",

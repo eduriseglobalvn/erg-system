@@ -61,13 +61,13 @@ export function TeachingPlanTable({
             bgcolor: "#FFFFFF",
             color: "#1C252E",
             fontSize: 15,
-            fontWeight: 800,
+            fontWeight: 600,
             lineHeight: "22px",
             py: 0.75,
             textAlign: "center",
           },
-          "thead tr:nth-of-type(2) th": { bgcolor: "#FFFFFF", color: "#1C252E", fontSize: 14, fontWeight: 800, py: 0.5, textAlign: "center" },
-          "thead tr:last-of-type th": { bgcolor: "#F4F6F8", color: "#52616F", fontWeight: 700, py: 0.75, textAlign: "center" },
+          "thead tr:nth-of-type(2) th": { bgcolor: "#FFFFFF", color: "#1C252E", fontSize: 14, fontWeight: 600, py: 0.5, textAlign: "center" },
+          "thead tr:last-of-type th": { bgcolor: "#F4F6F8", color: "#52616F", fontWeight: 600, py: 0.75, textAlign: "center" },
         }}
       >
         <thead>
@@ -138,7 +138,7 @@ export function TeachingPlanTable({
                         maxRows={3}
                         sx={{
                           "& .MuiInputBase-root": { bgcolor: "#FFFFFF", borderRadius: 1 },
-                          "& .MuiInputBase-input": { fontSize: 12.5, fontWeight: 700, color: "#1E293B" },
+                          "& .MuiInputBase-input": { fontSize: 12.5, fontWeight: 600, color: "#1E293B" },
                         }}
                       />
                       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", px: 0.25 }}>
@@ -148,7 +148,7 @@ export function TeachingPlanTable({
                           sx={{
                             height: 20,
                             fontSize: 10.5,
-                            fontWeight: 700,
+                            fontWeight: 600,
                             bgcolor: selectedTopic === row.topic ? "#BFDBFE" : "#E2E8F0",
                             color: selectedTopic === row.topic ? "#1E40AF" : "#334155",
                           }}
@@ -188,7 +188,7 @@ export function TeachingPlanTable({
                         sx={{
                           height: 20,
                           fontSize: 10,
-                          fontWeight: 700,
+                          fontWeight: 600,
                           bgcolor: "#FEE2E2",
                           color: "#B91C1C",
                           border: "1px solid #FECACA",

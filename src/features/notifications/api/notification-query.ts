@@ -1,5 +1,5 @@
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 import { normalizePortal } from "./notification-mappers";
 import type { NotificationPortal, NotificationStatusFilter } from "./notification-types";
@@ -32,7 +32,7 @@ export const notificationQueryKeys = {
 };
 
 export function resolveNotificationQueryScope(portal: NotificationPortal): Required<NotificationQueryScope> {
-  const session = readStoredAuthSession(toStoredAuthPortal(portal)) as { accountId?: string } | null;
+  const session = getAuthScope(toStoredAuthPortal(portal)).session as { accountId?: string } | null;
   return {
     accountId: session?.accountId ?? ANONYMOUS_NOTIFICATION_ACCOUNT,
     tenantId: getDefaultTenantId(),

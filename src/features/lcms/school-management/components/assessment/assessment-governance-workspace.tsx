@@ -8,6 +8,8 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 /**
  * Assessment governance is intentionally unavailable until the backend publishes
@@ -21,8 +23,8 @@ export function AssessmentGovernanceWorkspace() {
       <Box
         sx={{
           alignItems: "center",
-          bgcolor: "rgba(0, 113, 227, 0.05)",
-          border: "1px solid rgba(0, 113, 227, 0.16)",
+          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.05),
+          border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.16)}`,
           borderRadius: "14px",
           display: "flex",
           gap: 1.75,
@@ -32,9 +34,9 @@ export function AssessmentGovernanceWorkspace() {
         <Box
           sx={{
             alignItems: "center",
-            bgcolor: "rgba(0, 113, 227, 0.12)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.12),
             borderRadius: "10px",
-            color: "#0071E3",
+            color: ergEnterpriseTokens.color.primary,
             display: "flex",
             flexShrink: 0,
             height: 38,
@@ -45,10 +47,10 @@ export function AssessmentGovernanceWorkspace() {
           <InfoOutlinedIcon sx={{ fontSize: 20 }} />
         </Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 700 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600 }}>
             Chính sách phân quyền khảo thí & đề thi
           </Typography>
-          <Typography sx={{ color: "#6E6E73", fontSize: "0.8125rem", mt: 0.25, lineHeight: 1.45 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", mt: 0.25, lineHeight: 1.45 }}>
             Dữ liệu đợt kiểm tra, quyền bổ sung câu hỏi và lịch sử nhập câu hỏi sẽ chỉ hiển thị sau khi backend cung
             cấp API có phân quyền và phạm vi trường/lớp.
           </Typography>
@@ -60,7 +62,7 @@ export function AssessmentGovernanceWorkspace() {
         elevation={0}
         sx={{
           bgcolor: "#FFFFFF",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
+          border: `1px solid ${ergEnterpriseTokens.color.border}`,
           borderRadius: "16px",
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
           p: { md: 3, xs: 2.25 },
@@ -70,7 +72,7 @@ export function AssessmentGovernanceWorkspace() {
         <Box
           sx={{
             alignItems: { md: "center", xs: "flex-start" },
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+            borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
             display: "flex",
             flexDirection: { md: "row", xs: "column" },
             gap: 2,
@@ -80,19 +82,19 @@ export function AssessmentGovernanceWorkspace() {
         >
           <Box>
             <Box sx={{ alignItems: "center", display: "inline-flex", gap: 1, mb: 0.5 }}>
-              <Typography sx={{ color: "#1D1D1F", fontSize: "1.125rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1.125rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
                 Quản trị kiểm tra & câu hỏi tạm
               </Typography>
               <Box
                 sx={{
                   alignItems: "center",
-                  bgcolor: "rgba(255, 149, 0, 0.1)",
-                  border: "1px solid rgba(255, 149, 0, 0.22)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.warning, 0.1),
+                  border: `1px solid ${alpha(ergEnterpriseTokens.color.warning, 0.22)}`,
                   borderRadius: "9999px",
                   color: "#B45309",
                   display: "inline-flex",
                   fontSize: "0.72rem",
-                  fontWeight: 700,
+                  fontWeight: 600,
                   gap: 0.6,
                   px: 1,
                   py: 0.3,
@@ -101,7 +103,7 @@ export function AssessmentGovernanceWorkspace() {
                 <Box
                   component="span"
                   sx={{
-                    bgcolor: "#FF9500",
+                    bgcolor: ergEnterpriseTokens.color.warning,
                     borderRadius: "50%",
                     display: "inline-block",
                     height: 5,
@@ -111,7 +113,7 @@ export function AssessmentGovernanceWorkspace() {
                 Chờ contract backend
               </Box>
             </Box>
-            <Typography sx={{ color: "#6E6E73", fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 760 }}>
+            <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 760 }}>
               Chưa có contract backend cho campaign, question-permission request hoặc import job. Không hiển thị số liệu
               mẫu để tránh nhầm dữ liệu demo với dữ liệu vận hành.
             </Typography>
@@ -126,7 +128,7 @@ export function AssessmentGovernanceWorkspace() {
               borderRadius: "11px",
               boxShadow: "none",
               fontSize: "0.85rem",
-              fontWeight: 650,
+              fontWeight: 600,
               px: 2.5,
               py: 1,
               textTransform: "none",
@@ -145,9 +147,9 @@ export function AssessmentGovernanceWorkspace() {
           <Typography
             variant="overline"
             sx={{
-              color: "#86868B",
+              color: ergEnterpriseTokens.color.textMuted,
               fontSize: "0.72rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
@@ -164,15 +166,15 @@ export function AssessmentGovernanceWorkspace() {
           >
             <RoadmapCard
               icon={<RuleFolderRoundedIcon sx={{ fontSize: 20 }} />}
-              iconBg="rgba(0, 113, 227, 0.08)"
-              iconColor="#0071E3"
+              iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
+              iconColor={ergEnterpriseTokens.color.primary}
               title="Campaign Scope API"
               description="Cần các endpoint đọc/ghi campaign, khung giờ làm bài và phạm vi áp dụng cho từng phân hiệu trường học."
             />
             <RoadmapCard
               icon={<SecurityUpdateGoodRoundedIcon sx={{ fontSize: 20 }} />}
-              iconBg="rgba(52, 199, 89, 0.1)"
-              iconColor="#34C759"
+              iconBg={alpha(ergEnterpriseTokens.color.success, 0.1)}
+              iconColor={ergEnterpriseTokens.color.success}
               title="Phê duyệt quyền câu hỏi"
               description="Quy trình phân quyền và phê duyệt câu hỏi bổ sung theo từng môn học, khối lớp và phân công chuyên môn."
             />
@@ -199,8 +201,8 @@ export function AssessmentGovernanceWorkspace() {
             p: 1.75,
           }}
         >
-          <CloudSyncRoundedIcon sx={{ color: "#86868B", fontSize: 20 }} />
-          <Typography sx={{ color: "#6E6E73", fontSize: "0.8125rem", lineHeight: 1.45 }}>
+          <CloudSyncRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 20 }} />
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", lineHeight: 1.45 }}>
             Khi contract được phát hành, workspace này sẽ được nối qua query/mutation có scope và trạng thái loading,
             empty, error đầy đủ. Chờ contract backend để kích hoạt.
           </Typography>
@@ -227,7 +229,7 @@ function RoadmapCard({
     <Box
       sx={{
         bgcolor: "#FBFBFD",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "14px",
         display: "flex",
         flexDirection: "column",
@@ -256,11 +258,11 @@ function RoadmapCard({
         >
           {icon}
         </Box>
-        <Typography sx={{ color: "#1D1D1F", fontSize: "0.875rem", fontWeight: 750 }}>
+        <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.875rem", fontWeight: 600 }}>
           {title}
         </Typography>
       </Box>
-      <Typography sx={{ color: "#6E6E73", fontSize: "0.8rem", lineHeight: 1.45 }}>
+      <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8rem", lineHeight: 1.45 }}>
         {description}
       </Typography>
       <Box sx={{ mt: "auto", pt: 0.5 }}>
@@ -269,10 +271,10 @@ function RoadmapCard({
             alignItems: "center",
             bgcolor: "rgba(0, 0, 0, 0.04)",
             borderRadius: "6px",
-            color: "#6E6E73",
+            color: ergEnterpriseTokens.color.textMuted,
             display: "inline-flex",
             fontSize: "0.72rem",
-            fontWeight: 650,
+            fontWeight: 600,
             px: 0.85,
             py: 0.25,
           }}

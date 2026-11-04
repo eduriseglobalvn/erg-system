@@ -37,7 +37,7 @@ export function TeachingPlanActions({
           onClick={handleSyncClick}
           sx={{
             textTransform: "none",
-            fontWeight: 700,
+            fontWeight: 600,
             px: 2.2,
             bgcolor: "#059669",
             color: "#FFFFFF",
@@ -60,7 +60,7 @@ export function TeachingPlanActions({
           onClick={() => void save()}
           sx={{
             textTransform: "none",
-            fontWeight: 700,
+            fontWeight: 600,
             px: 2.5,
             bgcolor: "#0F6CBD",
             borderRadius: 1.5,

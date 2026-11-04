@@ -30,7 +30,7 @@ export function EmployeeListHeader({ onCreate }: { onCreate: () => void }) {
             sx={{
               color: appleDesign.colors.blue,
               fontSize: "0.725rem",
-              fontWeight: 700,
+              fontWeight: 600,
               letterSpacing: "0.08em",
             }}
           >
@@ -41,7 +41,7 @@ export function EmployeeListHeader({ onCreate }: { onCreate: () => void }) {
           variant="h4"
           sx={{
             color: appleDesign.colors.textPrimary,
-            fontWeight: 750,
+            fontWeight: 600,
             letterSpacing: "-0.03em",
             lineHeight: 1.2,
           }}
@@ -71,7 +71,7 @@ export function EmployeeListHeader({ onCreate }: { onCreate: () => void }) {
           boxShadow: appleDesign.shadows.button,
           flexShrink: 0,
           fontSize: "0.875rem",
-          fontWeight: 650,
+          fontWeight: 600,
           px: 2.5,
           py: 1.1,
           textTransform: "none",

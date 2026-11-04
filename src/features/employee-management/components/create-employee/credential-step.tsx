@@ -6,6 +6,8 @@ import Typography from "@mui/material/Typography";
 
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
 import type { EmployeeForm, SetEmployeeField } from "@/features/employee-management/components/create-employee/constants";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmployeeField }) {
   return (
@@ -14,7 +16,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
         sx={{
           color: appleDesign.colors.textPrimary,
           fontSize: "0.85rem",
-          fontWeight: 700,
+          fontWeight: 600,
           mb: 0.5,
         }}
       >
@@ -24,7 +26,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
         onClick={() => set("credentialDelivery", "EMAIL_INVITE")}
         sx={{
           alignItems: "center",
-          bgcolor: form.credentialDelivery === "EMAIL_INVITE" ? "rgba(0, 113, 227, 0.04)" : "#FFFFFF",
+          bgcolor: form.credentialDelivery === "EMAIL_INVITE" ? alpha(ergEnterpriseTokens.color.primary, 0.04) : "#FFFFFF",
           border: `1.5px solid ${
             form.credentialDelivery === "EMAIL_INVITE" ? appleDesign.colors.blue : appleDesign.colors.borderMedium
           }`,
@@ -43,7 +45,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
           sx={{
             alignItems: "center",
             bgcolor: form.credentialDelivery === "EMAIL_INVITE" ? appleDesign.colors.blueSoft : "rgba(0, 0, 0, 0.04)",
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             color: form.credentialDelivery === "EMAIL_INVITE" ? appleDesign.colors.blue : appleDesign.colors.textSecondary,
             display: "flex",
             height: 40,
@@ -54,7 +56,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
           <MailOutlineRoundedIcon fontSize="small" />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 700 }}>
+          <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
             Gửi thư mời qua Email
           </Typography>
           <Typography sx={{ color: appleDesign.colors.textSecondary, fontSize: "0.78rem", mt: 0.25 }}>
@@ -67,7 +69,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
         onClick={() => set("credentialDelivery", "ONE_TIME_PASSWORD")}
         sx={{
           alignItems: "center",
-          bgcolor: form.credentialDelivery === "ONE_TIME_PASSWORD" ? "rgba(0, 113, 227, 0.04)" : "#FFFFFF",
+          bgcolor: form.credentialDelivery === "ONE_TIME_PASSWORD" ? alpha(ergEnterpriseTokens.color.primary, 0.04) : "#FFFFFF",
           border: `1.5px solid ${
             form.credentialDelivery === "ONE_TIME_PASSWORD" ? appleDesign.colors.blue : appleDesign.colors.borderMedium
           }`,
@@ -86,7 +88,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
           sx={{
             alignItems: "center",
             bgcolor: form.credentialDelivery === "ONE_TIME_PASSWORD" ? appleDesign.colors.blueSoft : "rgba(0, 0, 0, 0.04)",
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             color: form.credentialDelivery === "ONE_TIME_PASSWORD" ? appleDesign.colors.blue : appleDesign.colors.textSecondary,
             display: "flex",
             height: 40,
@@ -97,7 +99,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
           <KeyRoundedIcon fontSize="small" />
         </Box>
         <Box sx={{ flex: 1 }}>
-          <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 700 }}>
+          <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
             Tạo Temporary Credential (Mật khẩu tạm thời)
           </Typography>
           <Typography sx={{ color: appleDesign.colors.textSecondary, fontSize: "0.78rem", mt: 0.25 }}>
@@ -109,9 +111,9 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
       <Alert
         severity="info"
         sx={{
-          bgcolor: "rgba(0, 113, 227, 0.04)",
-          border: "1px solid rgba(0, 113, 227, 0.15)",
-          borderRadius: "10px",
+          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.04),
+          border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
+          borderRadius: `${ergEnterpriseTokens.radius.md}px`,
           color: appleDesign.colors.blue,
           mt: 1,
         }}

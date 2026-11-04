@@ -17,7 +17,7 @@ export function ReviewRow({ label, value }: { label: string; value: string }) {
         variant="caption"
         sx={{
           color: appleDesign.colors.textTertiary,
-          fontWeight: 650,
+          fontWeight: 600,
           letterSpacing: "0.02em",
         }}
       >
@@ -27,7 +27,7 @@ export function ReviewRow({ label, value }: { label: string; value: string }) {
         variant="body2"
         sx={{
           color: appleDesign.colors.textPrimary,
-          fontWeight: 750,
+          fontWeight: 600,
           mt: 0.25,
         }}
       >

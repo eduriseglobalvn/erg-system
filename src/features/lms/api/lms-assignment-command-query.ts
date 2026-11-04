@@ -18,7 +18,7 @@ import {
 } from "@/features/lms/api/lms-assignment-command-api";
 import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 import {
   createOfflineTeachingCommandAdapter,
@@ -78,7 +78,7 @@ export const lmsAssignmentReadQueryKeys = {
 
 
 function resolveLmsAssignmentReadAccountId() {
-  const session = readStoredAuthSession("lms") as { accountId?: string | null } | null;
+  const session = getAuthScope("lms").session as { accountId?: string | null } | null;
   return session?.accountId?.trim() || "anonymous";
 }
 

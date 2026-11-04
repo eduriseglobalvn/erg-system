@@ -13,6 +13,8 @@ import { ProfileFormPanel, SecurityPanel } from "@/features/profile/components/p
 import { ProfileSidebar } from "@/features/profile/components/profile-sidebar";
 import { useProfilePageController } from "@/features/profile/hooks/use-profile-page-controller";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function ProfilePage() {
   const location = useLocation();
@@ -54,7 +56,7 @@ export function ProfilePage() {
   const primaryDisabled = activeTab === "security" ? !canChangePassword || isSavingPassword : !account || isSavingProfile;
 
   return (
-    <Box component="main" sx={{ bgcolor: "#F5F5F7", color: "#1D1D1F", minHeight: "100vh", p: { xs: 2.5, md: 4 } }}>
+    <Box component="main" sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "100vh", p: { xs: 2.5, md: 4 } }}>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 3, marginInline: "auto", maxWidth: "80rem", width: "100%" }}>
         {/* Apple Translucent Window Header */}
         <Paper
@@ -62,7 +64,7 @@ export function ProfilePage() {
           sx={{
             backdropFilter: "blur(20px)",
             bgcolor: "rgba(255, 255, 255, 0.88)",
-            border: "1px solid rgba(0, 0, 0, 0.06)",
+            border: `1px solid ${ergEnterpriseTokens.color.border}`,
             borderRadius: "16px",
             boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
             overflow: "hidden",
@@ -86,11 +88,11 @@ export function ProfilePage() {
                 variant="outlined"
                 sx={{
                   bgcolor: "#FFFFFF",
-                  borderColor: "rgba(0, 0, 0, 0.12)",
-                  borderRadius: "10px",
-                  color: "#1D1D1F",
+                  borderColor: "divider",
+                  borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+                  color: "text.primary",
                   fontSize: "0.825rem",
-                  fontWeight: 650,
+                  fontWeight: 600,
                   height: 38,
                   px: 1.75,
                   textTransform: "none",
@@ -101,10 +103,10 @@ export function ProfilePage() {
               </Button>
               <Box sx={{ bgcolor: "rgba(0, 0, 0, 0.06)", display: { xs: "none", sm: "block" }, height: 28, width: "1px" }} />
               <Box>
-                <Typography sx={{ color: "#86868B", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+                <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
                   ERG Account
                 </Typography>
-                <Typography sx={{ color: "#1D1D1F", fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.02em" }}>
+                <Typography sx={{ color: "text.primary", fontSize: "1.2rem", fontWeight: 600, letterSpacing: "-0.02em" }}>
                   Hồ sơ và bảo mật
                 </Typography>
               </Box>
@@ -124,19 +126,19 @@ export function ProfilePage() {
               }
               variant="contained"
               sx={{
-                bgcolor: "#0071E3",
-                borderRadius: "10px",
-                boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+                bgcolor: "primary.main",
+                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+                boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
                 color: "#FFFFFF",
                 fontSize: "0.85rem",
-                fontWeight: 650,
+                fontWeight: 600,
                 height: 38,
                 px: 2.25,
                 textTransform: "none",
                 transition: "all 0.15s ease",
                 "&:hover": {
-                  bgcolor: "#0077ED",
-                  boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+                  bgcolor: "primary.dark",
+                  boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
                 },
               }}
             >
@@ -146,7 +148,7 @@ export function ProfilePage() {
         </Paper>
 
         {isLoading ? (
-          <Box sx={{ bgcolor: "rgba(0, 113, 227, 0.05)", borderRadius: "12px", display: "grid", gap: 1, p: 2 }}>
+          <Box sx={{ bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.05), borderRadius: "12px", display: "grid", gap: 1, p: 2 }}>
             <Skeleton height={20} sx={{ borderRadius: "6px" }} variant="rounded" width="50%" />
             <Skeleton height={16} sx={{ borderRadius: "6px" }} variant="rounded" width="30%" />
           </Box>

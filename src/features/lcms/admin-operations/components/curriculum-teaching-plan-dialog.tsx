@@ -204,7 +204,7 @@ export function CurriculumTeachingPlanDialog({
           ) : null}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <CalendarMonth color="primary" />
-            <Typography variant="h6" sx={{ fontSize: 18, fontWeight: 700 }}>
+            <Typography variant="h6" sx={{ fontSize: 18, fontWeight: 600 }}>
               Khung chương trình môn học · {subject?.label ?? "Chưa chọn môn"}
             </Typography>
           </Box>

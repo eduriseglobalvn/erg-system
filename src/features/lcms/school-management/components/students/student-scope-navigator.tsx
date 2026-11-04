@@ -12,6 +12,8 @@ import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 import { useEffect, useState } from "react";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 type StudentScopeNavigatorProps = {
   school: PartnerSchool;
@@ -59,7 +61,7 @@ export function StudentScopeNavigator({
         alignSelf: "start",
         bgcolor: "#FFFFFF",
         borderRadius: "16px",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 8px 24px -4px rgba(0, 0, 0, 0.04)",
         overflow: "hidden",
         position: { lg: "sticky" },
@@ -71,7 +73,7 @@ export function StudentScopeNavigator({
         sx={{
           alignItems: "center",
           bgcolor: "rgba(0, 0, 0, 0.015)",
-          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
           display: "flex",
           gap: 1.25,
           px: 2,
@@ -81,9 +83,9 @@ export function StudentScopeNavigator({
         <Box
           sx={{
             alignItems: "center",
-            bgcolor: "rgba(0, 113, 227, 0.08)",
+            bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
             borderRadius: "9px",
-            color: "#0071E3",
+            color: ergEnterpriseTokens.color.primary,
             display: "flex",
             height: 32,
             justifyContent: "center",
@@ -95,9 +97,9 @@ export function StudentScopeNavigator({
         <Box sx={{ minWidth: 0 }}>
           <Typography
             sx={{
-              color: "#1D1D1F",
+              color: ergEnterpriseTokens.color.text,
               fontSize: "0.85rem",
-              fontWeight: 750,
+              fontWeight: 600,
               letterSpacing: "-0.01em",
               lineHeight: 1.2,
             }}
@@ -106,7 +108,7 @@ export function StudentScopeNavigator({
           </Typography>
           <Typography
             sx={{
-              color: "#86868B",
+              color: ergEnterpriseTokens.color.textMuted,
               fontSize: "0.72rem",
               fontWeight: 500,
               mt: 0.2,
@@ -124,15 +126,15 @@ export function StudentScopeNavigator({
           onClick={onSelectSchool}
           selected={isAllSelected}
           sx={{
-            bgcolor: isAllSelected ? "rgba(0, 113, 227, 0.09) !important" : "transparent",
+            bgcolor: isAllSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
             borderRadius: "10px",
-            color: isAllSelected ? "#0071E3" : "#1D1D1F",
+            color: isAllSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
             mb: 0.5,
             minHeight: 38,
             px: 1.25,
             transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
             "&:hover": {
-              bgcolor: isAllSelected ? "rgba(0, 113, 227, 0.13) !important" : "rgba(0, 0, 0, 0.035)",
+              bgcolor: isAllSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.13)} !important` : "rgba(0, 0, 0, 0.035)",
             },
             "&:active": {
               transform: "scale(0.985)",
@@ -140,14 +142,14 @@ export function StudentScopeNavigator({
           }}
         >
           <ListItemIcon sx={{ minWidth: 30 }}>
-            <GroupsRoundedIcon sx={{ color: isAllSelected ? "#0071E3" : "#86868B", fontSize: 18 }} />
+            <GroupsRoundedIcon sx={{ color: isAllSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted, fontSize: 18 }} />
           </ListItemIcon>
           <ListItemText
             primary="Toàn trường"
             slotProps={{
               primary: {
                 sx: {
-                  color: isAllSelected ? "#0071E3" : "#1D1D1F",
+                  color: isAllSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
                   fontSize: "0.825rem",
                   fontWeight: isAllSelected ? 750 : 600,
                   letterSpacing: "-0.01em",
@@ -157,11 +159,11 @@ export function StudentScopeNavigator({
           />
           <Box
             sx={{
-              bgcolor: isAllSelected ? "rgba(0, 113, 227, 0.16)" : "rgba(0, 0, 0, 0.05)",
+              bgcolor: isAllSelected ? alpha(ergEnterpriseTokens.color.primary, 0.16) : "rgba(0, 0, 0, 0.05)",
               borderRadius: "9999px",
-              color: isAllSelected ? "#0071E3" : "#6E6E73",
+              color: isAllSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted,
               fontSize: "0.7rem",
-              fontWeight: 700,
+              fontWeight: 600,
               lineHeight: 1,
               px: 1,
               py: 0.35,
@@ -185,14 +187,14 @@ export function StudentScopeNavigator({
                 onClick={() => onSelectGrade(grade)}
                 selected={gradeSelected}
                 sx={{
-                  bgcolor: gradeSelected ? "rgba(0, 113, 227, 0.09) !important" : "transparent",
+                  bgcolor: gradeSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                   borderRadius: "10px",
-                  color: gradeSelected ? "#0071E3" : "#1D1D1F",
+                  color: gradeSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
                   minHeight: 36,
                   px: 1.25,
                   transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                   "&:hover": {
-                    bgcolor: gradeSelected ? "rgba(0, 113, 227, 0.13) !important" : "rgba(0, 0, 0, 0.035)",
+                    bgcolor: gradeSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.13)} !important` : "rgba(0, 0, 0, 0.035)",
                   },
                   "&:active": {
                     transform: "scale(0.985)",
@@ -210,7 +212,7 @@ export function StudentScopeNavigator({
                 >
                   <KeyboardArrowRightRoundedIcon
                     sx={{
-                      color: gradeSelected ? "#0071E3" : "#86868B",
+                      color: gradeSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted,
                       fontSize: 18,
                       transform: isExpanded && hasClasses ? "rotate(90deg)" : "rotate(0deg)",
                       transition: "transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -222,7 +224,7 @@ export function StudentScopeNavigator({
                   slotProps={{
                     primary: {
                       sx: {
-                        color: gradeSelected ? "#0071E3" : "#1D1D1F",
+                        color: gradeSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
                         fontSize: "0.825rem",
                         fontWeight: gradeSelected ? 750 : 650,
                         letterSpacing: "-0.01em",
@@ -232,11 +234,11 @@ export function StudentScopeNavigator({
                 />
                 <Box
                   sx={{
-                    bgcolor: gradeSelected ? "rgba(0, 113, 227, 0.16)" : "rgba(0, 0, 0, 0.05)",
+                    bgcolor: gradeSelected ? alpha(ergEnterpriseTokens.color.primary, 0.16) : "rgba(0, 0, 0, 0.05)",
                     borderRadius: "9999px",
-                    color: gradeSelected ? "#0071E3" : "#6E6E73",
+                    color: gradeSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted,
                     fontSize: "0.7rem",
-                    fontWeight: 700,
+                    fontWeight: 600,
                     lineHeight: 1,
                     px: 0.9,
                     py: 0.35,
@@ -253,7 +255,7 @@ export function StudentScopeNavigator({
                     dense
                     disablePadding
                     sx={{
-                      borderLeft: "1.5px solid rgba(0, 0, 0, 0.06)",
+                      borderLeft: `1.5px solid ${ergEnterpriseTokens.color.border}`,
                       ml: 2.25,
                       mt: 0.25,
                       pl: 0.75,
@@ -271,7 +273,7 @@ export function StudentScopeNavigator({
                           onClick={() => onSelectClass(classroom.name, grade)}
                           selected={isSelected}
                           sx={{
-                            bgcolor: isSelected ? "rgba(0, 113, 227, 0.09) !important" : "transparent",
+                            bgcolor: isSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                             borderRadius: "8px",
                             mb: 0.25,
                             minHeight: 34,
@@ -279,7 +281,7 @@ export function StudentScopeNavigator({
                             transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                             "&:hover": {
                               bgcolor: isSelected
-                                ? "rgba(0, 113, 227, 0.13) !important"
+                                ? `${alpha(ergEnterpriseTokens.color.primary, 0.13)} !important`
                                 : "rgba(0, 0, 0, 0.03)",
                             },
                             "&:active": {
@@ -293,7 +295,7 @@ export function StudentScopeNavigator({
                             slotProps={{
                               primary: {
                                 sx: {
-                                  color: isSelected ? "#0071E3" : "#1D1D1F",
+                                  color: isSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
                                   fontSize: "0.785rem",
                                   fontWeight: isSelected ? 750 : 600,
                                 },
@@ -301,7 +303,7 @@ export function StudentScopeNavigator({
                               secondary: {
                                 noWrap: true,
                                 sx: {
-                                  color: isSelected ? "rgba(0, 113, 227, 0.7)" : "#86868B",
+                                  color: isSelected ? alpha(ergEnterpriseTokens.color.primary, 0.7) : ergEnterpriseTokens.color.textMuted,
                                   fontSize: "0.685rem",
                                   fontWeight: 500,
                                 },
@@ -310,11 +312,11 @@ export function StudentScopeNavigator({
                           />
                           <Box
                             sx={{
-                              bgcolor: isSelected ? "#0071E3" : "rgba(0, 0, 0, 0.05)",
+                              bgcolor: isSelected ? ergEnterpriseTokens.color.primary : "rgba(0, 0, 0, 0.05)",
                               borderRadius: "9999px",
-                              color: isSelected ? "#FFFFFF" : "#6E6E73",
+                              color: isSelected ? "#FFFFFF" : ergEnterpriseTokens.color.textMuted,
                               fontSize: "0.68rem",
-                              fontWeight: 700,
+                              fontWeight: 600,
                               lineHeight: 1,
                               px: 0.75,
                               py: 0.25,
@@ -342,7 +344,7 @@ export function StudentScopeNavigator({
                   onClick={() => onSelectClass(classroom.name, classroom.grade)}
                   selected={isSelected}
                   sx={{
-                    bgcolor: isSelected ? "rgba(0, 113, 227, 0.09) !important" : "transparent",
+                    bgcolor: isSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                     borderRadius: "8px",
                     mb: 0.25,
                     minHeight: 36,
@@ -350,14 +352,14 @@ export function StudentScopeNavigator({
                   }}
                 >
                   <ListItemIcon sx={{ minWidth: 26 }}>
-                    <SchoolRoundedIcon sx={{ color: isSelected ? "#0071E3" : "#86868B", fontSize: 16 }} />
+                    <SchoolRoundedIcon sx={{ color: isSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.textMuted, fontSize: 16 }} />
                   </ListItemIcon>
                   <ListItemText
                     primary={classroom.name}
                     secondary={classroom.homeroomTeacher || "Chưa phân công"}
                     slotProps={{
                       primary: { sx: { fontSize: "0.8rem", fontWeight: isSelected ? 750 : 600 } },
-                      secondary: { sx: { fontSize: "0.7rem", color: "#86868B" } },
+                      secondary: { sx: { fontSize: "0.7rem", color: ergEnterpriseTokens.color.textMuted } },
                     }}
                   />
                 </ListItemButton>

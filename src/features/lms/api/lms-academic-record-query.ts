@@ -14,7 +14,7 @@ import {
 import type { UpsertAttendanceInput, UpsertGradebookScoreInput } from "@/lib/api/generated/graphql";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import {
   createOfflineTeachingCommandAdapter,
   type OfflineTeachingCommandResult,
@@ -60,7 +60,7 @@ export const lmsAcademicRecordQueryKeys = {
 };
 
 export function resolveAcademicRecordIdentity() {
-  const session = readStoredAuthSession("lms") as { accountId?: string | null; tenantId?: string | null } | null;
+  const session = getAuthScope("lms").session as { accountId?: string | null; tenantId?: string | null } | null;
   return {
     accountId: normalizeAccount(session?.accountId),
     tenantId: normalizeTenant(session?.tenantId),

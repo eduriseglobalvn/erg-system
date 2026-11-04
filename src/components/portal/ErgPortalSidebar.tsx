@@ -2,6 +2,7 @@
 
 import { Box, Drawer, IconButton } from "@mui/material";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import { alpha } from "@mui/material/styles";
 import { useLocation } from "@tanstack/react-router";
 import type { MenuGroup, PortalInfo } from "./ErgPortalLayout";
 import {
@@ -104,8 +105,8 @@ export default function ErgPortalSidebar({
             "&:active": { transform: "scale(0.92)", transition: "transform 80ms ease-out" },
             "&:hover": {
               background: "#FFFFFF",
-              borderColor: "rgba(0, 113, 227, 0.35)",
-              boxShadow: "0 3px 10px rgba(0, 113, 227, 0.18)",
+              borderColor: alpha(NAV_PRIMARY, 0.35),
+              boxShadow: `0 3px 10px ${alpha(NAV_PRIMARY, 0.18)}`,
               color: NAV_PRIMARY,
             },
           }}

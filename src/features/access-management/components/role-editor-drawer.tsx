@@ -16,6 +16,8 @@ import { useEffect, useMemo, useState } from "react";
 import { ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { usePermissionGroups, useRoleCommands, useRoleDetail } from "@/features/access-management/hooks/use-access-management";
 import type { SystemPermission } from "@/features/access-management/types/access-management";
+import { alpha } from "@mui/material/styles";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const SENSITIVE_PERMISSION = /(^users\.manage$|^rbac\.(role\.assign|override\.manage)$|password|\.publish$|\.export$)/i;
 
@@ -100,12 +102,12 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
         }}
       >
         {/* Header */}
-        <Box sx={{ alignItems: "center", borderBottom: "1px solid rgba(0, 0, 0, 0.06)", display: "flex", minHeight: 64, px: 3, py: 1.5 }}>
+        <Box sx={{ alignItems: "center", borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`, display: "flex", minHeight: 64, px: 3, py: 1.5 }}>
           <Box sx={{ flex: 1 }}>
-            <Typography sx={{ color: "#1D1D1F", fontSize: "1.2rem", fontWeight: 800, letterSpacing: "-0.015em" }}>
+            <Typography sx={{ color: "text.primary", fontSize: "1.2rem", fontWeight: 600, letterSpacing: "-0.015em" }}>
               {isCreate ? "Tạo nhóm quyền" : "Sửa nhóm quyền"}
             </Typography>
-            <Typography sx={{ color: "#86868B", fontSize: "0.78rem" }}>
+            <Typography sx={{ color: "text.disabled", fontSize: "0.78rem" }}>
               Role được cấu thành từ permission thật trong cơ sở dữ liệu.
             </Typography>
           </Box>
@@ -114,7 +116,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
             onClick={onClose}
             sx={{
               bgcolor: "rgba(0, 0, 0, 0.05)",
-              color: "#1D1D1F",
+              color: "text.primary",
               height: 32,
               width: 32,
               "&:hover": { bgcolor: "rgba(0, 0, 0, 0.09)", transform: "scale(1.05)" },
@@ -126,7 +128,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 
         {/* Form Body */}
         <Box sx={{ display: "grid", gap: 2.5, overflowY: "auto", p: 3 }}>
-          {roleQuery.isPending && !isCreate ? <><Skeleton height={56} sx={{ borderRadius: "10px" }} /><Skeleton height={96} sx={{ borderRadius: "10px" }} /></> : null}
+          {roleQuery.isPending && !isCreate ? <><Skeleton height={56} sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px` }} /><Skeleton height={96} sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px` }} /></> : null}
           {roleQuery.isError || groupsQuery.isError ? (
             <ErgErrorState title="Không tải được cấu hình quyền" description="Dữ liệu role và permission phải cùng đến từ backend." />
           ) : null}
@@ -159,12 +161,12 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
               <Box sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1 }}>
                 <Box
                   sx={{
-                    bgcolor: "rgba(0, 113, 227, 0.08)",
-                    border: "1px solid rgba(0, 113, 227, 0.18)",
+                    bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
+                    border: `1px solid ${alpha(ergEnterpriseTokens.color.primary, 0.18)}`,
                     borderRadius: "9999px",
-                    color: "#0071E3",
+                    color: "primary.main",
                     fontSize: "0.75rem",
-                    fontWeight: 700,
+                    fontWeight: 600,
                     px: 1.25,
                     py: 0.4,
                   }}
@@ -176,9 +178,9 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                     sx={{
                       bgcolor: "rgba(0, 0, 0, 0.05)",
                       borderRadius: "9999px",
-                      color: "#6E6E73",
+                      color: "text.secondary",
                       fontSize: "0.75rem",
-                      fontWeight: 650,
+                      fontWeight: 600,
                       px: 1.25,
                       py: 0.4,
                     }}
@@ -194,7 +196,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                       borderRadius: "9999px",
                       color: "#7E22CE",
                       fontSize: "0.75rem",
-                      fontWeight: 700,
+                      fontWeight: 600,
                       px: 1.25,
                       py: 0.4,
                     }}
@@ -214,7 +216,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 18 }} />
+                        <SearchRoundedIcon sx={{ color: "text.disabled", fontSize: 18 }} />
                       </InputAdornment>
                     ),
                   },
@@ -222,13 +224,13 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                 sx={{
                   "& .MuiOutlinedInput-root": {
                     bgcolor: "#FFFFFF",
-                    borderRadius: "10px",
+                    borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                     fontSize: "0.85rem",
-                    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.1)" },
+                    "& fieldset": { borderColor: "divider" },
                     "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.2)" },
                     "&.Mui-focused fieldset": {
-                      borderColor: "#0071E3",
-                      boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                      borderColor: "primary.main",
+                      boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                     },
                   },
                 }}
@@ -244,7 +246,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                     key={group.id}
                     sx={{
                       bgcolor: "#FFFFFF",
-                      border: "1px solid rgba(0, 0, 0, 0.06)",
+                      border: `1px solid ${ergEnterpriseTokens.color.border}`,
                       borderRadius: "14px",
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.02)",
                       overflow: "hidden",
@@ -254,7 +256,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                       sx={{
                         alignItems: "center",
                         bgcolor: "rgba(0, 0, 0, 0.02)",
-                        borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+                        borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
                         display: "flex",
                         px: 2,
                         py: 0.5,
@@ -266,15 +268,15 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                             checked={group.permissions.every((permission) => selected.has(permission.name))}
                             indeterminate={group.permissions.some((permission) => selected.has(permission.name)) && !group.permissions.every((permission) => selected.has(permission.name))}
                             onChange={() => toggleGroup(group.permissions)}
-                            sx={{ color: "#86868B", "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "#0071E3" } }}
+                            sx={{ color: "text.disabled", "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "primary.main" } }}
                           />
                         }
                         label={
                           <Box sx={{ py: 0.5 }}>
-                            <Typography sx={{ color: "#1D1D1F", fontSize: "0.85rem", fontWeight: 750 }}>
+                            <Typography sx={{ color: "text.primary", fontSize: "0.85rem", fontWeight: 600 }}>
                               {group.label}
                             </Typography>
-                            <Typography sx={{ color: "#86868B", fontSize: "0.72rem" }}>
+                            <Typography sx={{ color: "text.disabled", fontSize: "0.72rem" }}>
                               {group.name} · {group.permissions.length} quyền
                             </Typography>
                           </Box>
@@ -290,15 +292,15 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                             <Checkbox
                               checked={selected.has(permission.name)}
                               onChange={() => toggle(permission.name)}
-                              sx={{ color: "#86868B", "&.Mui-checked": { color: "#0071E3" } }}
+                              sx={{ color: "text.disabled", "&.Mui-checked": { color: "primary.main" } }}
                             />
                           }
                           label={
                             <Box sx={{ py: 0.75 }}>
-                              <Typography sx={{ color: "#1D1D1F", fontFamily: "var(--font-mono)", fontSize: "0.8rem", fontWeight: 700 }}>
+                              <Typography sx={{ color: "text.primary", fontFamily: "var(--font-mono)", fontSize: "0.8rem", fontWeight: 600 }}>
                                 {permission.name}
                               </Typography>
-                              <Typography sx={{ color: "#6E6E73", fontSize: "0.72rem" }}>
+                              <Typography sx={{ color: "text.secondary", fontSize: "0.72rem" }}>
                                 {permission.label}
                                 {permission.action ? ` · ${permission.action}` : ""}
                                 {SENSITIVE_PERMISSION.test(permission.name) ? " · ⚠️ Quyền nhạy cảm" : ""}
@@ -307,7 +309,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
                           }
                           sx={{
                             alignItems: "flex-start",
-                            borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
+                            borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
                             m: 0,
                             "&:last-child": { borderBottom: 0 },
                           }}
@@ -322,17 +324,17 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
         </Box>
 
         {/* Footer Actions */}
-        <Box sx={{ alignItems: "center", bgcolor: "#FFFFFF", borderTop: "1px solid rgba(0, 0, 0, 0.06)", display: "flex", gap: 1.25, justifyContent: "flex-end", mt: "auto", p: 2 }}>
+        <Box sx={{ alignItems: "center", bgcolor: "#FFFFFF", borderTop: `1px solid ${ergEnterpriseTokens.color.border}`, display: "flex", gap: 1.25, justifyContent: "flex-end", mt: "auto", p: 2 }}>
           <Button variant="contained"
             onClick={onClose}
             sx={{
-              borderRadius: "10px",
-              color: "#6E6E73",
+              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+              color: "text.secondary",
               fontSize: "0.85rem",
-              fontWeight: 650,
+              fontWeight: 600,
               px: 2,
               textTransform: "none",
-              "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "#1D1D1F" },
+              "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "text.primary" },
             }}
           >
             Hủy
@@ -342,19 +344,19 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
             onClick={requestSave}
             variant="contained"
             sx={{
-              bgcolor: "#0071E3",
-              borderRadius: "10px",
-              boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
+              bgcolor: "primary.main",
+              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
+              boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
               color: "#FFFFFF",
               fontSize: "0.85rem",
-              fontWeight: 650,
+              fontWeight: 600,
               px: 2.5,
               py: 0.85,
               textTransform: "none",
               transition: "all 0.15s ease",
               "&:hover": {
-                bgcolor: "#0077ED",
-                boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
+                bgcolor: "primary.dark",
+                boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
               },
             }}
           >
@@ -380,20 +382,20 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 const appleInputSx = {
   "& .MuiOutlinedInput-root": {
     bgcolor: "#FFFFFF",
-    borderRadius: "10px",
+    borderRadius: `${ergEnterpriseTokens.radius.md}px`,
     fontSize: "0.85rem",
     fontWeight: 550,
-    "& fieldset": { borderColor: "rgba(0, 0, 0, 0.12)" },
+    "& fieldset": { borderColor: "divider" },
     "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.22)" },
     "&.Mui-focused fieldset": {
-      borderColor: "#0071E3",
-      boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+      borderColor: "primary.main",
+      boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
     },
   },
   "& .MuiInputLabel-root": {
-    color: "#6E6E73",
+    color: "text.secondary",
     fontSize: "0.85rem",
-    fontWeight: 650,
-    "&.Mui-focused": { color: "#0071E3" },
+    fontWeight: 600,
+    "&.Mui-focused": { color: "primary.main" },
   },
 };

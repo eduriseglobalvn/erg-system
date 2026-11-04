@@ -14,15 +14,14 @@ import { AUDIT_PAGE_SIZE, type AuditFilters } from "@/features/audit/types/audit
 import { hasApiBase, isBffAuthEnabled } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
-import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
 
 export function AuditTrailWorkspace({ scopeId }: { scopeId?: string }) {
   const [filters, setFilters] = useState<AuditFilters>({ page: 0, size: AUDIT_PAGE_SIZE });
   const tenantId = getDefaultTenantId();
   const accountId = getCurrentAccount("lcms")?.id?.trim() || "bff-session";
-  const session = readStoredAuthSession("lcms");
+  const session = getAuthScope("lcms").session;
   const canRead = isBffAuthEnabled() || evaluatePermission({ permission: "lms.school.read", grantedPermissions: session?.permissions ?? [], deniedPermissions: session?.deniedPermissions ?? [] });
   const eventsQuery = useQuery({
     queryKey: auditQueryKeys.events(tenantId, accountId, "ADMIN", scopeId, filters),

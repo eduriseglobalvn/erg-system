@@ -57,14 +57,14 @@ export function AttendanceCurriculumTable({ controller }: { controller: Attendan
   );
 }
 
-const planNoticeStyle = { backgroundColor: "#EEF6FF", borderBottom: "1px solid #D9E2EF", color: "#0F6CBD", fontSize: 12, fontWeight: 700, padding: "8px 10px" };
+const planNoticeStyle = { backgroundColor: "#EEF6FF", borderBottom: "1px solid #D9E2EF", color: "#0F6CBD", fontSize: 12, fontWeight: 600, padding: "8px 10px" };
 
 const curriculumTitleCellStyle = {
   background: "linear-gradient(180deg, #FFFFFF 0%, #F7F8FF 100%)",
   border: "1px solid #D9E2EF",
   color: "#1C252E",
   fontSize: 15,
-  fontWeight: 800,
+  fontWeight: 600,
   lineHeight: "22px",
   padding: "7px 10px 4px",
   textAlign: "center" as const,
@@ -77,7 +77,7 @@ const curriculumHeadCellStyle = (width?: string | number) => ({
   border: "1px solid #D9E2EF",
   color: "#52616F",
   fontSize: 12,
-  fontWeight: 700,
+  fontWeight: 600,
   lineHeight: "18px",
   padding: "2px 6px",
   textAlign: "center" as const,
@@ -89,7 +89,7 @@ const curriculumTopicCellStyle = {
   border: "1px solid #D9E2EF",
   color: "#334155",
   fontSize: 12,
-  fontWeight: 700,
+  fontWeight: 600,
   lineHeight: "18px",
   padding: "2px 6px",
   textAlign: "center" as const,

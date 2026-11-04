@@ -78,7 +78,7 @@ export function MultipleResponseQuestion({
               borderRadius: "10px",
               color: "#0F6CBD",
               fontSize: 13.5,
-              fontWeight: 750,
+              fontWeight: 600,
               minHeight: 42,
               px: 2.5,
               py: 0.75,

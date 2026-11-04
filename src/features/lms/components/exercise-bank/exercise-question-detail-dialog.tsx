@@ -379,7 +379,7 @@ export function ExerciseQuestionDetailDialog({
               borderRadius: "8px",
               px: 2.5,
               fontSize: "12px",
-              fontWeight: 700,
+              fontWeight: 600,
               textTransform: "none",
               bgcolor: "#0F6CBD",
               boxShadow: "0 1px 3px rgba(15, 108, 189, 0.25)",

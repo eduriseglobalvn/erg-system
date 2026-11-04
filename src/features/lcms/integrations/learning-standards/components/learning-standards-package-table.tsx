@@ -46,7 +46,7 @@ export function LearningStandardsPackageTable({ packages, isLoading, isError, ca
             {packages.map((value) => (
               <TableRow hover key={value.id}>
                 <TableCell>
-                  <Typography sx={{ fontWeight: 800 }} variant="body2">{value.title}</Typography>
+                  <Typography sx={{ fontWeight: 600 }} variant="body2">{value.title}</Typography>
                   <Typography color="text.secondary" variant="caption">{value.id} · {value.packageVersion}</Typography>
                   {value.quarantineReason ? <Typography color="error.main" variant="caption">{value.quarantineReason}</Typography> : null}
                 </TableCell>

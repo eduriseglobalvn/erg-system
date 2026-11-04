@@ -55,7 +55,7 @@ export function AuthWorkspace() {
 
       <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", mx: "auto", maxWidth: 460, pb: { xs: 5, sm: 7 }, position: "relative", pt: 2, width: "100%", zIndex: 10 }}>
         {auth.notice ? (
-          <Alert severity={auth.notice.tone === "success" ? "success" : auth.notice.tone === "error" ? "error" : "info"} sx={{ backdropFilter: "blur(16px)", boxShadow: "0 16px 34px rgba(57,78,124,0.1)", fontSize: 14, fontWeight: 700, mb: 2 }}>
+          <Alert severity={auth.notice.tone === "success" ? "success" : auth.notice.tone === "error" ? "error" : "info"} sx={{ backdropFilter: "blur(16px)", boxShadow: "0 16px 34px rgba(57,78,124,0.1)", fontSize: 14, fontWeight: 600, mb: 2 }}>
             {auth.notice.message}
           </Alert>
         ) : null}

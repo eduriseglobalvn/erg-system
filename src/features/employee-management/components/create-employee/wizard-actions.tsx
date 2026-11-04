@@ -4,6 +4,7 @@ import DialogActions from "@mui/material/DialogActions";
 
 import { appleDesign } from "@/features/employee-management/components/apple-ui-tokens";
 import { steps } from "@/features/employee-management/components/create-employee/constants";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function WizardActions({
   isPending,
@@ -36,9 +37,9 @@ export function WizardActions({
           onClick={onClose}
           sx={{
             bgcolor: `${appleDesign.colors.blue} !important`,
-            borderRadius: "10px",
+            borderRadius: `${ergEnterpriseTokens.radius.md}px`,
             boxShadow: appleDesign.shadows.button,
-            fontWeight: 650,
+            fontWeight: 600,
             textTransform: "none",
             "&:hover": { bgcolor: `${appleDesign.colors.blueHover} !important` },
           }}
@@ -52,9 +53,9 @@ export function WizardActions({
             onClick={() => setStep((value) => Math.max(0, value - 1))}
             disabled={step === 0}
             sx={{
-              borderRadius: "10px",
+              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
               color: `${appleDesign.colors.textSecondary} !important`,
-              fontWeight: 650,
+              fontWeight: 600,
               px: 2,
               textTransform: "none",
               "&:hover": {
@@ -75,10 +76,10 @@ export function WizardActions({
               disabled={!valid}
               sx={{
                 bgcolor: `${appleDesign.colors.blue} !important`,
-                borderRadius: "10px",
+                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                 boxShadow: appleDesign.shadows.button,
                 color: "#FFFFFF !important",
-                fontWeight: 650,
+                fontWeight: 600,
                 px: 2.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: `${appleDesign.colors.blueHover} !important` },
@@ -99,10 +100,10 @@ export function WizardActions({
               startIcon={isPending ? <CircularProgress size={16} sx={{ color: "#FFFFFF" }} /> : undefined}
               sx={{
                 bgcolor: `${appleDesign.colors.blue} !important`,
-                borderRadius: "10px",
+                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
                 boxShadow: appleDesign.shadows.button,
                 color: "#FFFFFF !important",
-                fontWeight: 650,
+                fontWeight: 600,
                 px: 2.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: `${appleDesign.colors.blueHover} !important` },

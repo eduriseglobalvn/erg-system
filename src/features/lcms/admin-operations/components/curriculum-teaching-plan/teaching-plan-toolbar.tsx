@@ -43,7 +43,7 @@ export function TeachingPlanToolbar({
           sx={{
             textTransform: "none",
             fontSize: 12.5,
-            fontWeight: 700,
+            fontWeight: 600,
             bgcolor: "#0F6CBD",
             color: "#FFFFFF",
             borderRadius: 1.5,
@@ -152,7 +152,7 @@ export function TeachingPlanToolbar({
           sx={{
             textTransform: "none",
             fontSize: 12.5,
-            fontWeight: 700,
+            fontWeight: 600,
             color: "#0F6CBD",
             bgcolor: "#EFF6FF",
             borderColor: "#BFDBFE",

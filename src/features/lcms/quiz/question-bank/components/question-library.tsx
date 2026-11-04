@@ -14,6 +14,8 @@ import type { QuestionBankApiData } from "@/features/lcms/quiz/question-bank/api
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { alpha } from "@mui/material/styles";
 
 export function QuestionLibrary({
   copy,
@@ -51,7 +53,7 @@ export function QuestionLibrary({
       elevation={0}
       sx={{
         bgcolor: "#FFFFFF",
-        border: "1px solid rgba(0, 0, 0, 0.06)",
+        border: `1px solid ${ergEnterpriseTokens.color.border}`,
         borderRadius: "16px",
         boxShadow: "0 2px 10px rgba(0, 0, 0, 0.03), 0 10px 24px -4px rgba(0, 0, 0, 0.05)",
         overflow: "hidden",
@@ -61,7 +63,7 @@ export function QuestionLibrary({
       <Box
         sx={{
           alignItems: { xs: "stretch", md: "center" },
-          borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+          borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           gap: 2,
@@ -70,10 +72,10 @@ export function QuestionLibrary({
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: "#1D1D1F", fontSize: "1rem", fontWeight: 750, letterSpacing: "-0.01em" }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
             {copy.libraryTitle}
           </Typography>
-          <Typography sx={{ color: "#86868B", fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
             {copy.libraryDescription(page.totalItems)}
           </Typography>
         </Box>
@@ -88,7 +90,7 @@ export function QuestionLibrary({
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchRoundedIcon sx={{ color: "#86868B", fontSize: 19 }} />
+                  <SearchRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 19 }} />
                 </InputAdornment>
               ),
               sx: {
@@ -97,11 +99,11 @@ export function QuestionLibrary({
                 fontSize: "0.85rem",
                 transition: "all 0.15s ease",
                 width: { md: 320, xs: "100%" },
-                "& fieldset": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                "& fieldset": { borderColor: ergEnterpriseTokens.color.border },
                 "&:hover fieldset": { borderColor: "rgba(0, 0, 0, 0.18)" },
                 "&.Mui-focused fieldset": {
-                  borderColor: "#0071E3",
-                  boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.15)",
+                  borderColor: ergEnterpriseTokens.color.primary,
+                  boxShadow: `0 0 0 3px ${alpha(ergEnterpriseTokens.color.primary, 0.15)}`,
                 },
               },
             },
@@ -115,11 +117,11 @@ export function QuestionLibrary({
           sx={{
             alignItems: "center",
             bgcolor: "rgba(250, 250, 252, 0.95)",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-            color: "#86868B",
+            borderBottom: `1px solid ${ergEnterpriseTokens.color.border}`,
+            color: ergEnterpriseTokens.color.textMuted,
             display: "grid",
             fontSize: "0.72rem",
-            fontWeight: 700,
+            fontWeight: 600,
             gap: 0,
             gridTemplateColumns: {
               xs: "44px minmax(0, 1fr) 80px",
@@ -146,7 +148,7 @@ export function QuestionLibrary({
               color: "rgba(0, 0, 0, 0.25)",
               justifySelf: "center",
               p: 0.5,
-              "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "#0071E3" },
+              "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: ergEnterpriseTokens.color.primary },
             }}
           />
           <span>{copy.table.question}</span>
@@ -192,9 +194,9 @@ export function QuestionLibrary({
               <Box
                 sx={{
                   alignItems: "center",
-                  bgcolor: "rgba(0, 113, 227, 0.08)",
+                  bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                   borderRadius: "50%",
-                  color: "#0071E3",
+                  color: ergEnterpriseTokens.color.primary,
                   display: "flex",
                   height: 56,
                   justifyContent: "center",
@@ -203,10 +205,10 @@ export function QuestionLibrary({
               >
                 <QuizOutlinedIcon sx={{ fontSize: 28 }} />
               </Box>
-              <Typography sx={{ color: "#1D1D1F", fontSize: "0.95rem", fontWeight: 750 }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "0.95rem", fontWeight: 600 }}>
                 {copy.noResults}
               </Typography>
-              <Typography sx={{ color: "#86868B", fontSize: "0.825rem", maxWidth: 420, lineHeight: 1.45 }}>
+              <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", maxWidth: 420, lineHeight: 1.45 }}>
                 Không tìm thấy câu hỏi nào phù hợp với bộ lọc hoặc từ khóa tìm kiếm. Hãy thử đổi môn học hoặc xóa từ khóa.
               </Typography>
             </Box>
@@ -228,7 +230,7 @@ export function QuestionLibrary({
                   }}
                   sx={{
                     alignItems: "center",
-                    bgcolor: selected ? "rgba(0, 113, 227, 0.04)" : "#FFFFFF",
+                    bgcolor: selected ? alpha(ergEnterpriseTokens.color.primary, 0.04) : "#FFFFFF",
                     borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
                     cursor: "pointer",
                     display: "grid",
@@ -244,7 +246,7 @@ export function QuestionLibrary({
                       py: 1.2,
                     },
                     "&:hover": {
-                      bgcolor: selected ? "rgba(0, 113, 227, 0.07)" : "rgba(0, 113, 227, 0.025)",
+                      bgcolor: selected ? alpha(ergEnterpriseTokens.color.primary, 0.07) : alpha(ergEnterpriseTokens.color.primary, 0.025),
                     },
                   }}
                 >
@@ -257,7 +259,7 @@ export function QuestionLibrary({
                       sx={{
                         color: "rgba(0, 0, 0, 0.25)",
                         p: 0.5,
-                        "&.Mui-checked": { color: "#0071E3" },
+                        "&.Mui-checked": { color: ergEnterpriseTokens.color.primary },
                       }}
                     />
                   </Box>
@@ -266,10 +268,10 @@ export function QuestionLibrary({
                     <Typography
                       title={question.stem}
                       sx={{
-                        color: "#1D1D1F",
+                        color: ergEnterpriseTokens.color.text,
                         display: "-webkit-box",
                         fontSize: "0.875rem",
-                        fontWeight: 650,
+                        fontWeight: 600,
                         lineHeight: 1.45,
                         overflow: "hidden",
                         WebkitBoxOrient: "vertical",
@@ -281,7 +283,7 @@ export function QuestionLibrary({
                     <Stack direction="row" spacing={0.75} sx={{ alignItems: "center", mt: 0.4, minWidth: 0 }}>
                       <Typography
                         sx={{
-                          color: "#86868B",
+                          color: ergEnterpriseTokens.color.textMuted,
                           flex: "0 1 auto",
                           fontSize: "0.76rem",
                           fontWeight: 500,
@@ -296,11 +298,11 @@ export function QuestionLibrary({
                       <Box
                         component="span"
                         sx={{
-                          bgcolor: "rgba(0, 113, 227, 0.08)",
+                          bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08),
                           borderRadius: "4px",
-                          color: "#0071E3",
+                          color: ergEnterpriseTokens.color.primary,
                           fontSize: "0.7rem",
-                          fontWeight: 700,
+                          fontWeight: 600,
                           px: 0.75,
                           py: 0.15,
                         }}
@@ -318,7 +320,7 @@ export function QuestionLibrary({
                         borderRadius: "6px",
                         color: "#48484A",
                         fontSize: "0.76rem",
-                        fontWeight: 650,
+                        fontWeight: 600,
                         overflow: "hidden",
                         px: 1,
                         py: 0.35,
@@ -340,13 +342,13 @@ export function QuestionLibrary({
                       onClick={() => onEditQuestion(question)}
                       sx={{
                         borderRadius: "8px",
-                        color: "#0071E3",
+                        color: ergEnterpriseTokens.color.primary,
                         fontSize: "0.8rem",
-                        fontWeight: 700,
+                        fontWeight: 600,
                         minWidth: 0,
                         px: 1,
                         textTransform: "none",
-                        "&:hover": { bgcolor: "rgba(0, 113, 227, 0.08)" },
+                        "&:hover": { bgcolor: alpha(ergEnterpriseTokens.color.primary, 0.08) },
                       }}
                     >
                       {copy.editQuestion}
@@ -362,7 +364,7 @@ export function QuestionLibrary({
         <Box
           sx={{
             alignItems: { xs: "stretch", sm: "center" },
-            borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+            borderTop: `1px solid ${ergEnterpriseTokens.color.border}`,
             display: "flex",
             flexDirection: { xs: "column", sm: "row" },
             gap: 1.5,
@@ -370,7 +372,7 @@ export function QuestionLibrary({
             p: 2,
           }}
         >
-          <Typography sx={{ color: "#86868B", fontSize: "0.8rem", fontWeight: 550 }}>
+          <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8rem", fontWeight: 550 }}>
             {copy.pageSummary(page.page + 1, Math.max(page.totalPages, 1), page.totalItems)}
           </Typography>
           <Stack direction="row" spacing={1} sx={{ justifyContent: "flex-end" }}>
@@ -382,13 +384,13 @@ export function QuestionLibrary({
               sx={{
                 borderColor: "rgba(0, 0, 0, 0.12)",
                 borderRadius: "9px",
-                color: "#1D1D1F",
+                color: ergEnterpriseTokens.color.text,
                 fontSize: "0.8rem",
-                fontWeight: 650,
+                fontWeight: 600,
                 px: 1.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
-                "&.Mui-disabled": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                "&.Mui-disabled": { borderColor: ergEnterpriseTokens.color.border },
               }}
             >
               {copy.previousPage}
@@ -401,13 +403,13 @@ export function QuestionLibrary({
               sx={{
                 borderColor: "rgba(0, 0, 0, 0.12)",
                 borderRadius: "9px",
-                color: "#1D1D1F",
+                color: ergEnterpriseTokens.color.text,
                 fontSize: "0.8rem",
-                fontWeight: 650,
+                fontWeight: 600,
                 px: 1.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
-                "&.Mui-disabled": { borderColor: "rgba(0, 0, 0, 0.06)" },
+                "&.Mui-disabled": { borderColor: ergEnterpriseTokens.color.border },
               }}
             >
               {copy.nextPage}

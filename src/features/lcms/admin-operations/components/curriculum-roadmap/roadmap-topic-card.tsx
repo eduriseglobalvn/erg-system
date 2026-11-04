@@ -70,13 +70,13 @@ export function RoadmapTopicCard({
             sx={{
               height: 22,
               fontSize: 11,
-              fontWeight: 800,
+              fontWeight: 600,
               bgcolor: isTopicSelected ? "#0F6CBD" : "#EFF6FF",
               color: isTopicSelected ? "#FFFFFF" : "#1D4ED8",
               borderRadius: 1,
             }}
           />
-          <Typography noWrap sx={{ color: "#0F172A", fontSize: 13.5, fontWeight: 750 }}>
+          <Typography noWrap sx={{ color: "#0F172A", fontSize: 13.5, fontWeight: 600 }}>
             {topic.title}
           </Typography>
           <Typography sx={{ color: "#64748B", fontSize: 11.5, fontWeight: 500, ml: 0.5 }}>
@@ -94,7 +94,7 @@ export function RoadmapTopicCard({
               onClick={() => actions.onCreateLesson(targetFolder)}
               sx={{
                 fontSize: 11.5,
-                fontWeight: 700,
+                fontWeight: 600,
                 py: 0.35,
                 px: 1.25,
                 textTransform: "none",
@@ -161,7 +161,7 @@ export function RoadmapTopicCard({
                 sx={{
                   color: "#0F6CBD",
                   fontSize: 11.5,
-                  fontWeight: 700,
+                  fontWeight: 600,
                   textTransform: "none",
                   py: 0.25,
                   "&:hover": { bgcolor: "rgba(15, 108, 189, 0.06)" },
@@ -183,7 +183,7 @@ export function RoadmapTopicCard({
               onClick={() => actions.onCreateLesson(targetFolder)}
               sx={{
                 fontSize: 11.5,
-                fontWeight: 700,
+                fontWeight: 600,
                 textTransform: "none",
                 borderColor: "#BFDBFE",
                 color: "#0F6CBD",

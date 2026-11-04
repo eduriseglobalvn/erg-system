@@ -4,6 +4,7 @@ import Table, { type TableProps } from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type ErgDataTableShellProps = PaperProps & {
   footer?: ReactNode;
@@ -61,9 +62,9 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
         {title ? (
           <Typography
             sx={{
-              color: "#1D1D1F",
+              color: "text.primary",
               fontSize: "1.05rem",
-              fontWeight: 800,
+              fontWeight: 600,
               letterSpacing: "-0.015em",
             }}
             variant="subtitle1"
@@ -74,7 +75,7 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
         {meta ? (
           <Typography
             sx={{
-              color: "#86868B",
+              color: "text.secondary",
               fontSize: "0.8rem",
               fontWeight: 500,
               mt: 0.25,
@@ -104,23 +105,23 @@ export function ErgTable({ sx, ...props }: TableProps) {
           "& .MuiTableCell-head": {
             bgcolor: "rgba(250, 250, 252, 0.96)",
             borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-            color: "#86868B",
+            color: "text.secondary",
             fontSize: "0.72rem",
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: "0.04em",
             py: 1.35,
             textTransform: "uppercase",
           },
           "& .MuiTableCell-body": {
             borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
-            color: "#1D1D1F",
+            color: "text.primary",
             fontSize: "0.85rem",
             py: 1.35,
           },
           "& .MuiTableRow-hover": {
             transition: "background-color 0.12s ease",
             "&:hover": {
-              bgcolor: "rgba(0, 113, 227, 0.035) !important",
+              bgcolor: `${ergEnterpriseTokens.color.primarySofter} !important`,
             },
           },
         },
