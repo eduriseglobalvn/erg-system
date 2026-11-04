@@ -5,18 +5,12 @@ import {
   loadQuizQuestionAnalytics,
 } from "@/features/lcms/quiz/quiz-reports/api/quiz-report-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
+import { quizReportQueryKeys } from "@/lib/quiz-report-query-keys";
 
 export const QUIZ_REPORT_STALE_TIME_MS = 60_000;
 export const QUIZ_REPORT_GC_TIME_MS = 30 * 60_000;
 
-export const quizReportQueryKeys = {
-  root: ["quiz-reports"] as const,
-  reportTenantRoot: (tenantId: string = getDefaultTenantId()) => [...quizReportQueryKeys.root, tenantId] as const,
-  assignmentReport: (assignmentId: string, tenantId: string = getDefaultTenantId()) =>
-    [...quizReportQueryKeys.reportTenantRoot(tenantId), "assignment-report", assignmentId] as const,
-  questionAnalytics: (quizVersionId: string, tenantId: string = getDefaultTenantId()) =>
-    [...quizReportQueryKeys.reportTenantRoot(tenantId), "question-analytics", quizVersionId] as const,
-};
+export { quizReportQueryKeys };
 
 export function quizQuestionAnalyticsQueryOptions(
   quizVersionId: string,

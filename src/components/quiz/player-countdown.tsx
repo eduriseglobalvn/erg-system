@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from "react";
 
-import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime";
+import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
 import { serverNowMs } from "@/components/quiz/player-shell-utils";
 
 type PlayerCountdownProps = {

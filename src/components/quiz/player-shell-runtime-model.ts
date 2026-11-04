@@ -1,4 +1,4 @@
-import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime";
+import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
 import type {
   AnswerPayload,
   AnswerRecord,

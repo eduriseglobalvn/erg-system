@@ -1,0 +1,43 @@
+export const navButtonClass =
+  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-transparent px-4 text-xs font-extrabold text-white shadow-[0_12px_26px_rgba(0,0,136,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_30px_rgba(0,0,136,0.22)] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
+export const secondaryButtonClass =
+  "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
+export const playerViewportClass = "lg:h-[calc(100vh-3.75rem)]";
+
+export function timerTone(seconds: number) {
+  return seconds <= 60 ? "bg-rose-50 text-rose-600 ring-1 ring-rose-200" : "bg-slate-100 text-slate-700";
+}
+
+export function buildPlayerStyles(isTrainingMode: boolean) {
+  const playerCardStyle = {
+    backgroundColor: "var(--quiz-player-bg)",
+    borderColor: "var(--quiz-canvas-border)",
+  };
+  const canvasStyle = {
+    backgroundColor: "var(--quiz-player-bg)",
+    borderColor: "var(--quiz-canvas-border)",
+  };
+  const headerStyle = {
+    background: "var(--quiz-header-bg)",
+    color: "var(--quiz-header-text)",
+  };
+  const accentButtonStyle = {
+    backgroundColor: "#000088",
+    boxShadow: "0 10px 24px rgba(0,0,136,0.18)",
+  };
+  const secondaryButtonStyle = {
+    borderColor: "rgba(0,0,136,0.18)",
+    backgroundColor: "rgba(255,255,255,0.72)",
+    color: "#000088",
+  };
+  const modeBadgeStyle = isTrainingMode
+    ? {
+        backgroundColor: "rgba(0,0,136,0.08)",
+        color: "#000088",
+      }
+    : {
+        backgroundColor: "rgba(232,40,40,0.10)",
+        color: "#b91c1c",
+      };
+  return { playerCardStyle, canvasStyle, headerStyle, accentButtonStyle, secondaryButtonStyle, modeBadgeStyle };
+}

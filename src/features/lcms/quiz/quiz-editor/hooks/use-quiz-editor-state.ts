@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 
-import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tr } from "@/platform/i18n";
@@ -10,51 +9,43 @@ import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/a
 import {
   createEmptyQuizEditorGroups,
   createNewQuizProjectSettings,
-  createMockChoice,
-  createMockFeedbackRows,
-  createMockFinalSlideOptions,
   createMockPlayerTemplate,
-  createMockQuestionOptions,
   createMockResultSlide,
 } from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
+import {
+  appendSlideToGroups,
+  appendSlidesToGroup,
+  buildSlideNumberMap,
+  countQuestionsByGroup,
+  duplicateSlidesInGroups,
+  filterGroupsByKeyword,
+  getFirstNode,
+  insertGroupAfter,
+  insertSlideAfter,
+  markSlidesPublished,
+  markUnsavedSlidesAsDraft,
+  moveGroupTo,
+  moveSlideTo,
+  removeSlideFromGroup,
+  removeSlidesFromGroups,
+  replaceGroupSlides,
+  type QuizEditorClipboard,
+} from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-groups";
+import {
+  buildIntroductionSlide,
+  buildQuestionSlide,
+} from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
+import { useSelectedSlideUpdaters } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/use-selected-slide-updaters";
 import type {
   IntroSlideKind,
   QuestionCreationPreset,
   QuestionType,
-  QuizEditorChoice,
-  QuizEditorDragDropItem,
-  QuizEditorElementOffset,
-  QuizEditorFeedbackRow,
-  QuizEditorFinalSlideOptions,
   QuizEditorGroup,
   QuizEditorSlide,
-  QuizEditorSlideOptions,
-  QuizEditorTextStyle,
-  QuizEditorTextStyles,
   QuizPlayerTemplate,
   QuizProjectSettings,
   SelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-
-function createChoice(id: string, label: string, correct = false): QuizEditorChoice {
-  return createMockChoice(id, label, correct);
-}
-
-function createFeedbackRows(correct: string, incorrect: string): QuizEditorFeedbackRow[] {
-  return createMockFeedbackRows(correct, incorrect);
-}
-
-function createQuestionOptions(
-  patch: Partial<QuizEditorSlideOptions> = {},
-): QuizEditorSlideOptions {
-  return createMockQuestionOptions(patch);
-}
-
-function createFinalSlideOptions(): QuizEditorFinalSlideOptions {
-  return createMockFinalSlideOptions();
-}
-
 
 export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocument | null) {
   const nextIdRef = useRef(1000);
@@ -63,27 +54,13 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
   const [quizProject, setQuizProject] = useState<QuizProjectSettings>(() => initialDraftDocument?.settings ?? createNewQuizProjectSettings());
   const [playerTemplate, setPlayerTemplate] = useState<QuizPlayerTemplate>(() => initialDraftDocument?.playerTemplate ?? createMockPlayerTemplate());
   const [selectedThemeId, setSelectedThemeId] = useState(defaultQuizTheme.id);
-  const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(() => {
-    if (initialDraftDocument?.tree?.length) {
-      const firstGroup = initialDraftDocument.tree[0];
-      const firstSlide = firstGroup?.slides[0];
-      if (firstGroup && firstSlide) {
-        return { type: "slide", groupId: firstGroup.id, slideId: firstSlide.id };
-      }
-      if (firstGroup) {
-        return { type: "group", groupId: firstGroup.id };
-      }
-    }
-    return { type: "group", groupId: "group-1" };
-  });
+  const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(() =>
+    getFirstNode(initialDraftDocument?.tree),
+  );
   const [searchValue, setSearchValue] = useState("");
   const debouncedSearchValue = useDebouncedValue(searchValue);
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<string[]>([]);
-  const [clipboard, setClipboard] = useState<
-    | { type: "group"; payload: QuizEditorGroup }
-    | { type: "slide"; payload: QuizEditorSlide }
-    | null
-  >(null);
+  const [clipboard, setClipboard] = useState<QuizEditorClipboard>(null);
 
   const activeGroupId = selectedNode.type === "result" ? null : selectedNode.groupId;
 
@@ -101,13 +78,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     return selectedGroup?.slides.find((slide) => slide.id === selectedNode.slideId) ?? null;
   }, [resultSlide, selectedGroup, selectedNode]);
 
-  const slideNumberMap = useMemo(
-    () =>
-      Object.fromEntries(
-        groups.flatMap((group) => group.slides).map((slide, index) => [slide.id, index + 1]),
-      ),
-    [groups],
-  );
+  const slideNumberMap = useMemo(() => buildSlideNumberMap(groups), [groups]);
 
   const totalSlides = Object.keys(slideNumberMap).length;
 
@@ -150,23 +121,9 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     };
 
     setGroups((currentGroups) => {
-      const targetGroup = currentGroups.find((g) => g.id === resolvedGroupId) ?? currentGroups[0];
-      if (!targetGroup) {
-        resolvedGroupId = "group-1";
-        return [
-          {
-            id: "group-1",
-            title: "Nhóm câu hỏi 1",
-            rule: "all",
-            randomCount: 0,
-            slides: [slideToInsert],
-          },
-        ];
-      }
-      resolvedGroupId = targetGroup.id;
-      return currentGroups.map((group) =>
-        group.id === targetGroup.id ? { ...group, slides: [...group.slides, slideToInsert] } : group,
-      );
+      const result = appendSlideToGroups(currentGroups, resolvedGroupId, slideToInsert);
+      resolvedGroupId = result.groupId;
+      return result.groups;
     });
     setSelectedNode({ type: "slide", groupId: resolvedGroupId, slideId: slideToInsert.id });
   }
@@ -191,11 +148,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     const targetGroupId = resolveTargetGroupId();
     const importedSlides = createSlidesFromQuestionBank(questions);
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === targetGroupId ? { ...group, slides: [...group.slides, ...importedSlides] } : group,
-      ),
-    );
+    setGroups((currentGroups) => appendSlidesToGroup(currentGroups, targetGroupId, importedSlides));
     setSelectedNode({ type: "slide", groupId: targetGroupId, slideId: importedSlides[0]!.id });
   }
 
@@ -203,25 +156,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     const importedSlides = createSlidesFromQuestionBank(questions);
     const selectedGroupId = groups.find((group) => group.id === "group-1")?.id ?? groups.find((group) => group.id !== "group-intro")?.id ?? "group-1";
 
-    setGroups((currentGroups) => {
-      const hasQuestionGroup = currentGroups.some((group) => group.id === selectedGroupId);
-      const nextGroups = currentGroups.map((group) => {
-        if (group.id !== selectedGroupId) return group;
-        return { ...group, title, slides: importedSlides };
-      });
-
-      if (hasQuestionGroup) return nextGroups;
-      return [
-        ...nextGroups,
-        {
-          id: selectedGroupId,
-          title,
-          rule: "all",
-          randomCount: 0,
-          slides: importedSlides,
-        },
-      ];
-    });
+    setGroups((currentGroups) => replaceGroupSlides(currentGroups, selectedGroupId, title, importedSlides));
 
     setSelectedNode(
       importedSlides[0]
@@ -229,86 +164,13 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
         : { type: "group", groupId: selectedGroupId },
     );
   }
+
   function addQuestion(type: QuestionType, preset?: QuestionCreationPreset) {
-    const defaultFeedbackRows = createFeedbackRows(
-      quizProject.questionDefaults.correctFeedback,
-      quizProject.questionDefaults.incorrectFeedback,
-    ).map((row) =>
-      row.kind === "correct"
-        ? { ...row, score: quizProject.questionDefaults.positivePoints }
-        : { ...row, score: quizProject.questionDefaults.negativePoints },
-    );
-
-    const choices =
-      preset === "yes-no"
-        ? [
-            createChoice(createId("choice"), tr("player.yes"), true),
-            createChoice(createId("choice"), tr("player.no"), false),
-          ]
-        : [
-            createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
-            createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
-            createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
-          ];
-
-    const isMatchQuestion = type === "matching" || type === "drag-and-drop";
-    const matchItems: QuizEditorDragDropItem[] = [
-      {
-        id: createId("item"),
-        label: "",
-        emoji: "",
-        target: "",
-        media: null,
-        targetMedia: null,
-      },
-    ];
-
-    insertSlide({
-      id: createId("slide"),
-      title: isMatchQuestion ? "" : tr("quiz.newQuestionTitle"),
-      kind: type,
-      textStyle: {
-        ...defaultQuizTextStyle,
-        fontFamily: quizProject.questionDefaults.questionFont,
-      },
-      textStyles: {
-        answer: {
-          fontFamily: quizProject.questionDefaults.answerFont,
-        },
-      },
-      choiceControlType: type === "multiple-choice" || type === "true-false" ? "radio" : "checkbox",
-      choices: isMatchQuestion ? [] : choices,
-      dragDropItems: isMatchQuestion ? matchItems : undefined,
-      feedbackRows: defaultFeedbackRows,
-      options: createQuestionOptions({
-        shuffleAnswers: quizProject.questionDefaults.shuffleAnswers,
-        matchingAuthoringMode: isMatchQuestion ? "edit" : undefined,
-      }),
-    });
+    insertSlide(buildQuestionSlide(type, preset, quizProject, createId));
   }
 
   function addIntroduction(type: IntroSlideKind) {
-    const titleByType: Record<IntroSlideKind, string> = {
-      "intro-slide": tr("quiz.introWelcome"),
-      "user-info": tr("quiz.userInfo"),
-      "instruction-slide": tr("quiz.introInstruction"),
-    };
-
-    insertSlide({
-      id: createId("slide"),
-      title: titleByType[type],
-      kind: type,
-      instructions: [
-        tr("quiz.instructionBullet1"),
-        tr("quiz.instructionBullet2"),
-        tr("quiz.instructionBullet3"),
-        tr("quiz.instructionBullet4"),
-      ],
-      textStyle: defaultQuizTextStyle,
-      options: {
-        displayQuizInstructions: true,
-      },
-    });
+    insertSlide(buildIntroductionSlide(type, createId));
   }
 
   function addQuestionGroup() {
@@ -358,11 +220,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
       title: `${selectedSlide.title} Copy`,
     };
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id ? { ...group, slides: [...group.slides, duplicatedSlide] } : group,
-      ),
-    );
+    setGroups((currentGroups) => appendSlidesToGroup(currentGroups, selectedGroup.id, [duplicatedSlide]));
     setSelectedNode({ type: "slide", groupId: selectedGroup.id, slideId: duplicatedSlide.id });
   }
 
@@ -394,56 +252,20 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
 
   function deleteSlides(slideIds: string[]) {
     if (!slideIds.length) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => ({
-        ...group,
-        slides: group.slides.filter((slide) => !slideIds.includes(slide.id)),
-      })),
-    );
+    setGroups((currentGroups) => removeSlidesFromGroups(currentGroups, slideIds));
   }
 
   function duplicateSlides(slideIds: string[]) {
     if (!slideIds.length) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => {
-        const slidesToDup = group.slides.filter((s) => slideIds.includes(s.id));
-        if (!slidesToDup.length) return group;
-        const copies = slidesToDup.map((s) => ({
-          ...s,
-          id: createId("slide"),
-          title: s.title ? `${s.title} (Bản sao)` : s.title,
-          status: "unsaved" as const,
-        }));
-        return {
-          ...group,
-          slides: [...group.slides, ...copies],
-        };
-      }),
-    );
+    setGroups((currentGroups) => duplicateSlidesInGroups(currentGroups, slideIds, createId));
   }
 
   function markAllAsSavedDraft() {
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => ({
-        ...group,
-        slides: group.slides.map((slide) =>
-          slide.status === "unsaved" || !slide.status
-            ? { ...slide, status: "draft" as const }
-            : slide,
-        ),
-      })),
-    );
+    setGroups(markUnsavedSlidesAsDraft);
   }
 
   function setSlidesPublished(slideIds: string[]) {
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => ({
-        ...group,
-        slides: group.slides.map((slide) =>
-          slideIds.includes(slide.id) ? { ...slide, status: "published" as const } : slide,
-        ),
-      })),
-    );
+    setGroups((currentGroups) => markSlidesPublished(currentGroups, slideIds));
   }
 
   function deleteSelected() {
@@ -467,13 +289,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     const nextSlide =
       selectedGroup.slides[currentIndex + 1] ?? selectedGroup.slides[currentIndex - 1] ?? null;
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? { ...group, slides: group.slides.filter((slide) => slide.id !== selectedSlide.id) }
-          : group,
-      ),
-    );
+    setGroups((currentGroups) => removeSlideFromGroup(currentGroups, selectedGroup.id, selectedSlide.id));
 
     if (nextSlide) {
       setSelectedNode({ type: "slide", groupId: selectedGroup.id, slideId: nextSlide.id });
@@ -502,13 +318,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
         slides: clipboard.payload.slides.map((slide) => ({ ...slide, id: createId("slide") })),
       };
 
-      setGroups((currentGroups) => {
-        const groupIndex = currentGroups.findIndex((group) => group.id === selectedGroup.id);
-        if (groupIndex < 0) return [...currentGroups, duplicatedGroup];
-        const nextGroups = [...currentGroups];
-        nextGroups.splice(groupIndex + 1, 0, duplicatedGroup);
-        return nextGroups;
-      });
+      setGroups((currentGroups) => insertGroupAfter(currentGroups, selectedGroup.id, duplicatedGroup));
       setSelectedNode({ type: "group", groupId: nextGroupId });
       return;
     }
@@ -520,16 +330,12 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     };
 
     setGroups((currentGroups) =>
-      currentGroups.map((group) => {
-        if (group.id !== selectedGroup.id) return group;
-        if (selectedNode.type === "slide") {
-          const slideIndex = group.slides.findIndex((slide) => slide.id === selectedNode.slideId);
-          const nextSlides = [...group.slides];
-          nextSlides.splice(slideIndex + 1, 0, duplicatedSlide);
-          return { ...group, slides: nextSlides };
-        }
-        return { ...group, slides: [...group.slides, duplicatedSlide] };
-      }),
+      insertSlideAfter(
+        currentGroups,
+        selectedGroup.id,
+        selectedNode.type === "slide" ? selectedNode.slideId : null,
+        duplicatedSlide,
+      ),
     );
     setSelectedNode({ type: "slide", groupId: selectedGroup.id, slideId: duplicatedSlide.id });
   }
@@ -544,12 +350,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
       if (currentIndex < 0 || targetIndex < 0 || targetIndex >= groups.length) return;
       if (selectedGroup.id === "group-intro") return;
 
-      setGroups((currentGroups) => {
-        const nextGroups = [...currentGroups];
-        const [movedGroup] = nextGroups.splice(currentIndex, 1);
-        nextGroups.splice(targetIndex, 0, movedGroup);
-        return nextGroups;
-      });
+      setGroups((currentGroups) => moveGroupTo(currentGroups, currentIndex, targetIndex));
       return;
     }
 
@@ -559,172 +360,27 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     if (currentIndex < 0 || targetIndex < 0 || targetIndex >= selectedGroup.slides.length) return;
 
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => {
-        if (group.id !== selectedGroup.id) return group;
-        const nextSlides = [...group.slides];
-        const [movedSlide] = nextSlides.splice(currentIndex, 1);
-        nextSlides.splice(targetIndex, 0, movedSlide);
-        return { ...group, slides: nextSlides };
-      }),
-    );
+    setGroups((currentGroups) => moveSlideTo(currentGroups, selectedGroup.id, currentIndex, targetIndex));
   }
 
-  function updateSelectedGroupTitle(value: string) {
-    if (!selectedGroup || selectedNode.type === "result") return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => (group.id === selectedGroup.id ? { ...group, title: value } : group)),
-    );
-  }
-
-  function updateSelectedGroupRule(rule: QuizEditorGroup["rule"]) {
-    if (!selectedGroup || selectedNode.type === "result") return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) => (group.id === selectedGroup.id ? { ...group, rule } : group)),
-    );
-  }
-
-  function updateSelectedSlideTitle(value: string) {
-    if (!selectedSlide) return;
-
-    if (selectedNode.type === "result") {
-      setResultSlide((current) => ({ ...current, title: value }));
-      return;
-    }
-
-    if (!selectedGroup) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) => (slide.id === selectedSlide.id ? { ...slide, title: value } : slide)),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideDescription(value: string) {
-    if (!selectedSlide) return;
-
-    if (selectedNode.type === "result") {
-      return;
-    }
-
-    if (!selectedGroup) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id ? { ...slide, description: value } : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideInstructions(nextInstructions: string[]) {
-    if (!selectedSlide || selectedNode.type === "result" || !selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id ? { ...slide, instructions: nextInstructions } : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideChoices(nextChoices: QuizEditorChoice[]) {
-    if (!selectedSlide || selectedNode.type === "result" || !selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id ? { ...slide, choices: nextChoices } : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideDragDropItems(nextItems: QuizEditorDragDropItem[]) {
-    if (!selectedSlide || selectedNode.type === "result" || !selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id ? { ...slide, dragDropItems: nextItems } : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideFeedbackRows(nextRows: QuizEditorFeedbackRow[]) {
-    if (!selectedSlide || !selectedGroup || selectedNode.type === "result") return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id ? { ...slide, feedbackRows: nextRows } : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function replaceSelectedSlide(nextSlide: QuizEditorSlide) {
-    if (!selectedSlide) return;
-
-    if (selectedNode.type === "result") {
-      setResultSlide(nextSlide);
-      return;
-    }
-
-    if (!selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? {
-                      ...nextSlide,
-                      status: nextSlide.status === "published" ? ("published" as const) : ("unsaved" as const),
-                    }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
+  const {
+    updateSelectedGroupTitle,
+    updateSelectedGroupRule,
+    updateSelectedSlideTitle,
+    updateSelectedSlideDescription,
+    updateSelectedSlideInstructions,
+    updateSelectedSlideChoices,
+    updateSelectedSlideDragDropItems,
+    updateSelectedSlideFeedbackRows,
+    replaceSelectedSlide,
+    updateSelectedSlideTextStyle,
+    applySelectedSlideTextStyles,
+    updateSelectedSlideOptions,
+    updateSelectedSlideElementOffset,
+    updateSelectedFinalSlideOptions,
+    updateSelectedResultTab,
+    changeSelectedQuestionType,
+  } = useSelectedSlideUpdaters({ selectedNode, selectedGroup, selectedSlide, setGroups, setResultSlide });
 
   function updateQuizProject(nextQuizProject: QuizProjectSettings) {
     setQuizProject(nextQuizProject);
@@ -735,241 +391,20 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
   }
 
   const hydrateDraftDocument = useCallback((draft: QuizEditorDraftDocument) => {
-    const firstGroup = draft.tree[0] ?? null;
-    const firstSlide = firstGroup?.slides[0] ?? null;
-
     setGroups(draft.tree);
     setQuizProject(draft.settings);
     setPlayerTemplate(draft.playerTemplate);
     setResultSlide(createMockResultSlide());
     setSelectedThemeId(defaultQuizTheme.id);
-    setSelectedNode(
-      firstGroup && firstSlide
-        ? { type: "slide", groupId: firstGroup.id, slideId: firstSlide.id }
-        : firstGroup
-          ? { type: "group", groupId: firstGroup.id }
-          : { type: "group", groupId: "group-1" },
-    );
+    setSelectedNode(getFirstNode(draft.tree));
   }, []);
 
-  function updateSelectedSlideTextStyle(patch: Partial<QuizEditorTextStyle>) {
-    if (!selectedSlide) return;
+  const questionCounts = useMemo(() => countQuestionsByGroup(groups), [groups]);
 
-    if (selectedNode.type === "result") {
-      setResultSlide((current) => ({
-        ...current,
-        textStyle: { ...defaultQuizTextStyle, ...current.textStyle, ...patch },
-        textStyles: {
-          ...current.textStyles,
-          question: { ...defaultQuizTextStyle, ...current.textStyle, ...current.textStyles?.question, ...patch },
-        },
-      }));
-      return;
-    }
-
-    if (!selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? {
-                      ...slide,
-                      textStyle: { ...defaultQuizTextStyle, ...slide.textStyle, ...patch },
-                      textStyles: {
-                        ...slide.textStyles,
-                        question: { ...defaultQuizTextStyle, ...slide.textStyle, ...slide.textStyles?.question, ...patch },
-                      },
-                    }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function applySelectedSlideTextStyles(nextTextStyles: QuizEditorTextStyles) {
-    if (!selectedSlide) return;
-
-    const nextQuestionStyle = nextTextStyles.question
-      ? { ...defaultQuizTextStyle, ...selectedSlide.textStyle, ...nextTextStyles.question }
-      : selectedSlide.textStyle;
-
-    if (selectedNode.type === "result") {
-      setResultSlide((current) => ({
-        ...current,
-        textStyle: nextQuestionStyle,
-        textStyles: { ...current.textStyles, ...nextTextStyles },
-      }));
-      return;
-    }
-
-    if (!selectedGroup) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? {
-                      ...slide,
-                      textStyle: nextQuestionStyle,
-                      textStyles: { ...slide.textStyles, ...nextTextStyles },
-                    }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideOptions(patch: Partial<QuizEditorSlideOptions>) {
-    if (!selectedSlide) return;
-
-    if (selectedNode.type === "result") {
-      setResultSlide((current) => ({
-        ...current,
-        options: { ...current.options, ...patch },
-      }));
-      return;
-    }
-
-    if (!selectedGroup) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? { ...slide, options: { ...slide.options, ...patch } }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedSlideElementOffset(elementId: string, offset: QuizEditorElementOffset) {
-    if (!selectedSlide) return;
-
-    const nextOptionsPatch: Partial<QuizEditorSlideOptions> = {
-      elementOffsets: {
-        ...(selectedSlide.options?.elementOffsets ?? {}),
-        [elementId]: offset,
-      },
-    };
-
-    if (selectedNode.type === "result") {
-      setResultSlide((current) => ({
-        ...current,
-        options: { ...current.options, ...nextOptionsPatch },
-      }));
-      return;
-    }
-
-    if (!selectedGroup) return;
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? { ...slide, options: { ...slide.options, ...nextOptionsPatch } }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  function updateSelectedFinalSlideOptions(
-    patch: Partial<QuizEditorFinalSlideOptions>,
-  ) {
-    if (selectedNode.type !== "result") return;
-
-    setResultSlide((current) => ({
-      ...current,
-      options: {
-        ...current.options,
-        finalSlide: {
-          ...createFinalSlideOptions(),
-          ...current.options?.finalSlide,
-          ...patch,
-        },
-      },
-    }));
-  }
-
-  function updateSelectedResultTab(nextTab: "passed" | "failed") {
-    setResultSlide((current) => ({ ...current, activeResultTab: nextTab }));
-  }
-
-  function changeSelectedQuestionType(nextType: QuestionType) {
-    if (selectedNode.type === "result") return;
-    if (!selectedSlide || !selectedGroup || !isQuestionType(selectedSlide.kind)) return;
-
-    setGroups((currentGroups) =>
-      currentGroups.map((group) =>
-        group.id === selectedGroup.id
-          ? {
-              ...group,
-              slides: group.slides.map((slide) =>
-                slide.id === selectedSlide.id
-                  ? {
-                      ...slide,
-                      kind: nextType,
-                      choiceControlType:
-                        nextType === "multiple-choice" || nextType === "true-false"
-                          ? "radio"
-                          : "checkbox",
-                    }
-                  : slide,
-              ),
-            }
-          : group,
-      ),
-    );
-  }
-
-  const questionCounts = useMemo(
-    () =>
-      groups.reduce<Record<string, number>>((acc, group) => {
-        acc[group.id] = group.slides.filter((slide) => isQuestionType(slide.kind)).length;
-        return acc;
-      }, {}),
-    [groups],
+  const filteredGroups = useMemo(
+    () => filterGroupsByKeyword(groups, debouncedSearchValue),
+    [debouncedSearchValue, groups],
   );
-
-  const filteredGroups = useMemo(() => {
-    const keyword = debouncedSearchValue.trim().toLowerCase();
-    if (!keyword) return groups;
-
-    return groups
-      .map((group) => {
-        const matchedSlides = group.slides.filter((slide) => {
-          const label = `${slide.title} ${slide.kind}`.toLowerCase();
-          return label.includes(keyword);
-        });
-
-        if (group.title.toLowerCase().includes(keyword)) {
-          return group;
-        }
-
-        return { ...group, slides: matchedSlides };
-      })
-      .filter((group) => group.title.toLowerCase().includes(keyword) || group.slides.length > 0);
-  }, [debouncedSearchValue, groups]);
 
   return {
     groups,

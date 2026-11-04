@@ -6,7 +6,7 @@ import {
   startAttempt,
 } from "@/features/lcms/quiz/quiz-runtime";
 import { normalizeAnswerForSubmission } from "@/lib/quiz";
-import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime";
+import type { QuizRuntimePortal } from "@/lib/quiz-runtime-types";
 import type { AnswerPayload, Question, QuizPackage } from "@/lib/types";
 
 export async function createFreshLocalSession(
