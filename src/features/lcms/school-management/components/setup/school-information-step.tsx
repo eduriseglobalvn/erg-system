@@ -88,7 +88,7 @@ function SchoolInformationForm({ saveSchool, school }: { saveSchool: (draft: Sch
     <Dialog maxWidth="sm" onClose={() => setConfirmTypeChange(false)} open={confirmTypeChange}>
       <DialogTitle sx={{ alignItems: "center", display: "flex", gap: 1 }}><WarningAmberRoundedIcon color="warning" />Đổi loại hình trường?</DialogTitle>
       <DialogContent><Typography color="text.secondary" variant="body2">Hệ thống sẽ tạo lại dải khối chuẩn. Lớp và người học vẫn được giữ, nhưng các liên kết khối không còn phù hợp sẽ chuyển về trạng thái chưa gán để bạn rà soát.</Typography></DialogContent>
-      <DialogActions><Button onClick={() => setConfirmTypeChange(false)}>Giữ loại hiện tại</Button><Button color="warning" onClick={commit} variant="contained">Đổi loại hình</Button></DialogActions>
+      <DialogActions><Button variant="contained" onClick={() => setConfirmTypeChange(false)}>Giữ loại hiện tại</Button><Button color="warning" onClick={commit} variant="contained">Đổi loại hình</Button></DialogActions>
     </Dialog>
   </>;
 }

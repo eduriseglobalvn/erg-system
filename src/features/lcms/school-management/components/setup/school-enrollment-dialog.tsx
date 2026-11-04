@@ -77,6 +77,6 @@ export function SchoolEnrollmentDialog({ initialClassId, onClose, onEnroll, scho
         {!filteredStudents.length ? <TableRow><TableCell colSpan={usesGrades ? 5 : 4} sx={{ color: "text.secondary", py: 5, textAlign: "center" }}>Không có người học phù hợp bộ lọc.</TableCell></TableRow> : null}
       </TableBody></Table></TableContainer>
     </DialogContent>
-    <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", px: 3, py: 1.75 }}><Typography color="text.secondary" sx={{ mr: "auto" }} variant="body2">Đã chọn {studentIds.size} người học</Typography><Button disabled={saving} onClick={onClose}>Hủy</Button><Button disabled={!studentIds.size || !classId || saving} onClick={confirm} startIcon={saving ? <CircularProgress color="inherit" size={16} /> : <PlaylistAddCheckRoundedIcon />} variant="contained">{saving ? "Đang ghi danh..." : "Xác nhận ghi danh"}</Button></DialogActions>
+    <DialogActions sx={{ borderTop: "1px solid", borderColor: "divider", px: 3, py: 1.75 }}><Typography color="text.secondary" sx={{ mr: "auto" }} variant="body2">Đã chọn {studentIds.size} người học</Typography><Button variant="contained" disabled={saving} onClick={onClose}>Hủy</Button><Button disabled={!studentIds.size || !classId || saving} onClick={confirm} startIcon={saving ? <CircularProgress color="inherit" size={16} /> : <PlaylistAddCheckRoundedIcon />} variant="contained">{saving ? "Đang ghi danh..." : "Xác nhận ghi danh"}</Button></DialogActions>
   </Dialog>;
 }

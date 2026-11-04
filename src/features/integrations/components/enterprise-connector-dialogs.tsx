@@ -77,7 +77,7 @@ export function EnterpriseConnectorRegisterDialog({ scope, open, onClose, onComp
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button variant="contained" onClick={onClose}>Hủy</Button>
         <Button disabled={mutation.isPending} onClick={() => void submit()} variant="contained">{mutation.isPending ? "Đang đăng ký…" : "Đăng ký"}</Button>
       </DialogActions>
     </Dialog>
@@ -121,7 +121,7 @@ export function EnterpriseConnectorDeprovisionDialog({ scope, open, connector, o
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Hủy</Button>
+        <Button variant="contained" onClick={onClose}>Hủy</Button>
         <Button color="warning" disabled={!connector || mutation.isPending} onClick={() => void submit()} variant="contained">{mutation.isPending ? "Đang xử lý…" : "Deprovision"}</Button>
       </DialogActions>
     </Dialog>

@@ -79,7 +79,7 @@ export function PermissionDetailDrawer({
 
       {query.isError ? (
         <ErgErrorState
-          action={<Button onClick={() => void query.refetch()}>Thử lại</Button>}
+          action={<Button variant="contained" onClick={() => void query.refetch()}>Thử lại</Button>}
           description="Kiểm tra lại quyền quản trị hoặc thử lại."
           title="Không tải được quyền"
         />

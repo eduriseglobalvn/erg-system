@@ -24,7 +24,7 @@ import { actionSx, fieldSx, headingSx, helperSx, panelSx, scopeLabels, sectionHe
 export function MemberRow({ active, user, onClick }: { active: boolean; user: AccessManagedUser; onClick: () => void }) {
   const superAdmin = isSuperAdmin(user);
   return (
-    <Button
+    <Button variant="contained"
       fullWidth
       onClick={onClick}
       sx={{

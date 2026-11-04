@@ -39,7 +39,7 @@ export function WeeklyClassLogHeader({ controller }: { controller: WeeklyClassLo
           ))}
         </Box>
         <Box sx={{ border: "1px solid #e5e7eb", borderRadius: 2, display: "flex", overflow: "hidden", width: { xs: "100%", sm: "auto" } }}>
-          <Button
+          <Button variant="contained"
             onClick={() => controller.goToWeek(1)}
             disabled={controller.selectedWeekIndex >= controller.weeks.length - 1}
             startIcon={<ChevronLeft sx={{ fontSize: 18 }} />}
@@ -47,7 +47,7 @@ export function WeeklyClassLogHeader({ controller }: { controller: WeeklyClassLo
           >
             Trước
           </Button>
-          <Button
+          <Button variant="contained"
             onClick={() => controller.goToWeek(-1)}
             disabled={controller.selectedWeekIndex <= 0}
             endIcon={<ChevronRight sx={{ fontSize: 18 }} />}

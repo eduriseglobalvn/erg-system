@@ -74,7 +74,7 @@ export function DesktopScoreSheetPanel({
               sx={{ minWidth: 180 }}
             />
 
-            <Button
+            <Button variant="contained"
               size="small"
               onClick={(event) => controller.setFilterAnchor(event.currentTarget)}
               startIcon={<FilterList />}

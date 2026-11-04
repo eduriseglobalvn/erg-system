@@ -65,7 +65,7 @@ export function CreateTeachingRoomDialog({ onClose, onCreate, onCreated, open, s
         />
       </DialogContent>
       <DialogActions>
-        <Button disabled={isSaving} onClick={closeDialog}>Hủy</Button>
+        <Button variant="contained" disabled={isSaving} onClick={closeDialog}>Hủy</Button>
         <Button disabled={isSaving} onClick={() => void submit()} variant="contained">Tạo phòng</Button>
       </DialogActions>
     </Dialog>

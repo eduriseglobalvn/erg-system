@@ -140,7 +140,7 @@ export function ShareDialog({
         </Paper>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2 }}>
-        <Button onClick={onClose} sx={{ borderRadius: 999, fontWeight: 800 }}>Đóng</Button>
+        <Button variant="contained" onClick={onClose} sx={{ borderRadius: 999, fontWeight: 800 }}>Đóng</Button>
         <Button variant="contained" onClick={() => void copyLink()} sx={{ bgcolor: MUI_PRIMARY, borderRadius: 999, fontWeight: 900 }}>
           Copy link
         </Button>

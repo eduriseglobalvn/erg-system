@@ -47,7 +47,7 @@ export function DesktopUpdateBanner() {
       severity={result?.status === "error" ? "error" : result?.status === "available" ? "info" : "success"}
       sx={{ borderRadius: 2 }}
       action={
-        <Button
+        <Button variant="contained"
           color="inherit"
           size="small"
           disabled={checking || installing}

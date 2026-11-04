@@ -96,7 +96,7 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
             <ChevronRightRoundedIcon fontSize="small" />
           </IconButton>
           {mobileLayout ? (
-            <Button
+            <Button variant="contained"
               aria-controls={miniCalendarOpen ? "erg-mobile-mini-calendar" : undefined}
               aria-expanded={miniCalendarOpen}
               aria-label={`${miniCalendarOpen ? "Đóng" : "Mở"} lịch ${monthLabel.toLocaleLowerCase("vi")}`}

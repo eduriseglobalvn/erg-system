@@ -41,7 +41,7 @@ export function AssignmentProgressExportControl({ assignmentId, classId }: { ass
         {enqueueMutation.isPending ? "Đang xếp hàng..." : "Xuất CSV"}
       </Button>
       {jobId && status === "running" ? <Chip color="info" label={`Đang tạo báo cáo${typeof statusQuery.data?.progress === "number" ? ` · ${statusQuery.data.progress}%` : ""}`} size="small" variant="outlined" /> : null}
-      {jobId && status === "completed" ? <Button size="small" onClick={() => downloadMutation.mutate()}>Tải file</Button> : null}
+      {jobId && status === "completed" ? <Button variant="contained" size="small" onClick={() => downloadMutation.mutate()}>Tải file</Button> : null}
       {jobId && status === "failed" ? <Alert severity="error" sx={{ py: 0 }}>Backend không tạo được báo cáo.</Alert> : null}
       {enqueueMutation.error ? <Alert severity="error" sx={{ py: 0 }}>{errorMessage(enqueueMutation.error)}</Alert> : null}
       {statusQuery.error ? <Alert severity="error" sx={{ py: 0 }}>{errorMessage(statusQuery.error)}</Alert> : null}

@@ -101,7 +101,7 @@ export function CurriculumExcelImportDialog({
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#2D3748" }}>
             Dán dữ liệu (Clipboard Paste)
           </Typography>
-          <Button
+          <Button variant="contained"
             size="small"
             startIcon={<AutoFixHigh fontSize="small" />}
             onClick={handleFillSample}
@@ -172,7 +172,7 @@ export function CurriculumExcelImportDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 2.5, py: 1.5 }}>
-        <Button onClick={onClose} sx={{ textTransform: "none" }}>
+        <Button variant="contained" onClick={onClose} sx={{ textTransform: "none" }}>
           Hủy bỏ
         </Button>
         <Button

@@ -93,7 +93,7 @@ export function TeachingScheduleEventDialog({ draft, mode, onChange, onClose, on
 
       <DialogActions sx={{ bgcolor: "background.default", justifyContent: "space-between", px: 3, py: 1.5 }}>
         <Button variant="text">Tùy chọn khác</Button>
-        <Button onClick={onSave} startIcon={<CheckRoundedIcon />}>Lưu</Button>
+        <Button variant="contained" onClick={onSave} startIcon={<CheckRoundedIcon />}>Lưu</Button>
       </DialogActions>
     </Dialog>
   );

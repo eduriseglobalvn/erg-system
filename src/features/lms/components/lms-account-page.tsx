@@ -262,7 +262,7 @@ export function LmsAccountPage({ onLoginLogs, onSignedOut }: { onLoginLogs: () =
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button disabled={busy} onClick={closeDialog}>Hủy</Button>
+          <Button variant="contained" disabled={busy} onClick={closeDialog}>Hủy</Button>
           {dialog === "phone" ? <Button disabled={busy} variant="contained" onClick={savePhone}>Lưu số điện thoại</Button> : null}
           {dialog === "recovery" ? <Button disabled={busy} variant="contained" onClick={challenge ? verifyRecovery : requestRecovery}>{challenge ? "Xác minh" : "Gửi mã xác minh"}</Button> : null}
           {dialog === "password" ? <Button disabled={busy} variant="contained" onClick={savePassword}>Lưu mật khẩu mới</Button> : null}
@@ -277,7 +277,7 @@ function SectionTitle({ description, title }: { description: string; title: stri
 }
 
 function AccountRow({ actionLabel, detail, label, onAction, value }: { actionLabel?: string; detail?: string; label: string; onAction?: () => void; value: string }) {
-  return <Stack direction="row" spacing={2} sx={{ alignItems: "center", p: 2.5 }}><Box sx={{ flex: 1 }}><Typography color="text.secondary" variant="caption">{label}</Typography><Typography sx={{ fontWeight: 650 }} variant="body2">{value}</Typography>{detail ? <Typography color="text.secondary" variant="caption">{detail}</Typography> : null}</Box>{actionLabel ? <Button size="small" onClick={onAction}>{actionLabel}</Button> : null}</Stack>;
+  return <Stack direction="row" spacing={2} sx={{ alignItems: "center", p: 2.5 }}><Box sx={{ flex: 1 }}><Typography color="text.secondary" variant="caption">{label}</Typography><Typography sx={{ fontWeight: 650 }} variant="body2">{value}</Typography>{detail ? <Typography color="text.secondary" variant="caption">{detail}</Typography> : null}</Box>{actionLabel ? <Button variant="contained" size="small" onClick={onAction}>{actionLabel}</Button> : null}</Stack>;
 }
 
 function dialogTitle(dialog: AccountDialog) {

@@ -58,7 +58,7 @@ export function StudentSpreadsheetGrid({ onChange, rows, usesGrades = true }: { 
         <Typography color="text.secondary" variant="caption">
           {rows.length > 50 ? `Hiển thị trang ${page + 1} (${displayedRows.length} / ${rows.length} học sinh) · có thể sao chép và dán trực tiếp vào bảng.` : "Có thể sao chép nhiều ô từ Excel/Google Sheets rồi dán trực tiếp vào bảng."}
         </Typography>
-        <Button onClick={() => onChange([...rows, createBlankImportRow(rows.length)])} size="small" startIcon={<AddRoundedIcon />}>Thêm hàng</Button>
+        <Button variant="contained" onClick={() => onChange([...rows, createBlankImportRow(rows.length)])} size="small" startIcon={<AddRoundedIcon />}>Thêm hàng</Button>
       </Box>
       <TableContainer sx={{ flex: 1, maxHeight: 420 }}>
         <Table stickyHeader sx={{ minWidth: usesGrades ? 930 : 820, tableLayout: "fixed" }}>

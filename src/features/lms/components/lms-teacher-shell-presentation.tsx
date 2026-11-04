@@ -73,7 +73,7 @@ export function LmsHomeDashboard({
           <Box sx={homePanelSx}>
             <Box sx={{ alignItems: "center", display: "flex", justifyContent: "space-between", mb: 1.5 }}>
               <Typography sx={{ color: "#1C252E", fontSize: 15, fontWeight: 800 }}>Bài tập cần theo dõi</Typography>
-              <Button onClick={onOpenHomework} size="small" sx={{ borderRadius: "8px", color: "#0F6CBD", fontSize: 13, fontWeight: 700, textTransform: "none" }}>
+              <Button variant="contained" onClick={onOpenHomework} size="small" sx={{ borderRadius: "8px", color: "#0F6CBD", fontSize: 13, fontWeight: 700, textTransform: "none" }}>
                 Xem tất cả
               </Button>
             </Box>

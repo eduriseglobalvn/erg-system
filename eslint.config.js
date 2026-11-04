@@ -75,4 +75,15 @@ export default defineConfig([
       }],
     },
   },
+  {
+    // The theme default is variant="text"; every MUI <Button> must state its variant (one "contained" CTA per page).
+    files: ['src/**/*.tsx'],
+    ignores: ['**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': ['error', {
+        selector: 'JSXOpeningElement[name.name="Button"]:not(:has(JSXAttribute[name.name="variant"])):not(:has(JSXSpreadAttribute))',
+        message: 'MUI <Button> must set variant explicitly (contained | outlined | text).',
+      }],
+    },
+  },
 ])

@@ -250,7 +250,7 @@ export default function SchoolDirectoryScreen() {
         {error ? (
           <Alert
             action={
-              <Button color="inherit" onClick={() => void refetch()} size="small">
+              <Button variant="contained" color="inherit" onClick={() => void refetch()} size="small">
                 Thử lại
               </Button>
             }

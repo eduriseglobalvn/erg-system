@@ -188,7 +188,7 @@ function MultiDayView({
               <Typography sx={{ color: "#3C4043", fontSize: 11, fontWeight: 650, textTransform: "uppercase" }}>
                 {weekLabels[day.day() === 0 ? 6 : day.day() - 1]}
               </Typography>
-              <Button onClick={() => setSelectedDate(day)} sx={weekDateButtonSx(isToday)}>
+              <Button variant="contained" onClick={() => setSelectedDate(day)} sx={weekDateButtonSx(isToday)}>
                 {day.date()}
               </Button>
             </Box>

@@ -155,7 +155,7 @@ export function QuizCreatePackageDialog({
       title={title ?? copy.createQuizDialogTitle}
       actions={
         <>
-          <Button onClick={onClose}>{copy.cancel}</Button>
+          <Button variant="contained" onClick={onClose}>{copy.cancel}</Button>
           <Button variant="contained" onClick={onSubmit} disabled={!draft.title.trim() || questionCount === 0}>
             {submitLabel ?? copy.createQuizConfirm}
           </Button>

@@ -231,10 +231,10 @@ export function SchoolSubjectAssignDialog({
               3. Chọn lớp học áp dụng ({selectedClassIds.length}/{school.classes.length} lớp · {selectedStudentCount} HS)
             </Typography>
             <Box sx={{ display: "flex", gap: 0.5 }}>
-              <Button onClick={selectAllClasses} size="small" sx={{ fontSize: 12 }}>
+              <Button variant="contained" onClick={selectAllClasses} size="small" sx={{ fontSize: 12 }}>
                 Chọn tất cả
               </Button>
-              <Button color="secondary" onClick={clearAllClasses} size="small" sx={{ fontSize: 12 }}>
+              <Button variant="contained" color="secondary" onClick={clearAllClasses} size="small" sx={{ fontSize: 12 }}>
                 Bỏ chọn
               </Button>
             </Box>
@@ -314,7 +314,7 @@ export function SchoolSubjectAssignDialog({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, pb: 2.5, pt: 1, borderTop: "1px solid", borderColor: "divider" }}>
-        <Button disabled={saving} onClick={onClose}>
+        <Button variant="contained" disabled={saving} onClick={onClose}>
           Hủy
         </Button>
         <Button

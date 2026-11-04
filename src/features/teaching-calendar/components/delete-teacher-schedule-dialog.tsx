@@ -82,7 +82,7 @@ export function DeleteTeacherScheduleDialog({ onDelete, schools, teachers }: Pro
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button disabled={isDeleting} onClick={() => setOpen(false)}>Hủy</Button>
+          <Button variant="contained" disabled={isDeleting} onClick={() => setOpen(false)}>Hủy</Button>
           <Button color="error" disabled={isDeleting} onClick={() => void submit()} variant="contained">Xác nhận xóa lịch</Button>
         </DialogActions>
       </Dialog>

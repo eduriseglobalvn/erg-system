@@ -41,7 +41,7 @@ export function SchoolStructurePanel({ school }: { school: PartnerSchool }) {
           <Table size="small">
             <TableHead><TableRow><TableCell>Mã môn</TableCell><TableCell>Tên môn</TableCell><TableCell align="right">Giáo viên</TableCell><TableCell align="right">Học sinh đã gán</TableCell><TableCell align="right">Thao tác</TableCell></TableRow></TableHead>
             <TableBody>{school.subjects.map((subject) => (
-              <TableRow hover key={subject.id}><TableCell><Typography color="text.secondary" sx={{ fontFamily: "var(--font-mono)", fontSize: 12.5 }}>{subject.code}</Typography></TableCell><TableCell sx={{ fontWeight: 750 }}>{subject.name}</TableCell><TableCell align="right">{subject.teacherCount}</TableCell><TableCell align="right">{subject.studentCount}</TableCell><TableCell align="right"><Button size="small" startIcon={<GroupAddRoundedIcon />}>Gán học sinh</Button></TableCell></TableRow>
+              <TableRow hover key={subject.id}><TableCell><Typography color="text.secondary" sx={{ fontFamily: "var(--font-mono)", fontSize: 12.5 }}>{subject.code}</Typography></TableCell><TableCell sx={{ fontWeight: 750 }}>{subject.name}</TableCell><TableCell align="right">{subject.teacherCount}</TableCell><TableCell align="right">{subject.studentCount}</TableCell><TableCell align="right"><Button variant="contained" size="small" startIcon={<GroupAddRoundedIcon />}>Gán học sinh</Button></TableCell></TableRow>
             ))}</TableBody>
           </Table>
         </TableContainer>

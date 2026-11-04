@@ -105,7 +105,7 @@ export function QuestionFormDialog({
         </div>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={saving}>{copy.cancel}</Button>
+        <Button variant="contained" onClick={onClose} disabled={saving}>{copy.cancel}</Button>
         <Button onClick={onSubmit} disabled={saving || !draft.stem.trim()} variant="contained">
           {saving ? copy.savingQuestion : copy.saveQuestion}
         </Button>

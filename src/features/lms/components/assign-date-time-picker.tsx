@@ -56,8 +56,8 @@ export function DateTimePickerPopover({ open, value, onChange, onClose, mode = "
     <Box ref={popoverRef} sx={{ position: "absolute", right: 0, top: "calc(100% + 10px)", zIndex: 100, width: 320, overflow: "hidden", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper", color: "text.primary", boxShadow: 3 }}>
       <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", borderBottom: 1, borderColor: "divider", px: 1.5, py: 1 }}>
         <Stack direction="row" spacing={1}>
-          <Button size="small" onClick={() => setStep("date")} sx={{ bgcolor: step === "date" ? "primary.light" : "transparent", color: step === "date" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>1. Chọn ngày</Button>
-          {mode === "date-time" && <Button size="small" onClick={() => setStep("time")} sx={{ bgcolor: step === "time" ? "primary.light" : "transparent", color: step === "time" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>2. Chọn giờ</Button>}
+          <Button variant="contained" size="small" onClick={() => setStep("date")} sx={{ bgcolor: step === "date" ? "primary.light" : "transparent", color: step === "date" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>1. Chọn ngày</Button>
+          {mode === "date-time" && <Button variant="contained" size="small" onClick={() => setStep("time")} sx={{ bgcolor: step === "time" ? "primary.light" : "transparent", color: step === "time" ? "primary.main" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none" }}>2. Chọn giờ</Button>}
         </Stack>
         <IconButton size="small" onClick={onClose} aria-label="Đóng bảng chọn ngày" sx={{ color: "text.secondary" }}>
           <CloseIcon fontSize="small" />
@@ -72,7 +72,7 @@ export function DateTimePickerPopover({ open, value, onChange, onClose, mode = "
           </Stack>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 0.5, textAlign: "center" }}>
             {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => <Typography key={day} sx={{ py: 0.5, color: "text.secondary", fontSize: 13, fontWeight: 700 }}>{day}</Typography>)}
-            {days.map((day, index) => day ? <Button key={dateKey(day)} onClick={() => selectDate(day)} sx={{ minWidth: 0, height: 36, borderRadius: 1, bgcolor: dateKey(day) === selectedKey ? "primary.main" : "transparent", color: dateKey(day) === selectedKey ? "common.white" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none", "&:hover": { bgcolor: dateKey(day) === selectedKey ? "primary.dark" : "primary.light" } }}>{day.getDate()}</Button> : <Box key={`blank-${index}`} />)}
+            {days.map((day, index) => day ? <Button variant="contained" key={dateKey(day)} onClick={() => selectDate(day)} sx={{ minWidth: 0, height: 36, borderRadius: 1, bgcolor: dateKey(day) === selectedKey ? "primary.main" : "transparent", color: dateKey(day) === selectedKey ? "common.white" : "text.secondary", fontSize: 13, fontWeight: 600, textTransform: "none", "&:hover": { bgcolor: dateKey(day) === selectedKey ? "primary.dark" : "primary.light" } }}>{day.getDate()}</Button> : <Box key={`blank-${index}`} />)}
           </Box>
         </Box>
       ) : (

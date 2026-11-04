@@ -30,7 +30,7 @@ export function ReauthDialog({
         </Typography>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 2.5 }}>
-        <Button color="inherit" onClick={onSignOut}>Đăng xuất</Button>
+        <Button variant="contained" color="inherit" onClick={onSignOut}>Đăng xuất</Button>
         <Button autoFocus variant="contained" onClick={onReauthenticate}>Xác thực lại</Button>
       </DialogActions>
     </Dialog>

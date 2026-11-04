@@ -292,7 +292,7 @@ export function CreateTeacherAccountDialog({
           <Button variant="contained" onClick={closeDialog}>Đóng</Button>
         ) : (
           <>
-            <Button disabled={submitting} onClick={step === 0 ? closeDialog : () => setStep((current) => current - 1)}>
+            <Button variant="contained" disabled={submitting} onClick={step === 0 ? closeDialog : () => setStep((current) => current - 1)}>
               {step === 0 ? "Hủy" : "Quay lại"}
             </Button>
             {step < steps.length - 1 ? (

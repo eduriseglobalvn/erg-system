@@ -48,7 +48,7 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         <MetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${profile.totalAssignments}`} />
       </Box>
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
-        <SectionCard action={<Button color="primary" onClick={() => onPageChange("assignments")} size="small" sx={{ fontWeight: 800 }}>Xem tất cả</Button>} title={copy.todayTitle}>
+        <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("assignments")} size="small" sx={{ fontWeight: 800 }}>Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
             {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
             {!assignmentsLoading && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
@@ -56,11 +56,11 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         </SectionCard>
         <Stack spacing={2.5}>
           {announcement ? (
-            <SectionCard action={<Button color="primary" onClick={() => onPageChange("announcements")} size="small" sx={{ fontWeight: 800 }}>Xem thêm</Button>} title={copy.announcementTitle}>
+            <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("announcements")} size="small" sx={{ fontWeight: 800 }}>Xem thêm</Button>} title={copy.announcementTitle}>
               <AnnouncementCard announcement={announcement} selected={false} />
             </SectionCard>
           ) : null}
-          <SectionCard action={<Button color="primary" onClick={() => onPageChange("discussion")} size="small" sx={{ fontWeight: 800 }}>Mở diễn đàn</Button>} title={copy.discussionTitle}>
+          <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("discussion")} size="small" sx={{ fontWeight: 800 }}>Mở diễn đàn</Button>} title={copy.discussionTitle}>
             <Stack spacing={1}>
               {discussionPreview.map((post) => (
                 <Paper key={post.id} sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
@@ -116,7 +116,7 @@ export function AssignmentsView({ assignments, completedAssignments, copy, openA
           ].map((tab) => {
             const active = statusFilter === tab.key;
             return (
-              <Button
+              <Button variant="contained"
                 key={tab.key}
                 onClick={() => setStatusFilter(tab.key as any)}
                 sx={{
@@ -167,7 +167,7 @@ export function AssignmentsView({ assignments, completedAssignments, copy, openA
           ].map((type) => {
             const active = typeFilter === type.key;
             return (
-              <Button
+              <Button variant="contained"
                 key={type.key}
                 onClick={() => setTypeFilter(type.key as any)}
                 sx={{

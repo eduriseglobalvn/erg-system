@@ -97,7 +97,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiButton: {
       defaultProps: {
         disableElevation: true,
-        variant: "contained",
+        variant: "text",
       },
       styleOverrides: {
         root: {
@@ -182,7 +182,7 @@ export const ergEnterpriseTheme = createTheme({
           border: `1px solid ${t.color.border}`,
           borderRadius: t.radius.lg,
           backgroundImage: "none",
-          boxShadow: t.shadow.xs,
+          boxShadow: "none", // cards are separated by border only (plan 7.1); shadows are for menus/dialogs
         },
       },
     },

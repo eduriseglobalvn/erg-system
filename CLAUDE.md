@@ -12,7 +12,7 @@
   - Ưu tiên wrapper `src/components/erg-mui/` (`ErgButton`, `ErgDialog`, `ErgTable`, `ErgTextField`, `ErgSkeleton`, ...) trước khi dùng MUI trực tiếp.
   - **Path import bắt buộc:** `import Button from "@mui/material/Button"`, KHÔNG `from "@mui/material"` (barrel) — `scripts/check-mui-barrel-imports.mjs` chặn trong `npm run verify`.
   - Styling bằng `sx` + theme tokens (`src/themes/erg-enterprise-tokens.ts`, `erg-enterprise-theme.tsx`). KHÔNG hardcode màu mới; dùng token.
-  - ⚠️ Theme đặt mặc định `MuiButton variant="contained"`. Nút dạng chữ/link PHẢI ghi rõ `variant="text"` (hoặc `"outlined"`), nếu không sẽ thành chữ màu trên nền primary.
+  - ⚠️ Theme đặt mặc định `MuiButton variant="text"`. ESLint BẮT BUỘC mọi `<Button>` ghi rõ `variant` (`contained` | `outlined` | `text`); mỗi trang đúng 1 nút `contained`. `ErgButton` có mặc định `contained` riêng.
   - Skeleton mặc định `animation="wave"` (theme).
 - ✅ **@mui/icons-material** — Icon chính, path import (`import AddIcon from "@mui/icons-material/Add"`). `lucide-react` chỉ còn ở code cũ, không thêm mới.
 - ✅ **@mui/x-date-pickers** — Date/time picker.

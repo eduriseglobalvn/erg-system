@@ -1021,7 +1021,7 @@ export function CurriculumTeachingPlanDialog({
         </DialogContent>
 
         <DialogActions sx={{ px: 2.5, py: 1.5, justifyContent: "space-between" }}>
-          <Button onClick={onClose} disabled={isSaving || isSyncing} sx={{ textTransform: "none" }}>
+          <Button variant="contained" onClick={onClose} disabled={isSaving || isSyncing} sx={{ textTransform: "none" }}>
             Đóng
           </Button>
 
@@ -1153,7 +1153,7 @@ export function CurriculumTeachingPlanDialog({
           </RadioGroup>
         </DialogContent>
         <DialogActions sx={{ px: 2.5, py: 1.5 }}>
-          <Button onClick={() => setSyncConfirmOpen(false)} sx={{ textTransform: "none" }}>
+          <Button variant="contained" onClick={() => setSyncConfirmOpen(false)} sx={{ textTransform: "none" }}>
             Hủy
           </Button>
           <Button

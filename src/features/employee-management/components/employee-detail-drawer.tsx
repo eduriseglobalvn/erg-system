@@ -694,7 +694,7 @@ export function EmployeeDetailDrawer({
                             </Box>
 
                             {!isRevoked ? (
-                              <Button
+                              <Button variant="contained"
                                 size="small"
                                 onClick={() => setSessionToRevoke(session.sessionId)}
                                 sx={{

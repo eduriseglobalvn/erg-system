@@ -201,7 +201,7 @@ export default function SchoolSubjectsScreen() {
 
               {/* Action Button */}
               <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-                <Button
+                <Button variant="contained"
                   onClick={() =>
                     void navigate({
                       href: `${adminPath("/schools/subject-enrollments")}?schoolId=${selectedSchool.id}&subjectId=${subject.id}`,

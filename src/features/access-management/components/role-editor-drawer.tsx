@@ -327,7 +327,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 
         {/* Footer Actions */}
         <Box sx={{ alignItems: "center", bgcolor: "#FFFFFF", borderTop: "1px solid rgba(0, 0, 0, 0.06)", display: "flex", gap: 1.25, justifyContent: "flex-end", mt: "auto", p: 2 }}>
-          <Button
+          <Button variant="contained"
             onClick={onClose}
             sx={{
               borderRadius: "10px",
@@ -390,7 +390,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button
+          <Button variant="contained"
             onClick={() => setConfirmOpen(false)}
             sx={{ borderRadius: "10px", color: "#6E6E73", fontWeight: 650, textTransform: "none" }}
           >

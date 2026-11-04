@@ -642,7 +642,7 @@ export function StudentDashboardWorkspaceRuntime() {
   const dashboardViews = (
     <>
       {studentDashboardQuery.isError ? (
-        <Alert action={<Button color="inherit" onClick={() => void studentDashboardQuery.refetch()} size="small" sx={{ color: "error.dark", fontWeight: 800 }}>Thử lại</Button>} severity="error" sx={{ borderRadius: 2.5, color: "error.dark", mb: 2 }}>Không thể tải bảng học tập từ máy chủ.</Alert>
+        <Alert action={<Button variant="contained" color="inherit" onClick={() => void studentDashboardQuery.refetch()} size="small" sx={{ color: "error.dark", fontWeight: 800 }}>Thử lại</Button>} severity="error" sx={{ borderRadius: 2.5, color: "error.dark", mb: 2 }}>Không thể tải bảng học tập từ máy chủ.</Alert>
       ) : null}
       {activePage === "overview" ? (
         <StudentDashboardOverviewSurface

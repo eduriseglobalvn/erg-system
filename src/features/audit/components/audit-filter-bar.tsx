@@ -60,7 +60,7 @@ export function AuditFilterBar({ filters, onChange, onReset }: {
         onChange={(event) => onChange({ ...filters, to: event.target.value ? new Date(`${event.target.value}T23:59:59.999`).toISOString() : undefined, page: 0 })}
         slotProps={{ inputLabel: { shrink: true } }}
       />
-      <Button startIcon={<FilterAltRoundedIcon />} onClick={onReset} sx={{ minHeight: 40, ml: { sm: "auto" } }}>
+      <Button variant="contained" startIcon={<FilterAltRoundedIcon />} onClick={onReset} sx={{ minHeight: 40, ml: { sm: "auto" } }}>
         Đặt lại
       </Button>
     </Box>

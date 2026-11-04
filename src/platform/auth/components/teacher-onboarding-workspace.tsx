@@ -696,7 +696,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                       {busy ? <CircularProgress size={20} sx={{ color: "#FFF", mr: 1 }} /> : null}
                       Xác minh
                     </Button>
-                    <Button
+                    <Button variant="contained"
                       color="inherit"
                       disabled={busy}
                       onClick={requestRecovery}
@@ -809,7 +809,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
             ) : null}
 
             {/* Logout Button */}
-            <Button
+            <Button variant="contained"
               color="inherit"
               disabled={busy}
               onClick={props.onLogout}

@@ -156,7 +156,7 @@ export function LmsNotificationCenter() {
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
             <Typography sx={{ fontSize: 16, fontWeight: 700 }}>Thông báo</Typography>
             <Stack direction="row" spacing={0.5}>
-              <Button
+              <Button variant="contained"
                 size="small"
                 onClick={markAllAsRead}
                 disabled={!unreadCount || markAllReadMutation.isPending}
@@ -222,7 +222,7 @@ export function LmsNotificationCenter() {
               <Box sx={{ px: 3, py: 2 }}>
                 <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1.5 }}>
                   <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Quan trọng</Typography>
-                  <Button
+                  <Button variant="contained"
                     size="small"
                     onClick={() => void navigate({ href: teacherPath("/notifications") })}
                     sx={{ fontSize: 12, fontWeight: 600, color: "primary.main", textTransform: "none", p: 0 }}
@@ -269,7 +269,7 @@ export function LmsNotificationCenter() {
         {/* Footer */}
         <Divider />
         <Box sx={{ px: 3, py: 1.5 }}>
-          <Button
+          <Button variant="contained"
             fullWidth
             onClick={() => void navigate({ href: teacherPath("/notifications") })}
             sx={{
@@ -419,7 +419,7 @@ function showSystemToast(notification: NotificationFeedItem, onOpenDetail: (noti
           boxShadow: "0 16px 42px rgba(15,23,42,0.16)",
         }}
       >
-        <Button
+        <Button variant="contained"
           onClick={() => {
             toast.dismiss(toastId);
             onOpenDetail(notification);

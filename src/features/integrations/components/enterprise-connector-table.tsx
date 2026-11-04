@@ -27,7 +27,7 @@ export function EnterpriseConnectorTable({ connectors, isLoading, isError, canSy
   return (
     <ErgDataTableShell toolbar={<ErgTableToolbar title="Enterprise connectors" meta={`${connectors.length} connector trong tenant hiện tại`} />}>
       {isLoading ? <ErgLoadingSkeleton rows={5} /> : isError ? (
-        <ErgEmptyState title="Không tải được connectors" description="Kiểm tra enterprise.connectors.read hoặc thử lại." action={<Button onClick={onRetry}>Thử lại</Button>} />
+        <ErgEmptyState title="Không tải được connectors" description="Kiểm tra enterprise.connectors.read hoặc thử lại." action={<Button variant="contained" onClick={onRetry}>Thử lại</Button>} />
       ) : connectors.length === 0 ? (
         <ErgEmptyState title="Chưa có connector" description="Đăng ký SIS, HRIS hoặc SCIM bằng secret reference do secret manager cấp." />
       ) : (
@@ -55,9 +55,9 @@ export function EnterpriseConnectorTable({ connectors, isLoading, isError, canSy
                 <TableCell>{connector.secretConfigured ? "Đã cấu hình" : "Thiếu"}</TableCell>
                 <TableCell><EnterpriseConnectorStatusChip status={connector.status} /></TableCell>
                 <TableCell align="right">
-                  {canSync && connector.status === "ACTIVE" ? <Button size="small" startIcon={<PlayCircleOutlineRoundedIcon />} onClick={() => onDryRun(connector)}>Dry-run</Button> : null}
-                  {canSync && connector.status === "ACTIVE" ? <Button size="small" startIcon={<SyncRoundedIcon />} onClick={() => onSync(connector)}>Sync</Button> : null}
-                  {canSync && connector.status === "ACTIVE" ? <Button color="warning" size="small" startIcon={<PersonOffRoundedIcon />} onClick={() => onDeprovision(connector)}>Deprovision</Button> : null}
+                  {canSync && connector.status === "ACTIVE" ? <Button variant="contained" size="small" startIcon={<PlayCircleOutlineRoundedIcon />} onClick={() => onDryRun(connector)}>Dry-run</Button> : null}
+                  {canSync && connector.status === "ACTIVE" ? <Button variant="contained" size="small" startIcon={<SyncRoundedIcon />} onClick={() => onSync(connector)}>Sync</Button> : null}
+                  {canSync && connector.status === "ACTIVE" ? <Button variant="contained" color="warning" size="small" startIcon={<PersonOffRoundedIcon />} onClick={() => onDeprovision(connector)}>Deprovision</Button> : null}
                 </TableCell>
               </TableRow>
             ))}

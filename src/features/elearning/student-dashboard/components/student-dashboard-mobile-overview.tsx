@@ -100,7 +100,7 @@ export function StudentDashboardMobileOverview({
       <Paper sx={{ ...surfaceSx, overflow: "hidden" }}>
         <Stack direction="row" sx={{ alignItems: "center", borderBottom: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 1.75, py: 1.4 }}>
           <Typography sx={{ fontSize: 15, fontWeight: 900 }}>{copy.todayTitle}</Typography>
-          <Button onClick={() => onPageChange("assignments")} size="small" sx={{ fontSize: 12, fontWeight: 800, minWidth: 0, textTransform: "none" }}>{copy.secondaryAction}</Button>
+          <Button variant="contained" onClick={() => onPageChange("assignments")} size="small" sx={{ fontSize: 12, fontWeight: 800, minWidth: 0, textTransform: "none" }}>{copy.secondaryAction}</Button>
         </Stack>
         <Stack spacing={0.25} sx={{ p: 0.75 }}>
           {assignmentsLoading ? Array.from({ length: 3 }).map((_, index) => <Skeleton height={62} key={index} sx={{ borderRadius: 2 }} variant="rounded" />) : null}

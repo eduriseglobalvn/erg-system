@@ -73,7 +73,7 @@ export function PortalWorkspaceSwitcher({
 
   return (
     <>
-      <Button
+      <Button variant="contained"
         aria-label="Chuyển workspace"
         onClick={(event) => setAnchorEl(event.currentTarget)}
         startIcon={<AppsRoundedIcon sx={{ fontSize: 18 }} />}

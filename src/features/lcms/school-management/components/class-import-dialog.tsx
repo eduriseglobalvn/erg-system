@@ -340,7 +340,7 @@ export function ClassImportDialog({
               : "Vui lòng chọn ít nhất 1 lớp hoặc học sinh để thực hiện"}
           </Typography>
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button disabled={importing} onClick={onClose}>Hủy</Button>
+            <Button variant="contained" disabled={importing} onClick={onClose}>Hủy</Button>
             <Button
               disabled={!canConfirm || importing}
               onClick={confirm}

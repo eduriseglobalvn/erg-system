@@ -148,7 +148,7 @@ export default function SchoolDetailFlowScreen() {
       <Box sx={{ minWidth: 0 }}>
         {content}
         <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", mt: 2 }}>
-          <Button disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)} startIcon={<ArrowBackRoundedIcon />}>Quay lại</Button>
+          <Button variant="contained" disabled={activeStep === 0} onClick={() => goStep(activeStep - 1)} startIcon={<ArrowBackRoundedIcon />}>Quay lại</Button>
           {activeStep < stepMeta.length - 1 ? <Button onClick={() => goStep(activeStep + 1)} endIcon={<ArrowForwardRoundedIcon />} variant="contained">Tiếp theo: {stepMeta[activeStep + 1].label}</Button> : <Button color="success" disabled={!completion[4]} onClick={() => void navigate({ href: adminPath("/schools/list") })} startIcon={<CheckCircleRoundedIcon />} variant="contained">Hoàn tất thiết lập</Button>}
         </Box>
       </Box>

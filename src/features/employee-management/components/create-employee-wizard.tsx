@@ -476,7 +476,7 @@ export function CreateEmployeeWizard({
               >
                 {oneTimePassword}
               </Typography>
-              <Button
+              <Button variant="contained"
                 startIcon={<ContentCopyRoundedIcon />}
                 onClick={() => {
                   void navigator.clipboard?.writeText(oneTimePassword);
