@@ -6,11 +6,14 @@ export type QueryPolicy = Readonly<{
   persist: boolean;
 }>;
 
+/** Persister maxAge (App.tsx); persisted queries must stay in memory at least this long or hydration is GC'd at once. */
+export const QUERY_PERSIST_MAX_AGE_MS = 24 * 60 * 60_000;
+
 export const QUERY_POLICIES: Record<QueryPolicyName, QueryPolicy> = {
   realtime: { staleTime: 15_000, gcTime: 2 * 60_000, persist: false },
   transactional: { staleTime: 60_000, gcTime: 10 * 60_000, persist: false },
   reference: { staleTime: 10 * 60_000, gcTime: 30 * 60_000, persist: false },
-  offlineCore: { staleTime: 5 * 60_000, gcTime: 24 * 60 * 60_000, persist: true },
+  offlineCore: { staleTime: 5 * 60_000, gcTime: QUERY_PERSIST_MAX_AGE_MS, persist: true },
   sensitive: { staleTime: 0, gcTime: 60_000, persist: false },
 };
 

@@ -15,7 +15,11 @@ import type { Question, Quiz, QuizPackage, Section } from "@/lib/types";
 
 export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
   const gradingMode = value.gradingMode ?? "server-authoritative";
-  const quiz = extractQuiz(value.quiz, value.answerKey ?? {}, gradingMode);
+  const extractedQuiz = extractQuiz(value.quiz, value.answerKey ?? {}, gradingMode);
+  // Training mode grades per question on the client, so only graded (testing) quizzes can lose the key.
+  const quiz = gradingMode === "server-authoritative" && extractedQuiz.settings.mode === "testing"
+    ? stripQuizAnswerKey(extractedQuiz)
+    : extractedQuiz;
   const quizVersion = String(value.quizVersion ?? value.version ?? quiz.version);
   const contentHash = value.contentHash ?? value.packageHash ?? createQuizPackage(quiz).contentHash;
 
@@ -44,6 +48,24 @@ export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
     source: value.source ?? "server",
     quiz,
   };
+}
+
+/**
+ * 4.4 #18: a server-authoritative package must not carry the answer key even if the backend sent it.
+ * Limitation: matching pairs / sequence order are the key by structure; the server has to send those unpaired.
+ */
+export function stripQuizAnswerKey(quiz: Quiz): Quiz {
+  const strip = (question: Question): Question => ({
+    ...question,
+    ...(question.choices ? { choices: question.choices.map((choice) => ({ ...choice, correct: false })) } : {}),
+    ...(question.inlineBlanks ? { inlineBlanks: question.inlineBlanks.map((blank) => ({ ...blank, correctOptionId: "" })) } : {}),
+    ...(question.textBlanks ? { textBlanks: question.textBlanks.map((blank) => ({ ...blank, correctAnswers: [] })) } : {}),
+    ...(question.numericAnswer ? { numericAnswer: { ...question.numericAnswer, correctValue: 0, tolerance: 0 } } : {}),
+    ...(question.wordSlots ? { wordSlots: question.wordSlots.map((slot) => ({ ...slot, correctWordId: "" })) } : {}),
+    ...(question.dragDropItems ? { dragDropItems: question.dragDropItems.map((item) => ({ ...item, correctTargetId: "" })) } : {}),
+    ...(question.hotspotAreas ? { hotspotAreas: [] } : {}),
+  });
+  return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(strip) })) };
 }
 
 function extractQuiz(

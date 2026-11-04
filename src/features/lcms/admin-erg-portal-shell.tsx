@@ -5,7 +5,6 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { toast } from "sonner";
 import ErgPortalLayout, { type MenuItem } from "@/components/portal/ErgPortalLayout";
-import { defaultClassId, defaultSchoolId } from "@/features/lms/classroom/api/mock-classroom-data";
 import { hasApiBase } from "@/lib/api-client";
 import { DashboardContent } from "@/layouts/dashboard/components/dashboard-content";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
@@ -218,8 +217,8 @@ export default function AdminErgPortalShell() {
             onOpenQuiz={(quizId) => void navigate({ href: `${adminContentPathForSection("quiz-editor")}?quizId=${encodeURIComponent(quizId)}` })}
             pendingQuestionImports={pendingQuestionImports}
             quizEditorQuizId={quizEditorQuizId}
-            selectedClassId={defaultClassId}
-            selectedSchoolId={defaultSchoolId}
+            selectedClassId=""
+            selectedSchoolId=""
             onQuestionImportsHandled={() => setPendingQuestionImports([])}
             onCreateQuizFromBank={(questions, options) => void createQuizFromBankQuestions(questions, options)}
           />

@@ -24,3 +24,16 @@ it("quarantines an undecryptable record instead of deleting it", async () => {
   expect(quarantined).toHaveLength(1);
   expect(db.get(`offline-outbox-quarantine|${quarantined[0]}`)).toEqual(record);
 });
+
+it("retry keeps still-undecryptable records, restores readable ones, and delete empties quarantine", async () => {
+  db.clear();
+  const store = new EncryptedIndexedDbOutboxStore();
+  db.set("offline-outbox-quarantine|erg-offline-quarantine:scope-a:1", { schemaVersion: 2, algorithm: "AES-GCM", iv: "AAAA", ciphertext: "AAAA" });
+  db.set("offline-outbox-quarantine|erg-offline-quarantine:scope:b:2", { schemaVersion: 1, entries: [] });
+
+  expect(await store.retryQuarantined()).toEqual({ restored: 1, failed: 1 });
+  expect(await store.listQuarantined()).toEqual(["erg-offline-quarantine:scope-a:1"]);
+
+  expect(await store.deleteQuarantined()).toBe(1);
+  expect(await store.listQuarantined()).toEqual([]);
+});

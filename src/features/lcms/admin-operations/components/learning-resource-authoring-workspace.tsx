@@ -24,7 +24,7 @@ import {
   mockLearningResourceAuthoringLocalContent as mockExplorerLocalContent,
   mockLearningResourceAuthoringResources as mockExplorerResources,
   mockLearningResourceAuthoringTaxonomy as mockExplorerModel,
-} from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
+} from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import {
   PublishScreen,
   ResourcesScreen,
@@ -55,7 +55,7 @@ import type {
   TaxonomyEditTarget,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { questionBankWorkspaceQueryOptions } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
-import { quizBankItems as fallbackQuizBankItems } from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
+import { fallbackQuizBankItems } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";

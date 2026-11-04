@@ -16,9 +16,8 @@ import TableRow from "@mui/material/TableRow";
 import Tabs from "@mui/material/Tabs";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { useMemo, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ErgChartCard } from "@/components/erg-mui";
-import { buildTrainingMonitoringData } from "@/features/lcms/school-management/api/mock-training-monitoring";
 import { trainingChartCopy } from "@/features/lcms/school-management/components/training/training-copy";
 import { selectTrainingPeriod, type TrainingChartPeriod } from "@/features/lcms/school-management/components/training/training-chart-data";
 import { ClassHealthChart, ScoreDistributionChart, TrainingWaveChart } from "@/features/lcms/school-management/components/training/training-charts";
@@ -26,6 +25,10 @@ import { TrainingDiagnosticPanels } from "@/features/lcms/school-management/comp
 import { TrainingInsightDrawer, type TrainingInsight } from "@/features/lcms/school-management/components/training/training-insight-drawer";
 import { TrainingMonitoringTable } from "@/features/lcms/school-management/components/training/training-monitoring-table";
 import type { PartnerSchool } from "@/features/lcms/school-management/types/school-management-types";
+import type { TrainingMonitoringData } from "@/features/lcms/school-management/types/training-monitoring-types";
+import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
+
+const emptyTrainingMonitoringData: TrainingMonitoringData = { assignments: [], classLogs: [], classSummaries: [], practiceTopics: [], students: [], teachers: [], weeklyMetrics: [] };
 
 const logStatus = { submitted: { label: "Đã báo giảng", color: "success" }, late: { label: "Nộp muộn", color: "warning" }, missing: { label: "Chưa báo", color: "error" } } as const;
 
@@ -35,7 +38,11 @@ export function TrainingMonitoringWorkspace({ school }: { school: PartnerSchool 
   const [className, setClassName] = useState("all");
   const [insight, setInsight] = useState<TrainingInsight | null>(null);
   const [chartPeriod, setChartPeriod] = useState<TrainingChartPeriod>("12-weeks");
-  const data = useMemo(() => buildTrainingMonitoringData(school), [school]);
+  const [data, setData] = useState(emptyTrainingMonitoringData);
+  useEffect(() => {
+    if (!(import.meta.env.DEV && runtimeFixturesEnabled())) return;
+    void import("@/test/fixtures/mock-training-monitoring").then((fixtures) => setData(fixtures.buildTrainingMonitoringData(school)));
+  }, [school]);
   const summaries = data.classSummaries.filter((item) => (grade === "all" || item.grade === grade) && (className === "all" || item.className === className));
   const availableClasses = school.classes.filter((item) => grade === "all" || item.grade === grade);
   const logs = data.classLogs.filter((item) => className === "all" || item.className === className);
@@ -97,11 +104,11 @@ function MetricCard({ color, icon, label, value }: { color: string; icon: ReactN
   return <Paper variant="outlined" sx={{ borderRadius: 2, p: 1.5 }}><Box sx={{ alignItems: "center", color, display: "flex", justifyContent: "space-between" }}>{icon}<Typography color="text.secondary" sx={{ fontSize: 11.5, fontWeight: 600 }}>Tuần 12</Typography></Box><Typography sx={{ color, fontSize: 27, fontVariantNumeric: "tabular-nums", fontWeight: 600, lineHeight: 1.15, mt: 0.75 }}>{value}</Typography><Typography sx={{ fontSize: 13, fontWeight: 600, mt: 0.25 }}>{label}</Typography></Paper>;
 }
 
-function ClassLogTable({ rows }: { rows: ReturnType<typeof buildTrainingMonitoringData>["classLogs"] }) {
+function ClassLogTable({ rows }: { rows: TrainingMonitoringData["classLogs"] }) {
   return <DataPaper title="Sổ đầu bài"><TableContainer sx={{ maxHeight: 560 }}><Table size="small" stickyHeader sx={{ minWidth: 1180 }}><TableHead><TableRow><TableCell>Ngày / tiết</TableCell><TableCell>Lớp</TableCell><TableCell>Môn · giáo viên</TableCell><TableCell>Chủ đề</TableCell><TableCell>Mục tiêu tiết học</TableCell><TableCell>Sĩ số</TableCell><TableCell>Phản ánh của GV</TableCell><TableCell>Hành động tiếp theo</TableCell><TableCell align="right">Chất lượng</TableCell><TableCell>Trạng thái</TableCell></TableRow></TableHead><TableBody>{rows.map((row) => { const meta = logStatus[row.status]; return <TableRow hover key={row.id}><TableCell><Typography sx={{ fontSize: 12.5, fontWeight: 600 }}>{row.date}</Typography><Typography color="text.secondary" variant="caption">{row.period}</Typography></TableCell><TableCell sx={{ fontWeight: 600 }}>{row.className}</TableCell><TableCell><Typography sx={{ fontSize: 12.5, fontWeight: 600 }}>{row.subject}</Typography><Typography color="text.secondary" variant="caption">{row.teacher}</Typography></TableCell><TableCell>{row.topic}</TableCell><TableCell>{row.lessonObjective}</TableCell><TableCell>{row.attendance}</TableCell><TableCell>{row.teacherReflection}</TableCell><TableCell>{row.nextAction}</TableCell><TableCell align="right" sx={{ fontWeight: 600 }}>{row.qualityScore}</TableCell><TableCell><Chip color={meta.color} label={meta.label} size="small" /></TableCell></TableRow>; })}</TableBody></Table></TableContainer></DataPaper>;
 }
 
-function PracticeTopicTable({ rows }: { rows: ReturnType<typeof buildTrainingMonitoringData>["practiceTopics"] }) {
+function PracticeTopicTable({ rows }: { rows: TrainingMonitoringData["practiceTopics"] }) {
   return <DataPaper title="Điểm thực hành"><TableContainer><Table size="small"><TableHead><TableRow><TableCell>Chủ đề</TableCell><TableCell>Môn học</TableCell><TableCell>Lớp</TableCell><TableCell align="right">Điểm TB</TableCell><TableCell align="right">Đã hoàn thành</TableCell><TableCell align="right">Cần hỗ trợ</TableCell></TableRow></TableHead><TableBody>{rows.map((row) => <TableRow hover key={row.id}><TableCell sx={{ fontWeight: 600 }}>{row.topic}</TableCell><TableCell>{row.subject}</TableCell><TableCell>{row.className}</TableCell><TableCell align="right">{row.averageScore}</TableCell><TableCell align="right">{row.completedStudents}</TableCell><TableCell align="right"><Chip color={row.needsSupport > 3 ? "warning" : "default"} label={row.needsSupport} size="small" /></TableCell></TableRow>)}</TableBody></Table></TableContainer></DataPaper>;
 }
 

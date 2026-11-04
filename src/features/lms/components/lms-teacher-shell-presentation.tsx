@@ -12,7 +12,7 @@ import Class from "@mui/icons-material/Class";
 import People from "@mui/icons-material/People";
 import FileText from "@mui/icons-material/Description";
 
-import { classroomSchools, classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSchools, classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 

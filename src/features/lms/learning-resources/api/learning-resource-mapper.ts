@@ -1,10 +1,8 @@
-import { USE_LEARNING_RESOURCE_AUTHORING_MOCK, mockLearningResourceAuthoringTaxonomy } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
 import type {
   LearningResourceResource,
   LearningResourceResourceSection,
   LearningResourceViewerUnit,
 } from "@/features/lms/learning-resources/api/learning-resource-domain-types";
-import { LEARNING_RESOURCE_LIBRARY_SECTIONS } from "@/features/lms/learning-resources/api/learning-resource-mock-data";
 import type {
   LearningResourceLibraryBootstrapResourceDTO,
   LearningResourceResourceCardDTO,
@@ -85,16 +83,9 @@ export function groupCardsBySection(resources: LearningResourceResource[]): Lear
       continue;
     }
 
-    const sectionTitle = USE_LEARNING_RESOURCE_AUTHORING_MOCK
-      ? mockLearningResourceAuthoringTaxonomy.sections.find((item) => item.id === resource.sectionId)?.label
-      : LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId)?.title;
-    const sectionSubtitle = USE_LEARNING_RESOURCE_AUTHORING_MOCK
-      ? undefined
-      : LEARNING_RESOURCE_LIBRARY_SECTIONS.find((item) => item.id === resource.sectionId)?.subtitle;
     sectionMap.set(resource.sectionId, {
       id: resource.sectionId,
-      title: sectionTitle ?? categoryLabel(resource.categoryId),
-      subtitle: sectionSubtitle,
+      title: categoryLabel(resource.categoryId),
       gradeId: resource.gradeId,
       subjectId: resource.subjectId,
       categoryId: resource.categoryId,

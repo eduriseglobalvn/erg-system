@@ -20,7 +20,7 @@ import {
   classroomSchools,
   classroomStudents,
   getSchoolSnapshots,
-} from "@/features/lms/classroom/api/mock-classroom-data";
+} from "@/features/lms/classroom/api/classroom-defaults";
 import {
   loadLmsClassWorkspace,
   mapClassWorkspaceToStudents,

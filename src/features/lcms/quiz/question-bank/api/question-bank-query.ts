@@ -4,14 +4,13 @@ import {
   createQuestionBankQuestion,
   deleteQuestionBankQuestion,
   loadQuestionBankData,
-  mockQuestionBankData,
+  type QuestionBankApiData,
   updateQuestionBankQuestion,
   type QuestionBankSaveQuestionInput,
   type QuestionBankWorkspaceInput,
 } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 
 export const QUESTION_BANK_WORKSPACE_STALE_TIME_MS = QUERY_POLICIES.reference.staleTime;
 export const QUESTION_BANK_WORKSPACE_GC_TIME_MS = QUERY_POLICIES.reference.gcTime;
@@ -28,13 +27,9 @@ export function questionBankWorkspaceQueryOptions(
   tenantId: string = getDefaultTenantId(),
   filters: Omit<QuestionBankWorkspaceInput, "tenantId"> = {},
 ) {
-  const fixtureBacked = runtimeFixturesEnabled();
-
   return {
     gcTime: QUESTION_BANK_WORKSPACE_GC_TIME_MS,
-    ...(fixtureBacked ? { initialData: mockQuestionBankData, initialDataUpdatedAt: 0 } : {}),
-    placeholderData: (previousData: ReturnType<typeof mockQuestionBankData> | undefined) =>
-      previousData ?? (fixtureBacked ? mockQuestionBankData() : undefined),
+    placeholderData: (previousData: QuestionBankApiData | undefined) => previousData,
     queryFn: ({ signal }: { signal: AbortSignal }) => loadQuestionBankData(tenantId, filters, signal),
     queryKey: questionBankQueryKeys.workspace(tenantId, filters),
     refetchOnWindowFocus: false,

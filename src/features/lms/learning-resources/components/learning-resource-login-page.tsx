@@ -6,6 +6,7 @@ import { Navigate, useLocation } from "@tanstack/react-router";
 import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { displayText, validateLibraryLoginEmail } from "@/features/lms/learning-resources/components/learning-resource-library-utils";
 
 function LibraryAccessGate({ onAuthenticated }: { onAuthenticated: () => void }) {
@@ -204,7 +205,7 @@ export function LearningResourceLoginPage() {
   const location = useLocation();
   const [account, setAccount] = useState(() => getCurrentAccount());
   const redirectPath = new URLSearchParams(location.searchStr).get("redirect") || "/kho-hoc-lieu/1";
-  const safeRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//") && !redirectPath.includes("\\") ? redirectPath : "/kho-hoc-lieu/1";
+  const safeRedirectPath = sanitizeLocalRedirect(redirectPath) ?? "/kho-hoc-lieu/1";
 
   useEffect(() => {
     function handleAuthChanged() {

@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
-import { classroomSnapshots, classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSnapshots, classroomStudents } from "@/test/fixtures/mock-classroom-data";
 import { AttendanceSheetPanel } from "@/features/lms/components/attendance-sheet-panel";
 
 const selectedClass = classroomSnapshots[0];

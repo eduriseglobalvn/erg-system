@@ -4,15 +4,11 @@ import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import {
   loadLearningResourceLibrarySections,
   loadLearningResourceResourceForViewer,
-  getMockLearningResourceLibrarySubjects,
-  getMockLearningResourceLibraryCategories,
-  getDefaultMockLearningResourceLibrarySelection,
 } from "@/features/lms/learning-resources/api/learning-resource-api";
-import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
 import {
   DEFAULT_LEARNING_RESOURCE_SELECTION,
-  LEARNING_RESOURCE_LIBRARY_SECTIONS,
   type LearningResourceResource,
+  type LearningResourceResourceSection,
 } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { ResourceViewerModal } from "@/features/lms/learning-resources/components/learning-resource-viewer-modal";
 import { LearningResourceExplorer } from "@/features/lms/learning-resources/components/library-page/explorer";
@@ -25,30 +21,15 @@ import {
 
 export function LearningResourceLibraryPage() {
   const initialGradeId = DEFAULT_LEARNING_RESOURCE_SELECTION.gradeId;
-  const initialSelection = useMemo(() => {
-    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
-      return getDefaultMockLearningResourceLibrarySelection(initialGradeId);
-    }
-    return getDefaultSelectionForGrade(initialGradeId);
-  }, [initialGradeId]);
+  const initialSelection = useMemo(() => getDefaultSelectionForGrade(initialGradeId), [initialGradeId]);
   const [account, setAccount] = useState(() => getCurrentAccount());
   const activeGradeId = initialSelection.gradeId;
   const activeSubjectId = initialSelection.subjectId;
   const [activeCategoryId, setActiveCategoryId] = useState(initialSelection.categoryId);
   const [keyword, setKeyword] = useState("");
-  const categories = useMemo(() => {
-    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
-      return getMockLearningResourceLibraryCategories();
-    }
-    return getLearningResourceExplorerCategories();
-  }, []);
-  const subjects = useMemo(() => {
-    if (USE_LEARNING_RESOURCE_AUTHORING_MOCK) {
-      return getMockLearningResourceLibrarySubjects();
-    }
-    return getLearningResourceExplorerSubjects();
-  }, []);
-  const [librarySections, setLibrarySections] = useState(LEARNING_RESOURCE_LIBRARY_SECTIONS);
+  const categories = useMemo(() => getLearningResourceExplorerCategories(), []);
+  const subjects = useMemo(() => getLearningResourceExplorerSubjects(), []);
+  const [librarySections, setLibrarySections] = useState<LearningResourceResourceSection[]>([]);
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [viewerLoadingResourceId, setViewerLoadingResourceId] = useState<string | null>(null);
   const [activeResource, setActiveResource] = useState<LearningResourceResource | null>(null);
@@ -74,7 +55,7 @@ export function LearningResourceLibraryPage() {
         if (!isCancelled) setLibrarySections(sections);
       } catch {
         if (!isCancelled) {
-          setLibrarySections(LEARNING_RESOURCE_LIBRARY_SECTIONS);
+          setLibrarySections([]);
           setLibraryError(null);
         }
       }

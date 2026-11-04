@@ -22,7 +22,6 @@ import WifiRoundedIcon from '@mui/icons-material/WifiRounded';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuthSession } from '@/platform/auth/hooks/use-auth-session';
 import { evaluatePermission } from '@/platform/auth/permissions/permission-evaluator';
-import { defaultClassId, defaultSchoolId } from '@/features/lms/classroom/api/mock-classroom-data';
 import { DashboardContent } from '@/layouts/dashboard/components/dashboard-content';
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
 import type { ContentScope, ManagementScope } from '@/types/scope-types';
@@ -392,8 +391,8 @@ function CrmContent({
           managementScope={crmScope}
           onOpenLeaf={onOpenLeaf}
           pendingQuestionImports={[]}
-          selectedClassId={defaultClassId}
-          selectedSchoolId={defaultSchoolId}
+          selectedClassId=""
+          selectedSchoolId=""
           onQuestionImportsHandled={() => undefined}
           onCreateQuizFromBank={() => undefined}
         />

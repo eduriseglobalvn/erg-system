@@ -1,16 +1,10 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
-const storage = vi.hoisted(() => ({
-  readStoredAuthIdentity: vi.fn(),
-  writeStoredAuthIdentity: vi.fn(),
-}));
+const storage = vi.hoisted(() => ({ clearStoredAuthSessions: vi.fn() }));
 
 vi.mock("@/platform/auth/api/auth-token-storage", () => ({
   AUTH_SESSION_STORAGE_CHANGED_EVENT: "erg-auth-session-storage-changed",
-  clearStoredAuthSessions: vi.fn(),
-  hasStoredAuthCredential: (session: { accessToken?: string } | null) => Boolean(session?.accessToken),
-  readStoredAuthIdentity: storage.readStoredAuthIdentity,
-  writeStoredAuthIdentity: storage.writeStoredAuthIdentity,
+  clearStoredAuthSessions: storage.clearStoredAuthSessions,
 }));
 
 class FakeBroadcastChannel {
@@ -29,8 +23,6 @@ class FakeBroadcastChannel {
     this.posted.push(message);
   }
 
-  close() {}
-
   emit(data: unknown) {
     this.onmessage?.({ data } as MessageEvent);
   }
@@ -38,36 +30,32 @@ class FakeBroadcastChannel {
 
 beforeEach(() => {
   vi.resetModules();
-  storage.readStoredAuthIdentity.mockReset();
-  storage.writeStoredAuthIdentity.mockReset();
+  storage.clearStoredAuthSessions.mockReset();
   FakeBroadcastChannel.latest = undefined;
   vi.stubGlobal("BroadcastChannel", FakeBroadcastChannel);
 });
 
-test("a new tab hydrates the existing tab session without another login", async () => {
-  storage.readStoredAuthIdentity.mockReturnValue(null);
-  const { hydrateSessionFromPeerTab } = await import("@/platform/auth/api/cross-tab-session");
-  const hydration = hydrateSessionFromPeerTab("lms", 1_000);
-  const request = FakeBroadcastChannel.latest!.posted[0] as { requestId: string };
-  const session = { accountId: "user-1", accessToken: "shared-token", portal: "lms", rememberMe: true };
+test("a local sign-in broadcasts a bare signal without any token", async () => {
+  const { initializeCrossTabAuthSync } = await import("@/platform/auth/api/cross-tab-session");
+  initializeCrossTabAuthSync();
+  const session = { accountId: "u1", accessToken: "secret", refreshToken: "secret-r" };
 
-  FakeBroadcastChannel.latest!.emit({ type: "SESSION_RESPONSE", requestId: request.requestId, session });
+  window.dispatchEvent(new CustomEvent("erg-auth-session-storage-changed", { detail: session }));
+  window.dispatchEvent(new CustomEvent("erg-auth-session-storage-changed", { detail: null }));
 
-  await expect(hydration).resolves.toBe(true);
-  expect(storage.writeStoredAuthIdentity).toHaveBeenCalledWith(session);
+  expect(FakeBroadcastChannel.latest!.posted).toEqual([{ type: "session-changed" }, { type: "signed-out" }]);
+  expect(JSON.stringify(FakeBroadcastChannel.latest!.posted)).not.toContain("secret");
 });
 
-test("an authenticated tab answers a peer session request", async () => {
-  const session = { accountId: "user-1", accessToken: "shared-token", portal: "lms", rememberMe: true };
-  storage.readStoredAuthIdentity.mockReturnValue(session);
-  const { hydrateSessionFromPeerTab } = await import("@/platform/auth/api/cross-tab-session");
-  await expect(hydrateSessionFromPeerTab("lms")).resolves.toBe(false);
+test("a signed-out signal clears this tab's own storage without echoing", async () => {
+  const { initializeCrossTabAuthSync } = await import("@/platform/auth/api/cross-tab-session");
+  initializeCrossTabAuthSync();
+  storage.clearStoredAuthSessions.mockImplementation(() =>
+    window.dispatchEvent(new CustomEvent("erg-auth-session-storage-changed", { detail: null })),
+  );
 
-  FakeBroadcastChannel.latest!.emit({ type: "SESSION_REQUEST", requestId: "request-1", portal: "lms" });
+  FakeBroadcastChannel.latest!.emit({ type: "signed-out" });
 
-  expect(FakeBroadcastChannel.latest!.posted).toContainEqual({
-    type: "SESSION_RESPONSE",
-    requestId: "request-1",
-    session,
-  });
+  expect(storage.clearStoredAuthSessions).toHaveBeenCalledTimes(1);
+  expect(FakeBroadcastChannel.latest!.posted).toEqual([]);
 });

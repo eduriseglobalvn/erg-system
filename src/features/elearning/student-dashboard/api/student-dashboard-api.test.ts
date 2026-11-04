@@ -1,6 +1,6 @@
 import { describe, expect, test, vi, beforeEach } from "vitest";
 
-import { studentAssignments, studentTeacherAnnouncements } from "@/features/elearning/student-dashboard/api/mock-student-dashboard";
+import { studentAssignments, studentTeacherAnnouncements } from "@/test/fixtures/mock-student-dashboard";
 import { loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import ElearningStudentDashboardDocument from "@/features/elearning/student-dashboard/api/student-dashboard.graphql?raw";
 import { graphQlRequest } from "@/lib/graphql-client";
@@ -211,7 +211,7 @@ describe("student dashboard API", () => {
       id: "assignment-a",
       title: "Assignment A",
       status: "in_progress",
-      dueLabel: expect.stringContaining("01-01"),
+      dueLabel: expect.stringContaining("01/01/2099"),
       focusNote: "Continue Assignment A",
     });
     expect(assignment.quizId).toBeUndefined();

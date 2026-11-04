@@ -13,6 +13,7 @@ import {
 import { saveCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { TeacherOnboardingWorkspace } from "@/platform/auth/components/teacher-onboarding-workspace";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { useLocation, useNavigate } from "@tanstack/react-router";
@@ -111,8 +112,8 @@ export function TeacherOnboardingPage() {
 }
 
 function sanitizeRedirect(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || value.startsWith("/onboarding")) return teacherPath("/home");
-  return value;
+  const safe = sanitizeLocalRedirect(value);
+  return !safe || safe.startsWith("/onboarding") ? teacherPath("/home") : safe;
 }
 
 export default TeacherOnboardingPage;

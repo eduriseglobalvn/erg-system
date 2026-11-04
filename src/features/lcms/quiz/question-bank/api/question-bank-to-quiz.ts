@@ -2,7 +2,7 @@ import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/component
 import {
   createMockPlayerTemplate,
   createMockQuizProjectSettings,
-} from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type {
   QuizEditorGroup,
   QuizEditorChoice,

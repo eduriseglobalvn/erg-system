@@ -7,7 +7,7 @@ import Stack from "@mui/material/Stack";
 import { keyframes } from "@mui/material/styles";
 import Typography from "@mui/material/Typography";
 import { useRouter, type ErrorComponentProps } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Component, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 
 const topBarGrow = keyframes`from { width: 0; } to { width: 92%; }`;
 
@@ -62,9 +62,47 @@ export function ContentPendingSkeleton() {
   );
 }
 
-export function RouteErrorBoundary(_props: ErrorComponentProps) {
-  const router = useRouter();
+const CHUNK_RELOAD_KEY = "erg-chunk-reload";
+const CHUNK_ERROR_PATTERN = /ChunkLoadError|Failed to fetch dynamically imported module|Importing a module script failed/i;
 
+export function isChunkLoadError(error: unknown) {
+  if (!error) return false;
+  const { name, message } = error as { name?: unknown; message?: unknown };
+  return CHUNK_ERROR_PATTERN.test(`${typeof name === "string" ? name : ""} ${typeof message === "string" ? message : String(error)}`);
+}
+
+// Indirection so tests can observe the hard reload (jsdom's location.reload is not spy-able).
+export const pageReload = { run: () => window.location.reload() };
+
+function readReloadGuard() {
+  try {
+    return sessionStorage.getItem(CHUNK_RELOAD_KEY) !== null;
+  } catch {
+    return true; // storage unavailable: never auto-reload, avoids a loop
+  }
+}
+
+function setReloadGuard() {
+  try {
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+/** A stale shell after a deploy: reload once automatically; the button always reloads. */
+function useChunkReload(error: unknown) {
+  const chunk = isChunkLoadError(error);
+  useEffect(() => {
+    if (chunk && !readReloadGuard()) {
+      setReloadGuard();
+      pageReload.run();
+    }
+  }, [chunk]);
+  return chunk;
+}
+
+function ErrorCard({ title, body, actionLabel, onAction }: { title: string; body: string; actionLabel: string; onAction: () => void }) {
   return (
     <Box
       sx={{
@@ -82,21 +120,73 @@ export function RouteErrorBoundary(_props: ErrorComponentProps) {
         variant="outlined"
       >
         <Typography sx={{ fontWeight: 800 }} variant="h6">
-          Không thể tải trang
+          {title}
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          Dữ liệu hoặc thành phần của trang chưa tải được. Vui lòng thử lại.
+          {body}
         </Typography>
         <Box>
-          <Button
-            onClick={() => void router.invalidate()}
-            startIcon={<ReplayRoundedIcon />}
-            variant="contained"
-          >
-            Thử lại
+          <Button onClick={onAction} startIcon={<ReplayRoundedIcon />} variant="contained">
+            {actionLabel}
           </Button>
         </Box>
       </Paper>
     </Box>
   );
+}
+
+export function RouteErrorBoundary({ error }: ErrorComponentProps) {
+  const router = useRouter();
+  const chunk = useChunkReload(error);
+
+  if (chunk) {
+    return (
+      <ErrorCard
+        actionLabel="Tải lại trang"
+        body="Ứng dụng vừa được cập nhật phiên bản mới. Vui lòng tải lại trang để tiếp tục."
+        onAction={() => {
+          setReloadGuard();
+          pageReload.run();
+        }}
+        title="Có phiên bản mới"
+      />
+    );
+  }
+  return (
+    <ErrorCard
+      actionLabel="Thử lại"
+      body="Dữ liệu hoặc thành phần của trang chưa tải được. Vui lòng thử lại."
+      onAction={() => void router.invalidate()}
+      title="Không thể tải trang"
+    />
+  );
+}
+
+/** Outermost safety net (outside RouterProvider): render errors the router cannot catch. */
+export class AppErrorBoundary extends Component<{ children: ReactNode }, { error: unknown; failed: boolean }> {
+  state = { error: null as unknown, failed: false };
+
+  static getDerivedStateFromError(error: unknown) {
+    return { error, failed: true };
+  }
+
+  componentDidCatch(error: unknown, info: ErrorInfo) {
+    console.error("App render error", error, info.componentStack);
+    if (isChunkLoadError(error) && !readReloadGuard()) {
+      setReloadGuard();
+      pageReload.run();
+    }
+  }
+
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <ErrorCard
+        actionLabel="Tải lại trang"
+        body="Đã xảy ra lỗi không mong muốn. Vui lòng tải lại trang; nếu lỗi còn lặp lại, hãy liên hệ quản trị viên."
+        onAction={() => pageReload.run()}
+        title="Ứng dụng gặp sự cố"
+      />
+    );
+  }
 }

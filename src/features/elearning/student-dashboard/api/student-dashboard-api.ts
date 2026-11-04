@@ -1,15 +1,11 @@
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
-import {
-  studentAssignments,
-  studentDashboardProfile,
-  studentTeacherAnnouncements,
-} from "@/features/elearning/student-dashboard/api/mock-student-dashboard";
 import type {
   StudentAssignmentStatus,
   StudentDashboardAssignment,
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
+import { formatDateTimeVi } from "@/lib/format-date";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type {
@@ -36,11 +32,12 @@ export async function loadStudentDashboardData({
 }: { signal?: AbortSignal; tenantId?: string } = {}): Promise<StudentDashboardApiData> {
   const session = getCurrentElearningViewerSession();
 
-  if (runtimeFixturesEnabled()) {
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    const fixtures = await import("@/test/fixtures/mock-student-dashboard");
     return {
-      assignments: studentAssignments,
-      profile: mergeProfileSession(studentDashboardProfile, session),
-      teacherAnnouncements: studentTeacherAnnouncements,
+      assignments: fixtures.studentAssignments,
+      profile: mergeProfileSession(fixtures.studentDashboardProfile, session),
+      teacherAnnouncements: fixtures.studentTeacherAnnouncements,
     };
   }
 
@@ -224,11 +221,11 @@ function statusLabelFor(status: StudentAssignmentStatus) {
 function formatDueLabel(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Chưa có hạn nộp";
-  return `Hạn nộp ${date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}`;
+  return `Hạn nộp ${formatDateTimeVi(date)}`;
 }
 
 function formatDateTimeLabel(value: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Chưa có hoạt động";
-  return date.toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" });
+  return formatDateTimeVi(date);
 }

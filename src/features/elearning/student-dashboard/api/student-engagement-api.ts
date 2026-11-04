@@ -22,6 +22,7 @@ import type {
 } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { createReactionSummary, discussionReactionKeys } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
+import { formatDateTimeVi } from "@/lib/format-date";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { isObject, validateResponse } from "@/lib/validate-response";
 import StudentEngagementDocument from "./student-engagement.graphql?raw";
@@ -195,7 +196,7 @@ function toTimestamp(value: string | null | undefined) {
 
 function formatRelativeDate(timestamp: number) {
   const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000));
-  return minutes < 1 ? "Vừa xong" : minutes < 60 ? `${minutes} phút trước` : new Date(timestamp).toLocaleString("vi-VN");
+  return minutes < 1 ? "Vừa xong" : minutes < 60 ? `${minutes} phút trước` : formatDateTimeVi(timestamp);
 }
 
 function initials(name: string | null | undefined) {

@@ -5,7 +5,7 @@ import {
   getClassStudents,
   resolveAssignHomeworkClassStudents,
 } from "@/features/lms/components/assign-homework-student-utils";
-import { classroomStudents, defaultClassId } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomStudents, defaultClassId } from "@/features/lms/classroom/api/classroom-defaults";
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import {

@@ -1,4 +1,5 @@
 import { ApiClientError, apiRequest } from "@/lib/api-client";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { getApiBase } from "@/lib/platform";
 import type { AccountRole, AuthProvider, TeacherAccount } from "@/platform/auth/types/auth-types";
 import type { TeacherAccountLifecycle } from "@/platform/auth/types/account-lifecycle";
@@ -352,20 +353,7 @@ function mapProfileToAccount(profile?: BackendProfileResponseDTO): AuthAccountRe
 
 function mapRole(roles?: string[]): AccountRole {
   const normalized = (roles ?? []).map((role) => role.toLowerCase());
-  if (
-    normalized.some((role) =>
-      [
-        "admin",
-        "super_admin",
-        "super-admin",
-        "system.super_admin",
-        "erg_admin",
-        "erg_super_admin",
-        "global_admin",
-        "lms_admin",
-      ].includes(role),
-    )
-  ) {
+  if (hasAdminLikeClaims(normalized)) {
     return "admin";
   }
   if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";

@@ -29,10 +29,11 @@ describe("StudentDashboardWorkspace split policy", () => {
   it("keeps the existing runtime behind one explicit owner", () => {
     const source = readComponent("student-dashboard-workspace-runtime.tsx");
 
-    expect(lineCount(source)).toBeLessThanOrEqual(750);
+    expect(lineCount(source)).toBeLessThanOrEqual(400);
     expect(source).toContain("export function StudentDashboardWorkspaceRuntime");
     expect(source).toContain("studentDashboardQueryOptions");
-    expect(source).toContain("studentDiscussionFeedQueryOptions");
+    expect(source).toContain("useStudentDiscussion");
+    expect(readFileSync(resolve(process.cwd(), "src/features/elearning/student-dashboard/hooks/use-student-discussion.ts"), "utf8")).toContain("studentDiscussionFeedQueryOptions");
     expect(source).toContain("<DiscussionView");
   });
 

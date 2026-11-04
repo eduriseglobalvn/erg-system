@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Snackbar from "@mui/material/Snackbar";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { OutboxQuarantineNotice } from "@/components/pwa/outbox-quarantine-notice";
 import { useServiceWorkerUpdate } from "@/hooks/use-service-worker-update";
 
 export const PWA_LAUNCH_FILE_EVENT = "erg:pwa:launch-file";
@@ -37,9 +38,9 @@ export function GlobalPwaBanner() {
     applyUpdate();
   };
 
-  if (!updateAvailable) return null;
-
   return (
+    <>
+    <OutboxQuarantineNotice />
     <Snackbar
       open={updateAvailable}
       anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
@@ -90,5 +91,6 @@ export function GlobalPwaBanner() {
         </Stack>
       </Alert>
     </Snackbar>
+    </>
   );
 }

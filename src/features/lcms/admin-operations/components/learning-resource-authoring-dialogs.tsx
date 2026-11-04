@@ -6,9 +6,9 @@ import type {
 } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import { createLearningResourceResource } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
 import { TaxonomyCreateDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog";
+import { TaxonomyDeleteDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-delete-dialog";
 import {
   LocalContentEditDialog,
-  TaxonomyDeleteDialog,
   TaxonomyEditDialog,
 } from "@/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs";
 import { nodeIdForCreated } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";

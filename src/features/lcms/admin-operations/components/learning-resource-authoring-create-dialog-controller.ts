@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 
-import { mockExerciseLibrary } from "@/features/lcms/admin-operations/api/mock-exercise-library";
-import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data";
+import { mockExerciseLibrary } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
+import { USE_LEARNING_RESOURCE_AUTHORING_MOCK } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import {
   filterExerciseLibraryItems,
   isGoogleSlidesUrl,

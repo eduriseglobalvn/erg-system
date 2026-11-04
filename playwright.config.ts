@@ -26,6 +26,7 @@ export default defineConfig({
   },
   projects: [
     { name: "lms", testMatch: /lms\.smoke\.spec\.ts/, use: { baseURL: portalHost("lms") } },
+    { name: "guest-redirect-loop", testMatch: /guest-redirect-loop\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "lcms", testMatch: /admin\.smoke\.spec\.ts/, use: { baseURL: portalHost("lcms") } },
     { name: "workspace-responsive", testMatch: /workspace-responsive\.spec\.ts/, use: { baseURL: portalHost("lms") } },
     { name: "teacher-pwa-calendar-home", testMatch: /teacher-pwa-calendar-home\.spec\.ts/, use: { baseURL: portalHost("lms") } },

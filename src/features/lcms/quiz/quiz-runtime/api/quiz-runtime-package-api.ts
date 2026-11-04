@@ -1,8 +1,6 @@
 import { createQuizPackage } from "@/lib/assessment-engine";
-import { getLocalQuizById, sampleQuiz } from "@/lib/sample-quiz";
 import { apiRequest } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { shouldUseLocalQuizRuntimeFallback } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-fallback";
 import { normalizeQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-normalizer";
 import { DEFAULT_QUIZ_RUNTIME_PORTAL } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
@@ -37,44 +35,32 @@ export async function getQuizPackage(
   tenantId: string = getDefaultTenantId(),
   signal?: AbortSignal,
 ): Promise<QuizPackage> {
-  const localQuiz = getLocalQuizById(quizId) ?? sampleQuiz;
-
-  if (runtimeFixturesEnabled()) {
-    return createQuizPackage(localQuiz, {
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) {
+    const { getLocalQuizById, sampleQuiz } = await import("@/lib/sample-quiz");
+    return createQuizPackage(getLocalQuizById(quizId) ?? sampleQuiz, {
       gradingMode: "client-first",
       source: "local",
     });
   }
 
-  try {
-    const cacheKey = `${tenantId}:${portal}:${quizId}`;
-    const backendPackage = await apiRequest<BackendQuizPackage | undefined>(API_ENDPOINTS.lms.quizPackage(quizId), {
-      cache: "default",
-      portal,
-      ...(signal ? { signal } : {}),
-    });
-    if (!backendPackage) {
-      const cachedPackage = normalizedPackageCache.get(cacheKey);
-      if (cachedPackage) {
-        return cachedPackage;
-      }
-      throw new Error("Quiz package returned no body and no cached package is available.");
+  const cacheKey = `${tenantId}:${portal}:${quizId}`;
+  const backendPackage = await apiRequest<BackendQuizPackage | undefined>(API_ENDPOINTS.lms.quizPackage(quizId), {
+    cache: "default",
+    portal,
+    ...(signal ? { signal } : {}),
+  });
+  if (!backendPackage) {
+    const cachedPackage = normalizedPackageCache.get(cacheKey);
+    if (cachedPackage) {
+      return cachedPackage;
     }
-
-    const validPackage = validateResponse(backendPackage, isBackendQuizPackage, "quiz-runtime.package");
-    const normalizedPackage = normalizeQuizPackage(validPackage);
-    normalizedPackageCache.set(cacheKey, normalizedPackage);
-    return normalizedPackage;
-  } catch (error) {
-    if (shouldUseLocalQuizRuntimeFallback(quizId, error)) {
-      return createQuizPackage(localQuiz, {
-        gradingMode: "client-first",
-        source: "local",
-      });
-    }
-
-    throw error;
+    throw new Error("Quiz package returned no body and no cached package is available.");
   }
+
+  const validPackage = validateResponse(backendPackage, isBackendQuizPackage, "quiz-runtime.package");
+  const normalizedPackage = normalizeQuizPackage(validPackage);
+  normalizedPackageCache.set(cacheKey, normalizedPackage);
+  return normalizedPackage;
 }
 
 function isBackendQuizPackage(value: unknown): value is BackendQuizPackage {

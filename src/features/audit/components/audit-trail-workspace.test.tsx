@@ -26,7 +26,7 @@ afterEach(() => vi.clearAllMocks());
 
 test("shows an inline error with retry instead of a skeleton when the API fails", async () => {
   vi.mocked(listAuditEvents).mockRejectedValueOnce(new Error("HTTP 500"));
-  vi.mocked(listAuditEvents).mockResolvedValueOnce({ hasNext: false, items: [], page: 0, size: 25, totalElements: 0 });
+  vi.mocked(listAuditEvents).mockResolvedValueOnce({ hasNext: false, items: [], page: 0, size: 25, totalElements: 0, totalPages: 0 });
   renderWorkspace();
   expect(await screen.findByText("Không thể tải nhật ký")).toBeTruthy();
   expect(document.querySelector(".MuiSkeleton-root")).toBeNull();
@@ -42,6 +42,7 @@ test("renders no raw UUIDs and formats time as dd/MM/yyyy", async () => {
     page: 0,
     size: 25,
     totalElements: 1,
+    totalPages: 1,
   });
   const { container } = renderWorkspace();
   expect(await screen.findByText("UPDATE")).toBeTruthy();
@@ -51,7 +52,7 @@ test("renders no raw UUIDs and formats time as dd/MM/yyyy", async () => {
 });
 
 test("filter bar has Áp dụng as the contained button and Đặt lại as text", async () => {
-  vi.mocked(listAuditEvents).mockResolvedValue({ hasNext: false, items: [], page: 0, size: 25, totalElements: 0 });
+  vi.mocked(listAuditEvents).mockResolvedValue({ hasNext: false, items: [], page: 0, size: 25, totalElements: 0, totalPages: 0 });
   renderWorkspace();
   expect(screen.getByRole("button", { name: "Áp dụng" }).className).toContain("MuiButton-contained");
   expect(screen.getByRole("button", { name: "Đặt lại" }).className).toContain("MuiButton-text");

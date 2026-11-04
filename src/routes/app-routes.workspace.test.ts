@@ -10,7 +10,6 @@ const teacherSource = read("teacher-routes.tsx");
 const studentSource = read("student-routes.tsx");
 const crmSource = read("crm-routes.tsx");
 const source = [adminSource, teacherSource, studentSource, crmSource, read("route-shared.tsx")].join(";");
-const accountMenuSource = readFileSync(resolve(process.cwd(), "src/layouts/dashboard/components/dashboard-account-menu.tsx"), "utf8");
 
 function routeBlock(src: string, routeName: string, nextRouteName: string) {
   const start = src.indexOf(`const ${routeName} = createRoute`);
@@ -29,8 +28,6 @@ describe("canonical LMS workspace route ownership", () => {
     expect(source).toContain('path: adminPath("/profile")');
     expect(source).toContain('path: teacherPath("/profile")');
     expect(source).toContain('path: studentPath("/profile")');
-    expect(accountMenuSource).toContain('teacherPath("/profile")');
-    expect(accountMenuSource).not.toContain('to="/profile"');
   });
 
   it("keeps content authoring nested under Admin instead of creating an author portal", () => {

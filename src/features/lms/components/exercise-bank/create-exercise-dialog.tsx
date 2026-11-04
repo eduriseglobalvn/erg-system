@@ -4,7 +4,7 @@ import DialogContent from "@mui/material/DialogContent";
 import { X } from "lucide-react";
 
 import {
-  mockQuestionBankData,
+  emptyQuestionBankData,
   type QuestionBankApiData,
 } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
@@ -43,14 +43,8 @@ export function CreateExerciseDialog({
     size: 100,
   });
 
-  // Luôn đảm bảo có dữ liệu dự phòng chuẩn mực khi API backend chưa seed hoặc quyền teacher bị giới hạn
-  const fallbackData: QuestionBankApiData = useMemo(() => mockQuestionBankData(), []);
-  const activeQbData: QuestionBankApiData = useMemo(() => {
-    if (qbData && (qbData.subjects.length > 0 || qbData.questions.length > 0)) {
-      return qbData;
-    }
-    return fallbackData;
-  }, [qbData, fallbackData]);
+  const emptyData = useMemo(() => emptyQuestionBankData(), []);
+  const activeQbData: QuestionBankApiData = qbData ?? emptyData;
 
   const subjects = useMemo(() => activeQbData.subjects ?? [], [activeQbData.subjects]);
   const allQuestions = useMemo(() => activeQbData.questions ?? [], [activeQbData.questions]);

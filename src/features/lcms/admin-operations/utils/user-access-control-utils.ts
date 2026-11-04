@@ -6,7 +6,7 @@ import type {
   UserAccessPolicy,
 } from "@/features/lcms/admin-operations/api/access-management-api";
 import type { AdminUserDetail } from "@/features/lcms/admin-operations/api/user-admin-api";
-import type { DraftPolicy } from "@/features/lcms/admin-operations/types/user-access-control";
+import type { DraftPolicy, ProfileDraft } from "@/features/lcms/admin-operations/types/user-access-control";
 
 export const ROOT_ADMIN_EMAIL = "admin@erg.edu.vn";
 
@@ -128,4 +128,36 @@ export function initials(value: string) {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
+}
+
+export const EMPTY_PROFILE_DRAFT: ProfileDraft = {
+  fullName: "", phone: "", jobTitle: "", avatarUrl: "", bio: "", gender: "",
+  dateOfBirth: "", address: "", city: "", district: "", region: "",
+};
+
+export function profileDraftFromDetail(detail: AdminUserDetail): ProfileDraft {
+  return {
+    fullName: detail.fullName ?? "",
+    phone: detail.phone ?? "",
+    jobTitle: detail.job_title ?? "",
+    avatarUrl: detail.avatar_url ?? detail.avatarUrl ?? "",
+    bio: detail.bio ?? "",
+    gender: detail.gender ?? "",
+    dateOfBirth: detail.date_of_birth ? detail.date_of_birth.slice(0, 10) : "",
+    address: detail.address ?? "",
+    city: detail.city ?? "",
+    district: detail.district ?? "",
+    region: detail.region ?? "",
+  };
+}
+
+/** Writes the list-visible fields of a freshly saved detail back into the member list. */
+export function mergeDetailIntoUsers(users: AccessManagedUser[], detail: AdminUserDetail): AccessManagedUser[] {
+  return sortUsers(
+    users.map((user) =>
+      user.id === detail.id
+        ? { ...user, fullName: detail.fullName, phone: detail.phone, status: detail.status, roles: detail.roles, isProfileCompleted: detail.isProfileCompleted }
+        : user,
+    ),
+  );
 }

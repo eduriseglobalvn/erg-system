@@ -1,6 +1,6 @@
 
 import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-api";
-import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 
 export function getClassStudents(classId?: string) {

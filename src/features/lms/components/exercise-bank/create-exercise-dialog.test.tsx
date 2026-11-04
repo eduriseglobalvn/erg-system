@@ -3,10 +3,18 @@ import { describe, it, expect, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
 import type { Exercise } from "./exercise-bank-model";
+import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { mockQuestionBankData } from "@/test/fixtures/mock-question-bank";
+
+function seededQueryClient() {
+  const queryClient = new QueryClient();
+  queryClient.setQueryData(questionBankQueryKeys.workspace(undefined, { includeQuestions: true, size: 100 }), mockQuestionBankData());
+  return queryClient;
+}
 
 describe("CreateExerciseDialog", () => {
   it("transitions to step 2 when clicking continue and submits correctly", async () => {
-    const queryClient = new QueryClient();
+    const queryClient = seededQueryClient();
     const handleClose = vi.fn();
     const handleSubmit = vi.fn();
 
@@ -49,7 +57,7 @@ describe("CreateExerciseDialog", () => {
   });
 
   it("picks exact number of random questions via custom count input", () => {
-    const queryClient = new QueryClient();
+    const queryClient = seededQueryClient();
     const handleClose = vi.fn();
     const handleSubmit = vi.fn();
 
@@ -77,7 +85,7 @@ describe("CreateExerciseDialog", () => {
   });
 
   it("loads existing exercise data when in edit mode and updates properly", () => {
-    const queryClient = new QueryClient();
+    const queryClient = seededQueryClient();
     const handleClose = vi.fn();
     const handleSubmit = vi.fn();
     const handleUpdate = vi.fn();

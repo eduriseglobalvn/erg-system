@@ -9,7 +9,9 @@ import { PortalNotificationsSourceContext } from "@/components/portal/use-portal
 import { usePortalNotifications } from "@/features/notifications/hooks/use-portal-notifications";
 import { I18nProvider } from "@/platform/i18n";
 import { appQueryClient } from "@/lib/query-client";
+import { QUERY_PERSIST_MAX_AGE_MS } from "@/lib/query-policy";
 import { createAppRouter } from "@/routes/app-routes";
+import { AppErrorBoundary } from "@/routes/route-feedback";
 import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { createAuthRouteState } from "@/platform/auth/router/auth-route-context";
@@ -38,11 +40,19 @@ export default function App() {
   const persistOptions = useMemo(() => {
     return {
       persister: createQueryPersister(scopeKey),
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: QUERY_PERSIST_MAX_AGE_MS,
       buster: QUERY_CACHE_BUSTER,
       dehydrateOptions: { shouldDehydrateQuery: shouldDehydratePersistedQuery },
     };
   }, [scopeKey]);
+
+  // The app stayed up for 10s, so a later deploy may auto-reload once again (see route-feedback).
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try { sessionStorage.removeItem("erg-chunk-reload"); } catch { /* storage unavailable */ }
+    }, 10_000);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handleScopeChange = () => {
@@ -65,7 +75,9 @@ export default function App() {
     <PersistQueryClientProvider client={appQueryClient} persistOptions={persistOptions}>
       <I18nProvider>
         <PortalNotificationsSourceContext.Provider value={usePortalNotifications}>
-          <AppRouterProvider router={router} />
+          <AppErrorBoundary>
+            <AppRouterProvider router={router} />
+          </AppErrorBoundary>
         </PortalNotificationsSourceContext.Provider>
         <Suspense fallback={null}><GlobalPwaBanner /></Suspense>
       </I18nProvider>

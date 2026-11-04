@@ -8,20 +8,11 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import ArrowLeft from "@mui/icons-material/ArrowBackRounded";
 import Alert from "@mui/material/Alert";
-import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
 import {
-  PlayerShell,
-} from "@/features/lcms/quiz/player/player-shell";
-import {
-  getCurrentElearningViewerSession,
   logoutElearningViewerSession,
-  type ElearningViewerSession,
 } from "@/platform/auth/api/elearning-viewer-session";
 import {
   useI18n,
@@ -30,21 +21,13 @@ import {
   useNavigate,
 } from "@tanstack/react-router";
 import { studentPath } from "@/platform/workspaces/workspace-paths";
-import { studentDiscussionThreads } from "@/features/elearning/student-dashboard/api/mock-student-dashboard";
 import {
   createStudentDashboardLoadingProfile,
   studentDashboardQueryOptions,
 } from "@/features/elearning/student-dashboard/api/student-dashboard-query";
 import {
-  createStudentDiscussion,
   markStudentAnnouncementRead as markStudentAnnouncementReadApi,
-  replyStudentDiscussion,
-  setStudentDiscussionReaction,
 } from "@/features/elearning/student-dashboard/api/student-engagement-api";
-import {
-  studentDiscussionFeedQueryOptions,
-  studentEngagementQueryKeys,
-} from "@/features/elearning/student-dashboard/api/student-engagement-query";
 import {
   DiscussionView,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-discussion-view";
@@ -56,36 +39,16 @@ import {
   viCopy,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace.copy";
 import type {
-  StudentDiscussionFeedPost,
-  StudentDiscussionReactionKey,
-} from "@/features/elearning/student-dashboard/types/discussion-feed-types";
-import type {
   DashboardCopy,
   StudentDockPageKey,
-  StudentDiscussionNotification,
   StudentPageKey,
   StudentViewState,
 } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
-import type {
-  StudentDiscussionImageAttachment,
-} from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import {
-  addFeedComment,
-  createReactionSummary,
-  toggleFeedCommentReaction,
-  toggleFeedPostReaction,
-} from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
 import {
   getDiscussionOverviewPreview,
 } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import {
   ANNOUNCEMENT_POPUP_SNOOZE_MS,
-  createInitialDiscussionFeedPosts,
-  createInitialDiscussionNotifications,
-  createTimestamp,
-  getInitials,
-  isAnnouncementPopupSnoozed,
-  maskProfanity,
   writeAnnouncementPopupSnooze,
 } from "@/features/elearning/student-dashboard/utils/student-dashboard-workspace-utils";
 import {
@@ -108,10 +71,18 @@ import {
 import { AnnouncementToast } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { AccountView, AnnouncementsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
 import { AssignmentsView } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
+import {
+  StudentQuizAssignmentMissing,
+  StudentQuizNotReady,
+  StudentQuizSession,
+} from "@/features/elearning/student-dashboard/components/student-dashboard-quiz-session";
 import { TopMenuShell } from "@/features/elearning/student-dashboard/components/student-dashboard-top-menu";
 import { StudentDashboardMobileShell } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-shell";
 import { StudentDashboardOverviewSurface } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-surface";
+import { useAnnouncementPopup } from "@/features/elearning/student-dashboard/hooks/use-announcement-popup";
 import { useDashboardSurface } from "@/features/elearning/student-dashboard/hooks/use-dashboard-surface";
+import { useElearningViewerAccount } from "@/features/elearning/student-dashboard/hooks/use-elearning-viewer-account";
+import { useStudentDiscussion } from "@/features/elearning/student-dashboard/hooks/use-student-discussion";
 
 export function StudentDashboardWorkspaceRuntime() {
   const navigate = useNavigate();
@@ -124,16 +95,14 @@ export function StudentDashboardWorkspaceRuntime() {
     return initialStudentPage(window.location.search);
   });
   const [viewState, setViewState] = useState<StudentViewState>({ type: "dashboard" });
-  const [account, setAccount] = useState<ElearningViewerSession | null>(() => getCurrentElearningViewerSession());
+  const [account, setAccount] = useElearningViewerAccount();
   const fixtureMode = runtimeFixturesEnabled();
   const apiEnabled = hasApiBase() && !fixtureMode;
   const tenantId = getDefaultTenantId();
   const [notificationAnchor, setNotificationAnchor] = useState<HTMLElement | null>(null);
-  const [announcementPopupOpen, setAnnouncementPopupOpen] = useState(false);
   const [selectedAnnouncementId, setSelectedAnnouncementId] = useState<string | null>(null);
   const [readAnnouncementIds, setReadAnnouncementIds] = useState<string[]>([]);
   const paceStateUpdate = usePacedStateBatch();
-  const autoCloseAnnouncementPopup = useDebouncedCallback(() => setAnnouncementPopupOpen(false), 30000);
   const scrollToAnnouncement = useDebouncedCallback((announcementId: string) => {
     document.getElementById(`student-announcement-${announcementId}`)?.scrollIntoView({
       behavior: "smooth",
@@ -152,7 +121,6 @@ export function StudentDashboardWorkspaceRuntime() {
     tenantId,
   }));
   const engagementScope = { accountId: account?.id, tenantId };
-  const discussionFeedQuery = useQuery(studentDiscussionFeedQueryOptions(engagementScope));
 
   const dashboardProfile = studentDashboardQuery.data?.profile ?? createStudentDashboardLoadingProfile(account);
   const assignments = useMemo(
@@ -163,28 +131,14 @@ export function StudentDashboardWorkspaceRuntime() {
     () => studentDashboardQuery.data?.teacherAnnouncements ?? [],
     [studentDashboardQuery.data?.teacherAnnouncements],
   );
-  const [discussionPosts, setDiscussionPosts] = useState<StudentDiscussionFeedPost[]>(() =>
-    fixtureMode ? createInitialDiscussionFeedPosts(studentDiscussionThreads) : [],
-  );
-  const [discussionNotifications, setDiscussionNotifications] = useState<StudentDiscussionNotification[]>(() =>
-    fixtureMode
-      ? createInitialDiscussionNotifications(createInitialDiscussionFeedPosts(studentDiscussionThreads), locale)
-      : [],
-  );
-  const discussionCommandMutation = useMutation({
-    mutationFn: (command: { apply: () => void; execute: () => Promise<unknown> }) => command.execute(),
-    onError: (_error, _command, context) => {
-      if (context?.previousPosts) setDiscussionPosts(context.previousPosts);
-    },
-    onMutate: (command: { apply: () => void; execute: () => Promise<unknown> }) => {
-      const previousPosts = discussionPosts;
-      command.apply();
-      return { previousPosts };
-    },
-    onSettled: () => queryClient.invalidateQueries({
-      exact: true,
-      queryKey: studentEngagementQueryKeys.feed(engagementScope),
-    }),
+  const discussion = useStudentDiscussion({
+    apiEnabled,
+    copy,
+    engagementScope,
+    fixtureMode,
+    locale,
+    profile: dashboardProfile,
+    tenantId,
   });
   const announcementReadMutation = useMutation({
     mutationFn: (announcementId: string) => markStudentAnnouncementReadApi({ announcementId, tenantId }),
@@ -203,11 +157,6 @@ export function StudentDashboardWorkspaceRuntime() {
   });
   const markAnnouncementReadOnServer = announcementReadMutation.mutate;
 
-  useEffect(() => {
-    if (!apiEnabled || !discussionFeedQuery.data) return;
-    setDiscussionPosts(discussionFeedQuery.data.items);
-  }, [apiEnabled, discussionFeedQuery.data]);
-
   const currentAssignment = viewState.type === "quiz"
     ? assignments.find((item) => item.id === viewState.assignmentId)
     : undefined;
@@ -219,82 +168,12 @@ export function StudentDashboardWorkspaceRuntime() {
   const priorityAssignment = openAssignments[0] ?? assignments[0];
   const pinnedAnnouncement = teacherAnnouncements.find((announcement) => announcement.isPinned) ?? teacherAnnouncements[0];
   const latestAnnouncement = teacherAnnouncements[0];
+  const { announcementPopupOpen, setAnnouncementPopupOpen } = useAnnouncementPopup(latestAnnouncement, viewState.type === "quiz");
   const unreadAnnouncementCount = useMemo(
     () => teacherAnnouncements.filter((announcement) => !readAnnouncementIds.includes(announcement.id)).length,
     [readAnnouncementIds, teacherAnnouncements],
   );
-  const discussionPreview = useMemo(() => getDiscussionOverviewPreview(discussionPosts), [discussionPosts]);
-
-  useEffect(() => {
-    function refreshViewerSession() {
-      const nextSession = getCurrentElearningViewerSession();
-      setAccount((currentSession) => {
-        if (currentSession?.accessToken === nextSession?.accessToken && currentSession?.email === nextSession?.email) {
-          return currentSession;
-        }
-
-        return nextSession;
-      });
-    }
-
-    refreshViewerSession();
-    window.addEventListener("focus", refreshViewerSession);
-    window.addEventListener("storage", refreshViewerSession);
-    window.addEventListener("erg-auth-session-replaced", refreshViewerSession);
-    window.addEventListener("erg-auth-session-invalid", refreshViewerSession);
-
-    return () => {
-      window.removeEventListener("focus", refreshViewerSession);
-      window.removeEventListener("storage", refreshViewerSession);
-      window.removeEventListener("erg-auth-session-replaced", refreshViewerSession);
-      window.removeEventListener("erg-auth-session-invalid", refreshViewerSession);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (viewState.type === "quiz") {
-      paceStateUpdate(() => setAnnouncementPopupOpen(false));
-      return;
-    }
-
-    if (!latestAnnouncement) return;
-    if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
-    paceStateUpdate(() => setAnnouncementPopupOpen(true));
-  }, [latestAnnouncement, paceStateUpdate, viewState.type]);
-
-  useEffect(() => {
-    if (!announcementPopupOpen) {
-      autoCloseAnnouncementPopup.cancel();
-      return;
-    }
-
-    autoCloseAnnouncementPopup.run();
-    return () => autoCloseAnnouncementPopup.cancel();
-  }, [announcementPopupOpen, autoCloseAnnouncementPopup]);
-
-  useEffect(() => {
-    function reopenAnnouncementPopup() {
-      if (viewState.type === "quiz") return;
-      if (!latestAnnouncement) return;
-      if (document.visibilityState !== "visible") return;
-      if (isAnnouncementPopupSnoozed(latestAnnouncement.id)) return;
-      setAnnouncementPopupOpen(true);
-    }
-
-    function handleVisibilityChange() {
-      if (document.visibilityState === "visible") {
-        reopenAnnouncementPopup();
-      }
-    }
-
-    window.addEventListener("focus", reopenAnnouncementPopup);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      window.removeEventListener("focus", reopenAnnouncementPopup);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [latestAnnouncement, viewState.type]);
+  const discussionPreview = useMemo(() => getDiscussionOverviewPreview(discussion.discussionPosts), [discussion.discussionPosts]);
 
   useEffect(() => {
     if (activePage !== "announcements") return;
@@ -344,147 +223,10 @@ export function StudentDashboardWorkspaceRuntime() {
     void navigate({ href: studentPath("/") });
   }
 
-  function createDiscussionPost(content: string, attachments: StudentDiscussionImageAttachment[]) {
-    const now = createTimestamp();
-    const safeContent = maskProfanity(content);
-    const postId = `discussion-post-${now}`;
-    const nextPost: StudentDiscussionFeedPost = {
-      id: postId,
-      content: safeContent.value,
-      authorName: dashboardProfile.name,
-      authorInitials: getInitials(dashboardProfile.name),
-      createdAtLabel: locale === "vi" ? "Vua xong" : "Just now",
-      createdAtMs: now,
-      className: dashboardProfile.className,
-      attachments,
-      moderationWarning: safeContent.hasProfanity,
-      reactions: createReactionSummary(),
-      comments: [],
-      viewerReaction: null,
-    };
-
-    const apply = () => setDiscussionPosts((currentPosts) => [nextPost, ...currentPosts]);
-    if (apiEnabled) {
-      discussionCommandMutation.mutate({
-        apply,
-        execute: () => createStudentDiscussion({
-          attachmentIds: attachments.map((attachment) => attachment.id),
-          content: safeContent.value,
-          idempotencyKey: postId,
-          tenantId,
-          title: safeContent.value.slice(0, 120) || copy.discussionTitle,
-        }),
-      });
-    } else {
-      apply();
-    }
-    pushDiscussionNotification({
-      id: `notification-${postId}`,
-      primaryText: copy.notificationNewThread(nextPost.authorName),
-      secondaryText: nextPost.content || copy.notificationImageOnly,
-      replyId: undefined,
-      threadId: postId,
-      timeLabel: locale === "vi" ? "Vua xong" : "Just now",
-      unread: true,
-    });
-  }
-
-  function addDiscussionComment(
-    postId: string,
-    parentCommentId: string | undefined,
-    content: string,
-    attachments: StudentDiscussionImageAttachment[],
-  ) {
-    const safeContent = maskProfanity(content);
-    const targetPost = discussionPosts.find((post) => post.id === postId);
-
-    const apply = () => setDiscussionPosts((currentPosts) =>
-      currentPosts.map((post) =>
-        post.id === postId
-          ? addFeedComment({
-              attachments,
-              content: safeContent.value,
-              createdAtLabel: locale === "vi" ? "Vua xong" : "Just now",
-              moderationWarning: safeContent.hasProfanity,
-              parentCommentId,
-              post,
-              viewer: {
-                id: dashboardProfile.id,
-                initials: getInitials(dashboardProfile.name),
-                name: dashboardProfile.name,
-              },
-            })
-          : post,
-      ),
-    );
-    if (apiEnabled) {
-      discussionCommandMutation.mutate({
-        apply,
-        execute: () => replyStudentDiscussion({
-          attachmentIds: attachments.map((attachment) => attachment.id),
-          content: safeContent.value,
-          idempotencyKey: `reply-${postId}-${createTimestamp()}`,
-          parentCommentId,
-          postId,
-          tenantId,
-        }),
-      });
-    } else {
-      apply();
-    }
-    pushDiscussionNotification({
-      id: `notification-comment-${postId}-${createTimestamp()}`,
-      primaryText: copy.notificationNewReply(dashboardProfile.name),
-      secondaryText: copy.notificationTopicContext(targetPost?.content.slice(0, 80) ?? copy.discussionTitle),
-      replyId: parentCommentId,
-      threadId: postId,
-      timeLabel: locale === "vi" ? "Vua xong" : "Just now",
-      unread: true,
-    });
-  }
-
-  function toggleDiscussionPostReaction(postId: string, reaction: StudentDiscussionReactionKey) {
-    const apply = () => setDiscussionPosts((currentPosts) =>
-      currentPosts.map((post) => (post.id === postId ? toggleFeedPostReaction(post, reaction) : post)),
-    );
-    if (apiEnabled) {
-      discussionCommandMutation.mutate({
-        apply,
-        execute: () => setStudentDiscussionReaction({ reaction, targetId: postId, targetType: "POST", tenantId }),
-      });
-    } else {
-      apply();
-    }
-  }
-
-  function toggleDiscussionCommentReaction(postId: string, commentId: string, reaction: StudentDiscussionReactionKey) {
-    const apply = () => setDiscussionPosts((currentPosts) =>
-      currentPosts.map((post) => (post.id === postId ? toggleFeedCommentReaction(post, commentId, reaction) : post)),
-    );
-    if (apiEnabled) {
-      discussionCommandMutation.mutate({
-        apply,
-        execute: () => setStudentDiscussionReaction({ reaction, targetId: commentId, targetType: "COMMENT", tenantId }),
-      });
-    } else {
-      apply();
-    }
-  }
-
-  function pushDiscussionNotification(notification: StudentDiscussionNotification) {
-    setDiscussionNotifications((currentNotifications) => [notification, ...currentNotifications].slice(0, 8));
-  }
-
   function handleDiscussionNotificationClick(threadId: string, replyId?: string) {
     setActivePage("discussion");
     setNotificationAnchor(null);
-    setDiscussionNotifications((currentNotifications) =>
-      currentNotifications.map((notification) =>
-        notification.threadId === threadId && notification.replyId === replyId
-          ? { ...notification, unread: false }
-          : notification,
-      ),
-    );
+    discussion.markNotificationRead(threadId, replyId);
     scrollToDiscussionPost.run(threadId);
   }
 
@@ -514,118 +256,18 @@ export function StudentDashboardWorkspaceRuntime() {
     { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", icon: null },
   ], [copy.navItems, locale]);
 
+  const backToDashboard = () => setViewState({ type: "dashboard" });
+
   if (viewState.type === "quiz" && !currentAssignment) {
-    return (
-      <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: MUI_BG, p: 3 }}>
-        <Box sx={{ maxWidth: 520, width: "100%", bgcolor: "#fff", border: "1px solid rgba(16,24,40,0.1)", borderRadius: 3, p: 3, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>Không tìm thấy bài được giao</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Bài này không còn trong dữ liệu tài khoản hiện tại. Không thể mở bằng một bài khác.
-          </Typography>
-          <Button variant="outlined" sx={{ mt: 2, borderRadius: 2 }} onClick={() => setViewState({ type: "dashboard" })}>
-            Quay lại bảng học tập
-          </Button>
-        </Box>
-      </Box>
-    );
+    return <StudentQuizAssignmentMissing onBack={backToDashboard} />;
   }
 
   if (viewState.type === "quiz" && currentAssignment && !currentAssignment.quizId) {
-    return (
-      <Box sx={{ minHeight: "100vh", display: "grid", placeItems: "center", bgcolor: MUI_BG, p: 3 }}>
-        <Box sx={{ maxWidth: 560, width: "100%", bgcolor: "#fff", border: "1px solid rgba(16,24,40,0.1)", borderRadius: 3, p: 3, textAlign: "center" }}>
-          <Typography variant="h6" sx={{ fontWeight: 600 }}>Assessment chưa sẵn sàng</Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Backend chưa trả về quiz gắn với “{currentAssignment.title}”. Hệ thống không tự suy đoán quiz từ assignment id.
-          </Typography>
-          <Button variant="outlined" sx={{ mt: 2, borderRadius: 2 }} onClick={() => setViewState({ type: "dashboard" })}>
-            Quay lại bảng học tập
-          </Button>
-        </Box>
-      </Box>
-    );
+    return <StudentQuizNotReady assignment={currentAssignment} onBack={backToDashboard} />;
   }
 
   if (viewState.type === "quiz" && currentAssignment) {
-    const subjectLabel = currentAssignment.subjectLabel ?? "Chưa có môn học";
-    const teacherName = currentAssignment.teacherName ?? "Chưa có giáo viên";
-    const subtitle = currentAssignment.subtitle ?? "Chưa có mô tả";
-    const lastActivityLabel = currentAssignment.lastActivityLabel ?? "Chưa có hoạt động";
-    return (
-      <Box
-        sx={{
-          height: "100vh",
-          overflow: "hidden",
-          bgcolor: "#f3f6ff",
-          backgroundImage:
-            "linear-gradient(180deg, rgba(255,255,255,0.82), rgba(246,248,255,0.88)), url('https://media.erg.edu.vn/logo/bg.jpg')",
-          backgroundPosition: "center",
-          backgroundSize: "cover",
-          color: MUI_TEXT,
-          fontFamily: "var(--font-app)",
-        }}
-      >
-        <AppBar
-          position="static"
-          color="default"
-          elevation={0}
-          sx={{
-            bgcolor: "rgba(255,255,255,0.72)",
-            borderBottom: "1px solid rgba(0,0,136,0.08)",
-            backdropFilter: "blur(18px)",
-            boxShadow: "0 10px 34px rgba(0,0,136,0.05)",
-          }}
-        >
-          <Toolbar sx={{ minHeight: { xs: 48, md: 46 }, gap: { xs: 1, md: 1.5 }, px: { xs: 1.25, md: 2 } }}>
-            <Button
-              size="small"
-              startIcon={<ArrowLeft sx={{ fontSize: 18 }} />}
-              variant="outlined"
-              onClick={() => setViewState({ type: "dashboard" })}
-              sx={{
-                bgcolor: "rgba(255,255,255,0.64)",
-                borderColor: "rgba(0,0,136,0.14)",
-                borderRadius: 2,
-                color: "#000088",
-                fontWeight: 600,
-                minHeight: 34,
-                px: 1.35,
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  bgcolor: "rgba(255,255,255,0.86)",
-                  borderColor: "rgba(232,40,40,0.22)",
-                },
-              }}
-            >
-              {copy.backToDashboard}
-            </Button>
-            <Box sx={{ minWidth: 0, flex: 1, textAlign: "right" }}>
-              <Typography noWrap variant="subtitle2" sx={{ color: "#000088", fontSize: { xs: 12, md: 13 }, fontWeight: 600, lineHeight: 1.2 }}>
-                {currentAssignment.title}
-              </Typography>
-              <Typography noWrap variant="caption" sx={{ color: "rgba(28,37,46,0.62)", display: { xs: "none", md: "block" }, lineHeight: 1.15 }}>
-                {copy.sessionDescription(subjectLabel, teacherName, currentAssignment.dueLabel)}
-              </Typography>
-            </Box>
-          </Toolbar>
-        </AppBar>
-        <Box sx={{ height: { md: "calc(100vh - 46px)" }, overflow: "hidden", px: { xs: 0.75, md: 1 }, py: { xs: 0.75, md: 0.75 } }}>
-          <PlayerShell
-            assignmentId={currentAssignment.id}
-            quizId={currentAssignment.quizId}
-            runtimePortal={quizRuntimePortal}
-            welcomeMeta={{
-              authorName: teacherName,
-              courseLabel: currentAssignment.title,
-              dueLabel: currentAssignment.dueLabel,
-              reviewContent: subtitle,
-              subjectLabel,
-              topics: [subjectLabel, currentAssignment.statusLabel, lastActivityLabel],
-            }}
-          />
-        </Box>
-      </Box>
-    );
+    return <StudentQuizSession assignment={currentAssignment} copy={copy} runtimePortal={quizRuntimePortal} onBack={backToDashboard} />;
   }
 
   const handlePageChange = (page: StudentPageKey) => {
@@ -663,12 +305,12 @@ export function StudentDashboardWorkspaceRuntime() {
       {activePage === "discussion" ? (
         <DiscussionView
           copy={copy}
-          posts={discussionPosts}
+          posts={discussion.discussionPosts}
           studentClass={dashboardProfile.className}
-          onAddComment={addDiscussionComment}
-          onCommentReaction={toggleDiscussionCommentReaction}
-          onCreatePost={createDiscussionPost}
-          onPostReaction={toggleDiscussionPostReaction}
+          onAddComment={discussion.addDiscussionComment}
+          onCommentReaction={discussion.toggleDiscussionCommentReaction}
+          onCreatePost={discussion.createDiscussionPost}
+          onPostReaction={discussion.toggleDiscussionPostReaction}
         />
       ) : null}
       {activePage === "announcements" ? (
@@ -716,7 +358,7 @@ export function StudentDashboardWorkspaceRuntime() {
         copy={copy}
         dashboardProfile={dashboardProfile}
         notificationAnchor={notificationAnchor}
-        notifications={discussionNotifications}
+        notifications={discussion.discussionNotifications}
         unreadAnnouncementCount={unreadAnnouncementCount}
         onAccountOpen={() => handlePageChange("account")}
         onNotificationClose={() => setNotificationAnchor(null)}

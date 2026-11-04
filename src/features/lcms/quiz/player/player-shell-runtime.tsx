@@ -1,9 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState, type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
-import { FinalResultScreen, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
+import { FinalResultScreen } from "@/components/quiz/final-result-screen";
+import { SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
 import {
   PlayerOfflineBanner,
   PlayerSaveIndicator,
@@ -37,6 +38,7 @@ import { usePlayerActions } from "@/features/lcms/quiz/player/player-shell-runti
 import { usePlayerKeyboard } from "@/components/quiz/player-shell-runtime/use-player-keyboard";
 import { usePlayerLoadEffect } from "@/features/lcms/quiz/player/player-shell-runtime/use-player-load-effect";
 import { usePlayerSyncEffects } from "@/features/lcms/quiz/player/player-shell-runtime/use-player-sync-effects";
+import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
 import { useTimeUpSubmit } from "@/features/lcms/quiz/player/player-shell-runtime/use-time-up-submit";
 import { useTrainingAdvanceEffects } from "@/components/quiz/player-shell-runtime/use-training-advance-effects";
 import {
@@ -67,6 +69,10 @@ export type PlayerShellProps = {
   startImmediately?: boolean;
   runtimePortal?: QuizRuntimePortal;
   welcomeMeta?: QuizWelcomeMeta;
+  /** Portable exams: opaque account id (class + student code) used as the attempt scope. */
+  identityAccountId?: string;
+  /** Portable exams: extra result-screen actions (export). Receives the finished attempt. */
+  renderResultActions?: (context: { attempt: Attempt; session: LocalQuizAttemptSession; quizPackage: QuizPackage }) => ReactNode;
 };
 
 export function PlayerShellRuntime({
@@ -77,6 +83,8 @@ export function PlayerShellRuntime({
   startImmediately = false,
   runtimePortal = "elearning",
   welcomeMeta,
+  identityAccountId,
+  renderResultActions,
 }: PlayerShellProps) {
   const resolvedQuizId = portablePackage?.quizId ?? quizId;
   const resolvedAssignmentId = assignmentId ?? (portablePackage ? `portable:${portablePackage.id}` : quizId);
@@ -86,11 +94,11 @@ export function PlayerShellRuntime({
   const attemptScope = useMemo(() => {
     const viewer = getCurrentElearningViewerSession();
     return {
-      accountId: viewer?.id,
+      accountId: identityAccountId ?? viewer?.id,
       portal: runtimePortal,
       tenantId: getDefaultTenantId(),
     };
-  }, [runtimePortal]);
+  }, [identityAccountId, runtimePortal]);
   const [loadState, setLoadState] = useState<PlayerLoadState>({ status: "loading" });
   const quizPackageQuery = useQuizPackageQuery(portablePackage ? "" : quizId ?? "", runtimePortal);
   const [started, setStarted] = useState(startImmediately);
@@ -136,7 +144,7 @@ export function PlayerShellRuntime({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
     attemptExpired, currentAnswerComplete, deadlineAt, draftAnswer, isFirstQuestion, isLastQuestion, isTestingMode,
     isTrainingMode, lastResult, questions, reviewingAttempt, submitFailed, submitted,
-  } = usePlayerDerivedState({ currentIndex, drafts, loadState, reviewingSubmittedAttempt, timeUp });
+  } = usePlayerDerivedState({ currentIndex, drafts, loadState, portableOffline, reviewingSubmittedAttempt, timeUp });
 
   const { beginAttempt, finalizeAttempt, requestSubmit, submitCurrentTrainingQuestion, submitReadyAttempt } = usePlayerActions({
     activeAttempt, activePackage, activeQuestion, activeQuiz, activeSession, allQuestionsAnswered, attemptCompleted,
@@ -151,7 +159,7 @@ export function PlayerShellRuntime({
     runtimePortal, saveAttemptDraftAsync, started, syncAttemptAsync, setDraftSync,
   });
 
-  useTimeUpSubmit({
+  const { phase: timeUpPhase, retry: retryTimeUpSubmit } = useTimeUpSubmit({
     activeAttempt, activePackage, activeSession, attemptCompleted, attemptScope, isTestingMode, started,
     submitReadyAttempt, submitting, timeUp, setLoadState, setSubmitError, setSubmitting,
   });
@@ -202,6 +210,7 @@ export function PlayerShellRuntime({
   const countdownProps = {
     active: started && isTestingMode && !attemptCompleted,
     deadlineAt,
+    localClock: portableOffline,
     onExpiredChange: setTimeUp,
     session: activeSession,
   };
@@ -221,6 +230,20 @@ export function PlayerShellRuntime({
     setReviewingSubmittedAttempt(true);
     setCurrentIndex(0);
   }
+
+  function handleReviewQuestion(index: number) {
+    setReviewingSubmittedAttempt(true);
+    setCurrentIndex(index);
+  }
+
+  function handleBackToList() {
+    window.history.back();
+  }
+
+  // Practice mode only: drop the finished local session, then reload into a fresh attempt.
+  const retryHandler = isTrainingMode && activeSession ? () => {
+    void localQuizAttemptStore.clearScopedSession(activeSession.assignmentId, activeSession.quizId, attemptScope).then(() => window.location.reload());
+  } : undefined;
 
   function handleDraftChange(next: AnswerPayload) {
     const previous = drafts[readyQuestion.id];
@@ -363,7 +386,13 @@ export function PlayerShellRuntime({
     onPrev: () => setCurrentIndex((value) => Math.max(0, value - 1)),
     onSubmitCurrentQuestion: () => void submitCurrentTrainingQuestion(),
     onToggleBookmark: () => void handleToggleBookmark(),
-    resultBody: <FinalResultScreen attempt={readyAttempt} resultDisplay={resultDisplay} onReview={handleReviewQuiz} />,
+    resultBody: (
+      <FinalResultScreen
+        attempt={readyAttempt} questions={questions} resultDisplay={resultDisplay} onReview={handleReviewQuiz}
+        onReviewQuestion={handleReviewQuestion} onRetry={retryHandler} onBackToList={handleBackToList}
+        extraActions={renderResultActions?.({ attempt: readyAttempt, session: readySession, quizPackage: readyPackage })}
+      />
+    ),
   };
 
   if (!started) {
@@ -404,6 +433,7 @@ export function PlayerShellRuntime({
       <QuizThemeSurface quiz={readyQuiz} className="quiz-player-shell">
         <MobilePlayerShell {...mobileShellProps} />
         {submitDialog}
+        <TimeUpOverlay phase={timeUpPhase} onRetry={retryTimeUpSubmit} />
       </QuizThemeSurface>
     );
   }
@@ -442,6 +472,8 @@ export function PlayerShellRuntime({
         submitting={submitting}
         handleRequestSubmit={handleRequestSubmit}
         handleReviewQuiz={handleReviewQuiz}
+        onBackToList={handleBackToList}
+        onRetry={retryHandler}
         handleToggleBookmark={handleToggleBookmark}
         setCurrentIndex={setCurrentIndex}
         submitCurrentTrainingQuestion={submitCurrentTrainingQuestion}
@@ -450,6 +482,7 @@ export function PlayerShellRuntime({
       {renderSidebar()}
 
       {submitDialog}
+      <TimeUpOverlay phase={timeUpPhase} onRetry={retryTimeUpSubmit} />
     </QuizThemeSurface>
   );
 }

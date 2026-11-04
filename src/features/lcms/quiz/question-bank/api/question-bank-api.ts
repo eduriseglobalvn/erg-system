@@ -1,9 +1,4 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import {
-  questionBankQuestions,
-  questionBankSubjects,
-  quizBankItems,
-} from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
 import { mapWorkspace, type QuestionBankWorkspaceDTO } from "@/features/lcms/quiz/question-bank/api/question-bank-mappers";
 import type {
   QuestionBankQuestion,
@@ -179,7 +174,7 @@ export async function loadQuestionBankData(
   filters: Omit<QuestionBankWorkspaceInput, "tenantId"> = {},
   signal?: AbortSignal,
 ): Promise<QuestionBankApiData> {
-  if (runtimeFixturesEnabled()) return mockQuestionBankData();
+  if (import.meta.env.DEV && runtimeFixturesEnabled()) return (await import("@/test/fixtures/mock-question-bank")).mockQuestionBankData();
   const raw = await loadQuestionBankWorkspace(
     { ...filters, tenantId, page: filters.page ?? 0, size: filters.size ?? 50 },
     signal,
@@ -279,18 +274,11 @@ function normalizeQuestionBankInput(input: QuestionBankWorkspaceInput): Question
   };
 }
 
-export function mockQuestionBankData(): QuestionBankApiData {
+export function emptyQuestionBankData(): QuestionBankApiData {
   return {
-    questions: questionBankQuestions,
-    questionPage: {
-      page: 0,
-      size: questionBankQuestions.length,
-      totalItems: questionBankQuestions.length,
-      totalPages: 1,
-      hasNext: false,
-      hasPrevious: false,
-    },
-    quizzes: quizBankItems,
-    subjects: questionBankSubjects,
+    questions: [],
+    questionPage: { page: 0, size: 0, totalItems: 0, totalPages: 0, hasNext: false, hasPrevious: false },
+    quizzes: [],
+    subjects: [],
   };
 }

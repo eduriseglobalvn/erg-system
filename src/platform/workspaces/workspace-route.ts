@@ -32,15 +32,25 @@ export function canonicalWorkspaceForPath(pathname: string): CanonicalLmsWorkspa
   return undefined;
 }
 
+/** Single host policy: dev-only local hosts count as the LMS workspace; production only trusts the real LMS host. */
+export function isLocalDevWorkspaceHost(hostname: string): boolean {
+  if (!import.meta.env.DEV) return false;
+  const host = normalizeHostname(hostname);
+  return (
+    host === "localhost" ||
+    host === "127.0.0.1" ||
+    host === "::1" ||
+    host === "[::1]" ||
+    host.endsWith(".localhost") ||
+    host === "lms.erg.edu.local"
+  );
+}
+
 export function isCanonicalLmsWorkspaceHost(location: HostLike): boolean {
-  const hostname = normalizeHostname(location.hostname);
   return (
     getDesktopRuntime() === "tauri" ||
-    hostname === ERG_WORKSPACE_DOMAINS.lms ||
-    hostname === "lms.erg.edu.local" ||
-    hostname === "localhost" ||
-    hostname === "127.0.0.1" ||
-    hostname === "::1"
+    normalizeHostname(location.hostname) === ERG_WORKSPACE_DOMAINS.lms ||
+    isLocalDevWorkspaceHost(location.hostname)
   );
 }
 

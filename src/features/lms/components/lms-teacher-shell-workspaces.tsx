@@ -26,7 +26,7 @@ import {
 } from "@/features/lms/components/lms-teacher-shell-presentation";
 import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import type { LmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
-import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 

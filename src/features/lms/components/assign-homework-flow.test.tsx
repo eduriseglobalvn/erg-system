@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, expect, it, vi } from "vitest";
 
-import { classroomSnapshots } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomSnapshots } from "@/test/fixtures/mock-classroom-data";
 import { AssignHomeworkPage } from "@/features/lms/components/assign-homework-page";
 
 vi.mock("@/features/lms/api/lms-assignment-command-api", () => ({

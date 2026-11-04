@@ -1,4 +1,3 @@
-import { classroomSchools } from "@/features/lms/classroom/api/mock-classroom-data";
 import {
   listLearningResourceResources,
   listLearningResourceSubjects,
@@ -45,7 +44,9 @@ function getTeacherDashboardCacheScope() {
   const tenantId = session?.tenantId?.trim() || import.meta.env.VITE_TENANT_ID?.trim() || "erg";
   return [tenantId, "lms", account?.id?.trim() || "anonymous"].join(":");
 }
-function fallbackManagedSchools(): LearningResourceManagedSchool[] {
+async function fallbackManagedSchools(): Promise<LearningResourceManagedSchool[]> {
+  if (!import.meta.env.DEV) return [];
+  const { classroomSchools } = await import("@/test/fixtures/mock-classroom-data");
   return classroomSchools.map((school) => ({
     id: school.id,
     name: school.name,

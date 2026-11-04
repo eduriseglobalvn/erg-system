@@ -103,20 +103,6 @@ export default defineConfig(({ command, mode }) => {
   ],
   resolve: {
     alias: [
-      ...(mode === "production" ? [
-        {
-          find: "@/features/lms/classroom/api/mock-classroom-data",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/classroom-data.ts"),
-        },
-        {
-          find: "@/features/lcms/admin-operations/api/mock-learning-resource-authoring-data",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/learning-resource-authoring-data.ts"),
-        },
-        {
-          find: "@/features/lcms/school-management/api/mock-training-monitoring",
-          replacement: path.resolve(__dirname, "./src/features/runtime-stubs/training-monitoring-data.ts"),
-        },
-      ] : []),
       { find: "@", replacement: path.resolve(__dirname, "./src") },
     ],
     dedupe: ["react", "react-dom"],

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Stack from "@mui/material/Stack";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
 import {
   ErgCalendarWorkspace,
@@ -80,6 +81,7 @@ export default function AdminGoogleCalendarWorkspace({
 }) {
   const queryClient = useQueryClient();
   const { session: lcmsSession } = useAuthSession("lcms");
+  const isMobile = useMediaQuery("(max-width:767.95px)");
   // Legacy login stores the shared admin session under lms even when the
   // current route is /admin. Keep the calendar capability fallback aligned
   // with PortalAuthGate until the BFF session is hydrated for lcms.
@@ -253,9 +255,9 @@ export default function AdminGoogleCalendarWorkspace({
       filterEventsByScope={false}
       errorMessage={workspaceQuery.error instanceof Error ? workspaceQuery.error.message : referenceCatalogQuery.error instanceof Error ? referenceCatalogQuery.error.message : undefined}
       initialDate={initialRange.initialDate}
-      initialMode="month"
+      initialMode={isMobile ? "schedule" : "month"}
       createDialogOpen={createDialogOpen}
-      isLoading={workspaceQuery.isPending || referenceCatalogQuery.isPending || createScheduleMutation.isPending || previewScheduleMutation.isPending || publishScheduleMutation.isPending}
+      isLoading={workspaceQuery.isLoading || referenceCatalogQuery.isLoading || createScheduleMutation.isPending || previewScheduleMutation.isPending || publishScheduleMutation.isPending}
       lanes={lcmsCalendarLanes}
       monthCountLabel="lịch dạy"
       monthCountOverride={workspaceQuery.data?.events.length}
@@ -287,7 +289,7 @@ export default function AdminGoogleCalendarWorkspace({
       resolveLaneSummaries={(activeLane, laneEvents) => resolveLcmsLaneSummaries(activeLane, laneEvents, calendarCatalog)}
       resolveScopeSelectLabel={resolveLcmsScopeSelectLabel}
       scheduleCatalog={calendarCatalog}
-      showCreateButton={canCreateSchedule}
+      showCreateButton={false}
       todayDate={initialRange.initialDate}
       />
     </Stack>

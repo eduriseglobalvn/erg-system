@@ -10,7 +10,7 @@ import {
   classroomSnapshots,
   defaultClassId,
   defaultSchoolId,
-} from "@/features/lms/classroom/api/mock-classroom-data";
+} from "@/features/lms/classroom/api/classroom-defaults";
 import type { AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsTeacherHomeworkWorkspace, mapAssignmentsToRuns } from "@/features/lms/api/lms-teacher-homework-api";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";

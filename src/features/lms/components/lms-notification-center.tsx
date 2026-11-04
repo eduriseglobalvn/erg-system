@@ -98,7 +98,7 @@ export function LmsNotificationCenter() {
   }
 
   function markAllAsRead() {
-    void markAllReadMutation.mutateAsync();
+    markAllReadMutation.mutate();
   }
 
   function openNotification(notification: NotificationFeedItem) {

@@ -12,9 +12,9 @@ import {
   type StoredAuthSession,
   type StoredAuthIdentity,
 } from "@/platform/auth/api/auth-token-storage";
-import { clearCrossDomainSession } from "@/platform/auth/api/cross-domain-session";
 import { tr } from "@/platform/i18n";
 import { getApiBase } from "@/lib/platform";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { AUTH_BYPASS_ENABLED, DEFAULT_BYPASS_ACCOUNT } from "@/platform/auth/config/auth-bypass";
 import {
@@ -68,7 +68,6 @@ function notifyAuthAccountChanged() {
 }
 
 function clearSession() {
-  clearCrossDomainSession();
   clearStoredAuthSessions();
 }
 
@@ -219,7 +218,7 @@ function accountFromSession(session: AccountSession): TeacherAccount | null {
 
 function mapRoleFromRoles(roles: string[]): AccountRole {
   const normalized = roles.map((role) => role.toLowerCase());
-  if (normalized.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))) {
+  if (hasAdminLikeClaims(normalized)) {
     return "admin";
   }
   if (normalized.some((role) => ["coordinator", "manager", "center_manager"].includes(role))) return "coordinator";

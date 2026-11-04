@@ -1,5 +1,6 @@
 const ADMIN_LIKE_ROLES: ReadonlySet<string> = new Set([
   "admin",
+  "erg_admin",
   "super_admin",
   "super-admin",
   "system.super_admin",

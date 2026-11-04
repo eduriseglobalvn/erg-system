@@ -71,10 +71,6 @@
     "hex": 13,
     "font": 2
   },
-  "src/components/nav-main.tsx": {
-    "hex": 0,
-    "font": 4
-  },
   "src/components/portal/ErgPortalHeader.tsx": {
     "hex": 0,
     "font": 1
@@ -113,7 +109,7 @@
   },
   "src/components/quiz/player-shell-parts.tsx": {
     "hex": 2,
-    "font": 22
+    "font": 10
   },
   "src/components/quiz/player-shell-runtime/player-desktop-layout.tsx": {
     "hex": 1,
@@ -200,8 +196,8 @@
     "font": 16
   },
   "src/components/shared/erg-calendar-feedback.tsx": {
-    "hex": 4,
-    "font": 6
+    "hex": 3,
+    "font": 4
   },
   "src/components/shared/erg-calendar-navigator.tsx": {
     "hex": 6,
@@ -265,7 +261,7 @@
   },
   "src/features/audit/components/audit-table.tsx": {
     "hex": 0,
-    "font": 5
+    "font": 3
   },
   "src/features/audit/components/audit-trail-workspace.tsx": {
     "hex": 0,
@@ -339,6 +335,10 @@
     "hex": 13,
     "font": 11
   },
+  "src/features/elearning/student-dashboard/components/student-dashboard-quiz-session.tsx": {
+    "hex": 5,
+    "font": 5
+  },
   "src/features/elearning/student-dashboard/components/student-dashboard-scores-view.tsx": {
     "hex": 45,
     "font": 30
@@ -352,8 +352,8 @@
     "font": 12
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-workspace-runtime.tsx": {
-    "hex": 5,
-    "font": 6
+    "hex": 0,
+    "font": 1
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-workspace-styles.tsx": {
     "hex": 10,
@@ -563,9 +563,13 @@
     "hex": 9,
     "font": 0
   },
-  "src/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs.tsx": {
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-delete-dialog.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-dialog-styles.ts": {
     "hex": 2,
-    "font": 4
+    "font": 3
   },
   "src/features/lcms/admin-operations/components/learning-resource-authoring-fields.tsx": {
     "hex": 4,
@@ -663,6 +667,10 @@
     "hex": 0,
     "font": 30
   },
+  "src/features/lcms/admin-operations/components/user-access-control-panels.tsx": {
+    "hex": 2,
+    "font": 0
+  },
   "src/features/lcms/admin-operations/components/user-access-control-role-section.tsx": {
     "hex": 0,
     "font": 5
@@ -674,10 +682,6 @@
   "src/features/lcms/admin-operations/components/user-access-control-section-primitives.tsx": {
     "hex": 0,
     "font": 15
-  },
-  "src/features/lcms/admin-operations/components/user-access-control-workspace.tsx": {
-    "hex": 2,
-    "font": 0
   },
   "src/features/lcms/certificates/components/certificate-registry-workspace.tsx": {
     "hex": 0,
@@ -755,9 +759,9 @@
     "hex": 1,
     "font": 0
   },
-  "src/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project.ts": {
-    "hex": 7,
-    "font": 1
+  "src/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults.ts": {
+    "hex": 2,
+    "font": 0
   },
   "src/features/lcms/quiz/quiz-editor/components/classic-editor-art.tsx": {
     "hex": 44,
@@ -796,8 +800,8 @@
     "font": 22
   },
   "src/features/lcms/quiz/quiz-editor/components/question-manager-table.tsx": {
-    "hex": 16,
-    "font": 16
+    "hex": 4,
+    "font": 6
   },
   "src/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style.ts": {
     "hex": 0,
@@ -849,7 +853,15 @@
   },
   "src/features/lcms/school-management/components/class-import-dialog.tsx": {
     "hex": 0,
-    "font": 26
+    "font": 5
+  },
+  "src/features/lcms/school-management/components/class-import-preview-table.tsx": {
+    "hex": 0,
+    "font": 9
+  },
+  "src/features/lcms/school-management/components/class-students-viewer-dialog.tsx": {
+    "hex": 0,
+    "font": 12
   },
   "src/features/lcms/school-management/components/school-analytics-workspace.tsx": {
     "hex": 9,
@@ -872,8 +884,8 @@
     "font": 15
   },
   "src/features/lcms/school-management/components/school-page-shell.tsx": {
-    "hex": 4,
-    "font": 11
+    "hex": 3,
+    "font": 10
   },
   "src/features/lcms/school-management/components/school-reviews-panel.tsx": {
     "hex": 0,
@@ -1046,10 +1058,6 @@
   "src/features/lms/classroom/components/class-students-workspace.tsx": {
     "hex": 0,
     "font": 6
-  },
-  "src/features/lms/classroom/components/classroom-tracking-workspace.tsx": {
-    "hex": 12,
-    "font": 0
   },
   "src/features/lms/classroom/components/overview-workspace.tsx": {
     "hex": 8,
@@ -1339,14 +1347,6 @@
     "hex": 0,
     "font": 3
   },
-  "src/layouts/dashboard/components/dashboard-account-card.tsx": {
-    "hex": 0,
-    "font": 8
-  },
-  "src/layouts/dashboard/components/dashboard-account-menu.tsx": {
-    "hex": 0,
-    "font": 5
-  },
   "src/layouts/dashboard/components/dashboard-content.tsx": {
     "hex": 4,
     "font": 5
@@ -1354,14 +1354,6 @@
   "src/layouts/dashboard/components/dashboard-placeholder-workspace.tsx": {
     "hex": 0,
     "font": 6
-  },
-  "src/layouts/dashboard/components/dashboard-scope-selector.tsx": {
-    "hex": 0,
-    "font": 24
-  },
-  "src/layouts/dashboard/components/dashboard-sidebar.tsx": {
-    "hex": 0,
-    "font": 3
   },
   "src/lib/quiz-theme-catalog.ts": {
     "hex": 240,

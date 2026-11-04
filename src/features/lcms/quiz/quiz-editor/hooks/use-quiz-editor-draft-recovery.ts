@@ -4,7 +4,7 @@ import {
   createEmptyQuizEditorGroups,
   createMockPlayerTemplate,
   createNewQuizProjectSettings,
-} from "@/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project";
+} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
   clearLocalQuizDraft,

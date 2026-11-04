@@ -34,3 +34,14 @@ jobs:
       - run: bun run test
       - run: bun run build
       - run: bun run budget:test
+      - name: Bundle must not contain the auth bypass fixtures
+        run: |
+          if grep -rEl 'DEFAULT_BYPASS|dev-bypass|dev-admin-id|dev-student-id' dist; then
+            echo "::error::Dev auth bypass fixtures leaked into the production bundle"; exit 1
+          fi
+      - name: Warn when mock fixtures are in the bundle (P0-6 debt, not yet blocking)
+        run: |
+          if grep -rEl 'sessionId:`mock-|source:`mock`' dist/assets; then
+            echo "::warning::Mock fixtures are still bundled in production"
+          fi
+      - run: bun run budget:check

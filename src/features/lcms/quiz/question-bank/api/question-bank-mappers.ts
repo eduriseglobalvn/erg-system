@@ -1,8 +1,3 @@
-import {
-  questionBankQuestions,
-  questionBankSubjects,
-  quizBankItems,
-} from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
 import type {
   QuestionBankQuestion,
   QuestionBankStatus,
@@ -13,6 +8,57 @@ import type {
 } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { GraphQlPage } from "@/lib/graphql-client";
+
+// Neutral defaults for fields the workspace payload does not carry. Never seeded with demo content.
+const emptySubject: QuestionBankSubject = {
+  id: "subject",
+  label: "Môn học",
+  description: "",
+  companyScopeLabel: "Dùng chung toàn công ty",
+  levels: [],
+  categories: [],
+};
+const blankQuestion: QuestionBankQuestion = {
+  id: "",
+  scope: { type: "global" },
+  subjectId: "",
+  subjectLabel: "",
+  levelId: "",
+  levelLabel: "",
+  categoryId: "",
+  categoryLabel: "",
+  gradeLabel: "",
+  type: "multiple-choice",
+  difficulty: "core",
+  status: "ready",
+  stem: "",
+  objective: "",
+  tags: [],
+  masteryRate: 0,
+  usageCount: 0,
+  schoolsUsing: 0,
+  lastUsedAt: "",
+  recommendedCluster: "",
+};
+const blankQuiz: QuizBankItem = {
+  id: "",
+  scope: { type: "global" },
+  title: "",
+  kind: "train",
+  status: "draft",
+  subjectId: "",
+  subjectLabel: "",
+  levelId: "",
+  levelLabel: "",
+  topicLabels: [],
+  questionIds: [],
+  questionCount: 0,
+  durationLabel: "",
+  scopeLabel: "",
+  sourceMode: "manual",
+  ownerLabel: "",
+  updatedAt: "",
+};
 
 export type QuestionBankWorkspaceDTO = {
   tenantId?: string | null;
@@ -110,11 +156,11 @@ function buildWorkspaceSubjects(workspace: QuestionBankWorkspaceDTO, questions: 
   const subjectOptions = collectOptions(
     workspace.subjects,
     questions.map((question) => question.subjectId),
-    new Map(questionBankSubjects.map((subject) => [subject.id, subject.label])),
+    new Map<string, string>(),
   );
   if (!subjectOptions.length) return [];
 
-  const fallbackSubject = questionBankSubjects[0];
+  const fallbackSubject = emptySubject;
   const levelOptions = collectOptions(
     workspace.levels,
     questions.map((question) => question.levelId),
@@ -191,8 +237,8 @@ function collectOptions(
 }
 
 function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSubject[], index: number): QuestionBankQuestion {
-  const template = questionTemplateFor(question.id, index);
-  const subject = subjects.find((item) => item.id === (question.subjectId ?? template.subjectId)) ?? subjects[0] ?? questionBankSubjects[0];
+  const template = blankQuestion;
+  const subject = subjects.find((item) => item.id === (question.subjectId ?? template.subjectId)) ?? subjects[0] ?? emptySubject;
   const level = subject.levels.find((item) => item.id === (question.levelId ?? template.levelId)) ?? subject.levels[0];
   const category =
     subject.categories.find((item) => item.id === (question.topicId ?? template.categoryId) && item.levelId === level?.id) ??
@@ -242,11 +288,11 @@ function mapQuiz(
   questions: QuestionBankQuestion[],
   index: number,
 ): QuizBankItem {
-  const template = quizTemplateFor(quiz.id, index);
+  const template = blankQuiz;
   const subject =
     subjects.find((item) => item.id === (quiz.subjectId ?? template.subjectId)) ??
     subjects[index % Math.max(subjects.length, 1)] ??
-    questionBankSubjects[0];
+    emptySubject;
   const level =
     subject.levels.find((item) => item.id === (quiz.levelId ?? template.levelId)) ??
     subject.levels[index % Math.max(subject.levels.length, 1)] ??
@@ -294,14 +340,6 @@ function mapQuestionScope(question: QuestionBankQuestionDTO, fallback: QuestionB
   }
   if (type === "global") return { type: "global" };
   return fallback;
-}
-
-function questionTemplateFor(questionId: string, index: number) {
-  return questionBankQuestions.find((question) => question.id === questionId) ?? questionBankQuestions[index % questionBankQuestions.length];
-}
-
-function quizTemplateFor(quizId: string, index: number) {
-  return quizBankItems.find((quiz) => quiz.id === quizId) ?? quizBankItems[index % quizBankItems.length];
 }
 
 function normalizeLabel(value: string | null | undefined, id: string, fallback?: string) {

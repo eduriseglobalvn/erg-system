@@ -5,7 +5,7 @@ import { Layers, Search, Users, UsersRound } from "lucide-react";
 import Alert from "@mui/material/Alert";
 
 import Button from "@mui/material/Button";
-import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
+import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import {
   useCreateLmsStudentGroupMutation,

@@ -1,5 +1,5 @@
 {
-  "name": "react-erg-elerning-fe",
+  "name": "erg-system",
   "private": true,
   "version": "0.0.0",
   "packageManager": "bun@1.3.11",
@@ -9,6 +9,8 @@
     "build": "tsc -b && vite build",
     "build:vercel": "vite build",
     "test": "vitest run",
+    "test:fast": "vitest run --exclude \"**/*.policy.test.*\" --exclude \"**/*.integration.test.*\" --exclude \"src/test/**\"",
+    "test:slow": "vitest run .policy.test .integration.test src/test/",
     "test:transport-integration": "vitest run src/test/api-graphql.integration.test.ts",
     "e2e": "playwright test",
     "e2e:lms": "playwright test --project=lms",

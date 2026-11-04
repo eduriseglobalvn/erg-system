@@ -30,21 +30,19 @@ describe("questionBankWorkspaceQueryOptions", () => {
     expect(options.placeholderData(undefined)).toBeUndefined();
   });
 
-  test("keeps local question-bank fixtures only when the explicit dev flag is enabled", () => {
+  test("loads local question-bank fixtures only when the explicit dev flag is enabled", async () => {
     vi.stubEnv("VITE_ENABLE_RUNTIME_FIXTURES", "true");
 
     const options = questionBankWorkspaceQueryOptions("tenant-a");
-    const initialData =
-      typeof options.initialData === "function" ? options.initialData() : options.initialData;
+    const data = await options.queryFn({ signal: new AbortController().signal });
 
     expect(options.queryKey).toEqual(["question-bank", "tenant-a", "workspace", defaultFilterKey]);
     expect(options.staleTime).toBe(QUESTION_BANK_WORKSPACE_STALE_TIME_MS);
     expect(options.gcTime).toBe(QUESTION_BANK_WORKSPACE_GC_TIME_MS);
-    expect(options.initialDataUpdatedAt).toBe(0);
-    expect(initialData?.questions.length).toBeGreaterThan(0);
-    expect(initialData?.quizzes.length).toBeGreaterThan(0);
-    expect(initialData?.subjects.length).toBeGreaterThan(0);
-    expect(options.placeholderData(undefined)).toEqual(initialData);
+    expect("initialData" in options).toBe(false);
+    expect(data.questions.length).toBeGreaterThan(0);
+    expect(data.quizzes.length).toBeGreaterThan(0);
+    expect(data.subjects.length).toBeGreaterThan(0);
   });
 
   test("does not seed mock question-bank data into API-backed workspaces", () => {

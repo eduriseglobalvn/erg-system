@@ -1,7 +1,7 @@
-import { ProfilePage as LegacyProfilePage } from "@/pages/profile-page";
+import { ProfilePage as ProfileFeaturePage } from "@/features/profile/components/profile-page";
 
 export function ProfilePage() {
-  return <LegacyProfilePage />;
+  return <ProfileFeaturePage />;
 }
 
 export default ProfilePage;

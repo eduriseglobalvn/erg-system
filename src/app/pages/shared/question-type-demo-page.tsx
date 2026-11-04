@@ -1,7 +1,7 @@
-import { QuestionTypeDemoPage as LegacyQuestionTypeDemoPage } from "@/pages/question-type-demo-page";
+import { QuestionTypeDemoWorkspace } from "@/features/lcms/quiz/question-type-demo";
 
 export function QuestionTypeDemoPage() {
-  return <LegacyQuestionTypeDemoPage />;
+  return <QuestionTypeDemoWorkspace />;
 }
 
 export default QuestionTypeDemoPage;
