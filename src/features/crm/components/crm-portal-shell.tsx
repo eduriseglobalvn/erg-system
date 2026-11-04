@@ -27,6 +27,7 @@ import { DashboardContent } from '@/layouts/dashboard/components/dashboard-conte
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
 import type { ContentScope, ManagementScope } from '@/types/scope-types';
 import ErgPortalLayout from '@/components/portal/ErgPortalLayout';
+import { usePortalNotifications } from '@/components/portal/use-portal-notifications';
 import type { MenuGroup, PortalInfo } from '@/components/portal/ErgPortalLayout';
 
 // =============================================================================
@@ -194,7 +195,6 @@ export function CrmPortalShell() {
     <ErgPortalLayout
       menuGroups={menuGroups}
       portalInfo={portalInfo}
-      notificationCount={24}
     >
       <CrmContent activeLeaf={activeLeaf} onOpenLeaf={openLeaf} account={account ?? undefined} />
     </ErgPortalLayout>
@@ -215,6 +215,7 @@ function CrmContent({
   account?: { fullName?: string; email?: string };
 }) {
   const { session } = useAuthSession('crm');
+  const { unreadCount } = usePortalNotifications('crm', 'all', false);
   const canAccessGlobalErg = evaluatePermission({
     permission: 'lms.admin',
     grantedPermissions: session?.permissions,
@@ -346,7 +347,7 @@ function CrmContent({
           </Tooltip>
 
           {/* Notifications */}
-          <Badge badgeContent={24} color="error" sx={{ ml: 0.5 }}>
+          <Badge badgeContent={unreadCount} color="error" max={99} sx={{ ml: 0.5 }}>
             <Tooltip title="Thông báo">
               <IconButton sx={headerIconButtonSx}>
                 <NotificationsNoneRoundedIcon sx={{ fontSize: 20 }} />

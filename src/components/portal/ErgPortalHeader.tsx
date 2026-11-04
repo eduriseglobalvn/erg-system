@@ -9,9 +9,10 @@ import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
 import { PortalHeaderActions } from "./portal-header-actions";
 import { PortalHeaderIdentity } from "./portal-header-identity";
-import { PORTAL_NOTIFICATIONS, type PortalNotificationTab } from "./portal-header-notification-data";
+import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { portalHeaderAppBarSx } from "./portal-header-styles";
+import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
 
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 
@@ -52,9 +53,11 @@ export default function ErgPortalHeader({
 }: HeaderProps) {
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
-  const notifications = activeTab === "unread"
-    ? PORTAL_NOTIFICATIONS.filter((notification) => !notification.isRead)
-    : PORTAL_NOTIFICATIONS;
+  const { notifications, unreadCount } = usePortalNotifications(
+    notificationPortalFromPath(typeof window === "undefined" ? "" : window.location.pathname),
+    activeTab,
+    notificationOpen,
+  );
 
   return (
     <>
@@ -82,7 +85,7 @@ export default function ErgPortalHeader({
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             <Box sx={{ display: { xs: "inline-flex", lg: "none" } }}>
               <PortalHeaderActions
-                notificationCount={notificationCount}
+                notificationCount={unreadCount ?? notificationCount}
                 onOpenNotifications={() => setNotificationOpen(true)}
                 userName={userName}
                 userEmail={userEmail}

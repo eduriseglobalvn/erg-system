@@ -13,6 +13,7 @@ import {
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useVirtualList } from "@/hooks/use-virtual-list";
+import { formatDateVi } from "@/lib/format-date";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import {
   baseScoreColumns,
@@ -268,7 +269,7 @@ function fromApiScoreKind(kind: string): ScoreColumn["kind"] {
 
 function formatUpdatedAt(value: string) {
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("vi-VN");
+  return Number.isNaN(date.getTime()) ? value : formatDateVi(date);
 }
 
 export type ScoreSheetController = ReturnType<typeof useScoreSheetController>;

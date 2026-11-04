@@ -1,6 +1,7 @@
 import { memo, type CSSProperties } from "react";
 
 import type { WeeklyClassLogDay, WeeklyClassLogPeriod } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
+import { inputDateToVi, viDateToInput } from "@/lib/format-date";
 import { getPeriodCompletionState } from "./weekly-class-log-model";
 import type { WeeklyClassLogController } from "./use-weekly-class-log-controller";
 
@@ -66,9 +67,9 @@ const DayRows = memo(function DayRows({
                 <div style={{ fontSize: 11, fontWeight: 600 }}>{day.label}</div>
                 <input
                   type="date"
-                  value={day.date}
+                  value={viDateToInput(day.date)}
                   disabled={disabled}
-                  onChange={(event) => onUpdateDay(day.id, event.target.value)}
+                  onChange={(event) => onUpdateDay(day.id, inputDateToVi(event.target.value))}
                   style={{ marginTop: 4, width: "100%", padding: "2px 4px", fontSize: 11, borderRadius: 4, border: "1px solid #e5e7eb", textAlign: "center" }}
                 />
               </td>

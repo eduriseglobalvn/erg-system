@@ -27,9 +27,10 @@ import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/workspaces/workspace-switcher";
 import type { PortalInfo } from "./ErgPortalLayout";
-import { PORTAL_NOTIFICATIONS, type PortalNotificationTab } from "./portal-header-notification-data";
+import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
 import { SIDEBAR_MOTION_MS } from "./portal-sidebar-styles";
+import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
 
 function workspaceFromPath(pathname: string): Workspace {
   const segment = pathname.split("/").filter(Boolean)[0];
@@ -56,7 +57,7 @@ const WORKSPACE_LOCAL_PATHS: Record<Workspace, string> = {
 export function SidebarBottom({
   collapsed,
   portalInfo,
-  notificationCount = 0,
+  notificationCount: notificationCountProp = 0,
   onNavigate,
   onSignOut,
 }: {
@@ -82,9 +83,12 @@ export function SidebarBottom({
     : workspacesFromLegacyPortals(portalInfo?.workspacePortals ?? [], current);
   const capabilities = workspaceCapabilities(granted, current, location?.pathname ?? "");
 
-  const notifications = activeTab === "unread"
-    ? PORTAL_NOTIFICATIONS.filter((n) => !n.isRead)
-    : PORTAL_NOTIFICATIONS;
+  const { notifications, unreadCount } = usePortalNotifications(
+    notificationPortalFromPath(location?.pathname ?? ""),
+    activeTab,
+    notificationOpen,
+  );
+  const notificationCount = unreadCount ?? notificationCountProp;
 
   const handleSearchClick = () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true, bubbles: true }));

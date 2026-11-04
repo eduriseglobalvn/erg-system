@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("@/components/portal/use-portal-notifications", () => ({ notificationPortalFromPath: () => "lms", usePortalNotifications: () => ({ notifications: [], unreadCount: undefined }) }));
 import ErgPortalSidebar from "@/components/portal/ErgPortalSidebar";
 import type { MenuGroup } from "@/components/portal/ErgPortalLayout";
 import { ERG_ASSETS } from "@/config/seo";

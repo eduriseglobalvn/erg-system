@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
+import { formatDateVi } from "@/lib/format-date";
 import { ExerciseQuestionDetailDialog } from "./exercise-question-detail-dialog";
 import {
   allExerciseFilter,
@@ -493,7 +494,7 @@ export function DesktopExerciseBankView({
                 {controller.selectedExercise.title}
               </h3>
               <p className="mt-0.5 text-[11px] text-[#5D5F60]">
-                Cập nhật ngày {new Date(controller.selectedExercise.updatedAt).toLocaleDateString("vi-VN")}
+                Cập nhật ngày {formatDateVi(controller.selectedExercise.updatedAt)}
               </p>
             </div>
 

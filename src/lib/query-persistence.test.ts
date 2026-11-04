@@ -49,3 +49,21 @@ test("versions the persisted cache key so schema changes migrate instead of hydr
   expect(QUERY_CACHE_STORAGE_KEY).toBe(`ERG_QUERY_CACHE:${QUERY_CACHE_BUSTER}`);
   expect(QUERY_CACHE_BUSTER).toBe("erg-query-cache-v6");
 });
+
+test("persister returns real promises and restores a persisted client", async () => {
+  const { createQueryPersister } = await import("@/lib/query-persistence");
+  const persister = createQueryPersister("test-scope");
+  const client = {
+    timestamp: Date.now(),
+    buster: QUERY_CACHE_BUSTER,
+    clientState: { mutations: [], queries: [] },
+  };
+  const persisting = persister.persistClient(client);
+  expect(typeof (persisting as Promise<void>).then).toBe("function");
+  await persisting;
+  const restoring = persister.restoreClient();
+  expect(typeof (restoring as Promise<unknown>).then).toBe("function");
+  expect(await restoring).toEqual(client);
+  await persister.removeClient();
+  expect(await persister.restoreClient()).toBeUndefined();
+});
