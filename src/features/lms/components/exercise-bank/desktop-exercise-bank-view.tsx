@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 import Button from "@mui/material/Button";
+import { ErgSelect } from "@/components/erg-mui";
 
 import { cn } from "@/lib/utils";
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
@@ -748,23 +749,14 @@ function FilterSelect({
 }) {
   const isFiltered = value !== allExerciseFilter && value !== "all";
   return (
-    <select
+    <ErgSelect
+      size="small"
+      fullWidth={false}
       value={value}
-      onChange={(event) => onChange(event.target.value)}
-      className={cn(
-        "h-8.5 rounded-lg px-3 text-[12px] font-medium outline-none transition-colors cursor-pointer border",
-        isFiltered
-          ? "border-[#0F6CBD] bg-blue-50/50 text-[#0F6CBD] font-semibold"
-          : "border-slate-200 bg-white hover:border-slate-300 text-slate-700 hover:bg-slate-50/60"
-      )}
-    >
-      <option value={allExerciseFilter}>{label}</option>
-      {values.map((item) => (
-        <option key={item} value={item}>
-          {labels?.[item] ?? item}
-        </option>
-      ))}
-    </select>
+      onChange={(event) => onChange(String(event.target.value))}
+      options={[{ value: allExerciseFilter, label }, ...values.map((item) => ({ value: item, label: labels?.[item] ?? item }))]}
+      sx={{ minWidth: 120, "& .MuiSelect-select": { fontSize: 12, fontWeight: isFiltered ? 600 : 500, py: 0.75, color: isFiltered ? "primary.main" : "text.primary" } }}
+    />
   );
 }
 

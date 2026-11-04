@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { CalendarDays, Download, Search, UserRound } from "lucide-react";
+import { Download, Search, UserRound } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
@@ -104,17 +104,14 @@ export function MobileAttendanceSheetPanel({
               }}
             />
           </label>
-          <label className="flex h-11 items-center gap-2 rounded-[14px] border border-[#d9e2ef] bg-white px-2 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-            <CalendarDays className="h-4 w-4 text-[var(--erg-blue)]" />
-            <input
-              type="date"
-              aria-label="Chọn ngày điểm danh"
-              value={selectedDate}
-              max={todayInputDate}
-              onChange={(event) => onSelectedDateChange(event.target.value)}
-              className="min-w-0 flex-1 bg-transparent text-[13px] font-bold text-slate-950 outline-none"
-            />
-          </label>
+          <TextField
+            type="date"
+            size="small"
+            value={selectedDate}
+            onChange={(event) => onSelectedDateChange(event.target.value)}
+            slotProps={{ htmlInput: { "aria-label": "Chọn ngày điểm danh", max: todayInputDate } }}
+            sx={{ "& input": { fontSize: 13, fontWeight: 700 } }}
+          />
         </div>
 
         {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}

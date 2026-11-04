@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import { useRef, useState, type PointerEvent, type ReactNode } from "react";
 
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
@@ -70,13 +71,14 @@ export function DesktopAttendanceSheetPanel({
               onChange={(event) => controller.clampSelectedDate(event.target.value)}
               sx={{ minWidth: 140 }}
             />
-            <select
+            <ErgSelect
+              size="small"
+              fullWidth={false}
               value={controller.selectedSubject}
-              onChange={(event) => controller.setSelectedSubject(event.target.value)}
-              style={{ height: 40, padding: "0 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 14, minWidth: 140 }}
-            >
-              {controller.subjectOptions.map((subject) => <option key={subject} value={subject}>{subject}</option>)}
-            </select>
+              onChange={(event) => controller.setSelectedSubject(String(event.target.value))}
+              options={controller.subjectOptions.map((subject) => ({ value: subject, label: subject }))}
+              sx={{ minWidth: 140 }}
+            />
             <Button
               variant="contained"
               startIcon={<Download sx={{ fontSize: 18 }} />}

@@ -4,13 +4,15 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
+import MenuItem from "@mui/material/MenuItem";
+import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import {
   ArrowLeft,
   ArrowRight,
   BookOpen,
   Check,
   CheckCircle2,
-  ChevronDown,
   Clock3,
   Dices,
   FileText,
@@ -40,7 +42,7 @@ import {
 
 interface FilterDropdownProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   children: React.ReactNode;
   className?: string;
   isFiltered?: boolean;
@@ -57,28 +59,19 @@ function FilterDropdown({
 }: FilterDropdownProps) {
   return (
     <div className={cn("relative inline-flex items-center", className)}>
+      <TextField
+        select
+        fullWidth
+        size="small"
+        value={value}
+        onChange={onChange}
+        sx={{ "& .MuiSelect-select": { fontSize: 12, fontWeight: isFiltered ? 600 : 500, py: 0.75, pl: Icon ? 4 : 1.25 } }}
+      >
+        {children}
+      </TextField>
       {Icon && (
         <Icon className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#0F6CBD] shrink-0" />
       )}
-      <select
-        value={value}
-        onChange={onChange}
-        className={cn(
-          "h-8.5 w-full appearance-none rounded-lg border text-[12px] font-medium outline-none transition-colors cursor-pointer shadow-2xs",
-          Icon ? "pl-8 pr-7" : "pl-2.5 pr-7",
-          isFiltered
-            ? "border-[#0F6CBD] bg-blue-50/70 text-[#0F6CBD] font-semibold"
-            : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/80 text-slate-700"
-        )}
-      >
-        {children}
-      </select>
-      <ChevronDown
-        className={cn(
-          "pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 transition-colors",
-          isFiltered ? "text-[#0F6CBD]" : "text-slate-400"
-        )}
-      />
     </div>
   );
 }
@@ -614,33 +607,23 @@ export function CreateExerciseDialog({
                       <label className="mb-1.5 block text-[12px] font-bold text-slate-800">
                         Môn học
                       </label>
-                      <select
+                      <ErgSelect
+                        size="small"
                         value={selectedSubjectId}
-                        onChange={(e) => handleSubjectChange(e.target.value)}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-slate-900 outline-none transition-colors hover:border-slate-300 focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10 cursor-pointer font-medium"
-                      >
-                        {subjects.map((sub) => (
-                          <option key={sub.id} value={sub.id}>
-                            {sub.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(e) => handleSubjectChange(String(e.target.value))}
+                        options={subjects.map((sub) => ({ value: sub.id, label: sub.label }))}
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-bold text-slate-800">
                         Cấp độ (Level)
                       </label>
-                      <select
+                      <ErgSelect
+                        size="small"
                         value={level}
-                        onChange={(e) => setLevel(e.target.value)}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-slate-900 outline-none transition-colors hover:border-slate-300 focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10 cursor-pointer font-medium"
-                      >
-                        {subjectLevels.map((lvl) => (
-                          <option key={lvl.id} value={lvl.label}>
-                            {lvl.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={(e) => setLevel(String(e.target.value))}
+                        options={subjectLevels.map((lvl) => ({ value: lvl.label, label: lvl.label }))}
+                      />
                     </div>
                   </div>
 
@@ -650,30 +633,32 @@ export function CreateExerciseDialog({
                       <label className="mb-1.5 block text-[12px] font-bold text-slate-800">
                         Phân loại bài
                       </label>
-                      <select
+                      <ErgSelect
+                        size="small"
                         value={type}
                         onChange={(e) => setType(e.target.value as ExerciseType)}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-slate-900 outline-none transition-colors hover:border-slate-300 focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10 cursor-pointer font-medium"
-                      >
-                        <option value="quiz">Trắc nghiệm</option>
-                        <option value="practice">Tự luyện</option>
-                        <option value="project">Dự án</option>
-                        <option value="exam">Đề kiểm tra</option>
-                      </select>
+                        options={[
+                          { value: "quiz", label: "Trắc nghiệm" },
+                          { value: "practice", label: "Tự luyện" },
+                          { value: "project", label: "Dự án" },
+                          { value: "exam", label: "Đề kiểm tra" },
+                        ]}
+                      />
                     </div>
                     <div>
                       <label className="mb-1.5 block text-[12px] font-bold text-slate-800">
                         Độ khó mục tiêu
                       </label>
-                      <select
+                      <ErgSelect
+                        size="small"
                         value={difficulty}
                         onChange={(e) => setDifficulty(e.target.value as ExerciseDifficulty)}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-slate-900 outline-none transition-colors hover:border-slate-300 focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10 cursor-pointer font-medium"
-                      >
-                        <option value="easy">Cơ bản (Dễ)</option>
-                        <option value="medium">Nâng cao (Trung bình)</option>
-                        <option value="hard">Thử thách (Khó)</option>
-                      </select>
+                        options={[
+                          { value: "easy", label: "Cơ bản (Dễ)" },
+                          { value: "medium", label: "Nâng cao (Trung bình)" },
+                          { value: "hard", label: "Thử thách (Khó)" },
+                        ]}
+                      />
                     </div>
                   </div>
 
@@ -698,14 +683,15 @@ export function CreateExerciseDialog({
                       <label className="mb-1.5 block text-[12px] font-bold text-slate-800">
                         Trạng thái phát hành
                       </label>
-                      <select
+                      <ErgSelect
+                        size="small"
                         value={status}
                         onChange={(e) => setStatus(e.target.value as ExerciseStatus)}
-                        className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[13px] text-slate-900 outline-none transition-colors hover:border-slate-300 focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10 cursor-pointer font-medium"
-                      >
-                        <option value="published">Đã xuất bản (Sẵn sàng giao)</option>
-                        <option value="draft">Bản nháp (Đang biên soạn)</option>
-                      </select>
+                        options={[
+                          { value: "published", label: "Đã xuất bản (Sẵn sàng giao)" },
+                          { value: "draft", label: "Bản nháp (Đang biên soạn)" },
+                        ]}
+                      />
                     </div>
                   </div>
 
@@ -914,9 +900,9 @@ export function CreateExerciseDialog({
                       className="min-w-[125px] shrink-0 font-bold"
                     >
                       {subjects.map((sub) => (
-                        <option key={sub.id} value={sub.id}>
+                        <MenuItem key={sub.id} value={sub.id}>
                           {sub.label}
-                        </option>
+                        </MenuItem>
                       ))}
                     </FilterDropdown>
 
@@ -958,11 +944,11 @@ export function CreateExerciseDialog({
                       isFiltered={selectedLevel !== "all"}
                       className="flex-1 sm:flex-initial min-w-[130px]"
                     >
-                      <option value="all">Tất cả cấp độ ({subjectLevels.length})</option>
+                      <MenuItem value="all">Tất cả cấp độ ({subjectLevels.length})</MenuItem>
                       {subjectLevels.map((lvl) => (
-                        <option key={lvl.id} value={lvl.id}>
+                        <MenuItem key={lvl.id} value={lvl.id}>
                           {lvl.label}
-                        </option>
+                        </MenuItem>
                       ))}
                     </FilterDropdown>
 
@@ -972,11 +958,11 @@ export function CreateExerciseDialog({
                       isFiltered={selectedTopic !== "all"}
                       className="flex-1 sm:flex-initial min-w-[135px] max-w-[210px]"
                     >
-                      <option value="all">Tất cả chủ đề ({availableTopics.length})</option>
+                      <MenuItem value="all">Tất cả chủ đề ({availableTopics.length})</MenuItem>
                       {availableTopics.map((tpc) => (
-                        <option key={tpc.id} value={tpc.id}>
+                        <MenuItem key={tpc.id} value={tpc.id}>
                           {tpc.label}
-                        </option>
+                        </MenuItem>
                       ))}
                     </FilterDropdown>
 
@@ -986,10 +972,10 @@ export function CreateExerciseDialog({
                       isFiltered={selectedDifficulty !== "all"}
                       className="flex-1 sm:flex-initial min-w-[115px]"
                     >
-                      <option value="all">Tất cả độ khó</option>
-                      <option value="core">Cơ bản</option>
-                      <option value="stretch">Nâng cao</option>
-                      <option value="challenge">Thử thách</option>
+                      <MenuItem value="all">Tất cả độ khó</MenuItem>
+                      <MenuItem value="core">Cơ bản</MenuItem>
+                      <MenuItem value="stretch">Nâng cao</MenuItem>
+                      <MenuItem value="challenge">Thử thách</MenuItem>
                     </FilterDropdown>
 
                     {hasActiveFilters && (

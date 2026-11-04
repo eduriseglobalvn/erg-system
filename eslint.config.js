@@ -5,6 +5,18 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
+const buttonVariantRule = {
+  selector: 'JSXOpeningElement[name.name="Button"]:not(:has(JSXAttribute[name.name="variant"])):not(:has(JSXSpreadAttribute))',
+  message: 'MUI <Button> must set variant explicitly (contained | outlined | text).',
+}
+const nativeFormRules = [
+  { selector: 'JSXOpeningElement[name.name="select"]', message: 'Use ErgSelect instead of a native <select>.' },
+  {
+    selector: 'JSXOpeningElement[name.name="input"]:has(JSXAttribute[name.name="type"][value.value=/^(date|datetime-local|time)$/])',
+    message: 'Use ErgTextField / MUI date pickers instead of a native date or time <input>.',
+  },
+]
+
 export default defineConfig([
   // Cargo/Tauri writes compressed generated assets under target; they are not
   // source files and must never be parsed as JavaScript by the repository lint.
@@ -77,13 +89,25 @@ export default defineConfig([
   },
   {
     // The theme default is variant="text"; every MUI <Button> must state its variant (one "contained" CTA per page).
+    // Flat-config entries with the same rule key override each other, so every no-restricted-syntax
+    // selector that applies to a file must live in the array that is last to match it.
     files: ['src/**/*.tsx'],
     ignores: ['**/*.test.tsx'],
     rules: {
-      'no-restricted-syntax': ['error', {
-        selector: 'JSXOpeningElement[name.name="Button"]:not(:has(JSXAttribute[name.name="variant"])):not(:has(JSXSpreadAttribute))',
-        message: 'MUI <Button> must set variant explicitly (contained | outlined | text).',
-      }],
+      'no-restricted-syntax': ['error', buttonVariantRule],
+    },
+  },
+  {
+    // Forms in features use ErgSelect / ErgTextField / MUI date pickers, never native widgets.
+    files: ['src/features/**/*.tsx'],
+    // The classic quiz editor styles its two native <select> with classic-editor.css; migrate with that stylesheet.
+    ignores: [
+      '**/*.test.tsx',
+      'src/features/lcms/quiz/quiz-editor/components/question-editor/question-settings.tsx',
+      'src/features/lcms/quiz/quiz-editor/components/question-editor/feedback-scoring.tsx',
+    ],
+    rules: {
+      'no-restricted-syntax': ['error', buttonVariantRule, ...nativeFormRules],
     },
   },
 ])

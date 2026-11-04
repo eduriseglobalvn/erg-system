@@ -4,6 +4,7 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
 
@@ -371,19 +372,12 @@ function SelectField({
   value: string;
 }) {
   return (
-    <label className="block select-none">
-      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{label}</span>
-      <select
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="mt-1.5 h-10 w-full rounded-lg border border-[#d7e0ec] bg-white px-3 text-sm font-semibold text-[#242424] shadow-sm outline-none transition hover:border-slate-300 focus:border-blue-300 focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-      >
-        {options.map((option) => (
-          <option key={option.value} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-    </label>
+    <ErgSelect
+      size="small"
+      label={label}
+      value={value}
+      onChange={(event) => onChange(String(event.target.value))}
+      options={options}
+    />
   );
 }

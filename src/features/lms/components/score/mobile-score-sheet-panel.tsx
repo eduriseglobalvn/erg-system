@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, Edit3, History, Plus, Search, UserRound } from "lucide-react";
+import { Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
 import { AppSelect } from "@/components/ui/app-select";
 import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score/score-sheet-model";
 import { cn } from "@/lib/utils";
@@ -209,22 +210,14 @@ export function MobileScoreSheetPanel({
       {mode === "column" && activeColumn ? (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0 border-b border-[#d9e2ef] bg-white px-3 py-2">
-            <label className="flex h-11 items-center gap-2 rounded-[14px] border border-[#d9e2ef] bg-white px-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-              <span className="text-[13px] font-bold text-slate-500">Cột</span>
-              <select
-                value={activeColumn.id}
-                onChange={(event) => setActiveColumnId(event.target.value)}
-                className="min-w-0 flex-1 bg-transparent text-[14px] font-bold text-slate-950 outline-none"
-                aria-label="Chọn cột điểm"
-              >
-                {scoreColumns.map((column) => (
-                  <option key={column.id} value={column.id}>
-                    {column.label}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="h-4 w-4 text-slate-500" />
-            </label>
+            <ErgSelect
+              size="small"
+              label="Cột"
+              value={activeColumn.id}
+              onChange={(event) => setActiveColumnId(String(event.target.value))}
+              options={scoreColumns.map((column) => ({ value: column.id, label: column.label }))}
+              slotProps={{ htmlInput: { "aria-label": "Chọn cột điểm" } }}
+            />
           </div>
           <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
             <div className="grid gap-2">

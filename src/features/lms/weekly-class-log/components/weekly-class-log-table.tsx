@@ -1,3 +1,5 @@
+import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import { memo, type CSSProperties } from "react";
 
 import type { WeeklyClassLogDay, WeeklyClassLogPeriod } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
@@ -65,12 +67,13 @@ const DayRows = memo(function DayRows({
             {index === 0 && (
               <td rowSpan={day.periods.length} style={{ ...tdStyle(100), verticalAlign: "middle", textAlign: "center" }}>
                 <div style={{ fontSize: 11, fontWeight: 600 }}>{day.label}</div>
-                <input
+                <TextField
                   type="date"
+                  size="small"
                   value={viDateToInput(day.date)}
                   disabled={disabled}
                   onChange={(event) => onUpdateDay(day.id, inputDateToVi(event.target.value))}
-                  style={{ marginTop: 4, width: "100%", padding: "2px 4px", fontSize: 11, borderRadius: 4, border: "1px solid #e5e7eb", textAlign: "center" }}
+                  sx={{ mt: 0.5, width: "100%", "& input": { px: 0.5, py: 0.25, fontSize: 11, textAlign: "center" } }}
                 />
               </td>
             )}
@@ -87,16 +90,16 @@ const DayRows = memo(function DayRows({
             <EditableCell value={period.lesson} onChange={(value) => onUpdatePeriod(day.id, period.id, "lesson", value)} disabled={disabled} multiline />
             <EditableCell value={period.comment} onChange={(value) => onUpdatePeriod(day.id, period.id, "comment", value)} disabled={disabled} multiline />
             <td style={{ ...tdStyle(70), textAlign: "center" }}>
-              <select
+              <ErgSelect
+                size="small"
+                fullWidth={false}
                 value={period.disciplineScore || ""}
-                onChange={(event) => onUpdatePeriod(day.id, period.id, "disciplineScore", event.target.value)}
+                onChange={(event) => onUpdatePeriod(day.id, period.id, "disciplineScore", String(event.target.value))}
                 disabled={disabled}
-                style={{ fontSize: 11, padding: "2px 4px", borderRadius: 4, border: "1px solid #e5e7eb", backgroundColor: "transparent", cursor: disabled ? "not-allowed" : "pointer" }}
-              >
-                <option value="">-</option>
-                <option value="Đạt">Đạt</option>
-                <option value="Chưa đạt">Chưa đạt</option>
-              </select>
+                options={[{ value: "", label: "-" }, { value: "Đạt", label: "Đạt" }, { value: "Chưa đạt", label: "Chưa đạt" }]}
+                slotProps={{ select: { displayEmpty: true } }}
+                sx={{ minWidth: 72, "& .MuiSelect-select": { fontSize: 11, py: 0.25 } }}
+              />
             </td>
             <td style={{ ...tdStyle(80), textAlign: "center", fontWeight: 600, fontSize: 11 }}>
               {period.className && period.ppct && period.lesson && period.comment && period.disciplineScore ? teacherName : ""}

@@ -9,6 +9,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
+import { ErgSelect } from "@/components/erg-mui";
 import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 
@@ -57,13 +58,14 @@ export function DesktopScoreSheetPanel({
           {controller.offlinePending ? <Chip label="Đang chờ đồng bộ" size="small" color="warning" /> : null}
 
           <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap" }}>
-            <select
+            <ErgSelect
+              size="small"
+              fullWidth={false}
               value={controller.selectedSubject}
-              onChange={(event) => controller.setSelectedSubject(event.target.value)}
-              style={{ height: 40, padding: "0 12px", borderRadius: 8, border: "1px solid #e5e7eb", fontSize: 14, minWidth: 160 }}
-            >
-              {controller.subjectOptions.map((subject) => <option key={subject} value={subject}>{subject}</option>)}
-            </select>
+              onChange={(event) => controller.setSelectedSubject(String(event.target.value))}
+              options={controller.subjectOptions.map((subject) => ({ value: subject, label: subject }))}
+              sx={{ minWidth: 160 }}
+            />
 
             <TextField
               size="small"
@@ -205,13 +207,19 @@ export function DesktopScoreSheetPanel({
                     />
                   </td>
                   <td style={tdStyle(100, "center")}>
-                    <select
+                    <ErgSelect
+                      size="small"
+                      fullWidth={false}
                       value={classification}
                       onChange={(event) => controller.requestClassificationChange(student, event.target.value as Classification)}
-                      style={{ minWidth: 56, height: 32, borderRadius: 16, fontSize: 12, fontWeight: 700, border: "1px solid", borderColor: getClassificationBorder(classification), backgroundColor: getClassificationBg(classification), color: getClassificationColor(classification), cursor: "pointer" }}
-                    >
-                      {classificationOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-                    </select>
+                      options={classificationOptions.map((option) => ({ value: option, label: option }))}
+                      sx={{
+                        minWidth: 72,
+                        "& .MuiOutlinedInput-root": { borderRadius: 4, bgcolor: getClassificationBg(classification) },
+                        "& .MuiOutlinedInput-root fieldset": { borderColor: getClassificationBorder(classification) },
+                        "& .MuiSelect-select": { fontSize: 12, fontWeight: 700, py: 0.5, color: getClassificationColor(classification) },
+                      }}
+                    />
                   </td>
                   {controller.scoreColumns.map((column, columnIndex) => {
                     const attempts = controller.attemptsFor(student, column, virtualRow.index, columnIndex);
