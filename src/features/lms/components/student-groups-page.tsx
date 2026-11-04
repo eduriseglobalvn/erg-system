@@ -12,6 +12,7 @@ import {
   useCreateLmsStudentGroupMutation,
   useDeleteLmsStudentGroupMutation,
   lmsAssignmentReadQueryKeys,
+  lmsReadPersistMeta,
   useLmsStudentGroupsQuery,
   useUpdateLmsStudentGroupMutation,
 } from "@/features/lms/api/lms-assignment-command-query";
@@ -99,7 +100,8 @@ export function StudentGroupsPage({
   const studentRosterQueries = useQueries({
     queries: studentRosterClasses.map((classroom) => ({
       enabled: apiBacked && Boolean(classroom.id),
-      gcTime: QUERY_POLICIES.transactional.gcTime,
+      gcTime: QUERY_POLICIES.offlineCore.gcTime,
+      meta: lmsReadPersistMeta(),
       queryFn: ({ signal }) =>
         loadLmsClassWorkspace({
           assignmentPage: 0,

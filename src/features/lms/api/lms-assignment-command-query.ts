@@ -19,7 +19,7 @@ import {
 import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
-import { QUERY_POLICIES } from "@/lib/query-policy";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 import {
   createOfflineTeachingCommandAdapter,
   type OfflineTeachingCommandResult,
@@ -83,7 +83,12 @@ function resolveLmsAssignmentReadAccountId() {
 }
 
 export const LMS_STUDENT_GROUPS_STALE_TIME_MS = QUERY_POLICIES.transactional.staleTime;
-export const LMS_STUDENT_GROUPS_GC_TIME_MS = QUERY_POLICIES.transactional.gcTime;
+export const LMS_STUDENT_GROUPS_GC_TIME_MS = QUERY_POLICIES.offlineCore.gcTime;
+
+/** `meta` for LMS read queries keyed by lmsAssignmentReadQueryKeys; arguments mirror the key factories' defaults. */
+export function lmsReadPersistMeta(tenantId: string = getDefaultTenantId(), accountId: string = resolveLmsAssignmentReadAccountId()) {
+  return persistedQueryMeta(tenantId, normalizeLmsAssignmentReadAccountId(accountId));
+}
 
 export type LmsAssignmentOfflineOptions = {
   capability?: BackendOfflineTeachingPolicySnapshot | null;
@@ -100,6 +105,7 @@ export function lmsStudentGroupsQueryOptions(
   return {
     enabled: options.enabled ?? true,
     gcTime: LMS_STUDENT_GROUPS_GC_TIME_MS,
+    meta: lmsReadPersistMeta(tenantId, accountId),
     queryFn: ({ signal }: { signal: AbortSignal }) => loadLmsStudentGroups({ classId, tenantId }, signal),
     queryKey: lmsAssignmentReadQueryKeys.studentGroups(tenantId, accountId, classId),
     staleTime: LMS_STUDENT_GROUPS_STALE_TIME_MS,

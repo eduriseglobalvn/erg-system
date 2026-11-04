@@ -10,7 +10,6 @@ import {
   lmsAcademicRecordQueryKeys,
   useUpsertAttendanceMutation,
 } from "@/features/lms/api/lms-academic-record-query";
-import { isPersistableQuery } from "@/lib/query-persistence";
 import { MemoryOfflineOutboxStore } from "@/platform/offline";
 
 vi.mock("@/features/lms/api/lms-academic-record-api", () => ({
@@ -47,10 +46,9 @@ describe("LMS academic-record query/cache boundary", () => {
   });
 
   it("persists only concrete authenticated academic-record scopes", () => {
-    const attendance = lmsAcademicRecordQueryKeys.attendance({ accountId: "teacher-a", classId: "class-a", from: "2026-07-20", subjectId: "math", tenantId: "tenant-a", to: "2026-07-23" });
-    const anonymous = lmsAcademicRecordQueryKeys.attendance({ accountId: "anonymous", classId: "class-a", from: "2026-07-20", subjectId: "math", tenantId: "tenant-a", to: "2026-07-23" });
-    expect(isPersistableQuery({ queryKey: attendance })).toBe(true);
-    expect(isPersistableQuery({ queryKey: anonymous })).toBe(false);
+    const scope = { classId: "class-a", from: "2026-07-20", subjectId: "math", tenantId: "tenant-a", to: "2026-07-23" };
+    expect(attendanceQueryOptions({ ...scope, accountId: "teacher-a" }).meta).toEqual({ persist: true });
+    expect(attendanceQueryOptions({ ...scope, accountId: "anonymous" }).meta).toBeUndefined();
   });
 
   it("rolls an optimistic attendance edit back when the server rejects it", async () => {

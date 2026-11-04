@@ -4,7 +4,7 @@ import { QUERY_POLICIES } from "@/lib/query-policy";
 import { Search } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
@@ -80,7 +80,8 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
       }, signal),
     enabled: apiBacked && Boolean(selectedClassId),
     staleTime: QUERY_POLICIES.transactional.staleTime,
-    gcTime: QUERY_POLICIES.transactional.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: lmsReadPersistMeta(),
     refetchOnWindowFocus: false,
   });
   const workspaceStudents = useMemo(

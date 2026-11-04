@@ -26,7 +26,7 @@ import {
   mapClassWorkspaceToStudents,
   type LmsClassWorkspace,
 } from "@/features/lms/api/lms-classroom-api";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -116,7 +116,8 @@ export function ClassStudentsWorkspace({
       }, signal),
     enabled: apiBacked && Boolean(selectedClassId),
     staleTime: QUERY_POLICIES.transactional.staleTime,
-    gcTime: QUERY_POLICIES.transactional.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: lmsReadPersistMeta(),
     refetchOnWindowFocus: false,
   });
 

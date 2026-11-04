@@ -11,7 +11,7 @@ import { createAppRouter } from "@/routes/app-routes";
 import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { createAuthRouteState } from "@/platform/auth/router/auth-route-context";
-import { clearPersistedQueryScope, createQueryPersister, isPersistableQuery, QUERY_CACHE_BUSTER, queryCacheScopeKey } from "@/lib/query-persistence";
+import { clearPersistedQueryScope, createQueryPersister, QUERY_CACHE_BUSTER, shouldDehydratePersistedQuery, queryCacheScopeKey } from "@/lib/query-persistence";
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
 import { AUTH_ACCOUNT_CHANGED_EVENT } from "@/platform/auth/api/auth-storage";
@@ -38,7 +38,7 @@ export default function App() {
       persister: createQueryPersister(scopeKey),
       maxAge: 24 * 60 * 60 * 1000,
       buster: QUERY_CACHE_BUSTER,
-      dehydrateOptions: { shouldDehydrateQuery: (query: { state: { status: string }; queryKey: readonly unknown[] }) => query.state.status === "success" && isPersistableQuery(query) },
+      dehydrateOptions: { shouldDehydrateQuery: shouldDehydratePersistedQuery },
     };
   }, [scopeKey]);
 

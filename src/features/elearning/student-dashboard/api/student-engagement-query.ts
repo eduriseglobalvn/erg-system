@@ -1,5 +1,5 @@
 import { loadStudentDiscussionFeed } from "@/features/elearning/student-dashboard/api/student-engagement-api";
-import { QUERY_POLICIES } from "@/lib/query-policy";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 
 export type StudentEngagementScope = {
   tenantId: string;
@@ -30,6 +30,7 @@ export function studentDiscussionFeedQueryOptions(scope: StudentEngagementScope)
   return {
     enabled: value.accountId !== "anonymous" && Boolean(value.tenantId),
     gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: persistedQueryMeta(value.tenantId, value.accountId),
     queryFn: ({ signal }: { signal: AbortSignal }) => loadStudentDiscussionFeed({ ...value, signal }),
     queryKey: studentEngagementQueryKeys.feed(scope),
     refetchOnWindowFocus: false,

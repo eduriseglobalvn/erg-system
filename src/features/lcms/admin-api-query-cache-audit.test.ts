@@ -10,7 +10,6 @@ import { quizRuntimeQueryKeys } from "@/features/lcms/quiz/quiz-runtime/api/quiz
 import { schoolManagementQueryKeys } from "@/features/lcms/school-management/api/school-management-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
 import { queryKeys } from "@/lib/query-keys";
-import { isPersistableQuery } from "@/lib/query-persistence";
 
 describe("LCMS API/query/cache audit characterization", () => {
   it("keeps quiz workspaces and reports scoped by tenant plus entity/filter", () => {
@@ -72,8 +71,10 @@ describe("LCMS API/query/cache audit characterization", () => {
       schoolManagementQueryKeys.operations("tenant-a", "admin-a", "school-a"),
     ];
 
-    rejectedKeys.forEach((queryKey) => {
-      expect(isPersistableQuery({ queryKey })).toBe(false);
+    // Persistence is opt-in via `meta.persist`; none of these owners may set it.
+    expect(rejectedKeys).toHaveLength(6);
+    ["quiz/question-bank/api/question-bank-query.ts", "quiz/quiz-editor/api/quiz-editor-query.ts", "quiz/quiz-runtime/api/quiz-runtime-query.ts", "quiz/quiz-reports/api/quiz-report-query.ts", "school-management/hooks/use-school-management.ts"].forEach((relativePath) => {
+      expect(fs.readFileSync(path.resolve(process.cwd(), "src/features/lcms", relativePath), "utf8")).not.toMatch(/persist:\s*true|persistedQueryMeta/);
     });
   });
 

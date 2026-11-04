@@ -9,7 +9,7 @@ import {
   loadLmsAssignmentProgressWorkspace,
   type LmsAssignmentProgressWorkspace,
 } from "@/features/lms/api/lms-assignment-progress-api";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import {
   useAssignmentReportQuery,
   useQuizQuestionAnalyticsQuery,
@@ -74,7 +74,8 @@ export function HomeworkProgressPage({
       loadLmsAssignmentProgressWorkspace({ assignmentId: selectedRunId, page: 0, size: 50 }, signal),
     enabled: apiBacked && Boolean(selectedRunId),
     staleTime: QUERY_POLICIES.realtime.staleTime,
-    gcTime: QUERY_POLICIES.realtime.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: lmsReadPersistMeta(tenantId),
     refetchOnWindowFocus: false,
   });
   const assignmentReportQuery = useAssignmentReportQuery(apiBacked ? selectedRunId : "");

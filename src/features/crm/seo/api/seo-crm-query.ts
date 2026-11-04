@@ -1,7 +1,7 @@
 import { queryOptions } from "@tanstack/react-query";
 
 import { loadSeoCrmWorkspace } from "@/features/crm/seo/api/seo-crm-transport";
-import { QUERY_POLICIES } from "@/lib/query-policy";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 
 export type SeoCrmQueryScope = { tenantId: string; accountId: string };
 
@@ -23,6 +23,7 @@ export const seoCrmQueryKeys = {
 export function seoCrmWorkspaceQueryOptions(scope: SeoCrmQueryScope) {
   return queryOptions({
     queryKey: seoCrmQueryKeys.workspace(scope),
+    meta: persistedQueryMeta(normalized(scope.tenantId, "default"), normalized(scope.accountId, "anonymous")),
     queryFn: ({ signal }) => loadSeoCrmWorkspace(signal),
     staleTime: QUERY_POLICIES.offlineCore.staleTime,
     gcTime: QUERY_POLICIES.offlineCore.gcTime,

@@ -1,7 +1,7 @@
 import { loadStudentDashboardData } from "@/features/elearning/student-dashboard/api/student-dashboard-api";
 import type { StudentDashboardProfile } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { QUERY_POLICIES } from "@/lib/query-policy";
+import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";
 
 export type StudentDashboardQueryScope = {
   accountId?: string | null;
@@ -57,6 +57,7 @@ export function studentDashboardQueryOptions(scope: StudentDashboardQueryScope) 
   return {
     gcTime: QUERY_POLICIES.offlineCore.gcTime,
     queryFn: ({ signal }: { signal: AbortSignal }) => loadStudentDashboardData({ signal, tenantId }),
+    meta: persistedQueryMeta(tenantId, normalizeAccountId(scope.accountId)),
     queryKey: studentDashboardQueryKeys.workspace(scope),
     refetchOnWindowFocus: false,
     staleTime: QUERY_POLICIES.offlineCore.staleTime,

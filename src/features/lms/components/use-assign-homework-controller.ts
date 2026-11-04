@@ -19,6 +19,7 @@ import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-ban
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import {
   lmsAssignmentReadQueryKeys,
+  lmsReadPersistMeta,
   useCreateLmsAssignmentMutation,
   useLmsStudentGroupsQuery,
 } from "@/features/lms/api/lms-assignment-command-query";
@@ -127,7 +128,8 @@ export function useAssignHomeworkController({
     enabled: apiBacked && targetType !== "grade" && Boolean(assignmentClass?.id ?? assignmentClassId),
     placeholderData: keepPreviousData,
     staleTime: QUERY_POLICIES.transactional.staleTime,
-    gcTime: QUERY_POLICIES.transactional.gcTime,
+    gcTime: QUERY_POLICIES.offlineCore.gcTime,
+    meta: lmsReadPersistMeta(),
     refetchOnWindowFocus: false,
   });
   const workspaceStudents = useMemo(
@@ -146,7 +148,8 @@ export function useAssignHomeworkController({
   const gradeClasses = classes.filter((classroom) => classroom.gradeLabel === selectedGradeLabel);
   const gradeClassWorkspaceQueries = useQueries({
     queries: gradeClasses.map((classroom) => ({
-      gcTime: QUERY_POLICIES.transactional.gcTime,
+      gcTime: QUERY_POLICIES.offlineCore.gcTime,
+      meta: lmsReadPersistMeta(),
       queryFn: ({ signal }) =>
         loadLmsClassWorkspace({
           assignmentPage: 0,

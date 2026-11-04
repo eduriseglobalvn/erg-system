@@ -13,7 +13,7 @@ import {
 } from "@/features/lms/classroom/api/mock-classroom-data";
 import type { AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
 import { loadLmsTeacherHomeworkWorkspace, mapAssignmentsToRuns } from "@/features/lms/api/lms-teacher-homework-api";
-import { lmsAssignmentReadQueryKeys } from "@/features/lms/api/lms-assignment-command-query";
+import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsDashboardBootstrap } from "@/features/lms/infrastructure/lms-dashboard-api";
 import { getCurrentAcademicYear } from "@/features/lms/learning-resources/api/teacher-resource-dashboard-api";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile";
@@ -81,6 +81,7 @@ export function useLmsTeacherShellController() {
   });
   const homeworkWorkspaceQuery = useQuery({
     queryKey: lmsAssignmentReadQueryKeys.homeworkWorkspace(tenantId, account?.id),
+    meta: lmsReadPersistMeta(tenantId, account?.id),
     queryFn: ({ signal }) => loadLmsTeacherHomeworkWorkspace({ page: 0, size: 50, status: "active", tenantId }, signal),
     enabled: apiBacked && shouldLoadHomeworkWorkspace,
     staleTime: QUERY_POLICIES.offlineCore.staleTime,

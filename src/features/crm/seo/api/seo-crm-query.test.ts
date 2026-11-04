@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { seoCrmQueryKeys, seoCrmWorkspaceQueryOptions } from "@/features/crm/seo/api/seo-crm-query";
-import { isPersistableQuery } from "@/lib/query-persistence";
 
 vi.mock("@/features/crm/seo/api/seo-crm-transport", () => ({
   loadSeoCrmWorkspace: vi.fn(async () => ({ leads: [], opportunities: [], followUps: [], handovers: [] })),
@@ -22,7 +21,7 @@ describe("CRM query scope and cancellation", () => {
     await options.queryFn?.({ signal: controller.signal } as never);
     const { loadSeoCrmWorkspace } = await import("@/features/crm/seo/api/seo-crm-transport");
     expect(loadSeoCrmWorkspace).toHaveBeenCalledWith(controller.signal);
-    expect(isPersistableQuery({ queryKey: seoCrmQueryKeys.workspace(scope) } as never)).toBe(true);
-    expect(isPersistableQuery({ queryKey: seoCrmQueryKeys.workspace({ tenantId: "tenant-a", accountId: "anonymous" }) } as never)).toBe(false);
+    expect(options.meta).toEqual({ persist: true });
+    expect(seoCrmWorkspaceQueryOptions({ tenantId: "tenant-a", accountId: "anonymous" }).meta).toBeUndefined();
   });
 });
