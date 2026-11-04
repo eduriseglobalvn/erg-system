@@ -5,6 +5,7 @@ import { readStoredAuthSession, type StoredAuthSession } from "@/platform/auth/a
 import { loginStudent } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { isAuthOnlyRedirect, sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { PLATFORM_ROOT_ADMIN_EMAIL, projectVerifiedWorkspaces } from "@/platform/auth/permissions/workspace-capability-projection";
 import { resolveWorkspaceLandingTarget } from "@/platform/auth/utils/access-denied";
 import { canAccessPortal } from "@/platform/auth/utils/portal-access";
@@ -181,8 +182,7 @@ function preferredWorkspaceForLogin(
   const roles = [...(account?.roles ?? []), ...(session?.roles ?? [])].map((role) => role.trim().toLowerCase());
   const adminLike = account?.role === "admin"
     || account?.email.trim().toLowerCase() === PLATFORM_ROOT_ADMIN_EMAIL
-    || roles.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))
-    || session?.permissions?.some((permission) => permission.trim().toLowerCase() === "lms.admin" || permission.trim() === "*") === true;
+    || hasAdminLikeClaims(roles, session?.permissions);
 
   if (adminLike) return "ADMIN";
 

@@ -1,3 +1,4 @@
+import { hasAdminLikeClaims } from "@/platform/auth/permissions/admin-like";
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
 import {
   createBrowserHistory,
@@ -245,8 +246,7 @@ function PortalIndexPage() {
     if (auth.isHydratingProfile) return <RoutePendingSkeleton />;
     const roles = [...(auth.session?.roles ?? []), ...(auth.account?.roles ?? [])].map((r) => r.trim().toLowerCase());
     const isPlatformAdmin = auth.account?.role === "admin"
-      || roles.some((role) => ["admin", "super_admin", "super-admin", "system.super_admin", "erg_super_admin", "global_admin", "lms_admin"].includes(role))
-      || (auth.session?.permissions ?? []).some((permission) => permission.trim().toLowerCase() === "lms.admin" || permission.trim() === "*");
+      || hasAdminLikeClaims(roles, auth.session?.permissions);
     const storedWorkspace = typeof window !== "undefined" ? window.localStorage?.getItem("erg_last_workspace") : null;
     const preferredWorkspace = storedWorkspace === "ADMIN" && isPlatformAdmin
       ? "ADMIN"
