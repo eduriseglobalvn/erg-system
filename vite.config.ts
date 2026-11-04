@@ -38,8 +38,8 @@ export default defineConfig(({ command, mode }) => {
         clientsClaim: true,
         importScripts: ["pwa-push.js"],
         skipWaiting: false,
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
-        globIgnores: ["**/mock/**"],
+        globPatterns: ["**/*.{js,css,html,svg,woff2}"],
+        globIgnores: ["**/mock/**", "**/*-latin-ext-*.woff2", "**/*-cyrillic-*.woff2", "**/*-greek-*.woff2"],
         manifestTransforms: [
           (entries) => filterPwaPrecacheManifest(entries, path.resolve(__dirname, "dist/index.html")),
         ],

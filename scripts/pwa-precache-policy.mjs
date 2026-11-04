@@ -18,16 +18,20 @@ export async function filterPwaPrecacheManifest(entries, indexHtmlPath) {
     throw new Error(`PWA shell asset policy found no JavaScript in ${indexHtmlPath}`);
   }
 
+  const seen = new Set();
   const manifest = entries.filter((entry) => {
     const url = normalizeAssetUrl(entry.url);
-    if (!url.startsWith("assets/") || !url.endsWith(".js")) return true;
+    // includeAssets and globPatterns both list static files; keep one entry per URL.
+    if (seen.has(url)) return false;
+    seen.add(url);
+    if (!url.startsWith("assets/") || !/\.(?:js|css)$/.test(url)) return true;
     return shellAssets.has(url);
   });
   const removedJavaScript = entries.length - manifest.length;
   return {
     manifest,
     warnings: removedJavaScript > 0
-      ? [`PWA shell policy removed ${removedJavaScript} non-critical JavaScript asset(s) from precache.`]
+      ? [`PWA shell policy removed ${removedJavaScript} non-critical JS/CSS asset(s) from precache.`]
       : [],
   };
 }
