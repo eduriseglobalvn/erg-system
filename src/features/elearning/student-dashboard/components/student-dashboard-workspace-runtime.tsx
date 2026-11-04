@@ -106,7 +106,8 @@ import {
   MUI_BG,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { AnnouncementToast } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
-import { AccountView, AnnouncementsView, AssignmentsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
+import { AccountView, AnnouncementsView } from "@/features/elearning/student-dashboard/components/student-dashboard-content-views";
+import { AssignmentsView } from "@/features/elearning/student-dashboard/components/student-dashboard-assignments-view";
 import { TopMenuShell } from "@/features/elearning/student-dashboard/components/student-dashboard-top-menu";
 import { StudentDashboardMobileShell } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-shell";
 import { StudentDashboardOverviewSurface } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-surface";
@@ -654,10 +655,7 @@ export function StudentDashboardWorkspaceRuntime() {
       {activePage === "assignments" ? (
         <AssignmentsView
           assignments={assignments}
-          completedAssignments={completedAssignments}
           copy={copy}
-          openAssignments={openAssignments}
-          overdueAssignments={overdueAssignments}
           onOpenAssignment={openAssignment}
         />
       ) : null}

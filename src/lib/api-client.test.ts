@@ -498,3 +498,13 @@ test("hides HTML error pages from proxies behind a friendly message", async () =
     message: "Máy chủ trả về phản hồi không hợp lệ (HTTP 500).",
   });
 });
+
+test("copies the Retry-After header into error details for lockout messages", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) => new Response(JSON.stringify({ error: { code: "AUTH_TOO_MANY_ATTEMPTS", message: "Too many" } }), { status: 429, headers: { "Content-Type": "application/json", "Retry-After": "60" } })));
+
+  await expect(apiRequest("/api/v1/auth/login", { auth: "public" })).rejects.toMatchObject({
+    code: "AUTH_TOO_MANY_ATTEMPTS",
+    details: expect.objectContaining({ retryAfterSeconds: 60 }),
+  });
+});

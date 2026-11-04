@@ -1,13 +1,9 @@
 import type { ReactNode } from "react";
-import HistoryRounded from "@mui/icons-material/HistoryRounded";
-import ReplayRounded from "@mui/icons-material/ReplayRounded";
-import BarChartRounded from "@mui/icons-material/BarChartRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -30,6 +26,8 @@ import {
   primaryButtonSx,
   Stack,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { formatDateTimeVi } from "@/lib/format-date";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function PageHeader({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {
@@ -96,38 +94,34 @@ export function MetricCard({ icon, label, tone = "primary", value }: { icon?: Re
   );
 }
 
-export function AssignmentListItem({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
-  const isCompleted = assignment.status === "submitted";
-  const scoreVal = assignment.score !== null ? assignment.score : isCompleted ? 46 : (assignment.progressRate ?? 0);
-  const isHigh = scoreVal >= 40 || (assignment.progressRate !== null && assignment.progressRate >= 80);
-  const courseTag = assignment.subjectLabel ? `[Tập huấn 2026] ${assignment.subjectLabel}` : "[Tập huấn 2026] IC3 GS6";
+const STATUS_TONE = { submitted: "success", overdue: "error", in_progress: "info", not_started: "neutral" } as const;
 
+/** One assignment card. Only the single most urgent row passes `primary` (contained); every other action is outlined. */
+export function AssignmentListItem({ assignment, copy, primary = false, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; primary?: boolean; onOpenAssignment: (assignmentId: string) => void }) {
+  const isCompleted = assignment.status === "submitted";
+  const due = assignment.dueAt ? formatDateTimeVi(assignment.dueAt) : "";
+  const hasScore = assignment.score !== null && assignment.maxScore !== null;
   return (
-    <Paper sx={{ bgcolor: "#FFFFFF", border: "1px solid #E2E8F0", borderLeft: "4px solid #F97316", borderRadius: "16px", boxShadow: "0 2px 10px rgba(0,0,0,0.02)", p: { xs: 1.8, md: 2.2 }, transition: "all 180ms ease", "&:hover": { boxShadow: "0 8px 24px rgba(0,0,0,0.06)", borderColor: "#CBD5E1" } }}>
+    <Paper variant="outlined" sx={{ borderRadius: `${ergEnterpriseTokens.radius.md}px`, boxShadow: "none", p: 2 }}>
       <Stack direction={{ xs: "column", md: "row" }} spacing={2} alignItems={{ xs: "stretch", md: "center" }} justifyContent="space-between">
         <Box sx={{ minWidth: 0, flex: 1 }}>
-          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.8, flexWrap: "wrap", rowGap: 0.5 }}>
-            <Box sx={{ bgcolor: "#FFF7ED", color: "#EA580C", border: "1px solid #FFEDD5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 600 }}>Bài thi</Box>
-            {isHigh ? <Box sx={{ bgcolor: "#ECFDF5", color: "#059669", border: "1px solid #D1FAE5", borderRadius: "6px", px: 1, py: 0.2, fontSize: 11, fontWeight: 600 }}>Điểm cao</Box> : null}
-            <Typography variant="caption" sx={{ color: "#64748B", fontWeight: 500, fontSize: 13 }}>{courseTag}</Typography>
+          <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.75, flexWrap: "wrap", rowGap: 0.5 }}>
+            <ErgStatusChip label={assignment.statusLabel} tone={STATUS_TONE[assignment.status]} />
+            {assignment.subjectLabel ? <Typography variant="caption" color="text.secondary">{assignment.subjectLabel}</Typography> : null}
           </Stack>
-          <Typography variant="subtitle1" sx={{ color: "#0F172A", fontWeight: 600, fontSize: 16 }}>{assignment.title}</Typography>
-          <Typography variant="body2" sx={{ color: "#64748B", mt: 0.4, fontSize: 13 }}>{isCompleted ? `Đỗ · ${scoreVal}/50` : assignment.dueLabel}</Typography>
+          <Typography variant="subtitle1">{assignment.title}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
+            {hasScore ? `Điểm: ${assignment.score}/${assignment.maxScore}` : due ? `Hạn nộp: ${due}` : assignment.dueLabel}
+          </Typography>
         </Box>
-        <Stack direction="row" spacing={1.5} alignItems="center" sx={{ flexShrink: 0, alignSelf: { xs: "flex-end", md: "center" } }}>
-          <Box sx={{ width: 44, height: 44, borderRadius: "50%", border: "2.5px solid #10B981", color: "#10B981", fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center" }}>
-            {scoreVal}
-          </Box>
-          <IconButton size="small" onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ color: "#64748B", bgcolor: "#F8FAFC", border: "1px solid #E2E8F0", borderRadius: "50%", p: 0.9, "&:hover": { bgcolor: "#F1F5F9" } }}>
-            <HistoryRounded sx={{ fontSize: 18 }} />
-          </IconButton>
-          <Button variant="contained" disabled={!assignment.quizId} startIcon={<ReplayRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ bgcolor: "#2563EB", color: "#fff", borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 2.2, py: 0.85, fontWeight: 600, fontSize: 13, textTransform: "none", boxShadow: "0 2px 8px rgba(37,99,235,0.25)", "&:hover": { bgcolor: "#1D4ED8" } }}>
-            {isCompleted ? "Làm lại" : copy.assignmentAction(assignment.status)}
-          </Button>
-          <Button variant="outlined" startIcon={<BarChartRounded sx={{ fontSize: 18 }} />} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ borderColor: "#E2E8F0", color: "#475569", borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 2, py: 0.85, fontWeight: 600, fontSize: 13, textTransform: "none", bgcolor: "#FFFFFF", "&:hover": { bgcolor: "#F8FAFC", borderColor: "#CBD5E1" } }}>
-            Xem kết quả
-          </Button>
-        </Stack>
+        <Button
+          variant={primary ? "contained" : "outlined"}
+          disabled={!assignment.quizId}
+          onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }}
+          sx={{ flexShrink: 0, minHeight: 44, minWidth: { md: 120 } }}
+        >
+          {isCompleted ? "Làm lại" : copy.assignmentAction(assignment.status)}
+        </Button>
       </Stack>
     </Paper>
   );

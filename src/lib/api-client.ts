@@ -75,6 +75,14 @@ export class ApiClientError extends Error {
   }
 }
 
+/** Copies a numeric `Retry-After` header (429/423 lockouts) into error details as `retryAfterSeconds`. */
+function withRetryAfter(details: unknown, response: Response): unknown {
+  const seconds = Number(response.headers.get("Retry-After"));
+  if (!Number.isFinite(seconds) || seconds <= 0) return details;
+  if (details === undefined || details === null) return { retryAfterSeconds: seconds };
+  return typeof details === "object" && !Array.isArray(details) ? { retryAfterSeconds: seconds, ...details } : details;
+}
+
 export function hasApiBase() {
   return Boolean(getApiBase());
 }
@@ -243,7 +251,7 @@ async function executeApiRequest<T>(
   if (!response.ok || errorBody) {
     const code = errorBody?.code ?? `HTTP_${response.status}`;
     const message = errorBody?.message ?? getEnvelopeMessage(body) ?? `Request failed: ${response.status}`;
-    const error = new ApiClientError(message, code, response.status, errorBody?.details, errorBody?.requestId);
+    const error = new ApiClientError(message, code, response.status, withRetryAfter(errorBody?.details, response), errorBody?.requestId);
 
     if (shouldRefreshAfterResponse(error, context.path, init)) {
       const nextToken = await refreshStoredAuthSession(context.portal);

@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 
 import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
-import { PortableExamVerificationError } from "@/features/elearning/portable-exam/types/portable-exam-types";
+import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
 import type { QuizPackage } from "@/lib/types";
 
 export type PortableArtifactState =
@@ -78,13 +78,4 @@ export async function loadEmbeddedPortablePackage(packageUrl: string) {
     source: "tauri-cache",
   });
   return quizPackage;
-}
-
-function portableArtifactErrorMessage(error: unknown) {
-  const code = error instanceof PortableExamVerificationError ? error.code : undefined;
-  if (code === "KEY_NOT_TRUSTED") return "Khóa phát hành của gói bài thi không được tin cậy.";
-  if (code === "INVALID_SIGNATURE" || code === "INVALID_CONTENT_HASH") return "Nội dung bài thi đã bị thay đổi hoặc không còn toàn vẹn.";
-  if (code === "EXPIRED" || code === "REVOKED") return "Gói bài thi đã hết hạn hoặc bị thu hồi.";
-  if (code === "MIN_RUNTIME") return "Gói bài thi yêu cầu phiên bản ứng dụng mới hơn.";
-  return "Gói bài thi không hợp lệ, bị thiếu hoặc không tương thích với phiên bản này.";
 }

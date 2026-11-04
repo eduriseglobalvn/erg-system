@@ -38,19 +38,18 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
 
   if (quizPackage) {
     return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6ff", p: { xs: 0.5, md: 1 } }}>
+      <Box sx={{ minHeight: "100vh", bgcolor: "background.default", p: { xs: 0.5, md: 1 } }}>
         <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center", px: { xs: 1, md: 2 }, py: 1 }}>
           <Button
             size="small"
             startIcon={<ArrowBack />}
             variant="outlined"
             onClick={() => setQuizPackage(null)}
-            sx={{ borderRadius: 1.5, fontWeight: 600 }}
           >
             Chọn bài khác
           </Button>
           <Typography variant="caption" color="text.secondary">
-            {workspace === "STUDENT" ? "Student workspace" : "Teacher workspace"} · Gói đã xác thực
+            Gói bài thi đã xác thực
           </Typography>
         </Stack>
         <PlayerShellRuntime
@@ -60,7 +59,7 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
           welcomeMeta={{
             courseLabel: quizPackage.quiz.title,
             reviewContent: quizPackage.quiz.description,
-            subjectLabel: "Portable exam",
+            subjectLabel: "Bài thi từ tệp",
           }}
         />
       </Box>
@@ -68,18 +67,22 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
   }
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6ff", py: { xs: 4, md: 8 } }}>
+    <Box sx={{ minHeight: "100vh", bgcolor: "background.default", py: { xs: 4, md: 8 } }}>
       <Container maxWidth="sm">
         <Stack spacing={2}>
           <Stack spacing={0.5}>
-            <Typography variant="overline" color="primary" sx={{ fontWeight: 600, letterSpacing: 1 }}>
-              ERG · {workspace === "STUDENT" ? "Student" : "Teacher"}
-            </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, letterSpacing: -1 }}>
-              Portable exam runtime
-            </Typography>
+            <Button
+              href={workspace === "STUDENT" ? "/student" : "/teacher"}
+              size="small"
+              startIcon={<ArrowBack />}
+              sx={{ alignSelf: "flex-start" }}
+              variant="text"
+            >
+              Về trang chủ
+            </Button>
+            <Typography variant="h1">Làm bài thi từ tệp</Typography>
             <Typography color="text.secondary">
-              Mở tệp bài kiểm tra đã phát hành và sử dụng đúng Player chung với web/PWA.
+              Mở tệp bài thi giáo viên đã gửi. Bài làm dùng cùng trình làm bài như trên web.
             </Typography>
           </Stack>
           <PortableExamLauncher onPackageReady={setQuizPackage} scope={scope} />

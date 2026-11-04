@@ -97,17 +97,34 @@ export function redirectAfterAuth(
     : accessDeniedPath(targetPortal, account?.email ?? "", destination));
 }
 
+const LOCKED_CODES = new Set(["ACCOUNT_LOCKED", "AUTH_ACCOUNT_LOCKED"]);
+const TOO_MANY_CODES = new Set(["AUTH_TOO_MANY_ATTEMPTS", "RATE_LIMITED"]);
+
+/** "Thử lại sau X phút" when the backend put retry seconds in the error details; empty otherwise. */
+function retryHint(details: unknown) {
+  const seconds = details && typeof details === "object"
+    ? Number((details as Record<string, unknown>).retryAfterSeconds ?? (details as Record<string, unknown>).retry_after_seconds)
+    : NaN;
+  return Number.isFinite(seconds) && seconds > 0 ? ` Thử lại sau ${Math.ceil(seconds / 60)} phút.` : "";
+}
+
 export function getFriendlyAuthErrorMessage(error: unknown, fallback: string) {
   if (error instanceof ApiClientError) {
     if (error.status === 0 || error.code === "NETWORK_ERROR" || error.code === "API_BASE_MISSING") {
-      return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+      return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra kết nối mạng rồi thử lại.";
+    }
+    if (LOCKED_CODES.has(error.code) || error.status === 423) {
+      return `Tài khoản đang tạm khóa do đăng nhập sai nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút hoặc liên hệ quản trị viên để được mở khóa."}`;
+    }
+    if (TOO_MANY_CODES.has(error.code) || error.status === 429) {
+      return `Bạn đã thử đăng nhập quá nhiều lần.${retryHint(error.details) || " Vui lòng thử lại sau ít phút."}`;
     }
     if (error.status === 401) return "Email hoặc mật khẩu chưa đúng. Vui lòng kiểm tra lại thông tin đăng nhập.";
     if (error.code === "AUTH_LOGIN_IN_PROGRESS") return "Một tab khác đang xử lý đăng nhập cho tài khoản này. Vui lòng chờ một chút rồi thử lại.";
     return error.message || fallback;
   }
   if (error instanceof TypeError && error.message.toLowerCase().includes("fetch")) {
-    return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra API/backend hoặc cấu hình môi trường rồi thử lại.";
+    return "Chưa kết nối được máy chủ ERG. Vui lòng kiểm tra kết nối mạng rồi thử lại.";
   }
   if (error instanceof Error) return error.message || fallback;
   return fallback;
@@ -210,6 +227,7 @@ function portalForRedirect(redirect: string, fallback: PortalKey): PortalKey {
 
 function isAccessDeniedError(error: unknown) {
   if (!(error instanceof ApiClientError)) return false;
+  if (LOCKED_CODES.has(error.code)) return false;
   const code = error.code.toLowerCase();
   return error.status === 403 || code.includes("forbidden") || code.includes("denied") || code.includes("permission");
 }

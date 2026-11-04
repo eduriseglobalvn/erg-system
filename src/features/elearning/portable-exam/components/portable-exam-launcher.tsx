@@ -11,6 +11,7 @@ import {
   loadPortableQuizPackage,
   type LoadPortableExamPackageOptions,
 } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
+import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
 import type { PortableExamScope } from "@/features/elearning/portable-exam/types/portable-exam-types";
 import type { QuizPackage } from "@/lib/types";
 
@@ -48,7 +49,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
         setMessage(`Đã xác thực ${result.quizPackage.quiz.title}. Gói bài thi sẵn sàng để bắt đầu.`);
       } catch (error) {
         setState("error");
-        setMessage(error instanceof Error ? error.message : "Không thể mở gói bài thi portable.");
+        setMessage(portableArtifactErrorMessage(error));
       }
     }
 
@@ -76,7 +77,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
       setMessage(`Đã xác thực ${result.quizPackage.quiz.title}. Gói bài thi sẵn sàng để bắt đầu.`);
     } catch (error) {
       setState("error");
-      setMessage(error instanceof Error ? error.message : "Không thể mở gói bài thi portable.");
+      setMessage(portableArtifactErrorMessage(error));
     }
   }
 
@@ -92,18 +93,23 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
       <CardContent>
         <Stack spacing={1.5}>
           <Stack spacing={0.5}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-              Mở bài kiểm tra portable
+            <Typography variant="subtitle1" component="h1">
+              Mở bài thi từ tệp
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Chọn tệp .ergquiz đã được ERG phát hành. Hệ thống sẽ xác thực chữ ký trước khi mở bài.
+              Dùng khi giáo viên gửi cho bạn tệp bài thi (đuôi .ergquiz).
+            </Typography>
+            <Typography component="ol" variant="body2" color="text.secondary" sx={{ m: 0, pl: 2.5 }}>
+              <li>Bấm "Chọn tệp bài thi" bên dưới.</li>
+              <li>Chọn tệp .ergquiz mà giáo viên đã gửi.</li>
+              <li>Chờ hệ thống kiểm tra tệp, sau đó bắt đầu làm bài.</li>
             </Typography>
           </Stack>
           <Button
             component="label"
             variant="contained"
             disabled={state === "loading"}
-            sx={{ alignSelf: "flex-start", borderRadius: 1.5, fontWeight: 600 }}
+            sx={{ alignSelf: "flex-start", minHeight: 44 }}
           >
             Chọn tệp bài thi
             <input
@@ -116,7 +122,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
           </Button>
           {state === "loading" ? <LinearProgress aria-label="Đang xác thực gói bài thi" /> : null}
           {state === "ready" && message ? <Alert severity="success">{message}</Alert> : null}
-          {state === "error" && message ? <Alert severity="error">{message}</Alert> : null}
+          {state === "error" && message ? <Alert severity="error">{message} Bạn có thể chọn lại tệp để thử lại.</Alert> : null}
         </Stack>
       </CardContent>
     </Card>
