@@ -31,6 +31,7 @@ const clampSx = { display: "-webkit-box", overflow: "hidden", WebkitBoxOrient: "
 
 export function StudentDashboardMobileOverview({
   announcement,
+  assignmentsFailed,
   assignmentsLoading,
   completedAssignments,
   copy,
@@ -42,6 +43,7 @@ export function StudentDashboardMobileOverview({
   onPageChange,
 }: {
   announcement: StudentTeacherAnnouncement | undefined;
+  assignmentsFailed: boolean;
   assignmentsLoading: boolean;
   completedAssignments: StudentDashboardAssignment[];
   copy: DashboardCopy;
@@ -104,7 +106,7 @@ export function StudentDashboardMobileOverview({
         </Stack>
         <Stack spacing={0.25} sx={{ p: 0.75 }}>
           {assignmentsLoading ? Array.from({ length: 3 }).map((_, index) => <Skeleton height={62} key={index} sx={{ borderRadius: 2 }} variant="rounded" />) : null}
-          {!assignmentsLoading && openAssignments.length === 0 ? <Typography color="text.secondary" variant="body2" sx={{ px: 1, py: 2, textAlign: "center" }}>{copy.heroAllDone}</Typography> : null}
+          {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? <Typography color="text.secondary" variant="body2" sx={{ px: 1, py: 2, textAlign: "center" }}>{copy.heroAllDone}</Typography> : null}
           {!assignmentsLoading ? openAssignments.slice(0, 3).map((assignment) => <MobileAssignmentRow assignment={assignment} copy={copy} key={assignment.id} onOpenAssignment={onOpenAssignment} />) : null}
         </Stack>
       </Paper>

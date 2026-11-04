@@ -46,7 +46,7 @@ export function RoleManagementWorkspace({ tenantId }: { tenantId: string }) {
         </Alert>
       ) : null}
       <ErgPageSurface flush>
-        <ErgDataTableShell toolbar={<ErgTableToolbar meta={query.data ? `${rows.length} nhóm quyền` : "Đang tải dữ liệu"} title="Danh sách nhóm quyền" />}>
+        <ErgDataTableShell toolbar={<ErgTableToolbar meta={query.data ? `${rows.length} nhóm quyền` : query.isPending ? "Đang tải dữ liệu" : undefined} title="Danh sách nhóm quyền" />}>
           {query.isPending ? <Box sx={{ p: 2 }}><ErgLoadingSkeleton rows={6} /></Box> : null}
           {query.isError && !rows.length ? (
             <Box sx={{ p: 2 }}>

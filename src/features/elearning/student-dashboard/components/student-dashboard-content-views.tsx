@@ -19,7 +19,7 @@ import { OverviewHeroActions, OverviewMetrics } from "@/features/elearning/stude
 import { PageHeader, SectionCard, PriorityPanel, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
 import { formatAverageScore, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
-export function OverviewView({ announcement, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey) => void; }) {
+export function OverviewView({ announcement, assignmentsFailed, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsFailed: boolean; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey) => void; }) {
   const hero = resolveOverviewHero(priorityAssignment, copy);
   return (
     <Stack spacing={2.5}>
@@ -50,7 +50,7 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
             {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
-            {!assignmentsLoading && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
+            {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
           </Stack>
         </SectionCard>
         <Stack spacing={2.5}>

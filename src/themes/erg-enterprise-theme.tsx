@@ -250,6 +250,24 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    // palette.*.light is a translucent soft tint; MUI derives Alert text from it, which made the text unreadable.
+    MuiAlert: {
+      styleOverrides: {
+        root: ({ ownerState, theme }) => {
+          const severity = ownerState.severity ?? "success";
+          const action = { "& .MuiAlert-action .MuiButton-root": { whiteSpace: "nowrap" } };
+          if (ownerState.variant === "filled") return action;
+          return {
+            ...action,
+            ...(ownerState.variant === "outlined"
+              ? { borderColor: alpha(theme.palette[severity].main, 0.4) }
+              : { backgroundColor: theme.palette[severity].light }),
+            color: theme.palette.text.primary,
+            "& .MuiAlert-icon": { color: theme.palette[severity].main },
+          };
+        },
+      },
+    },
     MuiChip: {
       styleOverrides: {
         root: {

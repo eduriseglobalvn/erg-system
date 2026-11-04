@@ -57,10 +57,12 @@ export function EmployeeAccessLogWorkspace({ tenantId }: { tenantId: string }) {
                 state={filters}
                 tenantId={tenantId}
               />
-              <Typography color="text.secondary" sx={{ px: { md: 2.5, xs: 2 }, pb: 1.5 }} variant="body2">
-                {query.data ? `${query.data.total} sự kiện` : "Đang tải dữ liệu"}
-                {clientFiltered ? " · ngày và kết quả chỉ lọc trong trang đang xem" : ""}
-              </Typography>
+              {query.isError ? null : (
+                <Typography color="text.secondary" sx={{ px: { md: 2.5, xs: 2 }, pb: 1.5 }} variant="body2">
+                  {query.data ? `${query.data.total} sự kiện` : "Đang tải dữ liệu"}
+                  {clientFiltered ? " · ngày và kết quả chỉ lọc trong trang đang xem" : ""}
+                </Typography>
+              )}
             </Box>
           }
         >

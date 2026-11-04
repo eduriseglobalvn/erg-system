@@ -20,7 +20,9 @@ export function EmployeeListToolbar({
   search,
   status,
   total,
+  loading,
 }: {
+  loading: boolean;
   onRoleChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: string) => void;
@@ -32,9 +34,11 @@ export function EmployeeListToolbar({
 }) {
   return (
     <Box sx={{ borderBottom: 1, borderColor: "divider", display: "grid", gap: 1.5, p: { md: 2.5, xs: 2 } }}>
-      <Typography color="text.secondary" variant="body2">
-        {total !== undefined ? `${total} tài khoản` : "Đang tải dữ liệu"}
-      </Typography>
+      {total !== undefined || loading ? (
+        <Typography color="text.secondary" variant="body2">
+          {total !== undefined ? `${total} tài khoản` : "Đang tải dữ liệu"}
+        </Typography>
+      ) : null}
       <Box sx={{ display: "flex", flexDirection: { sm: "row", xs: "column" }, gap: 1.5 }}>
         <TextField
           fullWidth

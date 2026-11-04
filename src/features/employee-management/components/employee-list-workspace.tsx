@@ -108,6 +108,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
               search={search}
               status={status}
               total={total}
+              loading={query.isPending}
             />
           }
         >

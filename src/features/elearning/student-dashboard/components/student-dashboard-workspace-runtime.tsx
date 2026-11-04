@@ -288,7 +288,7 @@ export function StudentDashboardWorkspaceRuntime() {
       ) : null}
       {activePage === "overview" ? (
         <StudentDashboardOverviewSurface
-          announcement={pinnedAnnouncement} assignmentsLoading={studentDashboardQuery.isLoading && openAssignments.length === 0}
+          announcement={pinnedAnnouncement} assignmentsFailed={studentDashboardQuery.isError && openAssignments.length === 0} assignmentsLoading={studentDashboardQuery.isLoading && openAssignments.length === 0}
           completedAssignments={completedAssignments} copy={copy} discussionPreview={discussionPreview}
           openAssignments={openAssignments} overdueAssignments={overdueAssignments} priorityAssignment={priorityAssignment}
           profile={dashboardProfile} surface={surface} onOpenAssignment={openAssignment} onPageChange={setActivePage}

@@ -11,6 +11,7 @@ import type { getDiscussionOverviewPreview } from "@/features/elearning/student-
 
 export function StudentDashboardOverviewSurface({
   announcement,
+  assignmentsFailed,
   assignmentsLoading,
   completedAssignments,
   copy,
@@ -24,6 +25,7 @@ export function StudentDashboardOverviewSurface({
   onPageChange,
 }: {
   announcement: StudentTeacherAnnouncement | undefined;
+  assignmentsFailed: boolean;
   assignmentsLoading: boolean;
   completedAssignments: StudentDashboardAssignment[];
   copy: DashboardCopy;
@@ -40,6 +42,7 @@ export function StudentDashboardOverviewSurface({
     return (
       <StudentDashboardMobileOverview
         announcement={announcement}
+        assignmentsFailed={assignmentsFailed}
         assignmentsLoading={assignmentsLoading}
         completedAssignments={completedAssignments}
         copy={copy}
@@ -56,7 +59,8 @@ export function StudentDashboardOverviewSurface({
   return (
     <OverviewView
       announcement={announcement}
-      assignmentsLoading={assignmentsLoading}
+      assignmentsFailed={assignmentsFailed}
+        assignmentsLoading={assignmentsLoading}
       completedAssignments={completedAssignments}
       copy={copy}
       discussionPreview={discussionPreview}
