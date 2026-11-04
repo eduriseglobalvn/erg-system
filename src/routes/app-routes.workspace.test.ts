@@ -58,7 +58,7 @@ describe("canonical LMS workspace route ownership", () => {
   it("enforces the same matrix before every generated admin, teacher and CRM route", () => {
     // Teacher/Student/Admin-after-conversion: one `_authed` beforeLoad runs the matrix check + canonical host once.
     expect(source).toContain("beforeLoad: authedBeforeLoad");
-    expect(guardsSource).toContain("enforceWorkspaceRoute(context.auth, location, workspace);");
+    expect(guardsSource).toContain("enforceWorkspaceRoute(auth, location, workspace);");
     expect(guardsSource).toContain("enforceCanonicalWorkspaceHost(location, workspace);");
     expect(teacherSource).not.toContain("beforeLoad: ({ context, location }) => enforceWorkspaceRoute");
     expect(crmSource).not.toContain("beforeLoad");

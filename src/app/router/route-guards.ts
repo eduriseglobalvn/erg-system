@@ -1,5 +1,9 @@
 import { redirect } from "@tanstack/react-router";
-import { resolveAuthRouteAccess, type AuthRouteState } from "@/platform/auth/router/auth-route-context";
+import { createAuthRouteState, resolveAuthRouteAccess, type AuthRouteState } from "@/platform/auth/router/auth-route-context";
+import { readStoredRefreshSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";
+import { getAuthScope, getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { refreshStoredAuthSession } from "@/lib/api-client/refresh";
+import { hasApiBase } from "@/lib/api-client";
 import { buildRedirectPath } from "@/platform/auth/utils/auth-redirects";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
@@ -97,11 +101,25 @@ export function enforceCanonicalWorkspaceHost(location: { href: string; pathname
  * then canonical host. Leaf routes declare `staticData.permission` for documentation/tests only;
  * the matrix lookup here stays the single source of truth.
  */
-export function authedBeforeLoad({ context, location }: { context: { auth: AuthRouteState }; location: { href: string; pathname: string } }): void {
+export function authedBeforeLoad({ context, location }: { context: { auth: AuthRouteState }; location: { href: string; pathname: string } }): void | Promise<void> {
   const workspace = authedWorkspaceForPath(location.pathname);
   if (!workspace) throwAuthRedirect("access-denied", "shared", safeLocationRedirect(location.href));
-  enforceWorkspaceRoute(context.auth, location, workspace);
-  enforceCanonicalWorkspaceHost(location, workspace);
+  const guard = (auth: AuthRouteState) => {
+    enforceWorkspaceRoute(auth, location, workspace);
+    enforceCanonicalWorkspaceHost(location, workspace);
+  };
+  // An expired access token with a stored refresh token is not a sign-out: refresh once before sending the user to login.
+  if (!context.auth.authenticated && !AUTH_BYPASS_ENABLED && readStoredRefreshSession()?.refreshToken) {
+    return refreshStoredAuthSession()
+      .catch(() => null)
+      .then((token) => guard(token ? storedAuthRouteState() : context.auth));
+  }
+  guard(context.auth);
+}
+
+function storedAuthRouteState() {
+  const portal = resolveCurrentPortal();
+  return createAuthRouteState({ account: getCurrentAccount(portal), session: getAuthScope(portal).session, apiBacked: hasApiBase() });
 }
 
 function throwAuthRedirect(decision: ReturnType<typeof resolveAuthRouteAccess>, portal: string, safeRedirect: string): never {
