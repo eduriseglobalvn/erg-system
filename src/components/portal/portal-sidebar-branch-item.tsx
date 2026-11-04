@@ -52,7 +52,8 @@ export function SidebarBranchItem({
   const isPinnedOpen = item.id === "learning-activities";
   const defaultExpanded = childActive || isPinnedOpen;
   const isExpanded = manualOpen ?? defaultExpanded;
-  const isBranchActive = isActive;
+  // Parent stays plain while a child is the active page (only the child is the solid pill).
+  const isBranchActive = isActive && !childActive;
   const isPreviewOpen = isExpanded && !childActive;
   const showExpandedChildren = isExpanded;
 
