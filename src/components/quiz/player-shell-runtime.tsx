@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Flag } from "lucide-react";
 
+import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import {
   AnswerKeyCard,
@@ -117,7 +118,7 @@ export function PlayerShellRuntime({
   const [sidebarQuery, setSidebarQuery] = useState("");
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
-  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
+  const [timeUp, setTimeUp] = useState(false);
   const [recentTrainingSubmitQuestionId, setRecentTrainingSubmitQuestionId] = useState<string | null>(null);
   const questionBodyRef = useRef<HTMLDivElement | null>(null);
   const lastReconnectSyncSignatureRef = useRef<string | null>(null);
@@ -158,7 +159,7 @@ export function PlayerShellRuntime({
       setSidebarQuery("");
       setSubmitDialogMode(null);
       setReviewingSubmittedAttempt(false);
-      setRemainingSeconds(null);
+      setTimeUp(false);
       setRecentTrainingSubmitQuestionId(null);
     });
 
@@ -281,7 +282,7 @@ export function PlayerShellRuntime({
     ? attemptDeadlineMs(activeSession, testingDurationSeconds)
     : null;
   const attemptServerNowMs = activeSession ? serverNowMs(activeSession) : null;
-  const attemptExpired = deadlineAt !== null && attemptServerNowMs !== null && attemptServerNowMs >= deadlineAt;
+  const attemptExpired = timeUp || (deadlineAt !== null && attemptServerNowMs !== null && attemptServerNowMs >= deadlineAt);
 
   const submitReadyAttempt = useCallback(async (
     readyPackage: QuizPackage,
@@ -390,7 +391,7 @@ export function PlayerShellRuntime({
         session: startedSession,
       });
       setStarted(true);
-      setRemainingSeconds(null);
+      setTimeUp(false);
       if (typeof nextIndex === "number") {
         setCurrentIndex(nextIndex);
       }
@@ -562,26 +563,6 @@ export function PlayerShellRuntime({
   }, [allQuestionsAnswered, attemptExpired, submitFailed]);
 
   useEffect(() => {
-    if (!started || !isTestingMode || attemptCompleted || deadlineAt === null || !activeSession) {
-      return;
-    }
-
-    const tick = () => {
-      const currentServerNowMs = serverNowMs(activeSession);
-      if (currentServerNowMs === null) {
-        setRemainingSeconds(null);
-        return;
-      }
-      const nextRemaining = Math.max(0, Math.ceil((deadlineAt - currentServerNowMs) / 1000));
-      setRemainingSeconds(nextRemaining);
-    };
-
-    tick();
-    const timerId = window.setInterval(tick, 1000);
-    return () => window.clearInterval(timerId);
-  }, [activeSession, started, isTestingMode, attemptCompleted, deadlineAt]);
-
-  useEffect(() => {
     if (!started || !activeSession?.serverStarted || !activePackage || attemptCompleted) {
       return;
     }
@@ -676,7 +657,7 @@ export function PlayerShellRuntime({
   ]);
 
   useEffect(() => {
-    if (!started || !isTestingMode || attemptCompleted || remainingSeconds !== 0 || submitting || !activePackage || !activeSession) {
+    if (!started || !isTestingMode || attemptCompleted || !timeUp || submitting || !activePackage || !activeSession) {
       return;
     }
 
@@ -703,7 +684,7 @@ export function PlayerShellRuntime({
         setSubmitting(false);
       }
     })();
-  }, [started, isTestingMode, attemptCompleted, remainingSeconds, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt]);
+  }, [started, isTestingMode, attemptCompleted, timeUp, submitting, activePackage, activeSession, activeAttempt, attemptScope, submitReadyAttempt]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -910,10 +891,18 @@ export function PlayerShellRuntime({
         backgroundColor: "rgba(232,40,40,0.10)",
         color: "#b91c1c",
       };
-  const testingTimerTone =
-    remainingSeconds !== null && remainingSeconds <= 60
-      ? "bg-rose-50 text-rose-600 ring-1 ring-rose-200"
-      : "bg-slate-100 text-slate-700";
+  const timerTone = (seconds: number) =>
+    seconds <= 60 ? "bg-rose-50 text-rose-600 ring-1 ring-rose-200" : "bg-slate-100 text-slate-700";
+
+  const countdownProps = {
+    active: started && isTestingMode && !attemptCompleted,
+    deadlineAt,
+    onExpiredChange: setTimeUp,
+    session: activeSession,
+  };
+  const countdown = isTestingMode ? (
+    <PlayerCountdown {...countdownProps}>{(seconds) => <span>{formatTimer(seconds)}</span>}</PlayerCountdown>
+  ) : null;
 
   async function handleFinalizeAttempt() {
     await finalizeAttempt();
@@ -1076,7 +1065,7 @@ export function PlayerShellRuntime({
             started={started}
             submitting={submitting}
             submitFailed={submitFailed}
-            remainingSeconds={remainingSeconds}
+            timer={countdown}
             onJumpToQuestion={handleJumpToQuestion}
             onNext={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
             onPrev={() => setCurrentIndex((value) => Math.max(0, value - 1))}
@@ -1149,7 +1138,7 @@ export function PlayerShellRuntime({
           started={started}
           submitting={submitting}
           submitFailed={submitFailed}
-          remainingSeconds={remainingSeconds}
+          timer={countdown}
           onJumpToQuestion={handleJumpToQuestion}
           onNext={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
           onPrev={() => setCurrentIndex((value) => Math.max(0, value - 1))}
@@ -1205,10 +1194,12 @@ export function PlayerShellRuntime({
             <span className="rounded-lg px-2.5 py-1 text-xs font-semibold" style={modeBadgeStyle}>
               {isTrainingMode ? "Luyện tập" : "Kiểm tra"}
             </span>
-            {isTestingMode && remainingSeconds !== null ? (
-              <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${testingTimerTone}`}>
-                {formatTimer(remainingSeconds)}
-              </span>
+            {isTestingMode ? (
+              <PlayerCountdown {...countdownProps}>
+                {(seconds) => (
+                  <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${timerTone(seconds)}`}>{formatTimer(seconds)}</span>
+                )}
+              </PlayerCountdown>
             ) : null}
           </div>
         </div>

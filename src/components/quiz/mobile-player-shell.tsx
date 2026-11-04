@@ -35,7 +35,7 @@ type MobilePlayerShellProps = {
   started: boolean;
   submitting: boolean;
   submitFailed: boolean;
-  remainingSeconds: number | null;
+  timer?: ReactNode;
   onJumpToQuestion: (index: number) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -72,7 +72,7 @@ export function MobilePlayerShell({
   started,
   submitting,
   submitFailed,
-  remainingSeconds,
+  timer,
   onJumpToQuestion,
   onNext,
   onPrev,
@@ -85,7 +85,6 @@ export function MobilePlayerShell({
   resultBody,
 }: MobilePlayerShellProps) {
   const showSubmitAction = !attemptCompleted;
-  const timerVisible = isTestingMode && remainingSeconds !== null;
 
   if (!started) {
     return (
@@ -167,7 +166,7 @@ export function MobilePlayerShell({
                 ) : null}
                 <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-400">
                   <span>{answeredCount}/{questions.length} đã trả lời</span>
-                  {timerVisible ? <span>{formatTimer(remainingSeconds)}</span> : null}
+                  {isTestingMode ? timer : null}
                 </div>
               </div>
               <div className="space-y-3">{body}</div>
@@ -311,11 +310,4 @@ function IntroStat({ label, value }: { label: string; value: string }) {
       <div className="mt-1 text-sm font-medium text-[var(--erg-blue)]">{value}</div>
     </div>
   );
-}
-
-function formatTimer(totalSeconds: number | null) {
-  const safeSeconds = Math.max(totalSeconds ?? 0, 0);
-  const minutes = Math.floor(safeSeconds / 60);
-  const seconds = safeSeconds % 60;
-  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
