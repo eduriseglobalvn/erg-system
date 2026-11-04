@@ -61,6 +61,8 @@ export type RoutePermissionEntry = {
   readonly permission: RoutePermission;
   /** Extra permissions that also open the route (any-of with `permission`). */
   readonly alternatePermissions?: readonly RoutePermission[];
+  /** Deeper paths (e.g. `/teacher/notifications/:id`) inherit this row even without rows of their own. */
+  readonly matchChildren?: boolean;
 };
 
 /** Every permission that opens the route: `permission` or any alternate. */
@@ -164,7 +166,7 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/teacher", workspace: "TEACHER", resource: "dashboard", action: "read", permission: "lms.dashboard.read" },
   { path: "/teacher/exams/portable", workspace: "TEACHER", resource: "exam.portable", action: "launch", permission: "lms.quiz.read" },
   { path: "/teacher/downloads/desktop", workspace: "TEACHER", resource: "desktop.release", action: "read", permission: "lms.dashboard.read" },
-  ...lmsPaths.map(teacherEntry),
+  ...lmsPaths.map((path) => (path === "notifications" ? { ...teacherEntry(path), matchChildren: true } : teacherEntry(path))),
   { path: "/student", workspace: "STUDENT", resource: "assignment", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/exams/portable", workspace: "STUDENT", resource: "exam.portable", action: "launch", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
   { path: "/student/downloads/desktop", workspace: "STUDENT", resource: "desktop.release", action: "read", permission: "elearning.assignment.read_self", alternatePermissions: STUDENT_PREVIEW_ALTERNATES },
@@ -179,7 +181,7 @@ export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
 const sortedMatrix = [...ROUTE_PERMISSION_MATRIX].sort((left, right) => right.path.length - left.path.length);
 const nestedRoutePrefixes = new Set(
   sortedMatrix
-    .filter((entry) => entry.path !== "/admin" && sortedMatrix.some((candidate) => candidate.path.startsWith(`${entry.path}/`)))
+    .filter((entry) => entry.path !== "/admin" && (entry.matchChildren || sortedMatrix.some((candidate) => candidate.path.startsWith(`${entry.path}/`))))
     .map((entry) => entry.path),
 );
 

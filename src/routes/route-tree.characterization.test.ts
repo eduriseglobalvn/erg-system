@@ -1,5 +1,5 @@
 import { createMemoryHistory, createRouter, isRedirect } from "@tanstack/react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { routeTree } from "@/routes/app-routes";
 import { createAuthRouteState } from "@/platform/auth/router/auth-route-context";
@@ -9,11 +9,20 @@ type Guard = (ctx: unknown) => unknown;
 type AnyRoute = {
   id: string;
   fullPath: string;
+  parentRoute?: AnyRoute;
+  children?: AnyRoute[];
   options: { path?: string; beforeLoad?: Guard; component?: unknown; validateSearch?: unknown };
 };
 
-const routes = (routeTree as unknown as { children: AnyRoute[] }).children;
-const concretePath = (path: string) => path.replace(/\$$/, "unknown-segment");
+// Workspaces are layout routes now (_authed / _teacherShell ...): compare the routable routes by fullPath,
+// and treat a route as guarded when any ancestor guard applies (the guard chain runs root -> leaf).
+const collect = (route: AnyRoute): AnyRoute[] => (route.children ?? []).flatMap((child) => [child, ...collect(child)]);
+const routes = collect(routeTree as unknown as AnyRoute).filter((route) => route.options.path !== undefined);
+const guardChain = (route: AnyRoute): Guard[] => [
+  ...(route.parentRoute ? guardChain(route.parentRoute) : []),
+  ...(route.options.beforeLoad ? [route.options.beforeLoad] : []),
+];
+const concretePath = (path: string) => path.replace(/\$\w*/g, "unknown-segment");
 
 const anon = createAuthRouteState({ account: null, session: null, apiBacked: true });
 const account = { id: "u1", email: "u1@erg.edu.vn", lifecycle: { status: "ACTIVE", nextSteps: [] } } as never;
@@ -29,15 +38,28 @@ const noPerms = createAuthRouteState({
 });
 
 function runGuard(route: AnyRoute, auth: unknown) {
-  const guard = route.options.beforeLoad;
-  if (!guard) return "no-guard";
+  // CRM paths are only served from the CRM host; the guard chain now includes that host check.
+  const onCrmHost = route.fullPath === "/seo" || route.fullPath.startsWith("/seo/");
+  if (onCrmHost) vi.stubGlobal("location", new URL("https://crm.erg.edu.local/"));
+  try {
+    return runGuardChain(route, auth);
+  } finally {
+    if (onCrmHost) vi.unstubAllGlobals();
+  }
+}
+
+function runGuardChain(route: AnyRoute, auth: unknown) {
+  const guards = guardChain(route);
+  if (guards.length === 0) return "no-guard";
   const pathname = concretePath(route.fullPath);
   try {
-    guard({
-      context: { auth },
-      location: { href: pathname, pathname, searchStr: "", hash: "" },
-      search: { redirect: "/teacher/home" },
-    });
+    for (const guard of guards) {
+      guard({
+        context: { auth },
+        location: { href: pathname, pathname, searchStr: "", hash: "" },
+        search: { redirect: "/teacher/home" },
+      });
+    }
     return "allow";
   } catch (error) {
     if (!isRedirect(error)) return `throw:${String(error)}`;
@@ -53,7 +75,7 @@ describe("route tree characterization (must not change during refactors)", () =>
 
   it("registers the same set of routes", () => {
     const rows = routes
-      .map((r) => `${r.fullPath} | guard=${Boolean(r.options.beforeLoad)} | component=${Boolean(r.options.component)} | validate=${Boolean(r.options.validateSearch)}`)
+      .map((r) => `${r.fullPath} | guard=${guardChain(r).length > 0} | component=${Boolean(r.options.component)} | validate=${Boolean(r.options.validateSearch)}`)
       .sort();
     expect(rows).toMatchSnapshot();
   });
@@ -75,7 +97,7 @@ describe("route tree characterization (must not change during refactors)", () =>
 
   it("keeps a matrix row for every guarded workspace path", () => {
     const rows = routes
-      .filter((r) => r.options.beforeLoad)
+      .filter((r) => guardChain(r).length > 0)
       .flatMap((r) => (["ADMIN", "TEACHER", "STUDENT", "CRM"] as const).map((w) => {
         const entry = routePermissionForPath(concretePath(r.fullPath), w);
         return `${r.fullPath} ${w} -> ${entry ? entry.permission : "none"}`;

@@ -174,7 +174,7 @@ const LEGACY_FILE_OWNERS = new Map([
     "src/features/lms/components/lms-teacher-shell.tsx",
   ],
   [
-    "src/features/lms/components/lms-teacher-shell-workspaces.tsx",
+    "src/features/lms/components/lms-teacher-route-pages.tsx",
     "src/features/lms/components/lms-teacher-shell.tsx",
   ],
   [

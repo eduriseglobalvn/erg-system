@@ -1,19 +1,27 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
+import { Outlet } from "@tanstack/react-router";
 
 import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import {
   LmsHeaderClassControl,
   LmsHeaderSchoolControl,
 } from "@/features/lms/components/lms-teacher-shell-presentation";
-import { LmsTeacherDesktopContent } from "@/features/lms/components/lms-teacher-shell-desktop-content";
-import { LmsTeacherMobileContent } from "@/features/lms/components/lms-teacher-shell-workspaces";
+import { LmsTeacherShellContext } from "@/features/lms/components/lms-teacher-shell-context";
 import { useLmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { LmsMobileShell } from "@/features/lms/mobile";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
+/** Teacher workspace layout: owns school/class state and chrome; each page is a child route rendered in <Outlet />. */
 export function LmsTeacherShell() {
   const model = useLmsTeacherShellController();
+  return (
+    <LmsTeacherShellContext.Provider value={model}>
+      <LmsTeacherShellFrame model={model} />
+    </LmsTeacherShellContext.Provider>
+  );
+}
 
+function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeacherShellController> }) {
   if (model.isMobile) {
     return (
       <Box sx={{ bgcolor: "background.default", display: "flex", height: "100dvh", minHeight: "100dvh", minWidth: 0, overflow: "hidden", width: "100%" }}>
@@ -38,7 +46,7 @@ export function LmsTeacherShell() {
           onSchoolChange={model.selectSchool}
           onSignOut={model.signOut}
         >
-          <LmsTeacherMobileContent model={model} />
+          <Outlet />
         </LmsMobileShell>
       </Box>
     );
@@ -73,7 +81,7 @@ export function LmsTeacherShell() {
           className="lms-teacher-shell"
           sx={{ flex: 1, minHeight: 0, overflow: "auto", overflowX: "hidden" }}
         >
-          <LmsTeacherDesktopContent model={model} />
+          <Outlet />
         </Box>
       </Box>
     </ErgPortalLayout>

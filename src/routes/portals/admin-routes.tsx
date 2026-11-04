@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { createRoute, Navigate } from "@tanstack/react-router";
+import { createRoute, lazyRouteComponent, redirect } from "@tanstack/react-router";
 
 import {
   ADMIN_LEARNING_STANDARDS_PATH,
@@ -9,39 +9,100 @@ import {
   lcmsWorkspacePaths,
 } from "@/app/portal-route-registry";
 import { enforcePermissionRoute, enforceWorkspaceRoute } from "@/app/router/route-guards";
-import { ADMIN_CONTENT_ROUTE_PATHS, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
+import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, adminContentPathForSection, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
-import { canonicalLmsWorkspaceHostForRuntime, isCanonicalLmsWorkspaceHost } from "@/platform/workspaces/workspace-route";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
-import {
-  PortalHostRedirect,
-  PortalRoute,
-  ProfileRouteContent,
-  rootRoute,
-  withPortalAuth,
-} from "@/routes/portals/route-shared";
+import { authedRoute, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
 
-const AdminPage = lazy(() => import("@/app/pages/admin/admin-page"));
 const QuestionTypeDemoPage = lazy(() =>
   import("@/app/pages/shared/question-type-demo-page").then((module) => ({
     default: module.QuestionTypeDemoPage,
   })),
 );
 
-const adminProfileRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: adminPath("/profile"),
-  beforeLoad: ({ context, location }) => {
-    enforceWorkspaceRoute(context.auth, location, "ADMIN");
-    enforcePermissionRoute(context.auth, location, "account.self.read");
+const routePages = () => import("@/features/lcms/admin-route-pages");
+const page = (name: keyof Awaited<ReturnType<typeof routePages>>) => lazyRouteComponent(routePages, name);
+
+const CONTENT_REDIRECTED_SEGMENTS = ["questions", "quiz-bank", "quiz-editor"];
+
+/** Component of the Admin menu entries that have their own screen; every other entry uses the generic host. */
+function adminPageFor(wPath: string) {
+  if (wPath === "settings/permissions") return page("AdminPermissionsRoute");
+  if (wPath === "settings/roles") return page("AdminRolesRoute");
+  if (wPath === "employees") return page("AdminEmployeesRoute");
+  if (wPath === "employees/access-logs") return page("AdminEmployeeAccessLogsRoute");
+  if (wPath === "ui-kit") return page("AdminUiKitRoute");
+  if (wPath === "schools" || wPath.startsWith("schools/")) return page("AdminSchoolsRoute");
+  return page("AdminGenericRoute");
+}
+
+// Pathless layout: the shell (menu, breadcrumb, quiz-import state) renders the pages below in its <Outlet />.
+const adminShellRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  id: "_adminShell",
+  component: lazyRouteComponent(() => import("@/app/pages/admin/admin-page")),
+});
+
+const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
+  createRoute({
+    getParentRoute: () => adminShellRoute,
+    path: contentPath,
+    staticData: permissionStaticData(contentPath, "ADMIN"),
+    component: contentPath === ADMIN_CONTENT_HOME_PATH ? page("AdminContentOverviewRoute") : page("AdminContentWorkspaceRoute"),
+  }),
+);
+
+const adminMenuRoutes = lcmsWorkspacePaths
+  .filter((wPath) => !CONTENT_REDIRECTED_SEGMENTS.includes(wPath) && wPath !== "setting/setting-center-role")
+  .map((wPath) => {
+    const path = canonicalAdminWorkspacePath(`/${wPath}`);
+    return createRoute({
+      getParentRoute: () => adminShellRoute,
+      path,
+      staticData: permissionStaticData(path, "ADMIN"),
+      component: adminPageFor(wPath),
+    });
+  });
+
+// Legacy alias of settings/roles.
+const settingCenterRoleRedirectRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: canonicalAdminWorkspacePath("/setting/setting-center-role"),
+  staticData: permissionStaticData(canonicalAdminWorkspacePath("/setting/setting-center-role"), "ADMIN"),
+  beforeLoad: () => {
+    throw redirect({ href: adminPath("/settings/roles"), replace: true });
   },
-  component: () => <ProfileRouteContent portal="lcms" />,
+});
+
+const adminIntegrationRoutes = [
+  [ADMIN_LEARNING_STANDARDS_PATH, "AdminLearningStandardsRoute"],
+  [ADMIN_ENTERPRISE_CONNECTORS_PATH, "AdminEnterpriseConnectorsRoute"],
+  ["/admin/learning-outcomes", "AdminLearningOutcomesRoute"],
+] as const;
+
+// The old home page showed hard-coded sample data; /admin lands on the first real workspace instead.
+// Runs after the `_authed` guard, so /admin still needs its matrix permission.
+const adminIndexRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: "/admin",
+  staticData: permissionStaticData("/admin", "ADMIN"),
+  beforeLoad: () => {
+    throw redirect({ href: adminContentPathForSection("resources"), replace: true });
+  },
+});
+
+// Standalone pages: same session/host guard, but not inside the Admin shell.
+const adminProfileRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  path: adminPath("/profile"),
+  beforeLoad: ({ context, location }) => enforcePermissionRoute(context.auth, location, "account.self.read"),
+  component: ProfileBody,
 });
 
 const questionTypesRoute = createRoute({
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => authedRoute,
   path: adminPath("/question-types"),
-  beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
+  staticData: permissionStaticData(adminPath("/question-types"), "ADMIN"),
   component: () => (
     <Suspense fallback={<RoutePendingSkeleton />}>
       <QuestionTypeDemoPage />
@@ -54,123 +115,41 @@ const legacyAdminContentRoutes = ["resources", "questions", "quiz-bank", "quiz-e
   createRoute({
     getParentRoute: () => rootRoute,
     path: adminPath(`/${segment}`),
-    component: () => <Navigate to={adminPath(`/content/${segment}`)} replace />,
-  }),
-);
-
-const adminWorkspaceRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin",
-  beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-  component: () => {
-    if (!isCanonicalLmsWorkspaceHost(window.location)) {
-      return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath="/admin" />;
-    }
-    return withPortalAuth("lcms", <AdminPage />);
-  },
-});
-
-const learningStandardsAdminRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: ADMIN_LEARNING_STANDARDS_PATH,
-  beforeLoad: ({ context, location }) => {
-    enforceWorkspaceRoute(context.auth, location, "ADMIN");
-    if (!context.auth.hasPermission("learning.standards.read") && !context.auth.hasPermission("learning.standards.manage")) {
-      enforcePermissionRoute(context.auth, location, "learning.standards.read");
-    }
-  },
-  component: () => {
-    if (!isCanonicalLmsWorkspaceHost(window.location)) {
-      return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={ADMIN_LEARNING_STANDARDS_PATH} />;
-    }
-    return withPortalAuth("lcms", <AdminPage />);
-  },
-});
-
-const legacyLearningStandardsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: LEGACY_LEARNING_STANDARDS_PATH,
-  beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-  component: () => <Navigate to={ADMIN_LEARNING_STANDARDS_PATH} replace />,
-});
-
-const enterpriseConnectorsAdminRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: ADMIN_ENTERPRISE_CONNECTORS_PATH,
-  beforeLoad: ({ context, location }) => {
-    enforceWorkspaceRoute(context.auth, location, "ADMIN");
-    if (!context.auth.hasPermission("enterprise.connectors.read") && !context.auth.hasPermission("enterprise.connectors.manage")) {
-      enforcePermissionRoute(context.auth, location, "enterprise.connectors.read");
-    }
-  },
-  component: () => {
-    if (!isCanonicalLmsWorkspaceHost(window.location)) {
-      return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={ADMIN_ENTERPRISE_CONNECTORS_PATH} />;
-    }
-    return withPortalAuth("lcms", <AdminPage />);
-  },
-});
-
-const legacyEnterpriseConnectorsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: LEGACY_ENTERPRISE_CONNECTORS_PATH,
-  beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-  component: () => <Navigate to={ADMIN_ENTERPRISE_CONNECTORS_PATH} replace />,
-});
-
-const learningOutcomesAdminRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/admin/learning-outcomes",
-  beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-  component: () => {
-    if (!isCanonicalLmsWorkspaceHost(window.location)) {
-      return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath="/admin/learning-outcomes" />;
-    }
-    return withPortalAuth("lcms", <AdminPage />, "learning.outcomes.manage");
-  },
-});
-
-const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map((contentPath) =>
-  createRoute({
-    getParentRoute: () => rootRoute,
-    path: contentPath,
-    beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-    component: () => {
-      if (!isCanonicalLmsWorkspaceHost(window.location)) {
-        return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={contentPath} />;
-      }
-      return withPortalAuth("lcms", <AdminPage />);
+    beforeLoad: () => {
+      throw redirect({ href: adminPath(`/content/${segment}`), replace: true });
     },
   }),
 );
 
-const lcmsRoutes = lcmsWorkspacePaths
-  .filter((wPath) => !["questions", "quiz-bank", "quiz-editor"].includes(wPath))
-  .map((wPath) =>
-    createRoute({
-      getParentRoute: () => rootRoute,
-      path: canonicalAdminWorkspacePath(`/${wPath}`),
-      beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN"),
-      component: () => (
-        <PortalRoute
-          allowedPortals={["lcms", "lms"]}
-          element={withPortalAuth("lcms", <AdminPage />)}
-          // Do not redirect here; requests from LMS/CRM should render 404.
-        />
-      ),
-    }),
-  );
+// Legacy /integration/* aliases keep the workspace guard (the matrix has no row for them, so they stay denied).
+const legacyIntegrationRoutes = [
+  [LEGACY_LEARNING_STANDARDS_PATH, ADMIN_LEARNING_STANDARDS_PATH],
+  [LEGACY_ENTERPRISE_CONNECTORS_PATH, ADMIN_ENTERPRISE_CONNECTORS_PATH],
+].map(([legacyPath, target]) =>
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: legacyPath,
+    beforeLoad: ({ context, location }) => {
+      enforceWorkspaceRoute(context.auth, location, "ADMIN");
+      throw redirect({ href: target, replace: true });
+    },
+  }),
+);
 
-export const adminRoutes = [
+/** Root-level legacy aliases (no workspace guard of their own, except /integration/*). */
+export const adminRoutes = [...legacyAdminContentRoutes, ...legacyIntegrationRoutes];
+
+/** Children of `_authed`: guarded once by authedBeforeLoad. */
+export const adminAuthedRoutes = [
+  adminIndexRoute,
   adminProfileRoute,
   questionTypesRoute,
-  ...legacyAdminContentRoutes,
-  adminWorkspaceRoute,
-  learningStandardsAdminRoute,
-  legacyLearningStandardsRoute,
-  enterpriseConnectorsAdminRoute,
-  legacyEnterpriseConnectorsRoute,
-  learningOutcomesAdminRoute,
-  ...adminContentRoutes,
-  ...lcmsRoutes,
+  settingCenterRoleRedirectRoute,
+  adminShellRoute.addChildren([
+    ...adminContentRoutes,
+    ...adminMenuRoutes,
+    ...adminIntegrationRoutes.map(([path, pageName]) =>
+      createRoute({ getParentRoute: () => adminShellRoute, path, staticData: permissionStaticData(path, "ADMIN"), component: page(pageName) }),
+    ),
+  ]),
 ];

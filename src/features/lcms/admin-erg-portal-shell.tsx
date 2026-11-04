@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import {
   createQuizFromBankQuestions as runCreateQuizFromBankQuestions,
@@ -21,7 +21,7 @@ import {
   canonicalAdminWorkspacePath,
   legacyAdminWorkspacePath,
 } from "@/features/lcms/admin-content/admin-content-route";
-import { AdminPortalContent } from "@/features/lcms/admin-portal-content";
+import { AdminShellContext, type AdminShellModel } from "@/features/lcms/admin-shell-context";
 import {
   AdminHeaderBreadcrumb,
   createClientIdempotencyKey,
@@ -57,16 +57,6 @@ export default function AdminErgPortalShell() {
   );
   const isSchoolManagement = legacyPathname === "/schools" || legacyPathname.startsWith("/schools/");
   const tenantId = session?.tenantId ?? import.meta.env.VITE_TENANT_ID ?? "erg";
-
-  useEffect(() => {
-    if (legacyPathname === "/setting/setting-center-role") {
-      void navigate({ replace: true, href: "/admin/settings/roles" });
-    }
-    // The old home page showed hard-coded sample data; land on the first real workspace instead.
-    if (legacyPathname === "/" || legacyPathname === "") {
-      void navigate({ replace: true, href: adminContentPathForSection("resources") });
-    }
-  }, [legacyPathname, navigate]);
 
   const portalInfo = useMemo(
     () => ({
@@ -109,6 +99,19 @@ export default function AdminErgPortalShell() {
     }, options);
   }
 
+  const model: AdminShellModel = {
+    activeItem,
+    activeLeaf,
+    isPreservedWorkspace,
+    legacyPathname,
+    pendingQuestionImports,
+    quizEditorQuizId,
+    tenantId,
+    onClearQuestionImports: () => setPendingQuestionImports([]),
+    onCreateQuizFromBank: (questions, options) => void createQuizFromBankQuestions(questions, options),
+    onOpenLeaf: openLeaf,
+  };
+
   return (
     <ErgPortalLayout
       contentMode={isPreservedWorkspace || isSchoolManagement ? "flush" : "padded"}
@@ -117,21 +120,9 @@ export default function AdminErgPortalShell() {
       menuGroups={ADMIN_MENU_GROUPS}
       portalInfo={portalInfo}
     >
-      <AdminPortalContent
-        activeItem={activeItem}
-        activeLeaf={activeLeaf}
-        isPreservedWorkspace={isPreservedWorkspace}
-        isSchoolManagement={isSchoolManagement}
-        legacyPathname={legacyPathname}
-        locationPathname={location.pathname}
-        pathname={pathname}
-        pendingQuestionImports={pendingQuestionImports}
-        quizEditorQuizId={quizEditorQuizId}
-        tenantId={tenantId}
-        onClearQuestionImports={() => setPendingQuestionImports([])}
-        onCreateQuizFromBank={(questions, options) => void createQuizFromBankQuestions(questions, options)}
-        onOpenLeaf={openLeaf}
-      />
+      <AdminShellContext.Provider value={model}>
+        <Outlet />
+      </AdminShellContext.Provider>
     </ErgPortalLayout>
   );
 }

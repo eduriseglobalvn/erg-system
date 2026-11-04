@@ -3,12 +3,12 @@ import { createBrowserHistory, createHashHistory, createRouter } from "@tanstack
 import { shouldUseHashRouter } from "@/lib/platform";
 import { getAdaptiveLoadingPolicy } from "@/lib/network-quality";
 import { RouteErrorBoundary, RoutePendingSkeleton } from "@/routes/route-feedback";
-import { adminRoutes } from "@/routes/portals/admin-routes";
+import { adminAuthedRoutes, adminRoutes } from "@/routes/portals/admin-routes";
 import { authRoutes } from "@/routes/portals/auth-routes";
 import { crmRoutes } from "@/routes/portals/crm-routes";
 import { catchAllRoute, legacyRoutes } from "@/routes/portals/legacy-routes";
 import { publicRoutes } from "@/routes/portals/public-routes";
-import { rootRoute } from "@/routes/portals/route-shared";
+import { authedRoute, rootRoute } from "@/routes/portals/route-shared";
 import { studentRoutes } from "@/routes/portals/student-routes";
 import { teacherRoutes } from "@/routes/portals/teacher-routes";
 
@@ -16,9 +16,7 @@ export const routeTree = rootRoute.addChildren([
   ...publicRoutes,
   ...authRoutes,
   ...adminRoutes,
-  ...teacherRoutes,
-  ...studentRoutes,
-  ...crmRoutes,
+  authedRoute.addChildren([...adminAuthedRoutes, ...teacherRoutes, ...studentRoutes, ...crmRoutes]),
   ...legacyRoutes,
   catchAllRoute,
 ]);

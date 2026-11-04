@@ -107,52 +107,6 @@ const ClassStat = memo(function ClassStat({ icon: Icon, label, value }: { icon: 
   );
 });
 
-export function MobileUnsupportedScreen({ activeLabel, onGoHome }: { activeLabel: string; onGoHome: () => void }) {
-  return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100%", justifyContent: "center", px: 3, py: 6 }}>
-      <Box
-        sx={{
-          p: 4,
-          borderRadius: 4,
-          textAlign: "center",
-          bgcolor: "background.paper",
-          boxShadow: "0 16px 38px rgba(15,23,42,0.08)",
-        }}
-      >
-        <Box
-          sx={{
-            width: 56,
-            height: 56,
-            mx: "auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "50%",
-            bgcolor: "primary.light",
-            color: "primary.main",
-          }}
-        >
-          <FileText sx={{ fontSize: 28 }} />
-        </Box>
-        <Typography sx={{ mt: 3, fontSize: 20, fontWeight: 600 }}>
-          {activeLabel} dùng trên web
-        </Typography>
-        <Typography sx={{ mt: 1, fontSize: 14, color: "text.secondary", lineHeight: 1.6 }}>
-          Phiên bản mobile LMS hiện hỗ trợ Giao bài, Kho bài, Lịch và Thông báo. Mở máy tính để thao tác đầy đủ màn này.
-        </Typography>
-        <Button
-          variant="contained"
-          fullWidth
-          onClick={onGoHome}
-          sx={{ mt: 4, borderRadius: 3, py: 1.5, textTransform: "none", fontWeight: 600 }}
-        >
-          Về Giao bài
-        </Button>
-      </Box>
-    </Box>
-  );
-}
-
 export function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);
 }

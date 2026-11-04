@@ -1,19 +1,23 @@
-import { createRoute } from "@tanstack/react-router";
+import { createRoute, lazyRouteComponent } from "@tanstack/react-router";
 
 import { crmPaths } from "@/app/portal-route-registry";
-import { enforceWorkspaceRoute } from "@/app/router/route-guards";
-import { CrmPage, PortalRoute, rootRoute, withPortalAuth } from "@/routes/portals/route-shared";
+import { authedRoute, permissionStaticData } from "@/routes/portals/route-shared";
 
-export const crmRoutes = crmPaths.map((cPath) =>
+// Pathless layout: the CRM shell renders the page of each /seo* route in its <Outlet />.
+const crmShellRoute = createRoute({
+  getParentRoute: () => authedRoute,
+  id: "_crmShell",
+  component: lazyRouteComponent(() => import("@/app/pages/crm/crm-page"), "CrmLayoutPage"),
+});
+
+const crmPageRoutes = crmPaths.map((cPath) =>
   createRoute({
-    getParentRoute: () => rootRoute,
+    getParentRoute: () => crmShellRoute,
     path: `/${cPath}`,
-    beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "CRM"),
-    component: () => (
-      <PortalRoute
-        allowedPortals={["crm"]}
-        element={withPortalAuth("crm", <CrmPage />)}
-      />
-    ),
+    staticData: permissionStaticData(`/${cPath}`, "CRM"),
+    component: lazyRouteComponent(() => import("@/features/crm/components/crm-portal-content"), "CrmPortalContent"),
   }),
 );
+
+/** Children of `_authed`. */
+export const crmRoutes = [crmShellRoute.addChildren(crmPageRoutes)];

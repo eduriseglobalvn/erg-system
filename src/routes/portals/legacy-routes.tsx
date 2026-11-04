@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { createRoute, Navigate } from "@tanstack/react-router";
+import { createRoute, redirect } from "@tanstack/react-router";
 
 import {
   ELEARNING_PORTAL_HOSTS,
@@ -9,6 +9,7 @@ import {
 } from "@/config/portal-urls";
 import { lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
 import { resolveActivePortal } from "@/app/router/portal-host-resolution";
+import { buildPortalHostUrl } from "@/app/router/portal-host-url";
 import { enforcePermissionRoute } from "@/app/router/route-guards";
 import { recordLegacyAliasHit, resolveLegacyRouteRedirect } from "@/app/router/legacy-route-redirects";
 import { canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
@@ -21,9 +22,7 @@ import {
 import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 import {
-  LegacyAliasRedirect,
   NotFoundPage,
-  PortalHostRedirect,
   ProfileRouteContent,
   rootRoute,
   stripPath,
@@ -32,17 +31,20 @@ import {
 const legacyProfileRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile",
-  beforeLoad: ({ context, location }) => enforcePermissionRoute(context.auth, location, "account.self.read"),
-  component: () => {
+  beforeLoad: ({ context, location }) => {
+    enforcePermissionRoute(context.auth, location, "account.self.read");
     const activePortal = resolveActivePortal();
-    if (activePortal === "crm") return <ProfileRouteContent portal="crm" />;
-    const target = activePortal === "lcms"
-      ? adminPath("/profile")
-      : activePortal === "elearning"
-        ? studentPath("/profile")
-        : teacherPath("/profile");
-    return <Navigate to={target} replace />;
+    if (activePortal === "crm") return;
+    throw redirect({
+      href: activePortal === "lcms"
+        ? adminPath("/profile")
+        : activePortal === "elearning"
+          ? studentPath("/profile")
+          : teacherPath("/profile"),
+      replace: true,
+    });
   },
+  component: () => <ProfileRouteContent portal="crm" />,
 });
 
 const LEGACY_ADMIN_CONTENT_SEGMENTS = ["structure", "resources", "questions", "quiz-bank", "quiz-editor"] as const;
@@ -63,57 +65,51 @@ function canonicalLegacyWorkspacePath(segment: string) {
   return teacherPath(legacyPath);
 }
 
-function LegacyWorkspaceRedirect({ segment }: { segment: string }) {
+/** Old un-prefixed workspace URLs (/homework, /schools ...) go to their canonical workspace path, on the canonical host. */
+function legacyWorkspaceBeforeLoad(segment: string) {
   const targetPath = canonicalLegacyWorkspacePath(segment);
-  if (typeof window !== "undefined" && isCanonicalLmsWorkspaceHost(window.location)) {
-    const suffix = `${window.location.search}${window.location.hash}`;
-    return <LegacyAliasRedirect href={sanitizeLocalRedirect(`${targetPath}${suffix}`) ?? targetPath} />;
+  const suffix = `${window.location.search}${window.location.hash}`;
+  if (isCanonicalLmsWorkspaceHost(window.location)) {
+    throw redirect({ href: sanitizeLocalRedirect(`${targetPath}${suffix}`) ?? targetPath, replace: true });
   }
-  return (
-    <PortalHostRedirect
-      preserveSearch
-      targetHost={canonicalLmsWorkspaceHostForRuntime()}
-      targetPath={targetPath}
-    />
-  );
+  const targetHost = canonicalLmsWorkspaceHostForRuntime();
+  if (!shouldRedirectLocalPortal(targetHost)) return; // unknown host: render the 404 below
+  throw redirect({ href: buildPortalHostUrl(targetHost, `${targetPath}${suffix}`, targetPath), reloadDocument: true });
 }
 
 const legacyWorkspaceRoutes = legacyWorkspaceSegments.map((segment) =>
   createRoute({
     getParentRoute: () => rootRoute,
     path: `/${segment}`,
-    component: () => <LegacyWorkspaceRedirect segment={segment} />,
+    beforeLoad: () => legacyWorkspaceBeforeLoad(segment),
+    component: NotFoundRoute,
   }),
 );
 
 const classesRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/classes",
-  component: () => {
-    const isLcms = isPortalHost(LCMS_PORTAL_HOSTS);
-    const isElearning = isPortalHost(ELEARNING_PORTAL_HOSTS);
-    if (isLcms) {
-      return (
-        <Suspense fallback={<RoutePendingSkeleton />}>
-          <NotFoundPage />
-        </Suspense>
-      );
-    }
-    if (isElearning) return <Navigate to="/student" replace />;
-    return <Navigate to="/teacher/homework" replace />;
+  beforeLoad: () => {
+    if (isPortalHost(LCMS_PORTAL_HOSTS)) return; // admin host has no classes page: 404 below
+    throw redirect({ href: isPortalHost(ELEARNING_PORTAL_HOSTS) ? "/student" : teacherPath("/homework"), replace: true });
   },
+  component: NotFoundRoute,
 });
 
 const homeworkClassesRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/homework/classes",
-  component: () => <Navigate to="/teacher/homework" replace />,
+  beforeLoad: () => {
+    throw redirect({ href: teacherPath("/homework"), replace: true });
+  },
 });
 
 const teachingScheduleRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/teaching-schedule",
-  component: () => <Navigate to="/teacher/calendar" replace />,
+  beforeLoad: () => {
+    throw redirect({ href: teacherPath("/calendar"), replace: true });
+  },
 });
 
 function isRecognizedErgHost(hostname: string) {
@@ -123,46 +119,41 @@ function isRecognizedErgHost(hostname: string) {
     || normalized.endsWith(".org.edu.local") || normalized.endsWith(".org.edu.vn");
 }
 
+function NotFoundRoute() {
+  return (
+    <Suspense fallback={<RoutePendingSkeleton />}>
+      <NotFoundPage />
+    </Suspense>
+  );
+}
+
+/** Table-driven legacy aliases (resolveLegacyRouteRedirect); anything else falls through to the 404 page. */
+export function catchAllBeforeLoad() {
+  const path = stripPath(window.location.pathname);
+  const legacyRedirect = resolveLegacyRouteRedirect(path, resolveActivePortal());
+  if (!legacyRedirect || !isRecognizedErgHost(window.location.hostname)) return;
+  recordLegacyAliasHit(path, legacyRedirect);
+  const targetHost = legacyRedirect.target === "crm"
+    ? canonicalCrmWorkspaceHostForRuntime()
+    : canonicalLmsWorkspaceHostForRuntime();
+  const suffix = `${window.location.search}${window.location.hash}`;
+  const safePath = sanitizeLocalRedirect(`${legacyRedirect.path ?? "/"}${suffix}`) ?? legacyRedirect.path ?? "/";
+  if (!shouldRedirectLocalPortal(targetHost)) {
+    // A canonical workspace path that has no concrete route must not redirect to itself forever.
+    if (safePath.split(/[?#]/, 1)[0] === `/${path}`) return;
+    throw redirect({ href: safePath, replace: true });
+  }
+  throw redirect({
+    href: buildPortalHostUrl(targetHost, `${legacyRedirect.path ?? "/"}${suffix}`, legacyRedirect.path),
+    reloadDocument: true,
+  });
+}
+
 const catchAllRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "$",
-  component: () => {
-    const path = stripPath(window.location.pathname);
-    const legacyRedirect = resolveLegacyRouteRedirect(path, resolveActivePortal());
-    if (legacyRedirect && isRecognizedErgHost(window.location.hostname)) {
-      recordLegacyAliasHit(path, legacyRedirect);
-      const targetHost = legacyRedirect.target === "crm"
-        ? canonicalCrmWorkspaceHostForRuntime()
-        : canonicalLmsWorkspaceHostForRuntime();
-      const safePath = sanitizeLocalRedirect(
-        `${legacyRedirect.path ?? "/"}${window.location.search}${window.location.hash}`,
-      ) ?? legacyRedirect.path ?? "/";
-      if (!shouldRedirectLocalPortal(targetHost)) {
-        // A canonical workspace path that has no concrete route must not
-        // redirect to itself forever through the catch-all alias boundary.
-        if (safePath.split(/[?#]/, 1)[0] === `/${path}`) {
-          return (
-            <Suspense fallback={<RoutePendingSkeleton />}>
-              <NotFoundPage />
-            </Suspense>
-          );
-        }
-        return <LegacyAliasRedirect href={safePath} />;
-      }
-      return (
-        <PortalHostRedirect
-          preserveSearch
-          targetHost={targetHost}
-          targetPath={legacyRedirect.path}
-        />
-      );
-    }
-    return (
-      <Suspense fallback={<RoutePendingSkeleton />}>
-        <NotFoundPage />
-      </Suspense>
-    );
-  },
+  beforeLoad: catchAllBeforeLoad,
+  component: NotFoundRoute,
 });
 
 export const legacyRoutes = [

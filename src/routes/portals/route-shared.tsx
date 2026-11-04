@@ -1,12 +1,15 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { createRootRouteWithContext } from "@tanstack/react-router";
+import { createRoute, createRootRouteWithContext, Outlet, useLocation } from "@tanstack/react-router";
 
 import { shouldRedirectLocalPortal } from "@/config/portal-urls";
 import { RootLayout } from "@/layouts/root-layout";
 import { AuthenticatedAccountGate, PortalAuthGate } from "@/platform/auth/components/portal-route-gates";
 import type { AuthRouteState } from "@/platform/auth/router/auth-route-context";
-import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
-import { resolveActivePortal } from "@/app/router/portal-host-resolution";
+import { buildPortalHostUrl } from "@/app/router/portal-host-url";
+import { authedBeforeLoad, authedWorkspaceForPath } from "@/app/router/route-guards";
+import { routePermissionForPath, type RoutePermission } from "@/platform/auth/permissions/route-permission-matrix";
+import { legacyPortalFromWorkspace } from "@/platform/workspaces/legacy-portal-compat";
+import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 
 type AppRouterContext = {
@@ -43,6 +46,39 @@ export const NotFoundPage = lazy(() =>
 
 export const rootRoute = createRootRouteWithContext<AppRouterContext>()({ component: RootLayout });
 
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    /** Matrix permission of this route (verified against ROUTE_PERMISSION_MATRIX by tests). */
+    permission?: RoutePermission;
+  }
+}
+
+/** `staticData` for a leaf route; fails at module load when the matrix has no row for the path. */
+export function permissionStaticData(path: string, workspace: Workspace) {
+  const entry = routePermissionForPath(path, workspace);
+  if (!entry) throw new Error(`ROUTE_PERMISSION_MATRIX has no row for ${workspace} ${path}`);
+  return { permission: entry.permission };
+}
+
+function AuthedLayout() {
+  const { pathname } = useLocation();
+  const workspace = authedWorkspaceForPath(pathname);
+  // Fallback UI only (login/onboarding/denied redirects, reauth dialog): access itself is decided in authedBeforeLoad.
+  return (
+    <PortalAuthGate portal={legacyPortalFromWorkspace(workspace ?? "TEACHER")}>
+      <Outlet />
+    </PortalAuthGate>
+  );
+}
+
+/** Session + permission + canonical host for every converted workspace, checked once. */
+export const authedRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: "_authed",
+  beforeLoad: authedBeforeLoad,
+  component: AuthedLayout,
+});
+
 export function PortalHostRedirect({
   preservePathAndSearch = false,
   preserveSearch = false,
@@ -59,37 +95,12 @@ export function PortalHostRedirect({
   useEffect(() => {
     if (!shouldRedirect || typeof window === "undefined") return;
 
-    const targetHostWithPort = runtimeHost(targetHost);
     const currentPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     const requestedPath = preservePathAndSearch
       ? currentPath
       : `${targetPath}${preserveSearch ? `${window.location.search}${window.location.hash}` : ""}`;
-    const safePath = sanitizeLocalRedirect(requestedPath) ?? sanitizeLocalRedirect(targetPath) ?? "/";
-    const targetUrl = new URL(`https://${targetHostWithPort}${safePath}`);
-    if (isLocalRuntimeHost(window.location.hostname) && window.location.protocol !== "https:") {
-      targetUrl.protocol = window.location.protocol;
-    }
-    window.location.replace(targetUrl.toString());
+    window.location.replace(buildPortalHostUrl(targetHost, requestedPath, targetPath));
   }, [preservePathAndSearch, preserveSearch, shouldRedirect, targetHost, targetPath]);
-
-  return <RoutePendingSkeleton />;
-}
-
-function runtimeHost(host: string) {
-  if (typeof window === "undefined") return host;
-  if (window.location.port === "3001" && !host.includes(":")) return `${host}:3001`;
-  return host;
-}
-
-function isLocalRuntimeHost(hostname: string) {
-  const normalized = hostname.toLowerCase();
-  return normalized === "localhost" || normalized === "127.0.0.1" || normalized === "::1" || normalized.endsWith(".erg.edu.local");
-}
-
-export function LegacyAliasRedirect({ href }: { href: string }) {
-  useEffect(() => {
-    window.location.replace(href);
-  }, [href]);
 
   return <RoutePendingSkeleton />;
 }
@@ -102,50 +113,16 @@ export function stripPath(pathname: string) {
   return pathname.replace(/^\/+/, "").replace(/\/+$/, "");
 }
 
-// Declarative host checking component
-export function PortalRoute({
-  allowedPortals,
-  element,
-  targetHostIfRedirect,
-  targetPathIfRedirect,
-  preservePath = true,
-}: {
-  allowedPortals: Array<"lms" | "lcms" | "crm" | "elearning">;
-  element: ReactNode;
-  targetHostIfRedirect?: string;
-  targetPathIfRedirect?: string;
-  preservePath?: boolean;
-}) {
-  const activePortal = resolveActivePortal();
-
-  if (activePortal && allowedPortals.includes(activePortal)) {
-    return <Suspense fallback={<RoutePendingSkeleton />}>{element}</Suspense>;
-  }
-
-  if (targetHostIfRedirect) {
-    return (
-      <PortalHostRedirect
-        targetHost={targetHostIfRedirect}
-        targetPath={targetPathIfRedirect}
-        preservePathAndSearch={preservePath}
-      />
-    );
-  }
-
+export function ProfileBody() {
   return (
-    <Suspense fallback={<RoutePendingSkeleton />}>
-      <NotFoundPage />
-    </Suspense>
-  );
-}
-
-export function ProfileRouteContent({ portal }: { portal: "lcms" | "crm" | "lms" | "elearning" }) {
-  return withPortalAuth(
-    portal,
     <AuthenticatedAccountGate>
       <Suspense fallback={<RoutePendingSkeleton />}>
         <ProfilePage />
       </Suspense>
-    </AuthenticatedAccountGate>,
+    </AuthenticatedAccountGate>
   );
+}
+
+export function ProfileRouteContent({ portal }: { portal: "lcms" | "crm" | "lms" | "elearning" }) {
+  return withPortalAuth(portal, <ProfileBody />);
 }

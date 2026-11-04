@@ -5,6 +5,15 @@ import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { routeAcceptedPermissions, routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 import { getDesktopRuntime, isDesktopWorkspace } from "@/platform/desktop";
 import { AUTH_BYPASS_ENABLED } from "@/platform/auth/config/auth-bypass";
+import { ELEARNING_PORTAL_HOSTS, isPortalHost, shouldRedirectLocalPortal } from "@/config/portal-urls";
+import { buildPortalHostUrl } from "@/app/router/portal-host-url";
+import { resolveActivePortal } from "@/app/router/portal-host-resolution";
+import { crmPaths } from "@/platform/auth/permissions/portal-route-registry";
+import {
+  canonicalLmsWorkspaceHostForRuntime,
+  canonicalWorkspaceForPath,
+  isCanonicalLmsWorkspaceHost,
+} from "@/platform/workspaces/workspace-route";
 
 export function enforceProtectedRoute(
   auth: AuthRouteState,
@@ -50,6 +59,49 @@ export function enforceWorkspaceRoute(
   const decisions = routeAcceptedPermissions(entry).map((permission) => resolveAuthRouteAccess(auth, { workspace, permission }));
   if (decisions.includes("allow")) return;
   throwAuthRedirect(decisions[0], workspace, safeRedirect);
+}
+
+const CRM_ROUTE_PATHS: ReadonlySet<string> = new Set(crmPaths.map((path) => `/${path}`));
+
+/** Workspace of a path served under `_authed`: /admin, /teacher, /student prefixes, or a CRM path (/seo...). */
+export function authedWorkspaceForPath(pathname: string): Workspace | undefined {
+  const crmPath = `/${pathname.replace(/^\/+|\/+$/g, "")}`;
+  return canonicalWorkspaceForPath(pathname) ?? (CRM_ROUTE_PATHS.has(crmPath) ? "CRM" : undefined);
+}
+
+/**
+ * Admin/Teacher/Student only live on the canonical LMS host. Other ERG hosts are sent there
+ * (full-page redirect, path/search/hash kept); any other host fails closed. CRM requires the CRM host.
+ */
+export function enforceCanonicalWorkspaceHost(location: { href: string; pathname?: string }, workspace: Workspace): void {
+  if (typeof window === "undefined") return;
+  if (workspace === "CRM") {
+    // CRM is served from its own host and is never redirected to; any other host fails closed.
+    if (resolveActivePortal() !== "crm") throwAuthRedirect("access-denied", workspace, safeLocationRedirect(location.href));
+    return;
+  }
+  if (isCanonicalLmsWorkspaceHost(window.location)) return;
+  // On the student host the dashboard is served at "/".
+  if (workspace === "STUDENT" && isPortalHost(ELEARNING_PORTAL_HOSTS) && location.pathname?.replace(/\/+$/, "") === "/student") {
+    throw redirect({ to: "/", replace: true });
+  }
+  const targetHost = canonicalLmsWorkspaceHostForRuntime();
+  if (!shouldRedirectLocalPortal(targetHost)) {
+    throwAuthRedirect("access-denied", workspace, safeLocationRedirect(location.href));
+  }
+  throw redirect({ href: buildPortalHostUrl(targetHost, safeLocationRedirect(location.href)), reloadDocument: true });
+}
+
+/**
+ * The one guard for every converted workspace subtree (`_authed`): session + matrix permission,
+ * then canonical host. Leaf routes declare `staticData.permission` for documentation/tests only;
+ * the matrix lookup here stays the single source of truth.
+ */
+export function authedBeforeLoad({ context, location }: { context: { auth: AuthRouteState }; location: { href: string; pathname: string } }): void {
+  const workspace = authedWorkspaceForPath(location.pathname);
+  if (!workspace) throwAuthRedirect("access-denied", "shared", safeLocationRedirect(location.href));
+  enforceWorkspaceRoute(context.auth, location, workspace);
+  enforceCanonicalWorkspaceHost(location, workspace);
 }
 
 function throwAuthRedirect(decision: ReturnType<typeof resolveAuthRouteAccess>, portal: string, safeRedirect: string): never {

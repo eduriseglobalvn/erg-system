@@ -9,6 +9,7 @@ const adminSource = read("admin-routes.tsx");
 const teacherSource = read("teacher-routes.tsx");
 const studentSource = read("student-routes.tsx");
 const crmSource = read("crm-routes.tsx");
+const guardsSource = readFileSync(resolve(process.cwd(), "src/app/router/route-guards.ts"), "utf8");
 const source = [adminSource, teacherSource, studentSource, crmSource, read("route-shared.tsx")].join(";");
 
 function routeBlock(src: string, routeName: string, nextRouteName: string) {
@@ -19,8 +20,11 @@ function routeBlock(src: string, routeName: string, nextRouteName: string) {
 
 describe("canonical LMS workspace route ownership", () => {
   it("keeps admin, teacher and student as explicit TanStack Router routes", () => {
-    expect(routeBlock(adminSource, "adminWorkspaceRoute", "learningStandardsAdminRoute")).toContain('path: "/admin"');
-    expect(routeBlock(teacherSource, "teacherWorkspaceRoute", "teacherPortableExamRoute")).toContain('path: "/teacher"');
+    expect(adminSource).toContain("const adminShellRoute = createRoute");
+    expect(routeBlock(adminSource, "adminIndexRoute", "adminProfileRoute")).toContain('path: "/admin"');
+    // Teacher is converted: a shell layout route whose Outlet renders one child route per page.
+    expect(teacherSource).toContain("const teacherShellRoute = createRoute");
+    expect(routeBlock(teacherSource, "teacherIndexRoute", "teacherPageRoutes")).toContain('path: "/teacher"');
     expect(routeBlock(studentSource, "studentRedirectRoute", "studentPortableExamRoute")).toContain('path: "/student"');
   });
 
@@ -33,28 +37,34 @@ describe("canonical LMS workspace route ownership", () => {
   it("keeps content authoring nested under Admin instead of creating an author portal", () => {
     expect(source).toContain("const adminContentRoutes = ADMIN_CONTENT_ROUTE_PATHS.map");
     expect(source).toContain("ADMIN_CONTENT_ROUTE_PATHS");
-    expect(source).toContain("isCanonicalLmsWorkspaceHost(window.location)");
     expect(source).not.toContain('path: "/author"');
   });
 
   it("maps each canonical path to its matching auth compatibility boundary", () => {
-    expect(routeBlock(adminSource, "adminWorkspaceRoute", "learningStandardsAdminRoute")).toContain('withPortalAuth("lcms"');
-    expect(routeBlock(teacherSource, "teacherWorkspaceRoute", "teacherPortableExamRoute")).toContain('withPortalAuth("lms"');
-    expect(routeBlock(studentSource, "studentRedirectRoute", "studentPortableExamRoute")).toContain('withPortalAuth("elearning"');
+    expect(adminSource).not.toContain("withPortalAuth(");
+    expect(source).toContain("<PortalAuthGate portal={legacyPortalFromWorkspace(");
+    expect(teacherSource).not.toContain("withPortalAuth(");
+    expect(studentSource).not.toContain("withPortalAuth(");
+    expect(studentSource).not.toContain("getParentRoute: () => rootRoute");
   });
 
   it("uses the typed canonical host predicate instead of treating the old LMS host list as canonical", () => {
-    expect(source).toContain("isCanonicalLmsWorkspaceHost(window.location)");
-    expect(routeBlock(adminSource, "adminWorkspaceRoute", "learningStandardsAdminRoute")).not.toContain("LMS_WORKSPACE_HOST");
-    expect(routeBlock(teacherSource, "teacherWorkspaceRoute", "teacherPortableExamRoute")).not.toContain("LMS_WORKSPACE_HOST");
-    expect(routeBlock(studentSource, "studentRedirectRoute", "studentPortableExamRoute")).not.toContain("LMS_WORKSPACE_HOST");
+    expect(adminSource).not.toContain("LMS_WORKSPACE_HOST");
+    expect(teacherSource).not.toContain("LMS_WORKSPACE_HOST");
+    expect(guardsSource).toContain("isCanonicalLmsWorkspaceHost(window.location)");
+    expect(studentSource).not.toContain("LMS_WORKSPACE_HOST");
   });
 
   it("enforces the same matrix before every generated admin, teacher and CRM route", () => {
-    expect(source).toContain('beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "ADMIN")');
-    expect(source).toContain('beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "TEACHER")');
-    expect(source).toContain('beforeLoad: ({ context, location }) => enforceWorkspaceRoute(context.auth, location, "CRM")');
-    expect(routeBlock(adminSource, "questionTypesRoute", "legacyAdminContentRoutes")).toContain('enforceWorkspaceRoute(context.auth, location, "ADMIN")');
+    // Teacher/Student/Admin-after-conversion: one `_authed` beforeLoad runs the matrix check + canonical host once.
+    expect(source).toContain("beforeLoad: authedBeforeLoad");
+    expect(guardsSource).toContain("enforceWorkspaceRoute(context.auth, location, workspace);");
+    expect(guardsSource).toContain("enforceCanonicalWorkspaceHost(location, workspace);");
+    expect(teacherSource).not.toContain("beforeLoad: ({ context, location }) => enforceWorkspaceRoute");
+    expect(crmSource).not.toContain("beforeLoad");
+    expect(crmSource).toContain("getParentRoute: () => crmShellRoute");
+    expect(routeBlock(adminSource, "questionTypesRoute", "legacyAdminContentRoutes")).toContain("getParentRoute: () => authedRoute");
+    expect(adminSource).toContain('id: "_adminShell"');
   });
 
   it("does not publish workspace-owned menu links without their workspace prefix", () => {
