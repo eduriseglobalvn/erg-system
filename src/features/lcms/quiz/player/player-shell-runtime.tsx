@@ -4,10 +4,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { MobilePlayerShell } from "@/components/quiz/mobile-player-shell";
 import { FinalResultScreen, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
+import {
+  PlayerOfflineBanner,
+  PlayerSaveIndicator,
+  PlayerTimerText,
+  type DraftSyncState,
+} from "@/components/quiz/player-status";
 import { QuestionNavigator } from "@/components/quiz/question-navigator";
 import {
   areAnswerPayloadsEqual,
-  formatTimer,
+  firstUnansweredIndex,
 } from "@/components/quiz/player-shell-utils";
 import { QuizThemeSurface } from "@/components/quiz/quiz-theme-surface";
 import { QuizWelcomeScreen, type QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
@@ -92,6 +98,7 @@ export function PlayerShellRuntime({
   const [drafts, setDrafts] = useState<Record<string, AnswerPayload>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [draftSync, setDraftSync] = useState<DraftSyncState>({ status: "idle" });
   const [sidebarQuery, setSidebarQuery] = useState("");
   const [submitDialogMode, setSubmitDialogMode] = useState<SubmitDialogMode | null>(null);
   const [reviewingSubmittedAttempt, setReviewingSubmittedAttempt] = useState(false);
@@ -141,7 +148,7 @@ export function PlayerShellRuntime({
 
   usePlayerSyncEffects({
     activePackage, activeSession, attemptCompleted, attemptScope, drafts, networkOnline: network.online,
-    runtimePortal, saveAttemptDraftAsync, started, syncAttemptAsync, setSubmitError,
+    runtimePortal, saveAttemptDraftAsync, started, syncAttemptAsync, setDraftSync,
   });
 
   useTimeUpSubmit({
@@ -199,7 +206,7 @@ export function PlayerShellRuntime({
     session: activeSession,
   };
   const countdown = isTestingMode ? (
-    <PlayerCountdown {...countdownProps}>{(seconds) => <span>{formatTimer(seconds)}</span>}</PlayerCountdown>
+    <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
   ) : null;
 
   async function handleFinalizeAttempt() {
@@ -276,10 +283,19 @@ export function PlayerShellRuntime({
     void beginAttempt();
   }
 
+  function handleGoToUnanswered() {
+    const index = firstUnansweredIndex(questions, drafts);
+    if (index >= 0) setCurrentIndex(index);
+    setSubmitDialogMode(null);
+  }
+
+  const saveIndicator = <PlayerSaveIndicator online={network.online} sync={draftSync} />;
   const footerMessage = buildFooterMessage({ reviewingAttempt, submitFailed, allQuestionsAnswered, isTrainingMode });
 
   const questionBody = (
     <>
+      {network.online ? null : <PlayerOfflineBanner />}
+
       <QuestionRenderer
         key={readyQuestion.id}
         question={readyQuestion}
@@ -327,6 +343,8 @@ export function PlayerShellRuntime({
       resultDisplay={resultDisplay}
       submitting={submitting}
       unansweredCount={questions.length - answeredCount}
+      flaggedCount={bookmarkedQuestionIds.length}
+      onGoToUnanswered={handleGoToUnanswered}
       onCancel={() => setSubmitDialogMode(null)}
       onConfirm={() => void handleFinalizeAttempt()}
     />
@@ -338,7 +356,7 @@ export function PlayerShellRuntime({
     isBookmarked: isCurrentQuestionBookmarked, isFirstQuestion, isLastQuestion, isTestingMode, isTrainingMode,
     currentAnswerComplete, currentQuestionSubmitted: submitted, playerCardStyle, canvasStyle, headerStyle,
     accentButtonStyle, secondaryButtonStyle, modeBadgeStyle, question: readyQuestion, questions, quiz: readyQuiz,
-    resultDisplay, reviewingSubmittedAttempt, started, submitting, submitFailed, timer: countdown,
+    resultDisplay, reviewingSubmittedAttempt, saveIndicator, started, submitting, submitFailed, timer: countdown,
     onJumpToQuestion: handleJumpToQuestion, onRequestSubmit: handleRequestSubmit, onReview: handleReviewQuiz,
     onStart: handleStartQuiz, body: questionBody,
     onNext: () => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1)),
@@ -417,6 +435,7 @@ export function PlayerShellRuntime({
         readyQuestion={readyQuestion}
         resultDisplay={resultDisplay}
         reviewingSubmittedAttempt={reviewingSubmittedAttempt}
+        saveIndicator={saveIndicator}
         secondaryButtonStyle={secondaryButtonStyle}
         submitFailed={submitFailed}
         submitted={submitted}

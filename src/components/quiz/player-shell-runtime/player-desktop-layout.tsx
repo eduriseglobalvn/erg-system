@@ -3,13 +3,12 @@ import { Flag } from "lucide-react";
 
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
 import { FinalResultScreen, QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
+import { PlayerTimerText } from "@/components/quiz/player-status";
 import {
   navButtonClass,
   playerViewportClass,
   secondaryButtonClass,
-  timerTone,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
-import { formatTimer, questionLabel } from "@/components/quiz/player-shell-utils";
 import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/lib/types";
 
 export type PlayerDesktopLayoutProps = {
@@ -37,6 +36,7 @@ export type PlayerDesktopLayoutProps = {
   readyQuestion: Question;
   resultDisplay: QuizResultDisplay;
   reviewingSubmittedAttempt: boolean;
+  saveIndicator: ReactNode;
   secondaryButtonStyle: CSSProperties;
   submitFailed: boolean;
   submitted: boolean;
@@ -73,6 +73,7 @@ export function PlayerDesktopLayout({
   readyQuestion,
   resultDisplay,
   reviewingSubmittedAttempt,
+  saveIndicator,
   secondaryButtonStyle,
   submitFailed,
   submitted,
@@ -85,13 +86,11 @@ export function PlayerDesktopLayout({
 }: PlayerDesktopLayoutProps) {
   return (
         <section
-          className={`flex min-w-0 flex-col rounded-[18px] border border-[rgba(145,158,171,0.16)] bg-white p-1.5 shadow-[0_18px_45px_rgba(28,37,46,0.08)] sm:p-2 ${playerViewportClass}`}
+          className={`flex min-w-0 flex-col rounded-lg border border-slate-200 bg-white p-1.5 sm:p-2 ${playerViewportClass}`}
           style={playerCardStyle}
         >
           <div className="flex min-h-8 items-center justify-between gap-2 px-1 pb-1.5 text-xs text-slate-500 sm:px-2">
             <div className="flex flex-wrap items-center gap-2">
-              <span>Tài nguyên</span>
-              <span className="text-slate-300">|</span>
               <span>{`Câu ${currentIndex + 1} / ${questions.length}`}</span>
               <span className="hidden text-slate-300 sm:inline">|</span>
               <span className="text-xs font-semibold text-slate-400">
@@ -109,51 +108,22 @@ export function PlayerDesktopLayout({
               >
                 <Flag className={`h-4 w-4 ${isCurrentQuestionBookmarked ? "fill-current" : ""}`} />
               </button>
+              {saveIndicator}
               <span className="rounded-lg px-2.5 py-1 text-xs font-semibold" style={modeBadgeStyle}>
                 {isTrainingMode ? "Luyện tập" : "Kiểm tra"}
               </span>
               {isTestingMode ? (
-                <PlayerCountdown {...countdownProps}>
-                  {(seconds) => (
-                    <span className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${timerTone(seconds)}`}>{formatTimer(seconds)}</span>
-                  )}
-                </PlayerCountdown>
+                <PlayerCountdown {...countdownProps}>{(seconds) => <PlayerTimerText seconds={seconds} />}</PlayerCountdown>
               ) : null}
             </div>
           </div>
 
           <div
-            className="relative min-h-[560px] min-w-0 flex-1 overflow-hidden rounded-[22px] border-[4px] bg-white p-3 shadow-[0_20px_48px_rgba(8,120,148,0.10)] sm:p-4 lg:flex lg:min-h-0 lg:flex-col"
-            style={{
-              ...canvasStyle,
-              backgroundColor: "#ffffff",
-              borderColor: "#000088",
-            }}
+            className="relative min-h-[560px] min-w-0 flex-1 overflow-hidden rounded-lg border bg-white p-3 sm:p-4 lg:flex lg:min-h-0 lg:flex-col"
+            style={canvasStyle}
           >
-            <div aria-hidden="true" className="pointer-events-none absolute -top-2 left-[28%] h-3 w-[34%] skew-x-[-28deg] bg-[#e82828]" />
-            <div aria-hidden="true" className="pointer-events-none absolute -bottom-2 left-[30%] h-3 w-[34%] skew-x-[28deg] bg-[#e82828]" />
-            <div aria-hidden="true" className="pointer-events-none absolute -right-24 top-[30%] h-72 w-72 rounded-full border-[34px] border-[#f7d8df] opacity-70" />
-            <div aria-hidden="true" className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-[#eef0ff] opacity-70" />
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute -bottom-10 right-16 h-56 w-56 rotate-45 rounded-[34px] bg-gradient-to-b from-[#dfe3ff] to-transparent opacity-80"
-            />
-            <div className="pointer-events-none absolute bottom-6 right-10 z-0 opacity-35">
-              <img
-                src="https://media.erg.edu.vn/logo/erg.png"
-                alt=""
-                className="h-auto w-[88px] object-contain"
-                aria-hidden="true"
-              />
-            </div>
-
-            <div className="relative z-10 -mx-3 mt-0 border border-[#3d43a8] bg-[#000088] px-5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.24)] sm:-mx-4 sm:px-6">
-              <div className="hidden">
-                <span>{`Câu ${currentIndex + 1} / ${questions.length}`}</span>
-                <span className="text-[#c6ced8]">|</span>
-                <span>{questionLabel(readyQuestion)}</span>
-              </div>
-              <h2 className="quiz-player-question-title leading-snug text-white" style={{ fontSize: "var(--quiz-question-title-size)" }}>
+            <div className="relative z-10 border-b border-slate-200 pb-3">
+              <h2 className="quiz-player-question-title leading-snug text-slate-900" style={{ fontSize: "var(--quiz-question-title-size)" }}>
                 {attemptCompleted && !reviewingSubmittedAttempt ? resultDisplay[readyAttempt.passed ? "passMessage" : "failMessage"] : readyQuestion.title}
               </h2>
             </div>
@@ -190,7 +160,7 @@ export function PlayerDesktopLayout({
             </div>
 
             {attemptCompleted && !reviewingSubmittedAttempt ? (
-              <div className="ml-auto flex flex-wrap items-center gap-2 rounded-full border border-[rgba(0,0,136,0.10)] bg-white/70 p-1 shadow-[0_12px_28px_rgba(0,0,136,0.08)] backdrop-blur-xl">
+              <div className="ml-auto flex flex-wrap items-center gap-2">
                 {resultDisplay.showReviewButton ? (
                   <button className={navButtonClass} style={accentButtonStyle} type="button" onClick={handleReviewQuiz}>
                     {resultDisplay.reviewButtonLabel}
@@ -198,7 +168,7 @@ export function PlayerDesktopLayout({
                 ) : null}
               </div>
             ) : (
-              <div className="ml-auto flex flex-wrap items-center gap-2 rounded-full border border-[rgba(0,0,136,0.10)] bg-white/70 p-1 shadow-[0_12px_28px_rgba(0,0,136,0.08)] backdrop-blur-xl">
+              <div className="ml-auto flex flex-wrap items-center gap-2">
                 {isTrainingMode ? (
                   <button
                     className={`${navButtonClass} min-w-[132px]`}
@@ -207,7 +177,7 @@ export function PlayerDesktopLayout({
                     disabled={submitting || submitted || !currentAnswerComplete}
                     onClick={() => void submitCurrentTrainingQuestion()}
                   >
-                    {submitted ? "ĐÃ NỘP" : submitting ? "ĐANG NỘP..." : "NỘP BÀI"}
+                    {submitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
                   </button>
                 ) : (
                   <>
@@ -218,7 +188,7 @@ export function PlayerDesktopLayout({
                   disabled={isFirstQuestion || submitting}
                   onClick={() => setCurrentIndex((value) => Math.max(0, value - 1))}
                 >
-                  QUAY LẠI
+                  Quay lại
                 </button>
                 <button
                   className={navButtonClass}
@@ -227,7 +197,7 @@ export function PlayerDesktopLayout({
                   disabled={isLastQuestion || submitting}
                   onClick={() => setCurrentIndex((value) => Math.min(questions.length - 1, value + 1))}
                 >
-                  TIẾP THEO
+                  Tiếp theo
                 </button>
                 {!attemptCompleted ? (
                   <button
@@ -237,7 +207,7 @@ export function PlayerDesktopLayout({
                     disabled={submitting}
                     onClick={handleRequestSubmit}
                   >
-                    {submitting ? "ĐANG NỘP..." : submitFailed ? "THỬ NỘP LẠI" : "NỘP BÀI"}
+                    {submitting ? "Đang nộp…" : submitFailed ? "Thử nộp lại" : "Nộp bài"}
                   </button>
                 ) : null}
                   </>

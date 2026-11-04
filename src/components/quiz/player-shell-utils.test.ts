@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
-import { attemptDeadlineMs, serverNowMs } from "@/components/quiz/player-shell-utils";
+import { attemptDeadlineMs, firstUnansweredIndex, serverNowMs } from "@/components/quiz/player-shell-utils";
+import type { Question } from "@/lib/types";
 
 describe("quiz player server clock policy", () => {
   test("derives current server time from the persisted response offset", () => {
@@ -19,5 +20,16 @@ describe("quiz player server clock policy", () => {
       serverClockOffsetMs: 0,
     }, 600)).toBe(Date.parse("2026-06-19T01:10:00.000Z"));
     expect(attemptDeadlineMs({ serverClockOffsetMs: 0 }, 600)).toBeNull();
+  });
+});
+
+describe("firstUnansweredIndex", () => {
+  const q = (id: string) => ({ id, kind: "single_choice", title: id, points: 1 }) as Question;
+
+  test("returns the first question without a complete answer, or -1", () => {
+    const questions = [q("a"), q("b"), q("c")];
+    expect(firstUnansweredIndex(questions, { a: { choiceId: "x" }, c: { choiceId: "y" } })).toBe(1);
+    expect(firstUnansweredIndex(questions, {})).toBe(0);
+    expect(firstUnansweredIndex(questions, { a: { choiceId: "x" }, b: { choiceId: "x" }, c: { choiceId: "y" } })).toBe(-1);
   });
 });

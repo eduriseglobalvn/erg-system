@@ -1,4 +1,4 @@
-import { normalizeAnswerForSubmission } from "@/lib/quiz";
+import { isAnswerComplete, normalizeAnswerForSubmission } from "@/lib/quiz";
 import type { AnswerPayload, Question } from "@/lib/types";
 
 export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now()) {
@@ -131,4 +131,9 @@ export function questionLabel(question: Question) {
     default:
       return "Câu hỏi";
   }
+}
+
+/** Index of the first question without a complete answer, or -1 when everything is answered. */
+export function firstUnansweredIndex(questions: Question[], drafts: Record<string, AnswerPayload>) {
+  return questions.findIndex((question) => !isAnswerComplete(question, drafts[question.id]));
 }

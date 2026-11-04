@@ -78,15 +78,19 @@ export function SubmitConfirmDialog({
   resultDisplay,
   submitting,
   unansweredCount = 0,
+  flaggedCount = 0,
   onCancel,
   onConfirm,
+  onGoToUnanswered,
 }: {
   mode: SubmitDialogMode;
   resultDisplay: QuizResultDisplay;
   submitting: boolean;
   unansweredCount?: number;
+  flaggedCount?: number;
   onCancel: () => void;
   onConfirm: () => void;
+  onGoToUnanswered?: () => void;
 }) {
   const isAllAnswered = mode === "all-answered";
 
@@ -111,11 +115,17 @@ export function SubmitConfirmDialog({
         <Box aria-hidden sx={{ alignItems: "center", border: "1px solid", borderColor: "divider", borderRadius: 0.75, color: "text.secondary", display: "grid", flex: "none", fontSize: 16, fontWeight: 600, height: 32, placeItems: "center", width: 32 }}>?</Box>
         <Box sx={{ display: "grid", flex: 1, gap: 3 }}>
           <Typography id="quiz-submit-confirm-title" sx={{ color: "text.primary", fontSize: 14, fontWeight: 500 }}>
-            {isAllAnswered
-              ? resultDisplay.submitAllPrompt
-              : `${unansweredCount > 0 ? `Còn ${unansweredCount} câu chưa trả lời. ` : ""}${resultDisplay.confirmSubmitPrompt}`}
+            {isAllAnswered ? resultDisplay.submitAllPrompt : resultDisplay.confirmSubmitPrompt}
+          </Typography>
+          <Typography color="text.secondary" data-testid="submit-summary" variant="body2">
+            {`Còn ${unansweredCount} câu chưa làm, ${flaggedCount} câu đánh dấu`}
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
+            {unansweredCount > 0 && onGoToUnanswered ? (
+              <Button disabled={submitting} variant="outlined" onClick={onGoToUnanswered} sx={{ minHeight: 36, px: 2.5 }}>
+                Đến câu chưa làm
+              </Button>
+            ) : null}
             <Button disabled={submitting} variant="contained" onClick={onConfirm} sx={{ minHeight: 36, minWidth: 136, px: 2.5 }}>
               {submitting ? "ĐANG NỘP..." : isAllAnswered ? resultDisplay.submitAllLabel : resultDisplay.confirmYesLabel}
             </Button>

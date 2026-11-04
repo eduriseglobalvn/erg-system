@@ -36,4 +36,31 @@ describe("SubmitConfirmDialog MUI migration", () => {
     fireEvent.click(screen.getByRole("button", { name: "Đồng ý" }));
     expect(onConfirm).toHaveBeenCalledOnce();
   });
+
+  it("summarises unanswered and flagged questions and jumps to the first unanswered", () => {
+    const onGoToUnanswered = vi.fn();
+    render(
+      <SubmitConfirmDialog
+        mode="confirm"
+        resultDisplay={resultDisplay}
+        submitting={false}
+        unansweredCount={3}
+        flaggedCount={2}
+        onCancel={vi.fn()}
+        onConfirm={vi.fn()}
+        onGoToUnanswered={onGoToUnanswered}
+      />,
+    );
+
+    expect(screen.getByText("Còn 3 câu chưa làm, 2 câu đánh dấu")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Đến câu chưa làm" }));
+    expect(onGoToUnanswered).toHaveBeenCalledOnce();
+  });
+
+  it("hides the jump button when everything is answered", () => {
+    render(
+      <SubmitConfirmDialog mode="all-answered" resultDisplay={resultDisplay} submitting={false} onCancel={vi.fn()} onConfirm={vi.fn()} onGoToUnanswered={vi.fn()} />,
+    );
+    expect(screen.queryByRole("button", { name: "Đến câu chưa làm" })).toBeNull();
+  });
 });

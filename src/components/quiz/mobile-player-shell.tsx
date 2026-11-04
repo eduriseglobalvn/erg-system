@@ -36,6 +36,7 @@ type MobilePlayerShellProps = {
   submitting: boolean;
   submitFailed: boolean;
   timer?: ReactNode;
+  saveIndicator?: ReactNode;
   onJumpToQuestion: (index: number) => void;
   onNext: () => void;
   onPrev: () => void;
@@ -73,6 +74,7 @@ export function MobilePlayerShell({
   submitting,
   submitFailed,
   timer,
+  saveIndicator,
   onJumpToQuestion,
   onNext,
   onPrev,
@@ -107,6 +109,9 @@ export function MobilePlayerShell({
               <div className="mt-5 grid grid-cols-2 gap-3 text-center">
                 <IntroStat label="Số câu" value={String(questions.length)} />
                 <IntroStat label="Chế độ" value={quiz.settings.mode === "training" ? "Luyện tập" : "Kiểm tra"} />
+                {quiz.settings.timeLimitMinutes ? (
+                  <IntroStat label="Thời lượng" value={`${quiz.settings.timeLimitMinutes} phút`} />
+                ) : null}
               </div>
               <button
                 type="button"
@@ -129,15 +134,17 @@ export function MobilePlayerShell({
         style={{ ...playerCardStyle, borderColor: "transparent" }}
       >
         <div className="sticky top-0 z-30 border-b border-slate-200 bg-white">
-          <div className="relative mx-auto flex min-h-10 max-w-md items-center justify-center px-4 py-2">
-            <div className="text-sm font-semibold text-slate-700">
+          <div className="mx-auto grid min-h-12 max-w-md grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-1">
+            <div className="flex min-w-0 items-center">{isTestingMode && !attemptCompleted ? timer : null}</div>
+            <div className="text-center text-sm font-semibold text-slate-700">
               {attemptCompleted && !reviewingSubmittedAttempt ? quiz.title : `Câu ${currentIndex + 1} / ${questions.length}`}
+              {saveIndicator ? <div>{saveIndicator}</div> : null}
             </div>
-            <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-3 text-slate-400">
+            <div className="flex items-center justify-end gap-1 text-slate-400">
               <button
                 type="button"
                 aria-label={isBookmarked ? "Bỏ đánh dấu câu hỏi" : "Đánh dấu câu hỏi"}
-                className="grid h-7 w-7 place-items-center"
+                className="grid h-11 w-11 place-items-center"
                 onClick={onToggleBookmark}
               >
                 <Flag className={`h-4 w-4 ${isBookmarked ? "fill-current text-[#FF5630]" : ""}`} />
@@ -166,7 +173,6 @@ export function MobilePlayerShell({
                 ) : null}
                 <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-slate-400">
                   <span>{answeredCount}/{questions.length} đã trả lời</span>
-                  {isTestingMode ? timer : null}
                 </div>
               </div>
               <div className="space-y-3">{body}</div>
@@ -192,13 +198,13 @@ export function MobilePlayerShell({
                   disabled={submitting || currentQuestionSubmitted || !currentAnswerComplete}
                   onClick={onSubmitCurrentQuestion}
                 >
-                  {currentQuestionSubmitted ? "Đã nộp" : submitting ? "Đang nộp" : "Nộp bài"}
+                  {currentQuestionSubmitted ? "Đã kiểm tra" : submitting ? "Đang kiểm tra…" : "Kiểm tra đáp án"}
                 </button>
               ) : (
               <div className={`grid gap-2 ${showSubmitAction ? "grid-cols-3" : "grid-cols-2"}`}>
                 <button
                   type="button"
-                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-3 text-[13px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isFirstQuestion || submitting}
                   onClick={onPrev}
                 >
@@ -207,7 +213,7 @@ export function MobilePlayerShell({
                 </button>
                 <button
                   type="button"
-                  className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-3 text-[13px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={isLastQuestion || submitting}
                   onClick={onNext}
                 >
@@ -217,7 +223,7 @@ export function MobilePlayerShell({
                 {showSubmitAction ? (
                   <button
                     type="button"
-                    className="inline-flex min-h-10 items-center justify-center rounded-md border border-[#b8d6fa] bg-[var(--erg-blue)] px-2 text-[11px] font-medium text-white shadow-sm disabled:cursor-not-allowed disabled:opacity-40"
+                    className={isLastQuestion ? "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-[var(--erg-blue)] px-3 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-40" : "inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md border border-[var(--erg-blue)] bg-white px-3 text-sm font-medium text-[var(--erg-blue)] disabled:cursor-not-allowed disabled:opacity-40"}
                     disabled={submitting}
                     onClick={onRequestSubmit}
                   >
@@ -255,7 +261,7 @@ function QuestionSheet({
       <button
         type="button"
         aria-label="Mở mục lục câu hỏi"
-        className="grid h-7 w-7 place-items-center text-[var(--erg-blue)] transition"
+        className="grid h-11 w-11 place-items-center text-[var(--erg-blue)] transition"
         onClick={() => setOpen(true)}
       >
         <List className="h-4 w-4" />

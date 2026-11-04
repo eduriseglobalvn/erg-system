@@ -6,6 +6,7 @@ import {
   type useSaveAttemptDraftMutation,
   type useSyncAttemptMutation,
 } from "@/features/lcms/quiz/quiz-runtime";
+import type { DraftSyncState } from "@/components/quiz/player-status";
 import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/lib/quiz-runtime-types";
 import type { AnswerPayload, QuizPackage } from "@/lib/types";
 
@@ -20,7 +21,8 @@ export type UsePlayerSyncEffectsArgs = {
   saveAttemptDraftAsync: ReturnType<typeof useSaveAttemptDraftMutation>["mutateAsync"];
   started: boolean;
   syncAttemptAsync: ReturnType<typeof useSyncAttemptMutation>["mutateAsync"];
-  setSubmitError: Dispatch<SetStateAction<string | null>>;
+  /** Draft-sync status only; submit errors live in a separate state. */
+  setDraftSync: Dispatch<SetStateAction<DraftSyncState>>;
 };
 
 export function usePlayerSyncEffects({
@@ -34,7 +36,7 @@ export function usePlayerSyncEffects({
   saveAttemptDraftAsync,
   started,
   syncAttemptAsync,
-  setSubmitError,
+  setDraftSync,
 }: UsePlayerSyncEffectsArgs) {
   const lastReconnectSyncSignatureRef = useRef<string | null>(null);
   const previousOnlineRef = useRef(networkOnline);
@@ -48,6 +50,7 @@ export function usePlayerSyncEffects({
     const packageSnapshot = activePackage;
     const answersSnapshot = { ...drafts };
     const syncTimerId = window.setTimeout(() => {
+      setDraftSync({ status: "saving" });
       void saveAttemptDraftAsync({
         attemptId: sessionSnapshot.attemptId,
         payload: {
@@ -62,8 +65,10 @@ export function usePlayerSyncEffects({
           },
         },
         portal: runtimePortal,
+      }).then(() => {
+        setDraftSync({ status: "saved", savedAt: Date.now() });
       }).catch((error) => {
-        setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ nháp lên máy chủ.");
+        setDraftSync({ status: "local", error: error instanceof Error ? error.message : "Không thể đồng bộ nháp lên máy chủ." });
       });
     }, 1500);
 
@@ -71,7 +76,7 @@ export function usePlayerSyncEffects({
       window.clearTimeout(syncTimerId);
     };
   }, [
-    setSubmitError,
+    setDraftSync,
     activePackage,
     activeSession,
     attemptCompleted,
@@ -113,7 +118,7 @@ export function usePlayerSyncEffects({
         },
         portal: runtimePortal,
       }).catch((error) => {
-        setSubmitError(error instanceof Error ? error.message : "Không thể đồng bộ lại bài làm sau khi có mạng.");
+        setDraftSync({ status: "local", error: error instanceof Error ? error.message : "Không thể đồng bộ lại bài làm sau khi có mạng." });
       });
     };
 
@@ -121,7 +126,7 @@ export function usePlayerSyncEffects({
     previousOnlineRef.current = networkOnline;
     if (becameOnline) replayAfterReconnect();
   }, [
-    setSubmitError,
+    setDraftSync,
     activePackage,
     activeSession,
     attemptCompleted,

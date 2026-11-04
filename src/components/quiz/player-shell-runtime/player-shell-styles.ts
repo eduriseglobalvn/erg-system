@@ -4,10 +4,6 @@ export const secondaryButtonClass =
   "inline-flex min-h-9 min-w-[108px] items-center justify-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-xs font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:bg-white disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:translate-y-0";
 export const playerViewportClass = "lg:h-[calc(100vh-3.75rem)]";
 
-export function timerTone(seconds: number) {
-  return seconds <= 60 ? "bg-rose-50 text-rose-600 ring-1 ring-rose-200" : "bg-slate-100 text-slate-700";
-}
-
 export function buildPlayerStyles(isTrainingMode: boolean) {
   const playerCardStyle = {
     backgroundColor: "var(--quiz-player-bg)",

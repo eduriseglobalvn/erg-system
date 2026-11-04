@@ -5,7 +5,7 @@ import {
   buildReconnectSignature,
   offlineAttemptScope,
 } from "@/components/quiz/player-shell-runtime/player-shell-runtime-helpers";
-import { buildPlayerStyles, timerTone } from "@/components/quiz/player-shell-runtime/player-shell-styles";
+import { buildPlayerStyles } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 
 describe("offlineAttemptScope", () => {
   it("fills blanks and falls back to the runtime portal", () => {
@@ -51,8 +51,4 @@ describe("player styles", () => {
     expect(buildPlayerStyles(false).modeBadgeStyle.color).toBe("#b91c1c");
   });
 
-  it("warns on the last minute", () => {
-    expect(timerTone(60)).toContain("rose");
-    expect(timerTone(61)).toContain("slate");
-  });
 });
