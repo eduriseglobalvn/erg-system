@@ -1,6 +1,5 @@
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import Box from "@mui/material/Box";
-import Chip from "@mui/material/Chip";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
@@ -8,6 +7,7 @@ import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import type { ContentScope } from "@/types/scope-types";
 
 type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
@@ -40,22 +40,14 @@ export const ERG_SHEET_COLORS = {
   selectedHover: "#e6f2ff",
 };
 
-export function toChipProps(tone: BadgeTone) {
-  if (tone === "outline") {
-    return { variant: "outlined" as const, color: "default" as const };
-  }
-  const colorMap: Record<Exclude<BadgeTone, "outline">, "primary" | "secondary" | "success" | "warning" | "error"> = {
-    primary: "primary",
-    secondary: "secondary",
-    success: "success",
-    warning: "warning",
-    danger: "error",
-  };
-  return { variant: "filled" as const, color: colorMap[tone] };
+const ERG_TONE = { primary: "info", secondary: "neutral", success: "success", warning: "warning", danger: "error", outline: "neutral" } as const;
+
+export function toErgTone(tone: BadgeTone): ComponentProps<typeof ErgStatusChip>["tone"] {
+  return ERG_TONE[tone];
 }
 
 export function Badge({ tone, className, children }: { tone: BadgeTone; className?: string; children: ReactNode }) {
-  return <Chip size="small" label={children} className={className} {...toChipProps(tone)} />;
+  return <ErgStatusChip className={className} label={children} tone={toErgTone(tone)} />;
 }
 
 export function SelectControl({

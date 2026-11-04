@@ -1,4 +1,3 @@
-import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
 import TextField from "@mui/material/TextField";
 import { Search } from "lucide-react";
@@ -7,7 +6,7 @@ import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shel
 import { AppSelect } from "@/components/ui/app-select";
 import type { SeoLeadStatus, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import {
-  formatDate, InfoLine, MiniValue, pipelineStatuses, statusLabelMap, statusToneMap, toChipProps,
+  formatDate, InfoLine, MiniValue, pipelineStatuses, statusLabelMap, statusToneMap, SeoBadge,
 } from "@/features/crm/seo/components/seo-crm-workspace-shared";
 import { cn } from "@/lib/utils";
 
@@ -39,7 +38,7 @@ export function SeoSchoolPipeline({ filteredLeads, query, selectedLead, statusFi
             <button key={lead.id} type="button" onClick={() => onSelectLead(lead.id)} className={cn("w-full rounded-lg border bg-white p-4 text-left transition hover:border-[#b8d6fa] hover:bg-[var(--erg-blue-light)]", selectedLead?.id === lead.id ? "border-[#b8d6fa] ring-4 ring-[var(--erg-blue-ring)]" : "border-slate-200")}>
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0"><h3 className="font-semibold text-slate-950">{lead.schoolName}</h3><p className="mt-1 text-sm text-slate-500">{lead.district}, {lead.province} · {lead.segment}</p></div>
-                <Chip label={statusLabelMap[lead.status]} size="small" {...toChipProps(statusToneMap[lead.status])} />
+                <SeoBadge tone={statusToneMap[lead.status]} label={statusLabelMap[lead.status]} />
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-3">
                 <MiniValue label="Xác suất" value={`${lead.probability}%`} />
@@ -57,7 +56,7 @@ export function SeoSchoolPipeline({ filteredLeads, query, selectedLead, statusFi
 
 function SchoolLeadDetail({ lead, onUpdateLeadStatus }: { lead: SeoSchoolLead; onUpdateLeadStatus: (leadId: string, status: SeoLeadStatus) => void }) {
   return (
-    <DashboardSectionCard title={lead.schoolName} description="Hồ sơ SEO của trường trước khi chuyển sang vận hành LMS." action={<Chip label={statusLabelMap[lead.status]} size="small" {...toChipProps(statusToneMap[lead.status])} />}>
+    <DashboardSectionCard title={lead.schoolName} description="Hồ sơ SEO của trường trước khi chuyển sang vận hành LMS." action={<SeoBadge tone={statusToneMap[lead.status]} label={statusLabelMap[lead.status]} />}>
       <div className="grid gap-4">
         <div className="grid gap-3 md:grid-cols-2">
           <InfoLine label="Người liên hệ" value={`${lead.contactName} · ${lead.contactRole}`} />
@@ -72,7 +71,7 @@ function SchoolLeadDetail({ lead, onUpdateLeadStatus }: { lead: SeoSchoolLead; o
           <LinearProgress variant="determinate" value={Math.max(0, Math.min(100, lead.probability))} className="mt-3" sx={{ height: 8, borderRadius: 9999, "& .MuiLinearProgress-bar": { bgcolor: "var(--erg-blue)" } }} />
         </div>
         <div><h3 className="text-sm font-semibold text-slate-950">Ghi chú tư vấn</h3><p className="mt-2 rounded-lg border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600">{lead.notes}</p></div>
-        <div><h3 className="text-sm font-semibold text-slate-950">Rủi ro cần xử lý</h3><div className="mt-2 flex flex-wrap gap-2">{lead.risks.map((risk) => <Chip key={risk} label={risk} size="small" {...toChipProps("warning")} />)}</div></div>
+        <div><h3 className="text-sm font-semibold text-slate-950">Rủi ro cần xử lý</h3><div className="mt-2 flex flex-wrap gap-2">{lead.risks.map((risk) => <SeoBadge key={risk} tone="warning" label={risk} />)}</div></div>
         <div className="rounded-lg border border-slate-200 bg-white p-4">
           <label className="grid gap-1.5"><span className="text-xs font-semibold text-slate-400">Cập nhật tình trạng</span>
             <AppSelect value={lead.status} onChange={(event) => onUpdateLeadStatus(lead.id, event.target.value as SeoLeadStatus)} className="h-11 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-900 shadow-sm outline-none focus:border-[#b8d6fa] focus:ring-4 focus:ring-[var(--erg-blue-ring)]">
