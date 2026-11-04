@@ -3,10 +3,11 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 
-// Lower layers must not import upper ones: platform -> app, lib -> features.
+// Lower layers must not import upper ones: platform -> app, lib -> features, components -> features.
 export const LAYER_RULES = [
   { from: "src/platform/", forbidden: "app", message: "platform must not import from app" },
   { from: "src/lib/", forbidden: "features", message: "lib must not import from features" },
+  { from: "src/components/", forbidden: "features", message: "components must not import from features", exceptFrom: "src/components/quiz/" }, // quiz: pending quiz domain move
 ];
 // Known exceptions as "file -> imported specifier". Keep empty; add a comment with the reason for each entry.
 export const LAYER_ALLOWLIST = new Set([]);
@@ -24,7 +25,7 @@ export function findLayerViolations(sources) {
   const violations = [];
   for (const [rawFile, text] of Object.entries(sources)) {
     const file = rawFile.replaceAll("\\", "/");
-    for (const rule of LAYER_RULES.filter((item) => file.startsWith(item.from))) {
+    for (const rule of LAYER_RULES.filter((item) => file.startsWith(item.from) && !(item.exceptFrom && file.startsWith(item.exceptFrom)))) {
       for (const match of text.matchAll(importSpecifierPattern)) {
         const specifier = match[2];
         if (!resolvesToLayer(file, specifier, rule.forbidden) || LAYER_ALLOWLIST.has(`${file} -> ${specifier}`)) continue;
@@ -55,7 +56,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     .split(/\r?\n/)
     .filter(Boolean);
   const violations = findOwnershipViolations(names);
-  const layerViolations = findLayerViolations(Object.fromEntries(["src/platform", "src/lib"].flatMap(readSources)));
+  const layerViolations = findLayerViolations(Object.fromEntries(["src/platform", "src/lib", "src/components"].flatMap(readSources)));
   if (violations.length) {
     console.error("Generated transport directories cannot own UI files:\n" + violations.join("\n"));
     process.exitCode = 1;

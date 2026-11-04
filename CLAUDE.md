@@ -71,7 +71,7 @@
 |---|---|
 | `bun run typecheck` | = `tsc -b` (~2,5 phút), gồm cả `tsconfig.test.json`. **`tsc --noEmit` ở thư mục gốc KHÔNG kiểm tra gì** (solution-style tsconfig). Kiểm nhanh: `bunx tsc -p tsconfig.app.json --noEmit`. |
 | `bunx eslint .` | 0 lỗi. Cảnh báo `no-restricted-imports` cho mock ở code production là nợ đã biết, không thêm mới. |
-| `bun run verify` | Vòng phụ thuộc, ranh giới data/folder, legacy identifier, MUI barrel import, endpoint literal, quyền sở hữu route workspace. |
+| `bun run verify` | Vòng phụ thuộc, ranh giới data/folder, legacy identifier, MUI barrel import, endpoint literal, quyền sở hữu route workspace, baseline token thiết kế (hex/fontSize/fontWeight cứng không được tăng; `node scripts/check-design-token-baseline.mjs --update` để hạ baseline). |
 | `bun run test` | ~5 phút. KHÔNG chạy song song với `tsc -b` (vitest bị kẹt pool timeout). `src/test/mui-icon-imports.test.ts` đôi khi chập chờn khi máy tải nặng — chạy riêng để xác nhận. |
 
 CI: `.github/workflows/ci.yml`. Mọi GitHub Action phải ghim theo SHA.

@@ -1,0 +1,1514 @@
+{
+  "src/app/pages/auth/teacher-onboarding-page.tsx": {
+    "hex": 4,
+    "font": 1
+  },
+  "src/app/pages/shared/desktop-workspace-entry-page.tsx": {
+    "hex": 0,
+    "font": 10
+  },
+  "src/app/pages/shared/portable-exam-page.tsx": {
+    "hex": 2,
+    "font": 3
+  },
+  "src/components/dashboard/dashboard-page-shell.tsx": {
+    "hex": 28,
+    "font": 2
+  },
+  "src/components/erg-footer.tsx": {
+    "hex": 6,
+    "font": 0
+  },
+  "src/components/erg-mui/charts/erg-chart-card.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/components/erg-mui/charts/erg-chart-theme.ts": {
+    "hex": 7,
+    "font": 0
+  },
+  "src/components/erg-mui/charts/erg-chart.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/components/erg-mui/erg-actions.tsx": {
+    "hex": 11,
+    "font": 1
+  },
+  "src/components/erg-mui/erg-confirm-dialog.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/components/erg-mui/erg-feedback.tsx": {
+    "hex": 6,
+    "font": 4
+  },
+  "src/components/erg-mui/erg-form.tsx": {
+    "hex": 10,
+    "font": 5
+  },
+  "src/components/erg-mui/erg-layout.tsx": {
+    "hex": 5,
+    "font": 3
+  },
+  "src/components/erg-mui/erg-metric-card.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/erg-mui/erg-overlays.tsx": {
+    "hex": 9,
+    "font": 6
+  },
+  "src/components/erg-mui/erg-page-header.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/components/erg-mui/erg-table.tsx": {
+    "hex": 6,
+    "font": 3
+  },
+  "src/components/erg-mui/offline/offline-shell-status.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/learning-resources/explorer-ui.tsx": {
+    "hex": 64,
+    "font": 0
+  },
+  "src/components/locale-switcher.tsx": {
+    "hex": 13,
+    "font": 2
+  },
+  "src/components/nav-main.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/portal/ErgPortalHeader.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/components/portal/ErgPortalLayout.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/components/portal/ErgPortalSidebar.tsx": {
+    "hex": 1,
+    "font": 1
+  },
+  "src/components/portal/portal-header-actions.tsx": {
+    "hex": 13,
+    "font": 32
+  },
+  "src/components/portal/portal-header-identity.tsx": {
+    "hex": 3,
+    "font": 5
+  },
+  "src/components/portal/portal-header-notification-item.tsx": {
+    "hex": 10,
+    "font": 4
+  },
+  "src/components/portal/portal-header-notifications.tsx": {
+    "hex": 11,
+    "font": 8
+  },
+  "src/components/portal/portal-header-styles.ts": {
+    "hex": 3,
+    "font": 0
+  },
+  "src/components/portal/portal-sidebar-bottom.tsx": {
+    "hex": 17,
+    "font": 32
+  },
+  "src/components/portal/portal-sidebar-branch-item.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/components/portal/portal-sidebar-compact-item.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/portal/portal-sidebar-leaf-item.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/portal/portal-sidebar-nav-layer.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/components/portal/portal-sidebar-report-icon.tsx": {
+    "hex": 2,
+    "font": 1
+  },
+  "src/components/portal/portal-sidebar-styles.ts": {
+    "hex": 6,
+    "font": 0
+  },
+  "src/components/portal/portal-sidebar-workspace-header.tsx": {
+    "hex": 31,
+    "font": 15
+  },
+  "src/components/portal/portal-workspace-switcher.tsx": {
+    "hex": 0,
+    "font": 10
+  },
+  "src/components/pwa/global-pwa-banner.tsx": {
+    "hex": 2,
+    "font": 2
+  },
+  "src/components/quiz/mobile-player-shell.tsx": {
+    "hex": 8,
+    "font": 0
+  },
+  "src/components/quiz/player-shell-parts.tsx": {
+    "hex": 2,
+    "font": 22
+  },
+  "src/components/quiz/player-shell-runtime/player-desktop-layout.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/components/quiz/player-shell-runtime/player-shell-styles.ts": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/components/quiz/question-navigator.tsx": {
+    "hex": 13,
+    "font": 17
+  },
+  "src/components/quiz/questions/choice-option.tsx": {
+    "hex": 22,
+    "font": 5
+  },
+  "src/components/quiz/questions/drag-drop-question.tsx": {
+    "hex": 14,
+    "font": 0
+  },
+  "src/components/quiz/questions/drag-words-question.tsx": {
+    "hex": 26,
+    "font": 0
+  },
+  "src/components/quiz/questions/hotspot-question.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/components/quiz/questions/inline-choice-question.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/components/quiz/questions/likert-question.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/components/quiz/questions/matching-question.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/components/quiz/questions/matching-question/matching-chips.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/components/quiz/questions/multiple-response-question.tsx": {
+    "hex": 3,
+    "font": 3
+  },
+  "src/components/quiz/questions/sequence-question.tsx": {
+    "hex": 22,
+    "font": 0
+  },
+  "src/components/quiz/questions/shared.tsx": {
+    "hex": 2,
+    "font": 1
+  },
+  "src/components/quiz/questions/single-choice-question.tsx": {
+    "hex": 3,
+    "font": 3
+  },
+  "src/components/quiz/questions/text-response-question.tsx": {
+    "hex": 7,
+    "font": 0
+  },
+  "src/components/quiz/quiz-welcome-screen.tsx": {
+    "hex": 33,
+    "font": 0
+  },
+  "src/components/shared/DataTable.tsx": {
+    "hex": 7,
+    "font": 6
+  },
+  "src/components/shared/PageHeader.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/components/shared/erg-calendar-board.tsx": {
+    "hex": 15,
+    "font": 35
+  },
+  "src/components/shared/erg-calendar-event-detail.tsx": {
+    "hex": 8,
+    "font": 16
+  },
+  "src/components/shared/erg-calendar-feedback.tsx": {
+    "hex": 4,
+    "font": 6
+  },
+  "src/components/shared/erg-calendar-navigator.tsx": {
+    "hex": 6,
+    "font": 5
+  },
+  "src/components/shared/erg-calendar-scope-picker.tsx": {
+    "hex": 7,
+    "font": 7
+  },
+  "src/components/shared/erg-calendar-toolbar.tsx": {
+    "hex": 2,
+    "font": 4
+  },
+  "src/components/shared/erg-calendar-workspace-styles.ts": {
+    "hex": 137,
+    "font": 29
+  },
+  "src/components/shared/teaching-schedule-dialog-model.ts": {
+    "hex": 33,
+    "font": 0
+  },
+  "src/components/shared/teaching-schedule-dialog-styles.ts": {
+    "hex": 38,
+    "font": 16
+  },
+  "src/components/shared/teaching-schedule-dialog.tsx": {
+    "hex": 13,
+    "font": 20
+  },
+  "src/components/shared/use-erg-calendar-workspace.ts": {
+    "hex": 30,
+    "font": 0
+  },
+  "src/components/social-reactions.tsx": {
+    "hex": 15,
+    "font": 0
+  },
+  "src/features/access-management/components/permission-catalog-workspace.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/access-management/components/permission-detail-drawer.tsx": {
+    "hex": 25,
+    "font": 15
+  },
+  "src/features/access-management/components/role-editor-drawer.tsx": {
+    "hex": 29,
+    "font": 12
+  },
+  "src/features/access-management/components/role-management-workspace.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/audit/components/audit-table.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/audit/components/audit-trail-workspace.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/crm/components/crm-portal-shell.tsx": {
+    "hex": 18,
+    "font": 22
+  },
+  "src/features/crm/seo/components/seo-crm-overview.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/crm/seo/components/seo-crm-pipeline.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/desktop-release/components/desktop-release-download-page.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/desktop-release/components/desktop-update-banner.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/elearning/competencies/components/student-learning-outcomes-workspace.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/elearning/content-player/learning-standard-player-panel.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/elearning/portable-exam/components/portable-artifact-app.tsx": {
+    "hex": 1,
+    "font": 2
+  },
+  "src/features/elearning/portable-exam/components/portable-exam-launcher.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/elearning/student-dashboard/components/student-announcement-popup.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-bottom-dock.tsx": {
+    "hex": 7,
+    "font": 7
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-content-views.tsx": {
+    "hex": 32,
+    "font": 32
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-composer-tools.tsx": {
+    "hex": 10,
+    "font": 12
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-post-card.tsx": {
+    "hex": 22,
+    "font": 16
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-primitives.tsx": {
+    "hex": 1,
+    "font": 6
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-reactions.tsx": {
+    "hex": 12,
+    "font": 13
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-shared.tsx": {
+    "hex": 13,
+    "font": 1
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-discussion-view.tsx": {
+    "hex": 4,
+    "font": 8
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-mobile-overview.tsx": {
+    "hex": 4,
+    "font": 34
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-mobile-shell.tsx": {
+    "hex": 13,
+    "font": 11
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-scores-view.tsx": {
+    "hex": 45,
+    "font": 30
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-top-menu.tsx": {
+    "hex": 36,
+    "font": 21
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-view-primitives.tsx": {
+    "hex": 35,
+    "font": 32
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-workspace-runtime.tsx": {
+    "hex": 5,
+    "font": 6
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-workspace-styles.tsx": {
+    "hex": 10,
+    "font": 1
+  },
+  "src/features/elearning/student-dashboard/components/student-dashboard-workspace.copy.tsx": {
+    "hex": 0,
+    "font": 8
+  },
+  "src/features/employee-management/components/apple-ui-tokens.tsx": {
+    "hex": 56,
+    "font": 5
+  },
+  "src/features/employee-management/components/create-employee-wizard.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/employee-management/components/create-employee/credential-step.tsx": {
+    "hex": 2,
+    "font": 3
+  },
+  "src/features/employee-management/components/create-employee/one-time-password-view.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/employee-management/components/create-employee/profile-step.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/employee-management/components/create-employee/review-row.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/employee-management/components/create-employee/role-scope-step.tsx": {
+    "hex": 1,
+    "font": 11
+  },
+  "src/features/employee-management/components/create-employee/step-indicator.tsx": {
+    "hex": 2,
+    "font": 1
+  },
+  "src/features/employee-management/components/create-employee/wizard-actions.tsx": {
+    "hex": 3,
+    "font": 4
+  },
+  "src/features/employee-management/components/employee-access-log-workspace.tsx": {
+    "hex": 3,
+    "font": 12
+  },
+  "src/features/employee-management/components/employee-detail-drawer.tsx": {
+    "hex": 1,
+    "font": 4
+  },
+  "src/features/employee-management/components/employee-detail/action-bar.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/employee-management/components/employee-detail/apple-field-card.tsx": {
+    "hex": 1,
+    "font": 1
+  },
+  "src/features/employee-management/components/employee-detail/detail-tabs.tsx": {
+    "hex": 1,
+    "font": 1
+  },
+  "src/features/employee-management/components/employee-detail/edit-dialog.tsx": {
+    "hex": 1,
+    "font": 5
+  },
+  "src/features/employee-management/components/employee-detail/profile-header.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/employee-management/components/employee-detail/roles-tab.tsx": {
+    "hex": 1,
+    "font": 6
+  },
+  "src/features/employee-management/components/employee-detail/sessions-tab.tsx": {
+    "hex": 1,
+    "font": 4
+  },
+  "src/features/employee-management/components/employee-list-workspace.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/employee-management/components/employee-list/action-menu.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/employee-management/components/employee-list/employee-table.tsx": {
+    "hex": 1,
+    "font": 8
+  },
+  "src/features/employee-management/components/employee-list/list-header.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/employee-management/components/employee-list/list-toolbar.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/employee-management/components/employee-list/metric-card.tsx": {
+    "hex": 1,
+    "font": 2
+  },
+  "src/features/employee-management/components/employee-list/role-assign-dialog.tsx": {
+    "hex": 2,
+    "font": 9
+  },
+  "src/features/employee-management/components/employee-security-timeline.tsx": {
+    "hex": 1,
+    "font": 5
+  },
+  "src/features/integrations/components/enterprise-connector-status-chip.tsx": {
+    "hex": 8,
+    "font": 1
+  },
+  "src/features/integrations/components/enterprise-connector-table.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/integrations/components/enterprise-connectors-workspace.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/admin-content/admin-content-menu.ts": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/admin-content/components/admin-content-overview.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/admin-erg-portal-shell.tsx": {
+    "hex": 3,
+    "font": 3
+  },
+  "src/features/lcms/admin-menu.tsx": {
+    "hex": 0,
+    "font": 10
+  },
+  "src/features/lcms/admin-operations/components/admin-operations-center-management.tsx": {
+    "hex": 8,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/admin-operations-education-editor.tsx": {
+    "hex": 0,
+    "font": 30
+  },
+  "src/features/lcms/admin-operations/components/admin-operations-insight.tsx": {
+    "hex": 15,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/admin-operations-workspace.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/create-education-unit-workspace.tsx": {
+    "hex": 3,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/create-teacher-account-dialog.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/admin-operations/components/curriculum-excel-import-dialog.tsx": {
+    "hex": 15,
+    "font": 12
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap-view.tsx": {
+    "hex": 10,
+    "font": 2
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap/roadmap-lesson-row.tsx": {
+    "hex": 53,
+    "font": 19
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap/roadmap-stage.tsx": {
+    "hex": 40,
+    "font": 18
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap/roadmap-summary-bar.tsx": {
+    "hex": 8,
+    "font": 12
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap/roadmap-summary.tsx": {
+    "hex": 13,
+    "font": 10
+  },
+  "src/features/lcms/admin-operations/components/curriculum-roadmap/roadmap-topic-card.tsx": {
+    "hex": 29,
+    "font": 17
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan-dialog.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan/teaching-plan-actions.tsx": {
+    "hex": 9,
+    "font": 2
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan/teaching-plan-summary.tsx": {
+    "hex": 10,
+    "font": 4
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan/teaching-plan-sync-confirm-dialog.tsx": {
+    "hex": 12,
+    "font": 10
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan/teaching-plan-table.tsx": {
+    "hex": 36,
+    "font": 21
+  },
+  "src/features/lcms/admin-operations/components/curriculum-teaching-plan/teaching-plan-toolbar.tsx": {
+    "hex": 27,
+    "font": 15
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-catalog-screens.tsx": {
+    "hex": 7,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog-config.ts": {
+    "hex": 6,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog-fields.tsx": {
+    "hex": 17,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog-presentation.tsx": {
+    "hex": 34,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog-view.tsx": {
+    "hex": 9,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs.tsx": {
+    "hex": 2,
+    "font": 4
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-fields.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-icons.tsx": {
+    "hex": 23,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-structure-screen.tsx": {
+    "hex": 46,
+    "font": 15
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-authoring-upload-screen.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-badges.tsx": {
+    "hex": 17,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-folder-canvas.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-grid.tsx": {
+    "hex": 15,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-inspector.tsx": {
+    "hex": 7,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-lanes.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-list.tsx": {
+    "hex": 19,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-model.tsx": {
+    "hex": 10,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-top-bar.tsx": {
+    "hex": 25,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/learning-resource-curriculum-explorer-tree.tsx": {
+    "hex": 9,
+    "font": 0
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import-workspace.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/import-primitives.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/sheet-range-card.tsx": {
+    "hex": 0,
+    "font": 9
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/sheet-url-card.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/student-preview-card.tsx": {
+    "hex": 0,
+    "font": 15
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/submit-sidebar-card.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lcms/admin-operations/components/student-sheet-import/target-unit-card.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-access-section.tsx": {
+    "hex": 0,
+    "font": 32
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-member-sections.tsx": {
+    "hex": 0,
+    "font": 30
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-role-section.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-section-config.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-section-primitives.tsx": {
+    "hex": 0,
+    "font": 15
+  },
+  "src/features/lcms/admin-operations/components/user-access-control-workspace.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/lcms/certificates/components/certificate-registry-workspace.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/components/admin-google-calendar-workspace.tsx": {
+    "hex": 33,
+    "font": 0
+  },
+  "src/features/lcms/components/admin-ui.tsx": {
+    "hex": 52,
+    "font": 0
+  },
+  "src/features/lcms/integrations/learning-standards/components/learning-standards-integration-panel.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/integrations/learning-standards/components/learning-standards-package-table.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/pages/admin-ui-kit.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/quiz/question-bank/components/question-bank-compact-header.tsx": {
+    "hex": 2,
+    "font": 2
+  },
+  "src/features/lcms/quiz/question-bank/components/question-bank-primitives.tsx": {
+    "hex": 15,
+    "font": 7
+  },
+  "src/features/lcms/quiz/question-bank/components/question-form-dialog.tsx": {
+    "hex": 1,
+    "font": 2
+  },
+  "src/features/lcms/quiz/question-bank/components/question-library.tsx": {
+    "hex": 20,
+    "font": 14
+  },
+  "src/features/lcms/quiz/question-bank/components/quiz-bank-panel.tsx": {
+    "hex": 20,
+    "font": 13
+  },
+  "src/features/lcms/quiz/question-bank/components/quiz-builder-panel.tsx": {
+    "hex": 21,
+    "font": 10
+  },
+  "src/features/lcms/quiz/question-bank/components/quiz-create-package-dialog.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lcms/quiz/question-type-demo/components/question-type-demo-workspace.tsx": {
+    "hex": 39,
+    "font": 0
+  },
+  "src/features/lcms/quiz/question-type-demo/data/question-type-demos.ts": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/api/mock-quiz-editor-project.ts": {
+    "hex": 7,
+    "font": 1
+  },
+  "src/features/lcms/quiz/quiz-editor/components/classic-editor-art.tsx": {
+    "hex": 44,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/learner-preview-shell.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/player-template-dialog.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor-dialog.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor/feedback-scoring.tsx": {
+    "hex": 12,
+    "font": 7
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor/final-slide-settings.tsx": {
+    "hex": 11,
+    "font": 11
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor/inspector.tsx": {
+    "hex": 16,
+    "font": 9
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor/media-settings.tsx": {
+    "hex": 13,
+    "font": 8
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-editor/question-settings.tsx": {
+    "hex": 18,
+    "font": 22
+  },
+  "src/features/lcms/quiz/quiz-editor/components/question-manager-table.tsx": {
+    "hex": 16,
+    "font": 16
+  },
+  "src/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style.ts": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-banners.tsx": {
+    "hex": 14,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/quiz-properties-dialog.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon.tsx": {
+    "hex": 8,
+    "font": 2
+  },
+  "src/features/lcms/quiz/quiz-editor/components/ribbon/question-menu-glyphs.tsx": {
+    "hex": 62,
+    "font": 10
+  },
+  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus.tsx": {
+    "hex": 70,
+    "font": 37
+  },
+  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-primitives.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-editor/components/slide-preview-dialog.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils.ts": {
+    "hex": 12,
+    "font": 0
+  },
+  "src/features/lcms/school-management/components/assessment/assessment-governance-workspace.tsx": {
+    "hex": 20,
+    "font": 12
+  },
+  "src/features/lcms/school-management/components/class-import-dialog.tsx": {
+    "hex": 0,
+    "font": 26
+  },
+  "src/features/lcms/school-management/components/school-analytics-workspace.tsx": {
+    "hex": 26,
+    "font": 17
+  },
+  "src/features/lcms/school-management/components/school-form-dialog.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/school-list-panel.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lcms/school-management/components/school-management-workspace.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/school-management/components/school-overview-panel.tsx": {
+    "hex": 26,
+    "font": 15
+  },
+  "src/features/lcms/school-management/components/school-page-shell.tsx": {
+    "hex": 14,
+    "font": 13
+  },
+  "src/features/lcms/school-management/components/school-reviews-panel.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/school-structure-panel.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lcms/school-management/components/school-students-panel.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/school-management/components/setup/school-curriculum-step.tsx": {
+    "hex": 0,
+    "font": 23
+  },
+  "src/features/lcms/school-management/components/setup/school-enrollment-dialog.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lcms/school-management/components/setup/school-flow-step-icon.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/setup/school-information-step.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/setup/school-review-step.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lcms/school-management/components/setup/school-step-surface.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/school-management/components/setup/school-structure-step.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/setup/school-students-step.tsx": {
+    "hex": 0,
+    "font": 20
+  },
+  "src/features/lcms/school-management/components/setup/school-subject-assign-dialog.tsx": {
+    "hex": 0,
+    "font": 10
+  },
+  "src/features/lcms/school-management/components/student-import-dialog.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lcms/school-management/components/student-spreadsheet-grid.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/components/students/school-student-directory-workspace.tsx": {
+    "hex": 75,
+    "font": 40
+  },
+  "src/features/lcms/school-management/components/students/student-scope-navigator.tsx": {
+    "hex": 29,
+    "font": 10
+  },
+  "src/features/lcms/school-management/components/training/training-chart-data.ts": {
+    "hex": 8,
+    "font": 0
+  },
+  "src/features/lcms/school-management/components/training/training-charts.tsx": {
+    "hex": 7,
+    "font": 6
+  },
+  "src/features/lcms/school-management/components/training/training-diagnostic-panels.tsx": {
+    "hex": 0,
+    "font": 10
+  },
+  "src/features/lcms/school-management/components/training/training-insight-drawer.tsx": {
+    "hex": 0,
+    "font": 21
+  },
+  "src/features/lcms/school-management/components/training/training-monitoring-table.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lcms/school-management/components/training/training-monitoring-workspace.tsx": {
+    "hex": 3,
+    "font": 15
+  },
+  "src/features/lcms/school-management/screens/school-academic-years-screen.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/screens/school-classes-screen.tsx": {
+    "hex": 32,
+    "font": 17
+  },
+  "src/features/lcms/school-management/screens/school-detail-flow-screen.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lcms/school-management/screens/school-directory-screen.tsx": {
+    "hex": 54,
+    "font": 22
+  },
+  "src/features/lcms/school-management/screens/school-enrollments-screen.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/features/lcms/school-management/screens/school-grades-screen.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/school-management/screens/school-imports-screen.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/school-management/screens/school-overview-screen.tsx": {
+    "hex": 4,
+    "font": 2
+  },
+  "src/features/lcms/school-management/screens/school-profile-screen.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lcms/school-management/screens/school-students-screen.tsx": {
+    "hex": 4,
+    "font": 2
+  },
+  "src/features/lcms/school-management/screens/school-subjects-screen.tsx": {
+    "hex": 17,
+    "font": 15
+  },
+  "src/features/lms/classroom/components/class-assignment-dialog.tsx": {
+    "hex": 22,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/class-list-workspace.tsx": {
+    "hex": 3,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/class-management-page.tsx": {
+    "hex": 19,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/class-reports-workspace.tsx": {
+    "hex": 6,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/class-students-table.tsx": {
+    "hex": 13,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/class-students-workspace.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lms/classroom/components/classroom-tracking-workspace.tsx": {
+    "hex": 12,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/overview-workspace.tsx": {
+    "hex": 8,
+    "font": 0
+  },
+  "src/features/lms/classroom/components/student-profile-detail-drawer.tsx": {
+    "hex": 16,
+    "font": 1
+  },
+  "src/features/lms/components/assign-date-time-picker.tsx": {
+    "hex": 0,
+    "font": 17
+  },
+  "src/features/lms/components/assign-homework-desktop-view.tsx": {
+    "hex": 73,
+    "font": 0
+  },
+  "src/features/lms/components/assign-homework-footer.tsx": {
+    "hex": 0,
+    "font": 9
+  },
+  "src/features/lms/components/assign-homework-groups.ts": {
+    "hex": 16,
+    "font": 0
+  },
+  "src/features/lms/components/assign-homework-mobile-view.tsx": {
+    "hex": 56,
+    "font": 0
+  },
+  "src/features/lms/components/assign-homework-parts.tsx": {
+    "hex": 70,
+    "font": 0
+  },
+  "src/features/lms/components/assign-homework-student-utils.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lms/components/attendance/attendance-curriculum-table.tsx": {
+    "hex": 29,
+    "font": 12
+  },
+  "src/features/lms/components/attendance/attendance-sheet-model.ts": {
+    "hex": 10,
+    "font": 0
+  },
+  "src/features/lms/components/attendance/attendance-student-table.tsx": {
+    "hex": 14,
+    "font": 13
+  },
+  "src/features/lms/components/attendance/desktop-attendance-sheet-panel.tsx": {
+    "hex": 19,
+    "font": 11
+  },
+  "src/features/lms/components/attendance/mobile-attendance-sheet-panel.tsx": {
+    "hex": 13,
+    "font": 4
+  },
+  "src/features/lms/components/exercise-bank/create-exercise-dialog.tsx": {
+    "hex": 2,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/create-exercise-footer.tsx": {
+    "hex": 18,
+    "font": 8
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/create-exercise-header.tsx": {
+    "hex": 9,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/filter-dropdown.tsx": {
+    "hex": 1,
+    "font": 1
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/pick-filter-bar.tsx": {
+    "hex": 13,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/pick-question-list.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/setup-form.tsx": {
+    "hex": 11,
+    "font": 2
+  },
+  "src/features/lms/components/exercise-bank/create-exercise/setup-preview.tsx": {
+    "hex": 5,
+    "font": 1
+  },
+  "src/features/lms/components/exercise-bank/desktop-exercise-bank-view.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/desktop-view/exercise-bank-header.tsx": {
+    "hex": 18,
+    "font": 6
+  },
+  "src/features/lms/components/exercise-bank/desktop-view/exercise-inspector.tsx": {
+    "hex": 54,
+    "font": 6
+  },
+  "src/features/lms/components/exercise-bank/desktop-view/exercise-list-toolbar.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/desktop-view/exercise-table.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/features/lms/components/exercise-bank/desktop-view/filter-select.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/features/lms/components/exercise-bank/exercise-question-detail-dialog.tsx": {
+    "hex": 28,
+    "font": 6
+  },
+  "src/features/lms/components/exercise-bank/mobile-exercise-bank-view.tsx": {
+    "hex": 14,
+    "font": 0
+  },
+  "src/features/lms/components/homework-panel.tsx": {
+    "hex": 0,
+    "font": 38
+  },
+  "src/features/lms/components/homework-progress-page.tsx": {
+    "hex": 29,
+    "font": 1
+  },
+  "src/features/lms/components/lms-account-page.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lms/components/lms-login-logs-page.tsx": {
+    "hex": 16,
+    "font": 3
+  },
+  "src/features/lms/components/lms-notification-center.tsx": {
+    "hex": 6,
+    "font": 38
+  },
+  "src/features/lms/components/lms-notification-detail-page.tsx": {
+    "hex": 27,
+    "font": 0
+  },
+  "src/features/lms/components/lms-teacher-shell-config.tsx": {
+    "hex": 0,
+    "font": 8
+  },
+  "src/features/lms/components/lms-teacher-shell-presentation.tsx": {
+    "hex": 47,
+    "font": 56
+  },
+  "src/features/lms/components/lms-teacher-shell.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lms/components/lms-ui.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lms/components/reports-panel.tsx": {
+    "hex": 0,
+    "font": 2
+  },
+  "src/features/lms/components/score/desktop-score-sheet-panel.tsx": {
+    "hex": 31,
+    "font": 25
+  },
+  "src/features/lms/components/score/mobile-score-sheet-panel.tsx": {
+    "hex": 25,
+    "font": 2
+  },
+  "src/features/lms/components/score/score-sheet-model.ts": {
+    "hex": 17,
+    "font": 2
+  },
+  "src/features/lms/components/score/score-sheet-overlays.tsx": {
+    "hex": 11,
+    "font": 12
+  },
+  "src/features/lms/components/student-attendance-context-menu.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lms/components/student-groups-page.tsx": {
+    "hex": 42,
+    "font": 3
+  },
+  "src/features/lms/components/teaching-schedule/lms-erg-calendar-workspace.tsx": {
+    "hex": 51,
+    "font": 0
+  },
+  "src/features/lms/components/teaching-schedule/teaching-schedule-event-dialog.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lms/learning-paths/components/learning-outcomes-admin-workspace.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lms/learning-paths/components/learning-outcomes-presentation.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/features/lms/learning-paths/components/learning-outcomes-teacher-workspace.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lms/learning-resources/components/learning-resource-login-page.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/learning-resource-slide-viewer-modal.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/learning-resource-viewer-modal.tsx": {
+    "hex": 20,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/library-page/empty-state.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/library-page/explorer.tsx": {
+    "hex": 16,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/library-page/mobile-explorer.tsx": {
+    "hex": 11,
+    "font": 0
+  },
+  "src/features/lms/learning-resources/components/pdf-resource-viewer.tsx": {
+    "hex": 20,
+    "font": 0
+  },
+  "src/features/lms/mobile/components/lms-bottom-dock.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/lms/mobile/components/lms-mobile-shell.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/lms/mobile/components/lms-mobile-top-bar.tsx": {
+    "hex": 0,
+    "font": 11
+  },
+  "src/features/lms/mobile/components/lms-pwa-setup-sheet.tsx": {
+    "hex": 0,
+    "font": 15
+  },
+  "src/features/lms/mobile/components/lms-scope-sheet.tsx": {
+    "hex": 0,
+    "font": 11
+  },
+  "src/features/lms/mobile/components/mobile-bottom-sheet.tsx": {
+    "hex": 0,
+    "font": 4
+  },
+  "src/features/lms/weekly-class-log/components/weekly-class-log-header.tsx": {
+    "hex": 4,
+    "font": 10
+  },
+  "src/features/lms/weekly-class-log/components/weekly-class-log-page.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/lms/weekly-class-log/components/weekly-class-log-summary.tsx": {
+    "hex": 12,
+    "font": 11
+  },
+  "src/features/lms/weekly-class-log/components/weekly-class-log-table.tsx": {
+    "hex": 8,
+    "font": 14
+  },
+  "src/features/portable-package-export/components/portable-package-catalog-dialog.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/features/portable-package-export/components/portable-package-export-dialog.tsx": {
+    "hex": 0,
+    "font": 7
+  },
+  "src/features/profile/components/avatar-crop-dialog.tsx": {
+    "hex": 4,
+    "font": 2
+  },
+  "src/features/profile/components/profile-page.tsx": {
+    "hex": 9,
+    "font": 7
+  },
+  "src/features/profile/components/profile-panels.tsx": {
+    "hex": 20,
+    "font": 20
+  },
+  "src/features/profile/components/profile-primitives.tsx": {
+    "hex": 29,
+    "font": 12
+  },
+  "src/features/profile/components/profile-sidebar.tsx": {
+    "hex": 12,
+    "font": 12
+  },
+  "src/features/profile/utils/profile-avatar.ts": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/features/teaching-calendar/api/teaching-calendar-mappers.ts": {
+    "hex": 24,
+    "font": 0
+  },
+  "src/features/teaching-calendar/components/teaching-schedule-batch-panel.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/layouts/dashboard/components/dashboard-account-card.tsx": {
+    "hex": 0,
+    "font": 8
+  },
+  "src/layouts/dashboard/components/dashboard-account-menu.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/layouts/dashboard/components/dashboard-content.tsx": {
+    "hex": 4,
+    "font": 5
+  },
+  "src/layouts/dashboard/components/dashboard-placeholder-workspace.tsx": {
+    "hex": 0,
+    "font": 6
+  },
+  "src/layouts/dashboard/components/dashboard-scope-selector.tsx": {
+    "hex": 0,
+    "font": 24
+  },
+  "src/layouts/dashboard/components/dashboard-sidebar.tsx": {
+    "hex": 0,
+    "font": 3
+  },
+  "src/lib/quiz-theme-catalog.ts": {
+    "hex": 240,
+    "font": 0
+  },
+  "src/lib/sample-quiz.ts": {
+    "hex": 21,
+    "font": 0
+  },
+  "src/pages/not-found-page.tsx": {
+    "hex": 0,
+    "font": 5
+  },
+  "src/platform/auth/components/access-denied-page.tsx": {
+    "hex": 28,
+    "font": 33
+  },
+  "src/platform/auth/components/access-denied-workspace-target.tsx": {
+    "hex": 10,
+    "font": 8
+  },
+  "src/platform/auth/components/account-panel.tsx": {
+    "hex": 4,
+    "font": 28
+  },
+  "src/platform/auth/components/auth-form-panel.tsx": {
+    "hex": 15,
+    "font": 35
+  },
+  "src/platform/auth/components/auth-icons.tsx": {
+    "hex": 4,
+    "font": 0
+  },
+  "src/platform/auth/components/auth-shared.tsx": {
+    "hex": 2,
+    "font": 11
+  },
+  "src/platform/auth/components/auth-workspace.tsx": {
+    "hex": 2,
+    "font": 2
+  },
+  "src/platform/auth/components/portal-auth-gates.tsx": {
+    "hex": 2,
+    "font": 1
+  },
+  "src/platform/auth/components/portal-login-presentation.tsx": {
+    "hex": 8,
+    "font": 2
+  },
+  "src/platform/auth/components/portal-mobile-login-form.tsx": {
+    "hex": 31,
+    "font": 28
+  },
+  "src/platform/auth/components/portal-mobile-login-shell.tsx": {
+    "hex": 1,
+    "font": 0
+  },
+  "src/platform/auth/components/sso-handoff-page.tsx": {
+    "hex": 0,
+    "font": 1
+  },
+  "src/platform/auth/components/teacher-onboarding-workspace.tsx": {
+    "hex": 15,
+    "font": 14
+  },
+  "src/platform/auth/components/teacher-onboarding/onboarding-section.tsx": {
+    "hex": 2,
+    "font": 3
+  },
+  "src/platform/auth/components/teacher-onboarding/onboarding-stepper.tsx": {
+    "hex": 11,
+    "font": 9
+  },
+  "src/platform/auth/components/teacher-onboarding/password-step.tsx": {
+    "hex": 5,
+    "font": 3
+  },
+  "src/platform/auth/components/teacher-onboarding/profile-step.tsx": {
+    "hex": 5,
+    "font": 3
+  },
+  "src/platform/auth/components/teacher-onboarding/recovery-step.tsx": {
+    "hex": 18,
+    "font": 18
+  },
+  "src/routes/route-feedback.tsx": {
+    "hex": 1,
+    "font": 1
+  }
+}
