@@ -66,7 +66,8 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
     onClose();
   };
 
-  const requestSave = () => addedSensitive.length ? setConfirmOpen(true) : void persist();
+  // Tạo mới và không có quyền nhạy cảm thì lưu luôn; sửa nhóm quyền đang có người dùng luôn phải xác nhận.
+  const requestSave = () => (isCreate && !addedSensitive.length ? void persist() : setConfirmOpen(true));
   const pending = commands.create.isPending || commands.update.isPending;
 
   const toggle = (permission: string) => setSelected((current) => {
@@ -325,7 +326,7 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 
         {/* Footer Actions */}
         <Box sx={{ alignItems: "center", bgcolor: "#FFFFFF", borderTop: `1px solid ${ergEnterpriseTokens.color.border}`, display: "flex", gap: 1.25, justifyContent: "flex-end", mt: "auto", p: 2 }}>
-          <Button variant="contained"
+          <Button variant="text"
             onClick={onClose}
             sx={{
               borderRadius: `${ergEnterpriseTokens.radius.md}px`,
@@ -367,13 +368,13 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
 
       <ErgConfirmDialog
         confirmLabel="Xác nhận và lưu"
-        description={`Thay đổi này thêm quyền nhạy cảm: ${addedSensitive.join(", ")}. Hành động sẽ được ghi audit.`}
+        description={addedSensitive.length ? `Thay đổi này thêm quyền nhạy cảm: ${addedSensitive.join(", ")}. Hành động sẽ được ghi audit.` : "Thay đổi quyền của nhóm có hiệu lực ngay với mọi người dùng thuộc nhóm. Hành động sẽ được ghi audit."}
         impact={`Ảnh hưởng ${role?.userCount ?? 0} người dùng`}
         loading={pending}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => void persist()}
         open={confirmOpen}
-        title="Xác nhận cấp quyền nhạy cảm"
+        title={addedSensitive.length ? "Xác nhận cấp quyền nhạy cảm" : "Xác nhận thay đổi nhóm quyền"}
       />
     </>
   );

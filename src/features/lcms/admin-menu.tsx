@@ -1,6 +1,6 @@
 import type { MenuGroup, MenuItem } from "@/components/portal/ErgPortalLayout";
 import ArticleRoundedIcon from "@mui/icons-material/ArticleRounded";
-import BarChartRoundedIcon from "@mui/icons-material/BarChartRounded";
+import FlagRoundedIcon from "@mui/icons-material/FlagRounded";
 import DashboardRoundedIcon from "@mui/icons-material/DashboardRounded";
 import EventAvailableRoundedIcon from "@mui/icons-material/EventAvailableRounded";
 import ExtensionRoundedIcon from "@mui/icons-material/ExtensionRounded";
@@ -63,20 +63,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         variant: "admin-overview",
       }),
       item({
-        label: "Báo cáo",
-        icon: <BarChartRoundedIcon sx={{ fontSize: 24 }} />,
-        children: [
-          { label: "Tổng quan", path: "/report/dashboard-report" },
-          { label: "Tuyển sinh", path: "/report/crm-report" },
-          { label: "Học viên", path: "/report/student-report" },
-          { label: "Công việc", path: "/report/task-report" },
-          { label: "Dòng tiền", path: "/report/cash-flow-report" },
-          { label: "Lãi lỗ", path: "/report/pnl-report" },
-          { label: "Hóa đơn", path: "/report/sale-report" },
-        ],
-      }),
-      item({
-        label: "Lịch toàn trung tâm",
+        label: "Lịch trung tâm",
         icon: <EventAvailableRoundedIcon sx={{ fontSize: 24 }} />,
         path: "/calendar",
         badge: "beta",
@@ -126,6 +113,12 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         description: "Tra cứu, mở và quản lý tài nguyên học tập dùng chung cho các lớp học.",
         variant: "admin-internal-docs",
       }),
+      item({
+        label: "Chuẩn đầu ra",
+        icon: <FlagRoundedIcon sx={{ fontSize: 24 }} />,
+        path: "/learning-outcomes",
+        section: "Giảng dạy",
+      }),
     ],
   },
   {
@@ -166,9 +159,6 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
         label: "Tích hợp",
         icon: <ExtensionRoundedIcon sx={{ fontSize: 24 }} />,
         children: [
-          { label: "Tổng đài", path: "/integration/setting-call-center" },
-          { label: "Tài khoản Zalo", path: "/integration/setting-zalo-account" },
-          { label: "API key", path: "/integration/setting-center-api-key" },
           { label: "Learning Standards", path: ADMIN_LEARNING_STANDARDS_PATH, description: "SCORM, LTI 1.3 và xAPI theo tenant; trạng thái do backend xác nhận." },
           { label: "Enterprise Connectors", path: ADMIN_ENTERPRISE_CONNECTORS_PATH, description: "Kết nối SIS, HRIS, SCIM; dry-run, sync và deprovision có version guard." },
         ],
@@ -177,6 +167,7 @@ export const ADMIN_BASE_MENU_GROUPS: MenuGroup[] = [
   },
 ];
 
+// Báo cáo (7 màn), Tổng đài, Zalo và API key bị ẩn: backend chưa có API đọc/ghi tương ứng (KE_HOACH 7.6). Chỉ thêm lại khi có endpoint thật.
 export const LCMS_MENU_GROUPS = ADMIN_BASE_MENU_GROUPS;
 
 export function getMenuItemDescription(menuItem: MenuItem) {

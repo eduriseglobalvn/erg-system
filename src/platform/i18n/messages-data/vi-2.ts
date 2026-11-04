@@ -322,7 +322,7 @@ export const viMessages2 = {
   "player.version": "Phiên bản",
   "player.brand": "ERG STUDENT",
 
-  "notFound.title": "Không tìm thấy màn hình",
-  "notFound.description": "Route này chưa tồn tại trong bản React + Vite hiện tại.",
+  "notFound.title": "Không tìm thấy trang",
+  "notFound.description": "Đường dẫn không đúng hoặc trang đã được chuyển đi.",
   "notFound.backHome": "Về trang chủ",
 } as const;

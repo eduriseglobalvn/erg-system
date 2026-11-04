@@ -14,7 +14,6 @@ import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { canonicalLmsWorkspaceHostForRuntime, isCanonicalLmsWorkspaceHost } from "@/platform/workspaces/workspace-route";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 import {
-  LearningOutcomesPage,
   PortalHostRedirect,
   PortalRoute,
   ProfileRouteContent,
@@ -23,8 +22,6 @@ import {
 } from "@/routes/portals/route-shared";
 
 const AdminPage = lazy(() => import("@/app/pages/admin/admin-page"));
-const LearningStandardsPage = lazy(() => import("@/app/pages/admin/learning-standards-page"));
-const EnterpriseConnectorsPage = lazy(() => import("@/app/pages/admin/enterprise-connectors-page"));
 const QuestionTypeDemoPage = lazy(() =>
   import("@/app/pages/shared/question-type-demo-page").then((module) => ({
     default: module.QuestionTypeDemoPage,
@@ -86,7 +83,7 @@ const learningStandardsAdminRoute = createRoute({
     if (!isCanonicalLmsWorkspaceHost(window.location)) {
       return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={ADMIN_LEARNING_STANDARDS_PATH} />;
     }
-    return withPortalAuth("lcms", <LearningStandardsPage />);
+    return withPortalAuth("lcms", <AdminPage />);
   },
 });
 
@@ -110,7 +107,7 @@ const enterpriseConnectorsAdminRoute = createRoute({
     if (!isCanonicalLmsWorkspaceHost(window.location)) {
       return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath={ADMIN_ENTERPRISE_CONNECTORS_PATH} />;
     }
-    return withPortalAuth("lcms", <EnterpriseConnectorsPage />);
+    return withPortalAuth("lcms", <AdminPage />);
   },
 });
 
@@ -129,7 +126,7 @@ const learningOutcomesAdminRoute = createRoute({
     if (!isCanonicalLmsWorkspaceHost(window.location)) {
       return <PortalHostRedirect targetHost={canonicalLmsWorkspaceHostForRuntime()} targetPath="/admin/learning-outcomes" />;
     }
-    return withPortalAuth("lcms", <LearningOutcomesPage workspace="ADMIN" />, "learning.outcomes.manage");
+    return withPortalAuth("lcms", <AdminPage />, "learning.outcomes.manage");
   },
 });
 

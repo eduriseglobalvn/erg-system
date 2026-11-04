@@ -323,6 +323,6 @@ export const enMessages2 = {
   "player.brand": "ERG STUDENT",
 
   "notFound.title": "Screen not found",
-  "notFound.description": "This route does not exist in the current React + Vite app.",
+  "notFound.description": "The link is wrong or the page has moved.",
   "notFound.backHome": "Back to home",
 } as const;

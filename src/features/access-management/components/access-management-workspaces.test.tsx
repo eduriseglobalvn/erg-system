@@ -28,7 +28,7 @@ describe("access-management workspaces", () => {
     });
   });
 
-  test("renders the DB permission catalog row with ID, key and usage binding", () => {
+  test("renders the permission catalog grouped by module without DB id or unbound noise", () => {
     hooks.usePermissionCatalog.mockReturnValue({
       isPending: false,
       isError: false,
@@ -68,10 +68,12 @@ describe("access-management workspaces", () => {
     });
     render(<PermissionCatalogWorkspace tenantId="tenant-1" />);
 
-    expect(screen.getByText("perm_lms_assignment_create")).toBeInTheDocument();
+    expect(screen.getByText("Học tập (LMS)")).toBeInTheDocument();
+    expect(screen.getByText("Tạo bài tập")).toBeInTheDocument();
     expect(screen.getByText("lms.assignment.create")).toBeInTheDocument();
-    expect(screen.getByText("POST /api/v1/lms/assignments")).toBeInTheDocument();
-    expect(screen.getByText("Đang dùng")).toBeInTheDocument();
+    expect(screen.queryByText("perm_lms_assignment_create")).not.toBeInTheDocument();
+    expect(screen.queryByText("Chưa bind")).not.toBeInTheDocument();
+    expect(screen.getByText("2 nhóm quyền · 8 người")).toBeInTheDocument();
   });
 
   test("renders real roles and does not expose legacy mock role rows", () => {
@@ -81,7 +83,7 @@ describe("access-management workspaces", () => {
       data: [
         {
           id: "role_lms_teacher",
-          name: "lms_teacher",
+          name: "lms.learner",
           description: "Teacher permissions",
           permissions: ["lms.assignment.read"],
           is_default: false,
@@ -93,10 +95,26 @@ describe("access-management workspaces", () => {
     });
     render(<RoleManagementWorkspace tenantId="tenant-1" />);
 
-    expect(screen.getByText("lms_teacher")).toBeInTheDocument();
-    expect(screen.getByText("role_lms_teacher")).toBeInTheDocument();
-    expect(screen.getByText("admin-1")).toBeInTheDocument();
+    expect(screen.getByText("lms.learner")).toBeInTheDocument();
+    expect(screen.getByText(/Học/)).toBeInTheDocument();
+    expect(screen.queryByText("role_lms_teacher")).not.toBeInTheDocument();
     expect(screen.queryByText("Teacher Readonly")).not.toBeInTheDocument();
+  });
+
+  test("shows an error alert when the permission-groups request fails", () => {
+    hooks.useRoles.mockReturnValue({ isPending: false, isError: false, data: [] });
+    hooks.usePermissionGroups.mockReturnValue({ data: undefined, isPending: false, isError: true, refetch: vi.fn() });
+    render(<RoleManagementWorkspace tenantId="tenant-1" />);
+    expect(screen.getByRole("alert")).toHaveTextContent("Không tải được danh mục quyền");
+  });
+
+  test("shows an alert instead of silently keeping stale roles after a failed refresh", () => {
+    hooks.useRoles.mockReturnValue({
+      isPending: false, isError: true, refetch: vi.fn(),
+      data: [{ id: "r1", name: "lms.learner", permissions: [], is_default: false, createdAt: "2026-07-15T00:00:00Z", updated_at: "2026-07-15T00:00:00Z" }],
+    });
+    render(<RoleManagementWorkspace tenantId="tenant-1" />);
+    expect(screen.getByRole("alert")).toHaveTextContent("dữ liệu đã tải trước đó");
   });
 
   test("edits a role with real grouped permissions and confirms sensitive grants", async () => {

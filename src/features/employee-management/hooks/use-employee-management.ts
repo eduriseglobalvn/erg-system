@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   assignEmployeeRoles,
   createEmployee,
@@ -23,7 +23,7 @@ import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function useEmployees(tenantId: string, filters: EmployeeListFilters) {
-  return useQuery({ queryKey: employeeManagementQueryKeys.list(tenantId, filters), queryFn: ({ signal }) => listEmployees(filters, signal), staleTime: QUERY_POLICIES.transactional.staleTime });
+  return useQuery({ queryKey: employeeManagementQueryKeys.list(tenantId, filters), queryFn: ({ signal }) => listEmployees(filters, signal), staleTime: QUERY_POLICIES.transactional.staleTime, placeholderData: keepPreviousData });
 }
 
 export function useEmployeeDetail(tenantId: string, userId?: string) {

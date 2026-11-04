@@ -49,8 +49,9 @@ describe("Admin pruned navigation contract", () => {
       "/employees",
       "/settings/permissions",
       "/settings/roles",
-      "/integration/setting-center-api-key",
     ]));
+    // Không có API thật: báo cáo, tổng đài, Zalo, API key không được xuất hiện trong menu.
+    expect(paths.filter((path) => path.startsWith("/report") || path.startsWith("/integration/setting-"))).toEqual([]);
     expect(paths).not.toEqual(expect.arrayContaining([
       "/setting/setting-center-feature",
       "/setting/promotions/price-discount-programs",

@@ -12,18 +12,18 @@ export function NotFoundPage() {
 
   return (
     <Box component="main" sx={{ display: "grid", minHeight: "100vh", p: { xs: 2, sm: 3, lg: 4 }, placeItems: "center" }}>
-      <Paper component="section" elevation={1} sx={{ border: "1px solid", borderColor: "divider", maxWidth: 576, p: { xs: 3, sm: 4 }, width: "100%" }}>
-        <Typography component="p" sx={{ bgcolor: "rgba(204,0,34,0.06)", borderRadius: 1, color: "error.main", display: "inline-flex", fontSize: 12, fontWeight: 700, px: 1.5, py: 0.75 }}>
+      <Paper component="section" elevation={0} sx={{ border: "1px solid", borderColor: "divider", maxWidth: 576, p: { xs: 3, sm: 4 }, width: "100%" }}>
+        <Typography component="p" color="text.secondary" variant="caption">
           404
         </Typography>
-        <Typography component="h1" sx={{ color: "text.primary", fontSize: 24, fontWeight: 700, lineHeight: 1.25, mt: 2 }}>
+        <Typography component="h1" sx={{ mt: 1 }} variant="h1">
           {t("notFound.title")}
         </Typography>
-        <Typography component="p" color="text.secondary" sx={{ fontSize: 14, lineHeight: 1.5, mt: 1.5 }}>
+        <Typography component="p" color="text.secondary" sx={{ mt: 1.5 }} variant="body1">
           {t("notFound.description")}
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mt: 3 }}>
-          <Button component={Link} color="error" sx={{ minHeight: 40, px: 2 }} to="/" variant="contained">
+          <Button component={Link} sx={{ minHeight: 40, px: 2 }} to="/" variant="contained">
             {t("notFound.backHome")}
           </Button>
         </Box>
