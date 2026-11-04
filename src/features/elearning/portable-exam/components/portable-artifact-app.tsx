@@ -12,6 +12,7 @@ import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-run
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
 import type { QuizPackage } from "@/domain/quiz/types";
+import { readOpenedExamFile } from "@/platform/desktop/opened-exam-file";
 
 export type PortableArtifactState =
   | { status: "loading" }
@@ -79,13 +80,18 @@ export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: {
 }
 
 export async function loadEmbeddedPortablePackage(packageUrl: string) {
-  const response = await fetch(packageUrl, { cache: "no-store", credentials: "omit" });
-  if (!response.ok) throw new Error(`PACKAGE_HTTP_${response.status}`);
-  const bytes = await response.arrayBuffer();
+  // The shared Exam Player bundles no exam: it plays the .ergquiz Windows opened it with; per-exam builds embed theirs.
+  const bytes = (await readOpenedExamFile()) ?? (await fetchEmbeddedPackage(packageUrl));
   const { quizPackage } = await loadPortableQuizPackage(bytes, {
     persist: false,
     runtimeVersion: import.meta.env.VITE_PORTABLE_RUNTIME_VERSION ?? "1.0.0",
     source: "tauri-cache",
   });
   return quizPackage;
+}
+
+async function fetchEmbeddedPackage(packageUrl: string) {
+  const response = await fetch(packageUrl, { cache: "no-store", credentials: "omit" });
+  if (!response.ok) throw new Error(`PACKAGE_HTTP_${response.status}`);
+  return response.arrayBuffer();
 }

@@ -43,7 +43,11 @@ assert.doesNotMatch(
   /[\"'](?:dangerousRemoteDomainIpcAccess|shell|process|fs|updater)[\"']\s*:/i,
   "Foundation config must not grant broad native access"
 );
-assert.doesNotMatch(lib, /#\[tauri::command\]|invoke_handler|std::process|std::fs/, "Foundation Rust shell must not expose commands or host access");
+assert.doesNotMatch(lib, /std::process/, "Foundation Rust shell must not spawn processes");
+// The only command is the parameterless OS file-open handler: the page cannot pass a path, so it can read nothing else.
+assert.deepEqual([...lib.matchAll(/#\[tauri::command\]\s*fn\s+(\w+)\s*\(\s*\)/g)].map((m) => m[1]), ["opened_exam_file"], "Rust shell exposes only the parameterless opened_exam_file command");
+assert.equal((lib.match(/#\[tauri::command\]/g) ?? []).length, 1, "Rust shell must not expose any other command");
+assert.match(lib, /generate_handler!\[opened_exam_file\]/, "Only opened_exam_file is registered");
 
 assert.match(runtime, /DESKTOP_WORKSPACES\s*=\s*\["TEACHER",\s*"STUDENT"\]/, "Desktop surface is limited to Teacher and Student");
 assert.doesNotMatch(runtime, /"ADMIN"|"CRM"/, "Admin and CRM must not be desktop workspaces in ERG-120");
@@ -69,8 +73,7 @@ for (const relativeDirectory of ["src/features", "src/app/pages"]) {
 }
 
 // 8.4.1/8.4.2: the single "ERG Exam Player" profile and the per-exam portable profile.
-// Single-instance (tauri-plugin-single-instance) is NOT a dependency yet: add it to Cargo.toml and register it in
-// lib.rs together with the Rust file-open handler (phase 1 Rust work) before relying on the .ergquiz association.
+// Single-instance (tauri-plugin-single-instance) is NOT a dependency yet: opening a second .ergquiz starts a second window.
 const player = JSON.parse(read("src-tauri/tauri.player.conf.json"));
 const portable = JSON.parse(read("src-tauri/tauri.portable.template.json"));
 assert.deepEqual(player.app.security.capabilities, [], "Player profile must not attach any capability");
