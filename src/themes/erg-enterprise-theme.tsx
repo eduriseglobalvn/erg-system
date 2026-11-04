@@ -46,18 +46,18 @@ export const ergEnterpriseTheme = createTheme({
   },
   typography: {
     fontFamily: t.font.body,
-    h1: { fontSize: 30, fontWeight: 800, lineHeight: 1.2, letterSpacing: 0 },
-    h2: { fontSize: 26, fontWeight: 800, lineHeight: 1.24, letterSpacing: 0 },
-    h3: { fontSize: 22, fontWeight: 750, lineHeight: 1.3, letterSpacing: 0 },
-    h4: { fontSize: 20, fontWeight: 750, lineHeight: 1.35, letterSpacing: 0 },
-    h5: { fontSize: 18, fontWeight: 750, lineHeight: 1.4, letterSpacing: 0 },
-    h6: { fontSize: 16, fontWeight: 750, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle1: { fontSize: 15, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    subtitle2: { fontSize: 14, fontWeight: 700, lineHeight: 1.45, letterSpacing: 0 },
-    body1: { fontSize: 15, fontWeight: 500, lineHeight: 1.55, letterSpacing: 0 },
-    body2: { fontSize: 14, fontWeight: 500, lineHeight: 1.5, letterSpacing: 0 },
-    caption: { fontSize: 12.5, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
-    button: { fontSize: 14, fontWeight: 750, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
+    h1: { fontSize: 24, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0 },
+    h2: { fontSize: 22, fontWeight: 600, lineHeight: 1.24, letterSpacing: 0 },
+    h3: { fontSize: 20, fontWeight: 600, lineHeight: 1.3, letterSpacing: 0 },
+    h4: { fontSize: 18, fontWeight: 600, lineHeight: 1.35, letterSpacing: 0 },
+    h5: { fontSize: 16, fontWeight: 600, lineHeight: 1.4, letterSpacing: 0 },
+    h6: { fontSize: 15, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    subtitle1: { fontSize: 14, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    subtitle2: { fontSize: 14, fontWeight: 600, lineHeight: 1.45, letterSpacing: 0 },
+    body1: { fontSize: 14, fontWeight: 400, lineHeight: 1.55, letterSpacing: 0 },
+    body2: { fontSize: 14, fontWeight: 400, lineHeight: 1.5, letterSpacing: 0 },
+    caption: { fontSize: 12, fontWeight: 500, lineHeight: 1.45, letterSpacing: 0 },
+    button: { fontSize: 14, fontWeight: 600, lineHeight: 1.2, letterSpacing: 0, textTransform: "none" },
   },
   components: {
     MuiCssBaseline: {
@@ -102,8 +102,8 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           minHeight: t.size.controlMd,
-          borderRadius: t.radius.md,
-          fontWeight: 750,
+          borderRadius: t.radius.xs,
+          fontWeight: 600,
           letterSpacing: 0,
           paddingInline: 18,
           textTransform: "none",
@@ -171,8 +171,15 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           borderColor: t.color.border,
-          borderRadius: t.radius.lg,
-          boxShadow: t.shadow.xs,
+          borderRadius: t.radius.sm,
+          boxShadow: "none", // shadows only for menu/popover/dialog (plan 7.1)
+        },
+      },
+    },
+    MuiPopover: {
+      styleOverrides: {
+        paper: {
+          boxShadow: t.shadow.sm,
         },
       },
     },
@@ -180,7 +187,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           border: `1px solid ${t.color.border}`,
-          borderRadius: t.radius.lg,
+          borderRadius: t.radius.sm,
           backgroundImage: "none",
           boxShadow: "none", // cards are separated by border only (plan 7.1); shadows are for menus/dialogs
         },
@@ -192,7 +199,7 @@ export const ergEnterpriseTheme = createTheme({
           minHeight: t.size.controlMd,
           borderRadius: t.radius.md,
           backgroundColor: t.color.surface,
-          fontWeight: 600,
+          fontWeight: 400,
           "& .MuiOutlinedInput-notchedOutline": {
             borderColor: t.color.border,
           },
@@ -220,7 +227,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           color: t.color.textMuted,
-          fontWeight: 700,
+          fontWeight: 500,
           letterSpacing: 0,
           "&.Mui-focused": {
             color: t.color.primary,
@@ -231,7 +238,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiFormHelperText: {
       styleOverrides: {
         root: {
-          fontWeight: 600,
+          fontWeight: 400,
           marginLeft: 2,
         },
       },
@@ -239,7 +246,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiSelect: {
       styleOverrides: {
         select: {
-          fontWeight: 700,
+          fontWeight: 400,
         },
       },
     },
@@ -247,7 +254,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           borderRadius: t.radius.sm,
-          fontWeight: 750,
+          fontWeight: 600,
         },
       },
     },
@@ -263,7 +270,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiDialogTitle: {
       styleOverrides: {
         root: {
-          fontWeight: 800,
+          fontWeight: 600,
           letterSpacing: 0,
         },
       },
@@ -311,14 +318,14 @@ export const ergEnterpriseTheme = createTheme({
           borderBottom: `1px solid ${t.color.border}`,
           color: t.color.text,
           fontSize: 14,
-          fontWeight: 600,
-          padding: "10px 16px",
+          fontWeight: 400,
+          padding: "12px 16px",
         },
         head: {
           backgroundColor: t.color.surfaceMuted,
           color: t.color.textMuted,
-          fontSize: 12.5,
-          fontWeight: 800,
+          fontSize: 12,
+          fontWeight: 600,
           textTransform: "uppercase",
         },
       },

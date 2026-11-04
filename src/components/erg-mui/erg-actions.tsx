@@ -23,9 +23,6 @@ export function ErgButton({
   variant = "contained",
   ...props
 }: ErgButtonProps) {
-  const isContained = variant === "contained";
-  const isOutlined = variant === "outlined";
-
   return (
     <Button
       disabled={disabled || loading}
@@ -33,45 +30,7 @@ export function ErgButton({
       startIcon={loading ? <CircularProgress color="inherit" size={16} /> : (startIcon ?? leadingIcon)}
       sx={[
         {
-          borderRadius: "10px",
-          fontSize: "0.85rem",
-          fontWeight: 650,
-          letterSpacing: "-0.01em",
-          minHeight: 38,
-          px: 2,
-          py: 0.85,
-          textTransform: "none",
-          transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
-          "&:active": {
-            transform: "scale(0.985)",
-          },
-          ...(isContained
-            ? {
-                bgcolor: "#0071E3",
-                boxShadow: "0 2px 8px rgba(0, 113, 227, 0.28)",
-                color: "#FFFFFF",
-                "&:hover": {
-                  bgcolor: "#0077ED",
-                  boxShadow: "0 4px 14px rgba(0, 113, 227, 0.38)",
-                },
-                "&:active": {
-                  bgcolor: "#005BB5",
-                  transform: "scale(0.985)",
-                },
-              }
-            : {}),
-          ...(isOutlined
-            ? {
-                bgcolor: "#FFFFFF",
-                borderColor: "rgba(0, 0, 0, 0.12)",
-                boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
-                color: "#1D1D1F",
-                "&:hover": {
-                  bgcolor: "rgba(0, 0, 0, 0.03)",
-                  borderColor: "rgba(0, 0, 0, 0.22)",
-                },
-              }
-            : {}),
+          transition: "background-color 0.15s ease, border-color 0.15s ease",
         },
         ...(Array.isArray(sx) ? sx : [sx]),
       ] as SxProps<Theme>}
@@ -93,18 +52,6 @@ export function ErgIconButton({ label, sx, tooltip, ...props }: ErgIconButtonPro
     <IconButton
       aria-label={label}
       sx={[
-        {
-          borderRadius: "9px",
-          color: "#4B5563",
-          transition: "all 0.15s ease",
-          "&:hover": {
-            bgcolor: "rgba(0, 0, 0, 0.05)",
-            color: "#1D1D1F",
-          },
-          "&:active": {
-            transform: "scale(0.92)",
-          },
-        },
         ...(Array.isArray(sx) ? sx : [sx]),
       ]}
       {...props}
@@ -121,27 +68,8 @@ export function ErgToolbarButton({ active = false, sx, variant = "outlined", ...
   return (
     <ErgButton
       variant={active ? "contained" : variant}
+      size="small"
       sx={[
-        {
-          borderRadius: "8px",
-          minHeight: 34,
-          px: 1.5,
-          py: 0.5,
-          ...(active
-            ? {
-                bgcolor: "#0071E3",
-                boxShadow: "0 2px 6px rgba(0, 113, 227, 0.24)",
-              }
-            : {
-                bgcolor: "#FFFFFF",
-                borderColor: "rgba(0, 0, 0, 0.12)",
-                color: "#1D1D1F",
-                "&:hover": {
-                  bgcolor: "rgba(0, 113, 227, 0.04)",
-                  borderColor: "rgba(0, 113, 227, 0.3)",
-                },
-              }),
-        },
         ...(Array.isArray(sx) ? sx : [sx]),
       ] as SxProps<Theme>}
       {...props}
