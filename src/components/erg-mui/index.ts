@@ -6,3 +6,6 @@ export * from "./erg-overlays";
 export * from "./erg-table";
 export * from "./charts";
 export * from "./offline";
+export * from "./erg-page-header";
+export * from "./erg-metric-card";
+export * from "./erg-confirm-dialog";
