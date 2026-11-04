@@ -1,7 +1,7 @@
 {
   "_comment": "Max raw (uncompressed) bytes per manualChunks prefix from vite.config.ts. Prefix matches dist/assets/<prefix>-<hash>.js (and sub-chunks like tanstack-form). Seeded from a real `vite build` on 2026-07-25 with ~15% headroom. Raise deliberately when a chunk legitimately grows; a jump usually means an accidental eager import. Checked by scripts/check-bundle-budget.mjs (npm run budget:check).",
   "index": 340000,
-  "pdfjs": 475000,
+  "pdf": 475000,
   "tanstack": 305000,
   "dnd": 60000,
   "icons": 24000,

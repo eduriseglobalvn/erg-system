@@ -126,7 +126,8 @@ export default defineConfig(({ command, mode }) => {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("pdfjs-dist")) return "pdfjs";
+            // pdfjs is not grouped: a manual pdfjs chunk captured Vite's preload helper, so the entry
+            // downloaded ~120 KB of pdfjs on every cold start. It now stays inside the lazy PDF viewer chunk.
             if (id.includes("@tanstack/react-virtual")) return "virtual";
             if (id.includes("@tanstack")) return "tanstack";
             if (id.includes("radix-ui")) return "radix";
