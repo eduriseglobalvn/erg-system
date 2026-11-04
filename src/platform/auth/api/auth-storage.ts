@@ -128,6 +128,11 @@ export function getCurrentAccount(portal: StoredAuthSession["portal"] = resolveC
   return listAccounts().find((account) => account.id === session.accountId) ?? accountFromSession(session) ?? (AUTH_BYPASS_ENABLED ? DEFAULT_BYPASS_ACCOUNT : null);
 }
 
+/** Account id for scoping query keys/caches; `fallback` when signed out. */
+export function getCurrentAccountId(portal: StoredAuthSession["portal"] = resolveCurrentPortal(), fallback = "anonymous") {
+  return getCurrentAccount(portal)?.id?.trim() || fallback;
+}
+
 function isBffAuthMode() {
   return import.meta.env.VITE_AUTH_MODE === "oidc-bff";
 }

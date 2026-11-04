@@ -12,7 +12,7 @@ import type { ManagementScope } from "@/types/scope-types";
 import { queryKeys } from "@/lib/query-keys";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 import { AppSelect } from "@/components/ui/app-select";
 import { LcmsListSkeleton, LcmsMiniStat, LcmsPanel, LcmsPanelHeader, LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 import { EducationUnitEditor } from "./admin-operations-education-editor";
@@ -34,7 +34,7 @@ export function CenterManagement({
 }) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const [units, setUnits] = useState<LmsEducationUnitDTO[]>([]);
   const [selectedUnitId, setSelectedUnitId] = useState("");
   const [keyword, setKeyword] = useState("");

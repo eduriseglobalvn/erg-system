@@ -60,7 +60,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import { cn } from "@/lib/utils";
 import { AppSelect } from "@/components/ui/app-select";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function UserAccessControlWorkspace({
   defaultSection = "profile",
@@ -71,7 +71,7 @@ export function UserAccessControlWorkspace({
 }) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const [users, setUsers] = useState<AccessManagedUser[]>([]);
   const [options, setOptions] = useState<AccessManagementOptions | null>(null);
   const [selectedUserId, setSelectedUserId] = useState("");

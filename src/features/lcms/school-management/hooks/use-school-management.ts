@@ -24,13 +24,13 @@ import type { SchoolClass, SchoolDraft, SchoolStudent, SchoolSubject } from "@/f
 import type { OperationalClassRecord, SchoolClassInput, SchoolStudentInput, SchoolSubjectInput } from "@/features/lcms/school-management/api/school-management-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function useSchoolManagement(initialSchoolId?: string | null) {
   const queryClient = useQueryClient();
   const [selectedSchoolId, setSelectedSchoolId] = useState(initialSchoolId ?? "");
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const directoryQuery = useQuery({
     queryKey: schoolManagementQueryKeys.directory(tenantId, accountId),
     queryFn: ({ signal }) => getSchoolDirectory("", signal),

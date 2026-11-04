@@ -20,7 +20,7 @@ import {
 } from "@/features/lcms/school-management/api/school-management-api";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 
 export function useEmployees(tenantId: string, filters: EmployeeListFilters) {
   return useQuery({ queryKey: employeeManagementQueryKeys.list(tenantId, filters), queryFn: ({ signal }) => listEmployees(filters, signal), staleTime: QUERY_POLICIES.transactional.staleTime });
@@ -59,7 +59,7 @@ export function useEmployeeRoleOptions(tenantId: string) {
 
 export function useEmployeeSchoolOptions(selectedSchoolId?: string) {
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
 
   const directoryQuery = useQuery({
     queryKey: schoolManagementQueryKeys.directory(tenantId, accountId),

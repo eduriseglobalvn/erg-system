@@ -6,7 +6,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import ListTree from "@mui/icons-material/AccountTree";
 import Skeleton from "@mui/material/Skeleton";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
+import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
 import {
   COURSE_STRUCTURE_WORKSPACE_DESCRIPTION,
   COURSE_STRUCTURE_WORKSPACE_LABEL,
@@ -125,7 +125,7 @@ function LearningResourceAuthoringSkeleton() {
 export function LearningResourceAuthoringWorkspace({ activeLeaf }: { activeLeaf: DashboardLeaf; onOpenLeaf?: (leafId: string) => void }) {
   const queryClient = useQueryClient();
   const tenantId = getDefaultTenantId();
-  const accountId = getCurrentAccount("lcms")?.id?.trim() || "anonymous";
+  const accountId = getCurrentAccountId("lcms");
   const [model, setModel] = useState<LearningResourceTaxonomyResponse>(emptyModel);
   const [resources, setResources] = useState<LearningResourceResourceCard[]>([]);
   const [loading, setLoading] = useState(true);
