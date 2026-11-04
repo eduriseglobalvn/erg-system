@@ -11,6 +11,7 @@ import {
   PortableExamLauncher,
   type PortableExamScope,
 } from "@/features/elearning/portable-exam";
+import { PortableResultImportCard } from "@/features/elearning/portable-exam/components/portable-result-import-card";
 import type { QuizPackage } from "@/domain/quiz/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
@@ -86,6 +87,7 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
             </Typography>
           </Stack>
           <PortableExamLauncher onPackageReady={setQuizPackage} scope={scope} />
+          <PortableResultImportCard portal={activeRuntimePortal} />
         </Stack>
       </Container>
     </Box>

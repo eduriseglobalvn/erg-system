@@ -176,14 +176,15 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   }, [refreshSchoolData, selectedSchool, selectedSchoolId, studentCreateMutation, studentImportMutation]);
 
   const addSubject = useCallback(async (row: Omit<SchoolSubject, "id" | "studentCount">) => {
-    if (!selectedSchoolId) return;
-    await subjectCreateMutation.mutateAsync({
+    if (!selectedSchoolId) return undefined;
+    const created = await subjectCreateMutation.mutateAsync({
       schoolId: selectedSchoolId,
       name: row.name,
       code: row.code,
       status: row.status || "ACTIVE",
     });
     await refreshSchoolData(selectedSchoolId);
+    return created;
   }, [refreshSchoolData, selectedSchoolId, subjectCreateMutation]);
 
   const updateClassGrade = useCallback(async (classId: string, grade: string) => {

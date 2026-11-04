@@ -2,6 +2,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ClassRoundedIcon from "@mui/icons-material/ClassRounded";
 import GroupAddRoundedIcon from "@mui/icons-material/GroupAddRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
@@ -9,7 +10,12 @@ import Paper from "@mui/material/Paper";
 import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
+import type { SchoolClassSubjectAllocation } from "@/features/lcms/school-management/api/school-class-subjects-api";
+import {
+  useSaveSchoolClassSubjectsMutation,
+  useSchoolClassSubjectsQuery,
+} from "@/features/lcms/school-management/api/school-class-subjects-query";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 import { SchoolEnrollmentDialog } from "@/features/lcms/school-management/components/setup/school-enrollment-dialog";
 import { SchoolStepSurface } from "@/features/lcms/school-management/components/setup/school-step-surface";
@@ -18,7 +24,23 @@ import { schoolTypeMeta } from "@/features/lcms/school-management/types/school-t
 // Stable fallback so memo deps do not change every render.
 const NONE: never[] = [];
 
+/** subject id -> ids of the classes that study it. */
 type SubjectClassAllocation = Record<string, string[]>;
+
+function toSubjectMap(allocations: SchoolClassSubjectAllocation[]): SubjectClassAllocation {
+  const bySubject: SubjectClassAllocation = {};
+  allocations.forEach(({ classId, subjectIds }) =>
+    subjectIds.forEach((subjectId) => (bySubject[subjectId] ??= []).push(classId)));
+  return bySubject;
+}
+
+function toClassAllocations(bySubject: SubjectClassAllocation, classIds: readonly string[]): SchoolClassSubjectAllocation[] {
+  const known = new Set(classIds);
+  const byClass = new Map<string, string[]>();
+  Object.entries(bySubject).forEach(([subjectId, assigned]) =>
+    assigned.filter((classId) => known.has(classId)).forEach((classId) => byClass.set(classId, [...(byClass.get(classId) ?? []), subjectId])));
+  return [...byClass].map(([classId, subjectIds]) => ({ classId, subjectIds }));
+}
 
 export function SchoolCurriculumStep() {
   const { addSubject, enrollStudentsInClass, selectedSchool } = useSchoolManagementContext();
@@ -26,47 +48,33 @@ export function SchoolCurriculumStep() {
   const [enrollOpen, setEnrollOpen] = useState(false);
   const [initialClassId, setInitialClassId] = useState<string | undefined>();
   const [viewMode, setViewMode] = useState<"by-subject" | "by-class">("by-subject");
-  const [allocations, setAllocations] = useState<SubjectClassAllocation>({});
+  const [saveError, setSaveError] = useState<string | null>(null);
 
-  const storageKey = selectedSchool ? `erg_school_subject_classes_${selectedSchool.id}` : "";
-
-  // Load saved class-to-subject allocations
-  useEffect(() => {
-    // Always set (default {}) so another school's allocations never leak across a storageKey change.
-    let next: SubjectClassAllocation = {};
-    try {
-      const saved = storageKey ? localStorage.getItem(storageKey) : null;
-      if (saved) next = JSON.parse(saved) as SubjectClassAllocation;
-    } catch {
-      // Ignore JSON error
-    }
-    setAllocations(next);
-  }, [storageKey]);
-
-  const saveAllocations = useCallback(
-    (next: SubjectClassAllocation) => {
-      setAllocations(next);
-      if (storageKey) {
-        try {
-          localStorage.setItem(storageKey, JSON.stringify(next));
-        } catch {
-          // Ignore
-        }
-      }
-    },
-    [storageKey]
+  const allocationScope = { schoolId: selectedSchool?.id, academicYear: selectedSchool?.academicYear || "current" };
+  const allocationQuery = useSchoolClassSubjectsQuery(allocationScope);
+  const saveAllocations = useSaveSchoolClassSubjectsMutation(allocationScope);
+  const savedSet = allocationQuery.data;
+  // Nothing saved yet (version 0): every subject applies to every class, as before.
+  const allocations = useMemo<SubjectClassAllocation | null>(
+    () => (savedSet && savedSet.version > 0 ? toSubjectMap(savedSet.allocations) : null),
+    [savedSet],
   );
 
   const schoolClasses = selectedSchool?.classes ?? NONE;
   const schoolSubjects = selectedSchool?.subjects ?? NONE;
 
   // Derive class-to-subjects map. Hooks stay above the `!selectedSchool` guard so they run on every render.
+  const allClassIds = useMemo(() => schoolClasses.map((c) => c.id), [schoolClasses]);
+  const classIdsFor = useCallback(
+    (subjectId: string) => (allocations ? allocations[subjectId] ?? [] : allClassIds),
+    [allClassIds, allocations],
+  );
   const classSubjectsMap = useMemo(() => {
     const map = new Map<string, Array<{ name: string; code: string }>>();
     schoolClasses.forEach((cls) => map.set(cls.id, []));
 
     schoolSubjects.forEach((subj) => {
-      const assignedClassIds = allocations[subj.code] || schoolClasses.map((c) => c.id);
+      const assignedClassIds = classIdsFor(subj.id);
       assignedClassIds.forEach((clsId) => {
         const list = map.get(clsId) || [];
         list.push({ name: subj.name, code: subj.code });
@@ -74,7 +82,7 @@ export function SchoolCurriculumStep() {
       });
     });
     return map;
-  }, [allocations, schoolClasses, schoolSubjects]);
+  }, [classIdsFor, schoolClasses, schoolSubjects]);
 
   if (!selectedSchool) return null;
   const meta = schoolTypeMeta[selectedSchool.schoolType];
@@ -96,10 +104,19 @@ export function SchoolCurriculumStep() {
     subjectCatalogId: string;
     levelCatalogId: string;
   }) {
-    await addSubject({ name: payload.name, code: payload.code, teacherCount: 0 });
-    // Update local allocations mapping
-    const next = { ...allocations, [payload.code]: payload.selectedClassIds };
-    saveAllocations(next);
+    setSaveError(null);
+    const created = await addSubject({ name: payload.name, code: payload.code, teacherCount: 0 });
+    if (!created) return;
+    // The first save writes the explicit matrix (unset subjects keep applying to every class).
+    const next: SubjectClassAllocation = Object.fromEntries(schoolSubjects.map((subject) => [subject.id, classIdsFor(subject.id)]));
+    next[created.id] = payload.selectedClassIds;
+    try {
+      await saveAllocations.mutateAsync({ allocations: toClassAllocations(next, allClassIds), expectedVersion: savedSet?.version ?? 0 });
+    } catch (error) {
+      const message = error instanceof Error && error.message ? error.message : "Không lưu được phân bổ môn học theo lớp.";
+      setSaveError(message);
+      throw error;
+    }
   }
 
   const classesWithSubjects = selectedSchool.classes.filter(
@@ -120,6 +137,7 @@ export function SchoolCurriculumStep() {
               Ghi danh vào lớp
             </Button>
             <Button
+              disabled={!allocationQuery.isSuccess}
               onClick={() => {
                 setInitialClassId(undefined);
                 setAssignOpen(true);
@@ -135,6 +153,20 @@ export function SchoolCurriculumStep() {
         eyebrow="Bước 4"
         title={`${meta.subjectLabel} & ghi danh`}
       >
+        {allocationQuery.isPending ? (
+          <Alert severity="info" sx={{ mb: 2 }}>Đang tải phân bổ môn học theo lớp…</Alert>
+        ) : null}
+        {allocationQuery.isError ? (
+          <Alert
+            action={<Button color="inherit" onClick={() => void allocationQuery.refetch()} size="small" variant="text">Tải lại</Button>}
+            severity="error"
+            sx={{ mb: 2 }}
+          >
+            Không tải được phân bổ môn học theo lớp. Chưa thể thêm môn mới cho đến khi tải lại thành công.
+          </Alert>
+        ) : null}
+        {saveError ? <Alert onClose={() => setSaveError(null)} severity="error" sx={{ mb: 2 }}>{saveError}</Alert> : null}
+
         {/* Inline stats strip */}
         <Box
           sx={{
@@ -180,7 +212,7 @@ export function SchoolCurriculumStep() {
         {viewMode === "by-subject" ? (
           <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" } }}>
             {selectedSchool.subjects.map((subject) => {
-              const assignedClassIds = allocations[subject.code] || selectedSchool.classes.map((c) => c.id);
+              const assignedClassIds = classIdsFor(subject.id);
               const assignedClasses = selectedSchool.classes.filter((c) => assignedClassIds.includes(c.id));
               const assignedStudentCount = assignedClasses.reduce((sum, c) => sum + (c.studentCount || 0), 0);
 
