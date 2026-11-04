@@ -1,5 +1,4 @@
 import type { MenuItem } from "./ErgPortalLayout";
-import { COLLAPSED_LABELS } from "./portal-sidebar-styles";
 
 export function normalizedLabel(label: string) {
   return label
@@ -14,10 +13,6 @@ export function isReportMenu(label: string) {
 
 export function isStudentLabel(label: string) {
   return normalizedLabel(label).includes("hoc vien");
-}
-
-export function getCollapsedLabel(label: string) {
-  return COLLAPSED_LABELS[label] ?? label;
 }
 
 const ROOT_WORKSPACE_PATHS = new Set([

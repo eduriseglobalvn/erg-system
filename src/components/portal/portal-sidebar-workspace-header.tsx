@@ -3,13 +3,12 @@
 import { useState, type ReactNode } from "react";
 import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
 import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
-import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
+import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
 import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import UnfoldMoreRoundedIcon from "@mui/icons-material/UnfoldMoreRounded";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
-import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import Tooltip from "@mui/material/Tooltip";
@@ -21,21 +20,22 @@ import {
   canonicalCrmWorkspaceHostForRuntime,
   canonicalLmsWorkspaceHostForRuntime,
 } from "@/platform/workspaces/workspace-route";
-import {
-  workspaceCapabilities,
-  workspacesFromLegacyPortals,
-} from "@/platform/workspaces/workspace-switcher";
+import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/workspaces/workspace-switcher";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
-import { ERG_ASSETS } from "@/config/seo";
 import type { PortalInfo } from "./ErgPortalLayout";
 import {
-  COLLAPSED_SIDEBAR_WIDTH,
-  EXPANDED_SIDEBAR_WIDTH,
-} from "./portal-sidebar-motion";
-import {
-  NAV_PANEL_BORDER,
-  SIDEBAR_FADE_EASING,
-  SIDEBAR_MOTION_CURVE,
+  gradientTileSx,
+  NAV_BORDER,
+  NAV_CARD_SHADOW,
+  NAV_FS,
+  NAV_FW,
+  NAV_HOVER_BG,
+  NAV_ICON_SIZE,
+  NAV_ITEM_RADIUS,
+  NAV_PADDING,
+  NAV_PRIMARY,
+  NAV_RAISED_RADIUS,
+  NAV_TILE_SIZE,
 } from "./portal-sidebar-styles";
 
 function workspaceFromPath(
@@ -43,12 +43,12 @@ function workspaceFromPath(
   hostname = typeof window === "undefined" ? "" : window.location.hostname,
 ): Workspace {
   const segment = pathname.split("/").filter(Boolean)[0];
+  const host = hostname.toLowerCase();
   if (segment === "admin") return "ADMIN";
   if (segment === "student") return "STUDENT";
-  if (hostname.toLowerCase() === canonicalCrmWorkspaceHostForRuntime(hostname)) return "CRM";
-  if (hostname.toLowerCase() === "crm.erg.edu.local" || hostname.toLowerCase() === "crm.erg.edu.vn") return "CRM";
-  const legacyAdminDomain = "lcms.erg.edu.local";
-  if (hostname.toLowerCase() === legacyAdminDomain) return "ADMIN";
+  if (host === canonicalCrmWorkspaceHostForRuntime(hostname)) return "CRM";
+  if (host === "crm.erg.edu.local" || host === "crm.erg.edu.vn") return "CRM";
+  if (host === "lcms.erg.edu.local") return "ADMIN";
   if (segment === "crm") return "CRM";
   return "TEACHER";
 }
@@ -66,84 +66,46 @@ function runtimeOriginForWorkspace(workspace: Workspace) {
 
 export const WORKSPACE_META: Record<
   Workspace,
-  {
-    label: string;
-    subtitle: string;
-    icon: ReactNode;
-    themeColor: string;
-    gradient: string;
-    shadow: string;
-    localPath: string;
-  }
+  { label: string; subtitle: string; icon: ReactNode; localPath: string }
 > = {
-  ADMIN: {
-    label: "Admin LMS",
-    subtitle: "Quản trị hệ thống",
-    icon: <AdminPanelSettingsRoundedIcon sx={{ fontSize: 20, color: "#FFFFFF" }} />,
-    themeColor: "#4F46E5",
-    gradient: "linear-gradient(135deg, #4F46E5 0%, #6366F1 50%, #7C3AED 100%)",
-    shadow: "0 3px 10px rgba(79, 70, 229, 0.32)",
-    localPath: "/admin",
-  },
-  TEACHER: {
-    label: "Giáo viên",
-    subtitle: "Không gian giảng dạy",
-    icon: <SchoolRoundedIcon sx={{ fontSize: 20, color: "#FFFFFF" }} />,
-    themeColor: "#059669",
-    gradient: "linear-gradient(135deg, #059669 0%, #10B981 50%, #0D9488 100%)",
-    shadow: "0 3px 10px rgba(16, 185, 129, 0.32)",
-    localPath: "/teacher/home",
-  },
-  STUDENT: {
-    label: "Học sinh",
-    subtitle: "Cổng học tập & bài tập",
-    icon: <MenuBookRoundedIcon sx={{ fontSize: 20, color: "#FFFFFF" }} />,
-    themeColor: "#0284C7",
-    gradient: "linear-gradient(135deg, #0284C7 0%, #0EA5E9 50%, #38BDF8 100%)",
-    shadow: "0 3px 10px rgba(2, 132, 199, 0.32)",
-    localPath: "/student",
-  },
-  CRM: {
-    label: "CRM Tuyển sinh",
-    subtitle: "Quản lý khách hàng",
-    icon: <BusinessRoundedIcon sx={{ fontSize: 20, color: "#FFFFFF" }} />,
-    themeColor: "#D97706",
-    gradient: "linear-gradient(135deg, #D97706 0%, #F59E0B 50%, #F97316 100%)",
-    shadow: "0 3px 10px rgba(217, 119, 6, 0.32)",
-    localPath: "/",
-  },
+  ADMIN: { label: "Admin LMS", subtitle: "Quản trị hệ thống", icon: <AdminPanelSettingsRoundedIcon />, localPath: "/admin" },
+  TEACHER: { label: "Giáo viên", subtitle: "Không gian giảng dạy", icon: <SchoolRoundedIcon />, localPath: "/teacher/home" },
+  STUDENT: { label: "Học sinh", subtitle: "Cổng học tập & bài tập", icon: <MenuBookRoundedIcon />, localPath: "/student" },
+  CRM: { label: "CRM Tuyển sinh", subtitle: "Quản lý khách hàng", icon: <BusinessRoundedIcon />, localPath: "/" },
 };
 
+function WorkspaceTile({ workspace, size }: { workspace: Workspace; size: number }) {
+  return (
+    <Box sx={{ ...gradientTileSx(size), "& .MuiSvgIcon-root": { fontSize: NAV_ICON_SIZE } }}>
+      {WORKSPACE_META[workspace].icon}
+    </Box>
+  );
+}
+
+/**
+ * Brand header of the sidebar and the only portal switcher: a gradient logo tile plus the current
+ * portal name; clicking it opens the list of portals the user can access. Collapsed = tile only.
+ */
 export function PortalSidebarWorkspaceHeader({
-  active,
+  active = true,
   collapsed,
-  mobile = false,
-  portalInfo,
-  onNavigate,
   fluid = false,
+  onNavigate,
+  portalInfo,
 }: {
-  active: boolean;
+  /** When false the header is hidden from assistive tech and focus. */
+  active?: boolean;
   collapsed: boolean;
-  mobile?: boolean;
-  portalInfo?: PortalInfo;
-  onNavigate?: (path: string) => void;
+  /** Plain bordered block (no sidebar padding), used by the student dashboard menu. */
   fluid?: boolean;
+  onNavigate?: (path: string) => void;
+  portalInfo?: PortalInfo;
 }) {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  void mobile;
-  let pathname = "";
-  try {
-     
-    const location = useLocation();
-    pathname = location?.pathname || "";
-  } catch {
-    if (typeof window !== "undefined") {
-      pathname = window.location.pathname || "";
-    }
-  }
+  const pathname = useLocation()?.pathname || "";
 
   const current = workspaceFromPath(pathname);
-  const meta = WORKSPACE_META[current] ?? WORKSPACE_META.TEACHER;
+  const meta = WORKSPACE_META[current];
 
   const sessionWorkspaces = typeof window !== "undefined" ? getAuthScope().session?.workspaces : undefined;
   const granted = portalInfo?.workspaceCapabilities?.length
@@ -151,24 +113,23 @@ export function PortalSidebarWorkspaceHeader({
     : sessionWorkspaces?.length
       ? [...sessionWorkspaces]
       : workspacesFromLegacyPortals(portalInfo?.workspacePortals ?? [], current);
-
   const capabilities = workspaceCapabilities(granted, current, pathname, {
     originForWorkspace: runtimeOriginForWorkspace,
   });
-
   const canSwitch = capabilities.length >= 2;
+  const triggerProps = {
+    "aria-expanded": Boolean(anchorEl),
+    "aria-haspopup": canSwitch ? ("menu" as const) : undefined,
+    "aria-label": `Không gian làm việc: ${meta.label}`,
+    onClick: (event: { currentTarget: HTMLElement }) => canSwitch && setAnchorEl(event.currentTarget),
+  };
 
-  const handleSelectWorkspace = (targetWorkspace: Workspace, fallbackHref?: string) => {
+  const handleSelectWorkspace = (target: Workspace, fallbackHref?: string) => {
     setAnchorEl(null);
-    if (typeof window !== "undefined") {
-      window.localStorage?.setItem("erg_last_workspace", targetWorkspace);
-    }
-    const targetPath = WORKSPACE_META[targetWorkspace]?.localPath ?? fallbackHref ?? "/";
-    if (onNavigate) {
-      onNavigate(targetPath);
-    } else if (typeof window !== "undefined") {
-      window.location.assign(targetPath);
-    }
+    window.localStorage?.setItem("erg_last_workspace", target);
+    const targetPath = WORKSPACE_META[target]?.localPath ?? fallbackHref ?? "/";
+    if (onNavigate) onNavigate(targetPath);
+    else window.location.assign(targetPath);
   };
 
   return (
@@ -176,261 +137,96 @@ export function PortalSidebarWorkspaceHeader({
       aria-hidden={!active}
       inert={!active}
       sx={{
-        alignItems: "center",
-        boxSizing: "border-box",
-        borderBottom: fluid ? "none" : `1px solid ${NAV_PANEL_BORDER}`,
         display: "flex",
-        height: fluid ? "auto" : 64,
         justifyContent: collapsed ? "center" : "flex-start",
-        left: 0,
-        opacity: active ? 1 : 0,
-        px: collapsed ? 0 : (fluid ? 0 : "10px"),
-        pointerEvents: active ? "auto" : "none",
-        position: fluid ? "relative" : "absolute",
-        top: 0,
-        transform: fluid ? "none" : (active ? "translate3d(0, 0, 0)" : `translate3d(${collapsed ? -6 : 6}px, 0, 0)`),
-        transition: fluid ? "none" : `opacity ${SIDEBAR_FADE_EASING}, transform ${SIDEBAR_MOTION_CURVE}`,
-        width: fluid ? "100%" : (collapsed ? COLLAPSED_SIDEBAR_WIDTH : EXPANDED_SIDEBAR_WIDTH),
-        zIndex: 2,
-        "@media (prefers-reduced-motion: reduce)": {
-          transition: "none",
-        },
+        ...(fluid ? {} : { pb: 1, pt: `${NAV_PADDING}px`, px: `${NAV_PADDING}px` }),
       }}
     >
-      <Box
-        component="img"
-        alt="ERG"
-        src={collapsed ? ERG_ASSETS.mobileLogo : ERG_ASSETS.logo}
-        sx={{ width: 0, height: 0, opacity: 0, position: "absolute", pointerEvents: "none" }}
-      />
       {collapsed ? (
-        <Tooltip
-          title={`${meta.label} • ${meta.subtitle}${canSwitch ? " (Nhấn để chuyển)" : ""}`}
-          placement="right"
-          arrow
-        >
-          <span>
-            <IconButton
-              aria-label={`Không gian làm việc: ${meta.label}`}
-              onClick={(e) => canSwitch && setAnchorEl(e.currentTarget)}
-              sx={{
-                background: meta.gradient,
-                borderRadius: "9px",
-                boxShadow: meta.shadow,
-                cursor: canSwitch ? "pointer" : "default",
-                height: 36,
-                p: 0,
-                transition: "all 0.18s cubic-bezier(0.2, 0, 0, 1)",
-                width: 36,
-                "&:hover": canSwitch
-                  ? {
-                      transform: "scale(1.06)",
-                      boxShadow: meta.shadow,
-                    }
-                  : {},
-              }}
-            >
-              {meta.icon}
-            </IconButton>
-          </span>
+        <Tooltip placement="right" title={`${meta.label} • ${meta.subtitle}`}>
+          <ButtonBase {...triggerProps} sx={{ borderRadius: NAV_ITEM_RADIUS, cursor: canSwitch ? "pointer" : "default" }}>
+            <WorkspaceTile size={NAV_TILE_SIZE} workspace={current} />
+          </ButtonBase>
         </Tooltip>
       ) : (
         <ButtonBase
-          aria-label={`Không gian làm việc: ${meta.label}`}
-          onClick={(e) => canSwitch && setAnchorEl(e.currentTarget)}
+          {...triggerProps}
           sx={{
             alignItems: "center",
-            bgcolor: anchorEl ? "rgba(54, 89, 187, 0.08)" : (fluid ? "#F8FAFC" : "transparent"),
-            border: fluid ? "1px solid #E2E8F0" : "none",
-            borderRadius: fluid ? "12px" : "10px",
-            boxSizing: "border-box",
+            bgcolor: anchorEl ? NAV_HOVER_BG : "transparent",
+            border: fluid ? `1px solid ${NAV_BORDER}` : "none",
+            borderRadius: NAV_ITEM_RADIUS,
             cursor: canSwitch ? "pointer" : "default",
-            display: "flex",
-            justifyContent: "space-between",
-            p: fluid ? "7px 9px" : "6px 8px",
+            gap: "12px",
+            justifyContent: "flex-start",
+            p: fluid ? "6px" : "0 8px 0 0",
             textAlign: "left",
-            transition: "all 0.18s cubic-bezier(0.2, 0, 0, 1)",
+            transition: "background-color 200ms",
             width: "100%",
-            "&:hover": canSwitch
-              ? {
-                  bgcolor: fluid ? "#F1F5F9" : "rgba(54, 89, 187, 0.06)",
-                  borderColor: fluid ? "#CBD5E1" : undefined,
-                }
-              : {},
+            "&:hover": canSwitch ? { bgcolor: NAV_HOVER_BG } : {},
           }}
         >
-          <Box sx={{ alignItems: "center", display: "flex", gap: 1.25, minWidth: 0 }}>
-            <Box
-              sx={{
-                alignItems: "center",
-                background: meta.gradient,
-                borderRadius: "9px",
-                boxShadow: meta.shadow,
-                display: "flex",
-                flexShrink: 0,
-                height: 35,
-                justifyContent: "center",
-                transition: "transform 0.18s ease",
-                width: 35,
-                "&:hover": {
-                  transform: canSwitch ? "scale(1.04)" : "none",
-                },
-              }}
-            >
-              {meta.icon}
-            </Box>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography
-                noWrap
-                sx={{
-                  color: "#1C252E",
-                  fontSize: 13.5,
-                  fontWeight: 600,
-                  letterSpacing: "-0.015em",
-                  lineHeight: 1.25,
-                }}
-              >
-                {meta.label}
-              </Typography>
-              <Typography
-                noWrap
-                sx={{
-                  color: "#667789",
-                  fontSize: 11,
-                  fontWeight: 500,
-                  lineHeight: 1.2,
-                  mt: 0.25,
-                }}
-              >
-                {meta.subtitle}
-              </Typography>
-            </Box>
+          <WorkspaceTile size={NAV_TILE_SIZE} workspace={current} />
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography noWrap sx={{ color: "text.primary", fontSize: NAV_FS.title, fontWeight: NAV_FW.semi, lineHeight: 1.3 }}>
+              {meta.label}
+            </Typography>
+            <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption, lineHeight: 1.3 }}>
+              {meta.subtitle}
+            </Typography>
           </Box>
-          {canSwitch ? (
-            <KeyboardArrowDownRoundedIcon
-              sx={{
-                color: anchorEl ? meta.themeColor : "#8898AA",
-                flexShrink: 0,
-                fontSize: 18,
-                transform: anchorEl ? "rotate(180deg)" : "rotate(0deg)",
-                transition: "transform 0.2s cubic-bezier(0.2, 0, 0, 1), color 0.15s ease",
-              }}
-            />
-          ) : null}
+          {canSwitch ? <UnfoldMoreRoundedIcon sx={{ color: "text.secondary", flexShrink: 0, fontSize: NAV_ICON_SIZE }} /> : null}
         </ButtonBase>
       )}
 
       {canSwitch ? (
         <Menu
           anchorEl={anchorEl}
-          anchorOrigin={{ horizontal: "left", vertical: "bottom" }}
+          anchorOrigin={collapsed ? { horizontal: "right", vertical: "top" } : { horizontal: "left", vertical: "bottom" }}
           onClose={() => setAnchorEl(null)}
           open={Boolean(anchorEl)}
-          sx={{ zIndex: 1400 }}
           slotProps={{
-            root: {
-              sx: { zIndex: 1400 },
-            },
             paper: {
               sx: {
-                bgcolor: "#FFFFFF",
-                border: "1px solid rgba(136, 145, 188, 0.2)",
-                borderRadius: "14px",
-                boxShadow: "0 16px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.04)",
-                minWidth: 236,
-                mt: 0.75,
-                p: 0.75,
-                zIndex: 1400,
+                border: `1px solid ${NAV_BORDER}`,
+                borderRadius: NAV_RAISED_RADIUS,
+                boxShadow: NAV_CARD_SHADOW,
+                ml: collapsed ? 1.5 : 0,
+                minWidth: 248,
+                mt: collapsed ? 0 : 0.75,
+                p: "6px",
               },
             },
+            root: { sx: { zIndex: 1400 } },
           }}
           transformOrigin={{ horizontal: "left", vertical: "top" }}
         >
-          <Box sx={{ borderBottom: "1px solid rgba(241, 245, 249, 1)", mb: 0.5, px: 1.5, py: 0.75 }}>
-            <Typography
-              variant="caption"
-              sx={{
-                color: "#8898AA",
-                fontSize: 10.5,
-                fontWeight: 600,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-              }}
-            >
-              Không gian làm việc
-            </Typography>
-          </Box>
+          <Typography
+            component="div"
+            sx={{ color: "text.secondary", fontSize: NAV_FS.caption, fontWeight: NAV_FW.semi, px: "10px", py: "6px" }}
+          >
+            Không gian làm việc
+          </Typography>
           {capabilities.map((cap) => {
             const isCurrent = cap.workspace === current;
-            const targetMeta = WORKSPACE_META[cap.workspace] ?? WORKSPACE_META.TEACHER;
+            const target = WORKSPACE_META[cap.workspace] ?? WORKSPACE_META.TEACHER;
             return (
               <MenuItem
                 key={cap.workspace}
                 onClick={() => handleSelectWorkspace(cap.workspace, cap.href)}
-                sx={{
-                  alignItems: "center",
-                  bgcolor: isCurrent ? "rgba(54, 89, 187, 0.07)" : "transparent",
-                  borderRadius: "10px",
-                  display: "flex",
-                  gap: 1.25,
-                  my: 0.25,
-                  px: 1.25,
-                  py: 0.85,
-                  transition: "all 0.15s ease",
-                  "&:hover": {
-                    bgcolor: isCurrent ? "rgba(54, 89, 187, 0.1)" : "rgba(241, 245, 249, 0.8)",
-                  },
-                }}
+                selected={isCurrent}
+                sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px", my: "2px", py: "6px" }}
               >
-                <Box
-                  sx={{
-                    alignItems: "center",
-                    background: targetMeta.gradient,
-                    borderRadius: "8px",
-                    boxShadow: targetMeta.shadow,
-                    display: "flex",
-                    flexShrink: 0,
-                    height: 32,
-                    justifyContent: "center",
-                    width: 32,
-                  }}
-                >
-                  {targetMeta.icon}
-                </Box>
+                <WorkspaceTile size={32} workspace={cap.workspace} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    noWrap
-                    sx={{
-                      color: "#1C252E",
-                      fontSize: 13,
-                      fontWeight: isCurrent ? 750 : 600,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {targetMeta.label}
+                  <Typography noWrap sx={{ color: "text.primary", fontSize: NAV_FS.label, fontWeight: NAV_FW.semi, lineHeight: 1.3 }}>
+                    {target.label}
                   </Typography>
-                  <Typography
-                    noWrap
-                    sx={{
-                      color: "#667789",
-                      fontSize: 11,
-                      fontWeight: 400,
-                      lineHeight: 1.2,
-                      mt: 0.25,
-                    }}
-                  >
-                    {targetMeta.subtitle}
+                  <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption, lineHeight: 1.3 }}>
+                    {target.subtitle}
                   </Typography>
                 </Box>
-                {isCurrent ? (
-                  <CheckCircleRoundedIcon
-                    sx={{
-                      color: targetMeta.themeColor,
-                      flexShrink: 0,
-                      fontSize: 18,
-                    }}
-                  />
-                ) : null}
+                {isCurrent ? <CheckRoundedIcon aria-label="Đang chọn" sx={{ color: NAV_PRIMARY, flexShrink: 0, fontSize: NAV_ICON_SIZE }} /> : null}
               </MenuItem>
             );
           })}

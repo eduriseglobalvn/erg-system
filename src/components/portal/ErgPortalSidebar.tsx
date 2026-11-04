@@ -1,25 +1,23 @@
 "use client";
 
-import { Box, Drawer, IconButton } from "@mui/material";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
-import { alpha } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import IconButton from "@mui/material/IconButton";
 import { useLocation } from "@tanstack/react-router";
 import type { MenuGroup, PortalInfo } from "./ErgPortalLayout";
+import { EXPANDED_SIDEBAR_WIDTH, PORTAL_SIDEBAR_TRANSITION, SIDEBAR_GUTTER } from "./portal-sidebar-motion";
 import {
-  NAV_BADGE_BORDER,
-  NAV_BUTTON_BG,
-  NAV_ITEM_COLOR,
-  NAV_PANEL_BORDER,
-  NAV_PANEL_SHADOW,
+  NAV_BORDER,
+  NAV_CARD_RADIUS,
+  NAV_CARD_SHADOW,
+  NAV_HOVER_BG,
+  NAV_ICON_SIZE,
   NAV_PRIMARY,
-  NAV_SURFACE_BG,
-  SIDEBAR_MOTION_CURVE,
+  REDUCED_MOTION,
 } from "./portal-sidebar-styles";
-import { normalizedLabel } from "./portal-sidebar-utils";
 import { PortalSidebarWorkspaceHeader } from "./portal-sidebar-workspace-header";
-import { SidebarLogo } from "./portal-sidebar-logo";
 import { SidebarNavigationLayer } from "./portal-sidebar-nav-layer";
-import { EXPANDED_SIDEBAR_WIDTH } from "./portal-sidebar-motion";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -34,6 +32,7 @@ interface SidebarProps {
   open?: boolean;
 }
 
+/** Premium sidebar: one floating white card (desktop) or a full-height temporary drawer (mobile). */
 export default function ErgPortalSidebar({
   collapsed,
   menuGroups,
@@ -46,11 +45,7 @@ export default function ErgPortalSidebar({
   onSignOut,
   open = true,
 }: SidebarProps) {
-  const location = useLocation();
-  const currentPath = location.pathname;
-  const hideSidebarBottom = false;
-  void normalizedLabel(portalInfo?.name ?? "");
-  void SidebarLogo;
+  const currentPath = useLocation().pathname;
 
   return (
     <Drawer
@@ -63,99 +58,63 @@ export default function ErgPortalSidebar({
         minWidth: 0,
         width: mobile ? EXPANDED_SIDEBAR_WIDTH : "100%",
         "& .MuiDrawer-paper": {
-          backgroundColor: mobile ? NAV_SURFACE_BG : "background.paper",
+          backgroundColor: "background.paper",
           backgroundImage: "none",
-          // Desktop: floating rounded card with a 1px border (menu redesign); mobile drawer stays full height.
-          border: mobile ? "none" : `1px solid ${NAV_PANEL_BORDER}`,
-          borderRadius: mobile ? 0 : 2,
-          borderRight: `1px solid ${NAV_PANEL_BORDER}`,
+          border: mobile ? "none" : `1px solid ${NAV_BORDER}`,
+          borderRadius: mobile ? 0 : NAV_CARD_RADIUS,
+          boxShadow: NAV_CARD_SHADOW,
           boxSizing: "border-box",
-          boxShadow: mobile ? NAV_PANEL_SHADOW : "none",
-          ...(mobile ? {} : { height: "calc(100% - 16px)", m: 1, width: "calc(100% - 16px)" }),
-          color: NAV_ITEM_COLOR,
+          color: "text.primary",
           display: "flex",
           flexDirection: "column",
           overflow: "visible",
-          position: mobile ? "fixed" : "relative",
           transition: "none",
-          ...(mobile ? { width: EXPANDED_SIDEBAR_WIDTH } : {}),
-          zIndex: mobile ? 1250 : 1,
+          ...(mobile
+            ? { width: EXPANDED_SIDEBAR_WIDTH }
+            : {
+                height: `calc(100% - ${SIDEBAR_GUTTER * 2}px)`,
+                m: `${SIDEBAR_GUTTER}px`,
+                position: "relative",
+                width: `calc(100% - ${SIDEBAR_GUTTER * 2}px)`,
+                zIndex: 1,
+              }),
         },
       }}
     >
       {!mobile ? (
         <IconButton
-          aria-label={collapsed ? "Mo rong menu" : "Thu gon menu"}
-          disableRipple
+          aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
           onClick={() => onCollapsedChange(!collapsed)}
-          size="small"
           sx={{
-            background: NAV_BUTTON_BG,
-            backdropFilter: "blur(12px)",
-            border: `1px solid ${NAV_BADGE_BORDER}`,
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
-            color: NAV_ITEM_COLOR,
-            height: 26,
+            bgcolor: "background.paper",
+            border: `1px solid ${NAV_BORDER}`,
+            boxShadow: NAV_CARD_SHADOW,
+            color: "text.secondary",
+            height: 28,
             position: "absolute",
-            right: -13,
-            top: 51,
-            transition: "all 120ms cubic-bezier(0.16, 1, 0.3, 1)",
-            width: 26,
-            zIndex: 1300,
-            "&:active": { transform: "scale(0.92)", transition: "transform 80ms ease-out" },
-            "&:hover": {
-              background: "#FFFFFF",
-              borderColor: alpha(NAV_PRIMARY, 0.35),
-              boxShadow: `0 3px 10px ${alpha(NAV_PRIMARY, 0.18)}`,
-              color: NAV_PRIMARY,
-            },
+            right: -14,
+            top: 18,
+            width: 28,
+            zIndex: 2,
+            "&:hover": { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY },
           }}
         >
           <ChevronLeftRoundedIcon
             sx={{
-              fontSize: 18,
-              transform: collapsed ? "rotate(180deg)" : "rotate(0deg)",
-              transition: `transform ${SIDEBAR_MOTION_CURVE}`,
-              "@media (prefers-reduced-motion: reduce)": { transition: "none" },
+              fontSize: NAV_ICON_SIZE,
+              transform: collapsed ? "rotate(180deg)" : "none",
+              transition: `transform ${PORTAL_SIDEBAR_TRANSITION}`,
+              ...REDUCED_MOTION,
             }}
           />
         </IconButton>
       ) : null}
 
-      <Box sx={{ boxSizing: "border-box", height: 64, position: "relative", zIndex: 1 }}>
-        <PortalSidebarWorkspaceHeader
-          active={!collapsed}
-          collapsed={false}
-          mobile={mobile}
-          onNavigate={onNavigate}
-          portalInfo={portalInfo}
-        />
-        <PortalSidebarWorkspaceHeader
-          active={collapsed}
-          collapsed
-          mobile={mobile}
-          onNavigate={onNavigate}
-          portalInfo={portalInfo}
-        />
-      </Box>
-
-      <Box sx={{ flex: 1, minHeight: 0, overflow: "hidden", position: "relative", width: "100%", zIndex: 1 }}>
+      <Box sx={{ borderRadius: "inherit", display: "flex", flex: 1, flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+        <PortalSidebarWorkspaceHeader collapsed={collapsed} onNavigate={onNavigate} portalInfo={portalInfo} />
         <SidebarNavigationLayer
-          active={!collapsed}
-          collapsed={false}
+          collapsed={collapsed}
           currentPath={currentPath}
-          hideSidebarBottom={hideSidebarBottom}
-          menuGroups={menuGroups}
-          notificationCount={notificationCount}
-          onNavigate={onNavigate}
-          onSignOut={onSignOut}
-          portalInfo={portalInfo}
-        />
-        <SidebarNavigationLayer
-          active={collapsed}
-          collapsed
-          currentPath={currentPath}
-          hideSidebarBottom={hideSidebarBottom}
           menuGroups={menuGroups}
           notificationCount={notificationCount}
           onNavigate={onNavigate}

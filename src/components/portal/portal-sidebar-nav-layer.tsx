@@ -1,16 +1,9 @@
 import Box from "@mui/material/Box";
+import Divider from "@mui/material/Divider";
 import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
 import type { MenuGroup, MenuItem, PortalInfo } from "./ErgPortalLayout";
-import {
-  COLLAPSED_SIDEBAR_WIDTH,
-  EXPANDED_SIDEBAR_WIDTH,
-} from "./portal-sidebar-motion";
-import {
-  NAV_MUTED_COLOR,
-  SIDEBAR_FADE_EASING,
-  SIDEBAR_MOTION_CURVE,
-} from "./portal-sidebar-styles";
+import { NAV_BORDER, NAV_FS, NAV_FW, NAV_PADDING } from "./portal-sidebar-styles";
 import { SidebarBottom } from "./portal-sidebar-bottom";
 import { SidebarBranchItem } from "./portal-sidebar-branch-item";
 import { SidebarCompactItem } from "./portal-sidebar-compact-item";
@@ -18,62 +11,32 @@ import { SidebarLeafItem } from "./portal-sidebar-leaf-item";
 
 function SidebarItem({
   collapsed,
-  item,
   currentPath,
+  item,
   onNavigate,
-  sidebarActive,
 }: {
   collapsed: boolean;
-  item: MenuItem;
   currentPath: string;
+  item: MenuItem;
   onNavigate: (path: string) => void;
-  sidebarActive: boolean;
 }) {
-  if (collapsed) {
-    return (
-      <SidebarCompactItem
-        currentPath={currentPath}
-        item={item}
-        onNavigate={onNavigate}
-        sidebarActive={sidebarActive}
-      />
-    );
-  }
-
-  if (item.children?.length) {
-    return (
-      <SidebarBranchItem
-        currentPath={currentPath}
-        item={item}
-        onNavigate={onNavigate}
-      />
-    );
-  }
-
-  return (
-    <SidebarLeafItem
-      currentPath={currentPath}
-      item={item}
-      onNavigate={onNavigate}
-    />
-  );
+  if (collapsed) return <SidebarCompactItem currentPath={currentPath} item={item} onNavigate={onNavigate} />;
+  if (item.children?.length) return <SidebarBranchItem currentPath={currentPath} item={item} onNavigate={onNavigate} />;
+  return <SidebarLeafItem accentBar currentPath={currentPath} item={item} onNavigate={onNavigate} />;
 }
 
+/** Scrollable menu groups plus the pinned bottom (search + user card). */
 export function SidebarNavigationLayer({
-  active,
   collapsed,
   currentPath,
-  hideSidebarBottom,
   menuGroups,
   notificationCount = 0,
   onNavigate,
   onSignOut,
   portalInfo,
 }: {
-  active: boolean;
   collapsed: boolean;
   currentPath: string;
-  hideSidebarBottom: boolean;
   menuGroups: MenuGroup[];
   notificationCount?: number;
   onNavigate: (path: string) => void;
@@ -81,90 +44,43 @@ export function SidebarNavigationLayer({
   portalInfo?: PortalInfo;
 }) {
   return (
-    <Box
-      aria-hidden={!active}
-      inert={!active}
-      sx={{
-        boxSizing: "border-box",
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        inset: 0,
-        opacity: active ? 1 : 0,
-        overflow: "hidden",
-        pointerEvents: active ? "auto" : "none",
-        position: "absolute",
-        transform: active
-          ? "translate3d(0, 0, 0)"
-          : `translate3d(${collapsed ? -6 : 6}px, 0, 0)`,
-        transition: `opacity ${SIDEBAR_FADE_EASING}, transform ${SIDEBAR_MOTION_CURVE}`,
-        width: collapsed ? COLLAPSED_SIDEBAR_WIDTH : EXPANDED_SIDEBAR_WIDTH,
-        "@media (prefers-reduced-motion: reduce)": {
-          transition: "none",
-        },
-      }}
-    >
+    <>
       <Box
+        aria-label="Điều hướng chính"
         component="nav"
         sx={{
-          display: "flex",
           flex: 1,
-          flexDirection: "column",
           minHeight: 0,
           overflowX: "hidden",
           overflowY: "auto",
           pb: 2,
-          px: collapsed ? 0.5 : 1,
-          scrollbarColor: "rgba(0, 0, 0, 0.15) transparent",
-          scrollbarWidth: "thin",
-          width: "100%",
-          "&::-webkit-scrollbar": { width: 5 },
-          "&::-webkit-scrollbar-track": { bgcolor: "transparent" },
-          "&::-webkit-scrollbar-thumb": {
-            bgcolor: "rgba(0, 0, 0, 0.14)",
-            borderRadius: 8,
-          },
-          "& > .erg-nav-group + .erg-nav-group": {
-            mt: collapsed ? 1 : 0.75,
-          },
+          pl: `${NAV_PADDING}px`,
+          ...(collapsed
+            ? // Icon column stays centred: no visible scrollbar (wheel/keyboard still scroll).
+              { pr: `${NAV_PADDING}px`, scrollbarWidth: "none" }
+            : // Thin scrollbar in a reserved right gutter, shown on hover, so rows never change width.
+              {
+                pr: "4px",
+                scrollbarColor: "transparent transparent",
+                scrollbarGutter: "stable",
+                scrollbarWidth: "thin",
+                "&:hover, &:focus-within": { scrollbarColor: `${NAV_BORDER} transparent` },
+              }),
         }}
       >
         {menuGroups.map((group, groupIndex) => (
-          <Box key={groupIndex} className="erg-nav-group" sx={{ width: "100%" }}>
+          <Box key={groupIndex} sx={{ width: "100%" }}>
+            {groupIndex > 0 && collapsed ? <Divider sx={{ mx: 1, my: 1 }} /> : null}
             {group.label && !collapsed ? (
-              <Box sx={{ height: 36, overflow: "hidden" }}>
-                <Typography
-                  component="div"
-                  sx={{
-                    alignItems: "center",
-                    color: NAV_MUTED_COLOR,
-                    display: "inline-flex",
-                    fontSize: 11,
-                    fontWeight: 600,
-                    height: 36,
-                    letterSpacing: "0.06em",
-                    lineHeight: "16px",
-                    p: "14px 8px 6px 12px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {group.label}
-                </Typography>
-              </Box>
+              <Typography
+                component="div"
+                noWrap
+                sx={{ color: "text.secondary", fontSize: NAV_FS.caption, fontWeight: NAV_FW.semi, mt: groupIndex > 0 ? 2 : 0, px: "12px", py: "4px" }}
+              >
+                {group.label}
+              </Typography>
             ) : null}
-            <List
-              disablePadding
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: collapsed ? 0.75 : 0.4,
-                listStyle: "none",
-                m: 0,
-                overflow: "visible",
-                p: 0,
-                width: "100%",
-              }}
-            >
+            <List disablePadding sx={{ display: "flex", flexDirection: "column", gap: "4px", listStyle: "none", m: 0 }}>
               {group.items.map((item, itemIndex) => (
                 <SidebarItem
                   key={item.id ?? item.path ?? `${groupIndex}-${itemIndex}`}
@@ -172,23 +88,19 @@ export function SidebarNavigationLayer({
                   currentPath={currentPath}
                   item={item}
                   onNavigate={onNavigate}
-                  sidebarActive={active}
                 />
               ))}
             </List>
           </Box>
         ))}
       </Box>
-
-      {!hideSidebarBottom ? (
-        <SidebarBottom
-          collapsed={collapsed}
-          notificationCount={notificationCount}
-          onNavigate={onNavigate}
-          onSignOut={onSignOut}
-          portalInfo={portalInfo}
-        />
-      ) : null}
-    </Box>
+      <SidebarBottom
+        collapsed={collapsed}
+        notificationCount={notificationCount}
+        onNavigate={onNavigate}
+        onSignOut={onSignOut}
+        portalInfo={portalInfo}
+      />
+    </>
   );
 }

@@ -1,18 +1,15 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
-import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
-import BusinessRoundedIcon from "@mui/icons-material/BusinessRounded";
-import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
+import { useState } from "react";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
-import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
-import SchoolRoundedIcon from "@mui/icons-material/SchoolRounded";
+import PersonOutlineRoundedIcon from "@mui/icons-material/PersonOutlineRounded";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Avatar from "@mui/material/Avatar";
-import Badge from "@mui/material/Badge";
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Divider from "@mui/material/Divider";
 import IconButton from "@mui/material/IconButton";
 import Menu from "@mui/material/Menu";
@@ -24,50 +21,46 @@ import { useLocation } from "@tanstack/react-router";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
 import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
-import type { Workspace } from "@/platform/workspaces/workspace-domain";
-import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/workspaces/workspace-switcher";
+import { adminPath, teacherPath } from "@/platform/workspaces/workspace-paths";
 import type { PortalInfo } from "./ErgPortalLayout";
 import type { PortalNotificationTab } from "./portal-header-notification-data";
 import { PortalHeaderNotifications } from "./portal-header-notifications";
-import { SIDEBAR_MOTION_MS } from "./portal-sidebar-styles";
+import { NavBadge } from "./portal-sidebar-parts";
+import {
+  NAV_BORDER,
+  NAV_CARD_SHADOW,
+  NAV_FS,
+  NAV_FW,
+  NAV_HOVER_BG,
+  NAV_ICON_SIZE,
+  NAV_ITEM_RADIUS,
+  NAV_PADDING,
+  NAV_PRIMARY,
+  NAV_RAISED_RADIUS,
+  NAV_TILE_SIZE,
+} from "./portal-sidebar-styles";
 import { notificationPortalFromPath, usePortalNotifications } from "./use-portal-notifications";
 
-function workspaceFromPath(pathname: string): Workspace {
-  const segment = pathname.split("/").filter(Boolean)[0];
-  if (segment === "admin") return "ADMIN";
-  if (segment === "student") return "STUDENT";
-  if (segment === "crm") return "CRM";
-  return "TEACHER";
+function profilePath(pathname: string) {
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) return adminPath("/profile");
+  if (pathname === "/teacher" || pathname.startsWith("/teacher/")) return teacherPath("/profile");
+  return undefined;
 }
-
-const WORKSPACE_ICONS: Record<Workspace, ReactNode> = {
-  ADMIN: <AdminPanelSettingsRoundedIcon sx={{ fontSize: 17, color: "primary.main" }} />,
-  TEACHER: <SchoolRoundedIcon sx={{ fontSize: 17, color: "success.main" }} />,
-  STUDENT: <MenuBookRoundedIcon sx={{ fontSize: 17, color: "info.main" }} />,
-  CRM: <BusinessRoundedIcon sx={{ fontSize: 17, color: "warning.main" }} />,
-};
-
-const WORKSPACE_LOCAL_PATHS: Record<Workspace, string> = {
-  ADMIN: "/admin",
-  TEACHER: "/teacher/home",
-  STUDENT: "/student",
-  CRM: "/",
-};
 
 export function SidebarBottom({
   collapsed,
-  portalInfo,
   notificationCount: notificationCountProp = 0,
   onNavigate,
   onSignOut,
+  portalInfo,
 }: {
   collapsed: boolean;
-  portalInfo?: PortalInfo;
   notificationCount?: number;
   onNavigate?: (path: string) => void;
   onSignOut?: () => void;
+  portalInfo?: PortalInfo;
 }) {
-  const location = useLocation();
+  const pathname = useLocation()?.pathname ?? "";
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<PortalNotificationTab>("all");
   const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
@@ -76,181 +69,127 @@ export function SidebarBottom({
   const userName = portalInfo?.userName || "Người dùng";
   const userEmail = portalInfo?.userEmail || "Tài khoản ERG";
   const initial = userName.charAt(0).toUpperCase() || "E";
-
-  const current = workspaceFromPath(location?.pathname ?? "");
-  const granted = portalInfo?.workspaceCapabilities?.length
-    ? [...portalInfo.workspaceCapabilities]
-    : workspacesFromLegacyPortals(portalInfo?.workspacePortals ?? [], current);
-  const capabilities = workspaceCapabilities(granted, current, location?.pathname ?? "");
+  const profile = profilePath(pathname);
 
   const { notifications, unreadCount } = usePortalNotifications(
-    notificationPortalFromPath(location?.pathname ?? ""),
+    notificationPortalFromPath(pathname),
     activeTab,
     notificationOpen,
   );
   const notificationCount = unreadCount ?? notificationCountProp;
 
+  const closeMenu = () => setMenuAnchor(null);
+  const openMenu = (event: { currentTarget: HTMLElement }) => setMenuAnchor(event.currentTarget);
   const handleSearchClick = () => {
     window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, ctrlKey: true, bubbles: true }));
   };
-
   const handleLogout = () => {
-    setMenuAnchor(null);
-    if (onSignOut) { onSignOut(); return; }
+    closeMenu();
+    if (onSignOut) return onSignOut();
     logoutStudentSession();
     logoutAccount();
     window.location.reload();
   };
 
-  const handleWorkspaceSelect = (path: string) => {
-    setMenuAnchor(null);
-    if (onNavigate) {
-      onNavigate(path);
-    } else if (typeof window !== "undefined") {
-      window.location.assign(path);
-    }
-  };
-
-  const actionBtnSx = {
-    color: "#637381",
-    height: 32,
-    width: 32,
-    "&:hover": { bgcolor: "rgba(145,158,171,0.08)", color: "#1C252E" },
-  };
+  const avatar = (
+    <Avatar sx={{ bgcolor: "primary.main", color: "primary.contrastText", fontSize: NAV_FS.label, fontWeight: NAV_FW.semi, height: NAV_TILE_SIZE, width: NAV_TILE_SIZE }}>
+      {initial}
+    </Avatar>
+  );
 
   return (
-    <Box
-      sx={{
-        borderTop: "1px solid",
-        borderColor: "divider",
-        mt: "auto",
-        p: collapsed ? "12px 8px" : "12px 14px",
-        transition: `padding ${SIDEBAR_MOTION_MS}`,
-      }}
-    >
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: "auto", p: `8px ${NAV_PADDING}px ${NAV_PADDING}px`, alignItems: collapsed ? "center" : "stretch" }}>
       {collapsed ? (
-        <Box sx={{ alignItems: "center", display: "flex", flexDirection: "column", gap: 1 }}>
-          <Tooltip title="Tìm kiếm (⌘K)" placement="right">
-            <IconButton onClick={handleSearchClick} size="small" sx={actionBtnSx}>
-              <SearchRoundedIcon sx={{ fontSize: 18 }} />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Thông báo" placement="right">
-            <IconButton onClick={() => setNotificationOpen(true)} size="small" sx={actionBtnSx}>
-              {notificationCount > 0 ? (
-                <Badge badgeContent={notificationCount} color="error" max={99}>
-                  <NotificationsNoneRoundedIcon sx={{ fontSize: 18 }} />
-                </Badge>
-              ) : (
-                <NotificationsNoneRoundedIcon sx={{ fontSize: 18 }} />
-              )}
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={userName} placement="right">
-            <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ p: 0, "&:hover": { opacity: 0.85 } }}>
-              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
-            </IconButton>
-          </Tooltip>
-        </Box>
+        <Tooltip placement="right" title="Tìm kiếm (⌘K)">
+          <IconButton aria-label="Tìm kiếm" onClick={handleSearchClick} sx={{ borderRadius: NAV_ITEM_RADIUS, height: 44, width: 44, "&:hover": { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY } }}>
+            <SearchRoundedIcon sx={{ fontSize: NAV_ICON_SIZE }} />
+          </IconButton>
+        </Tooltip>
       ) : (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1, width: "100%" }}>
-          <Box component="button" type="button" onClick={handleSearchClick} sx={{ alignItems: "center", bgcolor: "rgba(145,158,171,0.06)", border: "1px solid rgba(145,158,171,0.14)", borderRadius: "8px", color: "#637381", cursor: "pointer", display: "flex", gap: 0.75, height: 32, px: 1, textAlign: "left", width: "100%", "&:hover": { bgcolor: "rgba(145,158,171,0.12)", color: "#1C252E" } }}>
-            <SearchRoundedIcon sx={{ fontSize: 16 }} />
-            <Typography sx={{ color: "#919EAB", flex: 1, fontSize: 11.5, fontWeight: 500 }}>Tìm kiếm...</Typography>
-            <Box component="span" sx={{ bgcolor: "#FFFFFF", border: "1px solid rgba(145,158,171,0.2)", borderRadius: "4px", color: "#637381", fontSize: 10, fontWeight: 600, px: 0.5, py: 0.05 }}>⌘K</Box>
+        <ButtonBase
+          aria-label="Tìm kiếm"
+          onClick={handleSearchClick}
+          sx={{
+            bgcolor: "background.paper",
+            border: `1px solid ${NAV_BORDER}`,
+            borderRadius: NAV_ITEM_RADIUS,
+            color: "text.secondary",
+            gap: "8px",
+            height: 40,
+            justifyContent: "flex-start",
+            px: "12px",
+            width: "100%",
+            "&:hover": { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY },
+          }}
+        >
+          <SearchRoundedIcon sx={{ fontSize: NAV_ICON_SIZE }} />
+          <Typography component="span" sx={{ color: "inherit", flex: 1, fontSize: NAV_FS.label, textAlign: "left" }}>Tìm kiếm...</Typography>
+          <Typography component="span" sx={{ border: `1px solid ${NAV_BORDER}`, borderRadius: "6px", color: "text.secondary", fontSize: NAV_FS.caption, px: "6px" }}>⌘K</Typography>
+        </ButtonBase>
+      )}
+
+      {collapsed ? (
+        <Tooltip placement="right" title={userName}>
+          <IconButton aria-label={`Tài khoản: ${userName}`} onClick={openMenu} sx={{ p: 0, position: "relative" }}>
+            {avatar}
+            {notificationCount > 0 ? (
+              <Box aria-hidden sx={{ bgcolor: NAV_PRIMARY, border: "2px solid", borderColor: "background.paper", borderRadius: "50%", height: 12, position: "absolute", right: -2, top: -2, width: 12 }} />
+            ) : null}
+          </IconButton>
+        </Tooltip>
+      ) : (
+        <Box sx={{ alignItems: "center", bgcolor: "background.default", borderRadius: NAV_RAISED_RADIUS, display: "flex", gap: "12px", p: "8px" }}>
+          {avatar}
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography noWrap sx={{ color: "text.primary", fontSize: NAV_FS.label, fontWeight: NAV_FW.semi, lineHeight: 1.3 }}>{userName}</Typography>
+            <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption, lineHeight: 1.3 }}>{userEmail}</Typography>
           </Box>
-          <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, width: "100%" }}>
-            <Box onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ alignItems: "center", borderRadius: "8px", cursor: "pointer", display: "flex", flex: 1, gap: 1, minWidth: 0, p: "3px 5px", transition: "background 140ms ease", "&:hover": { bgcolor: "rgba(145,158,171,0.08)" } }}>
-              <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
-              <Box sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}>
-                <Typography noWrap sx={{ color: "#0F172A", fontSize: 12, fontWeight: 600, lineHeight: 1.2 }}>{userName}</Typography>
-                <Typography noWrap sx={{ color: "#94A3B8", fontSize: 10, lineHeight: 1.2, mt: 0.2 }}>{userEmail}</Typography>
-              </Box>
-            </Box>
-            <Tooltip title="Thông báo">
-              <IconButton onClick={() => setNotificationOpen(true)} size="small" sx={actionBtnSx}>
-                {notificationCount > 0 ? (
-                  <Badge badgeContent={notificationCount} color="error" max={99}>
-                    <NotificationsNoneRoundedIcon sx={{ fontSize: 18 }} />
-                  </Badge>
-                ) : (
-                  <NotificationsNoneRoundedIcon sx={{ fontSize: 18 }} />
-                )}
-              </IconButton>
-            </Tooltip>
-          </Box>
+          <IconButton aria-label="Tùy chọn tài khoản" aria-haspopup="menu" onClick={openMenu} size="small" sx={{ color: "text.secondary", position: "relative" }}>
+            <MoreVertRoundedIcon />
+            {notificationCount > 0 ? (
+              <Box aria-hidden sx={{ bgcolor: NAV_PRIMARY, borderRadius: "50%", height: 8, position: "absolute", right: 4, top: 4, width: 8 }} />
+            ) : null}
+          </IconButton>
         </Box>
       )}
 
       <Menu
         anchorEl={menuAnchor}
+        anchorOrigin={{ horizontal: collapsed ? "right" : "left", vertical: "top" }}
+        onClose={closeMenu}
         open={Boolean(menuAnchor)}
-        onClose={() => setMenuAnchor(null)}
-        sx={{ zIndex: 1400 }}
         slotProps={{
+          paper: { sx: { border: `1px solid ${NAV_BORDER}`, borderRadius: NAV_RAISED_RADIUS, boxShadow: NAV_CARD_SHADOW, minWidth: 220, p: "6px" } },
           root: { sx: { zIndex: 1400 } },
-          paper: {
-            sx: {
-              bgcolor: "#FFFFFF",
-              borderRadius: "12px",
-              boxShadow: "0 10px 30px rgba(15,23,42,0.12)",
-              minWidth: 200,
-              p: 0.5,
-              zIndex: 1400,
-            },
-          },
         }}
+        transformOrigin={{ horizontal: "left", vertical: "bottom" }}
       >
-        <Box sx={{ px: 1.5, py: 0.75 }}>
-          <Typography variant="subtitle2" sx={{ color: "#0F172A", fontSize: 13, fontWeight: 600 }}>{userName}</Typography>
-          <Typography variant="caption" sx={{ color: "#94A3B8", fontSize: 11 }}>{userEmail}</Typography>
+        <Box sx={{ px: "10px", py: "6px" }}>
+          <Typography noWrap sx={{ color: "text.primary", fontSize: NAV_FS.label, fontWeight: NAV_FW.semi }}>{userName}</Typography>
+          <Typography noWrap sx={{ color: "text.secondary", fontSize: NAV_FS.caption }}>{userEmail}</Typography>
         </Box>
-        <Divider sx={{ my: 0.5 }} />
-
-        {capabilities.length >= 2 ? (
-          <>
-            <Box sx={{ px: 1.5, py: 0.5 }}>
-              <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: 600, textTransform: "uppercase", fontSize: 10.5, letterSpacing: "0.05em" }}>
-                Không gian làm việc
-              </Typography>
-            </Box>
-            {capabilities.map((cap) => {
-              const isCurrent = cap.workspace === current;
-              const targetPath = WORKSPACE_LOCAL_PATHS[cap.workspace];
-              return (
-                <MenuItem
-                  key={cap.workspace}
-                  onClick={() => handleWorkspaceSelect(targetPath)}
-                  sx={{
-                    bgcolor: isCurrent ? "action.selected" : "transparent",
-                    borderRadius: "8px",
-                    fontSize: 12.5,
-                    gap: 1.25,
-                    fontWeight: isCurrent ? 700 : 500,
-                    my: 0.25,
-                  }}
-                >
-                  <Box component="span" sx={{ display: "inline-flex" }}>
-                    {WORKSPACE_ICONS[cap.workspace]}
-                  </Box>
-                  <Typography variant="body2" sx={{ flex: 1, fontSize: "inherit", fontWeight: "inherit" }}>
-                    {cap.label}
-                  </Typography>
-                  {isCurrent ? <CheckRoundedIcon sx={{ color: "primary.main", fontSize: 16 }} /> : null}
-                </MenuItem>
-              );
-            })}
-            <Divider sx={{ my: 0.5 }} />
-          </>
-        ) : null}
-
-        {!installed && canInstall ? (
-          <MenuItem onClick={() => { setMenuAnchor(null); void promptInstall(); }} sx={{ borderRadius: "8px", fontSize: 12.5, gap: 1 }}>
-            <DownloadRoundedIcon sx={{ fontSize: 16 }} /> Cài đặt ứng dụng ERG
+        <Divider sx={{ my: "4px" }} />
+        <MenuItem onClick={() => { closeMenu(); setNotificationOpen(true); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
+          <NotificationsNoneRoundedIcon fontSize="small" />
+          Thông báo
+          {notificationCount > 0 ? <NavBadge active={false}>{notificationCount > 99 ? "99+" : notificationCount}</NavBadge> : null}
+        </MenuItem>
+        {profile && onNavigate ? (
+          <MenuItem onClick={() => { closeMenu(); onNavigate(profile); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
+            <PersonOutlineRoundedIcon fontSize="small" />
+            Hồ sơ
           </MenuItem>
         ) : null}
-        <MenuItem onClick={handleLogout} sx={{ borderRadius: "8px", color: "#EF4444", fontSize: 12.5, gap: 1 }}>
-          <LogoutRoundedIcon sx={{ fontSize: 16 }} /> Đăng xuất
+        {!installed && canInstall ? (
+          <MenuItem onClick={() => { closeMenu(); void promptInstall(); }} sx={{ borderRadius: NAV_ITEM_RADIUS, gap: "12px" }}>
+            <DownloadRoundedIcon fontSize="small" />
+            Cài đặt ứng dụng ERG
+          </MenuItem>
+        ) : null}
+        <Divider sx={{ my: "4px" }} />
+        <MenuItem onClick={handleLogout} sx={{ borderRadius: NAV_ITEM_RADIUS, color: "error.main", gap: "12px" }}>
+          <LogoutRoundedIcon fontSize="small" />
+          Đăng xuất
         </MenuItem>
       </Menu>
 

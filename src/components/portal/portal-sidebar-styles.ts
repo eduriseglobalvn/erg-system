@@ -1,48 +1,100 @@
-import { alpha } from "@mui/material/styles";
+import { alpha, lighten } from "@mui/material/styles";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
-import {
-  PORTAL_SIDEBAR_MOTION_MS,
-  PORTAL_SIDEBAR_TRANSITION,
-} from "./portal-sidebar-motion";
+import { PORTAL_SIDEBAR_TRANSITION } from "./portal-sidebar-motion";
 
-export const NAV_BLUE = ergEnterpriseTokens.color.primary;
-export const NAV_RED = ergEnterpriseTokens.color.danger;
-export const NAV_ITEM_COLOR = "#4B5563";
-export const NAV_TEXT_COLOR = ergEnterpriseTokens.color.text;
-export const NAV_MUTED_COLOR = ergEnterpriseTokens.color.textMuted;
 export const NAV_PRIMARY = ergEnterpriseTokens.color.primary;
+export const NAV_ON_PRIMARY = ergEnterpriseTokens.color.surface;
+export const NAV_BORDER = ergEnterpriseTokens.color.border;
+export const NAV_ACTIVE_GRADIENT = `linear-gradient(135deg, ${NAV_PRIMARY} 0%, ${lighten(NAV_PRIMARY, 0.28)} 100%)`;
+export const NAV_ACTIVE_SHADOW = `0 8px 18px ${alpha(NAV_PRIMARY, 0.35)}`;
+export const NAV_HOVER_BG = alpha(NAV_PRIMARY, 0.08);
+export const NAV_CARD_SHADOW = "0 10px 30px rgba(15, 23, 42, 0.08)";
+export const NAV_RAISED_SHADOW = "0 6px 16px rgba(15, 23, 42, 0.08)";
 
-// Apple Translucent Vibrancy Material (Emil Kowalski's apple-design specs)
-export const NAV_SURFACE_BG = "rgba(248, 249, 252, 0.88)";
-export const NAV_SUBTLE_GLASS_BG = "rgba(255, 255, 255, 0.75)";
-export const NAV_PREVIEW_BG = "rgba(0, 0, 0, 0.03)";
-export const NAV_HOVER_BG = "rgba(0, 0, 0, 0.045)";
-// Active item = solid primary pill with white text (admin/teacher menu redesign).
-export const NAV_ACTIVE_BG = ergEnterpriseTokens.color.primary;
-export const NAV_ACTIVE_BORDER = ergEnterpriseTokens.color.primary;
-export const NAV_ACTIVE_TEXT = ergEnterpriseTokens.color.surface;
-export const NAV_BADGE_BG = ergEnterpriseTokens.color.primarySoft;
-export const NAV_BADGE_BORDER = alpha(ergEnterpriseTokens.color.primary, 0.22);
-export const NAV_PREVIEW_BORDER = "rgba(0, 0, 0, 0.06)";
-export const NAV_ACTIVE_SHADOW = "none";
-export const NAV_PANEL_BG = "rgba(248, 249, 252, 0.88)";
-export const NAV_PANEL_BORDER = "rgba(0, 0, 0, 0.08)";
-export const NAV_PANEL_SHADOW =
-  "inset -1px 0 0 rgba(255, 255, 255, 0.75), 4px 0 16px rgba(0, 0, 0, 0.02)";
-export const NAV_BUTTON_BG = "rgba(255, 255, 255, 0.88)";
+export const NAV_CARD_RADIUS = "20px";
+export const NAV_RAISED_RADIUS = "14px";
+export const NAV_ITEM_RADIUS = "12px";
+export const NAV_ITEM_HEIGHT = 44;
+export const NAV_CHILD_HEIGHT = 40;
+export const NAV_TILE_SIZE = 40;
+export const NAV_ICON_SIZE = 20;
+export const NAV_CHILD_ICON_SIZE = 16;
+// Open branch card = 1px border + 6px padding around its rows.
+export const NAV_BRANCH_INSET = 7;
+export const NAV_PADDING = 12;
+// Typography scale of the sidebar (px); weights follow the theme (500 / 600).
+export const NAV_FS = { caption: 12, label: 14, title: 16 } as const;
+export const NAV_FW = { medium: 500, semi: 600 } as const;
 
-export const SIDEBAR_MOTION_MS = PORTAL_SIDEBAR_MOTION_MS;
-export const SIDEBAR_MOTION_CURVE = PORTAL_SIDEBAR_TRANSITION;
-// Apple spring response 0.3-0.4, critically damped (damping 1.0)
-export const SIDEBAR_FADE_EASING = "160ms cubic-bezier(0.16, 1, 0.3, 1)";
-export const SUBMENU_MOTION_EASING = "220ms cubic-bezier(0.16, 1, 0.3, 1)";
-export const SUBMENU_DISCLOSURE_TRANSITION =
-  "200ms cubic-bezier(0.16, 1, 0.3, 1)";
-export const TREE_CONNECTOR_MASK =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 14 14'%3E%3Cpath d='M1 1v4a8 8 0 0 0 8 8h4' stroke='%23d1d5db' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E\") 50% 50% / 100% no-repeat";
+export const NAV_EASE = PORTAL_SIDEBAR_TRANSITION;
+export const NAV_TRANSITION = `background-color ${NAV_EASE}, color ${NAV_EASE}, box-shadow ${NAV_EASE}`;
+export const REDUCED_MOTION = { "@media (prefers-reduced-motion: reduce)": { transition: "none" } } as const;
 
-export const COLLAPSED_LABELS: Record<string, string> = {
-  "Lịch toàn trung tâm": "Lịch toàn tr...",
-  "Bài tập & tài liệu": "Bài tập & tài...",
-  "Quản lý học liệu": "Quản lý...",
-};
+/** Gradient square used for the brand tile and workspace icons. */
+export const gradientTileSx = (size: number): SxProps<Theme> => ({
+  alignItems: "center",
+  background: NAV_ACTIVE_GRADIENT,
+  borderRadius: NAV_ITEM_RADIUS,
+  boxShadow: NAV_ACTIVE_SHADOW,
+  color: NAV_ON_PRIMARY,
+  display: "flex",
+  flexShrink: 0,
+  height: size,
+  justifyContent: "center",
+  width: size,
+});
+
+/** White inner card used for an open branch and for collapsed flyouts. */
+export const raisedCardSx = {
+  bgcolor: "background.paper",
+  border: `1px solid ${NAV_BORDER}`,
+  borderRadius: NAV_RAISED_RADIUS,
+  boxShadow: NAV_RAISED_SHADOW,
+  p: "6px",
+} as const;
+
+/**
+ * Shared row/button look: gradient pill when active, primary tint on hover.
+ * `bar` (px) adds the 4px accent bar on the card's far-left edge for an active row.
+ */
+export function navRowSx(
+  active: boolean,
+  { bar, height = NAV_ITEM_HEIGHT, open = false }: { bar?: number; height?: number; open?: boolean } = {},
+) {
+  const tinted = { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY };
+  return {
+    alignItems: "center",
+    background: active ? NAV_ACTIVE_GRADIENT : "transparent",
+    borderRadius: NAV_ITEM_RADIUS,
+    boxShadow: active ? NAV_ACTIVE_SHADOW : "none",
+    color: active ? NAV_ON_PRIMARY : "text.primary",
+    display: "flex",
+    height,
+    minHeight: height,
+    overflow: "visible",
+    position: "relative",
+    px: "12px",
+    transition: NAV_TRANSITION,
+    width: "100%",
+    ...(open && !active ? { color: NAV_PRIMARY } : {}),
+    "&:hover": active ? { background: NAV_ACTIVE_GRADIENT } : tinted,
+    "&.Mui-focusVisible": { outline: `2px solid ${alpha(NAV_PRIMARY, 0.5)}`, outlineOffset: 2 },
+    "& .MuiSvgIcon-root": { color: "currentColor" },
+    ...(active && bar !== undefined
+      ? {
+          "&::before": {
+            background: NAV_PRIMARY,
+            borderRadius: "0 4px 4px 0",
+            content: '""',
+            height: 24,
+            left: -bar,
+            position: "absolute",
+            top: (height - 24) / 2,
+            width: 4,
+          },
+        }
+      : {}),
+    ...REDUCED_MOTION,
+  } as const;
+}

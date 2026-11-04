@@ -84,12 +84,8 @@
     "font": 1
   },
   "src/components/portal/ErgPortalLayout.tsx": {
-    "hex": 2,
-    "font": 0
-  },
-  "src/components/portal/ErgPortalSidebar.tsx": {
     "hex": 1,
-    "font": 1
+    "font": 0
   },
   "src/components/portal/portal-header-actions.tsx": {
     "hex": 13,
@@ -107,48 +103,16 @@
     "hex": 11,
     "font": 8
   },
-  "src/components/portal/portal-sidebar-bottom.tsx": {
-    "hex": 17,
-    "font": 32
-  },
-  "src/components/portal/portal-sidebar-branch-item.tsx": {
-    "hex": 0,
-    "font": 5
-  },
-  "src/components/portal/portal-sidebar-compact-item.tsx": {
-    "hex": 0,
-    "font": 4
-  },
-  "src/components/portal/portal-sidebar-leaf-item.tsx": {
-    "hex": 0,
-    "font": 4
-  },
-  "src/components/portal/portal-sidebar-nav-layer.tsx": {
-    "hex": 0,
-    "font": 2
-  },
   "src/components/portal/portal-sidebar-report-icon.tsx": {
     "hex": 2,
     "font": 1
-  },
-  "src/components/portal/portal-sidebar-styles.ts": {
-    "hex": 1,
-    "font": 0
-  },
-  "src/components/portal/portal-sidebar-workspace-header.tsx": {
-    "hex": 31,
-    "font": 15
-  },
-  "src/components/portal/portal-workspace-switcher.tsx": {
-    "hex": 0,
-    "font": 10
   },
   "src/components/pwa/global-pwa-banner.tsx": {
     "hex": 2,
     "font": 2
   },
   "src/components/quiz/mobile-player-shell.tsx": {
-    "hex": 8,
+    "hex": 5,
     "font": 0
   },
   "src/components/quiz/player-shell-parts.tsx": {
@@ -156,7 +120,7 @@
     "font": 22
   },
   "src/components/quiz/player-shell-runtime/player-desktop-layout.tsx": {
-    "hex": 11,
+    "hex": 1,
     "font": 0
   },
   "src/components/quiz/player-shell-runtime/player-shell-styles.ts": {
@@ -359,13 +323,9 @@
     "hex": 11,
     "font": 0
   },
-  "src/features/elearning/student-dashboard/components/student-dashboard-bottom-dock.tsx": {
-    "hex": 7,
-    "font": 7
-  },
   "src/features/elearning/student-dashboard/components/student-dashboard-content-views.tsx": {
     "hex": 32,
-    "font": 32
+    "font": 24
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-discussion-composer-tools.tsx": {
     "hex": 10,
@@ -391,10 +351,6 @@
     "hex": 4,
     "font": 8
   },
-  "src/features/elearning/student-dashboard/components/student-dashboard-mobile-overview.tsx": {
-    "hex": 4,
-    "font": 34
-  },
   "src/features/elearning/student-dashboard/components/student-dashboard-mobile-shell.tsx": {
     "hex": 13,
     "font": 11
@@ -404,12 +360,12 @@
     "font": 30
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-top-menu.tsx": {
-    "hex": 36,
-    "font": 21
+    "hex": 0,
+    "font": 2
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-view-primitives.tsx": {
-    "hex": 35,
-    "font": 32
+    "hex": 33,
+    "font": 30
   },
   "src/features/elearning/student-dashboard/components/student-dashboard-workspace-runtime.tsx": {
     "hex": 5,
@@ -960,8 +916,8 @@
     "font": 15
   },
   "src/features/lcms/school-management/components/school-page-shell.tsx": {
-    "hex": 5,
-    "font": 13
+    "hex": 4,
+    "font": 11
   },
   "src/features/lcms/school-management/components/school-reviews-panel.tsx": {
     "hex": 0,
@@ -1276,7 +1232,7 @@
     "font": 6
   },
   "src/features/lms/components/exercise-bank/mobile-exercise-bank-view.tsx": {
-    "hex": 14,
+    "hex": 11,
     "font": 0
   },
   "src/features/lms/components/homework-panel.tsx": {
@@ -1308,8 +1264,8 @@
     "font": 8
   },
   "src/features/lms/components/lms-teacher-shell-presentation.tsx": {
-    "hex": 47,
-    "font": 56
+    "hex": 12,
+    "font": 28
   },
   "src/features/lms/components/lms-teacher-shell.tsx": {
     "hex": 1,
@@ -1448,15 +1404,15 @@
     "font": 2
   },
   "src/features/profile/components/profile-page.tsx": {
-    "hex": 2,
-    "font": 7
+    "hex": 1,
+    "font": 3
   },
   "src/features/profile/components/profile-panels.tsx": {
-    "hex": 10,
-    "font": 20
+    "hex": 8,
+    "font": 18
   },
   "src/features/profile/components/profile-primitives.tsx": {
-    "hex": 6,
+    "hex": 5,
     "font": 12
   },
   "src/features/profile/components/profile-sidebar.tsx": {
@@ -1523,10 +1479,6 @@
     "hex": 4,
     "font": 28
   },
-  "src/platform/auth/components/auth-form-panel.tsx": {
-    "hex": 15,
-    "font": 35
-  },
   "src/platform/auth/components/auth-icons.tsx": {
     "hex": 4,
     "font": 0
@@ -1535,25 +1487,9 @@
     "hex": 2,
     "font": 11
   },
-  "src/platform/auth/components/auth-workspace.tsx": {
-    "hex": 2,
-    "font": 2
-  },
   "src/platform/auth/components/portal-auth-gates.tsx": {
     "hex": 2,
     "font": 1
-  },
-  "src/platform/auth/components/portal-login-presentation.tsx": {
-    "hex": 8,
-    "font": 2
-  },
-  "src/platform/auth/components/portal-mobile-login-form.tsx": {
-    "hex": 31,
-    "font": 28
-  },
-  "src/platform/auth/components/portal-mobile-login-shell.tsx": {
-    "hex": 1,
-    "font": 0
   },
   "src/platform/auth/components/sso-handoff-page.tsx": {
     "hex": 0,
