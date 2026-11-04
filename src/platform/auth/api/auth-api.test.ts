@@ -171,7 +171,7 @@ test("keeps snake_case access tokens in browser-session storage only", async () 
         id: "teacher-1",
         email: "teacher@erg.edu.vn",
         full_name: "ERG Teacher",
-      },
+      } as never,
       access_token: "jwt-token",
       refresh_token: "refresh-token",
       expires_in: 3600,

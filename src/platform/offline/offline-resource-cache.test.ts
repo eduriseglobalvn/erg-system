@@ -46,13 +46,13 @@ describe("offline resource cache", () => {
     const cache = new OfflineResourceCache(new MemoryScopedJsonStore());
     const base = basePut(scope, "resource-a", [1]);
 
-    await expect(cache.put({ ...base, launchMode: "external" })).rejects.toMatchObject({ code: "RESOURCE_NOT_ALLOWED" });
-    await expect(cache.put({ ...base, isDownloadable: false })).rejects.toMatchObject({ code: "RESOURCE_NOT_ALLOWED" });
-    await expect(cache.put({ ...base, bytes: new Uint8Array(), mimeType: "text/plain", metadata: { accessToken: "never" } })).rejects.toMatchObject({ code: "CREDENTIAL_PAYLOAD" });
+    await expect(cache.put({ ...base, launchMode: "external" } as never)).rejects.toMatchObject({ code: "RESOURCE_NOT_ALLOWED" });
+    await expect(cache.put({ ...base, isDownloadable: false } as never)).rejects.toMatchObject({ code: "RESOURCE_NOT_ALLOWED" });
+    await expect(cache.put({ ...base, bytes: new Uint8Array(), mimeType: "text/plain", metadata: { accessToken: "never" } } as never)).rejects.toMatchObject({ code: "CREDENTIAL_PAYLOAD" });
   });
 });
 
-function basePut(scope: typeof import("@/platform/offline/offline-resource-cache").OfflineResourceScope, resourceId: string, bytes: number[]) {
+function basePut(scope: import("@/platform/offline/offline-resource-cache").OfflineResourceScope, resourceId: string, bytes: number[]) {
   return {
     scope,
     resourceId,

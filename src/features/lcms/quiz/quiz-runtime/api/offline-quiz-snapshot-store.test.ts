@@ -69,11 +69,11 @@ describe("offline quiz snapshot store", () => {
       snapshot: Object.freeze({ ...capability.snapshot, packageHash: packageValue.contentHash }),
     };
 
-    await expect(store.save({ scope, capability: approvedCapability, quizPackage: packageValue })).resolves.toMatchObject({ status: "stored" });
+    await expect(store.save({ scope, capability: approvedCapability as never, quizPackage: packageValue })).resolves.toMatchObject({ status: "stored" });
     expect(await store.get({ scope, assignmentId: "assignment-a", quizId: "quiz-a", attemptId: "attempt-a", nowMs: Date.parse("2026-08-09T08:30:00.000Z") })).toMatchObject({ packageHash: packageValue.contentHash });
 
     const unsafePackage = createQuizPackage(quiz, { gradingMode: "client-first", source: "server" });
-    await expect(store.save({ scope, capability: approvedCapability, quizPackage: unsafePackage })).rejects.toMatchObject({ code: "SNAPSHOT_MISMATCH" });
+    await expect(store.save({ scope, capability: approvedCapability as never, quizPackage: unsafePackage })).rejects.toMatchObject({ code: "SNAPSHOT_MISMATCH" });
   });
 
   test("does not cross tenant/account/attempt scope and expires from the server deadline", async () => {
@@ -83,7 +83,7 @@ describe("offline quiz snapshot store", () => {
       ...capability,
       snapshot: Object.freeze({ ...capability.snapshot, packageHash: packageValue.contentHash }),
     };
-    await store.save({ scope, capability: approvedCapability, quizPackage: packageValue });
+    await store.save({ scope, capability: approvedCapability as never, quizPackage: packageValue });
 
     expect(await store.get({ scope: { ...scope, accountId: "student-b" }, assignmentId: "assignment-a", quizId: "quiz-a", attemptId: "attempt-a", nowMs: Date.parse("2026-08-09T08:30:00.000Z") })).toBeNull();
     expect(await store.get({ scope, assignmentId: "assignment-a", quizId: "quiz-a", attemptId: "attempt-a", nowMs: Date.parse("2026-08-09T09:00:01.000Z") })).toBeNull();

@@ -117,7 +117,7 @@ describe("DB-backed access management API", () => {
     const { accessManagementQueryKeys } = await import("@/features/access-management/api/access-management-api");
     const filters = { page: 1, limit: 25, search: "teacher", group: "lms", portal: "lms", status: "ACTIVE" };
 
-    expect(accessManagementQueryKeys.permissions("tenant-a", filters)).toEqual([
+    expect(accessManagementQueryKeys.permissions("tenant-a", filters as never)).toEqual([
       "access-management",
       "tenant-a",
       "permissions",

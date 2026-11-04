@@ -39,7 +39,7 @@ const mockExercises: ExerciseLibraryItem[] = [
 ];
 
 test("shows lecture and exercise options only for child content under topic or section", () => {
-  expect(getAvailableContentOptions("root", "category")).toEqual(["category"]);
+  expect(getAvailableContentOptions("root", "category" as never)).toEqual(["category"]);
   expect(getAvailableContentOptions("child", "group")).toEqual(["section"]);
   expect(getAvailableContentOptions("child", "lesson")).toEqual(["lecture", "exercise", "resource"]);
   expect(shouldShowContentOption("child", "lecture", "lesson")).toBe(true);

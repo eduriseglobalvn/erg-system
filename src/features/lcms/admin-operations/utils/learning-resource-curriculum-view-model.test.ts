@@ -40,7 +40,7 @@ const subject: StudioSubject = {
   id: "subject-ic3",
   label: "IC3 GS6",
   status: "active",
-  tree: [levelNode],
+  tree: [levelNode as never],
   groupCount: 1,
   lessonCount: 1,
   resourceCount: 2,
@@ -72,7 +72,7 @@ const localContentItems: LocalContentItem[] = [
   },
 ];
 
-const resources: AttachedResourceItem[] = [
+const resources = [
   {
     id: "pdf-1",
     title: "Teacher handout",
@@ -84,7 +84,7 @@ const resources: AttachedResourceItem[] = [
     fileTypeBadge: "PDF",
     status: "published",
   },
-];
+] as unknown as AttachedResourceItem[];
 
 const quizBankItems: QuizBankItem[] = [
   {
@@ -275,7 +275,7 @@ test("maps user-created sections as first-class topics when no taxonomyTopic is 
     id: "custom-subject-geo",
     label: "Địa Lý",
     status: "active",
-    tree: [customLevelNode],
+    tree: [customLevelNode as never],
     groupCount: 1,
     lessonCount: 1,
     resourceCount: 0,
@@ -324,13 +324,13 @@ test("maps each attached lecture to a lesson row under a topic", () => {
     id: "subject-geo",
     label: "Địa Lý",
     status: "active",
-    tree: [customLevelNode],
+    tree: [customLevelNode as never],
     groupCount: 1,
     lessonCount: 2,
     resourceCount: 2,
   };
 
-  const attachedLectures: AttachedResourceItem[] = [
+  const attachedLectures = [
     {
       id: "res-1",
       title: "Bài 1: Xác định tọa độ",
@@ -349,7 +349,7 @@ test("maps each attached lecture to a lesson row under a topic", () => {
       selectedFileType: "PPTX",
       status: "published",
     },
-  ];
+  ] as unknown as AttachedResourceItem[];
 
   const stages = buildCurriculumRoadmapStages({
     subject: customSubject,
@@ -365,7 +365,7 @@ test("maps each attached lecture to a lesson row under a topic", () => {
 });
 
 test("sorts lessons correctly even when backend returns them in reversed or scrambled order", () => {
-  const reversedLectures: AttachedResourceItem[] = [
+  const reversedLectures = [
     { id: "r-6", title: "Ôn tập 6", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
     { id: "r-5", title: "Bài 35: Tác động (2)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
     { id: "r-4", title: "Bài 34: Tác động (1)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
@@ -373,7 +373,7 @@ test("sorts lessons correctly even when backend returns them in reversed or scra
     { id: "r-2", title: "Bài 32: Dấu hiệu (2)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
     { id: "r-1", title: "Bài 31: Dấu hiệu (1)", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
     { id: "r-0", title: "Bài 30: Bảo mật thiết bị", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-1", selectedFileType: "PDF", status: "published" },
-  ];
+  ] as unknown as AttachedResourceItem[];
 
   const testSubject: StudioSubject = {
     id: "sub-1",
@@ -428,10 +428,10 @@ test("sorts lessons correctly even when backend returns them in reversed or scra
 });
 
 test("sorts topics correctly based on curriculum progression (Topic with Bài 1 before Topic with Bài 30)", () => {
-  const multiTopicLectures: AttachedResourceItem[] = [
+  const multiTopicLectures = [
     { id: "r-sec-1", title: "Bài 30: An toàn", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-security", selectedFileType: "PDF", status: "published" },
     { id: "r-bas-1", title: "Bài 1: Căn bản", subjectId: "sub-1", categoryId: "lvl-1", sectionId: "top-basics", selectedFileType: "PDF", status: "published" },
-  ];
+  ] as unknown as AttachedResourceItem[];
 
   const testSubject: StudioSubject = {
     id: "sub-1",

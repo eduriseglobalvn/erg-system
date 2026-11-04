@@ -129,9 +129,9 @@ describe("school management API", () => {
       .mockResolvedValueOnce({ enrollSchoolStudent: { id: "e1", tenantId: "erg", schoolId: "s1", studentId: "st1", classId: "c1", status: "ACTIVE", version: "1", replayed: false } })
       .mockResolvedValueOnce({ bulkEnrollSchoolStudents: { idempotencyKey: "enroll-1", requested: 2, enrolled: 2, replayed: 0, items: [{ id: "e1", tenantId: "erg", schoolId: "s1", studentId: "st1", classId: "c1", status: "ACTIVE", version: "1", replayed: false }] } });
 
-    await expect(importSchoolStudents("s1", [{ studentCode: "HS01", fullName: "Nguyen An" }], "students-1")).resolves.toMatchObject({ created: 1, items: [{ id: "st1" }] });
-    await expect(enrollSchoolStudent({ studentId: "st1", classId: "c1" }, "enroll-1")).resolves.toMatchObject({ classId: "c1" });
-    await expect(bulkEnrollSchoolStudents([{ studentId: "st1", classId: "c1" }], "enroll-2")).resolves.toMatchObject({ enrolled: 2 });
+    await expect(importSchoolStudents("s1", [{ studentCode: "HS01", fullName: "Nguyen An" }], "students-1" as never)).resolves.toMatchObject({ created: 1, items: [{ id: "st1" }] });
+    await expect(enrollSchoolStudent({ studentId: "st1", classId: "c1" }, "enroll-1" as never)).resolves.toMatchObject({ classId: "c1" });
+    await expect(bulkEnrollSchoolStudents([{ studentId: "st1", classId: "c1" }], "enroll-2" as never)).resolves.toMatchObject({ enrolled: 2 });
     expect(graphQlRequest.mock.calls[0][0].variables.input).toMatchObject({ schoolId: "s1", idempotencyKey: "students-1" });
     expect(graphQlRequest.mock.calls[1][0].variables.input).toMatchObject({ studentId: "st1", classId: "c1", idempotencyKey: "enroll-1" });
     expect(graphQlRequest.mock.calls[2][0].variables.input.items).toEqual([{ studentId: "st1", classId: "c1" }]);
@@ -148,7 +148,7 @@ describe("school management API", () => {
       .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b1", requested: 50, created: 50, replayed: 0, items: [] } })
       .mockResolvedValueOnce({ importSchoolStudents: { idempotencyKey: "key-b2", requested: 20, created: 20, replayed: 0, items: [] } });
 
-    const result = await importSchoolStudents("s1", manyStudents, "key");
+    const result = await importSchoolStudents("s1", manyStudents, "key" as never);
     expect(result.created).toBe(120);
     expect(result.requested).toBe(120);
     expect(graphQlRequest).toHaveBeenCalledTimes(3);

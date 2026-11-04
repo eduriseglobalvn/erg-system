@@ -3,6 +3,10 @@ import { describe, expect, test, beforeEach } from "vitest";
 import { localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime/api/local-quiz-attempt-store";
 import type { LocalQuizAttemptSession } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 
+// Fixtures predate the required startIdempotencyKey; these tests do not exercise it.
+const createTestSession = (input: Omit<Parameters<typeof localQuizAttemptStore.createSession>[0], "startIdempotencyKey">) =>
+  localQuizAttemptStore.createSession(input as never);
+
 const SESSION_KEY = "erg:local-quiz-attempt:v1:assignment-1:quiz-1";
 
 describe("localQuizAttemptStore bookmarks", () => {
@@ -12,7 +16,7 @@ describe("localQuizAttemptStore bookmarks", () => {
   });
 
   test("creates sessions with an empty bookmark list", async () => {
-    const session = await localQuizAttemptStore.createSession({
+    const session = await createTestSession({
       assignmentId: "assignment-1",
       attemptId: "attempt-1",
       packageHash: "hash-1",
@@ -25,7 +29,7 @@ describe("localQuizAttemptStore bookmarks", () => {
   });
 
   test("persists bookmark toggles across reloads", async () => {
-    const session = await localQuizAttemptStore.createSession({
+    const session = await createTestSession({
       assignmentId: "assignment-1",
       attemptId: "attempt-1",
       packageHash: "hash-1",
@@ -42,7 +46,7 @@ describe("localQuizAttemptStore bookmarks", () => {
   });
 
   test("does not write active attempt data to plain localStorage", async () => {
-    await localQuizAttemptStore.createSession({
+    await createTestSession({
       accountId: "student-a",
       assignmentId: "assignment-1",
       attemptId: "attempt-1",
@@ -58,7 +62,7 @@ describe("localQuizAttemptStore bookmarks", () => {
   });
 
   test("keeps local attempt sessions separated by tenant portal and account", async () => {
-    const studentA = await localQuizAttemptStore.createSession({
+    const studentA = await createTestSession({
       accountId: "student-a",
       assignmentId: "assignment-1",
       attemptId: "attempt-a",
@@ -69,7 +73,7 @@ describe("localQuizAttemptStore bookmarks", () => {
       submitIdempotencyKey: "submit-a",
       tenantId: "tenant-a",
     });
-    const studentB = await localQuizAttemptStore.createSession({
+    const studentB = await createTestSession({
       accountId: "student-b",
       assignmentId: "assignment-1",
       attemptId: "attempt-b",
@@ -125,7 +129,7 @@ describe("localQuizAttemptStore bookmarks", () => {
   });
 
   test("persists server attempt policy without replacing it with the browser clock", async () => {
-    const session = await localQuizAttemptStore.createSession({
+    const session = await createTestSession({
       accountId: "student-a",
       assignmentId: "assignment-1",
       attemptId: "attempt-local",

@@ -9,7 +9,7 @@ import {
 } from "./learning-resource-authoring-create-dialog-model";
 import type { StudioNode } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
-const mockLevelNode: StudioNode = {
+const mockLevelNode = {
   id: "lvl-1",
   kind: "group",
   label: "Level 1",
@@ -18,7 +18,7 @@ const mockLevelNode: StudioNode = {
   optionId: "lvl-1",
   children: [],
   location: { subjectId: "sub-1", categoryId: "lvl-1" },
-};
+} as unknown as StudioNode;
 
 describe("learning-resource-authoring-create-dialog-model", () => {
   it("resolves level mode strictly when state.mode is level or root", () => {

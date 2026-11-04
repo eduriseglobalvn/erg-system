@@ -14,7 +14,7 @@ let publicKeyValue = "";
 
 beforeAll(async () => {
   vi.stubGlobal("crypto", webcrypto);
-  const pair = await webcrypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"]);
+  const pair = (await webcrypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])) as unknown as CryptoKeyPair;
   privateKey = pair.privateKey;
   publicKey = pair.publicKey;
   publicKeyValue = toBase64(new Uint8Array(await webcrypto.subtle.exportKey("spki", publicKey)));
