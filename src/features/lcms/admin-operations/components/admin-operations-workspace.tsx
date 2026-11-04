@@ -1,13 +1,20 @@
+import { lazy } from "react";
 import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import { UserAccessControlWorkspace } from "@/features/lcms/admin-operations/components/user-access-control-workspace";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import type { ManagementScope } from "@/types/scope-types";
 import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
 import { AdminOverview } from "./admin-operations-overview";
 import { CenterManagement } from "./admin-operations-center-management";
 import { InternalDocsWorkspace, SheetImportWorkspace, getScopeDescription, getScopedCenters } from "./admin-operations-support";
+
+// Heaviest part of this chunk (user/role management); only two leaves need it.
+const UserAccessControlWorkspace = lazy(() =>
+  import("@/features/lcms/admin-operations/components/user-access-control-workspace").then((module) => ({
+    default: module.UserAccessControlWorkspace,
+  })),
+);
 
 export type AdminOperationsWorkspaceProps = {
   activeLeaf: DashboardLeaf;
