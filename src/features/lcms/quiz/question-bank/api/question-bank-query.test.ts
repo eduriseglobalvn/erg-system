@@ -41,9 +41,9 @@ describe("questionBankWorkspaceQueryOptions", () => {
     expect(options.staleTime).toBe(QUESTION_BANK_WORKSPACE_STALE_TIME_MS);
     expect(options.gcTime).toBe(QUESTION_BANK_WORKSPACE_GC_TIME_MS);
     expect(options.initialDataUpdatedAt).toBe(0);
-    expect(initialData.questions.length).toBeGreaterThan(0);
-    expect(initialData.quizzes.length).toBeGreaterThan(0);
-    expect(initialData.subjects.length).toBeGreaterThan(0);
+    expect(initialData?.questions.length).toBeGreaterThan(0);
+    expect(initialData?.quizzes.length).toBeGreaterThan(0);
+    expect(initialData?.subjects.length).toBeGreaterThan(0);
     expect(options.placeholderData(undefined)).toEqual(initialData);
   });
 

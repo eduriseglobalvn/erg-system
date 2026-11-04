@@ -3,7 +3,6 @@ import { expect, test } from "vitest";
 import {
   MemoryOfflineOutboxStore,
   OfflineOutbox,
-  OfflineOutboxError,
   OFFLINE_OUTBOX_RETENTION_MS,
   type OfflineMutation,
   type OfflineOutboxScope,
@@ -81,7 +80,7 @@ test("replays queued mutations in FIFO order and deduplicates the same operation
     entityType: "attendance",
     entityId: "student-1",
     payload: { status: "ABSENT", lessonIndex: 1 },
-  })).rejects.toMatchObject<OfflineOutboxError>({ code: "IDEMPOTENCY_CONFLICT" });
+  })).rejects.toMatchObject({ code: "IDEMPOTENCY_CONFLICT" });
 
   const sent: string[] = [];
   const summary = await outbox.replay(async (mutation) => {
@@ -180,7 +179,7 @@ test("rejects credentials and sensitive fields from offline payloads", async () 
     entityType: "attendance",
     entityId: "student-1",
     payload: { metadata: { accessToken: "should-never-persist" } },
-  })).rejects.toMatchObject<OfflineOutboxError>({ code: "CREDENTIAL_PAYLOAD" });
+  })).rejects.toMatchObject({ code: "CREDENTIAL_PAYLOAD" });
 });
 
 test("prunes expired records while retaining fresh operations", async () => {

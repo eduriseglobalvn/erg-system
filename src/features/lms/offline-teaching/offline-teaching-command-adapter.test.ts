@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   createOfflineTeachingCommandAdapter,
-  OfflineTeachingCommandError,
 } from "@/features/lms/offline-teaching/offline-teaching-command-adapter";
 import {
   resolveOfflineTeachingCapability,
@@ -45,7 +44,7 @@ describe("offline teaching command boundary", () => {
       operation: "attendance.upsert",
       payload: { status: "PRESENT" },
       send: vi.fn(),
-    })).rejects.toMatchObject<OfflineTeachingCommandError>({ code: "OFFLINE_CAPABILITY_UNAVAILABLE" });
+    })).rejects.toMatchObject({ code: "OFFLINE_CAPABILITY_UNAVAILABLE" });
   });
 
   it("requires the capability scope and operation to match exactly", () => {

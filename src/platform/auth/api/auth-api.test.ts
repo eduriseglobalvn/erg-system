@@ -34,7 +34,7 @@ afterEach(() => {
 
 test("backend login sends portal in the body without a browser-controlled tenant header", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {
@@ -74,7 +74,7 @@ test("backend login sends portal in the body without a browser-controlled tenant
 
 test("backend login sends LCMS portal in its authenticated request body", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {
@@ -110,7 +110,7 @@ test("keeps the configured spring API base when the CRM portal runs on its own h
     origin: "https://crm.erg.edu.local:3001",
     protocol: "https:",
   });
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       JSON.stringify({
         data: {
@@ -484,7 +484,7 @@ test("accepts a login response that carries a usable account and access token", 
 
 test("login rejects a malformed backend response with a clear typed error", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
-  const fetchMock = vi.fn(async () =>
+  const fetchMock = vi.fn(async (_url?: string | URL | Request, _init?: RequestInit) =>
     new Response(
       // Missing account identity and access token entirely.
       JSON.stringify({ data: { portals: ["lms"] } }),

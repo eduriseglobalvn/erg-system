@@ -18,7 +18,10 @@ class FakeBroadcastChannel {
   onmessage: ((event: MessageEvent) => void) | null = null;
   posted: unknown[] = [];
 
-  constructor(public name: string) {
+  name: string;
+
+  constructor(name: string) {
+    this.name = name;
     FakeBroadcastChannel.latest = this;
   }
 
