@@ -222,10 +222,10 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       return result;
     }
     case "essay": {
+      // Essays are graded by a teacher (server marks them for manual review); never award points locally.
       if ((answer.essayText ?? "").trim().length > 0) {
-        result.correct = true;
-        result.awardedPoints = question.points;
-        result.message = question.feedback.correct;
+        result.pendingReview = true;
+        result.message = "Bài tự luận sẽ được giáo viên chấm.";
       }
       return result;
     }

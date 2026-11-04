@@ -9,8 +9,9 @@ import type { AnswerResult, Question, QuizResultDisplay } from "@/domain/quiz/ty
 type SubmitDialogMode = "all-answered" | "confirm";
 
 export function QuestionFeedbackPanel({ floating = false, result }: { floating?: boolean; result: AnswerResult }) {
-  const title = result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
-  const message = result.correct ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
+  const title = result.pendingReview ? "Đã ghi nhận bài làm" : result.correct ? "Đáp án chính xác!" : "Đáp án chưa đúng!";
+  const message = result.correct || result.pendingReview ? result.message : "Câu trả lời chưa đúng. Em hãy xem lại đáp án và thử ở lần sau.";
+  const headerColor = result.pendingReview ? "info.main" : result.correct ? "#22C55E" : "#e82828";
 
   return (
     <Box
@@ -27,7 +28,7 @@ export function QuestionFeedbackPanel({ floating = false, result }: { floating?:
         width: "100%",
       }}
     >
-      <Box sx={{ alignItems: "center", bgcolor: result.correct ? "#22C55E" : "#e82828", color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
+      <Box sx={{ alignItems: "center", bgcolor: headerColor, color: "common.white", display: "flex", fontSize: 16, fontWeight: 600, justifyContent: "space-between", minHeight: 48, px: 2.5 }}>
         <span>{title}</span>
       </Box>
       <Box sx={{ color: "text.primary", fontSize: 16, lineHeight: "28px", px: 2.5, py: 2.5 }}>{message}</Box>

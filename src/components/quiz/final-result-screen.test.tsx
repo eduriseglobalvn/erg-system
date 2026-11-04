@@ -33,6 +33,13 @@ describe("FinalResultScreen", () => {
     expect(screen.queryByRole("button", { name: "Làm lại" })).toBeNull();
   });
 
+  it("labels an essay waiting for the teacher as pending, not wrong", () => {
+    const pending = { ...attempt, answers: { ...attempt.answers, q3: { result: { correct: false, pendingReview: true } } } } as unknown as Attempt;
+    render(<FinalResultScreen attempt={pending} questions={questions} resultDisplay={display} onReview={vi.fn()} onReviewQuestion={vi.fn()} onBackToList={vi.fn()} />);
+    expect(screen.getByRole("button", { name: /Câu 3: chờ giáo viên chấm/ })).toBeTruthy();
+    expect(screen.getByText(/Chờ chấm 1/)).toBeTruthy();
+  });
+
   it("shows Làm lại in practice mode", () => {
     setup(vi.fn());
     expect(screen.getByRole("button", { name: "Làm lại" })).toBeTruthy();

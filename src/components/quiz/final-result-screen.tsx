@@ -28,11 +28,14 @@ export type FinalResultScreenProps = {
 export function FinalResultScreen({ attempt, questions, resultDisplay, onReview, onReviewQuestion, onRetry, onBackToList, extraActions }: FinalResultScreenProps) {
   const rows = questions.map((question, index) => {
     const record = attempt.answers[question.id];
-    const state: "correct" | "wrong" | "blank" = !record ? "blank" : record.result?.correct ? "correct" : "wrong";
+    const state: "correct" | "wrong" | "pending" | "blank" = !record
+      ? "blank"
+      : record.result?.pendingReview ? "pending" : record.result?.correct ? "correct" : "wrong";
     return { question, index, state };
   });
   const correctCount = rows.filter((row) => row.state === "correct").length;
   const wrongCount = rows.filter((row) => row.state === "wrong").length;
+  const pendingCount = rows.filter((row) => row.state === "pending").length;
   const resultMessage = attempt.passed ? resultDisplay.passMessage : resultDisplay.failMessage;
 
   return (
@@ -43,14 +46,15 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
           {attempt.totalScore}/{attempt.maxScore}
         </Typography>
         <Typography color="text.secondary" variant="body2">
-          {attempt.percent}% · Đúng {correctCount} · Sai {wrongCount} · Chưa làm {rows.length - correctCount - wrongCount}
+          {attempt.percent}% · Đúng {correctCount} · Sai {wrongCount}
+          {pendingCount ? ` · Chờ chấm ${pendingCount}` : ""} · Chưa làm {rows.length - correctCount - wrongCount - pendingCount}
         </Typography>
       </Box>
 
       <Box component="ol" aria-label="Kết quả từng câu" sx={{ display: "grid", gap: 1, gridTemplateColumns: "repeat(auto-fill, minmax(88px, 1fr))", listStyle: "none", m: 0, p: 0 }}>
         {rows.map(({ question, index, state }) => {
           const tint = state === "correct" ? success : state === "wrong" ? error : neutral;
-          const label = state === "correct" ? "đúng" : state === "wrong" ? "sai" : "chưa làm";
+          const label = state === "correct" ? "đúng" : state === "wrong" ? "sai" : state === "pending" ? "chờ giáo viên chấm" : "chưa làm";
           return (
             <li key={question.id}>
               <ButtonBase

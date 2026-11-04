@@ -248,6 +248,8 @@ export type AnswerResult = {
   awardedPoints: number;
   maxPoints: number;
   message: string;
+  /** Answered but needs a teacher to grade it (essay); awardedPoints stays 0 until then. */
+  pendingReview?: boolean;
   correctChoiceIds?: string[];
   correctMatchingOrder?: string[];
   correctSequenceOrder?: string[];

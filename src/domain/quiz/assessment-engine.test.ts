@@ -78,7 +78,6 @@ const rows: Row[] = [
   ["drag drop swapped", dnd, { dragDropPlacements: { d1: "t2", d2: "t1" } }, 0, "wrong"],
   ["likert all rows", likert, { likertResponses: { r1: "1", r2: "3" } }, 10, "correct"],
   ["likert missing row", likert, { likertResponses: { r1: "1" } }, 0, "wrong"],
-  ["essay with text", essay, { essayText: "bài" }, 10, "correct"],
   ["essay blank", essay, { essayText: "   " }, 0, "wrong"],
   ["hotspot inside rect", rect, { hotspotPoint: { x: 20, y: 20 } }, 10, "correct"],
   ["hotspot rect edge", rect, { hotspotPoint: { x: 30, y: 30 } }, 10, "correct"],
@@ -96,6 +95,12 @@ describe("scoreQuestion (table)", () => {
     expect(result.partiallyRight).toBe(state === "partial");
     expect(result.maxPoints).toBe(10);
     expect(result.message).toBe(state === "correct" ? "OK" : state === "partial" ? "PART" : "NO");
+  });
+
+  it("never auto-awards essay points; marks the answer for teacher review", () => {
+    const result = scoreQuestion(essay, { essayText: "bài" });
+    expect(result).toMatchObject({ awardedPoints: 0, correct: false, pendingReview: true });
+    expect(scoreQuestion(essay, { essayText: "  " }).pendingReview).toBeUndefined();
   });
 
   it("returns the answer key on the result for review screens", () => {
