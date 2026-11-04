@@ -5,6 +5,9 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
+import { portableIdentityAccountId, type PortableStudentIdentity } from "@/features/elearning/portable-exam/api/portable-exam-identity";
+import { PortableIdentityStep } from "@/features/elearning/portable-exam/components/portable-identity-step";
+import { PortableResultExportButton } from "@/features/elearning/portable-exam/components/portable-result-export-button";
 import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
@@ -17,6 +20,7 @@ export type PortableArtifactState =
 
 export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: { packageUrl?: string }) {
   const [state, setState] = useState<PortableArtifactState>({ status: "loading" });
+  const [identity, setIdentity] = useState<PortableStudentIdentity | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,11 +60,17 @@ export function PortableArtifactApp({ packageUrl = "/portable-exam.ergquiz" }: {
     );
   }
 
+  if (!identity) {
+    return <PortableIdentityStep onConfirm={setIdentity} roster={state.quizPackage.roster} title={state.quizPackage.quiz.title} />;
+  }
+
   return (
     <Box component="main" data-portable-artifact="question-only" sx={{ bgcolor: "#f3f6ff", minHeight: "100dvh", p: { xs: 0.5, md: 1 } }}>
       <PlayerShellRuntime
+        identityAccountId={portableIdentityAccountId(identity)}
         portableOffline={state.quizPackage.gradingMode === "client-first"}
         portablePackage={state.quizPackage}
+        renderResultActions={(context) => <PortableResultExportButton identity={identity} {...context} />}
         runtimePortal="elearning"
         startImmediately
       />

@@ -1,6 +1,7 @@
 import { normalizeQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-normalizer";
 import type { BackendQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-api";
 import { readPortableExamPackage, type PortableExamPackageInput } from "@/features/elearning/portable-exam/api/portable-exam-package-reader";
+import { parsePortableRoster } from "@/features/elearning/portable-exam/api/portable-exam-identity";
 import { portableExamPackageStore } from "@/features/elearning/portable-exam/api/portable-exam-package-store";
 import { verifyPortableExamPackage } from "@/features/elearning/portable-exam/api/portable-exam-package-verifier";
 import { resolvePortableAssetReferences } from "@/features/elearning/portable-exam/api/portable-exam-assets";
@@ -73,7 +74,9 @@ export function normalizePortableQuizPackage(
     quiz: rawQuiz,
     ...(answerKey ? { answerKey } : {}),
   };
-  return normalizeQuizPackage(backendPackage);
+  const roster = parsePortableRoster(payload.roster);
+  const normalized = normalizeQuizPackage(backendPackage);
+  return roster ? { ...normalized, roster } : normalized;
 }
 
 export async function getStoredPortableQuizPackage(input: {

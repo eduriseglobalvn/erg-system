@@ -1,0 +1,53 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ERG Exam Player",
+  "version": "1.0.0",
+  "identifier": "vn.erg.examplayer",
+  "build": {
+    "frontendDist": "../dist-portable"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "ERG Exam Player",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 960,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": true,
+        "visible": true,
+        "devtools": false
+      }
+    ],
+    "security": {
+      "capabilities": [],
+      "csp": "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'none'; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": false,
+    "targets": ["nsis", "dmg"],
+    "fileAssociations": [
+      {
+        "ext": ["ergquiz"],
+        "name": "ERG Quiz Package",
+        "description": "ERG exam package",
+        "mimeType": "application/vnd.erg.quiz+json",
+        "role": "Viewer"
+      }
+    ],
+    "windows": {
+      "webviewInstallMode": { "type": "offlineInstaller", "silent": true }
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

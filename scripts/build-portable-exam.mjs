@@ -30,6 +30,8 @@ const template = readFileSync(TEMPLATE, "utf8")
   .replaceAll("__ERG_PORTABLE_VERSION__", version)
   .replaceAll("__ERG_PORTABLE_IDENTIFIER__", identifier);
 const config = JSON.parse(template);
+// 8.1 #2: never ship the package as a plain file next to the executable.
+if (config.bundle?.resources) fail("tauri.portable.template.json must not bundle the exam package as a resource.");
 writeFileSync(GENERATED, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 
 const targetDirectory = resolveInsideRoot(options.output || `deploy/portable/${safeIdentifier(packageId)}/${version}`);

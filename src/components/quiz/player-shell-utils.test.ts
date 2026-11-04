@@ -23,6 +23,30 @@ describe("quiz player server clock policy", () => {
   });
 });
 
+describe("portable/offline local timer", () => {
+  const session = { startedAt: "2026-06-19T01:00:00.000Z" };
+
+  test("uses the locally stored start time only when asked to", () => {
+    expect(attemptDeadlineMs(session, 600)).toBeNull();
+    expect(attemptDeadlineMs(session, 600, true)).toBe(Date.parse("2026-06-19T01:10:00.000Z"));
+  });
+
+  test("server data still wins over the local start", () => {
+    expect(attemptDeadlineMs({ ...session, deadlineAt: "2026-06-19T01:30:00.000Z" }, 600, true)).toBe(Date.parse("2026-06-19T01:30:00.000Z"));
+  });
+
+  test("no deadline without a time limit or with a corrupt start", () => {
+    expect(attemptDeadlineMs(session, 0, true)).toBeNull();
+    expect(attemptDeadlineMs({ startedAt: "nope" }, 600, true)).toBeNull();
+  });
+
+  test("local clock is opt-in; a server offset always wins", () => {
+    expect(serverNowMs({}, 5_000)).toBeNull();
+    expect(serverNowMs({}, 5_000, true)).toBe(5_000);
+    expect(serverNowMs({ serverClockOffsetMs: 100 }, 5_000, true)).toBe(5_100);
+  });
+});
+
 describe("firstUnansweredIndex", () => {
   const q = (id: string) => ({ id, kind: "single_choice", title: id, points: 1 }) as Question;
 

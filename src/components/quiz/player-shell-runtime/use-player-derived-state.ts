@@ -9,12 +9,14 @@ export function usePlayerDerivedState({
   currentIndex,
   drafts,
   loadState,
+  portableOffline = false,
   reviewingSubmittedAttempt,
   timeUp,
 }: {
   currentIndex: number;
   drafts: Record<string, AnswerPayload>;
   loadState: PlayerLoadState;
+  portableOffline?: boolean;
   reviewingSubmittedAttempt: boolean;
   timeUp: boolean;
 }) {
@@ -47,10 +49,10 @@ export function usePlayerDerivedState({
   const isFirstQuestion = currentIndex === 0;
   const isLastQuestion = currentIndex === questions.length - 1;
   const testingDurationSeconds = Math.max(activeQuiz?.settings.timeLimitMinutes ?? 0, 0) * 60;
-  const deadlineAt = isTestingMode && activeSession?.serverStarted
-    ? attemptDeadlineMs(activeSession, testingDurationSeconds)
+  const deadlineAt = isTestingMode && activeSession && (activeSession.serverStarted || portableOffline)
+    ? attemptDeadlineMs(activeSession, testingDurationSeconds, portableOffline)
     : null;
-  const attemptServerNowMs = activeSession ? serverNowMs(activeSession) : null;
+  const attemptServerNowMs = activeSession ? serverNowMs(activeSession, undefined, portableOffline) : null;
   const attemptExpired = timeUp || (deadlineAt !== null && attemptServerNowMs !== null && attemptServerNowMs >= deadlineAt);
 
   return {

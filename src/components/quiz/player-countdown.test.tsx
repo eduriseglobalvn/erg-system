@@ -36,3 +36,23 @@ test("renders nothing when inactive", () => {
   );
   expect(screen.queryByTestId("t")).toBeNull();
 });
+
+test("localClock counts down from the device clock when the session has no server offset", () => {
+  const onExpiredChange = vi.fn();
+  const offline = {} as LocalQuizAttemptSession;
+  const { rerender } = render(
+    <PlayerCountdown active deadlineAt={Date.now() + 3000} onExpiredChange={onExpiredChange} session={offline}>
+      {(s) => <span data-testid="t">{s}</span>}
+    </PlayerCountdown>,
+  );
+  expect(screen.queryByTestId("t")).toBeNull();
+  rerender(
+    <PlayerCountdown active localClock deadlineAt={Date.now() + 3000} onExpiredChange={onExpiredChange} session={offline}>
+      {(s) => <span data-testid="t">{s}</span>}
+    </PlayerCountdown>,
+  );
+  expect(screen.getByTestId("t").textContent).toBe("3");
+  act(() => { vi.advanceTimersByTime(4000); });
+  expect(screen.getByTestId("t").textContent).toBe("0");
+  expect(onExpiredChange).toHaveBeenLastCalledWith(true);
+});

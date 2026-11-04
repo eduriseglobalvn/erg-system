@@ -4,6 +4,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
+import type { ReactNode } from "react";
 
 import type { Attempt, Question, QuizResultDisplay } from "@/lib/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
@@ -20,9 +21,11 @@ export type FinalResultScreenProps = {
   /** Practice mode only: omit to hide "Làm lại". */
   onRetry?: () => void;
   onBackToList: () => void;
+  /** Extra buttons next to the standard ones (e.g. portable "Tải kết quả"). */
+  extraActions?: ReactNode;
 };
 
-export function FinalResultScreen({ attempt, questions, resultDisplay, onReview, onReviewQuestion, onRetry, onBackToList }: FinalResultScreenProps) {
+export function FinalResultScreen({ attempt, questions, resultDisplay, onReview, onReviewQuestion, onRetry, onBackToList, extraActions }: FinalResultScreenProps) {
   const rows = questions.map((question, index) => {
     const record = attempt.answers[question.id];
     const state: "correct" | "wrong" | "blank" = !record ? "blank" : record.result?.correct ? "correct" : "wrong";
@@ -69,6 +72,7 @@ export function FinalResultScreen({ attempt, questions, resultDisplay, onReview,
           <Button variant="contained" onClick={onReview}>{resultDisplay.reviewButtonLabel}</Button>
         ) : null}
         {onRetry ? <Button variant="outlined" onClick={onRetry}>Làm lại</Button> : null}
+        {extraActions}
         <Button variant="outlined" onClick={onBackToList}>Về danh sách</Button>
       </Box>
       <Typography color="text.secondary" sx={{ textAlign: "center" }} variant="body2">{resultDisplay.thankYouMessage}</Typography>

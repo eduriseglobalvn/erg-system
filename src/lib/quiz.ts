@@ -49,7 +49,7 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
     }
     case "multiple_response": {
       const correctIds = question.choices?.filter((choice) => choice.correct).map((choice) => choice.id) ?? [];
-      const chosenIds = [...(answer.choiceIds ?? [])].sort();
+      const chosenIds = [...new Set(answer.choiceIds ?? [])].sort();
       const expectedIds = [...correctIds].sort();
       result.correctChoiceIds = expectedIds;
       if (JSON.stringify(chosenIds) === JSON.stringify(expectedIds)) {
@@ -60,9 +60,11 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       }
 
       const matched = chosenIds.filter((choiceId) => expectedIds.includes(choiceId)).length;
-      if (matched > 0 && expectedIds.length > 0) {
+      // Wrong picks cancel right ones, otherwise ticking every option scores full marks.
+      const net = matched - (chosenIds.length - matched);
+      if (net > 0 && expectedIds.length > 0) {
         result.partiallyRight = true;
-        result.awardedPoints = Math.floor((question.points * matched) / expectedIds.length);
+        result.awardedPoints = Math.floor((question.points * net) / expectedIds.length);
         result.message = question.feedback.partial;
       }
       return result;
@@ -113,7 +115,7 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
         (blank) => answer.inlineSelections?.[blank.id] === blank.correctOptionId,
       ).length;
 
-      if (matched === (question.inlineBlanks?.length ?? 0)) {
+      if (matched > 0 && matched === (question.inlineBlanks?.length ?? 0)) {
         result.correct = true;
         result.awardedPoints = question.points;
         result.message = question.feedback.correct;
@@ -155,11 +157,12 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
     case "numeric": {
       const expected = question.numericAnswer?.correctValue;
       const tolerance = question.numericAnswer?.tolerance ?? 0;
-      const actual = Number(answer.numericValue);
+      const rawValue = (answer.numericValue ?? "").trim().replace(",", ".");
+      const actual = rawValue === "" ? Number.NaN : Number(rawValue);
       result.correctNumericValue =
         expected === undefined ? undefined : `${expected}${question.numericAnswer?.unit ? ` ${question.numericAnswer.unit}` : ""}`;
 
-      if (expected !== undefined && Number.isFinite(actual) && Math.abs(actual - expected) <= tolerance) {
+      if (expected !== undefined && Number.isFinite(actual) && Math.abs(actual - expected) <= tolerance + 1e-9) {
         result.correct = true;
         result.awardedPoints = question.points;
         result.message = question.feedback.correct;

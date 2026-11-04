@@ -1,23 +1,31 @@
 import { isAnswerComplete, normalizeAnswerForSubmission } from "@/lib/quiz";
 import type { AnswerPayload, Question } from "@/lib/types";
 
-export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now()) {
+/** `localClock` (portable/offline only): there is no server, so the device clock is the reference. */
+export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now(), localClock = false) {
   if (typeof session.serverClockOffsetMs !== "number" || !Number.isFinite(session.serverClockOffsetMs)) {
-    return null;
+    return localClock ? nowMs : null;
   }
 
   return nowMs + session.serverClockOffsetMs;
 }
 
 export function attemptDeadlineMs(
-  session: { deadlineAt?: string; serverStartedAt?: string; serverClockOffsetMs?: number },
+  session: { deadlineAt?: string; serverStartedAt?: string; serverClockOffsetMs?: number; startedAt?: string },
   durationSeconds: number,
+  /** Portable/offline: fall back to the locally stored start time when the server never started the attempt. */
+  localStart = false,
 ) {
   const explicitDeadline = session.deadlineAt ? Date.parse(session.deadlineAt) : Number.NaN;
   if (Number.isFinite(explicitDeadline)) return explicitDeadline;
 
   const startedAt = session.serverStartedAt ? Date.parse(session.serverStartedAt) : Number.NaN;
   if (Number.isFinite(startedAt) && durationSeconds > 0) return startedAt + durationSeconds * 1000;
+
+  if (localStart && durationSeconds > 0) {
+    const localStartedAt = session.startedAt ? Date.parse(session.startedAt) : Number.NaN;
+    if (Number.isFinite(localStartedAt)) return localStartedAt + durationSeconds * 1000;
+  }
 
   return null;
 }

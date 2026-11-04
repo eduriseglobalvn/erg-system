@@ -276,8 +276,14 @@ export type Attempt = {
   answers: Record<string, AnswerRecord>;
 };
 
+/** Optional roster inside a signed portable package; validates the student identity step. */
+export type PortableRoster = {
+  classes: Array<{ code: string; name?: string; students: Array<{ code: string; name?: string }> }>;
+};
+
 export type QuizPackage = {
   id: string;
+  roster?: PortableRoster;
   quizId: string;
   quizVersion: string;
   generatedAt: string;

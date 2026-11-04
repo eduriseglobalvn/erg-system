@@ -68,4 +68,19 @@ for (const relativeDirectory of ["src/features", "src/app/pages"]) {
   }
 }
 
+// 8.4.1/8.4.2: the single "ERG Exam Player" profile and the per-exam portable profile.
+// Single-instance (tauri-plugin-single-instance) is NOT a dependency yet: add it to Cargo.toml and register it in
+// lib.rs together with the Rust file-open handler (phase 1 Rust work) before relying on the .ergquiz association.
+const player = JSON.parse(read("src-tauri/tauri.player.conf.json"));
+const portable = JSON.parse(read("src-tauri/tauri.portable.template.json"));
+assert.deepEqual(player.app.security.capabilities, [], "Player profile must not attach any capability");
+assert.doesNotMatch(player.app.security.csp, /https?:/, "Player CSP must not allow any remote origin");
+assert.ok(
+  player.bundle.fileAssociations?.some((association) => association.ext?.includes("ergquiz")),
+  "Player profile must associate .ergquiz files",
+);
+assert.equal(player.bundle.windows?.webviewInstallMode?.type, "offlineInstaller", "Player installer must work without Internet");
+assert.equal(player.bundle.resources, undefined, "Player must not bundle an exam");
+assert.equal(portable.bundle.resources, undefined, "Portable exam must not ship the package as a plain resource file");
+
 console.log("Tauri architecture passed: shared React boundary, Teacher/Student-only surface, least privilege and no credential IPC.");
