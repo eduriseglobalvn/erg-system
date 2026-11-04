@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-  getAvailableDialogOptions,
   getCanSubmit,
   getDialogSubtitle,
   getDialogTitle,
-  getSubmitHint,
   getSubmitLabel,
   isLevelNode,
   resolveTaxonomyMode,
