@@ -10,7 +10,7 @@ import Typography from "@mui/material/Typography";
 import { ErgDrawer, ErgSearchField, ErgSelect } from "@/components/erg-mui";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { AttendanceCurriculumTable } from "./attendance-curriculum-table";
 import { AttendanceDateField } from "./attendance-date-field";
 import { AttendanceStudentTable } from "./attendance-student-table";

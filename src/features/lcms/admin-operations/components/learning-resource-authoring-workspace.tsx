@@ -18,7 +18,7 @@ import {
   loadLearningResourceStudioWorkspaceData,
   type LearningResourceResourceCard,
   type LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   USE_LEARNING_RESOURCE_AUTHORING_MOCK,
   mockLearningResourceAuthoringLocalContent as mockExplorerLocalContent,
@@ -54,7 +54,7 @@ import type {
   TaxonomyDialogState,
   TaxonomyEditTarget,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import { questionBankWorkspaceQueryOptions } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankWorkspaceQueryOptions } from "@/features/question-bank/api/question-bank-query";
 import { fallbackQuizBankItems } from "@/features/lcms/admin-operations/api/learning-resource-authoring-defaults";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";

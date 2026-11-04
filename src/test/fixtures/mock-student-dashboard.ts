@@ -4,7 +4,7 @@ import type {
   StudentDiscussionThread,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { sampleQuiz, testingSampleQuiz, trainingSampleQuiz } from "@/lib/sample-quiz";
+import { sampleQuiz, testingSampleQuiz, trainingSampleQuiz } from "@/domain/quiz/sample-quiz";
 
 export const studentDashboardProfile: StudentDashboardProfile = {
   id: "student-current",

@@ -1,6 +1,6 @@
 import { expect, test } from "vitest";
 
-import { sampleQuiz } from "@/lib/sample-quiz";
+import { sampleQuiz } from "@/domain/quiz/sample-quiz";
 import { normalizePortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import type { VerifiedPortableExamPackage } from "@/features/elearning/portable-exam/types/portable-exam-types";
 

@@ -1,4 +1,4 @@
-import type { MatchingPair } from "@/lib/types";
+import type { MatchingPair } from "@/domain/quiz/types";
 
 export type DisplayMatchingPair = MatchingPair & {
   leftText: string;

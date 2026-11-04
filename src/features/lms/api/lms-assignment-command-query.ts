@@ -16,7 +16,7 @@ import {
   type UpdateLmsAssignmentInput,
   type UpdateLmsAssignmentRecipientsInput,
 } from "@/features/lms/api/lms-assignment-command-api";
-import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports";
+import { quizReportQueryKeys } from "@/features/quiz-reports";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import { persistedQueryMeta, QUERY_POLICIES } from "@/lib/query-policy";

@@ -1,5 +1,5 @@
-import { createInitialAnswer } from "@/lib/quiz";
-import type { AnswerPayload, Question } from "@/lib/types";
+import { createInitialAnswer } from "@/domain/quiz/quiz";
+import type { AnswerPayload, Question } from "@/domain/quiz/types";
 import type { QuizEditorFeedbackRow, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 export type PreviewMode = "question" | "correct" | "incorrect";

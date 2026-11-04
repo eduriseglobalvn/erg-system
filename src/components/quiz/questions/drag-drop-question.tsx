@@ -1,6 +1,6 @@
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { DragDropItem, DropTarget } from "@/lib/types";
+import type { DragDropItem, DropTarget } from "@/domain/quiz/types";
 import { cn } from "@/utils/cn";
 
 export function DragDropQuestion({

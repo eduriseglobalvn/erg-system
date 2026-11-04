@@ -17,7 +17,7 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import { useI18n } from "@/platform/i18n";
-import type { AnswerPayload, Question } from "@/lib/types";
+import type { AnswerPayload, Question } from "@/domain/quiz/types";
 import type {
   QuizEditorFeedbackRow,
   QuizEditorSlide,

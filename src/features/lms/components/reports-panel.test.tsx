@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ReportsPanel } from "./reports-panel";
 import { buildSubmissionTrend, filterRunsByPeriod, studentsNeedingSupport } from "./reports-panel-data";
-import type { AssignmentRun, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun, ClassroomStudent } from "@/domain/school/classroom-types";
 
 const run = (id: string, dueLabel: string, completionRate = 50): AssignmentRun => ({
   activeClasses: 1, completionRate, dueLabel, id, inProgressCount: 0, needsReviewCount: 0,

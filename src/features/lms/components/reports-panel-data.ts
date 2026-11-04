@@ -1,4 +1,4 @@
-import type { AssignmentRun, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun, ClassroomStudent } from "@/domain/school/classroom-types";
 
 export type ReportPeriod = "7" | "30" | "all";
 

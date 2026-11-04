@@ -8,7 +8,7 @@ import TextField from "@mui/material/TextField";
 import { AppSelect } from "@/components/ui/app-select";
 import { inputClassName } from "@/components/ui/input";
 import { TsForm } from "@/components/ui/tanstack-form";
-import { uploadLearningResourceResource } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { uploadLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   AuthoringCardDescription,
   AuthoringCardHeader,

@@ -7,9 +7,9 @@ import type {
   QuestionBankSubjectId,
   QuizBankItem,
   QuizBankKind,
-} from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+} from "@/features/question-bank/types/question-bank-types";
 import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import type { QuestionBankApiData } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
+import type { QuestionBankApiData } from "@/features/question-bank/api/question-bank-api";
 import type { ContentScope } from "@/types/scope-types";
 
 const globalScope: ContentScope = { type: "global" };

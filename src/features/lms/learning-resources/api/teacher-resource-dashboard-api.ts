@@ -4,7 +4,7 @@ import {
   loadLearningResourceTaxonomies,
   type LearningResourceResourceCard,
   type LearningResourceTaxonomyOption,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { listManageableUnits, type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
 import type {
   LearningResourceManagedSchool,

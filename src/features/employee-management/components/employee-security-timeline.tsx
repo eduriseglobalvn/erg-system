@@ -1,4 +1,4 @@
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import AccessTimeRoundedIcon from "@mui/icons-material/AccessTimeRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";

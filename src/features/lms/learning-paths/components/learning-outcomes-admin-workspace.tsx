@@ -9,7 +9,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState, type ReactNode } from "react";
-import { CertificateRegistryWorkspace } from "@/features/lcms/certificates";
+import { CertificateRegistryWorkspace } from "@/features/lms/learning-paths/certificates";
 import {
   useAddPathNode,
   useCompetencies,

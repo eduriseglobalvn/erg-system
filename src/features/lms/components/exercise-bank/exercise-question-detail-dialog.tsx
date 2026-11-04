@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import {
   difficultyLabels,
   typeLabels,

@@ -2,7 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { PlayerCountdown } from "@/components/quiz/player-countdown";
-import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 
 const session = { serverClockOffsetMs: 0 } as LocalQuizAttemptSession;
 

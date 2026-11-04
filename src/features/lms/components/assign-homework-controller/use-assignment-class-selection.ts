@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 type StudentLike = { id: string };
 

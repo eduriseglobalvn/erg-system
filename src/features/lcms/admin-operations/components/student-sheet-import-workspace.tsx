@@ -5,7 +5,7 @@ import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shel
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import { bulkCreateStudentAccounts, type BulkStudentAccountResponse } from "@/features/lcms/admin-operations/api/student-account-import-api";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useDebouncedCallback } from "@/hooks/use-paced-callback";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { ManagementScope } from "@/types/scope-types";

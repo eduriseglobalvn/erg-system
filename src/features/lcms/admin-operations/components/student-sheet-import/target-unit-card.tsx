@@ -6,7 +6,7 @@ import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import type { ManagementScope } from "@/types/scope-types";
 import { ImportField } from "@/features/lcms/admin-operations/components/student-sheet-import/import-primitives";
 

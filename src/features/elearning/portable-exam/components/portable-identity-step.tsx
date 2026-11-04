@@ -10,7 +10,7 @@ import {
   type PortableIdentityErrors,
   type PortableStudentIdentity,
 } from "@/features/elearning/portable-exam/api/portable-exam-identity";
-import type { PortableRoster } from "@/lib/types";
+import type { PortableRoster } from "@/domain/quiz/types";
 
 export type PortableIdentityStepProps = {
   title: string;

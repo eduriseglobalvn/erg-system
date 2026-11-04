@@ -5,7 +5,7 @@ import type {
   StudentDashboardProfile,
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type {

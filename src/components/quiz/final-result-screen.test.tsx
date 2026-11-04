@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { FinalResultScreen } from "@/components/quiz/final-result-screen";
-import type { Attempt, Question, QuizResultDisplay } from "@/lib/types";
+import type { Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 const questions = [1, 2, 3].map((n) => ({ id: `q${n}`, title: `Câu ${n}` })) as unknown as Question[];
 const attempt = {

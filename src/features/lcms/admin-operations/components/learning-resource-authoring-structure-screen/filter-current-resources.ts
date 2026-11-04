@@ -1,4 +1,4 @@
-import type { LearningResourceResourceCard } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
 export function filterCurrentResources(

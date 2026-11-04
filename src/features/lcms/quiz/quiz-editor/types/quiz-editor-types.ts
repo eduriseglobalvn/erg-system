@@ -1,5 +1,5 @@
 import type { MessageKey } from "@/platform/i18n";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 export type QuestionType =
   | "multiple-choice"

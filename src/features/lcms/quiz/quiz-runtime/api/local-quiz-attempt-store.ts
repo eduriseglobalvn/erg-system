@@ -1,5 +1,5 @@
 import type { LocalQuizAttemptSession, QuizRuntimePortal, StartAttemptResult } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
-import type { AnswerPayload } from "@/lib/types";
+import type { AnswerPayload } from "@/domain/quiz/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { createOfflineScopedJsonStore } from "@/platform/offline/offline-scoped-json-store";
 import { offlineScopeKey } from "@/platform/offline/offline-outbox";

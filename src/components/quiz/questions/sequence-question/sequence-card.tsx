@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-import type { SequenceItem } from "@/lib/types";
+import type { SequenceItem } from "@/domain/quiz/types";
 
 import { SequenceInlineImage } from "./sequence-media";
 

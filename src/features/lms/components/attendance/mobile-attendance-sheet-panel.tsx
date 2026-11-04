@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Download, Search } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import {
   attendanceLabel,
   attendanceText,
@@ -13,7 +13,7 @@ import {
   type CurriculumItem,
 } from "@/features/lms/components/attendance/attendance-sheet-model";
 import { cn } from "@/lib/utils";
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { AttendanceDateField } from "./attendance-date-field";
 
 type MobileAttendanceMode = "today" | "week" | "program";

@@ -15,7 +15,7 @@ import {
   formatIpAddress,
 } from "@/features/employee-management/lib/access-log-display";
 import type { SecurityFeedItem } from "@/features/employee-management/types/employee-management";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 
 export function AccessLogTable({ rows }: { rows: SecurityFeedItem[] }) {
   return (

@@ -1,4 +1,4 @@
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 export type ScoreColumn = {
   id: string;

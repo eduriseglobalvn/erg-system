@@ -1,4 +1,4 @@
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 export type ContentDialogNodeKind = "group" | "lesson" | "folder";
 export type ContentDialogCreateMode = "subject" | "root" | "child";

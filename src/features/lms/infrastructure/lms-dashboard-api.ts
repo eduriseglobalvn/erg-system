@@ -1,5 +1,5 @@
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomClusterId, ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { readStoredAuthSession, resolveCurrentPortal } from "@/platform/auth/api/auth-token-storage";

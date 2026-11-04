@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState, type Dispatch, type SetStateA
 
 import type { PlayerLoadState } from "@/components/quiz/player-shell-runtime-model";
 import { createEmptyAttempt, localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
-import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/lib/quiz-runtime-types";
-import type { Attempt, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 
 export type UseTimeUpSubmitArgs = {
   activeAttempt: Attempt | null;

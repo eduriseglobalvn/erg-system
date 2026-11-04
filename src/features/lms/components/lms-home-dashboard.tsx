@@ -9,9 +9,9 @@ import Typography from "@mui/material/Typography";
 import AssignmentRoundedIcon from "@mui/icons-material/AssignmentRounded";
 
 import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
-import type { AssignmentRun, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { TodayLessonsPanel } from "@/features/lms/components/lms-home-today-lessons";
-import { formatDateVi, todayInput } from "@/lib/format-date";
+import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
 
 export function greetingFor(hour: number) {
   if (hour < 11) return "Chào buổi sáng";

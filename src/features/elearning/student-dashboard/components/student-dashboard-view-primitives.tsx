@@ -27,7 +27,7 @@ import {
   Stack,
 } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function PageHeader({ description, icon, title }: { description: string; icon: ReactNode; title: string }) {

@@ -17,9 +17,9 @@ import Chip from "@mui/material/Chip";
 import { AppSelect } from "@/components/ui/app-select";
 import { EmptyState } from "@/components/ui/empty-state";
 import { inputClassName } from "@/components/ui/input";
-import type { LearningResourceResourceCard } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { ContentLifecycleControls, lifecycleResourceKindForTaxonomyKind, lifecycleStateFromStatus } from "@/features/lcms/content-lifecycle";
-import type { QuestionBankQuestion, QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import {
   AuthoringCardDescription,
   AuthoringCardHeader,

@@ -19,7 +19,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useOfflineShellStatus } from "@/hooks/use-offline-shell-status";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import type { AnswerPayload } from "@/lib/types";
+import type { AnswerPayload } from "@/domain/quiz/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 import type { PlayerShellProps } from "./player-shell-props";

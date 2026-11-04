@@ -1,5 +1,5 @@
 import type { useI18n } from "@/platform/i18n";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorChoice, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 const hotspotPlaceholderImage =

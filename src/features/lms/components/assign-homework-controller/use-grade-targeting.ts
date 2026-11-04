@@ -7,7 +7,7 @@ import {
   lmsReadPersistMeta,
 } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { QUERY_POLICIES } from "@/lib/query-policy";
 
 export function useGradeTargeting({

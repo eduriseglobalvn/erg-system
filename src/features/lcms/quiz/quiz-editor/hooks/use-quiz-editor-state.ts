@@ -3,8 +3,8 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tr } from "@/platform/i18n";
-import { createQuizSlideFromBankQuestion } from "@/features/lcms/quiz/question-bank/api/question-bank-to-quiz";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import { createQuizSlideFromBankQuestion } from "@/features/question-bank/api/question-bank-to-quiz";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
   createEmptyQuizEditorGroups,

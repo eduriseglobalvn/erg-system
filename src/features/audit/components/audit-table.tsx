@@ -8,7 +8,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import type { AuditEntry, AuditOutcome } from "@/features/audit/types/audit-types";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { maskAuditEntry } from "@/features/audit/utils/audit-masking";
 
 const outcomeMeta: Record<AuditOutcome, { color: "success" | "error" | "warning" | "info"; label: string }> = {

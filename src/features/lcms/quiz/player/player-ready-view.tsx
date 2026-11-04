@@ -15,8 +15,8 @@ import {
   playerViewportClass,
 } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { TimeUpOverlay } from "@/components/quiz/time-up-overlay";
-import { isAnswerComplete } from "@/lib/quiz";
-import type { QuizResultDisplay } from "@/lib/types";
+import { isAnswerComplete } from "@/domain/quiz/quiz";
+import type { QuizResultDisplay } from "@/domain/quiz/types";
 import type { PlayerShellProps } from "./player-shell-props";
 import { usePlayerReadyHandlers, type PlayerReady } from "./use-player-ready-handlers";
 import type { PlayerRuntime } from "./use-player-runtime";

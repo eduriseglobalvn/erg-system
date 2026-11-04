@@ -12,7 +12,7 @@ import {
   updateLearningResourceAsset,
   updateLearningResourceResource,
   updateLearningResourceTaxonomy,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   ContentLinkField,
   ContentTextFields,

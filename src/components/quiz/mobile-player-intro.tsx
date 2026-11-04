@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { IntroStat } from "@/components/quiz/mobile-player-question-sheet";
-import type { Question, Quiz } from "@/lib/types";
+import type { Question, Quiz } from "@/domain/quiz/types";
 
 type Props = {
   modeBadgeStyle: CSSProperties;

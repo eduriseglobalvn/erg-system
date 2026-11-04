@@ -16,7 +16,7 @@ import { QuestionEditorToolbar } from "@/features/lcms/quiz/quiz-editor/componen
 import { resolveSlideTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { useI18n } from "@/platform/i18n";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 import type {
   QuizEditorFeedbackRow,
   QuizEditorFinalSlideOptions,

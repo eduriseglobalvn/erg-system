@@ -13,7 +13,7 @@ import {
 } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
 import type { PortableExamScope } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 
 export type PortableExamLauncherProps = {
   onPackageReady: (quizPackage: QuizPackage) => void;

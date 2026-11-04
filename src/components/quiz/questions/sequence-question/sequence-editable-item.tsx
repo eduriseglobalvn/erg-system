@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { X } from "lucide-react";
 import { useEffect, useRef, type ButtonHTMLAttributes, type TextareaHTMLAttributes } from "react";
 
-import type { QuestionImage, SequenceItem } from "@/lib/types";
+import type { QuestionImage, SequenceItem } from "@/domain/quiz/types";
 
 import { SequenceHandle } from "./sequence-card";
 import { SequenceImageControls, SequenceInlineImage } from "./sequence-media";

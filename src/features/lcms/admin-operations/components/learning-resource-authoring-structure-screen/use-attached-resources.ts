@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import {
   loadLearningResourceResourceDetail,
   type LearningResourceResourceCard,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { AttachedResourceItem } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
 export function useAttachedResources(currentResources: LearningResourceResourceCard[]) {

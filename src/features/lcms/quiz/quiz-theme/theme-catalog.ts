@@ -1,1 +1,1 @@
-export * from "@/lib/quiz-theme-catalog";
+export * from "@/domain/quiz/quiz-theme-catalog";

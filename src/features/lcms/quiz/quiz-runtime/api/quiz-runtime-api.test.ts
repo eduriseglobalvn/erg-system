@@ -1,8 +1,8 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
-import { createQuizPackage } from "@/lib/assessment-engine";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
 import { apiRequest } from "@/lib/api-client";
-import { sampleQuiz } from "@/lib/sample-quiz";
+import { sampleQuiz } from "@/domain/quiz/sample-quiz";
 import { ResponseValidationError } from "@/lib/validate-response";
 import {
   buildClientSubmitPayload,

@@ -17,8 +17,8 @@ vi.mock("@/lib/graphql-client", async (importOriginal) => ({
   graphQlRequest: mocks.graphQlRequest,
 }));
 
-import { questionBankWorkspaceQueryOptions } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
-import { loadQuestionBankData } from "@/features/lcms/quiz/question-bank/api/question-bank-api";
+import { questionBankWorkspaceQueryOptions } from "@/features/question-bank/api/question-bank-query";
+import { loadQuestionBankData } from "@/features/question-bank/api/question-bank-api";
 import {
   loadQuizEditorDraft,
   loadQuizEditorVersions,
@@ -32,17 +32,17 @@ import {
 import {
   assignmentReportQueryOptions,
   quizQuestionAnalyticsQueryOptions,
-} from "@/features/lcms/quiz/quiz-reports/api/quiz-report-query";
+} from "@/features/quiz-reports/api/quiz-report-query";
 import {
   loadAssignmentReport,
   loadQuizQuestionAnalytics,
-} from "@/features/lcms/quiz/quiz-reports/api/quiz-report-api";
+} from "@/features/quiz-reports/api/quiz-report-api";
 import {
   getSchoolDirectory,
   getSchoolOperations,
 } from "@/features/lcms/school-management/api/school-management-api";
 import { loadAccessManagementWorkspace } from "@/features/lcms/admin-operations/api/access-management-api";
-import { loadLearningResourceStudioWorkspaceData } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { loadLearningResourceStudioWorkspaceData } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 
 describe("Admin query cancellation boundary", () => {
   beforeEach(() => {

@@ -1,4 +1,4 @@
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import type { AttachedResourceItem, LocalContentItem, StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { CurriculumContentItem, CurriculumContentKind } from "@/features/lcms/admin-operations/utils/curriculum-view-model/types";
 import { normalizeForMatch, resourceBelongsToNode } from "@/features/lcms/admin-operations/utils/curriculum-view-model/node-matching";

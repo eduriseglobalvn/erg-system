@@ -2,7 +2,7 @@ import type {
   ClassroomSnapshot,
   ClassroomStudent,
   StudentStatus,
-} from "@/features/lms/classroom/types/classroom-types";
+} from "@/domain/school/classroom-types";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 import {
   isLmsEntity,

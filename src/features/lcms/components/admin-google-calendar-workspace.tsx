@@ -35,7 +35,7 @@ import {
   type TeachingCalendarWorkspaceInput,
   updateTeachingScheduleEvent,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
-import { createInitialCalendarRange } from "@/features/teaching-calendar/components/calendar-date-range";
+import { createInitialCalendarRange } from "@/domain/calendar/calendar-date-range";
 import { TeachingCalendarEventActions } from "@/features/teaching-calendar/components/teaching-calendar-event-actions";
 import { DeleteTeacherScheduleDialog } from "@/features/teaching-calendar/components/delete-teacher-schedule-dialog";
 import { TeachingScheduleBatchPanel } from "@/features/teaching-calendar/components/teaching-schedule-batch-panel";

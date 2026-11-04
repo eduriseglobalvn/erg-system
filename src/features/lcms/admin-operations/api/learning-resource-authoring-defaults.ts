@@ -1,10 +1,10 @@
 import type {
   LearningResourceResourceCard,
   LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { LocalContentItem } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 // Production never seeds the authoring workspace with demo content; the flag stays false and the
 // collections stay empty. Demo data: src/test/fixtures/mock-learning-resource-authoring-data.ts.

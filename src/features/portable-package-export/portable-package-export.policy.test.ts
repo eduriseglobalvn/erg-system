@@ -7,7 +7,7 @@ const read = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8"
 
 describe("portable package authoring boundary", () => {
   it("is discoverable from Admin and permission-gated Teacher operations", () => {
-    const admin = read("src/features/lcms/quiz/question-bank/components/question-bank-workspace-shell.tsx");
+    const admin = read("src/features/question-bank/components/question-bank-workspace-shell.tsx");
     const teacher = read("src/features/lms/components/exercise-bank-page.tsx");
 
     expect(admin).toContain("PortablePackageExportDialog");

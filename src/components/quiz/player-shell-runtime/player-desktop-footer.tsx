@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 
 import { navButtonClass, secondaryButtonClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
-import type { Question, QuizResultDisplay } from "@/lib/types";
+import type { Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 export type PlayerDesktopFooterProps = {
   accentButtonStyle: CSSProperties;

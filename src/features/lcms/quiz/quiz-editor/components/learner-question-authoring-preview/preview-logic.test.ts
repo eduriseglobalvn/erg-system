@@ -14,7 +14,7 @@ import {
   normalizeChoices,
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import { clampUnit } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/draggable-slide-media";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 const t = ((key: string) => key) as never;

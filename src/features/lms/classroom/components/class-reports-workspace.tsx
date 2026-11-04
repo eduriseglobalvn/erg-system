@@ -6,7 +6,7 @@ import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
-import type { ClassroomSnapshot, LeaderboardEntry, LeaderboardScope } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, LeaderboardEntry, LeaderboardScope } from "@/domain/school/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 

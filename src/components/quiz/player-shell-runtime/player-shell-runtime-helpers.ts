@@ -1,6 +1,6 @@
-import type { QuizRuntimePortal } from "@/lib/quiz-runtime-types";
+import type { QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
 import { isEventRecord } from "@/components/quiz/player-shell-runtime-model";
-import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
 
 export function offlineAttemptScope(scope: { accountId?: string | null; tenantId?: string | null; portal?: QuizRuntimePortal | null }, runtimePortal: QuizRuntimePortal) {
   return {

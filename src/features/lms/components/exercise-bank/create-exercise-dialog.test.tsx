@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
 import type { Exercise } from "./exercise-bank-model";
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import { mockQuestionBankData } from "@/test/fixtures/mock-question-bank";
 
 function seededQueryClient() {

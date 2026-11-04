@@ -12,7 +12,7 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import LinearProgress from "@mui/material/LinearProgress";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { AppSelect } from "@/components/ui/app-select";

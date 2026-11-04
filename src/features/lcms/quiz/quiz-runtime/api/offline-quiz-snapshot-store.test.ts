@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 
-import { createQuizPackage } from "@/lib/assessment-engine";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
 import {
   MemoryScopedJsonStore,
   OfflineQuizSnapshotStore,
 } from "@/features/lcms/quiz/quiz-runtime/api/offline-quiz-snapshot-store";
-import type { Quiz } from "@/lib/types";
+import type { Quiz } from "@/domain/quiz/types";
 
 const quiz: Quiz = {
   id: "quiz-a",

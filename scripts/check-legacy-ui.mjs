@@ -259,8 +259,8 @@ const LEGACY_FILE_OWNERS = new Map([
     "quiz-builder-panel.tsx",
     "quiz-bank-panel.tsx",
   ].map((file) => [
-    `src/features/lcms/quiz/question-bank/components/${file}`,
-    "src/features/lcms/quiz/question-bank/components/question-bank-workspace.tsx",
+    `src/features/question-bank/components/${file}`,
+    "src/features/question-bank/components/question-bank-workspace.tsx",
   ]),
   ...[
     "user-access-control-section-config.tsx",

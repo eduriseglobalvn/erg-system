@@ -7,7 +7,7 @@ import TableRow from "@mui/material/TableRow";
 import type { Users } from "lucide-react";
 
 import type { LmsStudentGroup, LmsStudentGroupInput } from "@/features/lms/api/lms-assignment-command-api";
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 import { cn } from "@/lib/utils";
 
 export type StudentGroup = {

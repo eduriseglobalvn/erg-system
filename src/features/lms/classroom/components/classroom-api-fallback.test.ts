@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 
 import { resolveClassManagementStudents } from "@/features/lms/classroom/components/class-management-page";
 import { resolveClassStudentsWorkspaceStudents } from "@/features/lms/classroom/components/class-students-workspace";
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 const fallbackStudents: ClassroomStudent[] = [
   {

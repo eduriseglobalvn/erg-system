@@ -3,7 +3,7 @@ import type {
   ClassroomSchool,
   ClassroomSnapshot,
   ClassroomStudent,
-} from "@/features/lms/classroom/types/classroom-types";
+} from "@/domain/school/classroom-types";
 
 // Empty seeds for UI code that still expects synchronous classroom collections.
 // Real data comes from the LMS API; demo data lives in src/test/fixtures/mock-classroom-data.ts.

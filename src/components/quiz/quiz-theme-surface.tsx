@@ -1,7 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 
-import { getQuizThemeStyle, resolveQuizTheme } from "@/lib/quiz-themes";
-import type { Quiz, Theme } from "@/lib/types";
+import { getQuizThemeStyle, resolveQuizTheme } from "@/domain/quiz/quiz-themes";
+import type { Quiz, Theme } from "@/domain/quiz/types";
 
 type QuizThemeLike = {
   themeId?: string;

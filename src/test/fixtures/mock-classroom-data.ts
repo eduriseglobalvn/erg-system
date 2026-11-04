@@ -9,7 +9,7 @@ import type {
   LeaderboardScope,
   LearnerJourney,
   StudentStatus,
-} from "@/features/lms/classroom/types/classroom-types";
+} from "@/domain/school/classroom-types";
 
 export const classroomClusters: Array<{ id: ClassroomClusterId; label: string }> = [
   { id: "central", label: "Cụm Trung tâm" },

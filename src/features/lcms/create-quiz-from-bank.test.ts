@@ -1,7 +1,7 @@
 import { describe, expect, test, vi } from "vitest";
 
 import { createQuizFromBankQuestions } from "@/features/lcms/create-quiz-from-bank";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 const question: QuestionBankQuestion = {
   answer: "A",

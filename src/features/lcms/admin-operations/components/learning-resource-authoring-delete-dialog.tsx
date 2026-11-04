@@ -20,7 +20,7 @@ import {
   deleteLearningResourceTaxonomy,
   loadLearningResourceTaxonomyImpact,
   type CurriculumTaxonomyImpact,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   RESOURCE_DIALOG_ACTIONS_SX,
   RESOURCE_DIALOG_CONTENT_SX,

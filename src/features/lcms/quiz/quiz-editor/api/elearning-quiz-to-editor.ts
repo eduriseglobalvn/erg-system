@@ -5,7 +5,7 @@ import type {
   QuizEditorSlide,
   QuestionType,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import type { Question, QuestionImage, QuestionKind } from "@/lib/types";
+import type { Question, QuestionImage, QuestionKind } from "@/domain/quiz/types";
 
 export function syncQuizEditorSlideFromRuntimeQuestion(
   slide: QuizEditorSlide,

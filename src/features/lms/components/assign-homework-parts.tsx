@@ -6,7 +6,7 @@ import {
   type AssignHomeworkGroupOption,
 } from "@/features/lms/components/assign-homework-student-utils";
 import type { AssignmentCatalogItem } from "@/features/lms/classroom/components/class-students-workspace.types";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { cn } from "@/lib/utils";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 

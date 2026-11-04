@@ -1,6 +1,6 @@
 import { useEffect, type Dispatch, type RefObject, type SetStateAction } from "react";
 
-import type { AnswerRecord, Question } from "@/lib/types";
+import type { AnswerRecord, Question } from "@/domain/quiz/types";
 
 export type UseTrainingAdvanceEffectsArgs = {
   activeQuestion: Question | null;

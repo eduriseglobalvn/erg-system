@@ -3,7 +3,7 @@ import { Edit3, History, Plus, Search, UserRound } from "lucide-react";
 
 import TextField from "@mui/material/TextField";
 import { ErgSelect } from "@/components/erg-mui";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score/score-sheet-model";
 import { cn } from "@/lib/utils";
 

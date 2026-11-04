@@ -1,4 +1,4 @@
-import { createLearningResourceTaxonomy, uploadLearningResourceResource, type CreateTaxonomyPayload } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { createLearningResourceTaxonomy, uploadLearningResourceResource, type CreateTaxonomyPayload } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { apiKindForNodeKind, normalizeTaxonomyOption, parsePositiveInteger } from "@/features/lcms/admin-operations/components/learning-resource-authoring-utils";
 import { getTaxonomyIconColor, getTaxonomyIconId, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { StudioNode, StudioSubject, TaxonomyCreateKind, TaxonomyDialogState } from "@/features/lcms/admin-operations/types/learning-resource-authoring";

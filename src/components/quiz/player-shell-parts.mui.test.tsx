@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
-import type { QuizResultDisplay } from "@/lib/types";
+import type { QuizResultDisplay } from "@/domain/quiz/types";
 
 const resultDisplay: QuizResultDisplay = {
   passMessage: "Đạt",

@@ -87,7 +87,7 @@ CI: `.github/workflows/ci.yml`. Mọi GitHub Action phải ghim theo SHA.
 
 ## 📅 Ngày giờ và định dạng
 
-- Dùng `@/lib/format-date`: `formatDateVi`, `formatDateTimeVi` (trả `""` khi không hợp lệ, không bao giờ "Invalid Date"), `todayInput` (ngày local `yyyy-MM-dd`), `viDateToInput`, `inputDateToVi`.
+- Dùng `@/domain/formatters/format-date`: `formatDateVi`, `formatDateTimeVi` (trả `""` khi không hợp lệ, không bao giờ "Invalid Date"), `todayInput` (ngày local `yyyy-MM-dd`), `viDateToInput`, `inputDateToVi`.
 - CẤM `new Date().toISOString().split("T")[0]` để lấy "hôm nay" (là ngày UTC, lệch 1 ngày từ 0h–7h giờ VN). CẤM `toLocale*String()` không truyền locale.
 - Ngày hiển thị `dd/MM/yyyy`, 24 giờ.
 

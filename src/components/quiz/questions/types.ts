@@ -1,4 +1,4 @@
-import type { AnswerPayload, AnswerResult, Question } from "@/lib/types";
+import type { AnswerPayload, AnswerResult, Question } from "@/domain/quiz/types";
 
 export type QuestionComponentProps = {
   question: Question;

@@ -1,4 +1,4 @@
-import type { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import type { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
 import { assignmentSubjects } from "@/features/lms/classroom/components/class-students-workspace.constants";
 
 type QuestionBankQuizzes = NonNullable<ReturnType<typeof useQuestionBankWorkspaceQuery>["data"]>["quizzes"];

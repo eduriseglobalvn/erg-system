@@ -8,8 +8,8 @@ import {
   downloadPortableResult,
   portableResultFileName,
 } from "@/features/elearning/portable-exam/api/portable-exam-result";
-import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
-import type { Attempt, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
+import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 
 /** 8.4.5: writes the `.ergresult` file the student hands to the teacher. */
 export function PortableResultExportButton({ attempt, identity, quizPackage, session }: {

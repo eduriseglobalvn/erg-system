@@ -1,5 +1,5 @@
 import type { QuizEditorDraftDocument, QuizEditorWorkspaceData } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
-import type { QuestionBankSubject } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankSubject } from "@/features/question-bank/types/question-bank-types";
 import type { QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 type QuizSummary = QuizEditorWorkspaceData["quizzes"]["items"][number];

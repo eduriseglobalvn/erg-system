@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
-import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
 import { ExerciseQuestionDetailDialog } from "./exercise-question-detail-dialog";
 import type { ExerciseBankController } from "./use-exercise-bank-controller";

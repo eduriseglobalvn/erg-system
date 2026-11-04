@@ -7,7 +7,7 @@ import TextField from "@mui/material/TextField";
 import { ErgEmptyState, ErgErrorState } from "@/components/erg-mui/erg-feedback";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { assignmentGroups } from "@/features/lms/components/assign-homework-groups";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { hasApiBase } from "@/lib/api-client";

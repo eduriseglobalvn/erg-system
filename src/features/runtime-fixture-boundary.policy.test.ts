@@ -6,7 +6,7 @@ import { expect, test } from "vitest";
 test("keeps learning-resource and question-bank fixtures behind the explicit dev gate", () => {
   const files = [
     "src/features/lms/learning-resources/api/learning-resource-library-query-api.ts",
-    "src/features/lcms/quiz/question-bank/api/question-bank-api.ts",
+    "src/features/question-bank/api/question-bank-api.ts",
     "src/features/lms/infrastructure/lms-dashboard-api.ts",
     "src/features/elearning/student-dashboard/api/student-dashboard-api.ts",
   ];

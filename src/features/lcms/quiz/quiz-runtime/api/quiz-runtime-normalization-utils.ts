@@ -1,4 +1,4 @@
-import type { QuestionKind, Quiz, QuizResultDisplay, Theme } from "@/lib/types";
+import type { QuestionKind, Quiz, QuizResultDisplay, Theme } from "@/domain/quiz/types";
 import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 
 export const DEFAULT_QUIZ_RUNTIME_PORTAL: QuizRuntimePortal = "elearning";

@@ -1,4 +1,4 @@
-import { createQuizPackage } from "@/lib/assessment-engine";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
 import { apiRequest } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { normalizeQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-normalizer";
@@ -6,7 +6,7 @@ import { DEFAULT_QUIZ_RUNTIME_PORTAL } from "@/features/lcms/quiz/quiz-runtime/a
 import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { isObject, validateResponse } from "@/lib/validate-response";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 import type { QuizRuntimePortal } from "@/features/lcms/quiz/quiz-runtime/types/quiz-runtime-types";
 
 export type BackendQuizPackage = Partial<Omit<QuizPackage, "quiz">> & {
@@ -36,7 +36,7 @@ export async function getQuizPackage(
   signal?: AbortSignal,
 ): Promise<QuizPackage> {
   if (import.meta.env.DEV && runtimeFixturesEnabled()) {
-    const { getLocalQuizById, sampleQuiz } = await import("@/lib/sample-quiz");
+    const { getLocalQuizById, sampleQuiz } = await import("@/domain/quiz/sample-quiz");
     return createQuizPackage(getLocalQuizById(quizId) ?? sampleQuiz, {
       gradingMode: "client-first",
       source: "local",

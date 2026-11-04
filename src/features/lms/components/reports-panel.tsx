@@ -19,7 +19,7 @@ import {
   studentsNeedingSupport,
   type ReportPeriod,
 } from "@/features/lms/components/reports-panel-data";
-import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 
 interface ReportsPanelProps {
   selectedClass?: ClassroomSnapshot;

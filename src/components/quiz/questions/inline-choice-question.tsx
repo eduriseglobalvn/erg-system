@@ -5,7 +5,7 @@ import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { AppSelect } from "@/components/ui/app-select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
-import type { AnswerPayload, InlineBlank } from "@/lib/types";
+import type { AnswerPayload, InlineBlank } from "@/domain/quiz/types";
 
 export function InlineChoiceQuestion({
   question,

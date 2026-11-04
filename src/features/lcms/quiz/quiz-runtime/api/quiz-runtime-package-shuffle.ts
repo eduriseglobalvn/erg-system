@@ -1,4 +1,4 @@
-import type { Choice, DragDropItem, DragWord, InlineBlank, Question, Quiz, QuizPackage, Section } from "@/lib/types";
+import type { Choice, DragDropItem, DragWord, InlineBlank, Question, Quiz, QuizPackage, Section } from "@/domain/quiz/types";
 
 export function prepareQuizPackageForAttempt(quizPackage: QuizPackage, attemptSeed: string): QuizPackage {
   const quiz = quizPackage.quiz;

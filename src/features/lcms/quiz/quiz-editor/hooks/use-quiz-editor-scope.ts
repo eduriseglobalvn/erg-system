@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
 import type { QuizEditorWorkspaceData } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
   courseScopeOptions,

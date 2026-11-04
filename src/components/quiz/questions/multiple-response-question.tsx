@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { ChoiceOption, EditableChoiceOption } from "@/components/quiz/questions/choice-option";
 import { QuestionContentImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { Choice, Question } from "@/lib/types";
+import type { Choice, Question } from "@/domain/quiz/types";
 
 export function MultipleResponseQuestion({
   question,

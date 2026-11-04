@@ -6,7 +6,7 @@ import Select from "@mui/material/Select";
 import type { ReactNode } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { AnswerPayload, Question } from "@/lib/types";
+import type { AnswerPayload, Question } from "@/domain/quiz/types";
 import { useI18n } from "@/platform/i18n";
 
 export function QuestionBodyWithImage({

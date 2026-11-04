@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
 import type { QuizWelcomeMeta } from "@/components/quiz/quiz-welcome-screen";
-import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/lib/quiz-runtime-types";
-import type { Attempt, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 
 export type PlayerShellProps = {
   assignmentId?: string;

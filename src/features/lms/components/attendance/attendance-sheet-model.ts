@@ -1,4 +1,4 @@
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 import type { CurriculumTreeSubject } from "@/features/lms/api/curriculum-tree-api";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 

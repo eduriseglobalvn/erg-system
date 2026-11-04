@@ -6,7 +6,7 @@ import ErgPortalLayout from "@/components/portal/ErgPortalLayout";
 import { hasApiBase } from "@/lib/api-client";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { Outlet, useLocation, useNavigate } from "@tanstack/react-router";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import {
   createQuizFromBankQuestions as runCreateQuizFromBankQuestions,
   type CreateQuizFromBankOptions,

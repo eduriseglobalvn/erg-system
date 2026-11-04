@@ -15,7 +15,7 @@ import {
   type MyTeachingCalendarInput,
   type TeachingCalendarEvent,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
-import { formatDateVi, todayInput } from "@/lib/format-date";
+import { formatDateVi, todayInput } from "@/domain/formatters/format-date";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 

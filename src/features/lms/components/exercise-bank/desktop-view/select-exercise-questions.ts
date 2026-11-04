@@ -1,4 +1,4 @@
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { Exercise } from "../exercise-bank-model";
 
 export function selectExerciseQuestions(

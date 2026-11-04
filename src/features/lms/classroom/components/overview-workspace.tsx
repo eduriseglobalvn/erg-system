@@ -4,7 +4,7 @@ import { DashboardPageShell, DashboardSectionCard, DashboardStatusBadge } from "
 import { DashboardSegmentedControl } from "@/components/dashboard/dashboard-segmented-control";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 import { cn } from "@/lib/utils";

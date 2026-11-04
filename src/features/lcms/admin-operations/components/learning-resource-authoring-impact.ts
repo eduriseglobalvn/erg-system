@@ -1,14 +1,14 @@
 import type {
   CurriculumTaxonomyImpact,
   LearningResourceResourceCard,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type {
   LocalContentItem,
   StudioNode,
   StudioSubject,
   TaxonomyDeleteTarget,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 export function estimateTaxonomyImpact({
   target,

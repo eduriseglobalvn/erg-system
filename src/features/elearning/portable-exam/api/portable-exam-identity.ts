@@ -1,4 +1,4 @@
-import type { PortableRoster } from "@/lib/types";
+import type { PortableRoster } from "@/domain/quiz/types";
 
 export type PortableStudentIdentity = { classCode: string; studentCode: string };
 export type PortableIdentityErrors = { classCode?: string; studentCode?: string };

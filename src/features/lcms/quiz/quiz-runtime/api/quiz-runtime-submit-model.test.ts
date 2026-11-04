@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { createQuizPackage } from "@/lib/assessment-engine";
-import type { Question, Quiz } from "@/lib/types";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
+import type { Question, Quiz } from "@/domain/quiz/types";
 import {
   buildClientSubmitPayload,
   countAnsweredQuestions,

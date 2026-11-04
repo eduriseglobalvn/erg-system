@@ -38,3 +38,18 @@ test("rejects every component importing features (no exceptions)", () => {
     "src/components/shared/d.tsx": 'import x from "@/lib/x";',
   }).length, 3);
 });
+
+test("rejects domain importing features, app or components", () => {
+  assert.equal(findLayerViolations({
+    "src/domain/quiz/a.ts": 'import x from "@/features/lcms/y"; import z from "@/app/r"; import c from "@/components/c";',
+    "src/domain/quiz/b.ts": 'import x from "@/lib/x"; import y from "./y";',
+  }).length, 3);
+});
+
+test("rejects lms importing lcms but allows lcms importing lms", () => {
+  assert.equal(findLayerViolations({
+    "src/features/lms/a.ts": 'import x from "@/features/lcms/y"; export * from "../lcms/z";',
+    "src/features/lms/b.ts": 'import x from "@/features/question-bank/y";',
+    "src/features/lcms/c.ts": 'import x from "@/features/lms/y";',
+  }).length, 2);
+});

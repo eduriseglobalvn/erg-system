@@ -6,7 +6,7 @@ import Chip from "@mui/material/Chip";
 import { StudentSheetImportWorkspace } from "@/features/lcms/admin-operations/components/student-sheet-import-workspace";
 import { LearningResourceAuthoringWorkspace } from "@/features/lcms/admin-operations/components/learning-resource-authoring-workspace";
 import { LearningResourceLibraryPage } from "@/features/lms/learning-resources/components/learning-resource-library-page";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { cn } from "@/lib/utils";
 import type { ManagementScope } from "@/types/scope-types";

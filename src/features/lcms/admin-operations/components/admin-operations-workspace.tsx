@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import type { ManagementScope } from "@/types/scope-types";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { AdminOverview } from "./admin-operations-overview";
 import { CenterManagement } from "./admin-operations-center-management";
 import { InternalDocsWorkspace, SheetImportWorkspace, getScopeDescription, getScopedCenters } from "./admin-operations-support";

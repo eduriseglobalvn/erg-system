@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import Button from "@mui/material/Button";
 import { type LmsEducationUnitDTO } from "@/features/lms/infrastructure/lms-dashboard-api";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { cn } from "@/lib/utils";
 import { LcmsStatusChip } from "@/features/lcms/components/admin-ui";
 

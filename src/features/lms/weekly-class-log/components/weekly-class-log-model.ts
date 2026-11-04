@@ -1,4 +1,4 @@
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import type {
   WeeklyClassLogPeriod,
   WeeklyClassLogSummary,

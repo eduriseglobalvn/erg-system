@@ -3,7 +3,7 @@ import { ChevronLeft, List, X } from "lucide-react";
 import Drawer from "@mui/material/Drawer";
 
 import { QuestionNavigator } from "@/components/quiz/question-navigator";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 export function MobileQuestionSheet({
   answeredQuestionIds,

@@ -3,7 +3,7 @@ import { PlayerOfflineBanner } from "@/components/quiz/player-status";
 import { QuestionNavigator } from "@/components/quiz/question-navigator";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
 import { playerViewportClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
-import type { Question, Quiz } from "@/lib/types";
+import type { Question, Quiz } from "@/domain/quiz/types";
 import type { ComponentProps, CSSProperties } from "react";
 
 type RendererProps = ComponentProps<typeof QuestionRenderer>;

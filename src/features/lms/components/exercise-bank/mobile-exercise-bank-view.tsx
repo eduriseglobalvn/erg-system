@@ -2,7 +2,7 @@ import { Eye, Search, Send } from "lucide-react";
 import Chip from "@mui/material/Chip";
 
 import { cn } from "@/lib/utils";
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import {
   allExerciseFilter,
   chipPropsForTone,

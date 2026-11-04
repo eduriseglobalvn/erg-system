@@ -13,7 +13,7 @@ import { useMemo, useState } from "react";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { SequenceItem } from "@/lib/types";
+import type { SequenceItem } from "@/domain/quiz/types";
 
 import { DraggableSequenceItem, SequenceCard, SequenceRowTarget } from "./sequence-question/sequence-card";
 import { DraggableEditableSequenceItem } from "./sequence-question/sequence-editable-item";

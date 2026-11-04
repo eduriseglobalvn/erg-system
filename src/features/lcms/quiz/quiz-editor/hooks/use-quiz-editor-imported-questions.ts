@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 /** Imports questions handed over from the question bank once per distinct id set. */
 export function useQuizEditorImportedQuestions({

@@ -1,5 +1,5 @@
-import { isAnswerComplete, normalizeAnswerForSubmission } from "@/lib/quiz";
-import type { AnswerPayload, Question } from "@/lib/types";
+import { isAnswerComplete, normalizeAnswerForSubmission } from "@/domain/quiz/quiz";
+import type { AnswerPayload, Question } from "@/domain/quiz/types";
 
 /** `localClock` (portable/offline only): there is no server, so the device clock is the reference. */
 export function serverNowMs(session: { serverClockOffsetMs?: number }, nowMs = Date.now(), localClock = false) {

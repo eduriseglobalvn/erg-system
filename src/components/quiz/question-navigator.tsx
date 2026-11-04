@@ -11,7 +11,7 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useState, type CSSProperties } from "react";
 
 import { questionLabel } from "@/components/quiz/player-shell-utils";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 export type NavigatorFilter = "all" | "unanswered" | "flagged";
 

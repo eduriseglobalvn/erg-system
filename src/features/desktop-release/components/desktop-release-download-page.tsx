@@ -12,7 +12,7 @@ import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { loadDesktopReleaseManifest } from "@/features/desktop-release/api/desktop-release-api";
 import type { DesktopReleaseArtifact, DesktopReleaseManifest } from "@/features/desktop-release/types/desktop-release-types";
 

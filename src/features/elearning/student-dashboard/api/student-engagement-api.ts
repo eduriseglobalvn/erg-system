@@ -22,7 +22,7 @@ import type {
 } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 import type { StudentDiscussionImageAttachment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { createReactionSummary, discussionReactionKeys } from "@/features/elearning/student-dashboard/utils/discussion-feed-state";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { getDefaultTenantId, graphQlRequest } from "@/lib/graphql-client";
 import { isObject, validateResponse } from "@/lib/validate-response";
 import StudentEngagementDocument from "./student-engagement.graphql?raw";

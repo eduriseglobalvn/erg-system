@@ -9,7 +9,7 @@ import {
   stringArray,
   stringValue,
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
-import type { Choice, Feedback, HotspotArea, InlineBlank, Question, QuizPackage } from "@/lib/types";
+import type { Choice, Feedback, HotspotArea, InlineBlank, Question, QuizPackage } from "@/domain/quiz/types";
 
 export function normalizeBackendQuestion(
   value: unknown,

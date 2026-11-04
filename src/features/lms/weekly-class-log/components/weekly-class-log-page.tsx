@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import EventNote from "@mui/icons-material/EventNote";
 import { ErgEmptyState } from "@/components/erg-mui";
 
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useWeeklyClassLogController } from "./use-weekly-class-log-controller";
 import { WeeklyClassLogHeader } from "./weekly-class-log-header";
 import { WeeklyClassLogSummary } from "./weekly-class-log-summary";

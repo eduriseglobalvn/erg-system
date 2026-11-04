@@ -25,7 +25,7 @@ import {
   type QuizEditorWorkspaceInput,
   type QuizEditorApiPortal,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import {
   clearNormalizedQuizPackageCache,
   quizRuntimeQueryKeys,

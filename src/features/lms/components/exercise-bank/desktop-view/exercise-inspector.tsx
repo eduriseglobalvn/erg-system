@@ -1,8 +1,8 @@
 import Button from "@mui/material/Button";
 import { Eye, HelpCircle, Pencil, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
-import { formatDateVi } from "@/lib/format-date";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { typeLabels } from "../exercise-bank-model";
 import type { ExerciseBankController } from "../use-exercise-bank-controller";
 import { DifficultyBadge, StatusIndicator } from "./exercise-badges";

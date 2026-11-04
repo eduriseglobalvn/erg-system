@@ -2,7 +2,7 @@ import CheckCircleOutlineRoundedIcon from "@mui/icons-material/CheckCircleOutlin
 import ErrorOutlineRoundedIcon from "@mui/icons-material/ErrorOutlineRounded";
 import HourglassEmptyRoundedIcon from "@mui/icons-material/HourglassEmptyRounded";
 import Box from "@mui/material/Box";
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import Chip from "@mui/material/Chip";
 import Skeleton from "@mui/material/Skeleton";
 import Table from "@mui/material/Table";

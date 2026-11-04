@@ -1,7 +1,7 @@
 
 import type { LmsStudentGroup } from "@/features/lms/api/lms-assignment-command-api";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 export function getClassStudents(classId?: string) {
   return classroomStudents.filter((student) => !classId || student.classId === classId);

@@ -2,7 +2,7 @@ import type {
   LearningResourceResourceCard,
   LearningResourceTaxonomyOption,
   LearningResourceTaxonomyResponse,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { LocalContentItem } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 

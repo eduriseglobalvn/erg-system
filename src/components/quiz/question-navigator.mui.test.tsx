@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { QuestionNavigator } from "@/components/quiz/question-navigator";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 const question: Question = {
   id: "question-1",

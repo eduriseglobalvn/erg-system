@@ -12,7 +12,7 @@ import Typography from "@mui/material/Typography";
 import { ErgSearchField, ErgSelect, ErgTextField } from "@/components/erg-mui";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { classificationOptions, getClassificationBg, getClassificationColor } from "./score-sheet-model";
 import { ScoreSheetGrid } from "./score-sheet-grid";
 import type { ScoreSheetController } from "./use-score-sheet-controller";

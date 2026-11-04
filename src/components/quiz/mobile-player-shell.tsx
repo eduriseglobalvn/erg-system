@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { MobilePlayerFooter } from "@/components/quiz/mobile-player-footer";
 import { MobilePlayerIntro } from "@/components/quiz/mobile-player-intro";
 import { MobileQuestionSheet } from "@/components/quiz/mobile-player-question-sheet";
-import type { Question, Quiz, QuizResultDisplay } from "@/lib/types";
+import type { Question, Quiz, QuizResultDisplay } from "@/domain/quiz/types";
 
 type MobilePlayerShellProps = {
   allQuestionsAnswered: boolean;

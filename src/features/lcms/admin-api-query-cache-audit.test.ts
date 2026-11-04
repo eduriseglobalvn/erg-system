@@ -3,9 +3,9 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import { quizEditorQueryKeys } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
-import { quizReportQueryKeys } from "@/features/lcms/quiz/quiz-reports/api/quiz-report-query";
+import { quizReportQueryKeys } from "@/features/quiz-reports/api/quiz-report-query";
 import { quizRuntimeQueryKeys } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-query";
 import { schoolManagementQueryKeys } from "@/features/lcms/school-management/api/school-management-api";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
@@ -73,14 +73,14 @@ describe("LCMS API/query/cache audit characterization", () => {
 
     // Persistence is opt-in via `meta.persist`; none of these owners may set it.
     expect(rejectedKeys).toHaveLength(6);
-    ["quiz/question-bank/api/question-bank-query.ts", "quiz/quiz-editor/api/quiz-editor-query.ts", "quiz/quiz-runtime/api/quiz-runtime-query.ts", "quiz/quiz-reports/api/quiz-report-query.ts", "school-management/hooks/use-school-management.ts"].forEach((relativePath) => {
+    ["../question-bank/api/question-bank-query.ts", "quiz/quiz-editor/api/quiz-editor-query.ts", "quiz/quiz-runtime/api/quiz-runtime-query.ts", "../quiz-reports/api/quiz-report-query.ts", "school-management/hooks/use-school-management.ts"].forEach((relativePath) => {
       expect(fs.readFileSync(path.resolve(process.cwd(), "src/features/lcms", relativePath), "utf8")).not.toMatch(/persist:\s*true|persistedQueryMeta/);
     });
   });
 
   it("contains no bare TanStack Query invalidation in Admin query owners", () => {
     const owners = [
-      "quiz/question-bank/api/question-bank-query.ts",
+      "../question-bank/api/question-bank-query.ts",
       "quiz/quiz-editor/api/quiz-editor-query.ts",
       "school-management/hooks/use-school-management.ts",
       "components/admin-google-calendar-workspace.tsx",

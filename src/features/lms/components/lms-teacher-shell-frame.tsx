@@ -9,7 +9,7 @@ import People from "@mui/icons-material/People";
 import FileText from "@mui/icons-material/Description";
 
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 export function TeacherWorkspaceFrame({
   children,

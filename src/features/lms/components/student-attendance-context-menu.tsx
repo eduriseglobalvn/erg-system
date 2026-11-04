@@ -7,7 +7,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
 
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 type StudentAttendanceContextMenuProps = {
   menu: { x: number; y: number; student: ClassroomStudent } | null;

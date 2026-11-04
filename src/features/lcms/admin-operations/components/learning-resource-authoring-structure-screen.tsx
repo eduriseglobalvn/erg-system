@@ -5,7 +5,7 @@ import {
   deleteLearningResourceResource,
   type LearningResourceResourceCard,
   type LearningResourceTaxonomyOption,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import { ResourceEditDialog } from "@/features/lcms/admin-operations/components/learning-resource-authoring-edit-dialogs";
 import { CurriculumTeachingPlanDialog } from "@/features/lcms/admin-operations/components/curriculum-teaching-plan-dialog";
 import type {
@@ -36,7 +36,7 @@ import {
   type ResourceCommandId,
 } from "@/features/lcms/admin-operations/utils/learning-resource-curriculum-view-model";
 import { CurriculumRoadmapView } from "@/features/lcms/admin-operations/components/curriculum-roadmap-view";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 export function StructureScreen({
   subjects,

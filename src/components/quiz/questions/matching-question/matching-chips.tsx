@@ -9,7 +9,7 @@ import {
   MatchingImageControls,
   MatchingInlineMedia,
 } from "@/components/quiz/questions/matching-question/matching-media";
-import type { MatchingPair, QuestionImage } from "@/lib/types";
+import type { MatchingPair, QuestionImage } from "@/domain/quiz/types";
 import { cn } from "@/lib/utils";
 
 export function EditableMatchingResponseChip({

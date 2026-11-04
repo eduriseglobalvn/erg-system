@@ -17,8 +17,8 @@ import {
   type AssignmentReport,
   type AssignmentReportStudentRow,
   type QuizQuestionAnalyticsReport,
-} from "@/features/lcms/quiz/quiz-reports";
-import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+} from "@/features/quiz-reports";
+import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { cn } from "@/lib/utils";

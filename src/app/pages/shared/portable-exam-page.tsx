@@ -11,7 +11,7 @@ import {
   PortableExamLauncher,
   type PortableExamScope,
 } from "@/features/elearning/portable-exam";
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentElearningViewerSession } from "@/platform/auth/api/elearning-viewer-session";
 

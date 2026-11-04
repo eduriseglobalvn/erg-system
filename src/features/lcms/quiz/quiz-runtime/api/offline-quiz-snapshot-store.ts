@@ -1,4 +1,4 @@
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 import {
   isOfflineCapabilityUsable,
   resolveOfflineCapability,

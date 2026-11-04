@@ -1,4 +1,4 @@
-import { createQuizPackage } from "@/lib/assessment-engine";
+import { createQuizPackage } from "@/domain/quiz/assessment-engine";
 import { normalizeBackendQuestion } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-question-normalizers";
 import {
   booleanValue,
@@ -11,7 +11,7 @@ import {
   stringValue,
 } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils";
 import type { BackendQuizPackage } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-package-api";
-import type { Question, Quiz, QuizPackage, Section } from "@/lib/types";
+import type { Question, Quiz, QuizPackage, Section } from "@/domain/quiz/types";
 
 export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
   const gradingMode = value.gradingMode ?? "server-authoritative";

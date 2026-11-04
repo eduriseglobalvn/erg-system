@@ -7,8 +7,8 @@ import {
   type useSyncAttemptMutation,
 } from "@/features/lcms/quiz/quiz-runtime";
 import type { DraftSyncState } from "@/components/quiz/player-status";
-import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/lib/quiz-runtime-types";
-import type { AnswerPayload, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { AnswerPayload, QuizPackage } from "@/domain/quiz/types";
 
 export type UsePlayerSyncEffectsArgs = {
   activePackage: QuizPackage | null;

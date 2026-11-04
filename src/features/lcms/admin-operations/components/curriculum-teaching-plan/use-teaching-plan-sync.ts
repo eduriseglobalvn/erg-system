@@ -10,8 +10,8 @@ import {
   createLearningResourceTaxonomy,
   deleteLearningResourceTaxonomy,
   updateLearningResourceTaxonomy,
-} from "@/features/lcms/admin-operations/api/learning-resource-authoring-taxonomy-command-api";
-import { createLearningResourceResource } from "@/features/lcms/admin-operations/api/learning-resource-authoring-resource-command-api";
+} from "@/features/lms/learning-resources/api/learning-resource-authoring-taxonomy-command-api";
+import { createLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-authoring-resource-command-api";
 import { cleanTaxonomyId, generateTopicCode } from "./helpers";
 import type { EditableCurriculumRow } from "./types";
 

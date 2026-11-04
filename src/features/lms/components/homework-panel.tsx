@@ -14,7 +14,7 @@ import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { ErgDataTableShell } from "@/components/erg-mui/erg-table";
 import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
-import type { ClassroomSnapshot, AssignmentRun } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, AssignmentRun } from "@/domain/school/classroom-types";
 
 interface HomeworkPanelProps {
   selectedClass?: ClassroomSnapshot;

@@ -6,7 +6,7 @@ import {
   resolveAssignHomeworkGradeStudentIds,
   resolveAssignHomeworkGroups,
 } from "@/features/lms/components/assign-homework-student-utils";
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
 
 const fallbackStudents = [
   {

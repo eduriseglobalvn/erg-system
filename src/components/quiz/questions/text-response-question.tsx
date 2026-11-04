@@ -1,7 +1,7 @@
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { EssayRubricCriterion, NumericAnswer, TextBlank } from "@/lib/types";
+import type { EssayRubricCriterion, NumericAnswer, TextBlank } from "@/domain/quiz/types";
 
 export function ShortAnswerQuestion(props: QuestionComponentProps) {
   return <TextBlankQuestion {...props} variant="short" />;

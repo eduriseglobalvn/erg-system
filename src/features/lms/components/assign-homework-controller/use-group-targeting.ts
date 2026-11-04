@@ -6,7 +6,7 @@ import {
   resolveAssignHomeworkClassStudents,
   resolveAssignHomeworkGroups,
 } from "@/features/lms/components/assign-homework-student-utils";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { useLmsStudentGroupsQuery } from "@/features/lms/api/lms-assignment-command-query";
 
 export function useGroupTargeting({

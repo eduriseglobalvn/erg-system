@@ -1,5 +1,5 @@
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
-import type { LearningResourceTaxonomyOption } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
+import type { LearningResourceTaxonomyOption } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { AttachedResourceItem, LocalContentItem, StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { CurriculumRoadmapStage, CurriculumRoadmapTopic } from "@/features/lcms/admin-operations/utils/curriculum-view-model/types";
 import { buildTopicContentGroups } from "@/features/lcms/admin-operations/utils/curriculum-view-model/content-items";

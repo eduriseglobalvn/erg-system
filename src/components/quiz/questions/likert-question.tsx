@@ -2,7 +2,7 @@ import { Check } from "lucide-react";
 
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { LikertRow, LikertScalePoint } from "@/lib/types";
+import type { LikertRow, LikertScalePoint } from "@/domain/quiz/types";
 import { cn } from "@/utils/cn";
 
 export function LikertQuestion({

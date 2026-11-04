@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { normalizeQuizPackage, stripQuizAnswerKey } from "./quiz-runtime-package-normalizer";
 import type { BackendQuizPackage } from "./quiz-runtime-package-api";
-import type { Quiz } from "@/lib/types";
+import type { Quiz } from "@/domain/quiz/types";
 
 const feedback = { correct: "", incorrect: "", partial: "" };
 const quiz = (mode: "testing" | "training"): Quiz => ({

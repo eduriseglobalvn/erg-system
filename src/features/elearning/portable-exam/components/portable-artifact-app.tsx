@@ -11,7 +11,7 @@ import { PortableResultExportButton } from "@/features/elearning/portable-exam/c
 import { PlayerShellRuntime } from "@/features/lcms/quiz/player/player-shell-runtime";
 import { loadPortableQuizPackage } from "@/features/elearning/portable-exam/api/portable-exam-runtime";
 import { portableArtifactErrorMessage } from "@/features/elearning/portable-exam/components/portable-exam-error-message";
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 
 export type PortableArtifactState =
   | { status: "loading" }

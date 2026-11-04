@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { filterCurrentResources } from "@/features/lcms/admin-operations/components/learning-resource-authoring-structure-screen/filter-current-resources";
-import type { LearningResourceResourceCard } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import type { LearningResourceResourceCard } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 
 const card = (o: Record<string, string | undefined>) => ({ id: "r", ...o }) as unknown as LearningResourceResourceCard;

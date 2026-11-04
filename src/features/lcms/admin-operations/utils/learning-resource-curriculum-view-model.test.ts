@@ -12,7 +12,7 @@ import type {
   StudioNode,
   StudioSubject,
 } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
-import type { QuizBankItem } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 const topicNode: StudioNode = {
   id: "lesson-topic-1",

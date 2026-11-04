@@ -11,7 +11,7 @@ import type {
   StoredPortableExamPackage,
   VerifiedPortableExamPackage,
 } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import type { QuizPackage } from "@/lib/types";
+import type { QuizPackage } from "@/domain/quiz/types";
 
 export type LoadPortableExamPackageOptions = PortableExamVerificationOptions & {
   nowMs?: number;

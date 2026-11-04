@@ -3,7 +3,7 @@ import {
   createPortableContentHash,
 } from "@/features/elearning/portable-exam/api/portable-exam-package-verifier";
 import type { PortableStudentIdentity } from "@/features/elearning/portable-exam/api/portable-exam-identity";
-import type { AnswerPayload, Attempt, QuizPackage } from "@/lib/types";
+import type { AnswerPayload, Attempt, QuizPackage } from "@/domain/quiz/types";
 
 export const PORTABLE_RESULT_FORMAT = "erg.portable-result";
 export const PORTABLE_RESULT_SCHEMA_VERSION = 1;

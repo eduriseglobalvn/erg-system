@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import type { QuizResultDisplay } from "@/lib/types";
+import type { QuizResultDisplay } from "@/domain/quiz/types";
 
 type Props = {
   attemptCompleted: boolean;

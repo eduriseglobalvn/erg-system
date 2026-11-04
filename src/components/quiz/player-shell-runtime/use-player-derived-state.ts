@@ -2,8 +2,8 @@ import { useMemo } from "react";
 
 import type { PlayerLoadState } from "@/components/quiz/player-shell-runtime-model";
 import { attemptDeadlineMs, serverNowMs } from "@/components/quiz/player-shell-utils";
-import { createInitialAnswer, getAllQuestions, isAnswerComplete } from "@/lib/quiz";
-import type { AnswerPayload } from "@/lib/types";
+import { createInitialAnswer, getAllQuestions, isAnswerComplete } from "@/domain/quiz/quiz";
+import type { AnswerPayload } from "@/domain/quiz/types";
 
 export function usePlayerDerivedState({
   currentIndex,

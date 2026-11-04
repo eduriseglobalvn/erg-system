@@ -1,4 +1,4 @@
-import { listLearningResourceResources } from "@/features/lcms/admin-operations/api/learning-resource-authoring-api";
+import { listLearningResourceResources } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import type { LearningResourceResource, LearningResourceResourceSection } from "@/features/lms/learning-resources/api/learning-resource-domain-types";
 import {
   mapGraphQlLearningResourceToResource,

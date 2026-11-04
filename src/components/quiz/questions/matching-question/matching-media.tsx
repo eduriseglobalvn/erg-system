@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { readImageAsDataUrl, resizeMatchingTextarea } from "@/components/quiz/questions/matching-question/matching-helpers";
-import type { MatchingPair, QuestionImage } from "@/lib/types";
+import type { MatchingPair, QuestionImage } from "@/domain/quiz/types";
 import { cn } from "@/lib/utils";
 
 export function MatchingImageControls({

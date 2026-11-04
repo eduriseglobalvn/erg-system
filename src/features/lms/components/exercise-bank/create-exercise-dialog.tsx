@@ -6,8 +6,8 @@ import { X } from "lucide-react";
 import {
   emptyQuestionBankData,
   type QuestionBankApiData,
-} from "@/features/lcms/quiz/question-bank/api/question-bank-api";
-import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+} from "@/features/question-bank/api/question-bank-api";
+import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
 import {
   type Exercise,
   type ExerciseDifficulty,

@@ -1,7 +1,7 @@
 import { useRef, useState, type MutableRefObject } from "react";
 import { toast } from "sonner";
 
-import type { QuestionBankSubject } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankSubject } from "@/features/question-bank/types/question-bank-types";
 import {
   useCreateQuizEditorQuizMutation,
   usePublishQuizEditorDraftMutation,

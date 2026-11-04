@@ -1,7 +1,7 @@
 import { Circle, Eye, EyeOff, Plus, Square, Trash2, MousePointer2 } from "lucide-react";
 import type { RefObject } from "react";
 
-import type { HotspotArea, Question } from "@/lib/types";
+import type { HotspotArea, Question } from "@/domain/quiz/types";
 
 import { HotspotEditableArea } from "./hotspot-editable-area";
 

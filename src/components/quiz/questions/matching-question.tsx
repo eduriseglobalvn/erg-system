@@ -31,7 +31,7 @@ import { MobileMatchingAnswerPicker } from "@/components/quiz/questions/matching
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
-import type { MatchingPair } from "@/lib/types";
+import type { MatchingPair } from "@/domain/quiz/types";
 import { cn } from "@/lib/utils";
 
 export function MatchingQuestion({

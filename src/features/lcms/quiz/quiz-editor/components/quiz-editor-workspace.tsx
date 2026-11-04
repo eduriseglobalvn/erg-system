@@ -35,7 +35,7 @@ import type {
   QuestionCreationPreset,
   QuestionType,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { isQuestionManagerSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import "@/features/lcms/quiz/quiz-editor/styles/classic-editor.css";
 

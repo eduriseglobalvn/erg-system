@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getCurrentAccountId } from "@/platform/auth/api/auth-storage";
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import { quizEditorQueryKeys } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
 import { queryKeys } from "@/lib/query-keys";
 import {

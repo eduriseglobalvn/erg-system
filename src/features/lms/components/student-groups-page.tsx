@@ -6,7 +6,7 @@ import Alert from "@mui/material/Alert";
 
 import Button from "@mui/material/Button";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import {
   useCreateLmsStudentGroupMutation,
   useDeleteLmsStudentGroupMutation,

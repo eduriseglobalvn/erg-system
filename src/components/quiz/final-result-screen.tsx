@@ -6,7 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
 
-import type { Attempt, Question, QuizResultDisplay } from "@/lib/types";
+import type { Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 const { success, error, neutral } = ergEnterpriseTokens.statusTint;

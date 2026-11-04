@@ -7,7 +7,7 @@ import { QuestionFeedbackPanel } from "@/components/quiz/player-shell-parts";
 import { PlayerTimerText } from "@/components/quiz/player-status";
 import { playerViewportClass } from "@/components/quiz/player-shell-runtime/player-shell-styles";
 import { PlayerDesktopFooter } from "@/components/quiz/player-shell-runtime/player-desktop-footer";
-import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/lib/types";
+import type { AnswerRecord, Attempt, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 export type PlayerDesktopLayoutProps = {
   accentButtonStyle: CSSProperties;

@@ -13,7 +13,7 @@ import {
   scopeMenuProps,
   scopeSelectSx,
 } from "@/features/lms/components/lms-teacher-shell-scope-styles";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 export function LmsHeaderSchoolControl({
   schoolId,

@@ -1,7 +1,7 @@
 import { areAnswerPayloadsEqual, firstUnansweredIndex } from "@/components/quiz/player-shell-utils";
 import { createRuntimeKey, localQuizAttemptStore } from "@/features/lcms/quiz/quiz-runtime";
-import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
-import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
+import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage } from "@/domain/quiz/types";
 import type { PlayerRuntime } from "./use-player-runtime";
 
 export type PlayerReady = {

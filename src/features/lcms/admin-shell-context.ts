@@ -2,7 +2,7 @@ import { createContext, useContext } from "react";
 
 import type { MenuItem } from "@/components/portal/ErgPortalLayout";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
 /** Shell state shared with the Admin child routes rendered in its Outlet. */

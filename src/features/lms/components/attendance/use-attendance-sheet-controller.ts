@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import { useCurriculumTeachingPlanQuery } from "@/features/lms/api/curriculum-teaching-plan-query";
 import { useCurriculumTreeQuery } from "@/features/lms/api/curriculum-tree-api";
 import { useCurriculumProgramReader } from "@/features/lms/api/curriculum-program-query-reader";

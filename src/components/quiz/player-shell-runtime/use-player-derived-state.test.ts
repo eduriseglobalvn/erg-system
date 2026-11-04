@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { PlayerLoadState } from "@/components/quiz/player-shell-runtime-model";
 import { usePlayerDerivedState } from "@/components/quiz/player-shell-runtime/use-player-derived-state";
-import type { LocalQuizAttemptSession } from "@/lib/quiz-runtime-types";
-import type { Attempt, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession } from "@/domain/quiz/quiz-runtime-types";
+import type { Attempt, QuizPackage } from "@/domain/quiz/types";
 
 const START = Date.parse("2026-11-04T10:00:00.000Z");
 const question = { id: "q1", kind: "single_choice", title: "Q", points: 1, feedback: { correct: "", incorrect: "", partial: "" } };

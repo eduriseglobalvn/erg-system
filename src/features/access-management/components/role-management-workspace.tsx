@@ -17,7 +17,7 @@ import { ErgDataTableShell, ErgTable, ErgTableToolbar } from "@/components/erg-m
 import { RoleEditorDrawer } from "@/features/access-management/components/role-editor-drawer";
 import { usePermissionGroups, useRoles } from "@/features/access-management/hooks/use-access-management";
 import { roleDisplayName, scopeTypeLabel } from "@/features/access-management/lib/permission-display";
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 export function RoleManagementWorkspace({ tenantId }: { tenantId: string }) {

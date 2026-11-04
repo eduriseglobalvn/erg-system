@@ -2,7 +2,7 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
 import { ExerciseQuestionDetailDialog } from "./exercise-question-detail-dialog";
 import type { Exercise } from "./exercise-bank-model";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 describe("ExerciseQuestionDetailDialog", () => {
   const mockExercise: Exercise = {

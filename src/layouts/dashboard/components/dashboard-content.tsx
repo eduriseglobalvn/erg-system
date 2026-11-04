@@ -5,9 +5,9 @@ import { lazy, Suspense, type ComponentType } from "react";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
-import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
-import type { ClassroomSchool, ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSchool, ClassroomSnapshot } from "@/domain/school/classroom-types";
 
 const AdminOperationsWorkspace = lazyNamed(
   () => import("@/features/lcms/admin-operations/components/admin-operations-workspace"),
@@ -34,7 +34,7 @@ const OverviewWorkspace = lazyNamed(
   "OverviewWorkspace",
 );
 const QuestionBankWorkspace = lazyNamed(
-  () => import("@/features/lcms/quiz/question-bank/components/question-bank-workspace"),
+  () => import("@/features/question-bank/components/question-bank-workspace"),
   "QuestionBankWorkspace",
 );
 const QuizEditorWorkspace = lazyNamed(

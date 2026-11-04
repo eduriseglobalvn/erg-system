@@ -4,7 +4,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 
-import type { AnswerResult, Question, QuizResultDisplay } from "@/lib/types";
+import type { AnswerResult, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 type SubmitDialogMode = "all-answered" | "confirm";
 

@@ -5,7 +5,7 @@ import { studentDashboardQueryOptions } from "@/features/elearning/student-dashb
 import { studentDiscussionFeedQueryOptions } from "@/features/elearning/student-dashboard/api/student-engagement-query";
 import { attendanceQueryOptions, gradebookQueryOptions } from "@/features/lms/api/lms-academic-record-query";
 import { lmsAssignmentReadQueryKeys, lmsReadPersistMeta, lmsStudentGroupsQueryOptions } from "@/features/lms/api/lms-assignment-command-query";
-import { questionBankQueryKeys } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
+import { questionBankQueryKeys } from "@/features/question-bank/api/question-bank-query";
 import { quizEditorQueryKeys } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
 import { quizRuntimeQueryKeys } from "@/features/lcms/quiz/quiz-runtime/api/quiz-runtime-query";
 import { notificationQueryKeys } from "@/features/notifications/api/notification-query";

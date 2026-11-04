@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import { attemptDeadlineMs, firstUnansweredIndex, serverNowMs } from "@/components/quiz/player-shell-utils";
-import type { Question } from "@/lib/types";
+import type { Question } from "@/domain/quiz/types";
 
 describe("quiz player server clock policy", () => {
   test("derives current server time from the persisted response offset", () => {

@@ -1,6 +1,6 @@
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 
-import type { HotspotArea } from "@/lib/types";
+import type { HotspotArea } from "@/domain/quiz/types";
 
 import { clamp, resizeHandles, type ResizeHandle } from "./hotspot-helpers";
 

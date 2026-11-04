@@ -14,7 +14,7 @@ import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { describeIpAddress, describeUserAgent } from "@/features/lms/components/lms-user-agent";
 import { queryKeys } from "@/lib/query-keys";
-import { formatDateTimeVi } from "@/lib/format-date";
+import { formatDateTimeVi } from "@/domain/formatters/format-date";
 import { listMyLoginSessions, type LoginSessionLog } from "@/platform/auth/api/account-api";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { hasApiBase } from "@/lib/api-client";

@@ -1,7 +1,7 @@
 import { ImagePlus, X } from "lucide-react";
 import { useCallback, useRef, type ChangeEvent, type PointerEvent as ReactPointerEvent } from "react";
 
-import type { QuestionImage } from "@/lib/types";
+import type { QuestionImage } from "@/domain/quiz/types";
 
 export function SequenceInlineImage({
   image,

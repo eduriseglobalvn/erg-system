@@ -1,8 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import type { ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomStudent } from "@/domain/school/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import { OfflineTeachingCommandError } from "@/features/lms/offline-teaching";
 import {
   isPendingAcademicRecordMutation,
@@ -13,7 +13,7 @@ import {
 import { lmsSubjectOptions } from "@/features/lms/components/lms-subject-options";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useVirtualList } from "@/hooks/use-virtual-list";
-import { formatDateVi } from "@/lib/format-date";
+import { formatDateVi } from "@/domain/formatters/format-date";
 import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import { describePaste, isBlockPaste, parseClipboardGrid, planScorePaste } from "./score-paste";
 import {

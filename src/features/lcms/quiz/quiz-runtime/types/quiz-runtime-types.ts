@@ -1,1 +1,1 @@
-export * from "@/lib/quiz-runtime-types";
+export * from "@/domain/quiz/quiz-runtime-types";

@@ -10,7 +10,7 @@ import {
   type ErgCalendarVisibleRange,
   type ErgScheduleCatalog,
 } from "@/components/shared/erg-calendar-workspace";
-import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";
+import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import {
   loadLmsMyTeachingCalendar,
   loadTeachingCalendarReferenceCatalog,
@@ -23,7 +23,7 @@ import {
   type MyTeachingCalendarInput,
   type TeachingCalendarViewMode,
 } from "@/features/teaching-calendar/api/teaching-calendar-api";
-import { createInitialCalendarRange } from "@/features/teaching-calendar/components/calendar-date-range";
+import { createInitialCalendarRange } from "@/domain/calendar/calendar-date-range";
 import { useLmsMobileBreakpoint } from "@/features/lms/mobile";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 

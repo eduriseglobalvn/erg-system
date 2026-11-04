@@ -3,7 +3,7 @@ import { useRef, useState } from "react";
 import { useI18n } from "@/platform/i18n";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import type { HotspotArea } from "@/lib/types";
+import type { HotspotArea } from "@/domain/quiz/types";
 
 import { HotspotAuthoring } from "./hotspot-question/hotspot-authoring";
 import { clamp, createRuntimeId } from "./hotspot-question/hotspot-helpers";

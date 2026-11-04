@@ -21,11 +21,11 @@ import {
   submitFinalAttempt,
   useSaveAttemptAnswerMutation,
 } from "@/features/lcms/quiz/quiz-runtime";
-import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/lib/quiz";
+import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/domain/quiz/quiz";
 import { quizReportQueryKeys } from "@/lib/quiz-report-query-keys";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/lib/quiz-runtime-types";
-import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage } from "@/lib/types";
+import type { LocalQuizAttemptSession, QuizRuntimePortal } from "@/domain/quiz/quiz-runtime-types";
+import type { AnswerPayload, Attempt, Question, Quiz, QuizPackage } from "@/domain/quiz/types";
 
 export type UsePlayerActionsArgs = {
   activeAttempt: Attempt | null;
