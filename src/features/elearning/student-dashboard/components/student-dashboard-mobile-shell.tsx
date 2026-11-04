@@ -12,6 +12,7 @@ import { useMemo, useState, type ReactNode } from "react";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ERG_ASSETS } from "@/config/seo";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
+import { StudentDashboardMobileAppBar } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-app-bar";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
@@ -23,21 +24,23 @@ export function StudentDashboardMobileShell({
   activePage,
   announcementUnreadCount = 0,
   children,
-  currentPageLabel: _currentPageLabel,
+  className,
   dockItems,
+  notificationLabel,
   studentName,
-  onAccountOpen: _onAccountOpen,
-  onAnnouncementsOpen: _onAnnouncementsOpen,
+  onAccountOpen,
+  onAnnouncementsOpen,
   onPageChange,
 }: {
   activePage: StudentPageKey;
   announcementUnreadCount?: number;
   children: ReactNode;
-  currentPageLabel?: string;
+  className: string;
+  notificationLabel: string;
   dockItems: Array<{ key: StudentDockPageKey; label: string; icon: ReactNode }>;
   studentName: string;
-  onAccountOpen?: () => void;
-  onAnnouncementsOpen?: () => void;
+  onAccountOpen: () => void;
+  onAnnouncementsOpen: () => void;
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
   const installPrompt = useInstallPrompt();
@@ -122,9 +125,18 @@ export function StudentDashboardMobileShell({
       {/* Brand logo reference for PWA shell branding & policy */}
       <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ display: "none" }} />
 
+      <StudentDashboardMobileAppBar
+        className={className}
+        notificationLabel={notificationLabel}
+        studentName={studentName}
+        unreadCount={announcementUnreadCount}
+        onAccountOpen={onAccountOpen}
+        onNotificationsOpen={onAnnouncementsOpen}
+      />
+
       {/* Floating service worker update banner */}
       {serviceWorkerUpdate.updateAvailable ? (
-        <Box sx={{ flexShrink: 0, px: 2, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", zIndex: 1100 }}>
+        <Box sx={{ flexShrink: 0, px: 2, pt: 1, zIndex: 1100 }}>
           <ButtonBase
             onClick={serviceWorkerUpdate.applyUpdate}
             sx={{
@@ -148,7 +160,7 @@ export function StudentDashboardMobileShell({
 
       {/* Device-aware PWA install prompt banner */}
       {shouldOfferInstall ? (
-        <Box sx={{ flexShrink: 0, px: 1.75, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", pb: 0.5, zIndex: 1050 }}>
+        <Box sx={{ flexShrink: 0, px: 1.75, pt: 1, pb: 0.5, zIndex: 1050 }}>
           <Box
             sx={{
               alignItems: "center",
@@ -225,8 +237,8 @@ export function StudentDashboardMobileShell({
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          pb: "calc(64px + env(safe-area-inset-bottom, 0px))",
-          pt: shouldOfferInstall ? 0.75 : "calc(env(safe-area-inset-top, 0px) + 12px)",
+          pb: "calc(72px + env(safe-area-inset-bottom, 0px))",
+          pt: shouldOfferInstall ? 0.75 : 1.5,
         }}
       >
         <Box sx={{ maxWidth: 448, mx: "auto", px: { xs: 1.75, sm: 2.25 }, py: 1.5 }}>

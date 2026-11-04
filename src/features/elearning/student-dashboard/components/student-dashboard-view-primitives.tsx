@@ -11,6 +11,7 @@ import IconButton from "@mui/material/IconButton";
 import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 import type { DashboardCopy } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
   StudentAssignmentStatus,
@@ -72,22 +73,23 @@ export function PriorityPanel({ assignment, copy, onOpenAssignment }: { assignme
       ) : (
         <LinearProgress value={assignment.progressRate} variant="determinate" sx={{ height: 10, mt: 2, bgcolor: "rgba(255,255,255,0.16)", borderRadius: 99, "& .MuiLinearProgress-bar": { bgcolor: "#8FD0FF", borderRadius: 99 } }} />
       )}
-      <Button fullWidth variant="contained" disabled={!assignment.quizId} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ ...primaryButtonSx, borderRadius: 2.2, mt: 2 }}>{copy.priority.action}</Button>
+      <Button fullWidth variant="outlined" disabled={!assignment.quizId} onClick={() => { if (assignment.quizId) onOpenAssignment(assignment.id); }} sx={{ borderColor: "common.white", color: "common.white", mt: 2, "&:hover": { borderColor: "common.white", bgcolor: "action.hover" }, "&.Mui-disabled": { borderColor: "grey.600", color: "grey.500" } }}>{copy.priority.action}</Button>
     </Paper>
   );
 }
 
-export function MetricCard({ icon, label, tone = "primary", value }: { icon?: ReactNode; label: string; tone?: "primary" | "error" | "success"; value: string | number }) {
-  const color = tone === "error" ? "#FF5630" : tone === "success" ? "#22C55E" : MUI_PRIMARY;
+/** The one metric card for desktop and mobile: sentence-case label, border only, token colours. */
+export function MetricCard({ icon, label, tone = "primary", value }: { icon?: ReactNode; label: string; tone?: "primary" | "error" | "success" | "info"; value: string | number }) {
+  const pad = { xs: 1.5, md: 2.2 };
   return (
-    <Card sx={elevatedCardSx}>
-      <CardContent sx={{ p: 2.2 }}>
+    <Card sx={{ ...elevatedCardSx, boxShadow: "none", minWidth: 0 }}>
+      <CardContent sx={{ p: pad, "&:last-child": { pb: pad } }}>
         <Stack direction="row" spacing={1.5} alignItems="center" justifyContent="space-between">
           <Box sx={{ minWidth: 0 }}>
-            <Typography variant="caption" sx={{ color: MUI_MUTED, fontWeight: 600 }}>{label}</Typography>
-            <Typography variant="h5" sx={{ mt: 0.5, color: MUI_TEXT, fontWeight: 600 }}>{value}</Typography>
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block" }}>{label}</Typography>
+            <Typography variant="h5" sx={{ mt: 0.5, color: "text.primary" }}>{value}</Typography>
           </Box>
-          {icon ? <Box sx={{ bgcolor: `${color}1A`, border: `1px solid ${color}22`, borderRadius: 3, color, display: "grid", height: 40, placeItems: "center", width: 40 }}>{icon}</Box> : null}
+          {icon ? <Box sx={{ bgcolor: (theme) => alpha(theme.palette[tone].main, 0.1), borderRadius: 2, color: `${tone}.main`, display: "grid", flexShrink: 0, height: 40, placeItems: "center", width: 40 }}>{icon}</Box> : null}
         </Stack>
       </CardContent>
     </Card>

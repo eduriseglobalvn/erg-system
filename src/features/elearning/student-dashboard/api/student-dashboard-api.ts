@@ -170,6 +170,7 @@ function mapAssignment(
     totalQuestions: null,
     score: null,
     maxScore: null,
+    ...(assignment.dueAt ? { dueAt: assignment.dueAt } : {}),
     dueLabel: assignment.dueAt ? formatDueLabel(assignment.dueAt) : "Chưa có hạn nộp",
     statusLabel: statusLabelFor(status),
     lastActivityLabel: "Chưa có hoạt động",

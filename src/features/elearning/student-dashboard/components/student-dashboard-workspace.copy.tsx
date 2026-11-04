@@ -17,8 +17,9 @@ export const viCopy: DashboardCopy = {
   heroEyebrow: "Bảng học tập",
   learnerFallbackName: "bạn",
   heroTitle: (name: string) => `Chào ${name}, chọn bài cần làm hôm nay.`,
-  heroDescription: (taskTitle: string) =>
-    `Ưu tiên của bạn là "${taskTitle}". Màn hình này gom bài tập, tiến độ và điểm số vào từng trang rõ ràng để bạn không phải tìm lâu.`,
+  heroDescription: (taskTitle: string, dueDate: string) => (dueDate ? `${taskTitle} · hạn ${dueDate}` : taskTitle),
+  heroAllDone: "Bạn đã xong hết bài",
+  heroEmpty: "Chưa có bài nào được giao",
   primaryAction: "Làm bài ưu tiên",
   secondaryAction: "Xem bài tập",
   stats: {
@@ -112,8 +113,9 @@ export const enCopy: DashboardCopy = {
   heroEyebrow: "Learning board",
   learnerFallbackName: "there",
   heroTitle: (name: string) => `Hi ${name}, choose what to finish today.`,
-  heroDescription: (taskTitle: string) =>
-    `Your priority is "${taskTitle}". Assignments, progress, and scores are separated into clear pages so students can find the next action quickly.`,
+  heroDescription: (taskTitle: string, dueDate: string) => (dueDate ? `${taskTitle} · due ${dueDate}` : taskTitle),
+  heroAllDone: "You are all caught up",
+  heroEmpty: "No assignments yet",
   primaryAction: "Open priority task",
   secondaryAction: "View assignments",
   stats: {

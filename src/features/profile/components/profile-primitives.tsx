@@ -86,11 +86,14 @@ export function SectionHeader({
 export function Field({
   children,
   fullWidth = false,
+  htmlFor,
   icon,
   label,
 }: {
   children: ReactNode;
   fullWidth?: boolean;
+  /** id of the control this label names. */
+  htmlFor: string;
   icon: ReactNode;
   label: string;
 }) {
@@ -98,7 +101,7 @@ export function Field({
     <Box sx={{ gridColumn: fullWidth ? { md: "1 / -1" } : undefined }}>
       <Box sx={{ alignItems: "center", color: "text.secondary", display: "flex", gap: 0.75, mb: 1 }}>
         <Box sx={{ color: "text.disabled", display: "flex" }}>{icon}</Box>
-        <Typography sx={{ color: "#4B5563", fontSize: "0.825rem", fontWeight: 600 }}>
+        <Typography component="label" htmlFor={htmlFor} sx={{ color: "text.secondary", fontSize: "0.825rem", fontWeight: 600 }}>
           {label}
         </Typography>
       </Box>
@@ -109,6 +112,7 @@ export function Field({
 
 export function PasswordInput({
   disabled,
+  id,
   onChange,
   onToggle,
   placeholder,
@@ -117,6 +121,7 @@ export function PasswordInput({
   value,
 }: {
   disabled: boolean;
+  id: string;
   onChange: (value: string) => void;
   onToggle: () => void;
   placeholder: string;
@@ -129,6 +134,7 @@ export function PasswordInput({
       <TextField
         disabled={disabled}
         fullWidth
+        id={id}
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         size="small"
@@ -166,6 +172,33 @@ export function PasswordInput({
       >
         {show ? <EyeOff sx={{ fontSize: 16 }} /> : <Eye sx={{ fontSize: 16 }} />}
       </IconButton>
+    </Box>
+  );
+}
+
+/** The page's single save action: sticks to the bottom of the screen on mobile, sits at the card's end on desktop. */
+export function StickyActionBar({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      sx={{
+        bgcolor: "background.paper",
+        borderRadius: { xs: "0 0 16px 16px", md: 0 },
+        borderTop: { xs: `1px solid ${ergEnterpriseTokens.color.border}`, md: "none" },
+        bottom: 0,
+        display: "flex",
+        justifyContent: { md: "flex-end" },
+        mb: { xs: -3, md: 0 },
+        mt: 3,
+        mx: { xs: -3, md: 0 },
+        pb: "calc(12px + env(safe-area-inset-bottom, 0px))",
+        position: { xs: "sticky", md: "static" },
+        pt: 1.5,
+        px: { xs: 3, md: 0 },
+        zIndex: 1,
+        "& > button": { minHeight: 44, width: { xs: "100%", md: "auto" } },
+      }}
+    >
+      {children}
     </Box>
   );
 }

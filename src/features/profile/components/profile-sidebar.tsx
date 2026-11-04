@@ -26,6 +26,7 @@ export function ProfileSidebar({
   isUploadingAvatar,
   openAvatarCropper,
   setActiveTab,
+  showWorkRoleFields,
 }: ReturnType<typeof useProfilePageController>) {
   return (
       <Box component="aside" sx={{ height: "fit-content", position: { lg: "sticky" }, top: { lg: 32 } }}>
@@ -185,8 +186,12 @@ export function ProfileSidebar({
   
           {/* Quick Info Lines */}
           <Box sx={{ display: "grid", gap: 1, mt: 2 }}>
-            <ProfileLine icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Vai trò" value={form.title || "Chưa cập nhật"} />
-            <ProfileLine icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận" value={form.department || "Chưa cập nhật"} />
+            {showWorkRoleFields ? (
+              <>
+                <ProfileLine icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Vai trò" value={form.title || "Chưa cập nhật"} />
+                <ProfileLine icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận" value={form.department || "Chưa cập nhật"} />
+              </>
+            ) : null}
             <ProfileLine icon={<Phone sx={{ fontSize: 16 }} />} label="Điện thoại" value={form.phone || "Chưa cập nhật"} />
           </Box>
         </Paper>

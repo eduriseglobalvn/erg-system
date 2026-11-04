@@ -43,9 +43,16 @@ export function useProfilePageController() {
   }, []);
   useEffect(() => () => { if (avatarCrop?.previewUrl) URL.revokeObjectURL(avatarCrop.previewUrl); }, [avatarCrop?.previewUrl]);
 
+  // Department and job title are staff fields; students never see or edit them.
+  const showWorkRoleFields = !location.pathname.startsWith("/student");
   const initials = useMemo(() => getProfileInitials(form.fullName || account?.email || "ERG"), [account?.email, form.fullName]);
   const avatarUrl = form.avatarUrl.trim();
-  const completionItems = useMemo(() => [Boolean(form.fullName.trim()), Boolean(form.phone.trim()), Boolean(form.department.trim()), Boolean(form.title.trim())], [form.department, form.fullName, form.phone, form.title]);
+  const completionItems = useMemo(
+    () => showWorkRoleFields
+      ? [Boolean(form.fullName.trim()), Boolean(form.phone.trim()), Boolean(form.department.trim()), Boolean(form.title.trim())]
+      : [Boolean(form.fullName.trim()), Boolean(form.phone.trim()), Boolean(form.avatarUrl.trim())],
+    [form.avatarUrl, form.department, form.fullName, form.phone, form.title, showWorkRoleFields],
+  );
   const completionPercent = Math.round((completionItems.filter(Boolean).length / completionItems.length) * 100);
   const passwordScore = getPasswordScore(passwordForm.nextPassword);
   const canChangePassword = Boolean(account?.id && account.provider === "password");
@@ -56,8 +63,10 @@ export function useProfilePageController() {
     if (!account) return;
     setIsSavingProfile(true); setProfileNotice(null);
     try {
-      const updated = await authApi.updateProfile(account.id, form);
-      const nextAccount: TeacherAccount = { ...account, ...updated, fullName: updated.fullName || form.fullName, phone: updated.phone || form.phone, department: form.department, title: form.title, avatarUrl: updated.avatarUrl || form.avatarUrl, bio: updated.bio || form.bio };
+      // Students keep the department/title the server already has instead of the staff defaults in the form.
+      const payload = showWorkRoleFields ? form : { ...form, department: account.department, title: account.title };
+      const updated = await authApi.updateProfile(account.id, payload);
+      const nextAccount: TeacherAccount = { ...account, ...updated, fullName: updated.fullName || form.fullName, phone: updated.phone || form.phone, department: payload.department, title: payload.title, avatarUrl: updated.avatarUrl || form.avatarUrl, bio: updated.bio || form.bio };
       saveCurrentAccount(nextAccount); setAccount(nextAccount); setForm(profileFormFromAccount(nextAccount));
       setProfileNotice({ tone: "success", message: "Hồ sơ đã được cập nhật." });
     } catch (error) {
@@ -108,6 +117,6 @@ export function useProfilePageController() {
     account, activeTab, avatarCrop, avatarInputRef, avatarUrl, canChangePassword, changePassword, closeAvatarCropper,
     completionPercent, form, initials, isLoading, isSavingPassword, isSavingProfile, isUploadingAvatar,
     openAvatarCropper, passwordForm, passwordScore, profileNotice, saveProfile, securityNotice, setActiveTab,
-    setAvatarCrop, setShowPasswords, showPasswords, update, updatePasswordField, uploadCroppedAvatar,
+    setAvatarCrop, setShowPasswords, showPasswords, showWorkRoleFields, update, updatePasswordField, uploadCroppedAvatar,
   };
 }

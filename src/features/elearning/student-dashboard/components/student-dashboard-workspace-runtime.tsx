@@ -509,7 +509,7 @@ export function StudentDashboardWorkspaceRuntime() {
   }
 
   const mobileDockItems = useMemo(() => [
-    ...copy.navItems.map((item) => ({ ...item, key: item.key as StudentDockPageKey, label: item.key === "scores" ? (locale === "vi" ? "Khóa học" : "Courses") : item.key === "assignments" ? (locale === "vi" ? "Bài tập" : "Tasks") : item.label })),
+    ...copy.navItems.map((item) => ({ ...item, key: item.key as StudentDockPageKey })),
     { key: "account" as const, label: locale === "vi" ? "Hồ sơ" : "Profile", icon: null },
   ], [copy.navItems, locale]);
 
@@ -632,7 +632,6 @@ export function StudentDashboardWorkspaceRuntime() {
     setActivePage(targetPage);
     setViewState({ type: "dashboard" });
   };
-  const currentPageLabel = activePage === "account" ? copy.accountTitle : copy.navItems.find((item) => item.key === activePage)?.label ?? copy.heroEyebrow;
   const announcementToast = latestAnnouncement ? (
     <AnnouncementToast
       announcement={latestAnnouncement} copy={copy} open={announcementPopupOpen}
@@ -700,8 +699,8 @@ export function StudentDashboardWorkspaceRuntime() {
       <Box sx={{ bgcolor: MUI_BG, color: MUI_TEXT, fontFamily: "var(--font-app)", minHeight: "100vh" }}>
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={activePage} announcementUnreadCount={unreadAnnouncementCount} currentPageLabel={currentPageLabel}
-          dockItems={mobileDockItems} studentName={account?.name ?? dashboardProfile.name}
+          activePage={activePage} announcementUnreadCount={unreadAnnouncementCount} className={dashboardProfile.className}
+          dockItems={mobileDockItems} notificationLabel={copy.notificationTitle} studentName={account?.name ?? dashboardProfile.name}
           onAccountOpen={() => handlePageChange("account")} onAnnouncementsOpen={() => handlePageChange("announcements")} onPageChange={handlePageChange}
         >
           <Box sx={{ px: 2, py: 2.5 }}>{dashboardViews}</Box>

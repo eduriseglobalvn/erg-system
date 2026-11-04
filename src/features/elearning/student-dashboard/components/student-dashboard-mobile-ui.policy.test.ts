@@ -23,8 +23,32 @@ describe("Student PWA mobile UI policy", () => {
 
     expect(runtime).toContain("StudentDashboardOverviewSurface");
     expect(surface).toContain("StudentDashboardMobileOverview");
-    expect(overview).toContain('gridTemplateColumns: "repeat(2, minmax(0, 1fr))"');
+    expect(overview).toContain('"repeat(2, minmax(0, 1fr))"');
     expect(overview).toContain("priorityAssignment");
+  });
+
+  it("has a 56px top app bar with class name, bell and avatar above the content", () => {
+    const shell = readSibling("./student-dashboard-mobile-shell.tsx");
+    const appBar = readSibling("./student-dashboard-mobile-app-bar.tsx");
+
+    expect(shell).toContain("StudentDashboardMobileAppBar");
+    expect(appBar).toContain("calc(56px + env(safe-area-inset-top, 0px))");
+    expect(appBar).toContain("NotificationsNoneRoundedIcon");
+    expect(appBar).toContain("Avatar");
+  });
+
+  it("uses one shared MetricCard and no ALL CAPS labels on the mobile overview", () => {
+    const overview = readSibling("./student-dashboard-mobile-overview.tsx");
+    const shared = readSibling("./student-dashboard-overview-shared.tsx");
+
+    expect(overview).toContain("OverviewMetrics");
+    expect(overview).not.toContain("MobileMetric");
+    expect(overview).not.toContain("uppercase");
+    expect(shared).toContain("MetricCard");
+  });
+
+  it("keeps bottom-dock touch targets at least 44px", () => {
+    expect(readSibling("./student-dashboard-bottom-dock.tsx")).toContain("minHeight: 56");
   });
 
   it("exposes an unmistakable selected state in the bottom dock", () => {

@@ -1,9 +1,5 @@
 import { useMemo, useState } from "react";
 import Bell from "@mui/icons-material/NotificationsNoneRounded";
-import BookOpenCheck from "@mui/icons-material/AutoStoriesRounded";
-import CheckCircle2 from "@mui/icons-material/CheckCircleOutlineRounded";
-import Clock3 from "@mui/icons-material/ScheduleRounded";
-import GraduationCap from "@mui/icons-material/SchoolRounded";
 import LogIn from "@mui/icons-material/LoginRounded";
 import LogOut from "@mui/icons-material/LogoutRounded";
 import User from "@mui/icons-material/PersonOutlineRounded";
@@ -20,9 +16,12 @@ import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student
 import type { StudentDashboardAssignment, StudentDashboardProfile, StudentTeacherAnnouncement } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { getDiscussionOverviewPreview } from "@/features/elearning/student-dashboard/utils/discussion-overview";
 import { MUI_PRIMARY, MUI_TEXT, MUI_MUTED, MUI_DIVIDER, elevatedCardSx, primaryButtonSx, Stack } from "@/features/elearning/student-dashboard/components/student-dashboard-workspace-styles";
-import { PageHeader, SectionCard, PriorityPanel, MetricCard, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
+import { OverviewHeroActions, OverviewMetrics } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
+import { PageHeader, SectionCard, PriorityPanel, AssignmentListItem, AnnouncementCard, EmptyPanel, SkeletonRow } from "@/features/elearning/student-dashboard/components/student-dashboard-view-primitives";
+import { formatAverageScore, resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
 
 export function OverviewView({ announcement, assignmentsLoading, completedAssignments, copy, discussionPreview, openAssignments, overdueAssignments, priorityAssignment, profile, onOpenAssignment, onPageChange }: { announcement: StudentTeacherAnnouncement | undefined; assignmentsLoading: boolean; completedAssignments: StudentDashboardAssignment[]; copy: DashboardCopy; discussionPreview: ReturnType<typeof getDiscussionOverviewPreview>; openAssignments: StudentDashboardAssignment[]; overdueAssignments: StudentDashboardAssignment[]; priorityAssignment?: StudentDashboardAssignment; profile: StudentDashboardProfile; onOpenAssignment: (assignmentId: string) => void; onPageChange: (page: StudentPageKey) => void; }) {
+  const hero = resolveOverviewHero(priorityAssignment, copy);
   return (
     <Stack spacing={2.5}>
       <Card sx={{ ...elevatedCardSx, background: "#fff", overflow: "hidden", position: "relative" }}>
@@ -31,24 +30,25 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
             <Box sx={{ minWidth: 0, maxWidth: 840 }}>
               <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
               <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(profile.name)}</Typography>
-              <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{copy.heroDescription(priorityAssignment?.title ?? "Bài tập tuần")}</Typography>
-              <Stack direction="row" spacing={1.25} sx={{ mt: 2.5, flexWrap: "wrap", rowGap: 1 }}>
-                <Button variant="contained" disabled={!priorityAssignment?.quizId} onClick={() => { if (priorityAssignment?.quizId) onOpenAssignment(priorityAssignment.id); }} sx={{ ...primaryButtonSx, borderRadius: 2.5, px: 2.6, py: 1 }}>{copy.primaryAction}</Button>
-                <Button variant="outlined" onClick={() => onPageChange("assignments")} sx={{ borderRadius: 2.5, borderColor: MUI_DIVIDER, color: MUI_TEXT, fontWeight: 600, px: 2.2, "&:hover": { borderColor: MUI_PRIMARY, bgcolor: "rgba(37,99,235,0.04)" } }}>{copy.secondaryAction}</Button>
-              </Stack>
+              <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{hero.description}</Typography>
+              <Box sx={{ mt: 2.5 }}>
+                <OverviewHeroActions copy={copy} hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
+              </Box>
             </Box>
-            {priorityAssignment ? <PriorityPanel assignment={priorityAssignment} copy={copy} onOpenAssignment={onOpenAssignment} /> : null}
+            {priorityAssignment && hero.primaryAssignmentId ? <PriorityPanel assignment={priorityAssignment} copy={copy} onOpenAssignment={onOpenAssignment} /> : null}
           </Stack>
         </CardContent>
       </Card>
-      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" } }}>
-        <MetricCard icon={<BookOpenCheck sx={{ fontSize: 18 }} />} label={copy.stats.open} value={openAssignments.length} />
-        <MetricCard icon={<Clock3 sx={{ fontSize: 18 }} />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
-        <MetricCard icon={<GraduationCap sx={{ fontSize: 18 }} />} label={copy.stats.average} value={profile.averageScore === null ? "—" : `${profile.averageScore}%`} />
-        <MetricCard icon={<CheckCircle2 sx={{ fontSize: 18 }} />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${profile.totalAssignments}`} />
-      </Box>
+      <OverviewMetrics
+        columns={{ xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" }}
+        completedAssignments={completedAssignments}
+        copy={copy}
+        openAssignments={openAssignments}
+        overdueAssignments={overdueAssignments}
+        profile={profile}
+      />
       <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: { xs: "1fr", lg: "1.7fr 1fr" }, alignItems: "start" }}>
-        <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("assignments")} size="small" sx={{ fontWeight: 600 }}>Xem tất cả</Button>} title={copy.todayTitle}>
+        <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
             {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
             {!assignmentsLoading && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
@@ -56,11 +56,11 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
         </SectionCard>
         <Stack spacing={2.5}>
           {announcement ? (
-            <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("announcements")} size="small" sx={{ fontWeight: 600 }}>Xem thêm</Button>} title={copy.announcementTitle}>
+            <SectionCard action={<Button variant="text" onClick={() => onPageChange("announcements")} size="small">Xem thêm</Button>} title={copy.announcementTitle}>
               <AnnouncementCard announcement={announcement} selected={false} />
             </SectionCard>
           ) : null}
-          <SectionCard action={<Button variant="contained" color="primary" onClick={() => onPageChange("discussion")} size="small" sx={{ fontWeight: 600 }}>Mở diễn đàn</Button>} title={copy.discussionTitle}>
+          <SectionCard action={<Button variant="text" onClick={() => onPageChange("discussion")} size="small">Mở diễn đàn</Button>} title={copy.discussionTitle}>
             <Stack spacing={1}>
               {discussionPreview.map((post) => (
                 <Paper key={post.id} sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
@@ -68,7 +68,7 @@ export function OverviewView({ announcement, assignmentsLoading, completedAssign
                     <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{post.authorName.slice(0, 1)}</Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
                       <Typography noWrap variant="body2" sx={{ fontWeight: 600 }}>{post.authorName}</Typography>
-                      <Typography noWrap variant="caption" color="text.secondary">{post.commentCount} replies</Typography>
+                      <Typography noWrap variant="caption" color="text.secondary">{copy.discussionRepliesLabel(post.commentCount)}</Typography>
                     </Box>
                   </Stack>
                   <Typography variant="body2" sx={{ mt: 1, color: MUI_MUTED, lineHeight: 1.55 }}>{post.content}</Typography>
@@ -243,7 +243,7 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
             <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, 1fr)" }}>
               <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.average}</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>{averageAssignmentScore === null ? "—" : `${averageAssignmentScore}%`}</Typography>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatAverageScore(averageAssignmentScore, profile.completedAssignments)}</Typography>
               </Paper>
               <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.open}</Typography>

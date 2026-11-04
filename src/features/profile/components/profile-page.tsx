@@ -1,9 +1,6 @@
 import ArrowLeft from "@mui/icons-material/ArrowBackRounded";
-import KeyRound from "@mui/icons-material/KeyRounded";
-import Save from "@mui/icons-material/SaveRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import CircularProgress from "@mui/material/CircularProgress";
 import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
@@ -47,13 +44,11 @@ export function ProfilePage() {
     setAvatarCrop,
     setShowPasswords,
     showPasswords,
+    showWorkRoleFields,
     update,
     updatePasswordField,
     uploadCroppedAvatar,
   } = controller;
-
-  const primaryAction = activeTab === "security" ? changePassword : saveProfile;
-  const primaryDisabled = activeTab === "security" ? !canChangePassword || isSavingPassword : !account || isSavingProfile;
 
   return (
     <Box component="main" sx={{ bgcolor: "background.default", color: "text.primary", minHeight: "100vh", p: { xs: 2.5, md: 4 } }}>
@@ -103,47 +98,12 @@ export function ProfilePage() {
               </Button>
               <Box sx={{ bgcolor: "rgba(0, 0, 0, 0.06)", display: { xs: "none", sm: "block" }, height: 28, width: "1px" }} />
               <Box>
-                <Typography sx={{ color: "text.disabled", fontSize: "0.72rem", fontWeight: 600, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-                  ERG Account
-                </Typography>
                 <Typography sx={{ color: "text.primary", fontSize: "1.2rem", fontWeight: 600, letterSpacing: "-0.02em" }}>
                   Hồ sơ và bảo mật
                 </Typography>
               </Box>
             </Box>
 
-            <Button
-              disabled={primaryDisabled}
-              onClick={() => void primaryAction()}
-              startIcon={
-                activeTab === "security" ? (
-                  isSavingPassword ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />
-                ) : isSavingProfile ? (
-                  <CircularProgress color="inherit" size={16} />
-                ) : (
-                  <Save sx={{ fontSize: 16 }} />
-                )
-              }
-              variant="contained"
-              sx={{
-                bgcolor: "primary.main",
-                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
-                boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
-                color: "#FFFFFF",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                height: 38,
-                px: 2.25,
-                textTransform: "none",
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: "primary.dark",
-                  boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
-                },
-              }}
-            >
-              {activeTab === "security" ? "Đổi mật khẩu" : "Lưu hồ sơ"}
-            </Button>
           </Box>
         </Paper>
 
@@ -166,6 +126,7 @@ export function ProfilePage() {
                 form={form}
                 isSaving={isSavingProfile}
                 notice={profileNotice}
+                showWorkRoleFields={showWorkRoleFields}
                 onSave={saveProfile}
                 onUpdate={update}
               />

@@ -43,6 +43,8 @@ export type StudentDashboardAssignment = {
   totalQuestions: number | null;
   score: number | null;
   maxScore: number | null;
+  /** Raw ISO deadline; lets the UI format dd/MM/yyyy itself. */
+  dueAt?: string;
   dueLabel: string;
   statusLabel: string;
   lastActivityLabel?: string;

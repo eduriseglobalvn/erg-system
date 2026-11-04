@@ -14,7 +14,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { Field, InfoTile, NoticeBox, PasswordInput, SectionHeader } from "@/features/profile/components/profile-primitives";
+import { Field, InfoTile, NoticeBox, PasswordInput, SectionHeader, StickyActionBar } from "@/features/profile/components/profile-primitives";
 import type { PasswordFormState, ProfileFormState, ProfileNotice as Notice } from "@/features/profile/types/profile-types";
 import { passwordScoreLabel } from "@/features/profile/utils/profile-utils";
 import type { TeacherAccount } from "@/platform/auth/types/auth-types";
@@ -26,6 +26,7 @@ export function ProfileFormPanel({
   form,
   isSaving,
   notice,
+  showWorkRoleFields,
   onSave,
   onUpdate,
 }: {
@@ -33,6 +34,7 @@ export function ProfileFormPanel({
   form: ProfileFormState;
   isSaving: boolean;
   notice: Notice | null;
+  showWorkRoleFields: boolean;
   onSave: () => Promise<void>;
   onUpdate: (field: keyof ProfileFormState, value: string) => void;
 }) {
@@ -52,32 +54,6 @@ export function ProfileFormPanel({
         eyebrow="Thông tin cá nhân"
         title="Hồ sơ hiển thị trong LMS"
         description="Thông tin này dùng cho lời chào, phân quyền, danh sách thành viên và các luồng quản trị."
-        action={
-          <Button
-            disabled={!account || isSaving}
-            onClick={() => void onSave()}
-            startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <Save sx={{ fontSize: 16 }} />}
-            variant="contained"
-            sx={{
-              bgcolor: "primary.main",
-              borderRadius: `${ergEnterpriseTokens.radius.md}px`,
-              boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
-              color: "#FFFFFF",
-              fontSize: "0.85rem",
-              fontWeight: 600,
-              minHeight: 38,
-              px: 2,
-              textTransform: "none",
-              transition: "all 0.15s ease",
-              "&:hover": {
-                bgcolor: "primary.dark",
-                boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
-              },
-            }}
-          >
-            Lưu hồ sơ
-          </Button>
-        }
       />
 
       <NoticeBox notice={notice} />
@@ -90,9 +66,10 @@ export function ProfileFormPanel({
           "@media (min-width: 48rem)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
         }}
       >
-        <Field icon={<UserRound sx={{ fontSize: 16 }} />} label="Họ và tên">
+        <Field htmlFor="profile-full-name" icon={<UserRound sx={{ fontSize: 16 }} />} label="Họ và tên">
           <TextField
             fullWidth
+            id="profile-full-name"
             onChange={(event) => onUpdate("fullName", event.target.value)}
             placeholder="Nhập họ và tên"
             size="small"
@@ -100,9 +77,10 @@ export function ProfileFormPanel({
             sx={appleInputSx}
           />
         </Field>
-        <Field icon={<Phone sx={{ fontSize: 16 }} />} label="Số điện thoại">
+        <Field htmlFor="profile-phone" icon={<Phone sx={{ fontSize: 16 }} />} label="Số điện thoại">
           <TextField
             fullWidth
+            id="profile-phone"
             onChange={(event) => onUpdate("phone", event.target.value)}
             placeholder="Nhập số điện thoại"
             size="small"
@@ -110,39 +88,47 @@ export function ProfileFormPanel({
             sx={appleInputSx}
           />
         </Field>
-        <Field icon={<Mail sx={{ fontSize: 16 }} />} label="Email đăng nhập">
+        <Field htmlFor="profile-email" icon={<Mail sx={{ fontSize: 16 }} />} label="Email đăng nhập">
           <TextField
             disabled
             fullWidth
+            id="profile-email"
             size="small"
             slotProps={{ htmlInput: { readOnly: true } }}
             value={account?.email ?? ""}
             sx={appleInputSx}
           />
         </Field>
-        <Field icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận">
+        {showWorkRoleFields ? (
+          <>
+            <Field htmlFor="profile-department" icon={<Building2 sx={{ fontSize: 16 }} />} label="Bộ phận">
+              <TextField
+                fullWidth
+                id="profile-department"
+                onChange={(event) => onUpdate("department", event.target.value)}
+                placeholder="ERG / LMS / Trung tâm"
+                size="small"
+                value={form.department}
+                sx={appleInputSx}
+              />
+            </Field>
+            <Field htmlFor="profile-title" icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Chức danh">
+              <TextField
+                fullWidth
+                id="profile-title"
+                onChange={(event) => onUpdate("title", event.target.value)}
+                placeholder="Giáo viên / Quản trị viên"
+                size="small"
+                value={form.title}
+                sx={appleInputSx}
+              />
+            </Field>
+          </>
+        ) : null}
+        <Field fullWidth htmlFor="profile-bio" icon={<UserRound sx={{ fontSize: 16 }} />} label="Giới thiệu ngắn">
           <TextField
             fullWidth
-            onChange={(event) => onUpdate("department", event.target.value)}
-            placeholder="ERG / LMS / Trung tâm"
-            size="small"
-            value={form.department}
-            sx={appleInputSx}
-          />
-        </Field>
-        <Field icon={<BadgeCheck sx={{ fontSize: 16 }} />} label="Chức danh">
-          <TextField
-            fullWidth
-            onChange={(event) => onUpdate("title", event.target.value)}
-            placeholder="Giáo viên / Quản trị viên"
-            size="small"
-            value={form.title}
-            sx={appleInputSx}
-          />
-        </Field>
-        <Field fullWidth icon={<UserRound sx={{ fontSize: 16 }} />} label="Giới thiệu ngắn">
-          <TextField
-            fullWidth
+            id="profile-bio"
             multiline
             minRows={3}
             onChange={(event) => onUpdate("bio", event.target.value)}
@@ -152,6 +138,17 @@ export function ProfileFormPanel({
           />
         </Field>
       </Box>
+
+      <StickyActionBar>
+        <Button
+          disabled={!account || isSaving}
+          onClick={() => void onSave()}
+          startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <Save sx={{ fontSize: 16 }} />}
+          variant="contained"
+        >
+          Lưu hồ sơ
+        </Button>
+      </StickyActionBar>
     </Paper>
   );
 }
@@ -199,32 +196,6 @@ export function SecurityPanel({
           eyebrow="Bảo mật tài khoản"
           title="Đổi mật khẩu"
           description="Mật khẩu mới yêu cầu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường và chữ số để bảo đảm an toàn."
-          action={
-            <Button
-              disabled={!canChangePassword || isSaving}
-              onClick={() => void onChangePassword()}
-              startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />}
-              variant="contained"
-              sx={{
-                bgcolor: "primary.main",
-                borderRadius: `${ergEnterpriseTokens.radius.md}px`,
-                boxShadow: `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}`,
-                color: "#FFFFFF",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                minHeight: 38,
-                px: 2,
-                textTransform: "none",
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: "primary.dark",
-                  boxShadow: `0 4px 14px ${alpha(ergEnterpriseTokens.color.primary, 0.38)}`,
-                },
-              }}
-            >
-              Đổi mật khẩu
-            </Button>
-          }
         />
 
         <NoticeBox notice={notice} />
@@ -257,9 +228,10 @@ export function SecurityPanel({
             "@media (min-width: 48rem)": { gridTemplateColumns: "repeat(2, minmax(0, 1fr))" },
           }}
         >
-          <Field fullWidth icon={<LockKeyhole sx={{ fontSize: 16 }} />} label="Mật khẩu hiện tại">
+          <Field fullWidth htmlFor="profile-current-password" icon={<LockKeyhole sx={{ fontSize: 16 }} />} label="Mật khẩu hiện tại">
             <PasswordInput
               disabled={!canChangePassword || isSaving}
+              id="profile-current-password"
               onChange={(value) => onUpdate("currentPassword", value)}
               onToggle={onTogglePasswords}
               placeholder="Nhập mật khẩu hiện tại"
@@ -268,10 +240,11 @@ export function SecurityPanel({
               value={form.currentPassword}
             />
           </Field>
-          <Field icon={<KeyRound sx={{ fontSize: 16 }} />} label="Mật khẩu mới">
+          <Field htmlFor="profile-next-password" icon={<KeyRound sx={{ fontSize: 16 }} />} label="Mật khẩu mới">
             <TextField
               disabled={!canChangePassword || isSaving}
               fullWidth
+              id="profile-next-password"
               onChange={(event) => onUpdate("nextPassword", event.target.value)}
               placeholder="Tối thiểu 8 ký tự"
               size="small"
@@ -280,10 +253,11 @@ export function SecurityPanel({
               sx={appleInputSx}
             />
           </Field>
-          <Field icon={<KeyRound sx={{ fontSize: 16 }} />} label="Nhập lại mật khẩu mới">
+          <Field htmlFor="profile-confirm-password" icon={<KeyRound sx={{ fontSize: 16 }} />} label="Nhập lại mật khẩu mới">
             <TextField
               disabled={!canChangePassword || isSaving}
               fullWidth
+              id="profile-confirm-password"
               onChange={(event) => onUpdate("confirmPassword", event.target.value)}
               placeholder="Nhập lại mật khẩu mới"
               size="small"
@@ -335,6 +309,17 @@ export function SecurityPanel({
             Gợi ý: Dùng tối thiểu 8 ký tự, có chữ hoa, chữ thường, số và ký tự đặc biệt để an toàn nhất.
           </Typography>
         </Box>
+
+        <StickyActionBar>
+          <Button
+            disabled={!canChangePassword || isSaving}
+            onClick={() => void onChangePassword()}
+            startIcon={isSaving ? <CircularProgress color="inherit" size={16} /> : <KeyRound sx={{ fontSize: 16 }} />}
+            variant="contained"
+          >
+            Đổi mật khẩu
+          </Button>
+        </StickyActionBar>
       </Paper>
 
       {/* Session Auth Info Card */}
