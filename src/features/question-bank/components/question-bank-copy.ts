@@ -96,8 +96,8 @@ export const viCopy = {
   deleteQuizSuccess: "Đã xóa quiz.",
   deleteQuizError: "Không thể xóa quiz.",
   confirmDeleteQuiz: (title: string): string => `Xóa quiz "${title}"?`,
-  syncError: "Không tải được dữ liệu từ BE",
-  syncErrorDetail: "Vui lòng kiểm tra kết nối, phiên đăng nhập hoặc quyền truy cập. FE không dùng mock khi API đã bật.",
+  syncError: "Không tải được ngân hàng câu hỏi",
+  syncErrorDetail: "Vui lòng kiểm tra kết nối, phiên đăng nhập hoặc quyền truy cập rồi thử lại.",
 };
 
 export const viPackageCopy = {
