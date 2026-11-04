@@ -22,6 +22,8 @@ import { logoutAccount } from "@/platform/auth/api/auth-storage";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
 import { getCurrentStudentSession, logoutStudentSession } from "@/platform/auth/api/student-auth-storage";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { evaluatePermission } from "@/platform/auth/permissions/permission-evaluator";
+import { routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 import {
   accessDeniedWorkspaceLabel,
   accessDeniedPathLabel,
@@ -71,6 +73,12 @@ export function AccessDeniedPage() {
       deniedPermissions: teacherSession?.deniedPermissions,
     });
     if (requestedWorkspace && landingTarget?.workspace !== requestedWorkspace) return;
+
+    // Bouncing back to a route the guard will deny again is an infinite redirect loop.
+    if (requestedWorkspace) {
+      const entry = routePermissionForPath(redirect, requestedWorkspace);
+      if (!entry || !evaluatePermission({ permission: entry.permission, grantedPermissions: teacherSession?.permissions, deniedPermissions: teacherSession?.deniedPermissions })) return;
+    }
 
     void navigate({ href: redirect, replace: true });
   }, [auth.account, auth.session, navigate, portal, redirect, requestedWorkspace]);

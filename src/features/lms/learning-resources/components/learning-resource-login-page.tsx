@@ -204,7 +204,7 @@ export function LearningResourceLoginPage() {
   const location = useLocation();
   const [account, setAccount] = useState(() => getCurrentAccount());
   const redirectPath = new URLSearchParams(location.searchStr).get("redirect") || "/kho-hoc-lieu/1";
-  const safeRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//") ? redirectPath : "/kho-hoc-lieu/1";
+  const safeRedirectPath = redirectPath.startsWith("/") && !redirectPath.startsWith("//") && !redirectPath.includes("\\") ? redirectPath : "/kho-hoc-lieu/1";
 
   useEffect(() => {
     function handleAuthChanged() {

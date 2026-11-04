@@ -4,8 +4,6 @@ import {
   getRoleMeta,
   getScopeMeta,
   groupRolesByCategory,
-  ROLE_DISPLAY_CATALOG,
-  SCOPE_DISPLAY_CATALOG,
 } from "@/platform/auth/permissions/role-display-catalog";
 
 describe("role-display-catalog", () => {

@@ -4,10 +4,10 @@ import type { StudentSession } from "@/platform/auth/api/student-auth-storage";
 
 /**
  * Global authentication bypass flag for UI preview, offline testing, and deployment.
- * Set to true to allow immediate, unauthenticated access across all workspaces
- * (Admin, Teacher, Student, CRM) without being redirected to the login screen.
+ * Only honoured in the Vite dev server (import.meta.env.DEV) and only when VITE_AUTH_BYPASS=true,
+ * so a production build can never ship with the bypass on.
  */
-export const AUTH_BYPASS_ENABLED = false;
+export const AUTH_BYPASS_ENABLED = import.meta.env.DEV && import.meta.env.VITE_AUTH_BYPASS === "true";
 
 export const DEFAULT_BYPASS_ACCOUNT: TeacherAccount = {
   id: "dev-admin-id",

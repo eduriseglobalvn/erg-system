@@ -127,7 +127,7 @@ export function googleEmailFromIdToken(idToken?: string) {
 }
 
 export function sanitizeRedirect(value: string | null, fallback = "/") {
-  return !value || !value.startsWith("/") || value.startsWith("//") ? fallback : value;
+  return !value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") ? fallback : value;
 }
 
 export function defaultPortalRedirect(portal: PortalKey) {

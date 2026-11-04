@@ -38,13 +38,13 @@ export function normalizeSsoReturnTo(rawReturnTo: string) {
 
 export function isAllowedSsoReturnHost(hostname: string) {
   const normalized = normalizeHost(hostname);
-  if (LOCALHOSTS.has(normalized)) return true;
+  if (import.meta.env.DEV && LOCALHOSTS.has(normalized)) return true;
   return [...ALLOWED_PORTAL_HOSTS].some((host) => host.split(":")[0] === normalized);
 }
 
 function isAllowedSsoReturnUrl(url: URL) {
   const normalizedHost = normalizeHost(url.host);
-  return LOCALHOSTS.has(url.hostname.toLowerCase()) || ALLOWED_PORTAL_HOSTS.has(normalizedHost);
+  return (import.meta.env.DEV && LOCALHOSTS.has(url.hostname.toLowerCase())) || ALLOWED_PORTAL_HOSTS.has(normalizedHost);
 }
 
 function getNestedLoginRedirect(url: URL) {

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Navigate, useLocation, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 
 import { getCurrentAccount } from "@/platform/auth/api/auth-storage";
 import { readStoredAuthSession } from "@/platform/auth/api/auth-token-storage";
@@ -72,15 +72,19 @@ export function PortalLoginPage({ badge, description, portal, title }: PortalLog
     window.setTimeout(() => void navigate({ href: path, replace: true }), 0);
   };
 
-  if (canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })) {
-    return <Navigate replace to={redirect} />;
-  }
-  if (portal !== "elearning" && auth.account && isAuthOnlyRedirect(portal, redirect)) {
-    return <Navigate replace to={redirect} />;
-  }
-  if (portal !== "elearning" && auth.account) {
-    return <Navigate replace to={accessDeniedPath(portal, auth.account.email, redirect)} />;
-  }
+  const redirectTarget = canAccessPortal({ portal, studentSession, teacherAccount, teacherSession })
+    ? redirect
+    : portal !== "elearning" && auth.account
+      ? isAuthOnlyRedirect(portal, redirect) ? redirect : accessDeniedPath(portal, auth.account.email, redirect)
+      : null;
+
+  // A string dependency navigates once per target. <Navigate> re-fires on every render while the
+  // lazy destination is pending, which loops into "Maximum update depth exceeded".
+  useEffect(() => {
+    if (redirectTarget) void navigate({ href: redirectTarget, replace: true });
+  }, [navigate, redirectTarget]);
+
+  if (redirectTarget) return null;
 
   return (
     <PortalLoginShell copy={resolvedCopy}>

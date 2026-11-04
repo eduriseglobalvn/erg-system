@@ -111,7 +111,7 @@ export function TeacherOnboardingPage() {
 }
 
 function sanitizeRedirect(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.startsWith("/onboarding")) return teacherPath("/home");
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("\\") || value.startsWith("/onboarding")) return teacherPath("/home");
   return value;
 }
 

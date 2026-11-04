@@ -143,6 +143,7 @@ function crmEntry(path: string): RoutePermissionEntry {
 
 export const ROUTE_PERMISSION_MATRIX: readonly RoutePermissionEntry[] = [
   { path: "/admin", workspace: "ADMIN", resource: "admin", action: "manage", permission: "lms.admin" },
+  { path: "/admin/profile", workspace: "ADMIN", resource: "account.self", action: "read", permission: "lms.admin" },
   ...ADMIN_CONTENT_ROUTE_PATHS.map((path) => ({
     ...(ADMIN_CONTENT_PERMISSIONS[path] ?? ADMIN_CONTENT_PERMISSIONS["/admin/content"]),
     path,
