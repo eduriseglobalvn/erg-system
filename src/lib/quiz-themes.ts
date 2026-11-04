@@ -8,6 +8,6 @@ export {
   groupedQuizThemePresets,
   quizThemePresets,
   resolveQuizTheme,
-} from "@/features/lcms/quiz/quiz-theme";
+} from "@/lib/quiz-theme-catalog";
 
-export type { QuizThemePreset } from "@/features/lcms/quiz/quiz-theme";
+export type { QuizThemePreset } from "@/lib/quiz-theme-catalog";

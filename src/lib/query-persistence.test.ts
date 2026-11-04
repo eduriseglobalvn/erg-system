@@ -1,43 +1,20 @@
 import { expect, test } from "vitest";
 
-import { isPersistableQuery, queryCacheScopeKey, QUERY_CACHE_BUSTER, QUERY_CACHE_STORAGE_KEY } from "@/lib/query-persistence";
+import { shouldDehydratePersistedQuery, queryCacheScopeKey, QUERY_CACHE_BUSTER, QUERY_CACHE_STORAGE_KEY } from "@/lib/query-persistence";
+import { persistedQueryMeta } from "@/lib/query-policy";
 
-test("persists only offline-core query families", () => {
-  for (const family of ["attendance", "homework", "scores"] as const) {
-    expect(isPersistableQuery({ queryKey: ["lms", family, "tenant-a", "account-a", "class-a"] })).toBe(true);
-    expect(isPersistableQuery({ queryKey: ["lms", family, "tenant-a", "anonymous", "class-a"] })).toBe(false);
-    expect(isPersistableQuery({ queryKey: ["lms", family, "tenant-a", "", "class-a"] })).toBe(false);
-    expect(isPersistableQuery({ queryKey: ["lms", family, "tenant-a"] })).toBe(false);
-  }
-  expect(isPersistableQuery({ queryKey: ["lms", "class-workspace", "tenant-a", "account-a", "class-management", "school-a", "class-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["lms", "class-workspace", "tenant-a", "anonymous", "class-management", "school-a", "class-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms", "student-groups", "tenant-a", "account-a", "class-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["lms", "student-groups", "tenant-a", "", "class-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms", "assignment-progress-workspace", "tenant-a", "account-a", "assignment-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["lms", "assignment-progress-workspace", "tenant-a", "assignment-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["student-dashboard", "tenant-a", "account-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["student-dashboard", "tenant-a", "anonymous"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["student-dashboard", "", "account-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["student-dashboard", "tenant-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["student-engagement", "feed", "tenant-a", "account-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["student-engagement", "feed", "tenant-a", "anonymous"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["student-engagement", "feed", "", "account-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms-teacher-shell", "teacher-homework-workspace", "tenant-a", "account-a"] })).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["lms-teacher-shell", "teacher-homework-workspace", "tenant-a", "anonymous"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms-teacher-shell", "teacher-homework-workspace", "tenant-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms", "notification-center", "tenant-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["lms", "unrelated-report", "tenant-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["security-feed", "tenant-a"] })).toBe(false);
-  expect(isPersistableQuery({ queryKey: ["auth", "session", "account-a"] })).toBe(false);
+test("dehydrates only successful queries flagged with meta.persist", () => {
+  expect(shouldDehydratePersistedQuery({ meta: { persist: true }, state: { status: "success" } } as never)).toBe(true);
+  expect(shouldDehydratePersistedQuery({ meta: { persist: true }, state: { status: "pending" } } as never)).toBe(false);
+  expect(shouldDehydratePersistedQuery({ meta: { persist: "yes" }, state: { status: "success" } } as never)).toBe(false);
+  expect(shouldDehydratePersistedQuery({ meta: undefined, state: { status: "success" } } as never)).toBe(false);
 });
 
-test("persists CRM workspace only with a concrete tenant and account scope", () => {
-  expect(isPersistableQuery({ queryKey: ["crm", "workspace", "crm", "tenant-a", "seo-a"] } as never)).toBe(true);
-  expect(isPersistableQuery({ queryKey: ["crm", "workspace", "crm", "tenant-a", "anonymous"] } as never)).toBe(false);
-});
-
-test("does not persist quiz packages through the generic query cache", () => {
-  expect(isPersistableQuery({ queryKey: ["quiz-runtime", "package", "tenant-a", "elearning", "quiz-a"] })).toBe(false);
+test("persistedQueryMeta refuses anonymous and blank scopes", () => {
+  expect(persistedQueryMeta("tenant-a", "account-a")).toEqual({ persist: true });
+  expect(persistedQueryMeta("tenant-a", " Anonymous ")).toBeUndefined();
+  expect(persistedQueryMeta("tenant-a", "")).toBeUndefined();
+  expect(persistedQueryMeta(" ", "account-a")).toBeUndefined();
 });
 
 test("creates a scope key that isolates portal tenant and account", () => {

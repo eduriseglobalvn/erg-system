@@ -1,7 +1,7 @@
 import type { ApiResponseData } from "@/lib/api/contract-types";
 import type { API_ENDPOINTS } from "@/lib/api/api-endpoints";
-import type { EmployeeList, EmployeeStatus } from "@/features/employee-management/types/employee-management";
-import type { PermissionPage, PermissionStatus, SystemPermission } from "@/features/access-management/types/access-management";
+import type { EmployeeList, EmployeeStatus } from "@/lib/api/models/employee-management";
+import type { PermissionPage, PermissionStatus, SystemPermission } from "@/lib/api/models/access-management";
 
 export type EmployeeListDto = ApiResponseData<typeof API_ENDPOINTS.adminUsers.root, "get">;
 export type PermissionPageDto = ApiResponseData<typeof API_ENDPOINTS.access.permissionsCatalog, "get">;

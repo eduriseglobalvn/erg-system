@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ADMIN_LEARNING_STANDARDS_PATH } from "@/app/portal-route-registry";
+import { ADMIN_LEARNING_STANDARDS_PATH } from "@/platform/auth/permissions/portal-route-registry";
 import { routePermissionForPath } from "@/platform/auth/permissions/route-permission-matrix";
 
 describe("learning standards route authorization", () => {

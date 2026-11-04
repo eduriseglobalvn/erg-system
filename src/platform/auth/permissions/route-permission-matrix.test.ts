@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
-import { ADMIN_CONTENT_ROUTE_PATHS } from "@/app/portal-route-registry";
+import { crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
+import { ADMIN_CONTENT_ROUTE_PATHS } from "@/platform/auth/permissions/portal-route-registry";
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { createAuthRouteState, resolveAuthRouteAccess } from "@/platform/auth/router/auth-route-context";
 import {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { lmsPaths } from "@/app/portal-route-registry";
+import { lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
 import {
   LMS_PERMISSION_CATALOG,
   LMS_PROTECTED_ROUTES,

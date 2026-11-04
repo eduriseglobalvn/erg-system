@@ -1,4 +1,4 @@
-import { ADMIN_CONTENT_ROUTE_PATHS, ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH, crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/app/portal-route-registry";
+import { ADMIN_CONTENT_ROUTE_PATHS, ADMIN_ENTERPRISE_CONNECTORS_PATH, ADMIN_LEARNING_STANDARDS_PATH, crmPaths, lcmsWorkspacePaths, lmsPaths } from "@/platform/auth/permissions/portal-route-registry";
 import { LMS_ROUTE_PERMISSIONS, type LmsPermission } from "@/platform/auth/permissions/lms-permission-catalog";
 import type { Workspace } from "@/platform/workspaces/workspace-domain";
 import { adminPath, studentPath, teacherPath } from "@/platform/workspaces/workspace-paths";
