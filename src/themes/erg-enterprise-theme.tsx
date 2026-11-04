@@ -348,6 +348,7 @@ export const ergEnterpriseTheme = createTheme({
       },
     },
     MuiSkeleton: {
+      defaultProps: { animation: "wave" },
       styleOverrides: {
         root: {
           borderRadius: t.radius.sm,

@@ -1,10 +1,9 @@
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
-import Skeleton from "@mui/material/Skeleton";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { lazy, Suspense, type ComponentType } from "react";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
+import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
@@ -53,7 +52,7 @@ function lazyNamed<T extends Record<string, unknown>, K extends keyof T>(loader:
 
 export function DashboardContent(props: Parameters<typeof DashboardContentInner>[0]) {
   return (
-    <Suspense fallback={<DashboardContentFallback />}>
+    <Suspense fallback={<ContentPendingSkeleton />}>
       <DashboardContentInner {...props} />
     </Suspense>
   );
@@ -201,16 +200,6 @@ function DashboardContentInner({
   }
 
   return <DashboardPlaceholderWorkspace activeLeaf={activeLeaf} onOpenLeaf={onOpenLeaf} />;
-}
-
-function DashboardContentFallback() {
-  return (
-    <Stack spacing={1.5} sx={{ p: 2.5 }}>
-      <Skeleton height={36} variant="rounded" width="35%" />
-      <Skeleton height={180} variant="rounded" />
-      <Skeleton height={180} variant="rounded" />
-    </Stack>
-  );
 }
 
 function AccessDeniedWorkspace({ deniedSchoolName }: { deniedSchoolName: string }) {

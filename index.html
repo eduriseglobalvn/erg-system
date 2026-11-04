@@ -68,9 +68,10 @@
       ::-webkit-scrollbar-thumb:hover{background:oklch(0.5 0 0 / 0.3)}
       ::selection{background:oklch(0.55 0.12 185 / 0.18)}
       html{background:var(--background)}
-      #root:empty{display:flex;min-height:100vh;align-items:center;justify-content:center;background:var(--background)}
-      #root:empty::after{content:"";width:64px;aspect-ratio:1;border-radius:50%;border:3px solid var(--border);border-top-color:var(--primary);animation:erg-spin 0.6s linear infinite}
-      @keyframes erg-spin{to{transform:rotate(360deg)}}
+      #root:empty{min-height:100vh;background:var(--background)}
+      /* Same 3px top bar as RoutePendingBar so boot -> route loading reads as one progress. */
+      #root:empty::after{content:"";position:fixed;top:0;left:0;height:3px;width:0;background:#696CFF;animation:erg-boot-bar 8s cubic-bezier(.1,.7,.2,1) forwards}
+      @keyframes erg-boot-bar{to{width:92%}}
     </style>
     <!-- CSS files are imported directly in src/main.tsx to enable Vite HMR and bundling -->
   </head>

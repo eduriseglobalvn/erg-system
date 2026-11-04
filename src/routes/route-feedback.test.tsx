@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 
-import { RouteErrorBoundary, RoutePendingSkeleton } from "@/routes/route-feedback";
+import { pendingBarOffsetMs, releasePendingBar, RouteErrorBoundary, RoutePendingSkeleton } from "@/routes/route-feedback";
 
 const routerMocks = vi.hoisted(() => ({ invalidate: vi.fn() }));
 
@@ -18,6 +18,18 @@ describe("route feedback", () => {
 
     expect(screen.getByRole("status", { name: "Đang tải trang" })).toBeInTheDocument();
     expect(screen.queryByRole("progressbar")).not.toBeInTheDocument();
+  });
+
+  test("pending bar continues across back-to-back fallbacks and restarts for a new load", () => {
+    const clock = { start: 0, hiddenAt: null as number | null, mounted: 0 };
+
+    expect(pendingBarOffsetMs(1200, clock)).toBe(1200); // continues the index.html boot bar
+    clock.mounted += 1;
+    releasePendingBar(1500, clock);
+    expect(pendingBarOffsetMs(1550, clock)).toBe(1550); // next fallback within 300ms: no jump back
+    clock.mounted += 1;
+    releasePendingBar(2000, clock);
+    expect(pendingBarOffsetMs(9000, clock)).toBe(0); // later navigation starts fresh
   });
 
   test("invalidates route loaders when the user retries", () => {

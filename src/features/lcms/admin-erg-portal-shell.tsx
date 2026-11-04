@@ -2,7 +2,6 @@
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import Box from "@mui/material/Box";
-import LinearProgress from "@mui/material/LinearProgress";
 import Typography from "@mui/material/Typography";
 import { toast } from "sonner";
 import ErgPortalLayout, { type MenuItem } from "@/components/portal/ErgPortalLayout";
@@ -11,6 +10,7 @@ import { hasApiBase } from "@/lib/api-client";
 import { DashboardContent } from "@/layouts/dashboard/components/dashboard-content";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
+import { ContentPendingSkeleton } from "@/routes/route-feedback";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import type { ContentScope, ManagementScope } from "@/types/scope-types";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
@@ -52,13 +52,7 @@ const PRESERVED_WORKSPACE_VARIANTS = new Set(["question-bank", "quiz-bank", "qui
 const lcmsScope: ManagementScope = { level: "global" };
 const globalContentScope: ContentScope = { type: "global" };
 
-function PageFallback() {
-  return (
-    <Box sx={{ alignItems: "center", display: "flex", justifyContent: "center", minHeight: 240 }}>
-      <LinearProgress sx={{ width: 128 }} />
-    </Box>
-  );
-}
+const PageFallback = ContentPendingSkeleton;
 
 export default function AdminErgPortalShell() {
   const location = useLocation();

@@ -647,6 +647,7 @@ export default function AdminDashboard() {
                 />
                 <Button
                   size="small"
+                  variant="text"
                   sx={{
                     fontSize: 13,
                     fontWeight: 600,
@@ -843,6 +844,7 @@ export default function AdminDashboard() {
             action={
               <Button
                 size="small"
+                variant="text"
                 sx={{
                   fontSize: 13,
                   fontWeight: 600,

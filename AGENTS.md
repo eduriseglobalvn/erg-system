@@ -17,7 +17,7 @@
   - **Framework & Bundler:** React 19, TypeScript 6, Vite 8
   - **Routing:** TanStack Router (type-safe routing dựa trên domain/host và pathname: `/admin`, `/teacher`, `/student`, `/crm`)
   - **Data Fetching & Cache:** TanStack Query v5 + IndexedDB persistence (hỗ trợ Offline-first)
-  - **Giao diện (UI Design System):** ERG Enterprise UI (MUI Material v7 + Emotion + `@mui/icons-material` path imports + hệ thống wrapper `src/components/erg-mui`)
+  - **Giao diện (UI Design System):** ERG Enterprise UI (MUI Material v9 + Emotion + `@mui/icons-material` path imports + hệ thống wrapper `src/components/erg-mui`)
   - **Desktop Container:** Tauri v2 (Rust backend, siêu nhẹ ~5MB phục vụ thi ngoại tuyến không cần mạng)
   - **PWA:** `vite-plugin-pwa` hỗ trợ học sinh học trên thiết bị di động với mạng 3G/chập chờn.
   - **Backend API:** Đồng bộ hợp đồng kiểu dữ liệu với `erg-spring` thông qua REST OpenAPI (`erg-openapi.json`) và GraphQL (`schema.graphqls`).
