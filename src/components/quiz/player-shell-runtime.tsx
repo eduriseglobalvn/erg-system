@@ -553,17 +553,13 @@ export function PlayerShellRuntime({
   }, [activeAttempt, activePackage, activeSession, attemptScope, submitReadyAttempt]);
 
   const requestSubmit = useCallback(() => {
-    if (isTestingMode && !allQuestionsAnswered && !submitFailed) {
-      return;
-    }
-
     if (attemptExpired && !submitFailed) {
       setSubmitError("Bài làm đã hết thời gian theo đồng hồ máy chủ.");
       return;
     }
 
     setSubmitDialogMode(allQuestionsAnswered ? "all-answered" : "confirm");
-  }, [allQuestionsAnswered, attemptExpired, isTestingMode, submitFailed]);
+  }, [allQuestionsAnswered, attemptExpired, submitFailed]);
 
   useEffect(() => {
     if (!started || !isTestingMode || attemptCompleted || deadlineAt === null || !activeSession) {
@@ -1170,6 +1166,7 @@ export function PlayerShellRuntime({
             mode={submitDialogMode}
             resultDisplay={resultDisplay}
             submitting={submitting}
+            unansweredCount={questions.length - answeredCount}
             onCancel={() => setSubmitDialogMode(null)}
             onConfirm={() => void handleFinalizeAttempt()}
           />
@@ -1323,7 +1320,7 @@ export function PlayerShellRuntime({
               >
                 TIẾP THEO
               </button>
-              {(allQuestionsAnswered || submitFailed) && !attemptCompleted ? (
+              {!attemptCompleted ? (
                 <button
                   className={navButtonClass}
                   style={accentButtonStyle}
@@ -1348,6 +1345,7 @@ export function PlayerShellRuntime({
           mode={submitDialogMode}
           resultDisplay={resultDisplay}
           submitting={submitting}
+          unansweredCount={questions.length - answeredCount}
           onCancel={() => setSubmitDialogMode(null)}
           onConfirm={() => void handleFinalizeAttempt()}
         />

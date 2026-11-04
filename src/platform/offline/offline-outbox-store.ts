@@ -1,4 +1,4 @@
-import { createStore, del, get, set } from "idb-keyval";
+import { createStore, del, get, keys, set } from "idb-keyval";
 
 import {
   migrateEntries,
@@ -35,6 +35,7 @@ export function createOfflineOutboxStore(): OfflineOutboxStore {
 export class EncryptedIndexedDbOutboxStore implements OfflineOutboxStore {
   private readonly dataStore = createStore("erg-system", "offline-outbox");
   private readonly keyStore = createStore("erg-system", "offline-outbox-keys");
+  private readonly quarantineStore = createStore("erg-system", "offline-outbox-quarantine");
 
   async load(scopeKey: string) {
     const record = await get<PersistedEnvelope>(dataKey(scopeKey), this.dataStore);
@@ -53,10 +54,17 @@ export class EncryptedIndexedDbOutboxStore implements OfflineOutboxStore {
       );
       const parsed = JSON.parse(new TextDecoder().decode(plaintext)) as { entries?: OfflineMutation[] };
       return migrateEntries(parsed.entries ?? []);
-    } catch {
-      await this.clear(scopeKey);
+    } catch (error) {
+      // Never drop unsynced work silently: park the undecodable record for recovery/support.
+      console.error("Offline outbox record could not be read; moved to quarantine.", error);
+      await set(`erg-offline-quarantine:${scopeKey}:${Date.now()}`, record, this.quarantineStore);
+      await del(dataKey(scopeKey), this.dataStore);
       return [];
     }
+  }
+
+  async listQuarantined() {
+    return keys(this.quarantineStore);
   }
 
   async save(scopeKey: string, entries: OfflineMutation[]) {

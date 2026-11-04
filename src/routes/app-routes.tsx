@@ -498,6 +498,15 @@ const legacyWorkspaceRoutes = legacyWorkspaceSegments.map((segment) =>
   }),
 );
 
+// Old bookmarks and menu links used /admin/<segment>; content now lives under /admin/content/<segment>.
+const legacyAdminContentRoutes = ["resources", "questions", "quiz-bank", "quiz-editor"].map((segment) =>
+  createRoute({
+    getParentRoute: () => rootRoute,
+    path: adminPath(`/${segment}`),
+    component: () => <Navigate to={adminPath(`/content/${segment}`)} replace />,
+  }),
+);
+
 const classesRedirectRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/classes",
@@ -769,6 +778,7 @@ export const routeTree = rootRoute.addChildren([
   studentProfileRoute,
   legacyProfileRoute,
   questionTypesRoute,
+  ...legacyAdminContentRoutes,
   classesRedirectRoute,
   homeworkClassesRedirectRoute,
   teachingScheduleRedirectRoute,

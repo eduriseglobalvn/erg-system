@@ -76,7 +76,8 @@ export function EmployeeDetailDrawer({
   const profile = employee?.profile;
 
   useEffect(() => {
-    if (!employee) return;
+    // A background refetch must not overwrite what the user is typing.
+    if (!employee || editing) return;
     setForm({
       departmentId: profile?.departmentId ?? "",
       employeeCode: profile?.employeeCode ?? "",
@@ -89,14 +90,15 @@ export function EmployeeDetailDrawer({
       phone: String(account?.phone ?? ""),
       workLocation: profile?.workLocation ?? "",
     });
-  }, [account, employee, profile]);
+  }, [account, editing, employee, profile]);
 
   const set = (name: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [name]: value }));
 
   const save = async () => {
     if (!userId) return;
-    await commands.update.mutateAsync({
+    try {
+      await commands.update.mutateAsync({
       payload: {
         fullName: form.fullName.trim(),
         phone: form.phone.trim(),
@@ -113,6 +115,9 @@ export function EmployeeDetailDrawer({
       },
       userId,
     });
+    } catch {
+      return; // keep the form open so edits are not lost; the global handler already toasted the error
+    }
     setEditing(false);
   };
 

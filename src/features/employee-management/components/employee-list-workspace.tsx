@@ -840,6 +840,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
 
       {/* Detail Drawer */}
       <EmployeeDetailDrawer
+        key={selectedUserId ?? "none"}
         tenantId={tenantId}
         userId={selectedUserId}
         onClose={() => setSelectedUserId(undefined)}

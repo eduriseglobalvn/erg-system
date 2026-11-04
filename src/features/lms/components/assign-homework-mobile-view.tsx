@@ -375,7 +375,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                       </div>
                       <div className="flex justify-between gap-3">
                         <span>Thoi gian</span>
-                        <span className="text-slate-950">{maxDurationMinutes} phut</span>
+                        <span className="text-slate-950">{maxDurationMinutes} phút</span>
                       </div>
                     </div>
                   </div>

@@ -182,7 +182,7 @@ export function mapClassWorkspaceToStudents(
       className,
       gradeLabel,
       avatarSeed: initials(student.fullName || student.username || student.studentCode || student.id),
-      currentAssignment: workspace.assignments.items[0]?.quizId ? `Bai tap ${workspace.assignments.items[0].quizId}` : "Chua co bai dang giao",
+      currentAssignment: workspace.assignments.items[0]?.quizId ? `Bài tập ${workspace.assignments.items[0].quizId}` : "Chưa có bài đang giao",
       currentStage: student.updatedAt ? `Cap nhat ${formatDateLabel(student.updatedAt)}` : "San sang hoc tap",
       progressRate: status === "ahead" ? 88 : status === "steady" ? 62 : 28,
       averageScore: Math.round(workspace.scoreSummary?.averagePercent ?? 0),

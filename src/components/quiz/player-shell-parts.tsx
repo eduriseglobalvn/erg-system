@@ -77,12 +77,14 @@ export function SubmitConfirmDialog({
   mode,
   resultDisplay,
   submitting,
+  unansweredCount = 0,
   onCancel,
   onConfirm,
 }: {
   mode: SubmitDialogMode;
   resultDisplay: QuizResultDisplay;
   submitting: boolean;
+  unansweredCount?: number;
   onCancel: () => void;
   onConfirm: () => void;
 }) {
@@ -109,7 +111,9 @@ export function SubmitConfirmDialog({
         <Box aria-hidden sx={{ alignItems: "center", border: "1px solid", borderColor: "divider", borderRadius: 0.75, color: "text.secondary", display: "grid", flex: "none", fontSize: 16, fontWeight: 600, height: 32, placeItems: "center", width: 32 }}>?</Box>
         <Box sx={{ display: "grid", flex: 1, gap: 3 }}>
           <Typography id="quiz-submit-confirm-title" sx={{ color: "text.primary", fontSize: 14, fontWeight: 500 }}>
-            {isAllAnswered ? resultDisplay.submitAllPrompt : resultDisplay.confirmSubmitPrompt}
+            {isAllAnswered
+              ? resultDisplay.submitAllPrompt
+              : `${unansweredCount > 0 ? `Còn ${unansweredCount} câu chưa trả lời. ` : ""}${resultDisplay.confirmSubmitPrompt}`}
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, justifyContent: "center" }}>
             <Button disabled={submitting} variant="contained" onClick={onConfirm} sx={{ minHeight: 36, minWidth: 136, px: 2.5 }}>

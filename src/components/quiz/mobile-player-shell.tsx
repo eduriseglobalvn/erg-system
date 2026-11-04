@@ -49,7 +49,6 @@ type MobilePlayerShellProps = {
 };
 
 export function MobilePlayerShell({
-  allQuestionsAnswered,
   answeredCount,
   answeredQuestionIds,
   attemptCompleted,
@@ -85,7 +84,7 @@ export function MobilePlayerShell({
   body,
   resultBody,
 }: MobilePlayerShellProps) {
-  const showSubmitAction = (allQuestionsAnswered || submitFailed) && !attemptCompleted;
+  const showSubmitAction = !attemptCompleted;
   const timerVisible = isTestingMode && remainingSeconds !== null;
 
   if (!started) {

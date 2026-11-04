@@ -32,6 +32,19 @@ if (import.meta.env.DEV && "serviceWorker" in navigator) {
   });
 }
 
+// A deploy replaces hashed chunks; reload once to pick up the new index instead of a blank route.
+window.addEventListener("vite:preloadError", (event) => {
+  const key = "erg-preload-reloaded";
+  try {
+    if (window.sessionStorage.getItem(key)) return;
+    window.sessionStorage.setItem(key, "1");
+  } catch {
+    return;
+  }
+  event.preventDefault();
+  window.location.reload();
+});
+
 // -- Phase 1: compatibility-session hydration (must happen before React mount) --
 // Legacy cookie hydration remains only until the BFF cutover; URL credentials are rejected.
 async function bootstrapApplication() {

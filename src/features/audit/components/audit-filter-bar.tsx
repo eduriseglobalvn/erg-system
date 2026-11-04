@@ -48,16 +48,16 @@ export function AuditFilterBar({ filters, onChange, onReset }: {
         label="Từ ngày"
         type="date"
         size="small"
-        value={filters.from?.slice(0, 10) ?? ""}
-        onChange={(event) => onChange({ ...filters, from: event.target.value ? `${event.target.value}T00:00:00Z` : undefined, page: 0 })}
+        value={localDateInput(filters.from)}
+        onChange={(event) => onChange({ ...filters, from: event.target.value ? new Date(`${event.target.value}T00:00:00`).toISOString() : undefined, page: 0 })}
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <TextField
         label="Đến ngày"
         type="date"
         size="small"
-        value={filters.to?.slice(0, 10) ?? ""}
-        onChange={(event) => onChange({ ...filters, to: event.target.value ? `${event.target.value}T23:59:59.999Z` : undefined, page: 0 })}
+        value={localDateInput(filters.to)}
+        onChange={(event) => onChange({ ...filters, to: event.target.value ? new Date(`${event.target.value}T23:59:59.999`).toISOString() : undefined, page: 0 })}
         slotProps={{ inputLabel: { shrink: true } }}
       />
       <Button startIcon={<FilterAltRoundedIcon />} onClick={onReset} sx={{ minHeight: 40, ml: { sm: "auto" } }}>
@@ -65,4 +65,12 @@ export function AuditFilterBar({ filters, onChange, onReset }: {
       </Button>
     </Box>
   );
+}
+
+// Filters hold UTC instants of local day boundaries; show the user's local calendar date.
+function localDateInput(iso?: string) {
+  if (!iso) return "";
+  const date = new Date(iso);
+  const pad = (value: number) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }

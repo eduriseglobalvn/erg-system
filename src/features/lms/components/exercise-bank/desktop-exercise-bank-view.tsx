@@ -16,7 +16,6 @@ import Button from "@mui/material/Button";
 
 import { cn } from "@/lib/utils";
 import { useQuestionBankWorkspaceQuery } from "@/features/lcms/quiz/question-bank/api/question-bank-query";
-import { questionBankQuestions } from "@/features/lcms/quiz/question-bank/api/mock-question-bank";
 import type { QuestionBankQuestion } from "@/features/lcms/quiz/question-bank/types/question-bank-types";
 import { CreateExerciseDialog } from "./create-exercise-dialog";
 import { ExerciseQuestionDetailDialog } from "./exercise-question-detail-dialog";
@@ -71,10 +70,7 @@ export function DesktopExerciseBankView({
   });
 
   const allQuestions: QuestionBankQuestion[] = useMemo(() => {
-    if (qbData && qbData.questions && qbData.questions.length > 0) {
-      return qbData.questions;
-    }
-    return questionBankQuestions;
+    return qbData?.questions ?? [];
   }, [qbData]);
 
   // Trích xuất danh sách câu hỏi cho bài tập được chọn

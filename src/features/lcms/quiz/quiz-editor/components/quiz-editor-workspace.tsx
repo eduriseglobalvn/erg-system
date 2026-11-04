@@ -148,6 +148,7 @@ export function QuizEditorWorkspace({
   const importedSignatureRef = useRef("");
   const hydratedDraftSignatureRef = useRef("");
   const draftReadyForRecoveryRef = useRef(false);
+  const publishingRef = useRef(false);
 
   const questionBankFilters = useMemo(
     () => ({
@@ -262,6 +263,16 @@ const activeDraftKey = effectiveQuizId.trim()
   // Do not auto-hijack editor with existing server draft on reload; user can click banner to open
 
   const activeKeyRef = useRef<string | null>(null);
+  const autosaveKeyRef = useRef(effectiveQuizId);
+
+  // Editor state still holds the previous quiz until the next draft hydrates; autosaving then would
+  // write quiz A's content under quiz B's key. Pause autosave on every quiz switch.
+  useEffect(() => {
+    if (autosaveKeyRef.current === effectiveQuizId) return;
+    autosaveKeyRef.current = effectiveQuizId;
+    draftReadyForRecoveryRef.current = false;
+    activeKeyRef.current = null; // let the new-draft effect re-hydrate when switching back to an unsaved quiz
+  }, [effectiveQuizId]);
 
   useEffect(() => {
     if (effectiveQuizId) return;
@@ -669,9 +680,9 @@ const activeDraftKey = effectiveQuizId.trim()
       toast.error("Vui lòng chọn ít nhất 1 câu hỏi để xuất bản.");
       return;
     }
+    if (publishingRef.current) return; // a second click must not create a second quiz
+    publishingRef.current = true;
     try {
-      setSlidesPublished(idsToPublish);
-
       const publishTree = groups.map((g) => ({
         ...g,
         slides: g.slides.map((s) =>
@@ -738,10 +749,13 @@ const activeDraftKey = effectiveQuizId.trim()
         tree: publishTree,
       });
 
+      setSlidesPublished(idsToPublish); // only mark published once the server accepted it
       toast.success(`Đã xuất bản thành công ${idsToPublish.length} câu hỏi.`);
       setPreviewMode("publish");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Xuất bản thất bại.");
+    } finally {
+      publishingRef.current = false;
     }
   }
 

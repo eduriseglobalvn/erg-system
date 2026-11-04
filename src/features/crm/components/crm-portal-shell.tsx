@@ -21,6 +21,7 @@ import TrendingUpRoundedIcon from '@mui/icons-material/TrendingUpRounded';
 import WifiRoundedIcon from '@mui/icons-material/WifiRounded';
 import { useLocation, useNavigate } from '@tanstack/react-router';
 import { useAuthSession } from '@/platform/auth/hooks/use-auth-session';
+import { evaluatePermission } from '@/platform/auth/permissions/permission-evaluator';
 import { defaultClassId, defaultSchoolId } from '@/features/lms/classroom/api/mock-classroom-data';
 import { DashboardContent } from '@/layouts/dashboard/components/dashboard-content';
 import type { DashboardLeaf, DashboardLeafVariant } from '@/layouts/dashboard/types/dashboard-types';
@@ -213,6 +214,12 @@ function CrmContent({
   onOpenLeaf: (id: string) => void;
   account?: { fullName?: string; email?: string };
 }) {
+  const { session } = useAuthSession('crm');
+  const canAccessGlobalErg = evaluatePermission({
+    permission: 'lms.admin',
+    grantedPermissions: session?.permissions,
+    deniedPermissions: session?.deniedPermissions,
+  });
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
@@ -379,7 +386,7 @@ function CrmContent({
       <Box sx={{ minHeight: 0, flex: 1, overflow: 'hidden' }}>
         <DashboardContent
           activeLeaf={activeLeaf}
-          canAccessGlobalErg
+          canAccessGlobalErg={canAccessGlobalErg}
           contentScope={globalContentScope}
           managementScope={crmScope}
           onOpenLeaf={onOpenLeaf}

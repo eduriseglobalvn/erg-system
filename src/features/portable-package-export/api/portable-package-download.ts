@@ -1,3 +1,4 @@
+import { DEFAULT_DESKTOP_RELEASE_ORIGINS } from "@/features/desktop-release/api/desktop-release-manifest";
 import type { PortableExamPackageEnvelope } from "@/features/elearning/portable-exam/types/portable-exam-types";
 
 export const PORTABLE_PACKAGE_MIME_TYPE = "application/vnd.erg.quiz+json";
@@ -21,7 +22,8 @@ export function downloadPortablePackage(
   anchor.download = portablePackageFileName(quizTitle, bundle.versionLabel);
   anchor.rel = "noopener";
   anchor.click();
-  environment.URL.revokeObjectURL(objectUrl);
+  // Revoking synchronously cancels the download in Safari; give the browser a tick to start it.
+  setTimeout(() => environment.URL.revokeObjectURL(objectUrl), 1_000);
   return anchor.download;
 }
 
@@ -45,7 +47,9 @@ export function publishedDesktopArtifactUrl(bundle: PortableExamPackageEnvelope)
   if (!bundle.downloadUrl) return undefined;
   try {
     const url = new URL(bundle.downloadUrl);
-    return url.protocol === "https:" && !url.username && !url.password ? url.toString() : undefined;
+    const trusted = url.protocol === "https:" && !url.username && !url.password &&
+      (DEFAULT_DESKTOP_RELEASE_ORIGINS as readonly string[]).includes(url.origin.toLowerCase());
+    return trusted ? url.toString() : undefined;
   } catch {
     return undefined;
   }

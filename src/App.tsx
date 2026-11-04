@@ -37,7 +37,7 @@ export default function App() {
       persister: createQueryPersister(scopeKey),
       maxAge: 24 * 60 * 60 * 1000,
       buster: QUERY_CACHE_BUSTER,
-      dehydrateOptions: { shouldDehydrateQuery: isPersistableQuery },
+      dehydrateOptions: { shouldDehydrateQuery: (query: { state: { status: string }; queryKey: readonly unknown[] }) => query.state.status === "success" && isPersistableQuery(query) },
     };
   }, [scopeKey]);
 

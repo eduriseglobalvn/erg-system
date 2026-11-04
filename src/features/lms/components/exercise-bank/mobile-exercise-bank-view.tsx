@@ -32,8 +32,8 @@ export function MobileExerciseBankView({
   return (
     <div className="min-h-full bg-[#f3f6fb] px-3 pb-4 pt-3 text-slate-950">
       <section className="rounded-[24px] border border-[#d9e2ef] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
-        <div className="text-[13px] font-extrabold text-[var(--erg-blue)]">Kho bai tap</div>
-        <h1 className="mt-1 text-xl font-extrabold leading-7">Chon bai va giao nhanh</h1>
+        <div className="text-[13px] font-extrabold text-[var(--erg-blue)]">Kho bài tập</div>
+        <h1 className="mt-1 text-xl font-extrabold leading-7">Chọn bài và giao nhanh</h1>
         <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">{controller.filteredExercises.length} ket qua phu hop bo loc hien tai</p>
         <div className="relative mt-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
@@ -76,7 +76,7 @@ export function MobileExerciseBankView({
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{typeLabels[exercise.type]}</span>
                 <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-extrabold text-amber-700">{difficultyLabels[exercise.difficulty]}</span>
-                <span className="rounded-full bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-extrabold text-[var(--erg-blue)]">{exercise.durationMinutes} phut</span>
+                <span className="rounded-full bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-extrabold text-[var(--erg-blue)]">{exercise.durationMinutes} phút</span>
                 <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{exercise.questionCount} cau</span>
               </div>
             </button>
@@ -93,9 +93,9 @@ export function MobileExerciseBankView({
 
         {controller.filteredExercises.length === 0 ? (
           <div className="rounded-[22px] border border-dashed border-[#cbd7e6] bg-white p-6 text-center">
-            <div className="text-base font-extrabold text-slate-950">Khong co bai phu hop</div>
-            <p className="mt-2 text-sm font-semibold text-slate-500">Thu doi tu khoa hoac xoa bo loc de xem lai kho bai.</p>
-            <button type="button" className="mt-4 h-11 rounded-[16px] !bg-[var(--erg-blue)] px-5 text-sm font-extrabold !text-white" onClick={controller.clearFilters}>Xoa loc</button>
+            <div className="text-base font-extrabold text-slate-950">Không có bài phù hợp</div>
+            <p className="mt-2 text-sm font-semibold text-slate-500">Thử đổi từ khoá hoặc xoá bộ lọc để xem lại kho bài.</p>
+            <button type="button" className="mt-4 h-11 rounded-[16px] !bg-[var(--erg-blue)] px-5 text-sm font-extrabold !text-white" onClick={controller.clearFilters}>Xoá lọc</button>
           </div>
         ) : null}
       </div>
@@ -113,7 +113,7 @@ export function MobileExerciseBankView({
               <button type="button" className="h-9 rounded-full !bg-[#f1f5f9] px-3 text-xs font-extrabold text-slate-600" onClick={() => controller.setSelectedExerciseId("")}>Dong</button>
             </div>
             <button type="button" className="mt-3 flex h-11 w-full items-center justify-center rounded-[16px] !bg-[var(--erg-blue)] text-sm font-extrabold !text-white" onClick={() => onAssign(controller.selectedExercise.title)}>
-              <Send className="mr-2 h-4 w-4" /> Giao bai tap nay
+              <Send className="mr-2 h-4 w-4" /> Giao bài tập này
             </button>
           </div>
         </div>
