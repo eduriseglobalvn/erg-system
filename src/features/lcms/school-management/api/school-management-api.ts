@@ -649,7 +649,7 @@ export async function createSchool(draft: SchoolDraft) {
   return mapCommandSchool(response);
 }
 
-export async function updateSchool(schoolId: string, version: number, draft: SchoolDraft) {
+export async function updateSchool(schoolId: string, version: number | undefined, draft: SchoolDraft) {
   const response = await apiRequest<SchoolCommandResponse>(API_ENDPOINTS.lcms.school(schoolId), {
     method: "PATCH",
     portal: "lcms",

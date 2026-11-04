@@ -14,6 +14,7 @@ import TableRow from "@mui/material/TableRow";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { SchoolPageShell } from "@/features/lcms/school-management/components/school-page-shell";
 import { useSchoolManagementContext } from "@/features/lcms/school-management/components/school-management-context";
 
@@ -22,6 +23,12 @@ export default function SchoolEnrollmentsScreen() {
   const [classId, setClassId] = useState(() => selectedSchool?.classes[0]?.id ?? "");
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [saving, setSaving] = useState(false);
+  const [classSchoolId, setClassSchoolId] = useState(selectedSchool?.id);
+  if (selectedSchool?.id !== classSchoolId) {
+    setClassSchoolId(selectedSchool?.id);
+    setClassId(selectedSchool?.classes[0]?.id ?? "");
+    setSelected(new Set());
+  }
   const classroom = selectedSchool?.classes.find((item) => item.id === classId);
   const rows = useMemo(() => selectedSchool?.students ?? [], [selectedSchool]);
   if (!selectedSchool) return null;
@@ -38,6 +45,7 @@ export default function SchoolEnrollmentsScreen() {
     if (!classId || !selected.size) return;
     setSaving(true);
     try { await enrollStudentsInClass(Array.from(selected), classId); setSelected(new Set()); }
+    catch (error) { toast.error(error instanceof Error ? error.message : "Không thể lưu ghi danh"); }
     finally { setSaving(false); }
   }
 

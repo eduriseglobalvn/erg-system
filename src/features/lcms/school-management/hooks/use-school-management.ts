@@ -39,11 +39,12 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
   });
   const directorySchools = useMemo(() => directoryQuery.data?.items ?? [], [directoryQuery.data]);
 
-  useEffect(() => {
-    if (initialSchoolId && initialSchoolId !== selectedSchoolId) {
-      setSelectedSchoolId(initialSchoolId);
-    }
-  }, [initialSchoolId, selectedSchoolId]);
+  // Follow the URL only when it changes, so create/archive selections are not reverted to the stale param.
+  const [seenSchoolId, setSeenSchoolId] = useState(initialSchoolId);
+  if (initialSchoolId !== seenSchoolId) {
+    setSeenSchoolId(initialSchoolId);
+    if (initialSchoolId) setSelectedSchoolId(initialSchoolId);
+  }
 
   useEffect(() => {
     if (!directorySchools.length) return;
@@ -78,7 +79,7 @@ export function useSchoolManagement(initialSchoolId?: string | null) {
 
   const saveMutation = useMutation({
     mutationFn: ({ draft, schoolId, version }: { draft: SchoolDraft; schoolId?: string; version?: number }) => (
-      schoolId ? updateSchool(schoolId, version ?? 0, draft) : createSchool(draft)
+      schoolId ? updateSchool(schoolId, version, draft) : createSchool(draft)
     ),
   });
   const archiveMutation = useMutation({ mutationFn: archiveSchool });

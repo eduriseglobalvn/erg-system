@@ -86,6 +86,9 @@ describe("school management API", () => {
     await updateSchool("s1", 4, draft);
     expect(apiRequest).toHaveBeenLastCalledWith("/api/v1/lcms/schools/s1", expect.objectContaining({ method: "PATCH", portal: "lcms" }));
     expect(JSON.parse(apiRequest.mock.calls[1][1].body).version).toBe(4);
+
+    await updateSchool("s1", undefined, draft);
+    expect(JSON.parse(apiRequest.mock.calls[2][1].body)).not.toHaveProperty("version");
   });
 
   it("archives and synchronizes default grades through REST", async () => {
