@@ -64,4 +64,15 @@ export default defineConfig([
       }],
     },
   },
+  {
+    files: ['src/features/**/{components,hooks}/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.{ts,tsx}'],
+    rules: {
+      // Mock data may only be reached through the api layer, which gates it behind runtime fixtures.
+      // Warn (not error) until the existing UI imports are migrated.
+      'no-restricted-imports': ['warn', {
+        patterns: [{ group: ['**/mock-*'], message: 'UI code must not import mock data; load it through the feature api layer.' }],
+      }],
+    },
+  },
 ])

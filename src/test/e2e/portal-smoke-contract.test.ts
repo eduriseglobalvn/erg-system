@@ -30,7 +30,7 @@ describe("portal smoke E2E contract", () => {
 
   test("keeps auth, bootstrap, interaction and API-failure smoke coverage per portal", () => {
     for (const portal of ["lms", "lcms", "crm", "elearning"]) {
-      const spec = read(`src/test/e2e/${portal}.smoke.spec.ts`);
+      const spec = read(`src/test/e2e/${portal === "lcms" ? "admin" : portal}.smoke.spec.ts`);
       expect(spec).toContain("assertGuestRedirect");
       expect(spec).toContain("seedAuthenticatedPortal");
       expect(spec).toContain("assertMainRoute");

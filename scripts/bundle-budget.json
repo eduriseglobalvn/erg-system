@@ -7,7 +7,6 @@
   "icons": 24000,
   "virtual": 3000,
   "radix": 3000,
-  "fullcalendar": 900000,
   "_entry_gzip_budget": 102400,
   "_precache_entry_budget": 80,
   "_precache_byte_budget": 2000000,

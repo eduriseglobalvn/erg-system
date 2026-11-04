@@ -131,7 +131,7 @@ export default defineConfig(({ command, mode }) => {
           if (context.hostType !== "html") return [];
           return deps.filter(
             (dep) =>
-              !/^(assets\/)?(pdfjs|pdf\.worker|fullcalendar|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
+              !/^(assets\/)?(pdfjs|pdf\.worker|dnd|radix|portal-brand-mark|learning-resource-library-page|teaching-schedule-panel|assign-homework-page)/.test(dep),
           );
         },
       },
@@ -140,7 +140,6 @@ export default defineConfig(({ command, mode }) => {
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-            if (id.includes("@fullcalendar")) return "fullcalendar";
             if (id.includes("pdfjs-dist")) return "pdfjs";
             if (id.includes("@tanstack/react-virtual")) return "virtual";
             if (id.includes("@tanstack")) return "tanstack";
