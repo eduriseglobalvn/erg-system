@@ -1,13 +1,13 @@
 /* ===========================================================================
    ERG LEGACY OPERATIONAL DESIGN TOKENS
-   Font: Manrope (body) — thay vì Public Sans như ERG cũ
+   Font: Be Vietnam Pro (body, heading)
    Primary: #696CFF (purple) — thay vì #0f6cbd (blue)
    =========================================================================== */
 
 @theme inline {
   /* === TYPOGRAPHY — ERG legacy === */
-  --font-sans: "Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-heading: "Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
 
   /* === COLORS — ERG legacy palette === */

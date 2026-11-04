@@ -1,18 +1,18 @@
 // ---------------------------------------------------------------------------
 // Font configuration for ERG system.
-// Operational UI uses the bundled Manrope family. Quiz content can still opt
+// Operational UI uses the bundled Be Vietnam Pro family. Quiz content can still opt
 // into its explicit Public Sans/Fraunces choices through quizFontStacks.
 // font-display: swap ensures text is visible immediately during font load.
 // ---------------------------------------------------------------------------
 
-export const appFontStack = '"Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-export const headingFontStack = '"Plus Jakarta Sans", "Be Vietnam Pro", "Manrope", "Manrope Variable", sans-serif';
+export const appFontStack = '"Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+export const headingFontStack = '"Be Vietnam Pro", sans-serif';
 export const monoFontStack = '"JetBrains Mono", "SF Mono", ui-monospace, monospace';
 
 export const quizFontStacks = {
   "Plus Jakarta Sans": appFontStack,
   "Be Vietnam Pro": '"Be Vietnam Pro", "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-  "Manrope": '"Manrope", "Manrope Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+  "Manrope": '"Be Vietnam Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   "Public Sans": '"Public Sans", "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
   "Fraunces": '"Fraunces", "Public Sans", serif',
   "Arial": 'Arial, "Helvetica Neue", sans-serif',
@@ -23,7 +23,7 @@ export const quizFontStacks = {
   "Verdana": 'Verdana, Geneva, sans-serif',
   "Tahoma": 'Tahoma, Geneva, sans-serif',
   "Trebuchet MS": '"Trebuchet MS", Arial, sans-serif',
-  "Segoe UI": '"Segoe UI", "Manrope", sans-serif',
+  "Segoe UI": '"Segoe UI", "Be Vietnam Pro", sans-serif',
   "Courier New": '"Courier New", Courier, monospace',
   "Default": appFontStack,
 } as const;

@@ -33,13 +33,14 @@
 - ❌ **react-router-dom** — Không dùng, dùng TanStack Router
 
 ### Design System: ERG operational UI tokens
-- **Primary:** #696CFF (PURPLE) — KHÔNG phải blue
-- **Typography:** Manrope Variable (body/sans), JetBrains Mono (mono) — KHÔNG dùng Public Sans
+- **Primary:** `#0F6CBD` (xanh, token `primary` trong `erg-enterprise-tokens.ts`). Quyết định 11/2026 theo `KE_HOACH_TRIEN_KHAI.md` mục 7.1. `#696CFF` (tím) chỉ còn ở code cũ, đang thay dần bằng token — KHÔNG thêm mới.
+- **Typography:** MỘT họ duy nhất **Be Vietnam Pro** (weight 400/500/600/700, subset latin + vietnamese), JetBrains Mono (mono). KHÔNG thêm họ font khác vào theme.
 - **Sidebar:** Dark theme (#1C252E), 280px width, 5 nhóm menu
 - **Bảng:** Header bg neutral-50, cell padding 12px 16px, border neutral-200
-- **Button:** border-radius sm (6px), shadow-sm, hover: translate-y-[-1px]
+- **Button:** border-radius sm (6px). Mỗi trang đúng 1 nút `contained`; phụ `outlined`/`text`; nguy hiểm `color="error"`.
 - **Badge:** Pill shape, 4 status colors (success/warning/danger/info)
-- **Card:** shadow-card (0 1px 3px), border neutral-200, p-6, radius-md (8px)
+- **Card:** chỉ viền 1px (neutral-200), không shadow; shadow chỉ cho menu/popover/dialog. p-6, radius-md (8px).
+- **Màu/cỡ chữ/độ đậm:** dùng token, không hex hay `fontSize`/`fontWeight` số viết tay trong code mới. Tiêu đề trang 24/600, body 14/400. Chi tiết: `KE_HOACH_TRIEN_KHAI.md` mục 7.1.
 
 ---
 
@@ -100,4 +101,4 @@ CI: `.github/workflows/ci.yml`. Mọi GitHub Action phải ghim theo SHA.
 
 - Không để code chết: xoá file không còn import (đã dọn 7 file ở 11/2026). Không thêm re-export "cho êm" để tắt cảnh báo.
 - File nguồn dùng CRLF. Sửa bằng script cần giữ nguyên kiểu xuống dòng; khi dùng Git Bash, tránh `sed` với dấu `\` — viết script Node.
-- Kế hoạch tổng thể: `KE_HOACH_TRIEN_KHAI.md`. Mục 7.1 của kế hoạch đề xuất primary `#0F6CBD` + Be Vietnam Pro + card không shadow; **file này (CLAUDE.md) vẫn là nguồn sự thật cho UI** cho đến khi chủ dự án chốt khác.
+- Kế hoạch tổng thể: `KE_HOACH_TRIEN_KHAI.md`. Mục 7.1 của kế hoạch đề xuất primary `#0F6CBD` + Be Vietnam Pro + card không shadow; chủ dự án đã chốt theo kế hoạch 7.1 (11/2026): primary `#0F6CBD`, Be Vietnam Pro, card chỉ viền. Phần chưa áp dụng hết trong code (nút mặc định `text`, bỏ shadow card, lint cấm hex) là việc đang làm.
