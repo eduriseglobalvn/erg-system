@@ -1,14 +1,10 @@
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Checkbox from "@mui/material/Checkbox";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
 import Drawer from "@mui/material/Drawer";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import IconButton from "@mui/material/IconButton";
@@ -367,54 +363,16 @@ export function RoleEditorDrawer({ tenantId, roleId, onClose }: { tenantId: stri
         </Box>
       </Drawer>
 
-      {/* Confirmation Dialog */}
-      <Dialog
+      <ErgConfirmDialog
+        confirmLabel="Xác nhận và lưu"
+        description={`Thay đổi này thêm quyền nhạy cảm: ${addedSensitive.join(", ")}. Hành động sẽ được ghi audit.`}
+        impact={`Ảnh hưởng ${role?.userCount ?? 0} người dùng`}
+        loading={pending}
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={() => void persist()}
         open={confirmOpen}
-        onClose={() => setConfirmOpen(false)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: "18px",
-              boxShadow: "0 20px 48px rgba(0, 0, 0, 0.16)",
-              p: 1,
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ color: "#1D1D1F", fontSize: "1.15rem", fontWeight: 800 }}>
-          Xác nhận cấp quyền nhạy cảm
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: "#6E6E73", fontSize: "0.85rem" }}>
-            Thay đổi này ảnh hưởng {role?.userCount ?? 0} người dùng và thêm: {addedSensitive.join(", ")}. Hành động sẽ được ghi audit.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button variant="contained"
-            onClick={() => setConfirmOpen(false)}
-            sx={{ borderRadius: "10px", color: "#6E6E73", fontWeight: 650, textTransform: "none" }}
-          >
-            Quay lại
-          </Button>
-          <Button
-            color="warning"
-            disabled={pending}
-            onClick={() => void persist()}
-            variant="contained"
-            sx={{
-              bgcolor: "#FF9500",
-              borderRadius: "10px",
-              boxShadow: "0 2px 8px rgba(255, 149, 0, 0.28)",
-              color: "#FFFFFF",
-              fontWeight: 650,
-              textTransform: "none",
-              "&:hover": { bgcolor: "#E68600" },
-            }}
-          >
-            Xác nhận và lưu
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Xác nhận cấp quyền nhạy cảm"
+      />
     </>
   );
 }

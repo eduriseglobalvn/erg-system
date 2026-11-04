@@ -158,4 +158,45 @@ describe("employee management workspace", () => {
       }),
     }));
   });
+
+  const commandsWith = (over: Record<string, unknown>) => {
+    const c = () => ({ mutateAsync: vi.fn(), isPending: false });
+    hooks.useEmployeeCommands.mockReturnValue({ create: c(), update: c(), status: c(), roles: c(), resetCredential: c(), revokeSession: c(), ...over });
+  };
+
+  test("row status toggle only fires after confirming", async () => {
+    const status = vi.fn().mockResolvedValue({});
+    commandsWith({ status: { mutateAsync: status, isPending: false } });
+    hooks.useEmployees.mockReturnValue({
+      isPending: false, isError: false,
+      data: { users: [{ id: "user-1", email: "teacher@erg.edu.vn", fullName: "Teacher One", status: "ACTIVE", roles: ["lms_teacher"], isProfileCompleted: true, createdAt: "2026-01-01T00:00:00Z" }], meta: { page: 1, limit: 25, total: 1, totalPages: 1 } },
+    });
+    render(<EmployeeListWorkspace tenantId="tenant-1" />);
+    fireEvent.click(screen.getByRole("button", { name: "Thao tác cho Teacher One" }));
+    fireEvent.click(screen.getByText("Deactive tài khoản"));
+    expect(status).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Deactive" }));
+    await waitFor(() => expect(status).toHaveBeenCalledWith({ userId: "user-1", status: "INACTIVE" }));
+  });
+
+  test("detail drawer reset credential and session revoke need confirmation", async () => {
+    const reset = vi.fn().mockResolvedValue({});
+    const revoke = vi.fn().mockResolvedValue({});
+    commandsWith({ resetCredential: { mutateAsync: reset, isPending: false }, revokeSession: { mutateAsync: revoke, isPending: false } });
+    hooks.useEmployeeDetail.mockReturnValue({
+      isPending: false,
+      isError: false,
+      data: {
+        account: { user: { id: "user-1", fullName: "Teacher One", email: "teacher@erg.edu.vn", phone: "0909", status: "ACTIVE", roles: ["lms_teacher"] }, sessions: [] },
+        profile: { id: "profile-1", userId: "user-1", tenantId: "tenant-1", employeeCode: "GV-001", jobTitle: "Teacher", emergencyContact: {} },
+      },
+    });
+    render(<EmployeeDetailDrawer tenantId="tenant-1" userId="user-1" onClose={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: /reset/i }));
+    expect(screen.getByText("Reset credential an toàn")).toBeInTheDocument();
+    expect(reset).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole("button", { name: "Xác nhận" }));
+    await waitFor(() => expect(reset).toHaveBeenCalledWith({ delivery: "ONE_TIME_PASSWORD", userId: "user-1" }));
+    expect(revoke).not.toHaveBeenCalled();
+  });
 });

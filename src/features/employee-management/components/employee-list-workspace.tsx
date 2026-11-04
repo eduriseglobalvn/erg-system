@@ -1,4 +1,5 @@
 import { formatDateTimeVi } from "@/lib/format-date";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import ComputerRoundedIcon from "@mui/icons-material/ComputerRounded";
 import MoreVertRoundedIcon from "@mui/icons-material/MoreVertRounded";
@@ -54,6 +55,7 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
   const [actionEmployee, setActionEmployee] = useState<EmployeeItem>();
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [roleName, setRoleName] = useState("");
+  const [statusTarget, setStatusTarget] = useState<EmployeeItem>();
 
   const commands = useEmployeeCommands(tenantId);
   const rolesQuery = useEmployeeRoleOptions(tenantId);
@@ -613,18 +615,31 @@ export function EmployeeListWorkspace({ tenantId }: { tenantId: string }) {
         <MenuItem onClick={openRoleDialog}>Gán nhóm quyền</MenuItem>
         <MenuItem
           onClick={() => {
-            if (actionEmployee) {
-              void commands.status.mutateAsync({
-                status: actionEmployee.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
-                userId: actionEmployee.id,
-              });
-            }
+            if (actionEmployee) setStatusTarget(actionEmployee);
             closeMenu();
           }}
         >
           {actionEmployee?.status === "ACTIVE" ? "Deactive tài khoản" : "Active tài khoản"}
         </MenuItem>
       </Menu>
+
+      <ErgConfirmDialog
+        confirmLabel={statusTarget?.status === "ACTIVE" ? "Deactive" : "Active"}
+        description="Thay đổi trạng thái có thể thu hồi toàn bộ session của nhân sự."
+        destructive={statusTarget?.status === "ACTIVE"}
+        onCancel={() => setStatusTarget(undefined)}
+        onConfirm={() => {
+          if (statusTarget) {
+            void commands.status.mutateAsync({
+              status: statusTarget.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+              userId: statusTarget.id,
+            });
+          }
+          setStatusTarget(undefined);
+        }}
+        open={Boolean(statusTarget)}
+        title={statusTarget?.status === "ACTIVE" ? "Deactive tài khoản" : "Active tài khoản"}
+      />
 
       {/* Role Assignment Dialog */}
       <Dialog

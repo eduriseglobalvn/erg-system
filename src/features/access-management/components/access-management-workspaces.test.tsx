@@ -144,6 +144,7 @@ describe("access-management workspaces", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /users\.manage/i }));
     fireEvent.click(screen.getByRole("button", { name: "Lưu thay đổi" }));
     expect(screen.getByText("Xác nhận cấp quyền nhạy cảm")).toBeInTheDocument();
+    expect(update).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Xác nhận và lưu" }));
 
     await waitFor(() => expect(update).toHaveBeenCalledWith({

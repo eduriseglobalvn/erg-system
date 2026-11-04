@@ -17,7 +17,6 @@ import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import Drawer from "@mui/material/Drawer";
 import IconButton from "@mui/material/IconButton";
@@ -27,6 +26,7 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { type ReactNode, useEffect, useState } from "react";
 
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgErrorState, ErgLoadingSkeleton } from "@/components/erg-mui/erg-feedback";
 import {
   AppleAvatar,
@@ -958,119 +958,29 @@ export function EmployeeDetailDrawer({
         </DialogActions>
       </Dialog>
 
-      {/* Confirm Action Dialog */}
-      <Dialog
+      <ErgConfirmDialog
+        confirmLabel="Xác nhận"
+        description={
+          confirmAction === "RESET"
+            ? "Hệ thống sẽ tạo temporary credential một lần, thu hồi session cũ và bắt buộc đổi mật khẩu ở lần đăng nhập kế tiếp."
+            : "Thay đổi trạng thái có thể thu hồi toàn bộ session của nhân sự."
+        }
+        destructive
+        onCancel={() => setConfirmAction(null)}
+        onConfirm={() => void confirm()}
         open={Boolean(confirmAction)}
-        onClose={() => setConfirmAction(null)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: "20px",
-              boxShadow: appleDesign.shadows.sheet,
-              p: 1,
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 750, letterSpacing: "-0.01em" }}>
-          {confirmAction === "RESET" ? "Reset credential an toàn" : "Xác nhận đổi trạng thái"}
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: appleDesign.colors.textSecondary }}>
-            {confirmAction === "RESET"
-              ? "Hệ thống sẽ tạo temporary credential một lần, thu hồi session cũ và bắt buộc đổi mật khẩu ở lần đăng nhập kế tiếp."
-              : "Thay đổi trạng thái có thể thu hồi toàn bộ session của nhân sự."}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button
-            variant="text"
-            onClick={() => setConfirmAction(null)}
-            sx={{
-              bgcolor: "transparent !important",
-              borderRadius: "10px",
-              color: `${appleDesign.colors.textSecondary} !important`,
-              fontWeight: 650,
-              textTransform: "none",
-              "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05) !important" },
-            }}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => void confirm()}
-            sx={{
-              bgcolor: `${appleDesign.colors.amber} !important`,
-              borderRadius: "10px",
-              color: "#FFFFFF !important",
-              fontWeight: 650,
-              textTransform: "none",
-              "&:hover": {
-                bgcolor: "#D97706 !important",
-              },
-            }}
-          >
-            Xác nhận
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title={confirmAction === "RESET" ? "Reset credential an toàn" : "Xác nhận đổi trạng thái"}
+      />
 
-      {/* Revoke Session Dialog */}
-      <Dialog
+      <ErgConfirmDialog
+        confirmLabel="Thu hồi phiên"
+        description="Thiết bị sẽ bị đăng xuất ở request tiếp theo. Hành động được ghi audit."
+        destructive
+        onCancel={() => setSessionToRevoke(undefined)}
+        onConfirm={() => void revokeSession()}
         open={Boolean(sessionToRevoke)}
-        onClose={() => setSessionToRevoke(undefined)}
-        slotProps={{
-          paper: {
-            sx: {
-              borderRadius: "20px",
-              boxShadow: appleDesign.shadows.sheet,
-              p: 1,
-            },
-          },
-        }}
-      >
-        <DialogTitle sx={{ fontWeight: 750, letterSpacing: "-0.01em" }}>
-          Thu hồi session
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ color: appleDesign.colors.textSecondary }}>
-            Thiết bị sẽ bị đăng xuất ở request tiếp theo. Hành động được ghi audit.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, py: 2 }}>
-          <Button
-            variant="text"
-            onClick={() => setSessionToRevoke(undefined)}
-            sx={{
-              bgcolor: "transparent !important",
-              borderRadius: "10px",
-              color: `${appleDesign.colors.textSecondary} !important`,
-              fontWeight: 650,
-              textTransform: "none",
-              "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05) !important" },
-            }}
-          >
-            Hủy
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => void revokeSession()}
-            sx={{
-              bgcolor: `${appleDesign.colors.red} !important`,
-              borderRadius: "10px",
-              color: "#FFFFFF !important",
-              fontWeight: 650,
-              textTransform: "none",
-              "&:hover": {
-                bgcolor: "#DC2626 !important",
-              },
-            }}
-          >
-            Thu hồi phiên
-          </Button>
-        </DialogActions>
-      </Dialog>
+        title="Thu hồi session"
+      />
     </>
   );
 }
