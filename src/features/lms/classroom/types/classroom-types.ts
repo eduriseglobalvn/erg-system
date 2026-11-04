@@ -65,6 +65,8 @@ export type ClassroomStudent = {
   currentAssignment: string;
   currentStage: string;
   progressRate: number;
+  /** false when progressRate is only a placeholder (no real per-student data): show "—". */
+  hasProgressData?: boolean;
   averageScore: number;
   streakDays: number;
   completedAssignments: number;

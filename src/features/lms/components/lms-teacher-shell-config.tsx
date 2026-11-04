@@ -8,6 +8,9 @@ import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import GroupsRoundedIcon from "@mui/icons-material/GroupsRounded";
 import HomeRoundedIcon from "@mui/icons-material/HomeRounded";
 import MenuBookRoundedIcon from "@mui/icons-material/MenuBookRounded";
+import MoreHorizRoundedIcon from "@mui/icons-material/MoreHorizRounded";
+import FactCheckRoundedIcon from "@mui/icons-material/FactCheckRounded";
+import InsightsRoundedIcon from "@mui/icons-material/InsightsRounded";
 import NotificationsNoneRoundedIcon from "@mui/icons-material/NotificationsNoneRounded";
 import FileText from "@mui/icons-material/Description";
 
@@ -17,7 +20,7 @@ import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resourc
 import { teacherPath } from "@/platform/workspaces/workspace-paths";
 
 export type LmsSection = "home" | "homework" | "score" | "attendance" | "schedule" | "classLog" | "resources" | "reports";
-export type LmsMobileSection = "assignHomework" | "exerciseBank" | "home" | "schedule" | "notifications" | "none";
+export type LmsMobileSection = "home" | "attendance" | "assignHomework" | "class" | "more";
 
 export const LearningResourceLibraryPage = lazy(() =>
   import("@/features/lms/learning-resources/components/learning-resource-library-page").then((module) => ({
@@ -187,11 +190,25 @@ export const LMS_MENU_GROUPS: MenuGroup[] = [
 ];
 
 export const lmsMobileDockItems: Array<LmsMobileDockItem<LmsMobileSection>> = [
+  { id: "home", label: "Hôm nay", path: teacherPath("/"), icon: HomeRoundedIcon },
+  { id: "attendance", label: "Điểm danh", path: teacherPath("/attendance"), icon: EventAvailableRoundedIcon },
   { id: "assignHomework", label: "Giao bài", path: teacherPath("/homework/assign"), icon: AssignmentRoundedIcon },
-  { id: "exerciseBank", label: "Kho bài", path: teacherPath("/homework/exercise-bank"), icon: MenuBookRoundedIcon },
-  { id: "home", label: "Home", path: teacherPath("/"), icon: HomeRoundedIcon },
-  { id: "schedule", label: "Lịch", path: teacherPath("/calendar"), icon: CalendarMonthRoundedIcon },
-  { id: "notifications", label: "Thông báo", path: teacherPath("/notifications"), icon: NotificationsNoneRoundedIcon },
+  { id: "class", label: "Lớp", path: teacherPath("/homework/class"), icon: GroupsRoundedIcon },
+  // "Thêm" opens the menu sheet in LmsMobileShell; the path is only used for the permission check.
+  { id: "more", label: "Thêm", path: teacherPath("/account"), icon: MoreHorizRoundedIcon, opensMenu: true },
+];
+
+/** Screens that left the dock; listed in the "Thêm" sheet so nothing becomes unreachable on mobile. */
+export const lmsMobileMoreItems: Array<{ icon: LmsMobileDockItem<string>["icon"]; label: string; path: string }> = [
+  { icon: CalendarMonthRoundedIcon, label: "Lịch làm việc", path: teacherPath("/calendar") },
+  { icon: MenuBookRoundedIcon, label: "Kho luyện tập", path: teacherPath("/homework/exercise-bank") },
+  { icon: InsightsRoundedIcon, label: "Tiến độ học tập", path: teacherPath("/homework/progress") },
+  { icon: GroupsRoundedIcon, label: "Nhóm học sinh", path: teacherPath("/homework/student-groups") },
+  { icon: FactCheckRoundedIcon, label: "Bảng điểm", path: teacherPath("/score") },
+  { icon: MenuBookRoundedIcon, label: "Sổ đầu bài", path: teacherPath("/class-log") },
+  { icon: FolderRoundedIcon, label: LEARNING_RESOURCE_WORKSPACE_LABEL, path: teacherPath("/resources") },
+  { icon: BarChartRoundedIcon, label: "Báo cáo lớp học", path: teacherPath("/reports") },
+  { icon: NotificationsNoneRoundedIcon, label: "Thông báo", path: teacherPath("/notifications") },
 ];
 
 function matchesWorkspacePath(pathname: string, canonicalPath: string) {
@@ -205,11 +222,25 @@ export function resolveSection(pathname: string): LmsSection {
 }
 
 export function resolveMobileSection(pathname: string): LmsMobileSection {
-  if (matchesWorkspacePath(pathname, teacherPath("/homework/exercise-bank"))) return "exerciseBank";
-  if (matchesWorkspacePath(pathname, teacherPath("/homework/assign"))) return "assignHomework";
-  if (matchesWorkspacePath(pathname, teacherPath("/homework"))) return "assignHomework";
-  if (matchesWorkspacePath(pathname, teacherPath("/calendar"))) return "schedule";
-  if (matchesWorkspacePath(pathname, teacherPath("/notifications"))) return "notifications";
   if (pathname === "/" || pathname === "/home" || pathname === "/dashboard" || pathname === teacherPath("/") || pathname === teacherPath("/home") || pathname === teacherPath("/dashboard")) return "home";
-  return "none";
+  if (matchesWorkspacePath(pathname, teacherPath("/attendance"))) return "attendance";
+  if (matchesWorkspacePath(pathname, teacherPath("/homework/class")) || matchesWorkspacePath(pathname, teacherPath("/homework/student-groups"))) return "class";
+  if (matchesWorkspacePath(pathname, teacherPath("/homework"))) return "assignHomework";
+  return "more";
+}
+
+const MOBILE_TITLES: Array<[string, string]> = [
+  ["/homework/exercise-bank", "Kho luyện tập"],
+  ["/homework/progress", "Tiến độ học tập"],
+  ["/homework/student-groups", "Nhóm học sinh"],
+  ["/homework/class", "Lớp học"],
+  ["/notifications", "Thông báo"],
+  ["/account", "Tài khoản"],
+];
+
+/** Top-bar title on mobile: specific screen name first, then the dock label, then the desktop section label. */
+export function resolveMobileTitle(pathname: string, section: LmsMobileSection, sectionLabel: string) {
+  const specific = MOBILE_TITLES.find(([path]) => matchesWorkspacePath(pathname, teacherPath(path)));
+  if (specific) return specific[1];
+  return (section === "more" ? undefined : lmsMobileDockItems.find((item) => item.id === section)?.label) ?? sectionLabel;
 }

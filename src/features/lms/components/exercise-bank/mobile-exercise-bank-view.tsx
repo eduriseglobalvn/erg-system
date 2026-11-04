@@ -2,6 +2,7 @@ import { Eye, Search, Send } from "lucide-react";
 import Chip from "@mui/material/Chip";
 
 import { cn } from "@/lib/utils";
+import { formatDateVi } from "@/lib/format-date";
 import {
   allExerciseFilter,
   chipPropsForTone,
@@ -23,10 +24,10 @@ export function MobileExerciseBankView({
   onOpenPortable?: () => void;
 }) {
   const statusTabs: Array<{ id: ExerciseStatus | typeof allExerciseFilter; label: string }> = [
-    { id: "published", label: "Xuat ban" },
-    { id: allExerciseFilter, label: "Tat ca" },
-    { id: "draft", label: "Nhap" },
-    { id: "archived", label: "Luu tru" },
+    { id: "published", label: "Xuất bản" },
+    { id: allExerciseFilter, label: "Tất cả" },
+    { id: "draft", label: "Nháp" },
+    { id: "archived", label: "Lưu trữ" },
   ];
 
   return (
@@ -34,14 +35,14 @@ export function MobileExerciseBankView({
       <section className="rounded-[24px] border border-[#d9e2ef] bg-white p-4 shadow-[0_12px_30px_rgba(15,23,42,0.06)]">
         <div className="text-[13px] font-extrabold text-[var(--erg-blue)]">Kho bài tập</div>
         <h1 className="mt-1 text-xl font-extrabold leading-7">Chọn bài và giao nhanh</h1>
-        <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">{controller.filteredExercises.length} ket qua phu hop bo loc hien tai</p>
+        <p className="mt-1 text-sm font-semibold leading-6 text-slate-500">{controller.filteredExercises.length} kết quả phù hợp bộ lọc hiện tại</p>
         <div className="relative mt-4">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
           <input
             value={controller.searchTerm}
             onChange={(event) => controller.setSearchTerm(event.target.value)}
             className="h-12 w-full rounded-[18px] border border-[#d7e0ec] bg-[#f8fbff] pl-10 pr-3 text-[15px] font-bold text-slate-950 outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-            placeholder="Tim bai, mon, tag"
+            placeholder="Tìm bài, môn, tag"
           />
         </div>
         <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
@@ -73,12 +74,9 @@ export function MobileExerciseBankView({
                 </div>
                 <Chip label={statusLabels[exercise.status]} size="small" {...chipPropsForTone(statusTones[exercise.status])} sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
               </div>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{typeLabels[exercise.type]}</span>
-                <span className="rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-extrabold text-amber-700">{difficultyLabels[exercise.difficulty]}</span>
-                <span className="rounded-full bg-[var(--erg-blue-light)] px-3 py-1 text-xs font-extrabold text-[var(--erg-blue)]">{exercise.durationMinutes} phút</span>
-                <span className="rounded-full bg-[#f1f5f9] px-3 py-1 text-xs font-extrabold text-slate-700">{exercise.questionCount} cau</span>
-              </div>
+              <p className="mt-3 text-xs font-bold text-slate-600">
+                {[typeLabels[exercise.type], difficultyLabels[exercise.difficulty], `${exercise.durationMinutes} phút`, `${exercise.questionCount} câu`, formatDateVi(exercise.updatedAt) && `Cập nhật ${formatDateVi(exercise.updatedAt)}`].filter(Boolean).join(" · ")}
+              </p>
             </button>
             <div className="mt-4 flex gap-2">
               <button type="button" className="flex h-11 min-w-0 flex-1 items-center justify-center rounded-[16px] !border !border-[#d9e2ef] !bg-white px-2 text-sm font-extrabold text-slate-700" onClick={() => controller.setSelectedExerciseId(exercise.id)}>
@@ -107,10 +105,10 @@ export function MobileExerciseBankView({
               <div className="min-w-0">
                 <div className="line-clamp-2 text-sm font-extrabold text-slate-950">{controller.selectedExercise.title}</div>
                 <div className="mt-1 text-xs font-bold text-slate-500">
-                  {controller.selectedExercise.subject} · {controller.selectedExercise.durationMinutes} phut · {controller.selectedExercise.questionCount} cau
+                  {controller.selectedExercise.subject} · {controller.selectedExercise.durationMinutes} phút · {controller.selectedExercise.questionCount} câu
                 </div>
               </div>
-              <button type="button" className="h-9 rounded-full !bg-[#f1f5f9] px-3 text-xs font-extrabold text-slate-600" onClick={() => controller.setSelectedExerciseId("")}>Dong</button>
+              <button type="button" className="h-9 rounded-full !bg-[#f1f5f9] px-3 text-xs font-extrabold text-slate-600" onClick={() => controller.setSelectedExerciseId("")}>Đóng</button>
             </div>
             <button type="button" className="mt-3 flex h-11 w-full items-center justify-center rounded-[16px] !bg-[var(--erg-blue)] text-sm font-extrabold !text-white" onClick={() => onAssign(controller.selectedExercise.title)}>
               <Send className="mr-2 h-4 w-4" /> Giao bài tập này

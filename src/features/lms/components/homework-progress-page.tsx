@@ -21,6 +21,7 @@ import type { AssignmentRun, ClassroomSnapshot, ClassroomStudent } from "@/featu
 import { hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
 import { cn } from "@/lib/utils";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 import { AssignmentProgressExportControl } from "@/features/reporting/components/assignment-progress-export-control";
 
 type ProgressStatus = "completed" | "inprogress" | "notstarted";
@@ -135,7 +136,7 @@ export function HomeworkProgressPage({
   const needsReviewCount = assignmentReportQuery.data?.needsReviewCount ?? progressQuery.data?.summary.needsReviewCount ?? selectedRun?.needsReviewCount ?? 0;
 
   return (
-    <div className="flex h-full min-h-0 flex-col gap-3 overflow-hidden px-4 py-4 xl:px-6">
+    <div className="flex min-h-full flex-col gap-3 px-3 py-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:px-6 xl:py-4">
       <section className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 shadow-[var(--shadow-xs)]">
         <div className="grid items-center gap-3 xl:grid-cols-[minmax(280px,1fr)_auto_auto]">
           <div className="min-w-0">
@@ -148,13 +149,13 @@ export function HomeworkProgressPage({
               Kiểm tra tiến độ làm bài, trạng thái nộp và điểm của học sinh trong {selectedClass?.className ?? "lớp hiện tại"}.
             </p>
           </div>
-          <div className="grid min-w-[520px] grid-cols-4 gap-2 max-xl:min-w-0">
+          <div className="grid min-w-[520px] grid-cols-4 gap-2 max-xl:min-w-0 max-sm:grid-cols-2">
             <ProgressStat icon={UsersRound} label="Tổng HS" value={String(total)} />
             <ProgressStat icon={CheckCircle2} label="Đã nộp" value={`${completedPct}%`} />
             <ProgressStat icon={Clock3} label="Đang làm" value={String(inProgress)} />
             <ProgressStat icon={FileCheck2} label="Chưa mở" value={String(notStarted)} />
           </div>
-          <div className="flex shrink-0 items-center justify-end gap-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 max-xl:justify-start">
             <AssignmentProgressExportControl assignmentId={selectedRunId} classId={selectedClass?.id} />
             <Button variant="outlined" sx={{ height: 40, borderRadius: "8px", px: 1.5, fontSize: "14px" }} onClick={onBack}>
               Về trang bài tập
@@ -163,10 +164,10 @@ export function HomeworkProgressPage({
         </div>
       </section>
 
-      <section className="grid min-h-0 flex-1 gap-3 overflow-hidden xl:grid-cols-[280px_minmax(0,1fr)]">
+      <section className="grid gap-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden xl:grid-cols-[280px_minmax(0,1fr)]">
         <aside className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
           <h2 className="mb-2 text-[13px] font-bold text-slate-600">Bài đã giao</h2>
-          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+          <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1 max-xl:max-h-56">
             {runs.map((run) => (
               <button
                 key={run.id}
@@ -188,7 +189,7 @@ export function HomeworkProgressPage({
           </div>
         </aside>
 
-        <div className="grid min-h-0 gap-3 overflow-hidden 2xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-3 xl:min-h-0 xl:overflow-hidden 2xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
             <div className="shrink-0 border-b border-[#cbd7e6] p-3">
               <div className="mb-3 flex items-start justify-between gap-3">
@@ -199,7 +200,7 @@ export function HomeworkProgressPage({
                 <Chip label={`${filteredRows.length} học sinh`} size="small" color="secondary" sx={{ flexShrink: 0, textTransform: "none", letterSpacing: "normal" }} />
               </div>
               <div className="flex flex-wrap gap-2">
-                <div className="relative min-w-[240px] flex-1">
+                <div className="relative min-w-[200px] flex-1">
                   <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
                   <input
                     type="text"
@@ -217,7 +218,27 @@ export function HomeworkProgressPage({
             </div>
 
             <div className="min-h-0 flex-1 overflow-auto">
-              <table className="erg-data-table min-w-[880px] w-full border-collapse text-left text-[14px]">
+              <ul className="grid gap-2 p-3 xl:hidden">
+                {filteredRows.map((row) => (
+                  <li key={row.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="truncate text-sm font-semibold text-slate-800">{row.name}</div>
+                        <div className="truncate text-[13px] font-semibold text-slate-500">{row.className} · {row.timestamp}</div>
+                      </div>
+                      <ProgressStatusBadge status={row.status} />
+                    </div>
+                    <div className="mt-2 flex items-center gap-2">
+                      <div className="h-2 flex-1 overflow-hidden rounded-md bg-slate-100">
+                        <div className={cn("h-full rounded-full", getProgressTone(row.status))} style={{ width: `${row.progress}%` }} />
+                      </div>
+                      <span className="w-10 text-right text-[13px] font-bold text-slate-600">{row.progress}%</span>
+                      <span className="w-16 text-right text-[13px] font-semibold text-slate-800">{row.score !== null ? `${row.score}/100` : "—"}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+              <table className="erg-data-table w-full min-w-[880px] border-collapse text-left text-[14px] max-xl:hidden">
                 <thead className="sticky top-0 z-10 bg-[#eef4fb] text-[13px] font-bold text-slate-700">
                   <tr>
                     <th className="border-r border-[#cbd7e6] px-4 py-3">Học sinh</th>
@@ -307,8 +328,8 @@ function mapAssignmentProgressRows(
 
     return {
       id: studentId || attempt?.studentId || `recipient-${index + 1}`,
-      name: recipient.fullName || recipient.username || recipient.studentCode || studentId || "Hoc sinh",
-      className: selectedClass?.className || recipient.academicClassId || workspace.assignment.academicClassId || "Lop hoc",
+      name: recipient.fullName || recipient.username || recipient.studentCode || studentId || "Học sinh",
+      className: selectedClass?.className || recipient.academicClassId || workspace.assignment.academicClassId || "Lớp học",
       progress: progressPercentFromAttempt(attempt, status),
       score,
       status,
@@ -324,8 +345,8 @@ function mapAssignmentProgressRows(
 
     return {
       id: attempt.studentId || attempt.id || `attempt-${index + 1}`,
-      name: attempt.studentId || `Hoc sinh ${index + 1}`,
-      className: selectedClass?.className || workspace.assignment.academicClassId || "Lop hoc",
+      name: attempt.studentId || `Học sinh ${index + 1}`,
+      className: selectedClass?.className || workspace.assignment.academicClassId || "Lớp học",
       progress: progressPercentFromAttempt(attempt, status),
       score,
       status,
@@ -344,8 +365,8 @@ export function mapAssignmentReportRows(
 
     return {
       id: student.studentUserId || `report-student-${index + 1}`,
-      name: student.studentName || student.studentUserId || "Hoc sinh",
-      className: selectedClass?.className || "Lop hoc",
+      name: student.studentName || student.studentUserId || "Học sinh",
+      className: selectedClass?.className || "Lớp học",
       progress,
       score: scoreFromReportStudent(student),
       status,
@@ -452,11 +473,8 @@ function scoreFromAttempt(attempt: AssignmentProgressAttempt | null | undefined)
   return null;
 }
 
-function formatProgressTimestamp(value?: string | null) {
-  if (!value) return "-";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
-  return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
+export function formatProgressTimestamp(value?: string | null) {
+  return formatShortDateTimeVi(value) || "—";
 }
 
 function ProgressStat({ icon: Icon, label, value }: { icon: typeof UsersRound; label: string; value: string }) {

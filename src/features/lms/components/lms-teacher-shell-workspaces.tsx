@@ -21,10 +21,10 @@ import {
 } from "@/features/lms/components/lms-teacher-shell-config";
 import {
   getClassStudents,
-  LmsHomeDashboard,
   MobileUnsupportedScreen,
   TeacherWorkspaceFrame,
 } from "@/features/lms/components/lms-teacher-shell-presentation";
+import { LmsHomeDashboard } from "@/features/lms/components/lms-home-dashboard";
 import type { LmsTeacherShellController } from "@/features/lms/components/use-lms-teacher-shell-controller";
 import { classroomStudents } from "@/features/lms/classroom/api/mock-classroom-data";
 import { LearningResourceDashboardScopeProvider } from "@/features/lms/learning-resources/hooks/use-learning-resource-dashboard-scope";
@@ -60,6 +60,10 @@ export function LmsTeacherDesktopContent({ model }: WorkspaceProps) {
     <>
       {activeSection === "home" ? (
         <LmsHomeDashboard
+          classes={selectedClassOptions}
+          onClassChange={(classId) => handleClassChange({ target: { value: classId } })}
+          onOpenNotifications={() => void navigate({ href: teacherPath("/notifications") })}
+          onOpenProgress={() => void navigate({ href: teacherPath("/homework/progress") })}
           runs={runs}
           selectedClass={selectedClass}
           selectedSchoolName={selectedSchoolName}
@@ -186,6 +190,8 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
     navigate,
     apiBacked,
     pathname,
+    progressAssignmentId,
+    selectedSchoolId,
     bootstrapQuery,
     classes,
     selectedClassOptions,
@@ -205,6 +211,10 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
     if (localPathname === "/" || localPathname === "/home" || localPathname === "/dashboard") {
       return (
         <LmsHomeDashboard
+          classes={selectedClassOptions}
+          onClassChange={(classId) => handleClassChange({ target: { value: classId } })}
+          onOpenNotifications={() => void navigate({ href: teacherPath("/notifications") })}
+          onOpenProgress={() => void navigate({ href: teacherPath("/homework/progress") })}
           runs={runs}
           selectedClass={selectedClass}
           selectedSchoolName={selectedSchoolName}
@@ -252,6 +262,46 @@ export function LmsTeacherMobileContent({ model }: WorkspaceProps) {
           <ExerciseBankPage
             onBack={() => void navigate({ href: teacherPath("/homework/assign") })}
             onAssign={(exerciseTitle) => handleLocalAssignmentCreated(exerciseTitle, "Kho bài tập", teacherPath("/homework/assign"))}
+          />
+        </Suspense>
+      );
+    }
+
+    if (localPathname === "/homework/progress") {
+      return (
+        <Suspense fallback={null}>
+          <HomeworkProgressPage
+            initialRunId={progressAssignmentId}
+            onBack={() => void navigate({ href: teacherPath("/homework") })}
+            runs={runs}
+            selectedClass={selectedClass}
+            students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
+          />
+        </Suspense>
+      );
+    }
+
+    if (localPathname === "/homework/student-groups") {
+      return (
+        <Suspense fallback={null}>
+          <StudentGroupsPage
+            classes={classes}
+            selectedClass={selectedClass}
+            selectedSchoolName={selectedSchoolName}
+            onBack={() => void navigate({ href: teacherPath("/homework") })}
+          />
+        </Suspense>
+      );
+    }
+
+    if (localPathname === "/homework/class") {
+      return (
+        <Suspense fallback={null}>
+          <ClassManagementPage
+            classes={classes}
+            selectedClass={selectedClass}
+            selectedSchoolName={selectedSchoolName}
+            students={classroomStudents.filter((student) => student.schoolId === selectedSchoolId)}
           />
         </Suspense>
       );

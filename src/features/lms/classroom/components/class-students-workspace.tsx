@@ -44,6 +44,7 @@ import {
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
 import { assignmentCatalog, assignmentSubjects } from "./class-students-workspace.constants";
 import { enCopy, viCopy } from "./class-students-workspace.copy";
+import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 import type { DeliveryBatch, ProgressFilter, StatusFilter } from "./class-students-workspace.types";
 import {
   formatDueDate,
@@ -482,15 +483,13 @@ function mapClassWorkspaceToSnapshot(
         0,
     ),
     competitionPoints: fallback?.competitionPoints ?? 0,
-    lastSubmissionAt: classInfo.updatedAt ? formatClassWorkspaceDate(classInfo.updatedAt) : fallback?.lastSubmissionAt ?? "Chua co du lieu",
+    lastSubmissionAt: classInfo.updatedAt ? formatClassWorkspaceDate(classInfo.updatedAt) : fallback?.lastSubmissionAt ?? "Chưa có dữ liệu",
     metricsAvailable: true,
   };
 }
 
 function formatClassWorkspaceDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Moi cap nhat";
-  return date.toLocaleString("vi-VN", { day: "2-digit", hour: "2-digit", minute: "2-digit", month: "2-digit" });
+  return formatShortDateTimeVi(value) || "Mới cập nhật";
 }
 
 function createStudentProfileDraft(student: { id: string; mentorNote: string; name: string }) {

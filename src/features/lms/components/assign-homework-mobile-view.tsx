@@ -112,7 +112,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
 
     return (
       <div className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-[#f3f6fb] text-slate-900">
-        <div className="min-h-0 min-w-0 flex-1 pb-[calc(190px+env(safe-area-inset-bottom,0px))]">
+        <div className="min-h-0 min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))]">
           <MobileAssignProgress selectedCount={mobileSelectedCount} step={step} targetType={targetType} />
 
           <div className="grid gap-2.5 p-3">
@@ -355,15 +355,15 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                     selectedResourceIds={selectedResourceIds}
                   />
                   <div className="rounded-[16px] border border-[#d9e2ef] bg-[#f8fbff] p-3">
-                    <div className="text-[13px] font-extrabold text-slate-950">Xac nhan giao bai</div>
+                    <div className="text-[13px] font-extrabold text-slate-950">Xác nhận giao bài</div>
                     <div className="mt-2 grid gap-2 text-[12px] font-bold text-slate-600">
                       <div className="flex justify-between gap-3">
-                        <span>Ten bai</span>
-                        <span className="min-w-0 truncate text-right text-slate-950">{title || "Chua nhap"}</span>
+                        <span>Tên bài</span>
+                        <span className="min-w-0 truncate text-right text-slate-950">{title || "Chưa nhập"}</span>
                       </div>
                       <div className="flex justify-between gap-3">
                         <span>Đối tượng</span>
-                        <span className="text-slate-950">{mobileSelectedCount} da chon</span>
+                        <span className="text-slate-950">{mobileSelectedCount} đã chọn</span>
                       </div>
                       <div className="flex justify-between gap-3">
                         <span>Bài tập</span>
@@ -374,7 +374,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                         <span className="min-w-0 truncate text-right text-slate-950">{selectedResource?.title ?? "Chưa chọn"}</span>
                       </div>
                       <div className="flex justify-between gap-3">
-                        <span>Thoi gian</span>
+                        <span>Thời gian</span>
                         <span className="text-slate-950">{maxDurationMinutes} phút</span>
                       </div>
                     </div>
@@ -483,8 +483,8 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
           </div>
         ) : null}
 
-        <div className="fixed inset-x-0 bottom-[calc(104px+env(safe-area-inset-bottom,0px))] z-50 px-3">
-          <div className="rounded-[18px] border border-[#d9e2ef] bg-white p-2.5 shadow-[0_12px_30px_rgba(15,23,42,0.12)]">
+        <div className="fixed inset-x-0 bottom-0 z-50 border-t border-[#d9e2ef] bg-white px-3 pb-[calc(env(safe-area-inset-bottom,0px)+8px)] pt-2">
+          <div>
             <div className="flex gap-2">
               <button
                 type="button"

@@ -25,12 +25,13 @@ import { teacherPath } from "@/platform/workspaces/workspace-paths";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 export function LmsMobileShell<TSection extends string>({
-  activeLabel, activeSection, children, classes, dockItems, notificationCenter, schoolName, schools,
+  activeLabel, activeSection, children, classes, dockItems, hideDock = false, moreItems = [], notificationCenter, schoolName, schools,
   selectedClassId, selectedClassName, selectedSchoolId, teacherEmail, teacherName, unreadNotificationCount,
   onClassChange, onOpenNotifications, onNavigate, onSchoolChange, onSignOut,
 }: {
   activeLabel: string; activeSection: TSection; children: ReactNode; classes: LmsMobileClassOption[];
-  dockItems: Array<LmsMobileDockItem<TSection>>; notificationCenter?: ReactNode; schoolName: string;
+  dockItems: Array<LmsMobileDockItem<TSection>>; hideDock?: boolean;
+  moreItems?: Array<{ icon: LmsMobileDockItem<string>["icon"]; label: string; path: string }>; notificationCenter?: ReactNode; schoolName: string;
   schools: LmsMobileSchoolOption[]; selectedClassId: string; selectedClassName: string; selectedSchoolId: string;
   teacherEmail: string; teacherName: string; unreadNotificationCount?: number;
   onClassChange: (classId: string) => void; onOpenNotifications?: () => void; onNavigate: (path: string) => void;
@@ -78,12 +79,21 @@ export function LmsMobileShell<TSection extends string>({
 
       <OfflineShellStatus network={network} />
 
-      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
-      <LmsBottomDock activeSection={activeSection} items={dockItems} onNavigate={navigate} />
+      <Box component="main" data-testid="lms-mobile-scroll-region" sx={{ flex: 1, minHeight: 0, overflowY: "auto", overscrollBehavior: "contain", pb: hideDock ? 0 : "calc(104px + env(safe-area-inset-bottom, 0px))" }}>{children}</Box>
+      {hideDock ? null : (
+        <LmsBottomDock
+          activeSection={activeSection}
+          items={dockItems}
+          onNavigate={(path) => (dockItems.find((item) => item.path === path)?.opensMenu ? setAccountOpen(true) : navigate(path))}
+        />
+      )}
       <LmsScopeSheet classes={classes} onClassChange={onClassChange} onOpenChange={setScopeOpen} onSchoolChange={onSchoolChange} open={scopeOpen} schools={schools} selectedClassId={selectedClassId} selectedSchoolId={selectedSchoolId} />
 
       <MobileBottomSheet description={teacherEmail} onOpenChange={setAccountOpen} open={accountOpen} title={teacherName}>
         <Stack spacing={1}>
+          {moreItems.map((item) => (
+            <AccountActionButton icon={<item.icon />} key={item.path} label={item.label} onClick={() => navigate(item.path)} />
+          ))}
           {canSwitchAdmin ? (
             <AccountActionButton
               icon={<AdminPanelSettingsRoundedIcon sx={{ color: "primary.main" }} />}

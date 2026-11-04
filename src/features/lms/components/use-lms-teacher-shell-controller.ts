@@ -22,8 +22,10 @@ import { isSchedulePublishedNotification, resolveLmsTeacherRuns } from "@/featur
 import {
   LMS_MENU_GROUPS,
   lmsMobileDockItems,
+  lmsMobileMoreItems,
   lmsNavItems,
   resolveMobileSection,
+  resolveMobileTitle,
   resolveSection,
 } from "@/features/lms/components/lms-teacher-shell-config";
 import { teachingCalendarQueryKeys } from "@/features/teaching-calendar/api/teaching-calendar-api";
@@ -146,9 +148,9 @@ export function useLmsTeacherShellController() {
   const selectedSchool = schools.find((school) => school.id === selectedSchoolId) ?? schools[0] ?? (apiBacked ? undefined : classroomSchools[0]);
   const selectedSchoolName = selectedSchool?.name ?? "ERG";
   const activeNav = lmsNavItems.find((item) => item.id === activeSection) ?? lmsNavItems[0];
-  const activeMobileNav = lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? {
-    ...lmsMobileDockItems[0],
-    label: activeNav.label,
+  const activeMobileNav = {
+    ...(lmsMobileDockItems.find((item) => item.id === activeMobileSection) ?? lmsMobileDockItems[0]),
+    label: resolveMobileTitle(pathname, activeMobileSection, activeNav.label),
   };
   const teacherName = account?.fullName || "Lê Thị Thùy";
   const teacherEmail = account?.email || "teacher@erg.edu.vn";
@@ -179,8 +181,12 @@ export function useLmsTeacherShellController() {
     () =>
       lmsMobileDockItems
         .filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions))
-        .map((item) => (item.id === "notifications" ? { ...item, badgeCount: unreadNotificationCount } : item)),
+        .map((item) => (item.id === "more" ? { ...item, badgeCount: unreadNotificationCount } : item)),
     [deniedPermissions, grantedPermissions, unreadNotificationCount],
+  );
+  const mobileMoreItems = useMemo(
+    () => lmsMobileMoreItems.filter((item) => canNavigateToLmsPath(item.path, grantedPermissions, deniedPermissions)),
+    [deniedPermissions, grantedPermissions],
   );
 
   useEffect(() => {
@@ -308,6 +314,7 @@ export function useLmsTeacherShellController() {
     deniedPermissions,
     filteredMenuGroups,
     mobileDockItems,
+    mobileMoreItems,
     selectSchool,
     signOut,
     handleSchoolChange,

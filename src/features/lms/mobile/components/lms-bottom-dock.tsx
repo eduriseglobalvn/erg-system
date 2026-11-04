@@ -13,6 +13,8 @@ export type LmsMobileDockItem<TSection extends string> = {
   icon: LmsMobileDockIcon;
   id: TSection;
   label: string;
+  /** Opens the shell's menu sheet instead of navigating. */
+  opensMenu?: boolean;
   path: string;
 };
 

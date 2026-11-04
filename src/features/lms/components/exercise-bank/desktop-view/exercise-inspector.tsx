@@ -44,9 +44,11 @@ export function ExerciseInspector({
               <h3 className="text-[14px] font-semibold leading-snug text-[#131416]">
                 {controller.selectedExercise.title}
               </h3>
-              <p className="mt-0.5 text-[11px] text-[#5D5F60]">
-                Cập nhật ngày {formatDateVi(controller.selectedExercise.updatedAt)}
-              </p>
+              {formatDateVi(controller.selectedExercise.updatedAt) ? (
+                <p className="mt-0.5 text-[11px] text-[#5D5F60]">
+                  Cập nhật ngày {formatDateVi(controller.selectedExercise.updatedAt)}
+                </p>
+              ) : null}
             </div>
 
             {/* Thông số phân cấp dạng Inset Card */}

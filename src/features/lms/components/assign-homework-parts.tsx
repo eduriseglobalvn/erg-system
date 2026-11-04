@@ -32,7 +32,8 @@ export function AssignmentCheckbox({ checked, onChange, label }: { checked: bool
   );
 }
 
-function StudentProgressCell({ value }: { value: number }) {
+function StudentProgressCell({ value, available = true }: { value: number; available?: boolean }) {
+  if (!available) return <span className="text-[13px] font-semibold text-slate-500">—</span>;
   return (
     <div className="min-w-[120px]">
       <div className="flex items-center justify-between gap-2 text-[13px] font-semibold text-slate-700">
@@ -117,7 +118,7 @@ export const StudentSelectionTableRow = memo(function StudentSelectionTableRow({
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-800">{student.currentAssignment}</td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2">
-        <StudentProgressCell value={student.progressRate} />
+        <StudentProgressCell available={student.hasProgressData !== false} value={student.progressRate} />
       </td>
       <td className="border-b border-r border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">{student.lastActivity}</td>
     </tr>

@@ -61,7 +61,7 @@ export function HomeworkPanel({
                 <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Môn học</TableCell>
                 <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Loại bài</TableCell>
                 <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Đối tượng</TableCell>
-                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Thời gian làm bài</TableCell>
+                <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Hạn nộp</TableCell>
                 <TableCell sx={{ fontWeight: 600, fontSize: 12, color: "text.secondary" }}>Trạng thái</TableCell>
                 <TableCell sx={{ width: 64 }} />
               </TableRow>
@@ -115,8 +115,7 @@ export function HomeworkPanel({
                   </TableCell>
                   <TableCell>
                     <Typography sx={{ fontSize: 13, color: "text.secondary", lineHeight: 1.6 }}>
-                      21/05/2026 10:{50 + index}<br />
-                      28/05/2026 10:{50 + index}
+                      {assignment.dueLabel}
                     </Typography>
                   </TableCell>
                   <TableCell>

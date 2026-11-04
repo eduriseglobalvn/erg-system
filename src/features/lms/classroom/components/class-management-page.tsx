@@ -158,7 +158,7 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
   }
 
   return (
-    <section className="flex h-full min-h-0 flex-col gap-2 bg-[#f8fafc] p-2 xl:p-3">
+    <section className="flex min-h-full flex-col gap-2 bg-[#f8fafc] p-2 xl:h-full xl:min-h-0 xl:p-3">
       <div className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-2.5 py-2 shadow-[var(--shadow-xs)]">
         <div className="flex flex-wrap items-center gap-1.5">
           <div className="mr-auto min-w-[220px]">
@@ -233,17 +233,36 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
+      <div className="flex flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)] xl:min-h-0 xl:flex-1">
         <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-[#cbd7e6] px-2.5 py-1.5">
           <h2 className="text-sm font-semibold text-slate-950">Bảng theo dõi học sinh</h2>
-          <div className="flex items-center gap-1.5 text-[13px] font-bold">
+          <div className="flex flex-wrap items-center gap-1.5 text-[13px] font-bold">
             <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-emerald-700">Hoàn thành</span>
             <span className="rounded-lg border border-amber-200 bg-amber-50 px-2 py-1 text-amber-700">Cần hỗ trợ</span>
             <span className="rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2 py-1 text-slate-700">Theo lớp / khối / nhóm</span>
           </div>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-auto">
+        <ul className="divide-y divide-slate-200 xl:hidden">
+          {visibleStudents.map((student) => (
+            <li key={student.id}>
+              <button type="button" className="block min-h-14 w-full px-3 py-2.5 text-left" onClick={() => openStudentDetail(student)}>
+                <span className="flex items-start justify-between gap-2">
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-bold text-[var(--erg-blue)]">{studentDrafts[student.id]?.name ?? student.name}</span>
+                    <span className="block truncate text-[13px] font-semibold text-slate-500">{student.className} · {student.currentAssignment}</span>
+                  </span>
+                  <span className={cn("inline-flex shrink-0 items-center rounded-lg border px-2 py-0.5 text-[13px] font-bold", statusClass(student.status))}>{statusLabel(student.status)}</span>
+                </span>
+                <span className="mt-1.5 block text-[13px] font-semibold text-slate-600">
+                  {student.hasProgressData === false ? "Tiến độ —" : `Tiến độ ${student.progressRate}%`} · Điểm TB {student.averageScore} · {student.completedAssignments} bài xong
+                </span>
+              </button>
+            </li>
+          ))}
+          {visibleStudents.length === 0 ? <li className="p-6 text-center text-sm font-semibold text-slate-500">Không có học sinh phù hợp.</li> : null}
+        </ul>
+        <div className="min-h-0 flex-1 overflow-auto max-xl:hidden">
           <table className="erg-data-table w-full min-w-[1260px] table-fixed border-separate border-spacing-0 text-[14px]">
             <thead>
               <tr className="bg-[#eef4fb] text-[13px] font-bold text-slate-700">
@@ -303,12 +322,16 @@ export function ClassManagementPage({ classes, selectedClass, selectedSchoolName
                       <div className="mt-1 whitespace-normal text-[13px] font-semibold leading-5 text-slate-600">{student.currentStage}</div>
                     </TableCell>
                     <TableCell className="w-[150px]">
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="h-1.5 w-20 overflow-hidden rounded-md bg-slate-100">
-                          <div className={cn("h-full rounded-full", progressColor(student.progressRate))} style={{ width: `${student.progressRate}%` }} />
+                      {student.hasProgressData === false ? (
+                        <span className="font-semibold text-slate-500">—</span>
+                      ) : (
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="h-1.5 w-20 overflow-hidden rounded-md bg-slate-100">
+                            <div className={cn("h-full rounded-full", progressColor(student.progressRate))} style={{ width: `${student.progressRate}%` }} />
+                          </div>
+                          <span className="w-8 text-right font-semibold text-slate-600">{student.progressRate}%</span>
                         </div>
-                        <span className="w-8 text-right font-semibold text-slate-600">{student.progressRate}%</span>
-                      </div>
+                      )}
                     </TableCell>
                     <TableCell className={cn("w-[90px] font-semibold", scoreTone(student.averageScore))}>{student.averageScore}</TableCell>
                     <TableCell className="w-[130px]">
