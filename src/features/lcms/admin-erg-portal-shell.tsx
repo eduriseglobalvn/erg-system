@@ -40,6 +40,7 @@ const PermissionCatalogPage = lazy(() => import("@/features/access-management/co
 const RoleManagementPage = lazy(() => import("@/features/access-management/components/role-management-workspace").then((m) => ({ default: m.RoleManagementWorkspace })));
 const EmployeeManagementPage = lazy(() => import("@/features/employee-management/components/employee-list-workspace").then((m) => ({ default: m.EmployeeListWorkspace })));
 const EmployeeAccessLogPage = lazy(() => import("@/features/employee-management/components/employee-access-log-workspace").then((m) => ({ default: m.EmployeeAccessLogWorkspace })));
+const AdminUiKitPage = lazy(() => import("@/features/lcms/pages/admin-ui-kit"));
 const SchoolManagementApp = lazy(() =>
   import("@/features/lcms/school-management").then((module) => ({
     default: module.SchoolManagementApp,
@@ -158,6 +159,10 @@ export default function AdminErgPortalShell() {
 
     if (legacyPathname === "/settings/roles") {
       return <Suspense fallback={<PageFallback />}><RoleManagementPage tenantId={tenantId} /></Suspense>;
+    }
+
+    if (legacyPathname === "/ui-kit") {
+      return <Suspense fallback={<PageFallback />}><AdminUiKitPage /></Suspense>;
     }
 
     if (legacyPathname === "/employees") {

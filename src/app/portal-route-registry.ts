@@ -55,6 +55,7 @@ export const lcmsWorkspacePaths = [
   "integration/setting-zalo-account",
   "integration/setting-center-api-key",
   "calendar",
+  "ui-kit",
 ] as const;
 
 export const ADMIN_CONTENT_ROUTE_PREFIX = "/admin/content" as const;
