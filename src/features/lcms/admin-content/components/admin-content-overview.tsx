@@ -3,7 +3,12 @@ import AccountTreeRoundedIcon from "@mui/icons-material/AccountTreeRounded";
 import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
 import QuizRoundedIcon from "@mui/icons-material/QuizRounded";
-import { Box, Button, Card, CardContent, Stack, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useNavigate } from "@tanstack/react-router";
 
 import { ADMIN_CONTENT_SECTIONS, type AdminContentSectionKey } from "../admin-content-route";

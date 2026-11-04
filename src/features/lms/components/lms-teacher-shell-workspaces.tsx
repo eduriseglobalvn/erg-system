@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 
 import { HomeworkPanel } from "@/features/lms/components/homework-panel";
 import { ReportsPanel } from "@/features/lms/components/reports-panel";

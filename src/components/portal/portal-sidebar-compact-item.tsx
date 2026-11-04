@@ -1,12 +1,10 @@
-import {
-  Box,
-  ClickAwayListener,
-  List,
-  ListItemButton,
-  Paper,
-  Popper,
-  Typography,
-} from "@mui/material";
+import Box from "@mui/material/Box";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
+import Paper from "@mui/material/Paper";
+import Popper from "@mui/material/Popper";
+import Typography from "@mui/material/Typography";
 import KeyboardArrowRightRoundedIcon from "@mui/icons-material/KeyboardArrowRightRounded";
 import type { MenuItem } from "./ErgPortalLayout";
 import { ErgPortalReportIcon } from "./portal-sidebar-report-icon";

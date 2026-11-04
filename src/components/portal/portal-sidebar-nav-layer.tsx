@@ -1,4 +1,6 @@
-import { Box, List, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import List from "@mui/material/List";
+import Typography from "@mui/material/Typography";
 import type { MenuGroup, MenuItem, PortalInfo } from "./ErgPortalLayout";
 import {
   COLLAPSED_SIDEBAR_WIDTH,

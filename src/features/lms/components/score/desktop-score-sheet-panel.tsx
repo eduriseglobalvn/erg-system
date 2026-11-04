@@ -3,7 +3,14 @@ import Add from "@mui/icons-material/Add";
 import Check from "@mui/icons-material/Check";
 import FilterList from "@mui/icons-material/FilterList";
 import Search from "@mui/icons-material/Search";
-import { Button, Chip, Menu, MenuItem, Stack, TextField, Tooltip, Typography } from "@mui/material";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
+import Tooltip from "@mui/material/Tooltip";
+import Typography from "@mui/material/Typography";
 
 import type { ClassroomSnapshot, ClassroomStudent } from "@/features/lms/classroom/types/classroom-types";
 import {

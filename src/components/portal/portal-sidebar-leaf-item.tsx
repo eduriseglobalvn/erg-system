@@ -1,4 +1,7 @@
-import { Box, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
+import Box from "@mui/material/Box";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
+import ListItemText from "@mui/material/ListItemText";
 import type { MenuItem } from "./ErgPortalLayout";
 import { ErgPortalReportIcon } from "./portal-sidebar-report-icon";
 import {

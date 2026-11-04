@@ -1,7 +1,9 @@
 "use client";
 
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
-import { Box, LinearProgress, Typography } from "@mui/material";
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
+import Typography from "@mui/material/Typography";
 import { toast } from "sonner";
 import ErgPortalLayout, { type MenuItem } from "@/components/portal/ErgPortalLayout";
 import { defaultClassId, defaultSchoolId } from "@/features/lms/classroom/api/mock-classroom-data";

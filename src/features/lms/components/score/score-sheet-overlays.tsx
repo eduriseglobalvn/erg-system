@@ -1,6 +1,9 @@
 import Add from "@mui/icons-material/Add";
 import Lock from "@mui/icons-material/Lock";
-import { Button, Chip, Stack, Typography } from "@mui/material";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import type { CSSProperties } from "react";
 
 import { StudentProfileDetailDrawer } from "@/features/lms/classroom/components/student-profile-detail-drawer";

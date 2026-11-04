@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 import { useLocation } from "@tanstack/react-router";
 import { ERG_ASSETS } from "@/config/seo";
 import {

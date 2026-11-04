@@ -1,6 +1,10 @@
 import Download from "@mui/icons-material/Download";
 import Search from "@mui/icons-material/Search";
-import { Box, Button, Chip, Stack, TextField } from "@mui/material";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import Chip from "@mui/material/Chip";
+import Stack from "@mui/material/Stack";
+import TextField from "@mui/material/TextField";
 import { useRef, useState, type PointerEvent, type ReactNode } from "react";
 
 import type { ClassroomSnapshot } from "@/features/lms/classroom/types/classroom-types";

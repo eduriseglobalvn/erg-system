@@ -1,5 +1,5 @@
 import type { WeeklyClassLogSummary as WeeklyClassLogSummaryData } from "@/features/lms/weekly-class-log/types/weekly-class-log-types";
-import { Box } from "@mui/material";
+import Box from "@mui/material/Box";
 
 export function WeeklyClassLogSummary({ summary }: { summary: WeeklyClassLogSummaryData }) {
   const summaryRows = [
