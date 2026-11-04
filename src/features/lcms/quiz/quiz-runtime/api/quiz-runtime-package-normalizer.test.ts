@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { normalizeQuizPackage, stripQuizAnswerKey } from "./quiz-runtime-package-normalizer";
+import { normalizeBackendQuestion } from "./quiz-runtime-question-normalizers";
 import type { BackendQuizPackage } from "./quiz-runtime-package-api";
 import type { Quiz } from "@/domain/quiz/types";
 
@@ -62,5 +63,39 @@ describe("answer key stripping (4.4 #18)", () => {
     const original = quiz("testing");
     stripQuizAnswerKey(original);
     expect(original.sections[0].questions[0].choices?.[0].correct).toBe(true);
+  });
+});
+
+describe("secured matching / sequence shapes", () => {
+  const matchingBody = {
+    id: "m", kind: "matching", points: 2,
+    matching: [{ id: "m1", prompt: "Cat" }, { id: "m2", prompt: "Dog" }],
+    matchingResponses: [{ id: "r-9f", response: "Woof" }, { id: "r-1c", response: "Meow" }],
+  };
+  const sequenceBody = { id: "s", kind: "sequence", points: 2, sequenceItems: [{ id: "s2", label: "B" }, { id: "s1", label: "A" }] };
+  const key = {
+    m: { pairs: [{ promptId: "m1", responseId: "r-1c" }, { promptId: "m2", responseId: "r-9f" }] },
+    s: { order: ["s1", "s2"] },
+  };
+
+  it("passes matchingResponses through and maps the offline key", () => {
+    const m = normalizeBackendQuestion(matchingBody, 0, key, "client-first");
+    expect(m?.matchingResponses?.map((r) => r.id)).toEqual(["r-9f", "r-1c"]);
+    expect(m?.matchingKey).toEqual({ m1: "r-1c", m2: "r-9f" });
+    const s = normalizeBackendQuestion(sequenceBody, 0, key, "client-first");
+    expect(s?.sequenceCorrectOrder).toEqual(["s1", "s2"]);
+  });
+
+  it("server-authoritative: no key leaks, sequence order is unknown", () => {
+    const m = normalizeBackendQuestion(matchingBody, 0, key, "server-authoritative");
+    expect(m?.matchingKey).toBeUndefined();
+    expect(m?.matchingResponses).toHaveLength(2);
+    expect(normalizeBackendQuestion(sequenceBody, 0, key, "server-authoritative")?.sequenceCorrectOrder).toEqual([]);
+  });
+
+  it("old shape (responses embedded in rows) is left untouched", () => {
+    const old = normalizeBackendQuestion({ id: "o", kind: "matching", points: 1, matching: [{ id: "m1", prompt: "Cat", response: "Meow" }] }, 0, {}, "client-first");
+    expect(old?.matchingResponses).toBeUndefined();
+    expect(old?.matching?.[0].response).toBe("Meow");
   });
 });

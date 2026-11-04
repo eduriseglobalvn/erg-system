@@ -42,6 +42,9 @@ export function normalizeBackendQuestion(
     contentImage: normalizeQuestionImage(value.contentImage ?? value.image),
     choices: normalizeChoices(value.choices ?? value.options, key),
     matching: normalizeList(value.matching),
+    matchingResponses: normalizeList(value.matchingResponses),
+    matchingKey: normalizeMatchingKey(key) ?? (isRecord(value.matchingKey) ? value.matchingKey as Record<string, string> : undefined),
+    sequenceCorrectOrder: normalizeSequenceCorrectOrder(kind, value, key, gradingMode),
     sequenceItems: normalizeList(value.sequenceItems),
     inlineBlanks: normalizeInlineBlanks(value.inlineBlanks, key),
     textBlanks: normalizeTextBlanks(value.textBlanks ?? value.blanks, key),
@@ -179,4 +182,23 @@ function normalizeQuestionImage(value: unknown): Question["contentImage"] {
 
 function normalizeList<T = never>(value: unknown): T[] | undefined {
   return Array.isArray(value) ? value as T[] : undefined;
+}
+
+function normalizeMatchingKey(key?: Record<string, unknown>): Record<string, string> | undefined {
+  const map = pairMap(key?.pairs);
+  return map.size > 0 ? Object.fromEntries(map) : undefined;
+}
+
+// Sequence items arrive shuffled; only the key knows the order. Server-graded without a key => [] (unknown).
+function normalizeSequenceCorrectOrder(
+  kind: Question["kind"],
+  value: Record<string, unknown>,
+  key: Record<string, unknown> | undefined,
+  gradingMode: QuizPackage["gradingMode"],
+): string[] | undefined {
+  if (kind !== "sequence") return undefined;
+  const order = stringArray(key?.order);
+  if (order.length > 0) return order;
+  if (Array.isArray(value.sequenceCorrectOrder)) return stringArray(value.sequenceCorrectOrder);
+  return gradingMode === "server-authoritative" ? [] : undefined;
 }

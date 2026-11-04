@@ -61,7 +61,7 @@ export function EditableMatchingResponseChip({
         />
         <AutoResizeMatchingTextarea
           className="quiz-runtime-edit-input matching-puzzle__response-text"
-          value={pair.response}
+          value={pair.response ?? ""}
           onChange={(event) => onResponseChange(event.target.value)}
           aria-label={`Response ${index + 1}`}
         />

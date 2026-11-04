@@ -4,6 +4,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Typography from "@mui/material/Typography";
 
+import { getMatchingKey, getSequenceCorrectOrder } from "@/domain/quiz/quiz";
 import type { AnswerResult, Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 type SubmitDialogMode = "all-answered" | "confirm";
@@ -133,9 +134,16 @@ function getAnswerKeyLines(question: Question): string[] {
         ? [`Đáp án đúng: ${question.numericAnswer.correctValue}${question.numericAnswer.unit ? ` ${question.numericAnswer.unit}` : ""}`]
         : [];
     case "matching":
-      return (question.matching ?? []).map((pair, index) => `${index + 1}. ${pair.prompt} -> ${pair.response}`);
+      return (question.matching ?? []).flatMap((pair, index) => {
+        const responseId = getMatchingKey(question)?.[pair.id];
+        const response = question.matchingResponses ? question.matchingResponses.find((item) => item.id === responseId)?.response : pair.response;
+        return response === undefined ? [] : [`${index + 1}. ${pair.prompt} -> ${response}`];
+      });
     case "sequence":
-      return (question.sequenceItems ?? []).map((item, index) => `${index + 1}. ${item.label}`);
+      return getSequenceCorrectOrder(question).flatMap((id, index) => {
+        const item = question.sequenceItems?.find((candidate) => candidate.id === id);
+        return item ? [`${index + 1}. ${item.label}`] : [];
+      });
     case "inline_choice":
     case "select_from_lists":
       return (question.inlineBlanks ?? []).map((blank, index) => `${index + 1}. ${blank.statement}: ${formatInlineOption(blank.correctOptionId)}`);

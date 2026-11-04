@@ -70,16 +70,18 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       return result;
     }
     case "matching": {
-      const correctOrder = question.matching?.map((pair) => pair.id) ?? [];
+      const matchingKey = getMatchingKey(question);
+      // Unknown key (secured body, server-graded) => no local correctness: "" never counts as a hit.
+      const correctOrder = (question.matching ?? []).map((pair) => matchingKey?.[pair.id] ?? "");
       result.correctMatchingOrder = correctOrder;
       const currentOrder = normalizeMatchingOrder(question.matching ?? [], answer);
-      if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+      if (matchingKey && correctOrder.length > 0 && JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
         result.correct = true;
         result.awardedPoints = question.points;
         result.message = question.feedback.correct;
         return result;
       }
-      const matched = currentOrder.filter((item, index) => item === correctOrder[index]).length;
+      const matched = currentOrder.filter((item, index) => item !== "" && item === correctOrder[index]).length;
       if (matched > 0 && correctOrder.length > 0) {
         result.partiallyRight = true;
         result.awardedPoints = Math.floor((question.points * matched) / correctOrder.length);
@@ -88,10 +90,10 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       return result;
     }
     case "sequence": {
-      const correctOrder = question.sequenceItems?.map((item) => item.id) ?? [];
+      const correctOrder = getSequenceCorrectOrder(question);
       const currentOrder = answer.sequenceOrder ?? [];
       result.correctSequenceOrder = correctOrder;
-      if (JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
+      if (correctOrder.length > 0 && JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
         result.correct = true;
         result.awardedPoints = question.points;
         result.message = question.feedback.correct;
@@ -287,7 +289,14 @@ export function normalizeAnswerForSubmission(question: Question, answer?: Answer
 
   if (question.kind === "matching") {
     if (safeAnswer.matchingOrder?.length) {
-      return safeAnswer;
+      // Server prefers matchingAssignments {promptId: responseId}; matchingOrder kept for older servers.
+      const order = safeAnswer.matchingOrder;
+      return {
+        ...safeAnswer,
+        matchingAssignments: Object.fromEntries(
+          (question.matching ?? []).flatMap((pair, index) => (order[index] ? [[pair.id, order[index]]] : [])),
+        ),
+      };
     }
 
     if (safeAnswer.matchingAssignments) {
@@ -329,7 +338,9 @@ export function createInitialAnswer(question: Question): AnswerPayload {
       return { choiceIds: [] };
     case "matching":
       return {
-        matchingOrder: [...(question.matching ?? [])].map((pair) => pair.id).reverse(),
+        matchingOrder: question.matchingResponses
+          ? question.matchingResponses.map((response) => response.id)
+          : [...(question.matching ?? [])].map((pair) => pair.id).reverse(),
         matchingConnectedRows: [],
       };
     case "sequence":
@@ -370,6 +381,18 @@ function normalizeTextAnswer(value: string) {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\s+/g, " ");
+}
+
+/** promptId -> correct responseId; undefined when unknown (new shape without a key). Old shape: id equality. */
+export function getMatchingKey(question: Question): Record<string, string> | undefined {
+  if (question.matchingKey) return question.matchingKey;
+  if (question.matchingResponses) return undefined;
+  return Object.fromEntries((question.matching ?? []).map((pair) => [pair.id, pair.id]));
+}
+
+/** Correct item ids in order. [] = unknown (server-graded); the received item order is only trusted for old-shape quizzes. */
+export function getSequenceCorrectOrder(question: Question): string[] {
+  return question.sequenceCorrectOrder ?? question.sequenceItems?.map((item) => item.id) ?? [];
 }
 
 export function normalizeMatchingOrder(pairs: MatchingPair[], answer: AnswerPayload): string[] {

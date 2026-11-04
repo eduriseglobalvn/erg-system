@@ -138,10 +138,10 @@ function mapRuntimeDragDropItems(question: Question): QuizEditorDragDropItem[] |
   if (question.matching?.length) {
     return question.matching.map((pair) => ({
       id: pair.id,
-      label: pair.response,
+      label: pair.response ?? "",
       emoji: "",
       target: pair.prompt,
-      media: pair.responseImage ? mapQuestionImage(pair.responseImage, pair.response) : null,
+      media: pair.responseImage ? mapQuestionImage(pair.responseImage, pair.response ?? "") : null,
       targetMedia: pair.promptImage ? mapQuestionImage(pair.promptImage, pair.prompt) : null,
     }));
   }

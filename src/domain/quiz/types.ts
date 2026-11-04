@@ -57,10 +57,19 @@ export type Choice = {
 export type MatchingPair = {
   id: string;
   prompt: string;
-  response: string;
+  /** Absent in the secured player body: responses live in Question.matchingResponses. */
+  response?: string;
   promptIcon?: string;
   responseIcon?: string;
   promptImage?: QuestionImage;
+  responseImage?: QuestionImage;
+};
+
+/** Shuffled response card with an opaque id (secured player body). */
+export type MatchingResponse = {
+  id: string;
+  response: string;
+  responseIcon?: string;
   responseImage?: QuestionImage;
 };
 
@@ -176,6 +185,12 @@ export type Question = {
   contentImage?: QuestionImage;
   choices?: Choice[];
   matching?: MatchingPair[];
+  /** Present => new shape (prompts in `matching`, shuffled responses here). Absent => old shape, response id == row id. */
+  matchingResponses?: MatchingResponse[];
+  /** Answer key promptId -> responseId; only for offline packages / teacher preview. */
+  matchingKey?: Record<string, string>;
+  /** Answer key for sequence (item ids in correct order). Empty = unknown (server-graded), never fall back to received order. */
+  sequenceCorrectOrder?: string[];
   sequenceItems?: SequenceItem[];
   inlineBlanks?: InlineBlank[];
   textBlanks?: TextBlank[];

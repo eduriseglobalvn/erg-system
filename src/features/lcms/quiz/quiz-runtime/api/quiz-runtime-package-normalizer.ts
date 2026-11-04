@@ -64,6 +64,8 @@ export function stripQuizAnswerKey(quiz: Quiz): Quiz {
     ...(question.wordSlots ? { wordSlots: question.wordSlots.map((slot) => ({ ...slot, correctWordId: "" })) } : {}),
     ...(question.dragDropItems ? { dragDropItems: question.dragDropItems.map((item) => ({ ...item, correctTargetId: "" })) } : {}),
     ...(question.hotspotAreas ? { hotspotAreas: [] } : {}),
+    ...(question.matchingKey ? { matchingKey: undefined } : {}),
+    ...(question.sequenceCorrectOrder ? { sequenceCorrectOrder: [] } : {}),
   });
   return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(strip) })) };
 }

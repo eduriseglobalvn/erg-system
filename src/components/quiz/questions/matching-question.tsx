@@ -31,6 +31,7 @@ import { MobileMatchingAnswerPicker } from "@/components/quiz/questions/matching
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { getMatchingKey } from "@/domain/quiz/quiz";
 import type { MatchingPair } from "@/domain/quiz/types";
 import { cn } from "@/lib/utils";
 
@@ -58,7 +59,7 @@ export function MatchingQuestion({
         return {
           ...pair,
           leftText: pair.prompt,
-          rightText: pair.response,
+          rightText: pair.response ?? "",
           leftIcon: pair.promptIcon,
           rightIcon: pair.responseIcon,
           leftImage: pair.promptImage,
@@ -68,6 +69,25 @@ export function MatchingQuestion({
     [question.matching],
   );
 
+  // New shape: response cards come from matchingResponses (opaque ids). Old shape: rows double as responses (id == response id).
+  const responseOptions = useMemo<DisplayMatchingPair[]>(
+    () =>
+      question.matchingResponses
+        ? question.matchingResponses.map((item) => ({
+            id: item.id,
+            prompt: "",
+            leftText: "",
+            rightText: item.response,
+            rightIcon: item.responseIcon,
+            rightImage: item.responseImage,
+          }))
+        : displayPairs,
+    [question.matchingResponses, displayPairs],
+  );
+  const responseMap = useMemo(() => new Map(responseOptions.map((option) => [option.id, option])), [responseOptions]);
+  const matchingKey = getMatchingKey(question);
+  const hasNewShape = Boolean(question.matchingResponses);
+
   const rowIds = displayPairs.map((pair) => pair.id);
   const pairMap = useMemo(() => new Map(displayPairs.map((pair) => [pair.id, pair])), [displayPairs]);
   const currentOrder = useMemo(() => {
@@ -76,13 +96,13 @@ export function MatchingQuestion({
     }
 
     if (value.matchingAssignments && Object.keys(value.matchingAssignments).length > 0) {
-      return rowIds.map((rowId) => value.matchingAssignments?.[rowId] ?? rowId);
+      return rowIds.map((rowId) => value.matchingAssignments?.[rowId] ?? (hasNewShape ? "" : rowId));
     }
 
-    return [...rowIds].reverse();
-  }, [rowIds, value.matchingAssignments, value.matchingOrder]);
+    return hasNewShape ? responseOptions.map((option) => option.id) : [...rowIds].reverse();
+  }, [hasNewShape, responseOptions, rowIds, value.matchingAssignments, value.matchingOrder]);
 
-  const activePair = activeId ? pairMap.get(activeId) ?? null : null;
+  const activePair = activeId ? responseMap.get(activeId) ?? null : null;
   const connectedRows = submitted || reviewMode ? rowIds : (value.matchingConnectedRows ?? []);
 
   function emitPairs(nextPairs: MatchingPair[]) {
@@ -276,10 +296,10 @@ export function MatchingQuestion({
         <div className="grid gap-3">
           {displayPairs.map((pair) => {
             const selectedId = value.matchingAssignments?.[pair.id] ?? "";
-            const selectedOption = selectedId ? pairMap.get(selectedId) ?? null : null;
-            const correctId = pair.id;
-            const isCorrect = reviewMode && selectedId === correctId;
-            const isWrong = reviewMode && selectedId !== correctId;
+            const selectedOption = selectedId ? responseMap.get(selectedId) ?? null : null;
+            const correctId = matchingKey?.[pair.id];
+            const isCorrect = reviewMode && Boolean(correctId) && selectedId === correctId;
+            const isWrong = reviewMode && Boolean(correctId) && selectedId !== correctId;
 
             return (
               <div
@@ -321,9 +341,9 @@ export function MatchingQuestion({
                     <ChevronDown className="h-4 w-4 flex-none text-slate-400" />
                   </button>
                 </div>
-                {reviewMode ? (
+                {reviewMode && correctId ? (
                   <div className={`px-3 pb-3 text-xs font-medium ${isCorrect ? "text-lime-600" : "text-rose-600"}`}>
-                    {isCorrect ? "Ghép chính xác" : `Đáp án đúng: ${pair.rightText}`}
+                    {isCorrect ? "Ghép chính xác" : `Đáp án đúng: ${correctId ? (responseMap.get(correctId)?.rightText ?? "") : ""}`}
                   </div>
                 ) : null}
               </div>
@@ -335,7 +355,7 @@ export function MatchingQuestion({
             activePromptId={activePromptId}
             assignments={value.matchingAssignments ?? {}}
             optionMap={pairMap}
-            options={displayPairs}
+            options={responseOptions}
             onClose={() => setActivePromptId(null)}
             onSelect={(rowId, optionId) => {
               onChange({
@@ -356,10 +376,11 @@ export function MatchingQuestion({
           <div className="matching-puzzle__list">
             {displayPairs.map((pair, index) => {
               const assignedId = currentOrder[index];
-              const assignedPair = assignedId ? pairMap.get(assignedId) ?? null : null;
-              const assignedPairIndex = assignedId ? displayPairs.findIndex((item) => item.id === assignedId) : -1;
-              const showReviewCorrect = reviewMode && assignedId === displayPairs[index]?.id;
-              const showReviewWrong = reviewMode && assignedId !== displayPairs[index]?.id;
+              const assignedPair = assignedId ? responseMap.get(assignedId) ?? null : null;
+              const assignedPairIndex = assignedId ? displayPairs.findIndex((item) => matchingKey?.[item.id] === assignedId) : -1;
+              const correctResponseId = matchingKey?.[pair.id];
+              const showReviewCorrect = reviewMode && Boolean(correctResponseId) && assignedId === correctResponseId;
+              const showReviewWrong = reviewMode && Boolean(correctResponseId) && assignedId !== correctResponseId;
               const rowConnected = connectedRows.includes(pair.id);
 
               return (

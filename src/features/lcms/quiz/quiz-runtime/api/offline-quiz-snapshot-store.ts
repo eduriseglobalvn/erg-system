@@ -167,6 +167,8 @@ function containsAnswerMaterial(value: unknown, parentKey = ""): boolean {
       normalizedKey === "correctchoiceids" ||
       normalizedKey === "correctmatchingorder" ||
       normalizedKey === "correctsequenceorder" ||
+      normalizedKey === "matchingkey" ||
+      normalizedKey === "sequencecorrectorder" ||
       normalizedKey === "correctinlineselections" ||
       normalizedKey === "correcttextresponses" ||
       normalizedKey === "correctnumericvalue" ||
