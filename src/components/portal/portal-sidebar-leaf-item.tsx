@@ -7,6 +7,9 @@ import { ErgPortalReportIcon } from "./portal-sidebar-report-icon";
 import {
   NAV_ACTIVE_BG,
   NAV_ACTIVE_BORDER,
+  NAV_ACTIVE_TEXT,
+  NAV_BADGE_BG,
+  NAV_BADGE_BORDER,
   NAV_ACTIVE_SHADOW,
   NAV_HOVER_BG,
   NAV_ITEM_COLOR,
@@ -56,7 +59,7 @@ export function SidebarLeafItem({
             ? `1px solid ${NAV_ACTIVE_BORDER}`
             : "1px solid transparent",
           borderRadius: "9px",
-          color: isActive ? NAV_PRIMARY : NAV_ITEM_COLOR,
+          color: isActive ? NAV_ACTIVE_TEXT : NAV_ITEM_COLOR,
           boxShadow: isActive ? NAV_ACTIVE_SHADOW : "none",
           display: "flex",
           height: 42,
@@ -74,7 +77,7 @@ export function SidebarLeafItem({
             background: NAV_ACTIVE_BG,
             borderColor: NAV_ACTIVE_BORDER,
             boxShadow: NAV_ACTIVE_SHADOW,
-            color: NAV_PRIMARY,
+            color: NAV_ACTIVE_TEXT,
           },
           "&.Mui-selected:hover": { background: NAV_ACTIVE_BG },
           "&:hover": {
@@ -82,7 +85,7 @@ export function SidebarLeafItem({
             borderColor: isActive
               ? NAV_ACTIVE_BORDER
               : "transparent",
-            color: isActive ? NAV_PRIMARY : NAV_TEXT_COLOR,
+            color: isActive ? NAV_ACTIVE_TEXT : NAV_TEXT_COLOR,
           },
         }}
       >
@@ -123,11 +126,10 @@ export function SidebarLeafItem({
                 <Box
                   component="span"
                   sx={{
-                    background: NAV_ACTIVE_BG,
-                    border: `1px solid ${NAV_ACTIVE_BORDER}`,
+                    background: isActive ? "rgba(255,255,255,0.2)" : NAV_BADGE_BG,
+                    border: `1px solid ${isActive ? "rgba(255,255,255,0.4)" : NAV_BADGE_BORDER}`,
                     borderRadius: "9999px",
-                    boxShadow: "inset 0 1px 0 rgba(255,255,255,0.62)",
-                    color: NAV_PRIMARY,
+                    color: isActive ? NAV_ACTIVE_TEXT : NAV_PRIMARY,
                     flexShrink: 0,
                     fontSize: 10.5,
                     fontWeight: 600,
@@ -147,7 +149,7 @@ export function SidebarLeafItem({
               sx: {
                 color: "inherit",
                 fontSize: 13.5,
-                fontWeight: isActive ? 650 : 500,
+                fontWeight: isActive ? 600 : 500,
                 letterSpacing: "-0.01em",
                 lineHeight: "20px",
                 overflow: "hidden",

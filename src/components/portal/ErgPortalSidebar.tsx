@@ -6,7 +6,7 @@ import { alpha } from "@mui/material/styles";
 import { useLocation } from "@tanstack/react-router";
 import type { MenuGroup, PortalInfo } from "./ErgPortalLayout";
 import {
-  NAV_ACTIVE_BORDER,
+  NAV_BADGE_BORDER,
   NAV_BUTTON_BG,
   NAV_ITEM_COLOR,
   NAV_PANEL_BORDER,
@@ -63,22 +63,22 @@ export default function ErgPortalSidebar({
         minWidth: 0,
         width: mobile ? EXPANDED_SIDEBAR_WIDTH : "100%",
         "& .MuiDrawer-paper": {
-          backgroundColor: NAV_SURFACE_BG,
+          backgroundColor: mobile ? NAV_SURFACE_BG : "background.paper",
           backgroundImage: "none",
-          backdropFilter: "blur(20px) saturate(190%)",
-          WebkitBackdropFilter: "blur(20px) saturate(190%)",
-          border: "none",
-          borderRadius: 0,
+          // Desktop: floating rounded card with a 1px border (menu redesign); mobile drawer stays full height.
+          border: mobile ? "none" : `1px solid ${NAV_PANEL_BORDER}`,
+          borderRadius: mobile ? 0 : 2,
           borderRight: `1px solid ${NAV_PANEL_BORDER}`,
           boxSizing: "border-box",
-          boxShadow: NAV_PANEL_SHADOW,
+          boxShadow: mobile ? NAV_PANEL_SHADOW : "none",
+          ...(mobile ? {} : { height: "calc(100% - 16px)", m: 1, width: "calc(100% - 16px)" }),
           color: NAV_ITEM_COLOR,
           display: "flex",
           flexDirection: "column",
           overflow: "visible",
           position: mobile ? "fixed" : "relative",
           transition: "none",
-          width: mobile ? EXPANDED_SIDEBAR_WIDTH : "100%",
+          ...(mobile ? { width: EXPANDED_SIDEBAR_WIDTH } : {}),
           zIndex: mobile ? 1250 : 1,
         },
       }}
@@ -92,7 +92,7 @@ export default function ErgPortalSidebar({
           sx={{
             background: NAV_BUTTON_BG,
             backdropFilter: "blur(12px)",
-            border: `1px solid ${NAV_ACTIVE_BORDER}`,
+            border: `1px solid ${NAV_BADGE_BORDER}`,
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,255,0.8)",
             color: NAV_ITEM_COLOR,
             height: 26,

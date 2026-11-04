@@ -11,10 +11,10 @@ import { ErgPortalReportIcon } from "./portal-sidebar-report-icon";
 import {
   NAV_ACTIVE_BG,
   NAV_ACTIVE_BORDER,
+  NAV_ACTIVE_TEXT,
   NAV_ACTIVE_SHADOW,
   NAV_HOVER_BG,
   NAV_ITEM_COLOR,
-  NAV_PRIMARY,
   NAV_TEXT_COLOR,
   SIDEBAR_FADE_EASING,
   SUBMENU_MOTION_EASING,
@@ -114,7 +114,7 @@ export function SidebarCompactItem({
             ? `1px solid ${NAV_ACTIVE_BORDER}`
             : "1px solid transparent",
           borderRadius: "11px",
-          color: miniSelected ? NAV_PRIMARY : NAV_ITEM_COLOR,
+          color: miniSelected ? NAV_ACTIVE_TEXT : NAV_ITEM_COLOR,
           boxShadow: miniSelected ? NAV_ACTIVE_SHADOW : "none",
           display: "flex",
           flexDirection: "column",
@@ -136,7 +136,7 @@ export function SidebarCompactItem({
             background: NAV_ACTIVE_BG,
             borderColor: NAV_ACTIVE_BORDER,
             boxShadow: NAV_ACTIVE_SHADOW,
-            color: NAV_PRIMARY,
+            color: NAV_ACTIVE_TEXT,
           },
           "&.Mui-selected:hover": { background: NAV_ACTIVE_BG },
           "&:hover": {
@@ -144,7 +144,7 @@ export function SidebarCompactItem({
             borderColor: miniSelected
               ? NAV_ACTIVE_BORDER
               : "transparent",
-            color: miniSelected ? NAV_PRIMARY : NAV_TEXT_COLOR,
+            color: miniSelected ? NAV_ACTIVE_TEXT : NAV_TEXT_COLOR,
           },
         }}
       >
@@ -264,7 +264,7 @@ export function SidebarCompactItem({
                           ? NAV_ACTIVE_BG
                           : "transparent",
                         borderRadius: "8px",
-                        color: isChildActive ? NAV_PRIMARY : NAV_ITEM_COLOR,
+                        color: isChildActive ? NAV_ACTIVE_TEXT : NAV_ITEM_COLOR,
                         height: 36,
                         maxHeight: 36,
                         minHeight: 36,
@@ -278,7 +278,7 @@ export function SidebarCompactItem({
                           background: isChildActive
                             ? NAV_ACTIVE_BG
                             : NAV_HOVER_BG,
-                          color: isChildActive ? NAV_PRIMARY : NAV_TEXT_COLOR,
+                          color: isChildActive ? NAV_ACTIVE_TEXT : NAV_TEXT_COLOR,
                         },
                       }}
                     >

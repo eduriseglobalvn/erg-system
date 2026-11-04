@@ -10,12 +10,12 @@ import { ErgPortalReportIcon } from "./portal-sidebar-report-icon";
 import {
   NAV_ACTIVE_BG,
   NAV_ACTIVE_BORDER,
+  NAV_ACTIVE_TEXT,
   NAV_ACTIVE_SHADOW,
   NAV_HOVER_BG,
   NAV_ITEM_COLOR,
   NAV_PREVIEW_BG,
   NAV_PREVIEW_BORDER,
-  NAV_PRIMARY,
   NAV_TEXT_COLOR,
   SUBMENU_DISCLOSURE_TRANSITION,
   TREE_CONNECTOR_MASK,
@@ -87,7 +87,7 @@ export function SidebarBranchItem({
               ? `1px solid ${NAV_PREVIEW_BORDER}`
             : "1px solid transparent",
           borderRadius: "9px",
-          color: isExpanded ? NAV_TEXT_COLOR : NAV_ITEM_COLOR,
+          color: isBranchActive ? NAV_ACTIVE_TEXT : isExpanded ? NAV_TEXT_COLOR : NAV_ITEM_COLOR,
           boxShadow: isBranchActive ? NAV_ACTIVE_SHADOW : "none",
           display: "flex",
           height: 42,
@@ -112,7 +112,7 @@ export function SidebarBranchItem({
               : isPreviewOpen
                 ? NAV_PREVIEW_BORDER
                 : "transparent",
-            color: NAV_TEXT_COLOR,
+            color: isBranchActive ? NAV_ACTIVE_TEXT : NAV_TEXT_COLOR,
           },
         }}
       >
@@ -241,7 +241,7 @@ export function SidebarBranchItem({
                         ? `1px solid ${NAV_ACTIVE_BORDER}`
                         : "1px solid transparent",
                       borderRadius: "8px",
-                      color: isChildActive ? NAV_PRIMARY : NAV_ITEM_COLOR,
+                      color: isChildActive ? NAV_ACTIVE_TEXT : NAV_ITEM_COLOR,
                       boxShadow: isChildActive ? NAV_ACTIVE_SHADOW : "none",
                       display: "flex",
                       height: 36,
@@ -276,7 +276,7 @@ export function SidebarBranchItem({
                         borderColor: isChildActive
                           ? NAV_ACTIVE_BORDER
                           : "transparent",
-                        color: isChildActive ? NAV_PRIMARY : NAV_TEXT_COLOR,
+                        color: isChildActive ? NAV_ACTIVE_TEXT : NAV_TEXT_COLOR,
                       },
                     }}
                   >
