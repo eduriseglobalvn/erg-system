@@ -12,13 +12,12 @@ describe("Teacher PWA calendar and action-button policy", () => {
     expect(source).toContain("--erg-blue-ring:");
   });
 
-  it("keeps the quick-assign action bound to an explicit ERG token", () => {
+  it("keeps the quick-assign action on themed MUI buttons", () => {
     const source = readFileSync(resolve("src/features/lms/components/exercise-bank/mobile-exercise-bank-view.tsx"), "utf8");
 
     expect(source).toContain("onAssign(exercise.title)");
-    expect(source).toContain("!bg-[var(--erg-blue)]");
-    expect(source).toContain("!text-white");
-    expect(source).toContain("!border-[#d9e2ef]");
+    expect(source).toContain('variant="contained"');
+    expect(source).not.toMatch(/className\s*=/);
   });
 
   it("selects agenda as the mobile calendar default without removing desktop week view", () => {

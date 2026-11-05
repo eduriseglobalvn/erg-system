@@ -1,5 +1,12 @@
-import { ChevronRight, RefreshCw, Search } from "lucide-react";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 
+import { ErgButton, ErgIconButton, ErgSearchField } from "@/components/erg-mui";
 import { WindowsFolderIcon } from "@/components/learning-resources/explorer-ui";
 import { LEARNING_RESOURCE_WORKSPACE_LABEL } from "@/components/learning-resources/learning-resource-workspace-labels";
 import type {
@@ -46,96 +53,174 @@ export function MobileLearningResourceExplorer({
   const itemCount = childCategories.length + resources.length;
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[20px] border border-white bg-[#f3f6fb] text-slate-900 shadow-[0_12px_34px_rgba(96,165,250,0.10)] md:hidden">
-      <header className="shrink-0 border-b border-[#dbe4f0] bg-white/95 px-3 py-3 shadow-[0_10px_28px_rgba(96,165,250,0.06)] backdrop-blur-md">
-        <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[12px] font-bold uppercase text-[var(--erg-blue)]">{displayText(activeSubject?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</p>
-            <h1 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</h1>
-          </div>
-          <button type="button" onClick={onRefresh} className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#dce6f1] bg-[#f8fbff] text-slate-700 shadow-[var(--shadow-xs)]" aria-label="Làm mới học liệu">
-            <RefreshCw className="h-4 w-4" />
-          </button>
-        </div>
-        <div className="mt-3 flex h-11 items-center rounded-[14px] border border-[#d7e0ec] bg-[#f8fbff] px-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] focus-within:border-[var(--erg-blue)] focus-within:ring-2 focus-within:ring-[var(--erg-blue-ring)]">
-          <Search className="mr-2 h-4 w-4 text-[var(--erg-blue)]" />
-          <input
-            value={keyword}
-            onChange={(event) => onKeywordChange(event.target.value)}
-            placeholder="Tìm học liệu"
-            className="min-w-0 flex-1 bg-transparent text-[15px] font-semibold outline-none placeholder:text-[#64748b]"
-            type="search"
-          />
-        </div>
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]">
+    <Box
+      sx={{
+        bgcolor: "background.default",
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 2.5,
+        boxShadow: 1,
+        color: "text.primary",
+        display: { xs: "flex", md: "none" },
+        flexDirection: "column",
+        height: "100%",
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
+      <Box component="header" sx={{ bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", flexShrink: 0, px: 1.5, py: 1.5 }}>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="caption" sx={{ color: "primary.main", display: "block", fontWeight: "fontWeightBold", textTransform: "uppercase" }}>
+              {displayText(activeSubject?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}
+            </Typography>
+            <Typography component="h1" variant="h5" noWrap>
+              {displayText(activeCategory?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}
+            </Typography>
+          </Box>
+          <ErgIconButton
+            label="Làm mới học liệu"
+            onClick={onRefresh}
+            sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1.5, flexShrink: 0, height: 44, width: 44 }}
+          >
+            <RefreshIcon fontSize="small" />
+          </ErgIconButton>
+        </Stack>
+        <ErgSearchField
+          value={keyword}
+          onChange={(event) => onKeywordChange(event.target.value)}
+          placeholder="Tìm học liệu"
+          type="search"
+          sx={{ mt: 1.5, "& .MuiOutlinedInput-root": { minHeight: 44 } }}
+        />
+        <Stack direction="row" spacing={1} sx={{ mt: 1.5, overflowX: "auto", pb: 0.5, scrollbarWidth: "none" }}>
           {breadcrumbItems.map((item, index) => (
-            <button
+            <ErgButton
               key={`${item.label}-${index}`}
-              type="button"
+              variant="outlined"
+              color="inherit"
               onClick={() => onSelectCategory(item.categoryId)}
-              className="min-h-11 max-w-[220px] shrink-0 truncate rounded-full border border-[#dce6f1] bg-[#f8fbff] px-3 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]"
+              sx={{
+                borderColor: "divider",
+                borderRadius: 999,
+                display: "block",
+                flexShrink: 0,
+                maxWidth: 220,
+                minHeight: 44,
+                overflow: "hidden",
+                px: 1.5,
+                textOverflow: "ellipsis",
+                typography: "subtitle2",
+                whiteSpace: "nowrap",
+              }}
             >
               {displayText(item.label)}
-            </button>
+            </ErgButton>
           ))}
-        </div>
-      </header>
+        </Stack>
+      </Box>
 
-      <main className="min-h-0 flex-1 overflow-y-auto p-3 pb-[calc(1rem+env(safe-area-inset-bottom))]">
-        <div className="mb-3 flex items-center justify-between gap-2 text-[13px] font-bold text-slate-600">
-          <span>{itemCount} mục</span>
-          <span className="truncate">{displayText(activeGrade?.label) || "-"} · {totalVisibleResources} học liệu</span>
-        </div>
+      <Box component="main" sx={{ flex: 1, minHeight: 0, overflowY: "auto", p: 1.5, pb: "calc(1rem + env(safe-area-inset-bottom))" }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", color: "text.secondary", justifyContent: "space-between", mb: 1.5 }}>
+          <Typography component="span" variant="subtitle2">{itemCount} mục</Typography>
+          <Typography component="span" variant="subtitle2" noWrap>
+            {displayText(activeGrade?.label) || "-"} · {totalVisibleResources} học liệu
+          </Typography>
+        </Stack>
 
         {childCategories.length ? (
-          <section className="mb-4 space-y-3">
+          <Stack component="section" spacing={1.5} sx={{ mb: 2 }}>
             {childCategories.map((category) => (
-              <button
+              <ButtonBase
                 key={category.id}
-                type="button"
                 onClick={() => onSelectCategory(category.id)}
-                className="flex min-h-14 w-full items-center gap-3 rounded-[16px] border border-white bg-white px-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)]"
+                sx={{ ...cardSx, gap: 1.5, justifyContent: "flex-start", minHeight: 56, px: 1.5 }}
               >
                 <WindowsFolderIcon />
-                <span className="min-w-0 flex-1 truncate text-[14px] font-bold text-slate-950">{displayText(category.label)}</span>
-                <ChevronRight className="h-4 w-4 text-slate-400" />
-              </button>
+                <Typography component="span" variant="subtitle2" noWrap sx={{ flex: 1, fontWeight: "fontWeightBold", minWidth: 0 }}>
+                  {displayText(category.label)}
+                </Typography>
+                <ChevronRightIcon fontSize="small" sx={{ color: "text.disabled" }} />
+              </ButtonBase>
             ))}
-          </section>
+          </Stack>
         ) : null}
 
-        <section className="space-y-3">
+        <Stack component="section" spacing={1.5}>
           {resources.map((resource) => (
-            <button
+            <ButtonBase
               key={resource.id}
-              type="button"
               onClick={() => onOpenResource(resource)}
-              className="w-full rounded-[16px] border border-white bg-white p-3 text-left shadow-[0_10px_26px_rgba(96,165,250,0.08)] transition active:scale-[0.99]"
+              sx={{ ...cardSx, alignItems: "flex-start", gap: 1.5, p: 1.5, "&:active": { transform: "scale(0.99)" } }}
             >
-              <div className="flex items-start gap-3">
-                <ResourceExplorerIcon resource={resource} />
-                <div className="min-w-0 flex-1">
-                  <p className="line-clamp-2 text-[14px] font-bold text-slate-950">{displayText(resource.title)}</p>
-                  <p className="mt-1 text-[13px] font-semibold text-slate-600">{getExplorerType(resource)} · {getExplorerSize(resource)}</p>
-                </div>
-                <span className="rounded-full border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-2.5 py-1 text-[12px] font-bold text-[var(--erg-blue)]">{displayText(resource.formatBadge)}</span>
-              </div>
-            </button>
+              <ResourceExplorerIcon resource={resource} />
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant="subtitle2"
+                  sx={{ WebkitBoxOrient: "vertical", WebkitLineClamp: 2, display: "-webkit-box", fontWeight: "fontWeightBold", overflow: "hidden" }}
+                >
+                  {displayText(resource.title)}
+                </Typography>
+                <Typography variant="body2" sx={{ color: "text.secondary", mt: 0.5 }}>
+                  {getExplorerType(resource)} · {getExplorerSize(resource)}
+                </Typography>
+              </Box>
+              <Typography
+                component="span"
+                variant="caption"
+                sx={{
+                  bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+                  border: 1,
+                  borderColor: (theme) => alpha(theme.palette.primary.main, 0.3),
+                  borderRadius: 999,
+                  color: "primary.main",
+                  fontWeight: "fontWeightBold",
+                  px: 1.25,
+                  py: 0.5,
+                }}
+              >
+                {displayText(resource.formatBadge)}
+              </Typography>
+            </ButtonBase>
           ))}
-        </section>
+        </Stack>
 
         {libraryError ? (
-          <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
+          <Typography variant="body2" sx={{ ...noticeSx, bgcolor: "warning.light", borderColor: "warning.main", color: "warning.dark" }}>
             {displayText(libraryError)}
-          </p>
+          </Typography>
         ) : null}
         {viewerLoadingResourceId ? (
-          <p className="mt-3 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-3 py-2 text-sm font-medium text-[var(--erg-blue)]">
+          <Typography
+            variant="body2"
+            sx={{ ...noticeSx, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), borderColor: "primary.main", color: "primary.main" }}
+          >
             Đang mở học liệu...
-          </p>
+          </Typography>
         ) : null}
         {!itemCount ? <EmptyState /> : null}
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 }
+
+const cardSx = {
+  bgcolor: "background.paper",
+  border: 1,
+  borderColor: "divider",
+  borderRadius: 2,
+  boxShadow: 1,
+  display: "flex",
+  textAlign: "left",
+  transition: "transform 0.15s ease",
+  width: "100%",
+} as const;
+
+const noticeSx = {
+  border: 1,
+  borderRadius: 0.75,
+  fontWeight: "fontWeightMedium",
+  mt: 1.5,
+  px: 1.5,
+  py: 1,
+} as const;

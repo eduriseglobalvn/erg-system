@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from "react";
+import Alert from "@mui/material/Alert";
+import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
-import { X } from "lucide-react";
 
 import {
   emptyQuestionBankData,
@@ -230,14 +231,13 @@ export function CreateExerciseDialog({
       slotProps={{
         backdrop: {
           sx: {
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
             backdropFilter: "blur(2px)",
           },
         },
         paper: {
           sx: {
-            borderRadius: { xs: "12px", sm: "16px", md: "20px" },
-            boxShadow: "0 25px 70px rgba(0, 0, 0, 0.2)",
+            borderRadius: { xs: 1.5, sm: 2, md: 2.5 },
+            boxShadow: 24,
             height: { xs: "94vh", sm: "90vh", md: "88vh" },
             maxHeight: { xs: "96vh", md: 840 },
             width: { xs: "calc(100% - 16px)", sm: "calc(100% - 32px)", md: "92vw" },
@@ -246,14 +246,12 @@ export function CreateExerciseDialog({
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            bgcolor: "#FFFFFF",
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif',
+            bgcolor: "background.paper",
           },
         },
       }}
     >
-      <div className="flex flex-col min-h-0 flex-1">
+      <Box sx={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
         <CreateExerciseHeader
           initialExercise={initialExercise}
           subjectName={subjectName}
@@ -277,25 +275,18 @@ export function CreateExerciseDialog({
             flexDirection: "column",
             minHeight: 0,
             overflow: "hidden",
-            bgcolor: "#F8FAFC",
+            bgcolor: "background.default",
           }}
         >
           {error ? (
-            <div className="m-4 mb-0 rounded-xl bg-rose-50 px-4 py-3 text-[12px] font-semibold text-rose-700 border border-rose-200 flex items-center justify-between">
-              <span>{error}</span>
-              <button
-                type="button"
-                onClick={() => setError("")}
-                className="text-rose-700 hover:opacity-75"
-              >
-                <X className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <Alert severity="error" onClose={() => setError("")} sx={{ m: 2, mb: 0 }}>
+              {error}
+            </Alert>
           ) : null}
 
           {activeStep === "setup" ? (
-            <div className="flex-1 min-h-0 overflow-y-auto bg-slate-50/50">
-              <div className="grid grid-cols-1 lg:grid-cols-12 min-h-full">
+            <Box sx={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+              <Box sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(0,1fr)", lg: "minmax(0,7fr) minmax(0,5fr)" }, minHeight: "100%" }}>
                 <SetupForm
                   title={title}
                   setTitle={setTitle}
@@ -332,10 +323,10 @@ export function CreateExerciseDialog({
                   selectedQuestions={selectedQuestions}
                   setActiveStep={setActiveStep}
                 />
-              </div>
-            </div>
+              </Box>
+            </Box>
           ) : (
-            <div className="flex flex-1 flex-col min-h-0 overflow-hidden bg-slate-50/50">
+            <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
               <PickFilterBar
                 subjects={subjects}
                 selectedSubjectId={selectedSubjectId}
@@ -367,7 +358,7 @@ export function CreateExerciseDialog({
                 selectedQuestionIds={selectedQuestionIds}
                 toggleQuestion={toggleQuestion}
               />
-            </div>
+            </Box>
           )}
         </DialogContent>
 
@@ -383,7 +374,7 @@ export function CreateExerciseDialog({
           handleSubmit={handleSubmit}
           onClose={onClose}
         />
-      </div>
+      </Box>
     </Dialog>
   );
 }

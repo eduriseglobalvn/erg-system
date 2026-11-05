@@ -1,19 +1,20 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, type ComponentProps } from "react";
+import Box from "@mui/material/Box";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
-import Button from "@mui/material/Button";
-import {
-  HelpCircle,
-  Pencil,
-  Search,
-  Send,
-  Sparkles,
-  X,
-} from "lucide-react";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import CloseIcon from "@mui/icons-material/Close";
+import EditIcon from "@mui/icons-material/Edit";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
+import SendIcon from "@mui/icons-material/Send";
 
-import { cn } from "@/lib/utils";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
+import { ErgEmptyState, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
+import { ErgSearchField } from "@/components/erg-mui/erg-form";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import {
   difficultyLabels,
@@ -21,25 +22,36 @@ import {
   type Exercise,
 } from "./exercise-bank-model";
 
-const questionTypeConfig: Record<string, { label: string; badgeClass: string }> = {
-  "multiple-choice": { label: "Trắc nghiệm 1 đáp án", badgeClass: "bg-blue-50 text-[#0F6CBD] border-blue-200" },
-  "multiple-response": { label: "Trắc nghiệm nhiều đáp án", badgeClass: "bg-sky-50 text-sky-700 border-sky-200" },
-  "true-false": { label: "Đúng / Sai", badgeClass: "bg-cyan-50 text-cyan-700 border-cyan-200" },
-  "fill-in-the-blanks": { label: "Điền vào chỗ trống", badgeClass: "bg-amber-50 text-amber-800 border-amber-200" },
-  "drag-the-words": { label: "Kéo thả từ", badgeClass: "bg-amber-50 text-amber-800 border-amber-200" },
-  "matching": { label: "Nối cột / Ghép thẻ", badgeClass: "bg-teal-50 text-teal-700 border-teal-200" },
-  "sequence": { label: "Sắp xếp thứ tự", badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  "short-answer": { label: "Trả lời ngắn", badgeClass: "bg-slate-100 text-slate-700 border-slate-300" },
-  "numeric": { label: "Điền đáp số", badgeClass: "bg-emerald-50 text-emerald-800 border-emerald-200" },
-  "essay": { label: "Tự luận", badgeClass: "bg-amber-50 text-amber-900 border-amber-300" },
-  "code": { label: "Lập trình / Code", badgeClass: "bg-slate-100 text-slate-800 border-slate-300" },
-  "hotspot": { label: "Tương tác hình ảnh", badgeClass: "bg-sky-50 text-sky-800 border-sky-200" },
-  "drag-and-drop": { label: "Kéo thả đối tượng", badgeClass: "bg-blue-50 text-[#0F6CBD] border-blue-200" },
+type ChipTone = ComponentProps<typeof ErgStatusChip>["tone"];
+
+const questionTypeConfig: Record<string, { label: string; tone: ChipTone }> = {
+  "multiple-choice": { label: "Trắc nghiệm 1 đáp án", tone: "info" },
+  "multiple-response": { label: "Trắc nghiệm nhiều đáp án", tone: "info" },
+  "true-false": { label: "Đúng / Sai", tone: "info" },
+  "fill-in-the-blanks": { label: "Điền vào chỗ trống", tone: "warning" },
+  "drag-the-words": { label: "Kéo thả từ", tone: "warning" },
+  "matching": { label: "Nối cột / Ghép thẻ", tone: "success" },
+  "sequence": { label: "Sắp xếp thứ tự", tone: "success" },
+  "short-answer": { label: "Trả lời ngắn", tone: "neutral" },
+  "numeric": { label: "Điền đáp số", tone: "success" },
+  "essay": { label: "Tự luận", tone: "warning" },
+  "code": { label: "Lập trình / Code", tone: "neutral" },
+  "hotspot": { label: "Tương tác hình ảnh", tone: "info" },
+  "drag-and-drop": { label: "Kéo thả đối tượng", tone: "info" },
 };
 
 function getQuestionTypeConfig(type?: string) {
-  if (!type) return { label: "Trắc nghiệm", badgeClass: "bg-blue-50 text-[#0F6CBD] border-blue-200" };
-  return questionTypeConfig[type] ?? { label: type, badgeClass: "bg-slate-100 text-slate-700 border-slate-200" };
+  if (!type) return { label: "Trắc nghiệm", tone: "info" as ChipTone };
+  return questionTypeConfig[type] ?? { label: type, tone: "neutral" as ChipTone };
+}
+
+function getStructureHint(q: QuestionBankQuestion): { label: string; tone: ChipTone } {
+  if (q.type === "matching") return { label: "Ghép nối các cặp thông tin tương ứng", tone: "success" };
+  if (q.type === "fill-in-the-blanks" || q.type === "drag-the-words") return { label: "Điền từ hoặc cụm từ vào vị trí còn khuyết", tone: "warning" };
+  if (q.type === "sequence") return { label: "Sắp xếp các bước theo đúng thứ tự logic", tone: "success" };
+  if (q.type === "essay") return { label: "Học sinh trình bày câu trả lời dạng tự luận", tone: "warning" };
+  if (q.type === "short-answer" || q.type === "numeric") return { label: "Nhập câu trả lời ngắn / đáp số", tone: "neutral" };
+  return { label: q.choices && q.choices.length > 0 ? `${q.choices.length} phương án lựa chọn` : "Trắc nghiệm tiêu chuẩn", tone: "info" };
 }
 
 interface ExerciseQuestionDetailDialogProps {
@@ -93,22 +105,19 @@ export function ExerciseQuestionDetailDialog({
       slotProps={{
         backdrop: {
           sx: {
-            backgroundColor: "rgba(15, 23, 42, 0.45)",
             backdropFilter: "blur(2px)",
           },
         },
         paper: {
           sx: {
-            borderRadius: { xs: "12px", sm: "16px" },
-            boxShadow: "0 25px 70px rgba(0, 0, 0, 0.2)",
+            borderRadius: { xs: 1.5, sm: 2 },
+            boxShadow: 24,
             height: { xs: "92vh", sm: "88vh" },
             maxHeight: 820,
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
-            bgcolor: "#FFFFFF",
-            fontFamily:
-              '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif',
+            bgcolor: "background.paper",
           },
         },
       }}
@@ -122,66 +131,56 @@ export function ExerciseQuestionDetailDialog({
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          borderBottom: "1px solid #E2E8F0",
-          bgcolor: "#FFFFFF",
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
           gap: 1.5,
         }}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="grid h-8.5 w-8.5 shrink-0 place-items-center rounded-lg bg-blue-50/80 text-[#0F6CBD] border border-blue-200/60 shadow-2xs">
-            <Sparkles className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-[15px] font-bold text-slate-900 leading-tight truncate">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1.25, minWidth: 0 }}>
+          <Box sx={{ display: "grid", placeItems: "center", width: 34, height: 34, flexShrink: 0, borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.default", color: "primary.main" }}>
+            <AutoAwesomeIcon fontSize="small" />
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+              <Typography variant="subtitle1" component="h2" noWrap sx={{ fontWeight: "fontWeightBold" }}>
                 {exercise.title}
-              </h2>
-              <span className="rounded-md bg-blue-50 text-[#0F6CBD] px-2 py-0.5 text-[11px] font-bold border border-blue-200/70">
-                {exercise.subject} • {exercise.level}
-              </span>
-            </div>
-            <p className="text-[11.5px] text-slate-500 mt-0.5">
+              </Typography>
+              <ErgStatusChip dot={false} label={`${exercise.subject} • ${exercise.level}`} tone="info" />
+            </Box>
+            <Typography variant="caption" component="p" sx={{ color: "text.secondary", mt: 0.25 }}>
               {typeLabels[exercise.type]} • {difficultyLabels[exercise.difficulty]} • {exercise.durationMinutes} phút • {questions.length} câu hỏi
-            </p>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Box>
 
-        <button
-          type="button"
-          onClick={onClose}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition-colors cursor-pointer shrink-0"
-          title="Đóng"
-        >
-          <X className="h-4 w-4" />
-        </button>
+        <ErgIconButton label="Đóng" size="small" onClick={onClose} sx={{ flexShrink: 0 }}>
+          <CloseIcon fontSize="small" />
+        </ErgIconButton>
       </DialogTitle>
 
       {/* TOOLBAR TÌM KIẾM CÂU HỎI */}
-      <div className="shrink-0 border-b border-slate-200/80 bg-[#F8FAFC] px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Tìm kiếm câu hỏi theo nội dung, chủ đề, dạng câu..."
-            className="h-8.5 w-full rounded-lg border border-slate-200 bg-white pl-8 pr-7 text-[12px] text-slate-900 placeholder:text-slate-400 outline-none transition-colors focus:border-[#0F6CBD] focus:ring-2 focus:ring-[#0F6CBD]/10"
-          />
-          {searchTerm && (
-            <button
-              type="button"
-              onClick={() => setSearchTerm("")}
-              className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-0.5 text-slate-400 hover:text-slate-600 cursor-pointer"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          )}
-        </div>
+      <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.default", px: { xs: 1.5, sm: 3 }, py: 1.25, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+        <ErgSearchField
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Tìm kiếm câu hỏi theo nội dung, chủ đề, dạng câu..."
+          slotProps={{
+            input: {
+              endAdornment: searchTerm ? (
+                <ErgIconButton label="Xóa tìm kiếm" size="small" onClick={() => setSearchTerm("")}>
+                  <CloseIcon fontSize="inherit" />
+                </ErgIconButton>
+              ) : undefined,
+            },
+          }}
+          sx={{ flex: 1, maxWidth: 448 }}
+        />
 
-        <div className="text-[12px] text-slate-500 font-medium shrink-0">
-          Hiển thị <strong className="text-slate-900">{filteredQuestions.length}</strong> / {questions.length} câu hỏi
-        </div>
-      </div>
+        <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+          Hiển thị <Box component="strong" sx={{ color: "text.primary" }}>{filteredQuestions.length}</Box> / {questions.length} câu hỏi
+        </Typography>
+      </Box>
 
       {/* DANH SÁCH CÂU HỎI (CHỈ HIỂN THỊ CÂU HỎI & ĐỊNH DẠNG, KHÔNG HIỆN ĐÁP ÁN) */}
       <DialogContent
@@ -189,119 +188,74 @@ export function ExerciseQuestionDetailDialog({
           p: { xs: 2, sm: 3 },
           flex: 1,
           overflowY: "auto",
-          bgcolor: "#F8FAFC",
+          bgcolor: "background.default",
         }}
       >
         {filteredQuestions.length > 0 ? (
-          <div className="space-y-3">
+          <Stack spacing={1.5}>
             {filteredQuestions.map((q, index) => {
               const typeConf = getQuestionTypeConfig(q.type);
+              const hint = getStructureHint(q);
               return (
-                <div
+                <Box
                   key={q.id || index}
-                  className="rounded-xl border border-slate-200/90 bg-white p-3.5 sm:p-4 shadow-2xs space-y-2.5"
+                  sx={{ border: 1, borderColor: "divider", borderRadius: 1.5, bgcolor: "background.paper", p: { xs: 1.75, sm: 2 }, display: "flex", flexDirection: "column", gap: 1.25 }}
                 >
                   {/* Meta câu hỏi: Số thứ tự, Dạng câu hỏi, Chủ đề, Độ khó */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="grid h-6 w-6 place-items-center rounded-md bg-blue-50 text-[#0F6CBD] font-bold text-[11px] border border-blue-100">
+                  <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
+                      <Typography variant="caption" sx={{ display: "grid", placeItems: "center", minWidth: 24, height: 24, borderRadius: 0.75, bgcolor: "background.default", color: "primary.main", fontWeight: "fontWeightBold" }}>
                         #{index + 1}
-                      </span>
+                      </Typography>
 
-                      <span className={cn("rounded px-2 py-0.5 text-[11px] font-semibold border", typeConf.badgeClass)}>
-                        {typeConf.label}
-                      </span>
+                      <ErgStatusChip dot={false} label={typeConf.label} tone={typeConf.tone} />
 
-                      {q.categoryLabel && (
-                        <span className="rounded bg-slate-100 text-slate-700 px-2 py-0.5 text-[11px] font-semibold border border-slate-200">
-                          {q.categoryLabel}
-                        </span>
-                      )}
+                      {q.categoryLabel && <ErgStatusChip dot={false} label={q.categoryLabel} />}
 
-                      <span
-                        className={cn(
-                          "rounded px-2 py-0.5 text-[11px] font-semibold border",
-                          q.difficulty === "core"
-                            ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                            : q.difficulty === "stretch"
-                            ? "bg-amber-50 text-amber-800 border-amber-300"
-                            : "bg-rose-50 text-rose-800 border-rose-300"
-                        )}
-                      >
-                        {q.difficulty === "core"
-                          ? "Cơ bản"
-                          : q.difficulty === "stretch"
-                          ? "Nâng cao"
-                          : "Thử thách"}
-                      </span>
-                    </div>
+                      <ErgStatusChip
+                        dot={false}
+                        label={q.difficulty === "core" ? "Cơ bản" : q.difficulty === "stretch" ? "Nâng cao" : "Thử thách"}
+                        tone={q.difficulty === "core" ? "success" : q.difficulty === "stretch" ? "warning" : "error"}
+                      />
+                    </Box>
 
                     {q.levelLabel && (
-                      <span className="text-[11px] text-slate-400 font-medium">
+                      <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
                         {q.levelLabel}
-                      </span>
+                      </Typography>
                     )}
-                  </div>
+                  </Box>
 
                   {/* Nội dung câu hỏi (Stem) */}
-                  <p className="text-[13.5px] sm:text-[14px] font-semibold text-slate-900 leading-relaxed pt-0.5">
+                  <Typography variant="subtitle2" component="p" sx={{ pt: 0.25 }}>
                     {q.stem}
-                  </p>
+                  </Typography>
 
                   {/* Quy cách và cấu trúc câu hỏi (KHÔNG hiển thị đáp án đúng / sai) */}
-                  <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100 text-[11.5px] text-slate-500">
-                    {q.type === "matching" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-teal-50/60 px-2 py-0.5 text-teal-700 font-medium border border-teal-200/60">
-                        Ghép nối các cặp thông tin tương ứng
-                      </span>
-                    ) : q.type === "fill-in-the-blanks" || q.type === "drag-the-words" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-amber-50/60 px-2 py-0.5 text-amber-800 font-medium border border-amber-200/60">
-                        Điền từ hoặc cụm từ vào vị trí còn khuyết
-                      </span>
-                    ) : q.type === "sequence" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-teal-50/60 px-2 py-0.5 text-teal-800 font-medium border border-teal-200/60">
-                        Sắp xếp các bước theo đúng thứ tự logic
-                      </span>
-                    ) : q.type === "essay" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-orange-50/60 px-2 py-0.5 text-orange-800 font-medium border border-orange-200/60">
-                        Học sinh trình bày câu trả lời dạng tự luận
-                      </span>
-                    ) : q.type === "short-answer" || q.type === "numeric" ? (
-                      <span className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 text-slate-700 font-medium border border-slate-200">
-                        Nhập câu trả lời ngắn / đáp số
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 rounded bg-blue-50/60 px-2 py-0.5 text-[#0F6CBD] font-medium border border-blue-200/60">
-                        {q.choices && q.choices.length > 0 ? `${q.choices.length} phương án lựa chọn` : "Trắc nghiệm tiêu chuẩn"}
-                      </span>
-                    )}
+                  <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1, pt: 0.5, borderTop: 1, borderColor: "divider" }}>
+                    <ErgStatusChip dot={false} label={hint.label} tone={hint.tone} />
 
                     {q.objective && (
-                      <span className="text-slate-500">
-                        • Mục tiêu: <span className="text-slate-700 font-medium">{q.objective}</span>
-                      </span>
+                      <Typography variant="caption" sx={{ color: "text.secondary" }}>
+                        • Mục tiêu: <Box component="span" sx={{ color: "text.primary", fontWeight: "fontWeightMedium" }}>{q.objective}</Box>
+                      </Typography>
                     )}
-                  </div>
+                  </Box>
 
                   {/* Tags nếu có */}
                   {q.tags && q.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1 pt-0.5">
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5, pt: 0.25 }}>
                       {q.tags.map((tag) => (
-                        <span key={tag} className="text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded font-medium">
-                          #{tag}
-                        </span>
+                        <ErgStatusChip key={tag} dot={false} label={`#${tag}`} />
                       ))}
-                    </div>
+                    </Box>
                   )}
-                </div>
+                </Box>
               );
             })}
-          </div>
+          </Stack>
         ) : (
-          <div className="py-12 text-center text-slate-500 text-[13px]">
-            <HelpCircle className="h-8 w-8 mx-auto text-slate-400 mb-2 opacity-50" />
-            <p>Không tìm thấy câu hỏi phù hợp với từ khóa.</p>
-          </div>
+          <ErgEmptyState icon={<HelpOutlineIcon />} title="Không tìm thấy câu hỏi phù hợp với từ khóa." />
         )}
       </DialogContent>
 
@@ -310,85 +264,49 @@ export function ExerciseQuestionDetailDialog({
         sx={{
           px: { xs: 2, sm: 3 },
           py: 1.5,
-          borderTop: "1px solid #E2E8F0",
+          borderTop: 1,
+          borderColor: "divider",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          bgcolor: "#FFFFFF",
+          bgcolor: "background.paper",
         }}
       >
-        <span className="text-[12px] text-slate-500 font-medium">
-          Tổng cộng: <strong className="text-slate-900">{questions.length} câu hỏi</strong> • Ước lượng ~{Math.max(15, Math.round(questions.length * 2))} phút
-        </span>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+          Tổng cộng: <Box component="strong" sx={{ color: "text.primary" }}>{questions.length} câu hỏi</Box> • Ước lượng ~{Math.max(15, Math.round(questions.length * 2))} phút
+        </Typography>
 
-        <div className="flex items-center gap-2">
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {onEdit && (
-            <Button
+            <ErgButton
               type="button"
               variant="outlined"
               onClick={() => {
                 onClose();
                 onEdit(exercise);
               }}
-              startIcon={<Pencil className="h-3.5 w-3.5 text-[#0F6CBD]" />}
-              sx={{
-                height: 36,
-                borderRadius: "8px",
-                px: 2,
-                fontSize: "12px",
-                textTransform: "none",
-                borderColor: "#CBD5E1",
-                color: "#1E293B",
-                fontWeight: 600,
-                "&:hover": { borderColor: "#0F6CBD", bgcolor: "#F0F7FF", color: "#0F6CBD" },
-              }}
+              startIcon={<EditIcon fontSize="small" />}
             >
               Chỉnh sửa bài này
-            </Button>
+            </ErgButton>
           )}
 
-          <Button
-            type="button"
-            variant="outlined"
-            onClick={onClose}
-            sx={{
-              height: 36,
-              borderRadius: "8px",
-              px: 2,
-              fontSize: "12px",
-              textTransform: "none",
-              borderColor: "#CBD5E1",
-              color: "#334155",
-              fontWeight: 600,
-              "&:hover": { borderColor: "#94A3B8", bgcolor: "#F8FAFC" },
-            }}
-          >
+          <ErgButton type="button" variant="text" onClick={onClose}>
             Đóng
-          </Button>
+          </ErgButton>
 
-          <Button
+          <ErgButton
             type="button"
             variant="contained"
             onClick={() => {
               onAssign(exercise.title);
               onClose();
             }}
-            startIcon={<Send className="h-3.5 w-3.5" />}
-            sx={{
-              height: 36,
-              borderRadius: "8px",
-              px: 2.5,
-              fontSize: "12px",
-              fontWeight: 600,
-              textTransform: "none",
-              bgcolor: "#0F6CBD",
-              boxShadow: "0 1px 3px rgba(15, 108, 189, 0.25)",
-              "&:hover": { bgcolor: "#0B5CAB" },
-            }}
+            startIcon={<SendIcon fontSize="small" />}
           >
             Giao bài tập này
-          </Button>
-        </div>
+          </ErgButton>
+        </Box>
       </DialogActions>
     </Dialog>
   );

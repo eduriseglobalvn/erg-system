@@ -1,10 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueries } from "@tanstack/react-query";
 import { QUERY_POLICIES } from "@/lib/query-policy";
-import { Layers, Search, Users, UsersRound } from "lucide-react";
+import GroupsOutlinedIcon from "@mui/icons-material/GroupsOutlined";
+import LayersOutlinedIcon from "@mui/icons-material/LayersOutlined";
+import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import Alert from "@mui/material/Alert";
-
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import ButtonBase from "@mui/material/ButtonBase";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+
+import { ErgSearchField, ErgSelect, ErgTextField } from "@/components/erg-mui/erg-form";
 import { classroomStudents } from "@/features/lms/classroom/api/classroom-defaults";
 import type { ClassroomSnapshot } from "@/domain/school/classroom-types";
 import {
@@ -17,7 +25,6 @@ import {
 } from "@/features/lms/api/lms-assignment-command-query";
 import { loadLmsClassWorkspace, mapClassWorkspaceToStudents } from "@/features/lms/api/lms-classroom-api";
 import { hasApiBase } from "@/lib/api-client";
-import { cn } from "@/lib/utils";
 import {
   GroupColorPicker,
   groupColorOptions,
@@ -30,7 +37,6 @@ import {
   type StudentGroup,
 } from "@/features/lms/components/student-groups-parts";
 import { CreateStudentGroupDialog } from "@/features/lms/components/student-group-create-dialog";
-import { AppSelect } from "@/components/erg-mui/app-select";
 
 const allClassesFilterValue = "all-classes";
 const initialStudentGroups = (): StudentGroup[] => [
@@ -289,125 +295,140 @@ export function StudentGroupsPage({
   }
 
   return (
-    <div className="flex min-h-full flex-col gap-3 px-3 py-3 xl:h-full xl:min-h-0 xl:overflow-hidden xl:px-6 xl:py-4">
-      <div className="shrink-0 rounded-lg border border-[#cbd7e6] bg-white px-3 py-2.5 shadow-[var(--shadow-xs)]">
-        <div className="grid items-center gap-3 xl:grid-cols-[minmax(280px,1fr)_auto_auto]">
-          <div className="min-w-0">
-            <div className="text-[13px] font-semibold text-slate-500">
-              Bài tập / <span className="text-slate-600">Quản lý nhóm học sinh</span>
-            </div>
-            <h1 className="mt-1 text-xl font-semibold tracking-normal text-slate-950">Quản lý nhóm học sinh</h1>
-            <p className="mt-0.5 truncate text-[13px] font-semibold text-slate-600">
+    <Box sx={{ display: "flex", minHeight: "100%", flexDirection: "column", gap: 1.5, px: { xs: 1.5, lg: 3 }, py: { xs: 1.5, lg: 2 }, height: { lg: "100%" }, overflow: { lg: "hidden" } }}>
+      <Paper variant="outlined" sx={{ ...panelSx, flexShrink: 0, px: 1.5, py: 1.25 }}>
+        <Box sx={{ display: "grid", alignItems: "center", gap: 1.5, gridTemplateColumns: { lg: "minmax(280px, 1fr) auto auto" } }}>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+              Bài tập / <Box component="span" sx={{ color: "text.primary" }}>Quản lý nhóm học sinh</Box>
+            </Typography>
+            <Typography variant="h3" component="h1" sx={{ mt: 0.5 }}>Quản lý nhóm học sinh</Typography>
+            <Typography variant="body2" noWrap sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
               Tạo nhóm và bóc học sinh từ nhiều lớp khác nhau trong {selectedSchoolName}.
-            </p>
-          </div>
-          <div className="grid min-w-[520px] grid-cols-3 gap-2 max-xl:min-w-0 max-sm:grid-cols-1">
-            <StudentGroupStat icon={Users} label="Số nhóm" value={String(groups.length)} />
-            <StudentGroupStat icon={UsersRound} label="Trong nhóm" value={`${groupStudents.length} học sinh`} />
-            <StudentGroupStat icon={Layers} label="Nguồn lớp" value={`${selectedClassCount} lớp`} />
-          </div>
-          <div className="flex shrink-0 flex-wrap justify-end gap-2">
-            <Button variant="outlined" onClick={onBack} sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }}>Về danh sách bài tập</Button>
-            <Button variant="contained" onClick={() => setCreateDialogOpen(true)} disabled={groupMutationPending} sx={{ height: 44, borderRadius: "8px", px: 2, fontSize: "14px", bgcolor: "var(--erg-blue)", "&:hover": { bgcolor: "var(--erg-blue-hover)" } }}>Tạo nhóm</Button>
-          </div>
-        </div>
-      </div>
+            </Typography>
+          </Box>
+          <Box sx={{ display: "grid", gap: 1, gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" }, minWidth: { lg: 520 } }}>
+            <StudentGroupStat icon={PeopleAltOutlinedIcon} label="Số nhóm" value={String(groups.length)} />
+            <StudentGroupStat icon={GroupsOutlinedIcon} label="Trong nhóm" value={`${groupStudents.length} học sinh`} />
+            <StudentGroupStat icon={LayersOutlinedIcon} label="Nguồn lớp" value={`${selectedClassCount} lớp`} />
+          </Box>
+          <Box sx={{ display: "flex", flexShrink: 0, flexWrap: "wrap", justifyContent: "flex-end", gap: 1 }}>
+            <Button variant="outlined" onClick={onBack} sx={{ height: 36, px: 1.5 }}>Về danh sách bài tập</Button>
+            <Button variant="contained" onClick={() => setCreateDialogOpen(true)} disabled={groupMutationPending} sx={{ height: 44, px: 2 }}>Tạo nhóm</Button>
+          </Box>
+        </Box>
+      </Paper>
 
       {groupsErrorMessage ? <Alert severity="error">{groupsErrorMessage}</Alert> : null}
 
-      <div className="grid gap-3 xl:min-h-0 xl:flex-1 xl:overflow-hidden xl:grid-cols-[280px_minmax(0,1fr)]">
-        <section className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-3 shadow-[var(--shadow-xs)]">
-          <h2 className="mb-2 text-[13px] font-bold text-slate-600">Danh sách nhóm</h2>
-          <div className="flex min-h-0 flex-1 flex-col">
-            <div className="mb-3 flex-1 space-y-2 overflow-y-auto pr-1 max-xl:max-h-64">
-              {groups.map((group) => (
-                <button
-                  key={group.id}
-                  type="button"
-                  onClick={() => setSelectedGroupId(group.id)}
-                  style={{
-                    backgroundColor: selectedGroupId === group.id ? group.color : undefined,
-                    borderLeftColor: group.color,
-                  }}
-                  className={cn(
-                    "w-full rounded-lg border border-l-4 px-3 py-2.5 text-left text-[13px] font-bold transition",
-                    selectedGroupId === group.id
-                      ? "border-transparent text-white shadow-sm"
-                      : "border-[#dbe4f0] bg-white text-slate-700 hover:bg-slate-50/75",
-                  )}
-                >
-                  <span className="flex items-center justify-between gap-3">
-                    <span className="truncate">{group.name}</span>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded px-1.5 py-0.5 text-[13px] font-bold",
-                        selectedGroupId === group.id ? "bg-white/20 text-white" : "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]",
-                      )}
-                    >
-                      {group.studentIds.length} HS
-                    </span>
-                  </span>
-                  <span
-                    className={cn(
-                      "mt-1 block truncate text-[13px] font-semibold",
-                      selectedGroupId === group.id ? "text-white/85" : "text-slate-500",
-                    )}
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { lg: "280px minmax(0, 1fr)" }, minHeight: { lg: 0 }, flex: { lg: 1 }, overflow: { lg: "hidden" } }}>
+        <Paper component="section" variant="outlined" sx={{ ...panelSx, display: "flex", minHeight: 0, flexDirection: "column", p: 1.5 }}>
+          <Typography variant="subtitle2" component="h2" sx={{ mb: 1, color: "text.secondary", fontWeight: "fontWeightBold" }}>Danh sách nhóm</Typography>
+          <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
+            <Stack spacing={1} sx={{ mb: 1.5, flex: 1, overflowY: "auto", pr: 0.5, maxHeight: { xs: 256, lg: "none" } }}>
+              {groups.map((group) => {
+                const selected = selectedGroupId === group.id;
+                return (
+                  <ButtonBase
+                    key={group.id}
+                    onClick={() => setSelectedGroupId(group.id)}
+                    sx={{
+                      display: "block",
+                      width: "100%",
+                      flexShrink: 0,
+                      border: 1,
+                      borderLeft: 4,
+                      borderColor: selected ? "transparent" : "divider",
+                      borderLeftColor: group.color,
+                      borderRadius: 1,
+                      bgcolor: selected ? group.color : "background.paper",
+                      color: selected ? "common.white" : "text.primary",
+                      boxShadow: selected ? 1 : 0,
+                      px: 1.5,
+                      py: 1.25,
+                      textAlign: "left",
+                      typography: "body2",
+                      fontWeight: "fontWeightBold",
+                      transition: "background-color 0.15s ease",
+                      "&:hover": selected ? undefined : { bgcolor: "action.hover" },
+                    }}
                   >
-                    {group.note || "Chưa có ghi chú"}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-          </div>
-        </section>
+                    <Box component="span" sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+                      <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{group.name}</Box>
+                      <Box
+                        component="span"
+                        sx={{
+                          flexShrink: 0,
+                          borderRadius: 0.5,
+                          px: 0.75,
+                          py: 0.25,
+                          bgcolor: selected ? "rgba(255, 255, 255, 0.2)" : "info.light",
+                          color: selected ? "common.white" : "primary.main",
+                        }}
+                      >
+                        {group.studentIds.length} HS
+                      </Box>
+                    </Box>
+                    <Box
+                      component="span"
+                      sx={{ mt: 0.5, display: "block", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: "fontWeightMedium", color: selected ? "common.white" : "text.secondary", opacity: selected ? 0.85 : 1 }}
+                    >
+                      {group.note || "Chưa có ghi chú"}
+                    </Box>
+                  </ButtonBase>
+                );
+              })}
+            </Stack>
+          </Box>
+        </Paper>
 
         {currentGroup ? (
-          <section className="grid gap-3 xl:min-h-0 xl:overflow-hidden 2xl:grid-cols-[minmax(0,0.9fr)_minmax(460px,1.1fr)]">
-            <div className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white p-4 shadow-[var(--shadow-xs)]">
-              <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <label className="mb-1 block text-[13px] font-semibold text-slate-600">Tên nhóm</label>
-                  <input
-                    type="text"
+          <Box component="section" sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { xl: "minmax(0, 0.9fr) minmax(460px, 1.1fr)" }, minHeight: { lg: 0 }, overflow: { lg: "hidden" } }}>
+            <Paper variant="outlined" sx={{ ...panelSx, display: "flex", minHeight: 0, flexDirection: "column", p: 2 }}>
+              <Box sx={{ mb: 1.5, display: "flex", flexWrap: "wrap", alignItems: "flex-start", justifyContent: "space-between", gap: 1.5 }}>
+                <Box sx={{ minWidth: 0, flex: 1, maxWidth: 384 }}>
+                  <ErgTextField
+                    compact
+                    label="Tên nhóm"
                     value={currentGroup.name}
                     onChange={(event) => updateGroup((group) => ({ ...group, name: event.target.value }))}
                     onBlur={() => void commitCurrentGroup()}
-                    className="w-full max-w-sm border-b border-transparent pb-1 text-lg font-semibold text-slate-900 focus:border-[#cbd7e6] focus:outline-none"
                   />
-                </div>
-                <Button variant="outlined" onClick={deleteGroup} disabled={groups.length <= 1 || groupMutationPending} sx={{ height: 36, borderRadius: "8px", px: 1.5, fontSize: "14px" }}>Xóa nhóm</Button>
-              </div>
+                </Box>
+                <Button variant="outlined" onClick={deleteGroup} disabled={groups.length <= 1 || groupMutationPending} sx={{ height: 36, px: 1.5 }}>Xóa nhóm</Button>
+              </Box>
 
               <GroupColorPicker
                 value={currentGroup.color}
                 onChange={(color) => void commitGroup((group) => ({ ...group, color }))}
               />
 
-              <label className="mb-1.5 block text-[13px] font-semibold text-slate-600">Ghi chú</label>
-              <textarea
+              <ErgTextField
+                label="Ghi chú"
+                multiline
+                minRows={2}
                 value={currentGroup.note}
                 onChange={(event) => updateGroup((group) => ({ ...group, note: event.target.value }))}
                 onBlur={() => void commitCurrentGroup()}
                 placeholder="Mục tiêu nhóm, lịch ôn tập, ghi chú khi giao bài..."
-                className="mb-3 min-h-16 resize-none rounded-lg border border-[#d7e0ec] bg-white px-3 py-2 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                sx={{ mb: 1.5 }}
               />
 
-              <div className="mb-2 flex items-center justify-between gap-3">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-900">Học sinh trong nhóm</h3>
-                  <p className="text-[13px] font-semibold text-slate-500">Bỏ chọn checkbox để đưa học sinh ra khỏi nhóm.</p>
-                </div>
-                <span className="rounded-md bg-[var(--erg-blue-light)] px-3 py-1 text-[13px] font-bold text-[var(--erg-blue)]">{groupStudents.length} học sinh</span>
-              </div>
+              <Box sx={{ mb: 1, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+                <Box>
+                  <Typography variant="subtitle2" component="h3">Học sinh trong nhóm</Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Bỏ chọn checkbox để đưa học sinh ra khỏi nhóm.</Typography>
+                </Box>
+                <Box component="span" sx={{ ...countPillSx, bgcolor: "info.light", color: "primary.main" }}>{groupStudents.length} học sinh</Box>
+              </Box>
 
-              <div className="mb-3 flex max-h-16 flex-wrap gap-2 overflow-y-auto pr-1">
+              <Box sx={{ mb: 1.5, display: "flex", maxHeight: 64, flexWrap: "wrap", gap: 1, overflowY: "auto", pr: 0.5 }}>
                 {groupSummaryByClass.map(({ classroom, count }) => (
-                  <span key={classroom.id} className="rounded-md border border-[#dbe4f0] bg-[#f8fbff] px-3 py-1 text-[13px] font-bold text-slate-700">
+                  <Box component="span" key={classroom.id} sx={{ ...countPillSx, border: 1, borderColor: "divider", bgcolor: "background.default" }}>
                     {classroom.className}: {count}
-                  </span>
+                  </Box>
                 ))}
-              </div>
+              </Box>
 
               <StudentSelectionTable
                 students={groupStudents}
@@ -425,44 +446,40 @@ export function StudentGroupsPage({
                 }}
                 mode="members"
               />
-            </div>
+            </Paper>
 
-            <div className="flex min-h-0 flex-col rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-              <div className="shrink-0 border-b border-[#dbe4f0] p-3">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-900">Danh sách học sinh</h3>
-                    <p className="text-[13px] font-semibold text-slate-500">Chọn checkbox để thêm học sinh vào nhóm hiện tại.</p>
-                  </div>
-                  <span className="rounded-md border border-[#dbe4f0] bg-[#f8fbff] px-3 py-1 text-[13px] font-bold text-slate-700">
+            <Paper variant="outlined" sx={{ ...panelSx, display: "flex", minHeight: 0, flexDirection: "column" }}>
+              <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", p: 1.5 }}>
+                <Box sx={{ mb: 1.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1.5 }}>
+                  <Box>
+                    <Typography variant="subtitle2" component="h3">Danh sách học sinh</Typography>
+                    <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Chọn checkbox để thêm học sinh vào nhóm hiện tại.</Typography>
+                  </Box>
+                  <Box component="span" sx={{ ...countPillSx, border: 1, borderColor: "divider", bgcolor: "background.default" }}>
                     {visibleStudents.length} học sinh
-                  </span>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <AppSelect
+                  </Box>
+                </Box>
+                <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1.5 }}>
+                  <ErgSelect
+                    size="small"
                     value={classFilter}
                     onChange={(event) => setClassFilter(event.target.value)}
-                    className="h-10 min-w-[220px] rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-900 outline-none focus:border-[var(--erg-blue)]"
-                  >
-                    <option value={allClassesFilterValue}>Tất cả lớp</option>
-                    {classes.map((classroom) => (
-                      <option key={classroom.id} value={classroom.id}>{classroom.className}</option>
-                    ))}
-                  </AppSelect>
-                  <div className="relative min-w-[240px] flex-1">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-                    <input
-                      type="text"
-                      value={studentSearch}
-                      onChange={(event) => setStudentSearch(event.target.value)}
-                      placeholder="Tìm học sinh hoặc lớp..."
-                      className="h-10 w-full rounded-lg border border-[#d7e0ec] bg-white pl-9 pr-3 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                    />
-                  </div>
-                </div>
-              </div>
+                    options={[
+                      { value: allClassesFilterValue, label: "Tất cả lớp" },
+                      ...classes.map((classroom) => ({ value: classroom.id, label: classroom.className })),
+                    ]}
+                    sx={{ width: "auto", minWidth: 220 }}
+                  />
+                  <ErgSearchField
+                    value={studentSearch}
+                    onChange={(event) => setStudentSearch(event.target.value)}
+                    placeholder="Tìm học sinh hoặc lớp..."
+                    sx={{ minWidth: 240, flex: 1 }}
+                  />
+                </Box>
+              </Box>
 
-              <div className="min-h-0 flex-1 p-3">
+              <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column", p: 1.5 }}>
                 <StudentSelectionTable
                   students={visibleStudents}
                   emptyLabel="Không tìm thấy học sinh phù hợp với bộ lọc hiện tại."
@@ -475,21 +492,24 @@ export function StudentGroupsPage({
                   }}
                   mode="available"
                 />
-              </div>
-            </div>
-          </section>
+              </Box>
+            </Paper>
+          </Box>
         ) : (
-          <section className="flex items-center justify-center rounded-lg border border-[#cbd7e6] bg-white p-8 text-sm font-semibold text-slate-600 shadow-[var(--shadow-xs)]">
-            Vui lòng tạo hoặc chọn một nhóm.
-          </section>
+          <Paper component="section" variant="outlined" sx={{ ...panelSx, display: "flex", alignItems: "center", justifyContent: "center", p: 4 }}>
+            <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Vui lòng tạo hoặc chọn một nhóm.</Typography>
+          </Paper>
         )}
-      </div>
+      </Box>
       <CreateStudentGroupDialog
         onClose={() => setCreateDialogOpen(false)}
         onSubmit={createGroup}
         open={createDialogOpen}
         pending={groupMutationPending}
       />
-    </div>
+    </Box>
   );
 }
+
+const panelSx = { borderRadius: 1, bgcolor: "background.paper", boxShadow: 1 } as const;
+const countPillSx = { borderRadius: 0.75, px: 1.5, py: 0.5, typography: "body2", fontWeight: "fontWeightBold", color: "text.primary" } as const;

@@ -1,6 +1,9 @@
-import Button from "@mui/material/Button";
-import { CheckCircle2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutlined";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import {
   difficultyLabels,
   statusLabels,
@@ -35,147 +38,124 @@ export function SetupPreview({
   setActiveStep: (step: CreateExerciseStep) => void;
 }) {
   return (
-                <div className="lg:col-span-5 p-4 sm:p-6 lg:p-7 space-y-4 bg-slate-50/70 border-t lg:border-t-0">
-                  {/* TIÊU ĐỀ CỘT PHẢI */}
-                  <div className="flex items-center justify-between pb-1 border-b border-slate-200/80">
-                    <span className="text-[12px] font-bold text-slate-700 uppercase tracking-wider">
-                      Xem trước thẻ bài tập
-                    </span>
-                    <span className="text-[11px] text-slate-400 font-medium">
-                      Cập nhật trực tiếp
-                    </span>
-                  </div>
+    <Box
+      sx={{
+        p: { xs: 2, sm: 3, lg: 3.5 },
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+        bgcolor: "background.default",
+        borderTop: { xs: 1, lg: 0 },
+        borderColor: "divider",
+      }}
+    >
+      {/* TIÊU ĐỀ CỘT PHẢI */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pb: 0.5, borderBottom: 1, borderColor: "divider" }}>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightBold", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Xem trước thẻ bài tập
+        </Typography>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+          Cập nhật trực tiếp
+        </Typography>
+      </Box>
 
-                  {/* THẺ PREVIEW CARD */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 shadow-xs">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-1.5">
-                        <span className="rounded bg-blue-50 text-[#0F6CBD] px-2 py-0.5 text-[11px] font-bold border border-blue-200">
-                          {subjectName} • {level || "Level 1"}
-                        </span>
-                        <span className="rounded bg-slate-100 text-slate-600 px-2 py-0.5 text-[11px] font-medium">
-                          {typeLabels[type]}
-                        </span>
-                      </div>
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold border",
-                          status === "published"
-                            ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                            : "bg-amber-50 text-amber-700 border-amber-200"
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "h-1.5 w-1.5 rounded-full",
-                            status === "published" ? "bg-emerald-500" : "bg-amber-500"
-                          )}
-                        />
-                        {statusLabels[status]}
-                      </span>
-                    </div>
+      {/* THẺ PREVIEW CARD */}
+      <Box sx={cardSx}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+            <ErgStatusChip dot={false} label={`${subjectName} • ${level || "Level 1"}`} tone="info" />
+            <ErgStatusChip dot={false} label={typeLabels[type]} />
+          </Box>
+          <ErgStatusChip label={statusLabels[status]} tone={status === "published" ? "success" : "warning"} />
+        </Box>
 
-                    <div>
-                      <h4 className="text-[14px] font-bold text-slate-900 leading-snug line-clamp-2">
-                        {title.trim() ? title : "Chưa đặt tên bài tập..."}
-                      </h4>
-                      <p className="text-[11px] text-slate-500 mt-1">
-                        Áp dụng: {classTargets || "Chưa gán lớp cụ thể"}
-                      </p>
-                    </div>
+        <Box>
+          <Typography
+            variant="subtitle2"
+            component="h4"
+            sx={{ fontWeight: "fontWeightBold", display: "-webkit-box", overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 }}
+          >
+            {title.trim() ? title : "Chưa đặt tên bài tập..."}
+          </Typography>
+          <Typography variant="caption" component="p" sx={{ color: "text.secondary", mt: 0.5 }}>
+            Áp dụng: {classTargets || "Chưa gán lớp cụ thể"}
+          </Typography>
+        </Box>
 
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-[11px]">
-                      <div className="rounded-lg bg-slate-50 p-2 border border-slate-100">
-                        <span className="block text-slate-500">Độ khó mục tiêu</span>
-                        <span className="block font-bold text-slate-800 mt-0.5">
-                          {difficultyLabels[difficulty]}
-                        </span>
-                      </div>
-                      <div className="rounded-lg bg-slate-50 p-2 border border-slate-100">
-                        <span className="block text-slate-500">Thời lượng dự tính</span>
-                        <span className="block font-bold text-slate-800 mt-0.5">
-                          ~{Math.max(15, Math.round(Math.max(1, selectedQuestionIds.length) * 2))} phút
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 1, pt: 1, borderTop: 1, borderColor: "divider" }}>
+          <PreviewStat label="Độ khó mục tiêu" value={difficultyLabels[difficulty]} />
+          <PreviewStat label="Thời lượng dự tính" value={`~${Math.max(15, Math.round(Math.max(1, selectedQuestionIds.length) * 2))} phút`} />
+        </Box>
+      </Box>
 
-                  {/* THẺ TỔNG QUAN CÂU HỎI ĐÃ BỐC */}
-                  <div className="rounded-xl border border-slate-200 bg-white p-4 space-y-3 shadow-xs">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-                        <h4 className="text-[13px] font-bold text-slate-900">
-                          Câu hỏi đã chọn ({selectedQuestionIds.length})
-                        </h4>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setActiveStep("pick")}
-                        className="text-[11.5px] font-semibold text-[#0F6CBD] hover:underline cursor-pointer"
-                      >
-                        ← Đổi câu hỏi
-                      </button>
-                    </div>
+      {/* THẺ TỔNG QUAN CÂU HỎI ĐÃ BỐC */}
+      <Box sx={cardSx}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <CheckCircleOutlineIcon color="success" fontSize="small" />
+            <Typography variant="subtitle2" component="h4" sx={{ fontWeight: "fontWeightBold" }}>
+              Câu hỏi đã chọn ({selectedQuestionIds.length})
+            </Typography>
+          </Box>
+          <ErgButton type="button" variant="text" size="small" onClick={() => setActiveStep("pick")}>
+            ← Đổi câu hỏi
+          </ErgButton>
+        </Box>
 
-                    {selectedQuestionIds.length > 0 ? (
-                      <div className="max-h-[220px] overflow-y-auto space-y-2 pr-1">
-                        {selectedQuestions.map((q, idx) => (
-                          <div
-                            key={q.id}
-                            className="rounded-lg border border-slate-100 bg-slate-50/70 p-2.5 text-[11.5px] space-y-1"
-                          >
-                            <div className="flex items-baseline gap-1.5">
-                              <span className="font-bold text-slate-400 shrink-0">#{idx + 1}</span>
-                              <p className="font-medium text-slate-800 line-clamp-1">{q.stem}</p>
-                            </div>
-                            <div className="flex items-center gap-2 text-[10.5px] text-slate-500">
-                              <span className="rounded bg-white px-1.5 py-0.2 border border-slate-200 font-medium">
-                                {q.categoryLabel}
-                              </span>
-                              {q.answer && (
-                                <>
-                                  <span>•</span>
-                                  <span className="text-emerald-700 font-medium">
-                                    Đ/a: {q.answer}
-                                  </span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="py-4 text-center">
-                        <p className="text-[12px] text-slate-500 italic mb-2">
-                          Chưa có câu hỏi nào được chọn từ ngân hàng.
-                        </p>
-                        <Button
-                          type="button"
-                          variant="outlined"
-                          size="small"
-                          onClick={() => setActiveStep("pick")}
-                          sx={{ textTransform: "none", fontSize: "11.5px", borderColor: "#0F6CBD", color: "#0F6CBD" }}
-                        >
-                          Bốc câu hỏi từ ngân hàng ngay →
-                        </Button>
-                      </div>
-                    )}
+        {selectedQuestionIds.length > 0 ? (
+          <Stack spacing={1} sx={{ maxHeight: 220, overflowY: "auto", pr: 0.5 }}>
+            {selectedQuestions.map((q, idx) => (
+              <Box key={q.id} sx={{ border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.default", p: 1.25, display: "grid", gap: 0.5 }}>
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 0.75 }}>
+                  <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontWeight: "fontWeightBold" }}>#{idx + 1}</Typography>
+                  <Typography variant="caption" component="p" noWrap sx={{ fontWeight: "fontWeightMedium" }}>{q.stem}</Typography>
+                </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <ErgStatusChip dot={false} label={q.categoryLabel} />
+                  {q.answer && (
+                    <>
+                      <Typography variant="caption" color="text.secondary">•</Typography>
+                      <Typography variant="caption" sx={{ color: "success.main", fontWeight: "fontWeightMedium" }}>
+                        Đ/a: {q.answer}
+                      </Typography>
+                    </>
+                  )}
+                </Box>
+              </Box>
+            ))}
+          </Stack>
+        ) : (
+          <Box sx={{ py: 2, textAlign: "center" }}>
+            <Typography variant="caption" component="p" sx={{ color: "text.secondary", fontStyle: "italic", mb: 1 }}>
+              Chưa có câu hỏi nào được chọn từ ngân hàng.
+            </Typography>
+            <ErgButton type="button" variant="outlined" size="small" onClick={() => setActiveStep("pick")}>
+              Bốc câu hỏi từ ngân hàng ngay →
+            </ErgButton>
+          </Box>
+        )}
 
-                    {/* NÚT THAO TÁC BỐC THÊM */}
-                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11.5px]">
-                      <span className="text-slate-500">
-                        Thời lượng: <strong>~{Math.round(selectedQuestionIds.length * 2)} phút</strong>
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setActiveStep("pick")}
-                        className="font-bold text-[#0F6CBD] hover:underline cursor-pointer"
-                      >
-                        + Chọn thêm câu hỏi
-                      </button>
-                    </div>
-                  </div>
-                </div>
+        {/* NÚT THAO TÁC BỐC THÊM */}
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", pt: 1, borderTop: 1, borderColor: "divider" }}>
+          <Typography variant="caption" sx={{ color: "text.secondary" }}>
+            Thời lượng: <strong>~{Math.round(selectedQuestionIds.length * 2)} phút</strong>
+          </Typography>
+          <ErgButton type="button" variant="text" size="small" onClick={() => setActiveStep("pick")}>
+            + Chọn thêm câu hỏi
+          </ErgButton>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+const cardSx = { border: 1, borderColor: "divider", borderRadius: 1.5, bgcolor: "background.paper", p: 2, display: "flex", flexDirection: "column", gap: 1.5, boxShadow: 1 } as const;
+
+function PreviewStat({ label, value }: { label: string; value: string }) {
+  return (
+    <Box sx={{ borderRadius: 1, border: 1, borderColor: "divider", bgcolor: "background.default", p: 1 }}>
+      <Typography variant="caption" component="span" sx={{ display: "block", color: "text.secondary" }}>{label}</Typography>
+      <Typography variant="caption" component="span" sx={{ display: "block", fontWeight: "fontWeightBold", mt: 0.25 }}>{value}</Typography>
+    </Box>
   );
 }

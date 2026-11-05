@@ -1,38 +1,48 @@
+import type { ChangeEvent, ReactNode } from "react";
+import InputAdornment from "@mui/material/InputAdornment";
 import TextField from "@mui/material/TextField";
-import { cn } from "@/lib/utils";
+import type { SxProps, Theme } from "@mui/material/styles";
 
 interface FilterDropdownProps {
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  children: React.ReactNode;
-  className?: string;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  children: ReactNode;
+  sx?: SxProps<Theme>;
   isFiltered?: boolean;
-  icon?: React.ComponentType<{ className?: string }>;
+  icon?: ReactNode;
 }
 
 export function FilterDropdown({
   value,
   onChange,
   children,
-  className,
+  sx,
   isFiltered,
-  icon: Icon,
+  icon,
 }: FilterDropdownProps) {
   return (
-    <div className={cn("relative inline-flex items-center", className)}>
-      <TextField
-        select
-        fullWidth
-        size="small"
-        value={value}
-        onChange={onChange}
-        sx={{ "& .MuiSelect-select": { fontSize: 12, fontWeight: isFiltered ? 600 : 500, py: 0.75, pl: Icon ? 4 : 1.25 } }}
-      >
-        {children}
-      </TextField>
-      {Icon && (
-        <Icon className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#0F6CBD] shrink-0" />
-      )}
-    </div>
+    <TextField
+      select
+      size="small"
+      value={value}
+      onChange={onChange}
+      slotProps={
+        icon
+          ? { input: { startAdornment: <InputAdornment position="start" sx={{ color: "primary.main", mr: 0 }}>{icon}</InputAdornment> } }
+          : undefined
+      }
+      sx={[
+        {
+          "& .MuiSelect-select": {
+            typography: "caption",
+            fontWeight: isFiltered ? "fontWeightBold" : "fontWeightMedium",
+            py: 0.75,
+          },
+        },
+        ...(Array.isArray(sx) ? sx : [sx]),
+      ]}
+    >
+      {children}
+    </TextField>
   );
 }

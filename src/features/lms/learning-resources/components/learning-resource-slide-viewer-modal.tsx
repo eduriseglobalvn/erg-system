@@ -1,5 +1,19 @@
 import { useEffect, useMemo, useState, type PointerEvent } from "react";
-import { ChevronLeft, ChevronRight, Eraser, MousePointer2, PenLine, RotateCcw, X } from "lucide-react";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import CloseIcon from "@mui/icons-material/Close";
+import CreateOutlinedIcon from "@mui/icons-material/CreateOutlined";
+import NearMeOutlinedIcon from "@mui/icons-material/NearMeOutlined";
+import ReplayIcon from "@mui/icons-material/Replay";
+import AutoFixNormalOutlinedIcon from "@mui/icons-material/AutoFixNormalOutlined";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import IconButton from "@mui/material/IconButton";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import { alpha, useTheme, type Theme } from "@mui/material/styles";
+
+import { ErgButton } from "@/components/erg-mui";
 
 import type { LearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-data";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
@@ -54,6 +68,7 @@ export function LearningResourceSlideViewerModal({
   const canGoNext = hasCustomSlides && activeSlideIndex < slides.length - 1;
   const thumbnailSlides = useMemo(() => slides.slice(0, 18), [slides]);
   const paceStateUpdate = usePacedStateBatch();
+  const theme = useTheme();
 
   useEffect(() => {
     paceStateUpdate(() => {
@@ -104,7 +119,7 @@ export function LearningResourceSlideViewerModal({
         ...(current[activeSlideIndex] ?? []),
         {
           points: [point],
-          color: "#f97316",
+          color: theme.palette.warning.main,
           width: 0.65,
         },
       ],
@@ -143,76 +158,136 @@ export function LearningResourceSlideViewerModal({
   }
 
   return (
-    <div className="fixed inset-0 z-[240] flex flex-col bg-[#f3f4f6]">
-      <header className="flex h-14 shrink-0 items-center justify-between bg-[#3f3f3f] px-4 text-white">
-        <div className="flex min-w-0 items-center gap-3">
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="Quay lại kho học liệu">
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <div className="min-w-0">
-            <h2 className="truncate text-[15px] font-bold">{resource.title}</h2>
-            <p className="truncate text-[13px] font-semibold text-white/70">{slideCounter}</p>
-          </div>
-        </div>
+    <Box sx={{ bgcolor: "grey.100", display: "flex", flexDirection: "column", inset: 0, position: "fixed", zIndex: 240 }}>
+      <Stack
+        component="header"
+        direction="row"
+        sx={{ alignItems: "center", bgcolor: "grey.800", color: "common.white", flexShrink: 0, height: 56, justifyContent: "space-between", px: 2 }}
+      >
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
+          <IconButton onClick={onClose} sx={darkIconSx} aria-label="Quay lại kho học liệu">
+            <ChevronLeftIcon />
+          </IconButton>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography component="h2" variant="h6" noWrap sx={{ fontWeight: "fontWeightBold" }}>
+              {resource.title}
+            </Typography>
+            <Typography variant="body2" noWrap sx={{ color: (t) => alpha(t.palette.common.white, 0.7), fontWeight: "fontWeightMedium" }}>
+              {slideCounter}
+            </Typography>
+          </Box>
+        </Stack>
 
-        <div className="flex items-center gap-2">
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
           {hasCustomSlides ? (
             <>
-              <button
-                type="button"
+              <ErgButton
+                variant="text"
+                color="inherit"
+                size="small"
                 onClick={() => setDrawingMode((current) => (current === "pen" ? "cursor" : "pen"))}
-                className={`inline-flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-bold ${
-                  drawingMode === "pen" ? "bg-white text-slate-950" : "text-white/85 hover:bg-white/10"
-                }`}
+                startIcon={drawingMode === "pen" ? <CreateOutlinedIcon fontSize="small" /> : <NearMeOutlinedIcon fontSize="small" />}
+                sx={drawingMode === "pen" ? { ...darkTextButtonSx, bgcolor: "common.white", color: "text.primary", "&:hover": { bgcolor: "common.white" } } : darkTextButtonSx}
               >
-                {drawingMode === "pen" ? <PenLine className="h-4 w-4" /> : <MousePointer2 className="h-4 w-4" />}
                 {drawingMode === "pen" ? "Đang vẽ" : "Con trỏ"}
-              </button>
-              <button
-                type="button"
+              </ErgButton>
+              <ErgButton
+                variant="text"
+                color="inherit"
+                size="small"
                 onClick={clearCurrentSlideAnnotations}
-                className="inline-flex h-9 items-center gap-2 rounded-md px-3 text-[13px] font-bold text-white/85 hover:bg-white/10"
+                startIcon={<AutoFixNormalOutlinedIcon fontSize="small" />}
+                sx={darkTextButtonSx}
               >
-                <Eraser className="h-4 w-4" />
                 Xóa nét
-              </button>
+              </ErgButton>
             </>
           ) : null}
-          <button type="button" onClick={onClose} className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/10" aria-label="Đóng viewer">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-      </header>
+          <IconButton onClick={onClose} sx={darkIconSx} aria-label="Đóng viewer">
+            <CloseIcon />
+          </IconButton>
+        </Stack>
+      </Stack>
 
       {hasCustomSlides ? (
-        <main className="grid min-h-0 flex-1 grid-cols-[96px_minmax(0,1fr)] bg-slate-950">
-          <aside className="min-h-0 overflow-y-auto border-r border-white/10 bg-slate-900 px-3 py-4">
-            <div className="space-y-3">
+        <Box component="main" sx={{ bgcolor: "grey.900", display: "grid", flex: 1, gridTemplateColumns: "96px minmax(0, 1fr)", minHeight: 0 }}>
+          <Box
+            component="aside"
+            sx={(t) => ({ bgcolor: "grey.800", borderRight: 1, borderColor: alpha(t.palette.common.white, 0.1), minHeight: 0, overflowY: "auto", px: 1.5, py: 2 })}
+          >
+            <Stack spacing={1.5}>
               {thumbnailSlides.map((slide, index) => {
                 const isActive = index === activeSlideIndex;
 
                 return (
-                  <button
+                  <ButtonBase
                     key={slide.id}
-                    type="button"
                     onClick={() => setActiveSlideIndex(index)}
-                    className={`block w-full overflow-hidden rounded-lg border text-left ${isActive ? "border-white bg-white" : "border-white/20 bg-white/10 hover:border-white/35"}`}
+                    sx={(t) => ({
+                      bgcolor: isActive ? "common.white" : alpha(t.palette.common.white, 0.1),
+                      border: 1,
+                      borderColor: isActive ? "common.white" : alpha(t.palette.common.white, 0.2),
+                      borderRadius: 1,
+                      display: "block",
+                      overflow: "hidden",
+                      textAlign: "left",
+                      width: "100%",
+                      "&:hover": isActive ? undefined : { borderColor: alpha(t.palette.common.white, 0.35) },
+                    })}
                   >
-                    <img src={slide.thumbnailUrl || slide.imageUrl} alt={slide.title || `Slide ${index + 1}`} className="aspect-video w-full object-cover" />
-                    <span className={`block px-2 py-1 text-center text-[12px] font-bold ${isActive ? "text-[#091f80]" : "text-white/75"}`}>{index + 1}</span>
-                  </button>
+                    <Box
+                      component="img"
+                      src={slide.thumbnailUrl || slide.imageUrl}
+                      alt={slide.title || `Slide ${index + 1}`}
+                      sx={{ aspectRatio: "16 / 9", display: "block", objectFit: "cover", width: "100%" }}
+                    />
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      sx={(t) => ({
+                        color: isActive ? "primary.dark" : alpha(t.palette.common.white, 0.75),
+                        display: "block",
+                        fontWeight: "fontWeightBold",
+                        px: 1,
+                        py: 0.5,
+                        textAlign: "center",
+                      })}
+                    >
+                      {index + 1}
+                    </Typography>
+                  </ButtonBase>
                 );
               })}
-            </div>
-          </aside>
+            </Stack>
+          </Box>
 
-          <section className="relative min-h-0 p-4">
-            <div className="absolute left-4 top-4 z-10 max-w-[calc(100%-32px)] truncate rounded-lg bg-black/60 px-3 py-1.5 text-[13px] font-bold text-white/85">{activeSlideTitle}</div>
-            <div className="flex h-full items-center justify-center">
-              <div className="relative aspect-video max-h-full w-full max-w-[1500px] overflow-hidden rounded-lg bg-black shadow-sm">
-                <img src={activeSlide?.imageUrl} alt={activeSlideTitle} className="h-full w-full object-contain" draggable={false} />
-                <svg
-                  className={`absolute inset-0 h-full w-full ${drawingMode === "pen" ? "cursor-crosshair" : "pointer-events-none"}`}
+          <Box component="section" sx={{ minHeight: 0, p: 2, position: "relative" }}>
+            <Typography
+              component="div"
+              variant="body2"
+              noWrap
+              sx={(t) => ({
+                bgcolor: alpha(t.palette.common.black, 0.6),
+                borderRadius: 1,
+                color: alpha(t.palette.common.white, 0.85),
+                fontWeight: "fontWeightBold",
+                left: 16,
+                maxWidth: "calc(100% - 32px)",
+                position: "absolute",
+                px: 1.5,
+                py: 0.75,
+                top: 16,
+                zIndex: 10,
+              })}
+            >
+              {activeSlideTitle}
+            </Typography>
+            <Box sx={{ alignItems: "center", display: "flex", height: "100%", justifyContent: "center" }}>
+              <Box sx={{ aspectRatio: "16 / 9", bgcolor: "common.black", borderRadius: 1, boxShadow: 1, maxHeight: "100%", maxWidth: 1500, overflow: "hidden", position: "relative", width: "100%" }}>
+                <Box component="img" src={activeSlide?.imageUrl} alt={activeSlideTitle} sx={{ display: "block", height: "100%", objectFit: "contain", width: "100%" }} draggable={false} />
+                <Box
+                  component="svg"
+                  sx={{ cursor: drawingMode === "pen" ? "crosshair" : undefined, height: "100%", inset: 0, pointerEvents: drawingMode === "pen" ? undefined : "none", position: "absolute", width: "100%" }}
                   viewBox="0 0 100 100"
                   preserveAspectRatio="none"
                   onPointerDown={handlePointerDown}
@@ -223,54 +298,78 @@ export function LearningResourceSlideViewerModal({
                   {currentPaths.map((path, index) => (
                     <path key={index} d={pathToD(path)} fill="none" stroke={path.color} strokeLinecap="round" strokeLinejoin="round" strokeWidth={path.width} />
                   ))}
-                </svg>
-              </div>
-            </div>
+                </Box>
+              </Box>
+            </Box>
 
-            <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-3 py-2 shadow-sm">
-              <button
-                type="button"
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{ alignItems: "center", bgcolor: "common.white", borderRadius: 999, bottom: 20, boxShadow: 1, left: "50%", position: "absolute", px: 1.5, py: 1, transform: "translateX(-50%)" }}
+            >
+              <IconButton
                 disabled={!canGoPrevious}
                 onClick={() => setActiveSlideIndex((current) => Math.max(0, current - 1))}
-                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-70"
+                sx={lightIconSx}
               >
-                <ChevronLeft className="h-5 w-5" />
-              </button>
-              <span className="min-w-20 text-center text-sm font-semibold text-slate-900">
+                <ChevronLeftIcon />
+              </IconButton>
+              <Typography component="span" variant="subtitle2" sx={{ color: "text.primary", minWidth: 80, textAlign: "center" }}>
                 {activeSlideIndex + 1} / {slides.length}
-              </span>
-              <button
-                type="button"
+              </Typography>
+              <IconButton
                 disabled={!canGoNext}
                 onClick={() => setActiveSlideIndex((current) => Math.min(slides.length - 1, current + 1))}
-                className="grid h-9 w-9 place-items-center rounded-full text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-70"
+                sx={lightIconSx}
               >
-                <ChevronRight className="h-5 w-5" />
-              </button>
-              <button
-                type="button"
+                <ChevronRightIcon />
+              </IconButton>
+              <IconButton
                 onClick={() => setActiveSlideIndex(0)}
-                className="grid h-9 w-9 place-items-center rounded-full text-slate-500 hover:bg-slate-100"
+                sx={{ ...lightIconSx, color: "text.secondary" }}
                 aria-label="Quay lại slide đầu"
               >
-                <RotateCcw className="h-4 w-4" />
-              </button>
-            </div>
-          </section>
-        </main>
+                <ReplayIcon fontSize="small" />
+              </IconButton>
+            </Stack>
+          </Box>
+        </Box>
       ) : (
-        <main className="min-h-0 flex-1 p-4">
-          <div className="relative h-full overflow-hidden rounded-lg bg-black">
-            <iframe
+        <Box component="main" sx={{ flex: 1, minHeight: 0, p: 2 }}>
+          <Box sx={{ bgcolor: "common.black", borderRadius: 1, height: "100%", overflow: "hidden", position: "relative" }}>
+            <Box
+              component="iframe"
               src={viewerUrl}
               title={resource.title}
-              className="h-full w-full border-0"
+              sx={{ border: 0, display: "block", height: "100%", width: "100%" }}
               allow="fullscreen; autoplay; clipboard-read; clipboard-write"
               allowFullScreen
             />
-          </div>
-        </main>
+          </Box>
+        </Box>
       )}
-    </div>
+    </Box>
   );
 }
+
+const darkIconSx = {
+  color: "common.white",
+  height: 36,
+  width: 36,
+  "&:hover": { bgcolor: (t: Theme) => alpha(t.palette.common.white, 0.1) },
+} as const;
+
+const darkTextButtonSx = {
+  color: "common.white",
+  fontWeight: "fontWeightBold",
+  height: 36,
+  px: 1.5,
+  "&:hover": { bgcolor: (t: Theme) => alpha(t.palette.common.white, 0.1) },
+} as const;
+
+const lightIconSx = {
+  color: "text.primary",
+  height: 36,
+  width: 36,
+  "&.Mui-disabled": { opacity: 0.7 },
+} as const;

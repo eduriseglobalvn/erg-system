@@ -1,17 +1,27 @@
 import { useRef } from "react";
 
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
 import Checkbox from "@mui/material/Checkbox";
+import Link from "@mui/material/Link";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import { ErgEmptyState } from "@/components/erg-mui/erg-feedback";
+import { ErgSelect } from "@/components/erg-mui/erg-form";
+import { ErgTable } from "@/components/erg-mui/erg-table";
 import type { ClassroomStudent } from "@/domain/school/classroom-types";
 import { useVirtualList } from "@/hooks/use-virtual-list";
-import { cn } from "@/lib/utils";
 import { TABLE_HEADER_HEIGHT, TABLE_ROW_HEIGHT, TABLE_VISIBLE_ROWS } from "./class-students-workspace.constants";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import { getStatusTone } from "./class-students-workspace.utils";
-import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function SelectControl({
   ariaLabel,
@@ -25,18 +35,13 @@ export function SelectControl({
   value: string;
 }) {
   return (
-    <AppSelect
-      aria-label={ariaLabel}
-      className="h-10 rounded-lg border border-[#d7e0ec] bg-white px-3 text-[14px] font-bold text-slate-800 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+    <ErgSelect
+      size="small"
+      options={options}
+      slotProps={{ htmlInput: { "aria-label": ariaLabel } }}
       onChange={(event) => onChange(event.target.value)}
       value={value}
-    >
-      {options.map((option) => (
-        <option key={option.value} value={option.value}>
-          {option.label}
-        </option>
-      ))}
-    </AppSelect>
+    />
   );
 }
 
@@ -62,12 +67,16 @@ export function SelectionBar({
   visibleCount: number;
 }) {
   return (
-    <div className="mt-4 flex flex-col gap-3 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-3 sm:flex-row sm:items-center sm:justify-between">
-      <div className="text-sm text-slate-600">
-        <span className="font-semibold text-slate-950">{copy.selectionSummary(selectedCount)}</span>
-        <span className="ml-1">{copy.visibleSummary(visibleCount)}</span>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <Stack
+      direction={{ xs: "column", sm: "row" }}
+      spacing={1.5}
+      sx={{ alignItems: { sm: "center" }, bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, justifyContent: { sm: "space-between" }, mt: 2, p: 1.5 }}
+    >
+      <Typography variant="body2" color="text.secondary">
+        <Box component="span" sx={{ color: "text.primary", fontWeight: "fontWeightBold" }}>{copy.selectionSummary(selectedCount)}</Box>
+        <Box component="span" sx={{ ml: 0.5 }}>{copy.visibleSummary(visibleCount)}</Box>
+      </Typography>
+      <Stack direction="row" useFlexGap sx={{ flexWrap: "wrap", gap: 1 }}>
         <Button size="small" variant="contained" onClick={onAssign} disabled={selectedCount === 0 || assignDisabled} title={assignDisabled ? assignDisabledReason : undefined}>
           {copy.openAssignDialog(selectedCount)}
         </Button>
@@ -77,8 +86,8 @@ export function SelectionBar({
         <Button size="small" variant="text" onClick={onClear} disabled={selectedCount === 0}>
           {copy.clearSelection}
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </Stack>
   );
 }
 
@@ -110,37 +119,35 @@ export function StudentDataTable({
 
   if (students.length === 0) {
     return (
-      <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-8 text-center">
-        <div className="text-sm font-semibold text-slate-950">{copy.emptyTitle}</div>
-        <div className="mt-2 text-sm text-slate-500">{copy.emptyDescription}</div>
-      </div>
+      <Box sx={{ mt: 2 }}>
+        <ErgEmptyState title={copy.emptyTitle} description={copy.emptyDescription} />
+      </Box>
     );
   }
 
   return (
     <>
-      <div
+      <Box
         ref={tableScrollRef}
-        className="mt-4 hidden overflow-auto rounded-lg border border-[#cbd7e6] md:block"
-        style={{ maxHeight: TABLE_HEADER_HEIGHT + TABLE_ROW_HEIGHT * TABLE_VISIBLE_ROWS }}
+        sx={{ border: 1, borderColor: "divider", borderRadius: 1, display: { xs: "none", md: "block" }, maxHeight: TABLE_HEADER_HEIGHT + TABLE_ROW_HEIGHT * TABLE_VISIBLE_ROWS, mt: 2, overflow: "auto" }}
       >
-        <table className="erg-data-table min-w-[980px] w-full border-collapse bg-white text-left text-[14px]">
-          <thead className="sticky top-0 z-10 bg-[#eef4fb] text-[13px] font-bold text-slate-700 shadow-sm">
-            <tr>
-              <th className="w-12 px-4 py-3">{copy.pickColumn}</th>
-              <th className="px-4 py-3">{copy.studentColumn}</th>
-              <th className="px-4 py-3">{copy.assignmentColumn}</th>
-              <th className="px-4 py-3">{copy.progressColumn}</th>
-              <th className="px-4 py-3">{copy.scoreColumn}</th>
-              <th className="px-4 py-3">{copy.statusColumn}</th>
-              <th className="px-4 py-3">{copy.actionColumn}</th>
-            </tr>
-          </thead>
-          <tbody>
+        <ErgTable sx={{ minWidth: 980 }}>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ width: 48 }}>{copy.pickColumn}</TableCell>
+              <TableCell>{copy.studentColumn}</TableCell>
+              <TableCell>{copy.assignmentColumn}</TableCell>
+              <TableCell>{copy.progressColumn}</TableCell>
+              <TableCell>{copy.scoreColumn}</TableCell>
+              <TableCell>{copy.statusColumn}</TableCell>
+              <TableCell>{copy.actionColumn}</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
             {topPadding > 0 ? (
-              <tr aria-hidden="true">
-                <td colSpan={7} style={{ height: topPadding, padding: 0 }} />
-              </tr>
+              <TableRow aria-hidden="true">
+                <TableCell colSpan={7} sx={{ height: topPadding, p: 0 }} />
+              </TableRow>
             ) : null}
             {virtualRows.map((virtualRow) => {
               const student = students[virtualRow.index];
@@ -159,15 +166,15 @@ export function StudentDataTable({
               );
             })}
             {bottomPadding > 0 ? (
-              <tr aria-hidden="true">
-                <td colSpan={7} style={{ height: bottomPadding, padding: 0 }} />
-              </tr>
+              <TableRow aria-hidden="true">
+                <TableCell colSpan={7} sx={{ height: bottomPadding, p: 0 }} />
+              </TableRow>
             ) : null}
-          </tbody>
-        </table>
-      </div>
+          </TableBody>
+        </ErgTable>
+      </Box>
 
-      <div className="mt-4 grid gap-3 md:hidden">
+      <Box sx={{ display: { xs: "grid", md: "none" }, gap: 1.5, mt: 2 }}>
         {students.map((student) => (
           <StudentMobileCard
             key={student.id}
@@ -179,8 +186,34 @@ export function StudentDataTable({
             student={student}
           />
         ))}
-      </div>
+      </Box>
     </>
+  );
+}
+
+function StudentAvatar({ seed, size }: { seed: string; size: number }) {
+  return (
+    <Box
+      component="span"
+      sx={{ bgcolor: "primary.main", borderRadius: 1, color: "primary.contrastText", display: "grid", flexShrink: 0, fontWeight: "fontWeightBold", height: size, placeItems: "center", typography: "caption", width: size }}
+    >
+      {seed}
+    </Box>
+  );
+}
+
+function StudentNameButton({ name, noWrap = false, onClick }: { name: string; noWrap?: boolean; onClick: () => void }) {
+  return (
+    <Link
+      component="button"
+      type="button"
+      underline="hover"
+      color="text.primary"
+      onClick={onClick}
+      sx={{ display: "block", fontWeight: "fontWeightBold", maxWidth: "100%", textAlign: "left", typography: "body2", ...(noWrap ? { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } : null), "&:hover": { color: "primary.main" } }}
+    >
+      {name}
+    </Link>
   );
 }
 
@@ -200,8 +233,8 @@ function StudentTableRow({
   student: ClassroomStudent;
 }) {
   return (
-    <tr className={cn("transition", active ? "bg-[#ebf3fc]" : "hover:bg-[#f8fbff]")}> 
-      <td className="px-4 py-3 align-middle">
+    <TableRow hover={!active} selected={active}>
+      <TableCell>
         <Checkbox
           size="small"
           sx={{ p: 0 }}
@@ -209,49 +242,46 @@ function StudentTableRow({
           checked={checked}
           onChange={onToggle}
         />
-      </td>
-      <td className="px-4 py-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-[13px] font-bold text-white">
-            {student.avatarSeed}
-          </span>
-          <div className="min-w-0">
-            <button type="button" className="block max-w-full truncate text-left font-bold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
-              {student.name}
-            </button>
-            <div className="mt-1 truncate text-[13px] font-medium text-slate-600">
+      </TableCell>
+      <TableCell>
+        <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", minWidth: 0 }}>
+          <StudentAvatar seed={student.avatarSeed} size={36} />
+          <Box sx={{ minWidth: 0 }}>
+            <StudentNameButton name={student.name} noWrap onClick={onFocus} />
+            <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block", mt: 0.5 }}>
               {student.className} • {student.lastActivity}
-            </div>
-          </div>
-        </div>
-      </td>
-      <td className="max-w-[260px] px-4 py-3">
-        <div className="truncate font-medium text-slate-900">{student.currentAssignment}</div>
-        <div className="mt-1 truncate text-[13px] font-medium text-slate-600">{student.currentStage}</div>
-      </td>
-      <td className="px-4 py-3">
-        <div className="mb-2 flex min-w-[120px] justify-between text-[13px] font-semibold text-slate-700">
+            </Typography>
+          </Box>
+        </Stack>
+      </TableCell>
+      <TableCell sx={{ maxWidth: 260 }}>
+        <Typography variant="body2" noWrap sx={{ fontWeight: "fontWeightMedium" }}>{student.currentAssignment}</Typography>
+        <Typography variant="caption" color="text.secondary" noWrap sx={{ display: "block", mt: 0.5 }}>{student.currentStage}</Typography>
+      </TableCell>
+      <TableCell>
+        <Stack direction="row" sx={{ justifyContent: "space-between", mb: 1, minWidth: 120, typography: "caption", fontWeight: "fontWeightBold" }}>
           <span>{copy.progressLabel}</span>
           <span>{student.progressRate}%</span>
-        </div>
+        </Stack>
         <LinearProgress
           variant="determinate"
           value={student.progressRate}
           sx={{ height: 8, borderRadius: 1, bgcolor: "grey.100" }}
         />
-      </td>
-      <td className="px-4 py-3 font-semibold text-slate-950">
-        {student.averageScore} <span className="text-[13px] font-semibold text-slate-500">{copy.scoreUnit}</span>
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell sx={{ fontWeight: "fontWeightBold" }}>
+        {student.averageScore}{" "}
+        <Typography component="span" variant="caption" color="text.secondary" sx={{ fontWeight: "fontWeightBold" }}>{copy.scoreUnit}</Typography>
+      </TableCell>
+      <TableCell>
         <Chip label={copy.status[student.status]} size="small" color={getStatusTone(student.status)} />
-      </td>
-      <td className="px-4 py-3">
+      </TableCell>
+      <TableCell>
         <Button size="small" variant="outlined" onClick={onFocus}>
           {copy.viewDetail}
         </Button>
-      </td>
-    </tr>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -271,8 +301,12 @@ function StudentMobileCard({
   student: ClassroomStudent;
 }) {
   return (
-    <article className={cn("rounded-lg border bg-white p-4", active ? "border-[#b8d6fa] ring-2 ring-[var(--erg-blue-ring)]" : "border-[#cbd7e6]")}>
-      <div className="flex items-start gap-3">
+    <Paper
+      component="article"
+      variant="outlined"
+      sx={{ borderColor: active ? "primary.main" : "divider", borderRadius: 1, boxShadow: active ? 2 : "none", p: 2 }}
+    >
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
         <Checkbox
           size="small"
           aria-label={copy.selectStudent(student.name)}
@@ -280,85 +314,82 @@ function StudentMobileCard({
           sx={{ mt: 0.5, p: 0.5 }}
           onChange={onToggle}
         />
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
-          {student.avatarSeed}
-        </span>
-        <div className="min-w-0 flex-1">
-          <button type="button" className="text-left font-bold text-slate-950 hover:text-[var(--erg-blue)] hover:underline" onClick={onFocus}>
-            {student.name}
-          </button>
-          <div className="mt-0.5 text-sm text-slate-500">
+        <StudentAvatar seed={student.avatarSeed} size={40} />
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <StudentNameButton name={student.name} onClick={onFocus} />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.25 }}>
             {student.className} • {student.lastActivity}
-          </div>
-        </div>
+          </Typography>
+        </Box>
         <Chip label={copy.status[student.status]} size="small" color={getStatusTone(student.status)} />
-      </div>
-      <div className="mt-4 rounded-lg bg-[#f8fbff] p-3">
-        <div className="text-sm font-semibold text-slate-950">{student.currentAssignment}</div>
-        <div className="mt-1 text-sm text-slate-500">{student.currentStage}</div>
-        <div className="mt-3 flex items-center justify-between text-sm font-semibold text-slate-700">
+      </Stack>
+      <Box sx={{ bgcolor: "background.default", borderRadius: 1, mt: 2, p: 1.5 }}>
+        <Typography variant="subtitle2">{student.currentAssignment}</Typography>
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{student.currentStage}</Typography>
+        <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between", mt: 1.5, typography: "subtitle2" }}>
           <span>{copy.progressLabel}</span>
           <span>{student.progressRate}%</span>
-        </div>
+        </Stack>
         <LinearProgress variant="determinate" value={student.progressRate} sx={{ mt: 1, height: 8, borderRadius: 1 }} />
-      </div>
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <span className="text-sm font-semibold text-slate-950">
+      </Box>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "center", justifyContent: "space-between", mt: 1.5 }}>
+        <Typography variant="subtitle2" component="span">
           {student.averageScore} {copy.scoreUnit}
-        </span>
+        </Typography>
         <Button size="small" variant="outlined" onClick={onFocus}>
           {copy.viewDetail}
         </Button>
-      </div>
-    </article>
+      </Stack>
+    </Paper>
   );
 }
 
 export function StudentDetailCard({ copy, student }: { copy: StudentCopy; student: ClassroomStudent }) {
   return (
     <DashboardSectionCard title={copy.studentPanelTitle} description={copy.studentPanelDescription}>
-      <div className="space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="grid h-12 w-12 place-items-center rounded-lg bg-[var(--erg-blue)] text-base font-semibold text-white">
+      <Stack spacing={2}>
+        <Stack direction="row" spacing={2} sx={{ alignItems: "center" }}>
+          <Box
+            sx={{ bgcolor: "primary.main", borderRadius: 1, color: "primary.contrastText", display: "grid", height: 48, placeItems: "center", typography: "h5", width: 48 }}
+          >
             {student.avatarSeed}
-          </div>
-          <div className="min-w-0">
-            <div className="truncate text-lg font-semibold text-slate-950">{student.name}</div>
-            <div className="mt-1 text-sm text-slate-500">
+          </Box>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography variant="h4" noWrap>{student.name}</Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               {student.className} • {student.schoolName}
-            </div>
-          </div>
-        </div>
+            </Typography>
+          </Box>
+        </Stack>
 
-        <div className="grid grid-cols-2 gap-3">
+        <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
           <Metric label={copy.progressLabel} value={`${student.progressRate}%`} />
           <Metric label={copy.scoreLabel} value={`${student.averageScore}`} />
           <Metric label={copy.streakLabel} value={`${student.streakDays}`} />
           <Metric label={copy.completedLabel} value={`${student.completedAssignments}`} />
-        </div>
+        </Box>
 
         <InfoBlock title={copy.currentAssignmentTitle} body={`${student.currentAssignment} - ${student.currentStage}`} />
         <InfoBlock title={copy.mentorNoteTitle} body={student.mentorNote} />
-      </div>
+      </Stack>
     </DashboardSectionCard>
   );
 }
 
 function Metric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-[#f8fbff] px-3 py-3">
-      <div className="text-[13px] font-semibold text-slate-600">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
-    </div>
+    <Box sx={{ bgcolor: "background.default", borderRadius: 1, px: 1.5, py: 1.5 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>{label}</Typography>
+      <Typography variant="h4" sx={{ mt: 0.5 }}>{value}</Typography>
+    </Box>
   );
 }
 
 function InfoBlock({ body, title }: { body: string; title: string }) {
   return (
-    <div className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-      <div className="text-sm font-semibold text-slate-950">{title}</div>
-      <div className="mt-2 text-sm leading-6 text-slate-500">{body}</div>
-    </div>
+    <Paper variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mt: 1 }}>{body}</Typography>
+    </Paper>
   );
 }
-

@@ -1,5 +1,9 @@
-import { Check, HelpCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Box from "@mui/material/Box";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
+import CheckIcon from "@mui/icons-material/Check";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlined";
+import { ErgEmptyState, ErgSkeleton, ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import type { BankQuestion } from "./types";
 
 export function PickQuestionList({
@@ -14,105 +18,88 @@ export function PickQuestionList({
   toggleQuestion: (id: string) => void;
 }) {
   return (
-              <div className="flex-1 overflow-y-auto p-3 sm:p-4 sm:px-6 space-y-2.5">
-                {isQuestionsLoading && displayedQuestions.length === 0 ? (
-                  <div className="space-y-3 py-2">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className="rounded-xl border border-slate-200 bg-white p-4 space-y-2.5"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <div className="h-4 w-6 bg-slate-200 rounded" />
-                          <div className="h-4 bg-slate-200 rounded w-3/5" />
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-4 w-16 bg-slate-100 rounded" />
-                          <div className="h-4 w-28 bg-slate-100 rounded" />
-                          <div className="h-4 w-16 bg-slate-100 rounded" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : displayedQuestions.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 sm:p-12 text-center text-[13px] text-slate-500">
-                    <HelpCircle className="h-8 w-8 mx-auto text-slate-300 mb-2" />
-                    Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại.
-                  </div>
-                ) : (
-                  displayedQuestions.map((q, idx) => {
-                    const isSelected = selectedQuestionIds.includes(q.id);
+    <Stack spacing={1.25} sx={{ flex: 1, overflowY: "auto", p: { xs: 1.5, sm: 2 }, px: { sm: 3 } }}>
+      {isQuestionsLoading && displayedQuestions.length === 0 ? (
+        <Stack spacing={1.5} sx={{ py: 1 }}>
+          {[1, 2, 3, 4].map((i) => (
+            <Box key={i} sx={{ border: 1, borderColor: "divider", borderRadius: 1.5, bgcolor: "background.paper", p: 2, display: "grid", gap: 1.25 }}>
+              <ErgSkeleton height={16} width="60%" />
+              <ErgSkeleton height={16} width="40%" />
+            </Box>
+          ))}
+        </Stack>
+      ) : displayedQuestions.length === 0 ? (
+        <ErgEmptyState icon={<HelpOutlineIcon />} title="Không tìm thấy câu hỏi phù hợp với bộ lọc hiện tại." />
+      ) : (
+        displayedQuestions.map((q, idx) => {
+          const isSelected = selectedQuestionIds.includes(q.id);
 
-                    return (
-                      <div
-                        key={q.id}
-                        onClick={() => toggleQuestion(q.id)}
-                        className={cn(
-                          "cursor-pointer rounded-xl border p-3 sm:p-3.5 sm:px-4 transition-colors select-none flex items-start gap-3 bg-white",
-                          isSelected
-                            ? "border-[#0F6CBD] bg-blue-50/40 ring-1 ring-[#0F6CBD]/20"
-                            : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
-                        )}
-                      >
-                        {/* Checkbox vuông tinh gọn */}
-                        <div className="pt-0.5">
-                          <div
-                            className={cn(
-                              "grid h-5 w-5 place-items-center rounded-md border transition-colors",
-                              isSelected
-                                ? "border-[#0F6CBD] bg-[#0F6CBD] text-white shadow-2xs"
-                                : "border-slate-300 bg-white hover:border-slate-400"
-                            )}
-                          >
-                            {isSelected ? <Check className="h-3 w-3 stroke-[3]" /> : null}
-                          </div>
-                        </div>
+          return (
+            <Box
+              key={q.id}
+              onClick={() => toggleQuestion(q.id)}
+              sx={{
+                cursor: "pointer",
+                userSelect: "none",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1.5,
+                border: 1,
+                borderRadius: 1.5,
+                p: { xs: 1.5, sm: 1.75 },
+                px: { sm: 2 },
+                transition: "border-color 0.15s ease, background-color 0.15s ease",
+                borderColor: isSelected ? "primary.main" : "divider",
+                bgcolor: isSelected ? "action.selected" : "background.paper",
+                "&:hover": isSelected ? undefined : { bgcolor: "action.hover" },
+              }}
+            >
+              {/* Checkbox vuông tinh gọn */}
+              <Box sx={{ pt: 0.25 }}>
+                <Box
+                  sx={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: 20,
+                    height: 20,
+                    border: 1,
+                    borderRadius: 0.75,
+                    borderColor: isSelected ? "primary.main" : "divider",
+                    bgcolor: isSelected ? "primary.main" : "background.paper",
+                    color: "primary.contrastText",
+                  }}
+                >
+                  {isSelected ? <CheckIcon fontSize="inherit" /> : null}
+                </Box>
+              </Box>
 
-                        {/* Nội dung câu hỏi gọn gàng */}
-                        <div className="flex-1 min-w-0">
-                          {/* Câu hỏi chính */}
-                          <div className="flex items-baseline gap-2 mb-1">
-                            <span className="text-[12px] font-bold text-slate-400 shrink-0">
-                              #{idx + 1}
-                            </span>
-                            <p className="text-[13px] sm:text-[13.5px] font-semibold text-slate-900 leading-snug">
-                              {q.stem}
-                            </p>
-                          </div>
+              {/* Nội dung câu hỏi gọn gàng */}
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, mb: 0.5 }}>
+                  <Typography variant="caption" sx={{ flexShrink: 0, color: "text.secondary", fontWeight: "fontWeightBold" }}>
+                    #{idx + 1}
+                  </Typography>
+                  <Typography variant="subtitle2" component="p">
+                    {q.stem}
+                  </Typography>
+                </Box>
 
-                          {/* Dòng tags phân loại & Đáp án ngắn gọn */}
-                          <div className="flex flex-wrap items-center gap-1.5 pt-0.5 text-[11px]">
-                            <span className="rounded bg-slate-100 text-slate-700 px-1.5 py-0.2 font-medium border border-slate-200">
-                              {q.levelLabel}
-                            </span>
-                            <span className="rounded bg-slate-100 text-slate-600 px-1.5 py-0.2 font-medium">
-                              {q.categoryLabel}
-                            </span>
-                            <span
-                              className={cn(
-                                "rounded px-1.5 py-0.2 font-semibold border",
-                                q.difficulty === "core"
-                                  ? "bg-emerald-50 text-emerald-800 border-emerald-300"
-                                  : q.difficulty === "stretch"
-                                  ? "bg-amber-50 text-amber-800 border-amber-300"
-                                  : "bg-rose-50 text-rose-800 border-rose-300"
-                              )}
-                            >
-                              {q.difficulty === "core"
-                                ? "Cơ bản"
-                                : q.difficulty === "stretch"
-                                ? "Nâng cao"
-                                : "Thử thách"}
-                            </span>
-                            <span className="rounded bg-slate-100 text-slate-500 px-1.5 py-0.2 font-medium">
-                              {q.type === "multiple-choice" ? "Trắc nghiệm" : q.type}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
+                {/* Dòng tags phân loại */}
+                <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75, pt: 0.25 }}>
+                  <ErgStatusChip dot={false} label={q.levelLabel} />
+                  <ErgStatusChip dot={false} label={q.categoryLabel} />
+                  <ErgStatusChip
+                    dot={false}
+                    label={q.difficulty === "core" ? "Cơ bản" : q.difficulty === "stretch" ? "Nâng cao" : "Thử thách"}
+                    tone={q.difficulty === "core" ? "success" : q.difficulty === "stretch" ? "warning" : "error"}
+                  />
+                  <ErgStatusChip dot={false} label={q.type === "multiple-choice" ? "Trắc nghiệm" : q.type} />
+                </Box>
+              </Box>
+            </Box>
+          );
+        })
+      )}
+    </Stack>
   );
 }

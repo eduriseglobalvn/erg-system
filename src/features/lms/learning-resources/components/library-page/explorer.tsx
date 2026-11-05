@@ -4,6 +4,10 @@ import CommandFileQuestion from "@mui/icons-material/HelpOutlineOutlined";
 import CommandAssign from "@mui/icons-material/AssignmentTurnedInOutlined";
 import CommandDownload from "@mui/icons-material/FileDownloadOutlined";
 import CommandPresentation from "@mui/icons-material/Slideshow";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Typography from "@mui/material/Typography";
+import { alpha, type SxProps, type Theme } from "@mui/material/styles";
 
 import {
   LearningResourceExplorerCardGrid,
@@ -111,13 +115,13 @@ export function LearningResourceExplorer({
   const [viewMode, setViewMode] = useState<ExplorerViewMode>("grid");
   const isMobile = useLmsMobileBreakpoint("(max-width: 767px)");
   const commandActions = useMemo<LearningResourceExplorerCommand[]>(() => [
-    { disabled: true, icon: <CommandPresentation className="h-4 w-4" />, label: "Thêm bài giảng" },
-    { disabled: true, icon: <CommandFileQuestion className="h-4 w-4" />, label: "Thêm bài tập" },
+    { disabled: true, icon: <CommandPresentation fontSize="small" />, label: "Thêm bài giảng" },
+    { disabled: true, icon: <CommandFileQuestion fontSize="small" />, label: "Thêm bài tập" },
     { icon: null, label: "separator-primary", variant: "separator" },
-    { disabled: true, icon: <CommandAssign className="h-4 w-4" />, label: "Giao cho lớp", title: "Mở một học liệu để giao cho lớp" },
-    { disabled: true, icon: <CommandDownload className="h-4 w-4" />, label: "Tải xuống", title: "Mở một học liệu để tải xuống" },
+    { disabled: true, icon: <CommandAssign fontSize="small" />, label: "Giao cho lớp", title: "Mở một học liệu để giao cho lớp" },
+    { disabled: true, icon: <CommandDownload fontSize="small" />, label: "Tải xuống", title: "Mở một học liệu để tải xuống" },
     {
-      icon: <CommandCopy className="h-4 w-4" />,
+      icon: <CommandCopy fontSize="small" />,
       label: "Sao chép liên kết",
       onClick: () => {
         if (typeof window !== "undefined" && navigator.clipboard) {
@@ -155,118 +159,152 @@ export function LearningResourceExplorer({
   }
 
   return (
-    <LearningResourceExplorerShell className="flex h-full flex-col">
-      <LearningResourceExplorerTopBar
-        breadcrumbItems={explorerBreadcrumbItems}
-        canGoBack={Boolean(parentCategoryId)}
-        onBack={() => {
-          if (parentCategoryId) onSelectCategory(parentCategoryId);
-        }}
-        onRefresh={onRefresh}
-        searchLabel={`Tìm trong ${LEARNING_RESOURCE_WORKSPACE_LABEL.toLocaleLowerCase("vi-VN")}`}
-        searchPlaceholder={`Tìm trong ${displayText(activeSubject?.label) || "học liệu"}`}
-        searchValue={keyword}
-        title={selectedExplorerUrl}
-        onSearchChange={onKeywordChange}
-      />
-      <LearningResourceExplorerCommandBar actions={commandActions} viewMode={viewMode} onViewModeChange={setViewMode} />
-
-      <div className="grid min-h-0 flex-1 grid-cols-[250px_minmax(0,1fr)] overflow-hidden">
-        <CategoryTree
-          activeCategoryId={activeCategoryId}
-          categories={categories}
-          onOpenResource={onOpenResource}
-          onSelectCategory={onSelectCategory}
-          resources={treeResources}
+    <LearningResourceExplorerShell>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+        <LearningResourceExplorerTopBar
+          breadcrumbItems={explorerBreadcrumbItems}
+          canGoBack={Boolean(parentCategoryId)}
+          onBack={() => {
+            if (parentCategoryId) onSelectCategory(parentCategoryId);
+          }}
+          onRefresh={onRefresh}
+          searchLabel={`Tìm trong ${LEARNING_RESOURCE_WORKSPACE_LABEL.toLocaleLowerCase("vi-VN")}`}
+          searchPlaceholder={`Tìm trong ${displayText(activeSubject?.label) || "học liệu"}`}
+          searchValue={keyword}
+          title={selectedExplorerUrl}
+          onSearchChange={onKeywordChange}
         />
+        <LearningResourceExplorerCommandBar actions={commandActions} viewMode={viewMode} onViewModeChange={setViewMode} />
 
-        <section className="min-h-0 min-w-0 overflow-hidden bg-white" onContextMenu={(event) => openContextMenu(event)}>
-          {viewMode === "list" ? (
-            <>
-              <div className="grid grid-cols-[minmax(260px,1fr)_145px_120px_90px] border-b border-[#d1d5db] bg-white text-[13px] text-[#27364a]">
-                <span className="border-r border-[#e5e7eb] px-4 py-1.5">Tên</span>
-                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Cập nhật</span>
-                <span className="border-r border-[#e5e7eb] px-3 py-1.5">Loại</span>
-                <span className="px-3 py-1.5">Dung lượng</span>
-              </div>
-              <div className="h-[calc(100%-31px)] overflow-y-auto [scrollbar-gutter:stable]">
+        <Box sx={{ display: "grid", flex: 1, gridTemplateColumns: "250px minmax(0, 1fr)", minHeight: 0, overflow: "hidden" }}>
+          <CategoryTree
+            activeCategoryId={activeCategoryId}
+            categories={categories}
+            onOpenResource={onOpenResource}
+            onSelectCategory={onSelectCategory}
+            resources={treeResources}
+          />
+
+          <Box
+            component="section"
+            sx={{ bgcolor: "background.paper", minHeight: 0, minWidth: 0, overflow: "hidden" }}
+            onContextMenu={(event) => openContextMenu(event)}
+          >
+            {viewMode === "list" ? (
+              <>
+                <Box sx={{ ...listGridSx, borderBottom: 1, borderColor: "divider", color: "text.primary" }}>
+                  <Box component="span" sx={{ ...headerCellSx, px: 2 }}>Tên</Box>
+                  <Box component="span" sx={headerCellSx}>Cập nhật</Box>
+                  <Box component="span" sx={headerCellSx}>Loại</Box>
+                  <Box component="span" sx={{ px: 1.5, py: 0.75 }}>Dung lượng</Box>
+                </Box>
+                <Box sx={{ height: "calc(100% - 31px)", overflowY: "auto", scrollbarGutter: "stable" }}>
+                  {childCategories.map((category) => (
+                    <ButtonBase
+                      key={category.id}
+                      onClick={() => onSelectCategory(category.id)}
+                      onContextMenu={openContextMenu}
+                      sx={listRowSx}
+                    >
+                      <Box component="span" sx={nameCellSx}>
+                        <WindowsFolderIcon />
+                        <Typography component="span" variant="body2" noWrap sx={{ fontWeight: "fontWeightMedium" }}>
+                          {displayText(category.label)}
+                        </Typography>
+                      </Box>
+                      <Box component="span" sx={cellSx}>{getStableDate(category.id)}</Box>
+                      <Box component="span" sx={cellSx}>Thư mục</Box>
+                      <Box component="span" sx={cellSx} />
+                    </ButtonBase>
+                  ))}
+
+                  {paneResources.map((resource) => (
+                    <ButtonBase
+                      key={resource.id}
+                      onClick={() => onOpenResource(resource)}
+                      onContextMenu={openContextMenu}
+                      sx={listRowSx}
+                    >
+                      <Box component="span" sx={nameCellSx}>
+                        <ResourceExplorerIcon resource={resource} />
+                        <Typography component="span" variant="body2" noWrap>
+                          {displayText(resource.title)}
+                        </Typography>
+                      </Box>
+                      <Box component="span" sx={cellSx}>{getStableDate(resource.id)}</Box>
+                      <Box component="span" sx={cellSx}>{getExplorerType(resource)}</Box>
+                      <Box component="span" sx={cellSx}>{getExplorerSize(resource)}</Box>
+                    </ButtonBase>
+                  ))}
+                </Box>
+              </>
+            ) : (
+              <LearningResourceExplorerCardGrid>
                 {childCategories.map((category) => (
-                  <button
+                  <div
                     key={category.id}
-                    type="button"
-                    onClick={() => onSelectCategory(category.id)}
                     onContextMenu={openContextMenu}
-                    className="grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#eef6ff]"
                   >
-                    <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
-                      <WindowsFolderIcon />
-                      <span className="truncate font-medium text-[#111827]">{displayText(category.label)}</span>
-                    </span>
-                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(category.id)}</span>
-                    <span className="truncate px-3 text-[#4b5563]">Thư mục</span>
-                    <span className="truncate px-3 text-[#4b5563]" />
-                  </button>
+                    <LearningResourceFolderTile
+                      label={displayText(category.label)}
+                      onClick={() => onSelectCategory(category.id)}
+                    />
+                  </div>
                 ))}
 
                 {paneResources.map((resource) => (
-                  <button
+                  <div
                     key={resource.id}
-                    type="button"
-                    onClick={() => onOpenResource(resource)}
                     onContextMenu={openContextMenu}
-                    className="grid w-full grid-cols-[minmax(260px,1fr)_145px_120px_90px] items-center border-b border-transparent text-left text-[13px] hover:bg-[#eef6ff]"
                   >
-                    <span className="flex min-w-0 items-center gap-2 px-4 py-1.5">
-                      <ResourceExplorerIcon resource={resource} />
-                      <span className="truncate text-[#111827]">{displayText(resource.title)}</span>
-                    </span>
-                    <span className="truncate px-3 text-[#4b5563]">{getStableDate(resource.id)}</span>
-                    <span className="truncate px-3 text-[#4b5563]">{getExplorerType(resource)}</span>
-                    <span className="truncate px-3 text-[#4b5563]">{getExplorerSize(resource)}</span>
-                  </button>
+                    <LearningActivityCard resource={resource} onOpen={onOpenResource} />
+                  </div>
                 ))}
-              </div>
-            </>
-          ) : (
-            <LearningResourceExplorerCardGrid className="p-5" contentClassName="lms-resource-card-grid">
-              {childCategories.map((category) => (
-                <div
-                  key={category.id}
-                  onContextMenu={openContextMenu}
-                >
-                  <LearningResourceFolderTile
-                    label={displayText(category.label)}
-                    onClick={() => onSelectCategory(category.id)}
-                  />
-                </div>
-              ))}
+              </LearningResourceExplorerCardGrid>
+            )}
 
-              {paneResources.map((resource) => (
-                <div
-                  key={resource.id}
-                  className="lms-resource-activity-card"
-                  onContextMenu={openContextMenu}
-                >
-                  <LearningActivityCard resource={resource} onOpen={onOpenResource} />
-                </div>
-              ))}
-            </LearningResourceExplorerCardGrid>
-          )}
-
-          {libraryError ? (
-            <p className="m-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-medium text-amber-700">
-              {displayText(libraryError)}
-            </p>
-          ) : null}
-          {viewerLoadingResourceId ? (
-            <p className="m-3 rounded-md border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-3 py-2 text-sm font-medium text-[var(--erg-blue)]">
-              Đang mở học liệu...
-            </p>
-          ) : null}
-          {!itemCount ? <EmptyState /> : null}
-        </section>
-      </div>
-
+            {libraryError ? (
+              <Typography variant="body2" sx={{ ...noticeSx, bgcolor: "warning.light", borderColor: "warning.main", color: "warning.dark" }}>
+                {displayText(libraryError)}
+              </Typography>
+            ) : null}
+            {viewerLoadingResourceId ? (
+              <Typography
+                variant="body2"
+                sx={{ ...noticeSx, bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08), borderColor: "primary.main", color: "primary.main" }}
+              >
+                Đang mở học liệu...
+              </Typography>
+            ) : null}
+            {!itemCount ? <EmptyState /> : null}
+          </Box>
+        </Box>
+      </Box>
     </LearningResourceExplorerShell>
   );
 }
+
+const listGridSx = {
+  display: "grid",
+  gridTemplateColumns: "minmax(260px, 1fr) 145px 120px 90px",
+  typography: "body2",
+} as const;
+
+const headerCellSx = { borderColor: "divider", borderRight: 1, px: 1.5, py: 0.75 } as const;
+
+const listRowSx: SxProps<Theme> = {
+  ...listGridSx,
+  alignItems: "center",
+  borderBottom: 1,
+  borderColor: "transparent",
+  justifyContent: "stretch",
+  textAlign: "left",
+  width: "100%",
+  "&:hover": { bgcolor: (theme) => alpha(theme.palette.primary.main, 0.06) },
+};
+
+const nameCellSx = { alignItems: "center", display: "flex", gap: 1, minWidth: 0, px: 2, py: 0.75 } as const;
+
+const cellSx = { color: "text.secondary", overflow: "hidden", px: 1.5, textOverflow: "ellipsis", whiteSpace: "nowrap" } as const;
+
+const noticeSx = { border: 1, borderRadius: 0.75, fontWeight: "fontWeightMedium", m: 1.5, px: 1.5, py: 1 } as const;

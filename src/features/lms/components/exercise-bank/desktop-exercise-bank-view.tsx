@@ -1,4 +1,6 @@
 import { useMemo, useState } from "react";
+import Box from "@mui/material/Box";
+import Paper from "@mui/material/Paper";
 
 import { useQuestionBankWorkspaceQuery } from "@/features/question-bank/api/question-bank-query";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
@@ -41,26 +43,20 @@ export function DesktopExerciseBankView({
   );
 
   return (
-    <div
-      className="flex h-full min-h-0 flex-col gap-3 overflow-hidden p-4 xl:p-5 bg-[#F9FBFC]"
-      style={{
-        fontFamily:
-          '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, sans-serif',
-      }}
-    >
+    <Box sx={{ display: "flex", height: "100%", minHeight: 0, flexDirection: "column", gap: 1.5, overflow: "hidden", p: { xs: 2, lg: 2.5 }, bgcolor: "background.default" }}>
       <ExerciseBankHeader controller={controller} onBack={onBack} onOpenPortable={onOpenPortable} />
 
       {/* ================================================================ */}
       {/* WORKSPACE CHÍNH: Bảng danh sách + Panel xem nhanh Inspector       */}
       {/* ================================================================ */}
-      <div className="grid min-h-0 flex-1 gap-3.5 overflow-hidden xl:grid-cols-[minmax(0,1fr)_330px]">
+      <Box sx={{ display: "grid", minHeight: 0, flex: 1, gap: 1.75, overflow: "hidden", gridTemplateColumns: { lg: "minmax(0, 1fr) 330px" } }}>
         {/* CỘT DANH SÁCH BÀI TẬP */}
-        <section className="flex min-h-0 flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-2xs">
+        <Paper component="section" variant="outlined" sx={{ display: "flex", minHeight: 0, flexDirection: "column", overflow: "hidden", borderRadius: 1.5 }}>
           {/* THANH ĐIỀU HƯỚNG TABS & LỌC TÍCH HỢP — RÕ RÀNG, THOÁNG ĐÃNG */}
           <ExerciseListToolbar controller={controller} />
 
           <ExerciseTable controller={controller} onAssign={onAssign} setDetailModalOpen={setDetailModalOpen} />
-        </section>
+        </Paper>
 
         <ExerciseInspector
           controller={controller}
@@ -68,7 +64,7 @@ export function DesktopExerciseBankView({
           setDetailModalOpen={setDetailModalOpen}
           selectedExerciseQuestions={selectedExerciseQuestions}
         />
-      </div>
+      </Box>
 
       {/* MODAL TẠO & CHỈNH SỬA BÀI TẬP */}
       <CreateExerciseDialog
@@ -91,6 +87,6 @@ export function DesktopExerciseBankView({
         onAssign={onAssign}
         onEdit={controller.openEditDialog}
       />
-    </div>
+    </Box>
   );
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Box from "@mui/material/Box";
 
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import {
@@ -124,8 +125,18 @@ export function LearningResourceLibraryPage() {
   }
 
   return (
-    <div className="flex h-[calc(100dvh-64px)] min-h-0 flex-col overflow-hidden bg-white md:h-[calc(100vh-64px)]">
-      <div className="min-h-0 flex-1 p-0">
+    <Box
+      sx={{
+        bgcolor: "background.paper",
+        display: "flex",
+        flexDirection: "column",
+        height: { xs: "calc(100dvh - 64px)", md: "calc(100vh - 64px)" },
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
+      {/* flex column so the explorer shell (flex: 1) fills the remaining height */}
+      <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0 }}>
         <LearningResourceExplorer
           activeCategoryId={activeCategoryId}
           activeGradeId={activeGradeId}
@@ -143,9 +154,9 @@ export function LearningResourceLibraryPage() {
           treeResources={treeResources}
           viewerLoadingResourceId={viewerLoadingResourceId}
         />
-      </div>
+      </Box>
 
       {activeResource ? <ResourceViewerModal resource={activeResource} onClose={() => setActiveResource(null)} /> : null}
-    </div>
+    </Box>
   );
 }

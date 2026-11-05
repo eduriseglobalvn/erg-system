@@ -1,11 +1,24 @@
-import { RefreshCw, Search } from "lucide-react";
-import { AppSelect } from "@/components/erg-mui/app-select";
-import { cn } from "@/lib/utils";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Typography from "@mui/material/Typography";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgSearchField, ErgSelect } from "@/components/erg-mui/erg-form";
+import { ErgTable } from "@/components/erg-mui/erg-table";
 import {
   AssignmentCheckbox,
   MobileGradeClassList,
   StudentSelectionTable,
 } from "@/features/lms/components/assign-homework-parts";
+import {
+  TargetCardHeader,
+  TargetCardShell,
+  TargetPreviewPanel,
+} from "@/features/lms/components/assign-homework-desktop-view/target-card-layout";
 import type { AssignHomeworkController } from "@/features/lms/components/use-assign-homework-controller";
 
 export function GradeTargetCard({ model }: { model: AssignHomeworkController }) {
@@ -36,156 +49,126 @@ export function GradeTargetCard({ model }: { model: AssignHomeworkController }) 
     resetPreviewStudents,
   } = model;
   return (
-        <section className="relative flex min-h-0 flex-1 flex-col overflow-visible rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-          <div className="px-6 py-3.5 border-b border-slate-50 flex flex-wrap items-center justify-between gap-4 shrink-0">
-            <div className="flex min-w-0 flex-wrap items-end gap-3">
-              <label className="grid min-w-[260px] gap-1.5">
-                <span className="text-[13px] font-bold tracking-normal text-slate-500">Chọn khối giao bài</span>
-                <div className="relative">
-                  <AppSelect
-                    value={selectedGradeLabel}
-                    onChange={(event) => {
-                      setSelectedGradeLabel(event.target.value);
-                      setSelectedGradeClassIds(new Set());
-                      setPreviewGradeClassId(null);
-                    }}
-                    className="h-9 w-full rounded-lg border border-[#cbd7e6] bg-white px-3 pr-9 text-[14px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:bg-white focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                  >
-                    {gradeOptions.map((grade) => (
-                      <option key={grade} value={grade}>
-                        {grade}
-                      </option>
-                    ))}
-                  </AppSelect>
-                </div>
-              </label>
-              <div className="rounded-md border border-[#b8d6fa] bg-[var(--erg-blue-light)] px-3 py-2">
-                <div className="text-[13px] font-bold tracking-normal text-[var(--erg-blue)]">Đã chọn</div>
-                <div className="mt-0.5 text-sm font-semibold text-[var(--erg-blue)]">
-                  {selectedGradeClassIds.size}/{gradeClasses.length} lớp
-                </div>
-              </div>
-            </div>
-            <p className="max-w-md text-[13px] font-semibold text-slate-500">
-              Chọn các lớp cần giao trong khối. Click vào tên lớp để xem và tinh chỉnh danh sách học sinh của lớp đó.
-            </p>
-          </div>
+    <TargetCardShell>
+      <TargetCardHeader
+        select={
+          <ErgSelect
+            label="Chọn khối giao bài"
+            size="small"
+            value={selectedGradeLabel}
+            onChange={(event) => {
+              setSelectedGradeLabel(event.target.value);
+              setSelectedGradeClassIds(new Set());
+              setPreviewGradeClassId(null);
+            }}
+            options={gradeOptions.map((grade) => ({ label: grade, value: grade }))}
+            sx={{ minWidth: 260, width: "auto" }}
+          />
+        }
+        selectedLabel={`${selectedGradeClassIds.size}/${gradeClasses.length} lớp`}
+        aside={
+          <Typography variant="body2" sx={{ maxWidth: 448, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+            Chọn các lớp cần giao trong khối. Click vào tên lớp để xem và tinh chỉnh danh sách học sinh của lớp đó.
+          </Typography>
+        }
+      />
 
-          <div className="relative min-h-0 flex-1 overflow-y-auto">
-            <MobileGradeClassList
-              classes={gradeClasses}
-              onOpenPreview={openGradeClassPreview}
-              onToggleClass={toggleGradeClass}
-              selectedClassIds={selectedGradeClassIds}
-              studentIdsByClass={gradeStudentIdsByClass}
-              selectedStudentIdsByClass={selectedGradeStudentIdsByClass}
-            />
-            <table className="erg-data-table hidden w-full border-collapse text-sm md:table">
-              <thead>
-                <tr className="bg-[#f8fafc] border-b border-[#dbe4f0]">
-                  <th className="py-3 px-5 w-12">
-                    <AssignmentCheckbox checked={allGradeClassesSelected} onChange={toggleAllGradeClasses} label="Chọn tất cả lớp trong khối" />
-                  </th>
-                  <th className="py-3 px-4 w-14 text-center text-[13px] font-bold text-slate-600 tracking-normal">STT</th>
-                  <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal">Lớp</th>
-                  <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-48">Trường</th>
-                  <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-32">Sỉ số</th>
-                  <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-32">Đã chọn</th>
-                  <th className="py-3 px-4 text-left text-[13px] font-bold text-slate-600 tracking-normal w-36">Bài đang mở</th>
-                </tr>
-              </thead>
-              <tbody>
-                {gradeClasses.map((classroom, index) => {
-                  const isChecked = selectedGradeClassIds.has(classroom.id);
-                  const classStudents = getGradeStudentsForClassId(classroom.id);
-                  const selectedStudentCount = selectedGradeStudentIdsByClass[classroom.id]?.length ?? classStudents.length;
-                  return (
-                    <tr
-                      key={classroom.id}
-                      onClick={() => toggleGradeClass(classroom.id)}
-                      className={cn(
-                        "transition-colors cursor-pointer select-none",
-                        isChecked ? "bg-[var(--erg-blue-light)] hover:bg-[var(--erg-blue-light)]" : "bg-white hover:bg-[#f8fbff]",
-                      )}
+      <Box sx={{ position: "relative", minHeight: 0, flex: 1, overflowY: "auto" }}>
+        <MobileGradeClassList
+          classes={gradeClasses}
+          onOpenPreview={openGradeClassPreview}
+          onToggleClass={toggleGradeClass}
+          selectedClassIds={selectedGradeClassIds}
+          studentIdsByClass={gradeStudentIdsByClass}
+          selectedStudentIdsByClass={selectedGradeStudentIdsByClass}
+        />
+        <ErgTable sx={{ display: { xs: "none", md: "table" }, width: "100%" }}>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ px: 2.5, width: 48 }}>
+                <AssignmentCheckbox checked={allGradeClassesSelected} onChange={toggleAllGradeClasses} label="Chọn tất cả lớp trong khối" />
+              </TableCell>
+              <TableCell align="center" sx={{ width: 56 }}>STT</TableCell>
+              <TableCell>Lớp</TableCell>
+              <TableCell sx={{ width: 192 }}>Trường</TableCell>
+              <TableCell sx={{ width: 128 }}>Sỉ số</TableCell>
+              <TableCell sx={{ width: 128 }}>Đã chọn</TableCell>
+              <TableCell sx={{ width: 144 }}>Bài đang mở</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {gradeClasses.map((classroom, index) => {
+              const isChecked = selectedGradeClassIds.has(classroom.id);
+              const classStudents = getGradeStudentsForClassId(classroom.id);
+              const selectedStudentCount = selectedGradeStudentIdsByClass[classroom.id]?.length ?? classStudents.length;
+              return (
+                <TableRow
+                  key={classroom.id}
+                  onClick={() => toggleGradeClass(classroom.id)}
+                  sx={{ cursor: "pointer", userSelect: "none", bgcolor: isChecked ? "info.light" : "background.paper" }}
+                >
+                  <TableCell align="center" sx={{ px: 2.5 }}>
+                    <AssignmentCheckbox checked={isChecked} onChange={() => toggleGradeClass(classroom.id)} label={`Chọn lớp ${classroom.className}`} />
+                  </TableCell>
+                  <TableCell align="center" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>{index + 1}</TableCell>
+                  <TableCell>
+                    <ButtonBase
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openGradeClassPreview(classroom.id);
+                      }}
+                      sx={{ typography: "body2", fontWeight: "fontWeightMedium", color: "primary.main", "&:hover": { textDecoration: "underline" } }}
                     >
-                      <td className="py-3 px-5 text-center">
-                        <AssignmentCheckbox checked={isChecked} onChange={() => toggleGradeClass(classroom.id)} label={`Chọn lớp ${classroom.className}`} />
-                      </td>
-                      <td className="py-3 px-4 text-center text-[13px] text-slate-500 font-semibold">{index + 1}</td>
-                      <td className="py-3 px-4">
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            openGradeClassPreview(classroom.id);
-                          }}
-                          className="font-medium text-[var(--erg-blue)] hover:text-[var(--erg-blue)] hover:underline"
-                        >
-                          {classroom.className}
-                        </button>
-                      </td>
-                      <td className="py-3 px-4 text-[13px] font-semibold text-slate-600">{classroom.schoolName}</td>
-                      <td className="py-3 px-4 text-[13px] font-semibold text-slate-700">{classroom.studentCount} học sinh</td>
-                      <td className="py-3 px-4">
-                        <span className="inline-flex rounded-md bg-[var(--erg-blue-light)] px-2.5 py-1 text-[13px] font-bold text-[var(--erg-blue)]">
-                          {selectedStudentCount}/{classStudents.length} HS
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-[13px] font-semibold text-slate-700">{classroom.activeAssignments} bài</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      {classroom.className}
+                    </ButtonBase>
+                  </TableCell>
+                  <TableCell sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>{classroom.schoolName}</TableCell>
+                  <TableCell sx={{ fontWeight: "fontWeightMedium" }}>{classroom.studentCount} học sinh</TableCell>
+                  <TableCell>
+                    <Typography component="span" variant="body2" sx={{ display: "inline-flex", borderRadius: 1, bgcolor: "info.light", px: 1.25, py: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}>
+                      {selectedStudentCount}/{classStudents.length} HS
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ fontWeight: "fontWeightMedium" }}>{classroom.activeAssignments} bài</TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </ErgTable>
 
-            {previewGradeClass ? (
-              <div
-                className="fixed left-1/2 top-1/2 z-50 flex h-[min(680px,calc(100vh-48px))] w-[min(1120px,calc(100vw-32px))] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-md shadow-slate-900/10"
-                onClick={(event) => event.stopPropagation()}
-              >
-                <div className="lms-modal-header shrink-0 border-b border-[#dbe4f0] px-5 py-3">
-                  <div className="mb-3 flex items-center justify-between gap-3">
-                    <div>
-                      <h4 className="text-base font-semibold text-slate-900">{previewGradeClass.className}</h4>
-                      <p className="text-[13px] font-semibold text-slate-500">
-                        {selectedPopupStudentIds.size}/{previewGradeClassStudents.length} học sinh đang chọn
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button type="button"
-                        onClick={resetPreviewStudents}
-                        className="flex h-9 items-center gap-1.5 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700 transition hover:border-[var(--erg-blue)] hover:bg-[#f8fbff]">
-                        <RefreshCw className="h-3 w-3" /> Đặt lại
-                      </button>
-                      <button type="button"
-                        onClick={() => setPreviewGradeClassId(null)}
-                        className="h-9 rounded-lg border border-[#cbd7e6] bg-white px-3 text-[13px] font-bold text-slate-700 transition hover:border-[var(--erg-blue)] hover:bg-[#f8fbff]">
-                        Đóng
-                      </button>
-                    </div>
-                  </div>
-                  <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-[var(--erg-blue)]" />
-                    <input
-                      type="text"
-                      placeholder="Tìm học sinh trong lớp..."
-                      value={gradeStudentSearch}
-                      onChange={(event) => setGradeStudentSearch(event.target.value)}
-                      className="h-9 w-full rounded-lg border border-[#d7e0ec] bg-white pl-8 pr-3 text-[13px] font-semibold text-slate-900 outline-none transition focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-                    />
-                  </div>
-                </div>
-                <StudentSelectionTable
-                  allSelected={allPreviewStudentsSelected}
-                  className="border-t border-[#cbd7e6]"
-                  onToggleAll={toggleAllPreviewStudents}
-                  onToggleStudent={togglePreviewStudent}
-                  selectedIds={selectedPopupStudentIds}
-                  students={filteredPreviewGradeClassStudents}
-                />
-              </div>
-            ) : null}
-          </div>
-        </section>
+        {previewGradeClass ? (
+          <TargetPreviewPanel
+            title={previewGradeClass.className}
+            meta={`${selectedPopupStudentIds.size}/${previewGradeClassStudents.length} học sinh đang chọn`}
+            actions={
+              <>
+                <ErgButton variant="outlined" size="small" startIcon={<RefreshIcon fontSize="small" />} onClick={resetPreviewStudents}>
+                  Đặt lại
+                </ErgButton>
+                <ErgButton variant="outlined" size="small" onClick={() => setPreviewGradeClassId(null)}>
+                  Đóng
+                </ErgButton>
+              </>
+            }
+            search={
+              <ErgSearchField
+                placeholder="Tìm học sinh trong lớp..."
+                value={gradeStudentSearch}
+                onChange={(event) => setGradeStudentSearch(event.target.value)}
+              />
+            }
+          >
+            <StudentSelectionTable
+              allSelected={allPreviewStudentsSelected}
+              sx={{ borderTop: 1, borderColor: "divider" }}
+              onToggleAll={toggleAllPreviewStudents}
+              onToggleStudent={togglePreviewStudent}
+              selectedIds={selectedPopupStudentIds}
+              students={filteredPreviewGradeClassStudents}
+            />
+          </TargetPreviewPanel>
+        ) : null}
+      </Box>
+    </TargetCardShell>
   );
 }
