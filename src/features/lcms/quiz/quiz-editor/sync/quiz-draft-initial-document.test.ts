@@ -72,11 +72,29 @@ describe("migrateLegacyLocalDrafts", () => {
     expect((await s.get("tenant-1:a", "q9"))?.dirty).toBe(true);
   });
 
-  it("treats new-quiz keys as not created yet", async () => {
-    putLegacy("new-quiz:c:all", "2026-10-01T00:00:00.000Z", serverDoc(0, "new-quiz:c:all"));
+  it("moves an old new-quiz key to the key the editor opens (all topics), as not created yet", async () => {
+    putLegacy("new-quiz:c:all", "2026-10-01T00:00:00.000Z", serverDoc(0, ""));
+    putLegacy("new-quiz:c:l1", "2026-10-01T00:00:00.000Z", serverDoc(0, ""));
     const s = createMemoryQuizDraftDeviceStore();
-    await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1");
-    expect(await s.get("tenant-1:a", "new-quiz:c:all")).toMatchObject({ quizId: null, key: "new-quiz:c:all" });
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(2);
+    expect(await s.get("tenant-1:a", newQuizDraftKey("c", null, "all"))).toMatchObject({ quizId: null, key: "new-quiz:c:all:all", dirty: true });
+    expect(await s.get("tenant-1:a", newQuizDraftKey("c", "l1", "all"))).toMatchObject({ quizId: null, key: "new-quiz:c:l1:all" });
+    expect(await s.get("tenant-1:a", "new-quiz:c:all")).toBeNull();
+    expect(localStorage.getItem(legacyKey("new-quiz:c:all"))).toBeNull();
+  });
+
+  it("moves the old course-less new-quiz:default draft to the course-less new-quiz key", async () => {
+    putLegacy("new-quiz:default", "2026-10-01T00:00:00.000Z", serverDoc(0, ""));
+    const s = createMemoryQuizDraftDeviceStore();
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(1);
+    expect(await s.get("tenant-1:a", newQuizDraftKey("", null, "all"))).toMatchObject({ quizId: null, key: "new-quiz::all:all", dirty: true });
+  });
+
+  it("compares a moved new-quiz draft with the store copy under its new key", async () => {
+    putLegacy("new-quiz:c:all", "2026-10-01T00:00:00.000Z", serverDoc(0, ""));
+    const s = createMemoryQuizDraftDeviceStore();
+    await s.put("tenant-1:a", rec({ key: "new-quiz:c:all:all", quizId: null, baseDocVersion: 0, editedAt: "2026-10-02T00:00:00.000Z" }));
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(0);
   });
 
   it("keeps a newer store copy and only removes the legacy key", async () => {

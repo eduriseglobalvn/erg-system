@@ -55,8 +55,9 @@ export async function migrateLegacyLocalDrafts(
 
   let migrated = 0;
   for (const legacyKey of found.legacyKeys) {
-    const key = decodeKey(legacyKey.slice(prefix.length));
-    if (key === null) continue; // malformed: leave it for a human, keep migrating the rest
+    const decoded = decodeKey(legacyKey.slice(prefix.length));
+    if (decoded === null) continue; // malformed: leave it for a human, keep migrating the rest
+    const key = currentNewQuizKey(decoded);
     if (key === OLD_PLACEHOLDER_KEY) {
       found.storage.removeItem(legacyKey); // the old hook cleared it too; it is not a real quiz
       continue;
@@ -85,6 +86,16 @@ export async function migrateLegacyLocalDrafts(
     found.storage.removeItem(legacyKey);
   }
   return migrated;
+}
+
+/**
+ * The old editor keyed a new quiz "new-quiz:<course>:<level>", or "new-quiz:default" with no course; the topic came
+ * later. Map both to the key the editor opens now with all topics (no course: the key it opens when there is none).
+ */
+function currentNewQuizKey(key: string): string {
+  if (key === `${NEW_QUIZ_PREFIX}default`) return newQuizDraftKey("", null, "all");
+  const isOld = key.startsWith(NEW_QUIZ_PREFIX) && key.slice(NEW_QUIZ_PREFIX.length).split(":").length === 2;
+  return isOld ? `${key}:all` : key;
 }
 
 function readLegacy(raw: string | null): { savedAtMs: number; payload: QuizEditorDraftDocument } | null {
