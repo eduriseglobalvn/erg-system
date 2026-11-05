@@ -110,12 +110,11 @@ export function AssessmentGovernanceWorkspace() {
                     width: 5,
                   }}
                 />
-                Chờ contract backend
+                Sắp ra mắt
               </Box>
             </Box>
             <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.85rem", lineHeight: 1.5, maxWidth: 760 }}>
-              Chưa có contract backend cho campaign, question-permission request hoặc import job. Không hiển thị số liệu
-              mẫu để tránh nhầm dữ liệu demo với dữ liệu vận hành.
+              Đợt đánh giá, yêu cầu cấp quyền câu hỏi và nhập dữ liệu sẽ có ở bản cập nhật tới. Hệ thống không hiển thị số liệu mẫu để tránh nhầm với dữ liệu thật.
             </Typography>
           </Box>
 
@@ -203,8 +202,7 @@ export function AssessmentGovernanceWorkspace() {
         >
           <CloudSyncRoundedIcon sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: 20 }} />
           <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", lineHeight: 1.45 }}>
-            Khi contract được phát hành, workspace này sẽ được nối qua query/mutation có scope và trạng thái loading,
-            empty, error đầy đủ. Chờ contract backend để kích hoạt.
+            Khu vực này sẽ tự hiển thị dữ liệu khi tính năng được bật.
           </Typography>
         </Box>
       </Paper>
@@ -279,7 +277,7 @@ function RoadmapCard({
             py: 0.25,
           }}
         >
-          Chờ contract backend
+          Sắp ra mắt
         </Box>
       </Box>
     </Box>

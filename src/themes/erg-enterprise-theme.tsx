@@ -5,6 +5,10 @@ import "@fontsource/be-vietnam-pro/500.css";
 import "@fontsource/be-vietnam-pro/600.css";
 import "@fontsource/be-vietnam-pro/700.css";
 
+// Phones get 44px touch targets on every button and input; desktop keeps the dense 40/34px sizes.
+const phone = "@media (max-width: 599.95px)";
+const phoneTarget = { [phone]: { minHeight: 44 } };
+
 export const ergEnterpriseTheme = createTheme({
   palette: {
     primary: {
@@ -102,6 +106,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           minHeight: t.size.controlMd,
+          ...phoneTarget,
           borderRadius: t.radius.xs,
           fontWeight: 600,
           letterSpacing: 0,
@@ -125,6 +130,7 @@ export const ergEnterpriseTheme = createTheme({
         },
         sizeSmall: {
           minHeight: t.size.controlSm,
+          ...phoneTarget,
           paddingInline: 12,
         },
         sizeLarge: {
@@ -149,9 +155,15 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    MuiToggleButton: {
+      styleOverrides: {
+        root: phoneTarget,
+      },
+    },
     MuiIconButton: {
       styleOverrides: {
         root: {
+          [phone]: { minHeight: 44, minWidth: 44 },
           borderRadius: t.radius.md,
           color: t.color.textMuted,
           "&:hover": {
@@ -197,6 +209,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           minHeight: t.size.controlMd,
+          ...phoneTarget,
           borderRadius: t.radius.md,
           backgroundColor: t.color.surface,
           fontWeight: 400,

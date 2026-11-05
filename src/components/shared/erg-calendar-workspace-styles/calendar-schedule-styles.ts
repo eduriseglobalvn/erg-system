@@ -164,7 +164,7 @@ export const viewToggleSx = {
   flexShrink: 0,
   overflow: "hidden",
   p: 0.375,
-  "& .MuiToggleButtonGroup-grouped": { border: 0, borderRadius: "999px !important", color: "#5F6368", fontWeight: 600, minHeight: 36, px: { xs: 0.85, xl: 1.05 }, textTransform: "none", whiteSpace: "nowrap" },
+  "& .MuiToggleButtonGroup-grouped": { border: 0, borderRadius: "999px !important", color: "#5F6368", fontWeight: 600, minHeight: { xs: 44, md: 36 }, px: { xs: 0.85, xl: 1.05 }, textTransform: "none", whiteSpace: "nowrap" },
   "& .Mui-selected": { backgroundColor: "#DCEBFF !important", color: "#202124 !important" },
 };
 export const miniCalendarSx = {

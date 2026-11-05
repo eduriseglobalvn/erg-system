@@ -219,7 +219,7 @@ export function QuestionManagerTable({
                 onClick={() => onAddNewQuestion?.("multiple-choice")}
               >
                 <AddRoundedIcon sx={{ fontSize: 18 }} />
-                <span>+ Tạo câu hỏi</span>
+                <span>Tạo câu hỏi</span>
               </button>
 
               {onSaveDraft ? (

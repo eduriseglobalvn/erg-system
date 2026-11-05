@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
 import {
@@ -233,6 +234,7 @@ export default function AdminGoogleCalendarWorkspace({
 
   return (
     <Stack spacing={2}>
+      <Typography component="h1" sx={{ clip: "rect(0 0 0 0)", height: "1px", overflow: "hidden", position: "absolute", whiteSpace: "nowrap", width: "1px" }}>Lịch trung tâm</Typography>
       <TeachingScheduleBatchPanel
         canCreate={canCreateSchedule}
         onCreate={() => setCreateDialogOpen(true)}

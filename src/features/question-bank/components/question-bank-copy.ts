@@ -90,7 +90,7 @@ export const viCopy = {
     actions: "Thao tác",
   },
   otherTopic: "Khác",
-  noQuizzes: "Chưa có quiz phù hợp.",
+  noQuizzes: "Chưa có gói bài tập phù hợp.",
   searchQuizPlaceholder: "Tìm bài tập...",
   openQuiz: "Mở quiz",
   deleteQuiz: "Xóa",

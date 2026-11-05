@@ -68,7 +68,7 @@ export function QuestionManagerEmptyState({
         className="classic-editor__manager-action is-primary"
       >
         <AddRoundedIcon />
-        <span>+ Tạo câu hỏi mới</span>
+        <span>Tạo câu hỏi mới</span>
       </button>
       <div className="classic-editor__manager-empty-presets">
         <span className="classic-editor__manager-empty-presets-label">Dạng câu hỏi:</span>

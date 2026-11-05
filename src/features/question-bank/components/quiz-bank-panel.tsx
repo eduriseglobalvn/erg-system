@@ -102,7 +102,7 @@ export function QuizBankPanel({
         }}
       >
         <Box sx={{ minWidth: 0 }}>
-          <Typography sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
+          <Typography component="h1" sx={{ color: ergEnterpriseTokens.color.text, fontSize: "1rem", fontWeight: 600, letterSpacing: "-0.01em" }}>
             {copy.quizBankTitle}
           </Typography>
           <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.8125rem", fontWeight: 500, mt: 0.25 }}>
@@ -163,7 +163,7 @@ export function QuizBankPanel({
                 color: ergEnterpriseTokens.color.textMuted,
                 fontSize: "0.8rem",
                 fontWeight: 600,
-                minHeight: 32,
+                minHeight: { xs: 44, md: 32 },
                 px: 1.5,
                 textTransform: "none",
                 transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -215,7 +215,11 @@ export function QuizBankPanel({
                       flexDirection: "column",
                       gap: 1.25,
                       justifyContent: "center",
+                      // Pin the message to the visible part of the horizontally scrolling table on phones.
+                      left: 0,
+                      position: { xs: "sticky", md: "static" },
                       textAlign: "center",
+                      width: { xs: "calc(100vw - 72px)", md: "auto" },
                     }}
                   >
                     <Box

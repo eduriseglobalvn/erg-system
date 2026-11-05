@@ -130,7 +130,7 @@ export function StudentScopeNavigator({
             borderRadius: "10px",
             color: isAllSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
             mb: 0.5,
-            minHeight: 38,
+            minHeight: { xs: 44, md: 38 },
             px: 1.25,
             transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
             "&:hover": {
@@ -190,7 +190,7 @@ export function StudentScopeNavigator({
                   bgcolor: gradeSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                   borderRadius: "10px",
                   color: gradeSelected ? ergEnterpriseTokens.color.primary : ergEnterpriseTokens.color.text,
-                  minHeight: 36,
+                  minHeight: { xs: 44, md: 36 },
                   px: 1.25,
                   transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                   "&:hover": {
@@ -276,7 +276,7 @@ export function StudentScopeNavigator({
                             bgcolor: isSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                             borderRadius: "8px",
                             mb: 0.25,
-                            minHeight: 34,
+                            minHeight: { xs: 44, md: 34 },
                             px: 1,
                             transition: "all 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
                             "&:hover": {
@@ -347,7 +347,7 @@ export function StudentScopeNavigator({
                     bgcolor: isSelected ? `${alpha(ergEnterpriseTokens.color.primary, 0.09)} !important` : "transparent",
                     borderRadius: "8px",
                     mb: 0.25,
-                    minHeight: 36,
+                    minHeight: { xs: 44, md: 36 },
                     px: 1,
                   }}
                 >

@@ -47,6 +47,7 @@ export function SchoolPageToolbar({
       >
         <Box sx={{ minWidth: 0 }}>
           <Typography
+            component="h1"
             sx={{
               color: ergEnterpriseTokens.color.text,
               fontSize: { xs: "1.25rem", md: "1.45rem" },
