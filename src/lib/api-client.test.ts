@@ -523,6 +523,16 @@ test("keeps the entries of a 422 envelope whose errors is an array as ApiClientE
   expect(error).toMatchObject({ message: "quiz failed publish validation", code: "HTTP_422", status: 422, details: errors, requestId: "req-1" });
 });
 
+test("does not treat a 200 body with data and a non-empty errors array (GraphQL style) as a failure", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ data: { ok: true }, errors: [{ message: "partial" }] }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  )));
+
+  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ data: { ok: true }, errors: [{ message: "partial" }] });
+});
+
 test("does not treat an empty errors array on a successful response as a failure", async () => {
   vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
   vi.stubGlobal("fetch", vi.fn(async () => new Response(

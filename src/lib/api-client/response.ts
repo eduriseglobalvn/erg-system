@@ -113,8 +113,9 @@ export function getErrorBody(value: unknown) {
       : { code: value.errors.code, message: value.message, details: value.errors, requestId: value.request_id };
   }
 
-  // Validation failures list their entries (field, message, ...) in an array; an empty one is not an error.
-  if (Array.isArray(value.errors) && value.errors.length > 0 && value.success !== true) {
+  // Validation failures list their entries (field, message, ...) in an array. Only when the body itself says 4xx/5xx:
+  // a GraphQL body carries an errors array next to partial data on a 200.
+  if (Array.isArray(value.errors) && value.errors.length > 0 && typeof value.statusCode === "number" && value.statusCode >= 400) {
     return { code: undefined, message: value.message, details: value.errors, requestId: value.request_id };
   }
 
