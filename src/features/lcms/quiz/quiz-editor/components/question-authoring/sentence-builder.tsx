@@ -14,8 +14,14 @@ const visuallyHidden = { border: 0, clip: "rect(0 0 0 0)", height: 1, margin: -1
 
 const fieldSx = { p: 0, font: "inherit", lineHeight: "inherit", letterSpacing: "inherit", bgcolor: "transparent", position: "relative", zIndex: 1 } as const;
 
-// One line only; NFC so a blank's offsets never split a base letter from its combining mark.
-const clean = (s: string) => s.replace(/\s*\r?\n\s*/g, " ").normalize("NFC");
+const PASTED = new Set(["insertFromPaste", "insertFromDrop"]);
+
+// One line only. Pasted text goes to NFC so a blank's offsets never split a base letter from its combining mark;
+// typed text is left alone because Unikey's combining mode deletes decomposed characters one by one.
+const clean = (s: string, pasted: boolean) => {
+  const line = s.replace(/\s*\r?\n\s*/g, " ");
+  return pasted ? line.normalize("NFC") : line;
+};
 
 export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, renderPopover }: {
   sentence: BlankSentence;
@@ -35,20 +41,22 @@ export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, r
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const descId = useId();
   // A cleaned value differs from what the textarea holds, so React would drop the caret at the end; put it back.
-  const caretAfter = useRef<number | null>(null);
+  // Only on the render that shows that value: a parent that hasn't applied it yet drops the restore.
+  const caretAfter = useRef<{ value: string; caret: number } | null>(null);
   useLayoutEffect(() => {
-    if (caretAfter.current === null) return;
-    inputRef.current?.setSelectionRange(caretAfter.current, caretAfter.current);
+    const pending = caretAfter.current;
     caretAfter.current = null;
+    if (pending && pending.value === sentence.text) inputRef.current?.setSelectionRange(pending.caret, pending.caret);
   });
 
   const spanOf = (id: string) =>
     Array.from(rootRef.current?.querySelectorAll<HTMLElement>("[data-blank-id]") ?? []).find((el) => el.dataset.blankId === id);
 
-  const edit = (el: HTMLTextAreaElement) => {
-    const value = clean(el.value);
-    const caret = clean(el.value.slice(0, el.selectionEnd)).length;
-    if (value !== el.value) caretAfter.current = caret;
+  const edit = (el: HTMLTextAreaElement, inputType: string | undefined) => {
+    const pasted = PASTED.has(inputType ?? "");
+    const value = clean(el.value, pasted);
+    const caret = clean(el.value.slice(0, el.selectionEnd), pasted).length;
+    if (value !== el.value) caretAfter.current = { value, caret };
     onChange(rebaseBlanks(sentence, value, caret));
   };
 
@@ -87,7 +95,7 @@ export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, r
           inputProps={{ "aria-label": "Câu có ô trống", "aria-describedby": descId }}
           inputRef={inputRef}
           multiline
-          onChange={(e) => edit(e.target as HTMLTextAreaElement)}
+          onChange={(e) => edit(e.target as HTMLTextAreaElement, (e.nativeEvent as InputEvent).inputType)}
           onClick={(e) => openAtPoint(e.clientX, e.clientY)}
           onKeyDown={(e) => {
             if (e.key !== "Enter" || e.nativeEvent.isComposing || e.keyCode === 229) return;
@@ -115,7 +123,7 @@ export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, r
           paper: {
             role: "dialog",
             "aria-label": openBlank ? `Ô trống “${blankWord(sentence, openBlank)}”` : undefined,
-            sx: { borderRadius: "12px", boxShadow: tokens.shadow.float, p: "10px 12px", display: "flex", flexDirection: "column", gap: 1, maxWidth: 330 },
+            sx: { borderRadius: `${tokens.radius.card}px`, boxShadow: tokens.shadow.float, p: "10px 12px", display: "flex", flexDirection: "column", gap: 1, maxWidth: 330 },
           },
         }}
       >

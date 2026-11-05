@@ -43,7 +43,7 @@ describe("ChipInput", () => {
   it("removes a chip from its delete icon", () => {
     const onRemove = vi.fn();
     setup([{ key: "x", label: "x", tone: "correct", onRemove }]);
-    fireEvent.click(screen.getByLabelText("Xoá “x”"));
+    fireEvent.click(screen.getByRole("img", { name: "Xoá “x”" }));
     expect(onRemove).toHaveBeenCalledTimes(1);
   });
 

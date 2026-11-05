@@ -71,6 +71,13 @@ describe("SentenceBuilder", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
+  it("ignores Enter while an IME is composing", () => {
+    const { textarea } = setup();
+    textarea.setSelectionRange(START + 2, START + 2);
+    fireEvent.keyDown(textarea, { key: "Enter", isComposing: true });
+    expect(screen.queryByRole("dialog")).toBeNull();
+  });
+
   it("opens a blank clicked with a collapsed selection", () => {
     const { container, textarea } = setup();
     const span = container.querySelector('[data-blank-id="b1"]') as HTMLElement;
@@ -90,9 +97,19 @@ describe("SentenceBuilder", () => {
   it("normalises a decomposed paste so blanks keep whole letters", () => {
     const { textarea } = setup();
     const pasted = "Tiếng ".normalize("NFD");
-    fireEvent.change(textarea, { target: { value: pasted + TEXT, selectionStart: pasted.length, selectionEnd: pasted.length } });
+    const target = { value: pasted + TEXT, selectionStart: pasted.length, selectionEnd: pasted.length };
+    fireEvent.input(textarea, { target, inputType: "insertFromPaste" });
     expect(latest.text).toBe(`Tiếng ${TEXT}`);
     expect(latest.blanks[0]).toMatchObject({ start: START + 6, end: START + 13 });
+    expect(textarea.selectionStart).toBe("Tiếng ".length);
+    expect(textarea.selectionEnd).toBe("Tiếng ".length);
+  });
+
+  it("leaves typed text decomposed, as Unikey's combining mode needs", () => {
+    const { textarea } = setup();
+    const typed = "ế".normalize("NFD");
+    fireEvent.input(textarea, { target: { value: typed + TEXT, selectionStart: typed.length, selectionEnd: typed.length }, inputType: "insertText" });
+    expect(latest.text).toBe(typed + TEXT);
   });
 
   it("never calls onChange just by rendering", () => {

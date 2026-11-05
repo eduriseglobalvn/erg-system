@@ -23,7 +23,7 @@ const chipSx = ({ tone, shape }: ChipItem) => ({
     ? { bgcolor: tokens.statusTint.success.bg, color: "success.main" }
     : { bgcolor: "background.paper", border: "1px solid", borderColor: tokens.color.border }),
   ...(shape === "word"
-    ? { borderRadius: "8px", boxShadow: `0 1px 0 ${tokens.color.border}` }
+    ? { borderRadius: `${tokens.radius.control}px`, boxShadow: `0 1px 0 ${tokens.color.border}` }
     : { borderRadius: `${tokens.radius.chip}px` }),
 });
 
@@ -47,7 +47,7 @@ export function ChipInput({ items, onAdd, inputLabel, placeholder }: {
       {items.map((item) => (
         <Chip
           aria-pressed={item.onToggle ? Boolean(item.pressed) : undefined}
-          deleteIcon={item.onRemove ? <CloseIcon aria-label={`Xoá “${item.label}”`} /> : undefined}
+          deleteIcon={item.onRemove ? <CloseIcon titleAccess={`Xoá “${item.label}”`} /> : undefined}
           icon={item.onToggle && item.pressed ? <CheckIcon /> : undefined}
           key={item.key}
           label={item.label}
