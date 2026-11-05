@@ -33,7 +33,8 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
   const { t } = useI18n();
   const hints = ACTION_HINTS[slide.kind] ?? {};
   const titleIssue = readiness.issues.find((issue) => issue.area === "title");
-  const answerIssues = readiness.issues.filter((issue) => issue.area === "answers");
+  // MatchingAuthoring shows pair-key itself, next to its confirm button.
+  const answerIssues = readiness.issues.filter((issue) => issue.area === "answers" && issue.code !== "pair-key");
   const write = (next: Question) => onReplaceSlide(writeSlideQuestion(slide, next));
   // Results of async steps (image processing) patch the latest slide, so edits made meanwhile survive.
   const updateLatest = (change: (latest: Question) => Question) =>

@@ -4,9 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
 import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
+import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
+import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
 import { slideFingerprint } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { QuestionEditorShell } from "./question-editor-shell";
+import { readSlideQuestion, writeSlideQuestion } from "./slide-question";
 
 const prepare = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/media/quiz-image", async (orig) => ({ ...(await orig<object>()), prepareQuizImage: prepare }));
@@ -182,6 +185,22 @@ describe("QuestionEditorShell", () => {
     const dialog = screen.getByRole("dialog", { name: "Soạn câu hỏi" });
     const banner = within(dialog).getByText("Mất kết nối");
     expect(banner.compareDocumentPosition(within(dialog).getByPlaceholderText("Nhập đề bài")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("shows an unconfirmed matching key once, in the warning that holds the confirm button", () => {
+    const base = buildQuestionSlide("matching", createNewQuizProjectSettings(), (p) => `${p}-m`);
+    const question = readSlideQuestion(base, ((key: string) => key) as never)!;
+    const keyless = writeSlideQuestion({ ...base, title: "Nối" }, {
+      ...question,
+      title: "Nối",
+      matching: [{ id: "p1", prompt: "A" }, { id: "p2", prompt: "B" }],
+      matchingResponses: [{ id: "x", response: "one" }, { id: "y", response: "two" }],
+    });
+    renderShell({ groups: [{ ...groups[0]!, slides: [keyless] }], selectedSlide: keyless });
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Chưa rõ cặp nào đúng. Ghép đúng các cặp rồi bấm “Các cặp đã đúng”.");
+    expect(within(alert).getByRole("button", { name: "Các cặp đã đúng" })).toBeInTheDocument();
+    for (const status of screen.queryAllByRole("status")) expect(status).not.toHaveTextContent("Chưa rõ cặp nào đúng");
   });
 });
 

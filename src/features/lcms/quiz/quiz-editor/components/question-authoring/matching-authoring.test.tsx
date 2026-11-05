@@ -137,7 +137,7 @@ describe("MatchingAuthoring", () => {
 
   it("keeps a keyless question unconfirmed through edits and swaps until the teacher confirms", () => {
     render(<Harness start={keyless()} />);
-    expect(screen.getByText("Chưa rõ cặp nào đúng. Kéo mảnh phải về đúng hàng.")).toBeInTheDocument();
+    expect(screen.getByText("Chưa rõ cặp nào đúng. Ghép đúng các cặp rồi bấm “Các cặp đã đúng”.")).toBeInTheDocument();
     fireEvent.change(screen.getByRole("textbox", { name: "Vế trái hàng 1" }), { target: { value: "A2" } });
     expect(codes()).toContain("pair-key");
     fireEvent.keyDown(screen.getByRole("button", { name: /^Kéo vế phải hàng 1,/ }), { key: "ArrowDown", altKey: true });

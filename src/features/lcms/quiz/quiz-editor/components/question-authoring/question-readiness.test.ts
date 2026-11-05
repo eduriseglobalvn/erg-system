@@ -257,7 +257,7 @@ describe("assessQuestionReadiness", () => {
           matchingResponses: [{ id: "r1", response: "x" }, { id: "r2", response: "y" }],
         });
       expect(codes(noKey("a"))).toEqual(["pair-key"]);
-      expect(assessQuestionReadiness(noKey("a"), { hasQuestionImage: false }).issues[0].message).toBe("Chưa rõ cặp nào đúng. Kéo mảnh phải về đúng hàng.");
+      expect(assessQuestionReadiness(noKey("a"), { hasQuestionImage: false }).issues[0].message).toBe("Chưa rõ cặp nào đúng. Ghép đúng các cặp rồi bấm “Các cặp đã đúng”.");
       expect(codes(noKey(""))).toEqual(["pair-sides", "pair-key"]);
     });
   });

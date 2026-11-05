@@ -128,7 +128,7 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
         return !filled(pair.prompt, pair.promptImage) || !responseOk;
       });
       if (incomplete) add("pair-sides", "Mỗi cặp cần đủ hai vế");
-      if (keyMissing) add("pair-key", "Chưa rõ cặp nào đúng. Kéo mảnh phải về đúng hàng.");
+      if (keyMissing) add("pair-key", "Chưa rõ cặp nào đúng. Ghép đúng các cặp rồi bấm “Các cặp đã đúng”.");
       break;
     }
     case "drag_drop":
