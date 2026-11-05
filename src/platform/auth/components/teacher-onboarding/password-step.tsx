@@ -87,7 +87,7 @@ export function PasswordStep({
         }}
       >
         {busy ? <CircularProgress size={20} sx={{ color: "#FFF", mr: 1 }} /> : null}
-        Hoàn tất onboarding
+        Hoàn tất thiết lập
       </Button>
     </OnboardingSection>
   );

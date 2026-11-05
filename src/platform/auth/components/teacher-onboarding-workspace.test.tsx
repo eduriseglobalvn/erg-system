@@ -108,7 +108,7 @@ describe("teacher onboarding workspace", () => {
     fireEvent.change(screen.getByLabelText("Mật khẩu tạm thời"), { target: { value: "Temporary@123" } });
     fireEvent.change(screen.getByLabelText("Mật khẩu mới"), { target: { value: "NewPassword@123" } });
     fireEvent.change(screen.getByLabelText("Xác nhận mật khẩu mới"), { target: { value: "NewPassword@123" } });
-    fireEvent.click(screen.getByRole("button", { name: "Hoàn tất onboarding" }));
+    fireEvent.click(screen.getByRole("button", { name: "Hoàn tất thiết lập" }));
 
     await waitFor(() => expect(onChangePassword).toHaveBeenCalledWith({ currentPassword: "Temporary@123", newPassword: "NewPassword@123" }));
     expect(onComplete).toHaveBeenCalled();
