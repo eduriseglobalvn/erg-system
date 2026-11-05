@@ -39,9 +39,9 @@ export function QuizTryRunner({ questions, startIndex, initialMode, feedback }: 
   const [confirming, setConfirming] = useState(false);
   const [done, setDone] = useState(false);
 
-  const reset = (nextMode: TryRunMode) => {
+  const reset = (nextMode: TryRunMode, at = startIndex) => {
     setMode(nextMode);
-    setIndex(startIndex);
+    setIndex(at);
     setAnswers({});
     setChecked({});
     setConfirming(false);
@@ -49,22 +49,26 @@ export function QuizTryRunner({ questions, startIndex, initialMode, feedback }: 
   };
 
   if (!questions.length) return <Typography color="text.secondary">Bài chưa có câu hỏi để chạy thử.</Typography>;
-  if (done) return <TryRunSummaryView onRestart={() => reset(mode)} summary={summarizeTryRun(questions, answers)} />;
+  if (done) return <TryRunSummaryView onRestart={() => reset(mode, 0)} summary={summarizeTryRun(questions, answers)} />;
 
   const last = questions.length - 1;
   const q = questions[Math.min(index, last)];
   const value = answers[q.id] ?? createInitialAnswer(q);
   const practice = mode === "practice";
   const isChecked = practice && !!checked[q.id];
-  const result = isChecked ? scoreQuestion(q, value) : null;
+  const graded = isAutoGraded(q);
+  const result = isChecked && graded ? scoreQuestion(q, value) : null;
   const text = feedback?.[q.id];
   const feedbackText = result ? (result.correct ? (text?.correct ?? q.feedback.correct) : (text?.incorrect ?? q.feedback.incorrect)) : "";
   const correctAnswer = describeCorrectAnswer(q);
 
-  const states: CellState[] = questions.map((x) => {
-    if (practice) return checked[x.id] ? (!isAutoGraded(x) ? "đã làm" : scoreQuestion(x, answers[x.id] ?? createInitialAnswer(x)).correct ? "đúng" : "sai") : "chưa làm";
-    return isAnswerComplete(x, answers[x.id]) ? "đã làm" : "chưa làm";
-  });
+  const cellState = (x: Question): CellState => {
+    if (!practice) return isAnswerComplete(x, answers[x.id]) ? "đã làm" : "chưa làm";
+    if (!checked[x.id]) return "chưa làm";
+    if (!isAutoGraded(x)) return "đã làm";
+    return scoreQuestion(x, answers[x.id] ?? createInitialAnswer(x)).correct ? "đúng" : "sai";
+  };
+  const states = questions.map(cellState);
 
   const primary = () => {
     if (practice && !isChecked) return setChecked({ ...checked, [q.id]: true });
@@ -97,10 +101,10 @@ export function QuizTryRunner({ questions, startIndex, initialMode, feedback }: 
             submitted={isChecked}
             value={value}
           />
-          {result ? (
+          {isChecked ? (
             <Box role="status" sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 3, mt: 2, p: 2 }}>
-              <Typography color={result.correct ? "success.main" : "error.main"} sx={{ fontWeight: "fontWeightBold" }}>
-                {result.correct ? "Chính xác!" : `Chưa đúng${correctAnswer ? ` · Đáp án đúng: ${correctAnswer}` : ""}`}
+              <Typography color={!result ? "text.secondary" : result.correct ? "success.main" : "error.main"} sx={{ fontWeight: "fontWeightBold" }}>
+                {!result ? "Câu này không chấm tự động." : result.correct ? "Chính xác!" : `Chưa đúng${correctAnswer ? ` · Đáp án đúng: ${correctAnswer}` : ""}`}
               </Typography>
               {feedbackText ? <Typography variant="body2">{feedbackText}</Typography> : null}
             </Box>
@@ -119,13 +123,13 @@ export function QuizTryRunner({ questions, startIndex, initialMode, feedback }: 
             </ErgButton>
           </Box>
         </Box>
-        <TryRunQuestionGrid current={index} onSelect={setIndex} states={states} />
+        <TryRunQuestionGrid current={index} practice={practice} onSelect={setIndex} states={states} />
       </Box>
-      <Dialog fullWidth maxWidth="xs" onClose={() => setConfirming(false)} open={confirming} role="alertdialog">
+      <Dialog aria-describedby={missing ? "try-run-submit-detail" : undefined} aria-labelledby="try-run-submit-title" fullWidth maxWidth="xs" onClose={() => setConfirming(false)} open={confirming} role="alertdialog">
         <DialogContent>
-          <Typography sx={{ fontWeight: "fontWeightBold" }}>{submitPrompt(questions, answers)}</Typography>
+          <Typography id="try-run-submit-title" sx={{ fontWeight: "fontWeightBold" }}>{submitPrompt(questions, answers)}</Typography>
           {missing ? (
-            <Typography color="text.secondary" variant="caption">
+            <Typography id="try-run-submit-detail" color="text.secondary" variant="caption">
               Sau khi nộp sẽ không sửa được đáp án.
             </Typography>
           ) : null}

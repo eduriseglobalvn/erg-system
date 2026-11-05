@@ -49,6 +49,50 @@ describe("QuizTryRunner", () => {
     expect(screen.getByRole("button", { name: "Câu 2, chưa làm" })).toBeInTheDocument();
   });
 
+  it("practice: a wrong answer shows the correct answer", () => {
+    render(<QuizTryRunner questions={questions} startIndex={0} initialMode="practice" />);
+    fireEvent.click(screen.getByText("Sai q1"));
+    fireEvent.click(screen.getByRole("button", { name: "Xem kết quả" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Chưa đúng · Đáp án đúng: Đúng q1");
+  });
+
+  it("practice: an essay is neutral, never wrong", () => {
+    const essay = { id: "e1", kind: "essay", title: "Tự luận", prompt: "x", feedback: { correct: "", incorrect: "", partial: "" } } as unknown as Question;
+    window.matchMedia ??= (() => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as never;
+    render(<QuizTryRunner questions={[essay]} startIndex={0} initialMode="practice" />);
+    fireEvent.change(screen.getByRole("textbox"), { target: { value: "bài làm" } });
+    fireEvent.click(screen.getByRole("button", { name: "Xem kết quả" }));
+    expect(screen.getByRole("status")).toHaveTextContent("Câu này không chấm tự động.");
+    expect(screen.queryByText(/Chưa đúng/)).toBeNull();
+  });
+
+  it("restart goes to question 1 even when started on question 2", () => {
+    render(<QuizTryRunner questions={questions} startIndex={1} initialMode="test" />);
+    fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));
+    fireEvent.click(screen.getByRole("button", { name: "Vẫn nộp" }));
+    fireEvent.click(screen.getByRole("button", { name: "Làm lại" }));
+    expect(screen.getByRole("button", { name: "Câu 1, đang làm" })).toBeInTheDocument();
+  });
+
+  it("switching mode clears answers and returns to the start question", () => {
+    render(<QuizTryRunner questions={questions} startIndex={1} initialMode="test" />);
+    fireEvent.click(screen.getByText("Đúng q2"));
+    expect(screen.getByText("1/2 đã làm")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Luyện tập" }));
+    fireEvent.click(screen.getByRole("button", { name: "Kiểm tra" }));
+    expect(screen.getByText("0/2 đã làm")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Câu 2, đang làm" })).toBeInTheDocument();
+  });
+
+  it("grid uses 5 columns up to 20 questions and 10 above", () => {
+    const many = (n: number) => Array.from({ length: n }, (_, i) => q(`m${i}`, `T${i}`));
+    const { unmount } = render(<QuizTryRunner questions={many(20)} startIndex={0} initialMode="test" />);
+    expect(screen.getByRole("button", { name: "Câu 1, đang làm" }).parentElement).toHaveStyle({ gridTemplateColumns: "repeat(5, 40px)" });
+    unmount();
+    render(<QuizTryRunner questions={many(21)} startIndex={0} initialMode="test" />);
+    expect(screen.getByRole("button", { name: "Câu 1, đang làm" }).parentElement).toHaveStyle({ gridTemplateColumns: "repeat(10, 30px)" });
+  });
+
   it("shows the empty state", () => {
     render(<QuizTryRunner questions={[]} startIndex={0} initialMode="practice" />);
     expect(screen.getByText("Bài chưa có câu hỏi để chạy thử.")).toBeInTheDocument();

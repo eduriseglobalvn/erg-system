@@ -26,7 +26,7 @@ export function TryRunSummaryView({ summary, onRestart }: { summary: TryRunSumma
     <Box sx={{ alignItems: "flex-start", display: "flex", flexWrap: "wrap", gap: 2.5 }}>
       <Box sx={{ ...cardSx, flex: "0 1 400px", textAlign: "center" }}>
         <Box aria-hidden component="svg" height={168} viewBox="0 0 168 168" width={168}>
-          <Box component="circle" cx={84} cy={84} r={R} sx={{ fill: "none", stroke: "divider", strokeWidth: 14 }} />
+          <Box component="circle" cx={84} cy={84} r={R} sx={{ fill: "none", stroke: (t) => t.palette.divider, strokeWidth: 14 }} />
           <Box
             component="circle"
             cx={84}

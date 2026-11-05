@@ -10,18 +10,21 @@ type Props = {
   /** State per question; the grid shows "đang làm" for the current one. */
   states: CellState[];
   current: number;
+  practice: boolean;
   onSelect: (index: number) => void;
 };
 
 const fill: Partial<Record<CellState, string>> = { "đúng": "success.main", "sai": "error.main", "đã làm": "primary.main" };
 
-export function TryRunQuestionGrid({ states, current, onSelect }: Props) {
+export function TryRunQuestionGrid({ states, current, practice, onSelect }: Props) {
   const n = states.length;
   const answered = states.filter((s) => s !== "chưa làm").length;
   const cols = n <= 20 ? 5 : 10;
   const size = n <= 20 ? 40 : 30;
   const currentRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => currentRef.current?.scrollIntoView?.({ block: "nearest" }), [current]);
+  useEffect(() => {
+    if (n > 100) currentRef.current?.scrollIntoView?.({ block: "nearest" });
+  }, [current, n]);
 
   return (
     <Box component="aside" sx={{ border: 1, borderColor: "divider", borderRadius: "20px", flex: "0 1 300px", minWidth: 0, p: 2.5 }}>
@@ -69,9 +72,17 @@ export function TryRunQuestionGrid({ states, current, onSelect }: Props) {
           );
         })}
       </Box>
-      <Typography color="text.secondary" component="p" sx={{ mt: 1.5 }} variant="caption">
-        {states.some((s) => s === "đúng" || s === "sai") ? "Đúng · Sai · Chưa làm" : "Đã làm · Chưa làm"}
-      </Typography>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1.5, mt: 1.5 }}>
+        {(practice
+          ? [["Đúng", "success.main"], ["Sai", "error.main"], ["Chưa làm", "background.paper"]]
+          : [["Đã làm", "primary.main"], ["Chưa làm", "background.paper"]]
+        ).map(([label, bg]) => (
+          <Typography color="text.secondary" key={label} sx={{ alignItems: "center", display: "inline-flex", gap: 0.75 }} variant="caption">
+            <Box component="span" sx={{ bgcolor: bg, border: 1.5, borderColor: bg === "background.paper" ? "divider" : bg, borderRadius: 0.5, height: 12, width: 12 }} />
+            {label}
+          </Typography>
+        ))}
+      </Box>
     </Box>
   );
 }
