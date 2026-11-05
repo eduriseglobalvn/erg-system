@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useI18n } from "@/platform/i18n";
-import type { QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getSlideKindLabelKey, isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getFeedbackText } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
@@ -33,6 +33,8 @@ type Props = {
   /** Sync notices (offline, recovery) shown under the title bar; the full-screen editor covers the page's copy. */
   banner: ReactNode;
   quizKind?: string;
+  /** Holds the publish fingerprints the rail compares each question with. */
+  quizProject: Pick<QuizProjectSettings, "publishedFingerprints">;
 };
 
 export function QuestionEditorShell(props: Props) {
@@ -96,7 +98,14 @@ export function QuestionEditorShell(props: Props) {
       <Box sx={{ display: "flex", flex: 1, flexWrap: "wrap", minHeight: 0, overflow: "auto" }}>
         {view === "author" ? (
           <>
-            <QuestionEditorRail entries={entries} groups={groups} onAdd={props.onAddQuestion} onSelect={onSelectSlide} selectedSlideId={slide.id} />
+            <QuestionEditorRail
+              entries={entries}
+              groups={groups}
+              onAdd={props.onAddQuestion}
+              onSelect={onSelectSlide}
+              quizProject={props.quizProject}
+              selectedSlideId={slide.id}
+            />
             <Box sx={{ flex: "1 1 560px", minWidth: 0, px: 4, py: 3.5 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mx: "auto", maxWidth: 720 }}>
                 {readiness ? (

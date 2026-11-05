@@ -3,7 +3,10 @@ import { act, renderHook, waitFor } from "@testing-library/react";
 import { createElement, useSyncExternalStore, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
+import { slideFingerprint } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { UseQuizDraftSyncResult } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
+import type { QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 const { publishQuizEditorDraft, toast } = vi.hoisted(() => ({
   publishQuizEditorDraft: vi.fn(),
@@ -33,7 +36,15 @@ const fakeSync = (overrides: Partial<UseQuizDraftSyncResult> = {}): UseQuizDraft
 });
 
 /** Serves `sync` the way useQuizDraftSync does: an external store that changes before flushNow resolves. */
-function setup(initial: UseQuizDraftSyncResult, questionSlideIds = ["s1", "s2", "s3"]) {
+const slides: QuizEditorSlide[] = ["s1", "s2", "s3"].map((id) => ({ id, title: `Câu ${id}`, kind: "multiple-choice" }));
+
+/** Applies what the hook handed to the quizProject setter, as React would. */
+function settingsAfter(updateQuizProject: ReturnType<typeof vi.fn>, current: QuizProjectSettings) {
+  const update = updateQuizProject.mock.calls[0]?.[0] as QuizProjectSettings | ((value: QuizProjectSettings) => QuizProjectSettings);
+  return typeof update === "function" ? update(current) : update;
+}
+
+function setup(initial: UseQuizDraftSyncResult, questionSlides = slides) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
   let snapshot = initial;
@@ -47,18 +58,20 @@ function setup(initial: UseQuizDraftSyncResult, questionSlideIds = ["s1", "s2", 
     for (const listener of listeners) listener();
   };
   const setSlidesPublished = vi.fn();
+  const updateQuizProject = vi.fn();
   const onPublished = vi.fn();
   const view = renderHook(
     () => useQuizEditorPublish({
       sync: useSyncExternalStore(subscribe, () => snapshot),
       draftId: "draft-1",
-      questionSlideIds,
+      questionSlides,
       setSlidesPublished,
+      updateQuizProject,
       onPublished,
     }),
     { wrapper },
   );
-  return { ...view, setSync, setSlidesPublished, onPublished };
+  return { ...view, setSync, setSlidesPublished, updateQuizProject, onPublished };
 }
 
 /** Like the session: the engine sends, then the snapshot changes, then flushNow resolves. No act(), so React schedules as in the app. */
@@ -109,6 +122,10 @@ describe("useQuizEditorPublish", () => {
       expect.objectContaining({ quizId: "quiz-1", docVersion: 5, idempotencyKey: "quiz-editor-publish:quiz-1:draft-1:5" }),
     );
     expect(view.setSlidesPublished).toHaveBeenCalledWith(["s1", "s2", "s3"]);
+    const current = createNewQuizProjectSettings("Phân số");
+    const next = settingsAfter(view.updateQuizProject, current);
+    expect(next.publishedFingerprints).toEqual(Object.fromEntries(slides.map((slide) => [slide.id, slideFingerprint(slide)])));
+    expect(next.info).toEqual(current.info);
     expect(view.onPublished).toHaveBeenCalledTimes(1);
     expect(toast.success).toHaveBeenCalled();
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
@@ -125,6 +142,20 @@ describe("useQuizEditorPublish", () => {
     expect(flushNow).toHaveBeenCalledTimes(1);
     expect(toast.error).toHaveBeenCalledWith("Chưa gửi được thay đổi lên máy chủ nên chưa xuất bản.");
     expect(publishQuizEditorDraft).not.toHaveBeenCalled();
+    expect(view.setSlidesPublished).not.toHaveBeenCalled();
+    expect(view.updateQuizProject).not.toHaveBeenCalled();
+    await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
+  });
+
+  it("leaves the fingerprints untouched when the server rejects the publish", async () => {
+    publishQuizEditorDraft.mockRejectedValue(new Error("Câu 2 chưa có đáp án đúng"));
+    const view = setup(fakeSync());
+
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+
+    expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
+    expect(view.updateQuizProject).not.toHaveBeenCalled();
     expect(view.setSlidesPublished).not.toHaveBeenCalled();
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
   });

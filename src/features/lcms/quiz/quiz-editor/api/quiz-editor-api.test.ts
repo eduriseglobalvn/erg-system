@@ -69,6 +69,12 @@ test("normalizes backend authoring draft settings into the full editor settings 
   expect(settings.questionDefaults.shuffleQuestions).toBe(true);
   expect(settings.result.passMessage).toBe("Pass");
   expect(settings.result.reviewButtonLabel).toBeTruthy();
+  expect(settings.publishedFingerprints).toBeUndefined();
+});
+
+test("keeps the publish fingerprints of a draft and drops values that are not strings", () => {
+  const settings = normalizeQuizProjectSettings({ publishedFingerprints: { s1: "1a2b", s2: 7 } });
+  expect(settings.publishedFingerprints).toEqual({ s1: "1a2b" });
 });
 
 test("normalizes backend groupId tree into editor groups without losing slides", () => {

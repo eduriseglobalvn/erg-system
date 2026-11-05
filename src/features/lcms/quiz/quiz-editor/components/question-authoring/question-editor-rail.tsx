@@ -5,14 +5,15 @@ import Typography from "@mui/material/Typography";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { useI18n } from "@/platform/i18n";
-import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { lifecycleLabel, slidePublishState } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
+import type { QuizEditorGroup, QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { readinessLabel } from "./question-readiness";
 import { readSlideReadiness } from "./slide-question";
 
 export type RailEntry = { groupId: string; slide: QuizEditorSlide };
 
-const DOT = { missing: "error.main", unpublished: "warning.main", ready: "success.main" } as const;
-const DOT_LABEL = { missing: "Còn thiếu", unpublished: "Chưa xuất bản", ready: "Sẵn sàng" } as const;
+const DOT = { missing: "error.main", changed: "warning.main", ready: "success.main" } as const;
 
 type Props = {
   groups: QuizEditorGroup[];
@@ -20,13 +21,18 @@ type Props = {
   selectedSlideId: string;
   onSelect: (groupId: string, slideId: string) => void;
   onAdd: () => void;
+  quizProject: Pick<QuizProjectSettings, "publishedFingerprints">;
 };
 
-export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect, onAdd }: Props) {
+export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect, onAdd, quizProject }: Props) {
   const { t } = useI18n();
   const numbered = entries.map((entry, index) => ({ ...entry, number: index + 1 }));
-  const statusOf = (slide: QuizEditorSlide): keyof typeof DOT =>
-    !readSlideReadiness(slide, t).ready ? "missing" : slide.status === "published" ? "ready" : "unpublished";
+  const statusOf = (slide: QuizEditorSlide): { key: keyof typeof DOT; label: string } => {
+    const readiness = readSlideReadiness(slide, t);
+    if (!readiness.ready) return { key: "missing", label: readinessLabel(readiness) };
+    if (slidePublishState(slide, quizProject) === "changed") return { key: "changed", label: lifecycleLabel.changed };
+    return { key: "ready", label: readinessLabel(readiness) };
+  };
 
   return (
     <Box
@@ -62,7 +68,7 @@ export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect,
                   <Typography component="span" noWrap sx={{ fontWeight: "inherit", maxWidth: "100%" }} variant="body2">
                     {slide.title.trim() || "(Chưa có đề bài)"}
                   </Typography>
-                  <Box aria-label={DOT_LABEL[status]} component="span" data-status={status} role="img" sx={{ bgcolor: DOT[status], borderRadius: "50%", height: 8, width: 8 }} />
+                  <Box aria-label={status.label} component="span" data-status={status.key} role="img" sx={{ bgcolor: DOT[status.key], borderRadius: "50%", height: 8, width: 8 }} />
                 </ButtonBase>
               );
             })}

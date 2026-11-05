@@ -126,7 +126,7 @@ export function QuizEditorWorkspace({
     quizId: effectiveQuizId,
     scope,
     editor: editorState,
-    questionSlideIds: questionManagerSlides.map((slide) => slide.id),
+    questionSlides: questionManagerSlides,
     selectedSlideId: selectedSlide?.id ?? null,
     questionEditorOpen,
     onQuizCreated: openQuiz,
@@ -251,6 +251,7 @@ export function QuizEditorWorkspace({
             syncChip={syncChip}
             banner={<QuizEditorSyncNotices sync={sync} />}
             quizKind="train"
+            quizProject={quizProject}
           />
         ) : null}
 

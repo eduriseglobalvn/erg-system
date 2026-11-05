@@ -4,6 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
 import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
+import { slideFingerprint } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { QuestionEditorShell } from "./question-editor-shell";
 
@@ -44,6 +45,7 @@ function renderShell(overrides: Partial<Parameters<typeof QuestionEditorShell>[0
     onClose: vi.fn(),
     syncChip: <span>sync-chip</span>,
     banner: null,
+    quizProject: {},
     ...overrides,
   };
   render(
@@ -66,6 +68,21 @@ describe("QuestionEditorShell", () => {
     const rail = screen.getByRole("navigation", { name: "Danh sách câu hỏi" });
     const row = within(rail).getByRole("button", { name: /\(Chưa có đề bài\)/ });
     expect(row.querySelector("[data-status]")?.getAttribute("data-status")).toBe("missing");
+    expect(row.querySelector("[data-status]")?.getAttribute("aria-label")).toBe("Chưa có đề bài · còn 3 chỗ khác");
+  });
+
+  it("marks a published question edited since with the yellow dot and its label", () => {
+    const edited = { ...ready, title: "2 + 2 = ? (sửa)" };
+    renderShell({
+      groups: [{ ...groups[0], slides: [edited, third] }],
+      selectedSlide: edited,
+      quizProject: { publishedFingerprints: { s1: slideFingerprint(ready), s3: slideFingerprint(third) } },
+    });
+    const rail = screen.getByRole("navigation", { name: "Danh sách câu hỏi" });
+    const [editedDot, thirdDot] = Array.from(rail.querySelectorAll("[data-status]"));
+    expect(editedDot?.getAttribute("data-status")).toBe("changed");
+    expect(editedDot?.getAttribute("aria-label")).toBe("Có sửa chưa xuất bản");
+    expect(thirdDot?.getAttribute("aria-label")).toBe("Sẵn sàng");
   });
 
   it.each([
@@ -204,6 +221,7 @@ describe("QuestionEditorShell images added while the teacher keeps typing", () =
           banner={null}
           groups={[{ ...groups[0]!, slides: [slide] }]}
           onReplaceSlide={(update) => setSlide((current) => (typeof update === "function" ? update(current) : update))}
+          quizProject={{}}
           selectedSlide={slide}
           syncChip={null}
         />

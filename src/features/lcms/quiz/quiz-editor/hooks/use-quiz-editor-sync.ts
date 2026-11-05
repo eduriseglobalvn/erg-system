@@ -11,24 +11,25 @@ import type { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/
 import { createBlankDraft, NEW_QUIZ_PREFIX, newQuizDraftKey } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-initial-document";
 import { classifySyncError } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-sync-engine";
 import { useQuizDraftSync } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
+import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 const blankDraft = () => createBlankDraft("", "local-new-quiz");
 
 /** Autosave, server sync and publish for the quiz editor: what the workspace renders around the editor state. */
-export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, selectedSlideId, questionEditorOpen, onQuizCreated, onPublished }: {
+export function useQuizEditorSync({ quizId, scope, editor, questionSlides, selectedSlideId, questionEditorOpen, onQuizCreated, onPublished }: {
   quizId: string;
   scope: Pick<ReturnType<typeof useQuizEditorScope>, "questionBankQuery" | "questionBankSubjects" | "selectedCourseId" | "selectedLevelId" | "selectedTopicId">;
   editor: Pick<
     ReturnType<typeof useQuizEditorState>,
-    "quizProject" | "playerTemplate" | "groups" | "hydrateDraftDocument" | "markAllAsSavedDraft" | "setSlidesPublished"
+    "quizProject" | "playerTemplate" | "groups" | "hydrateDraftDocument" | "markAllAsSavedDraft" | "setSlidesPublished" | "updateQuizProject"
   >;
-  questionSlideIds: string[];
+  questionSlides: QuizEditorSlide[];
   selectedSlideId: string | null;
   questionEditorOpen: boolean;
   onQuizCreated: (quizId: string) => void;
   onPublished: () => void;
 }) {
-  const { quizProject, playerTemplate, groups, hydrateDraftDocument, markAllAsSavedDraft, setSlidesPublished } = editor;
+  const { quizProject, playerTemplate, groups, hydrateDraftDocument, markAllAsSavedDraft, setSlidesPublished, updateQuizProject } = editor;
   const { questionBankSubjects, selectedCourseId, selectedLevelId, selectedTopicId } = scope;
   const queryClient = useQueryClient();
   const draftKey = quizId || newQuizDraftKey(selectedCourseId, selectedLevelId, selectedTopicId);
@@ -100,7 +101,14 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, sel
     return () => clearTimeout(timer);
   }, [retrying, quizId, refetch]);
 
-  const publish = useQuizEditorPublish({ sync, draftId: base.draftId, questionSlideIds, setSlidesPublished, onPublished });
+  const publish = useQuizEditorPublish({
+    sync,
+    draftId: base.draftId,
+    questionSlides,
+    setSlidesPublished,
+    updateQuizProject,
+    onPublished,
+  });
   return {
     sync,
     ...publish,

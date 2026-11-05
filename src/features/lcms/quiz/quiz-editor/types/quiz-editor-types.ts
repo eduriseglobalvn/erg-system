@@ -255,6 +255,8 @@ export type QuizProjectSettings = {
     metaDescription: string;
     metaKeywords: string;
   };
+  /** slideId -> fingerprint at the last publish (model/quiz-publish-state.ts). Absent until the first publish. */
+  publishedFingerprints?: Record<string, string>;
 };
 
 export type QuizPlayerTemplate = {

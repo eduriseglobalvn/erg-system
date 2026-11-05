@@ -60,7 +60,7 @@ function setup(quizId: string) {
           selectedTopicId: "all",
         } as never,
         editor,
-        questionSlideIds: [],
+        questionSlides: [],
         selectedSlideId: null,
         questionEditorOpen: false,
         onQuizCreated: vi.fn(),

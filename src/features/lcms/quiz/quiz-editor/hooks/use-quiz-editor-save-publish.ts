@@ -1,12 +1,14 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState, type SetStateAction } from "react";
 import { toast } from "sonner";
 
 import type { QuestionBankSubject } from "@/features/question-bank/types/question-bank-types";
 import { usePublishQuizEditorDraftMutation } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
 import type { QuizEditorCreateInput, QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { resolveNewQuizScope } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-utils";
+import { recordPublished } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { QuizDraftSyncStatus } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-sync-engine";
 import type { useQuizDraftSync } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
+import type { QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 /** What the sync engine sends to create the quiz the first time a new draft reaches the server. */
 export function buildQuizCreateInput({ doc, subjects, courseId, levelId, topicId }: {
@@ -36,12 +38,13 @@ function blockedReason(status: QuizDraftSyncStatus, questionCount: number): stri
 }
 
 /** Publishes the whole quiz (the server compiles every question), after the last edit reached the server. */
-export function useQuizEditorPublish({ sync, draftId, questionSlideIds, setSlidesPublished, onPublished }: {
+export function useQuizEditorPublish({ sync, draftId, questionSlides, setSlidesPublished, updateQuizProject, onPublished }: {
   sync: ReturnType<typeof useQuizDraftSync>;
   /** Id of the server draft being edited: a fork starts a new draft whose docVersion counts from 0 again. */
   draftId: string;
-  questionSlideIds: string[];
+  questionSlides: QuizEditorSlide[];
   setSlidesPublished: (ids: string[]) => void;
+  updateQuizProject: (update: SetStateAction<QuizProjectSettings>) => void;
   onPublished: () => void;
 }): { handlePublish: () => Promise<void>; isPublishing: boolean; publishBlockedReason: string | null } {
   const publishMutation = usePublishQuizEditorDraftMutation();
@@ -52,7 +55,7 @@ export function useQuizEditorPublish({ sync, draftId, questionSlideIds, setSlide
   useLayoutEffect(() => {
     latest.current = sync;
   });
-  const publishBlockedReason = blockedReason(sync.status, questionSlideIds.length);
+  const publishBlockedReason = blockedReason(sync.status, questionSlides.length);
 
   async function handlePublish() {
     if (publishBlockedReason || publishingRef.current) return;
@@ -71,7 +74,9 @@ export function useQuizEditorPublish({ sync, draftId, questionSlideIds, setSlide
       const idempotencyKey = `quiz-editor-publish:${quizId}:${draftId}:${docVersion}`;
       await publishMutation.mutateAsync({ quizId, docVersion, idempotencyKey });
       // Publishing does not change the server draft's docVersion, so the engine's base stays as it is.
-      setSlidesPublished(questionSlideIds);
+      setSlidesPublished(questionSlides.map((slide) => slide.id));
+      // The slides as clicked are what the flush sent. The new fingerprints reach the server with the next autosave.
+      updateQuizProject((current) => recordPublished(current, questionSlides));
       toast.success("Đã xuất bản bài kiểm tra.");
       onPublished();
     } catch {

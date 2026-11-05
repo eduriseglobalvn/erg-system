@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 
 import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -378,7 +378,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     changeSelectedQuestionType,
   } = useSelectedSlideUpdaters({ selectedNode, selectedGroup, selectedSlide, setGroups, setResultSlide });
 
-  function updateQuizProject(nextQuizProject: QuizProjectSettings) {
+  function updateQuizProject(nextQuizProject: SetStateAction<QuizProjectSettings>) {
     setQuizProject(nextQuizProject);
   }
 
