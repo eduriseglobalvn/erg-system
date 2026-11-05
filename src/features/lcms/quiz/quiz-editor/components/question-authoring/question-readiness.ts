@@ -78,6 +78,11 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       else if (slots.some((slot) => !bank.some((word) => word.id === slot.correctWordId && word.label.trim()))) {
         add("blank-word", "Ô trống chưa có từ đúng");
       }
+      // Grading goes by word id, so two slots with the same word fail a learner who places the copies crosswise.
+      const words = slots
+        .map((slot) => bank.find((word) => word.id === slot.correctWordId)?.label.trim().toLowerCase())
+        .filter(Boolean);
+      if (new Set(words).size < words.length) add("blank-word-duplicate", "Hai ô trống không được dùng cùng một từ");
       break;
     }
     case "short_answer": {

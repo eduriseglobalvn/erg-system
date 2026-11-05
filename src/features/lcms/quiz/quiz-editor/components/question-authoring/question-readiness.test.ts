@@ -146,6 +146,15 @@ describe("assessQuestionReadiness", () => {
       expect(codes(q({ ...k, wordSlots: slots, wordBank: [] }))).toEqual(["blank-word"]);
       expect(codes(q({ ...k, wordSlots: slots, wordBank: [{ id: "w", label: " " }] }))).toEqual(["blank-word"]);
     });
+    it("blank-word-duplicate: two slots whose correct words read the same", () => {
+      const two = [...slots, { id: "s2", label: "", correctWordId: "w2" }];
+      const question = q({ ...k, wordSlots: two, wordBank: [{ id: "w", label: "số" }, { id: "w2", label: " Số " }] });
+      expect(codes(question)).toEqual(["blank-word-duplicate"]);
+      expect(assessQuestionReadiness(question, { hasQuestionImage: false }).issues[0].message).toBe(
+        "Hai ô trống không được dùng cùng một từ",
+      );
+      expect(codes(q({ ...k, wordSlots: two, wordBank: [{ id: "w", label: "số" }, { id: "w2", label: "chữ" }] }))).toEqual([]);
+    });
   });
 
   describe("short_answer", () => {
