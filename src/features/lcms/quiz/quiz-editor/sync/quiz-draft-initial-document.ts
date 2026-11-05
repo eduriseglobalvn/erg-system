@@ -10,7 +10,7 @@ import type { DeviceDraftRecord, QuizDraftDeviceStore } from "./quiz-draft-devic
 
 // Same prefix as api/quiz-editor-local-draft.ts, which Task 7 deletes.
 const LEGACY_PREFIX = "erg:quiz-editor:recovery:v1";
-const NEW_QUIZ_PREFIX = "new-quiz:";
+export const NEW_QUIZ_PREFIX = "new-quiz:";
 const OLD_PLACEHOLDER_KEY = "default-quiz-draft";
 
 export function createBlankDraft(quizId: string, draftId: string): QuizEditorDraftDocument {
