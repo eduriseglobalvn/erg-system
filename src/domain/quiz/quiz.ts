@@ -157,7 +157,9 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       return result;
     }
     case "numeric": {
-      const expected = question.numericAnswer?.correctValue;
+      // Stored data may hold null or a non-finite value: nothing can be graded against it.
+      const stored = question.numericAnswer?.correctValue;
+      const expected = typeof stored === "number" && Number.isFinite(stored) ? stored : undefined;
       const tolerance = question.numericAnswer?.tolerance ?? 0;
       const rawValue = (answer.numericValue ?? "").trim().replace(",", ".");
       const actual = rawValue === "" ? Number.NaN : Number(rawValue);

@@ -27,6 +27,8 @@ const inline = q("inline_choice", { inlineBlanks: [1, 2].map((n) => ({ id: `b${n
 const text = q("fill_blank", { textBlanks: [{ id: "t1", label: "", correctAnswers: ["Hà Nội", "Ha Noi"] }, { id: "t2", label: "", correctAnswers: ["Huế"] }] });
 const numeric = q("numeric", { numericAnswer: { correctValue: 3.5, tolerance: 0.1 } });
 const numericZero = q("numeric", { numericAnswer: { correctValue: 0 } });
+// Data from the server may hold null for a missing value.
+const numericNull = q("numeric", { numericAnswer: { correctValue: null as unknown as number } });
 const words = q("drag_words", { wordSlots: [{ id: "w1", label: "", correctWordId: "a" }, { id: "w2", label: "", correctWordId: "b" }] });
 const dnd = q("drag_drop", { dragDropItems: [{ id: "d1", label: "", correctTargetId: "t1" }, { id: "d2", label: "", correctTargetId: "t2" }] });
 const likert = q("likert_scale", { likertRows: [{ id: "r1", label: "" }, { id: "r2", label: "" }] });
@@ -71,6 +73,7 @@ const rows: Row[] = [
   ["numeric zero expected, empty answer", numericZero, { numericValue: "" }, 0, "wrong"],
   ["numeric zero expected, whitespace", numericZero, { numericValue: "  " }, 0, "wrong"],
   ["numeric zero expected, 0", numericZero, { numericValue: "0" }, 10, "correct"],
+  ["numeric null expected, 0", numericNull, { numericValue: "0" }, 0, "wrong"],
   ["drag words all", words, { dragWordPlacements: { w1: "a", w2: "b" } }, 10, "correct"],
   ["drag words one", words, { dragWordPlacements: { w1: "a", w2: "a" } }, 5, "partial"],
   ["drag words empty", words, {}, 0, "wrong"],
@@ -106,6 +109,7 @@ describe("scoreQuestion (table)", () => {
   it("returns the answer key on the result for review screens", () => {
     expect(scoreQuestion(single, {}).correctChoiceIds).toEqual(["c2"]);
     expect(scoreQuestion(numeric, {}).correctNumericValue).toBe("3.5");
+    expect(scoreQuestion(numericNull, {}).correctNumericValue).toBeUndefined();
   });
 
   it("scores degenerate questions without correct answers as not correct", () => {
