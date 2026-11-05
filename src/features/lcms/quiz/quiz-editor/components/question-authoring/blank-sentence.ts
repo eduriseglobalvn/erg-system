@@ -43,12 +43,15 @@ export function rebaseBlanks(prev: BlankSentence, nextText: string, caret: numbe
   const d = nextText.length - prev.text.length;
   const { a, pEnd } = locateEdit(prev.text, nextText, caret);
   const typedLetters = d > 0 && pEnd === a && LETTERS.test(nextText.slice(a, a + d));
-  // Only one blank grows, so two blanks never overlap; an emptied blank at the caret wins over the word before it.
-  const grows = typedLetters ? prev.blanks.filter((b) => b.end === a).pop() : undefined;
+  // Only one blank grows, so two blanks never overlap. The word being typed wins over an empty blank after it:
+  // guessing wrong leaves that blank empty, which readiness flags, instead of moving its answer to another word.
+  const atCaret = typedLetters ? prev.blanks.filter((b) => b.end === a) : [];
+  const grows = atCaret.find((b) => b.start < b.end) ?? atCaret[0];
   const blanks: SentenceBlank[] = [];
   for (const b of prev.blanks) {
     if (b === grows) blanks.push({ ...b, end: b.end + d });
-    // Checked before the shift, so an empty blank at the caret stays before whatever is typed there.
+    // An empty blank rides after text inserted at its spot, so a retyped space or a refilled blank before it never strands it.
+    else if (b.start === b.end && b.start === a && pEnd === a && d > 0) blanks.push({ ...b, start: a + d, end: a + d });
     else if (a >= b.end) blanks.push(b);
     else if (pEnd <= b.start) blanks.push({ ...b, start: b.start + d, end: b.end + d });
     else if (b.start <= a && pEnd <= b.end) {

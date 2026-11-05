@@ -141,19 +141,35 @@ describe("retyping inside a blank", () => {
     expect(word(retyped)).toBe("á");
   });
 
-  it("keeps an emptied blank empty when a space or punctuation is typed there", () => {
+  it("keeps an emptied blank empty, after a space or punctuation typed there", () => {
     const empty: BlankSentence = { text: "A  B", blanks: [{ id: "e", start: 2, end: 2 }] };
-    for (const t of [" ", "."]) expect(type(empty, 2, t).blanks).toEqual([{ id: "e", start: 2, end: 2 }]);
+    for (const t of [" ", "."]) expect(type(empty, 2, t).blanks).toEqual([{ id: "e", start: 3, end: 3 }]);
   });
 
-  it("grows only one blank when two end where a letter is typed, preferring the emptied one", () => {
+  it("refills an emptied blank after the space before it is Backspaced and retyped", () => {
+    let s = S;
+    for (let at = END; at > START - 1; at--) s = backspace(s, at);
+    for (const [i, ch] of [..." MEAN"].entries()) s = type(s, START - 1 + i, ch);
+    expect(s.text).toBe("Hàm tính trung bình là MEAN.");
+    expect(word(s)).toBe("MEAN");
+  });
+
+  it("refills two blanks in order after both and the space between are Backspaced", () => {
+    let s: BlankSentence = { text: "AB CD", blanks: [{ id: "x", start: 0, end: 2 }, { id: "y", start: 3, end: 5 }] };
+    for (let at = 5; at > 0; at--) s = backspace(s, at);
+    for (const [i, ch] of [..."AB CD"].entries()) s = type(s, i, ch);
+    expect(s.blanks).toEqual([{ id: "x", start: 0, end: 2 }, { id: "y", start: 3, end: 5 }]);
+  });
+
+  it("grows only one blank when two end where a letter is typed: the word being typed, else the first emptied one", () => {
     const ab: BlankSentence = { text: "AB", blanks: [{ id: "a", start: 0, end: 1 }, { id: "b", start: 1, end: 2 }] };
     const both = backspace(backspace(ab, 2), 1);
     expect(both.blanks).toEqual([{ id: "a", start: 0, end: 0 }, { id: "b", start: 0, end: 0 }]);
     const typed = type(both, 0, "c");
-    expect(typed.blanks).toEqual([{ id: "a", start: 0, end: 0 }, { id: "b", start: 0, end: 1 }]);
+    expect(typed.blanks).toEqual([{ id: "a", start: 0, end: 1 }, { id: "b", start: 1, end: 1 }]);
     expect(sentenceParts(typed).join("")).toBe("");
-    expect(type(backspace(ab, 2), 1, "c").blanks).toEqual([{ id: "a", start: 0, end: 1 }, { id: "b", start: 1, end: 2 }]);
+    // Adjacent blanks are ambiguous; the emptied one stays empty and readiness flags it.
+    expect(type(backspace(ab, 2), 1, "c").blanks).toEqual([{ id: "a", start: 0, end: 2 }, { id: "b", start: 2, end: 2 }]);
   });
 
   it("drops a blank whose word becomes whitespace only", () => {
