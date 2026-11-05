@@ -93,6 +93,16 @@ describe("old data", () => {
     expect(writeBlankSentence(withDistractor, S).wordBank).toContainEqual({ id: "d1", label: "màu" });
   });
 
+  it("drops a distractor whose word becomes a blank, and keeps others when blanks change", () => {
+    const out = writeBlankSentence(drag, S);
+    const words = out.wordBank!.map((w) => w.label);
+    const withDistractors = { ...out, wordBank: [...out.wordBank!, { id: "d1", label: words[0] }, { id: "d2", label: "màu" }] };
+    const bank = writeBlankSentence(withDistractors, S).wordBank!;
+    expect(bank.filter((w) => w.label === words[0])).toHaveLength(1);
+    expect(bank).toContainEqual({ id: "d2", label: "màu" });
+    expect(writeBlankSentence(withDistractors, { ...S, blanks: [] }).wordBank).toContainEqual({ id: "d2", label: "màu" });
+  });
+
   it("gives two slots that share a word distinct word ids", () => {
     const shared: Question = {
       ...drag,

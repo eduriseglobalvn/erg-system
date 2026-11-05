@@ -93,7 +93,9 @@ function writeDrag(question: Question, edited: EditedBlank[]): Pick<Question, "w
     return { ...old, id, label: lead, suffix, correctWordId };
   });
   const referenced = new Set([...used, ...oldSlots.map((slot) => slot.correctWordId)]);
-  const distractors = (question.wordBank ?? []).filter((word) => !referenced.has(word.id));
+  // A distractor that became a blank's word would show twice in the learner's tray.
+  const slotWords = new Set(edited.map(({ word }) => word.trim()));
+  const distractors = (question.wordBank ?? []).filter((word) => !referenced.has(word.id) && !slotWords.has(word.label.trim()));
   return {
     wordSlots,
     wordBank: [...wordSlots.map((slot, i) => ({ id: slot.correctWordId, label: edited[i].word })), ...distractors],
