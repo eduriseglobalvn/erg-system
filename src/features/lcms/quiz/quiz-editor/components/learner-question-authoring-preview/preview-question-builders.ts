@@ -4,9 +4,10 @@ import { isHotspotPlaceholder } from "@/features/lcms/quiz/quiz-editor/api/elear
 import type { QuizEditorChoice, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { parseDecimal } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/decimal-text";
 
+// `_t` stays so existing callers keep one signature; no builder needs a translation, they read teacher text only.
 export function buildPreviewQuestion(
   slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
+  _t: ReturnType<typeof useI18n>["t"],
 ): Question | null {
   if (slide.runtimeQuestion) {
     return {
@@ -19,7 +20,7 @@ export function buildPreviewQuestion(
     };
   }
 
-  return buildLearnerQuestion(slide, t);
+  return buildLearnerQuestion(slide);
 }
 
 // Answer images written before runtime questions carried them live only on the slide; show them instead of dropping them.
@@ -54,11 +55,8 @@ function mediaImage(media: QuizEditorSlide["media"]) {
   return media?.src ? { url: media.src, alt: media.alt } : undefined;
 }
 
-function buildLearnerQuestion(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-): Question | null {
-  const feedback = buildFeedback(slide, t);
+function buildLearnerQuestion(slide: QuizEditorSlide): Question | null {
+  const feedback = buildFeedback(slide);
   const points = extractCorrectScore(slide);
   const contentImage = slideContentImage(slide);
   const base = {
@@ -93,7 +91,7 @@ function buildLearnerQuestion(
       return {
         ...base,
         kind: "matching",
-        matching: buildMatchingPairs(slide, t),
+        matching: buildMatchingPairs(slide),
       };
     case "drag-and-drop":
       return {
@@ -187,12 +185,12 @@ function buildTextBlanks(slide: QuizEditorSlide) {
   if (slide.kind === "short-answer") {
     // One blank holds every accepted spelling, so the learner gets a single input.
     const correctAnswers = written(slide).filter((choice) => choice.correct).map((choice) => choice.label);
-    return correctAnswers.length ? [{ id: `${slide.id}-answer`, label: "", placeholder: "......", correctAnswers }] : [];
+    return correctAnswers.length ? [{ id: `${slide.id}-answer`, label: "", placeholder: "", correctAnswers }] : [];
   }
   return written(slide).map((choice, index) => ({
       id: choice.id || `${slide.id}-blank-${index + 1}`,
-      label: `Blank ${index + 1}`,
-      placeholder: "......",
+      label: "",
+      placeholder: "",
       correctAnswers: [choice.label],
     }));
 }
@@ -201,8 +199,8 @@ function buildInlineBlanks(slide: QuizEditorSlide) {
   return written(slide).map((choice) => ({
     id: choice.id,
     statement: choice.label,
-    options: ["yes", "no"],
-    correctOptionId: choice.correct ? "yes" : "no",
+    options: [] as string[],
+    correctOptionId: "",
     selectPosition: "after" as const,
   }));
 }
@@ -215,9 +213,9 @@ function buildWordBank(slide: QuizEditorSlide) {
 }
 
 function buildWordSlots(slide: QuizEditorSlide) {
-  return buildWordBank(slide).slice(0, 2).map((word, index) => ({
+  return buildWordBank(slide).map((word, index) => ({
     id: `${slide.id}-slot-${index + 1}`,
-    label: index === 0 ? "Fill the blank with" : "then choose",
+    label: "",
     correctWordId: word.id,
   }));
 }
@@ -244,10 +242,7 @@ function buildLikertRows(slide: QuizEditorSlide) {
   }));
 }
 
-export function buildMatchingPairs(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
+export function buildMatchingPairs(slide: QuizEditorSlide) {
   if (slide.dragDropItems?.length) {
     return slide.dragDropItems.map((item, index) => ({
       id: item.id || `match-${index + 1}`,
@@ -261,7 +256,7 @@ export function buildMatchingPairs(
   return normalizeChoices(slide.choices).map((choice, index) => ({
     id: choice.id || `match-${index + 1}`,
     prompt: choice.label,
-    response: choice.correct ? t("common.correct") : t("common.incorrect"),
+    response: "",
   }));
 }
 
@@ -299,13 +294,9 @@ export function createDragDropTargetId(label: string, index: number) {
   return `drop-target-${slug || index + 1}`;
 }
 
-export function buildFeedback(slide: QuizEditorSlide, t: ReturnType<typeof useI18n>["t"]) {
-  const correct =
-    slide.feedbackRows?.find((row) => row.kind === "correct")?.feedback ||
-    t("quiz.defaultCorrectFeedback");
-  const incorrect =
-    slide.feedbackRows?.find((row) => row.kind === "incorrect")?.feedback ||
-    t("quiz.defaultIncorrectFeedback");
+export function buildFeedback(slide: QuizEditorSlide) {
+  const correct = slide.feedbackRows?.find((row) => row.kind === "correct")?.feedback ?? "";
+  const incorrect = slide.feedbackRows?.find((row) => row.kind === "incorrect")?.feedback ?? "";
 
   return {
     correct,

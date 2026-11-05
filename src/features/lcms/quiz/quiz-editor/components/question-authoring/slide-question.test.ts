@@ -201,3 +201,10 @@ describe("short answer slides", () => {
     expect(blanks[0].correctAnswers).toEqual(["Alpha", "Gamma"]);
   });
 });
+
+describe("legacy fill-blank slide built from empty data", () => {
+  it("is not ready", () => {
+    const empty = { id: "s1", title: "Q", kind: "fill-in-the-blanks" } as unknown as QuizEditorSlide;
+    expect(readSlideReadiness(empty, t).ready).toBe(false);
+  });
+});

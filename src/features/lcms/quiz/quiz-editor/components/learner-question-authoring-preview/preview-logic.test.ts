@@ -174,3 +174,32 @@ describe("round trip fidelity", () => {
     expect(syncQuizEditorSlideFromRuntimeQuestion(dd, buildPreviewQuestion(dd, t)!).dragDropItems?.[0].media).toEqual(media);
   });
 });
+
+describe("legacy slides never gain invented content", () => {
+  const choices = [{ id: "c1", label: "Alpha", correct: true }, { id: "c2", label: "Beta", correct: false }, { id: "c3", label: "Gamma", correct: false }];
+  const read = (kind: string, extra: Record<string, unknown> = {}) => buildPreviewQuestion(slideOf({ kind, choices, ...extra }), t)!;
+
+  test("inline blanks carry no invented options or answer", () => {
+    expect(read("select-from-lists").inlineBlanks?.map((b) => [b.options, b.correctOptionId])).toEqual([[[], ""], [[], ""], [[], ""]]);
+  });
+
+  test("word slots cover every word and carry no sample label", () => {
+    const slots = read("drag-the-words").wordSlots!;
+    expect(slots.map((s) => s.label)).toEqual(["", "", ""]);
+    expect(slots.map((s) => s.correctWordId)).toEqual(["c1", "c2", "c3"]);
+  });
+
+  test("fill blanks have no label or placeholder", () => {
+    expect(read("fill-in-the-blanks").textBlanks?.map((b) => [b.label, b.placeholder])).toEqual([["", ""], ["", ""], ["", ""]]);
+  });
+
+  test("matching without pairs leaves the response empty", () => {
+    expect(read("matching").matching?.map((m) => m.response)).toEqual(["", "", ""]);
+  });
+
+  test("feedback stays empty until the teacher writes it", () => {
+    expect(read("multiple-choice").feedback).toEqual({ correct: "", incorrect: "", partial: "" });
+    const written = read("multiple-choice", { feedbackRows: [{ kind: "correct", feedback: "Đúng rồi" }, { kind: "incorrect", feedback: "Sai rồi" }] });
+    expect(written.feedback).toEqual({ correct: "Đúng rồi", incorrect: "Sai rồi", partial: "Sai rồi" });
+  });
+});
