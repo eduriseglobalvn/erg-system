@@ -164,29 +164,35 @@ export function HotspotQuestion({
   return (
     <div className="quiz-answer-region-wide grid gap-3">
       <div
-        ref={imageRef}
-        className="relative grid min-h-[420px] overflow-hidden rounded-2xl border bg-white shadow-[0_14px_30px_rgba(0,0,136,0.05)]"
+        className="grid min-h-[420px] place-items-center overflow-hidden rounded-2xl border bg-white shadow-[0_14px_30px_rgba(0,0,136,0.05)]"
         style={{
           borderColor: "var(--quiz-canvas-border)",
           height: "min(64vh, 720px)",
         }}
-        onClick={(event) => {
-          handlePickPoint(event.clientX, event.clientY, imageRef.current);
-        }}
       >
-        <img
-          src={question.hotspotImage.url}
-          alt={question.title}
-          className="block h-full w-full object-contain"
-        />
-        {reviewMode
-          ? question.hotspotAreas?.map((area) => (
-              <HotspotReviewArea key={area.id} area={area} />
-            ))
-          : null}
-        {value.hotspotPoint ? (
-          <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
-        ) : null}
+        {/* Sized by the image itself, so clicks and areas are fractions of the image, not of its frame. */}
+        <div
+          ref={imageRef}
+          data-testid="hotspot-image-box"
+          className="relative inline-block"
+          onClick={(event) => {
+            handlePickPoint(event.clientX, event.clientY, imageRef.current);
+          }}
+        >
+          <img
+            src={question.hotspotImage.url}
+            alt={question.title}
+            style={{ display: "block", maxWidth: "100%", maxHeight: "min(64vh, 720px)", width: "auto", height: "auto" }}
+          />
+          {reviewMode
+            ? question.hotspotAreas?.map((area) => (
+                <HotspotReviewArea key={area.id} area={area} />
+              ))
+            : null}
+          {value.hotspotPoint ? (
+            <HotspotMarker x={value.hotspotPoint.x} y={value.hotspotPoint.y} />
+          ) : null}
+        </div>
       </div>
       <p className="text-sm text-slate-500">{t("player.clickImagePrompt")}</p>
     </div>
