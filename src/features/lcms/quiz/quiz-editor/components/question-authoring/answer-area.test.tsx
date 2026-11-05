@@ -32,8 +32,8 @@ describe("AnswerArea", () => {
   });
 
   it("falls back to the renderer for kinds without an authoring surface", () => {
-    const question = readSlideQuestion(build("numeric"), t)!;
-    render(<Harness kind="numeric" question={question} />);
+    const question = readSlideQuestion(build("essay"), t)!;
+    render(<Harness kind="essay" question={question} />);
     expect(screen.getByTestId("answer-fallback")).toBeInTheDocument();
   });
 });

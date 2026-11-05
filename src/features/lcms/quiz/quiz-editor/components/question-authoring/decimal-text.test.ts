@@ -1,0 +1,13 @@
+import { describe, expect, it } from "vitest";
+
+import { formatDecimal, parseDecimal } from "./decimal-text";
+
+describe("decimal-text", () => {
+  it("parses a comma decimal", () => expect(parseDecimal("2,6")).toBe(2.6));
+  it.each(["", "-", "abc", "Infinity"])("reads %j as NaN", (text) => expect(parseDecimal(text)).toBeNaN());
+  it("formats with a comma and no grouping", () => {
+    expect(formatDecimal(2.6 - 0.05)).toBe("2,55");
+    expect(formatDecimal(16384)).toBe("16384");
+    expect(formatDecimal(NaN)).toBe("");
+  });
+});
