@@ -3,11 +3,10 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import type { Question, SequenceItem } from "@/domain/quiz/types";
-import { prepareQuizImage, QuizImageRejectedError } from "@/lib/media/quiz-image";
 import { moveChoice } from "./move-choice";
+import { readQuizImage } from "./read-quiz-image";
 import { SequenceStepRow } from "./sequence-step-row";
 import { moveRowBy, newRowId, usePendingFocus, useRowSensors, verticalOnly } from "./sortable-rows";
 
@@ -47,13 +46,10 @@ export function SequenceAuthoring({ question, onUpdate }: {
   };
 
   const pickImage = async (id: string, file: File) => {
-    try {
-      const { dataUrl } = await prepareQuizImage(file);
-      const image = { url: dataUrl, alt: "" };
-      update((list) => list.map((i) => (i.id === id ? { ...i, image } : i)));
-    } catch (error) {
-      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
-    }
+    const read = await readQuizImage(file);
+    if (!read) return;
+    const image = { url: read.dataUrl, alt: "" };
+    update((list) => list.map((i) => (i.id === id ? { ...i, image } : i)));
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {

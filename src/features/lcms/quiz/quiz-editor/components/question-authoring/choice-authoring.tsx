@@ -3,13 +3,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import type { Choice, Question } from "@/domain/quiz/types";
-import { prepareQuizImage, QuizImageRejectedError } from "@/lib/media/quiz-image";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { moveChoice } from "./move-choice";
 import { ChoiceRow } from "./choice-row";
+import { readQuizImage } from "./read-quiz-image";
 import { moveRowBy, newRowId, usePendingFocus, useRowSensors, verticalOnly } from "./sortable-rows";
 
 const MIN_CHOICES = 2;
@@ -49,12 +48,8 @@ export function ChoiceAuthoring({ question, mode, onUpdate }: {
   };
 
   const pickImage = async (id: string, file: File) => {
-    try {
-      const { dataUrl } = await prepareQuizImage(file);
-      patch(id, { image: { url: dataUrl, alt: "" } });
-    } catch (error) {
-      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
-    }
+    const image = await readQuizImage(file);
+    if (image) patch(id, { image: { url: image.dataUrl, alt: "" } });
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {

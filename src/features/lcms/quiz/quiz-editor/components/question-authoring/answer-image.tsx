@@ -6,10 +6,10 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import { useRef } from "react";
 
-import { readImageAsDataUrl } from "@/components/quiz/questions/matching-question/matching-helpers";
 import type { QuestionImage } from "@/domain/quiz/types";
 import { QUIZ_IMAGE_TYPES } from "@/lib/media/quiz-image";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { readQuizImage } from "./read-quiz-image";
 
 export type ImageChange = (latest: QuestionImage | undefined) => QuestionImage | undefined;
 
@@ -20,8 +20,8 @@ export type ImageChange = (latest: QuestionImage | undefined) => QuestionImage |
 export function AnswerImage({ image, name, onChange }: { image?: QuestionImage; name: string; onChange: (change: ImageChange) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const pick = async (file: File) => {
-    const url = await readImageAsDataUrl(file);
-    if (url !== null) onChange((latest) => ({ url, alt: latest?.alt ?? "" }));
+    const image = await readQuizImage(file);
+    if (image) onChange((latest) => ({ url: image.dataUrl, alt: latest?.alt ?? "" }));
   };
   const input = (
     <input

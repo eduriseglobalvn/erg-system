@@ -7,14 +7,14 @@ import Button from "@mui/material/Button";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { useRef, useState, type DragEvent, type PointerEvent } from "react";
-import { toast } from "sonner";
 
 import type { HotspotArea, Question } from "@/domain/quiz/types";
-import { prepareQuizImage, QUIZ_IMAGE_TYPES, QuizImageRejectedError } from "@/lib/media/quiz-image";
+import { QUIZ_IMAGE_TYPES } from "@/lib/media/quiz-image";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { HotspotAreaMark, HotspotAreaToolbar } from "./hotspot-area-mark";
 import { areaFromDrag, toFraction, type Fraction } from "./hotspot-geometry";
 import { QuestionImageSlot, type ImageSize } from "./question-image-slot";
+import { readQuizImage } from "./read-quiz-image";
 import { newRowId, usePendingFocus } from "./sortable-rows";
 
 type Shape = "rect" | "ellipse";
@@ -37,13 +37,8 @@ export function HotspotAuthoring({ question, onUpdate }: {
   const setImage = (url: string, size?: ImageSize) =>
     onUpdate((latest) => ({ ...latest, hotspotImage: { url, width: size?.width ?? 1200, height: size?.height ?? 675 } }));
   const take = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      const { dataUrl, width, height } = await prepareQuizImage(file);
-      setImage(dataUrl, { width, height });
-    } catch (error) {
-      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
-    }
+    const image = file && (await readQuizImage(file));
+    if (image) setImage(image.dataUrl, image);
   };
 
   const updateAreas = (change: (list: HotspotArea[]) => HotspotArea[]) =>

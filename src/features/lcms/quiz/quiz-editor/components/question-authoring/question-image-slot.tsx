@@ -4,11 +4,11 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
 import TextField from "@mui/material/TextField";
-import { toast } from "sonner";
 
 import type { QuizEditorSlideMedia } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { prepareQuizImage, QUIZ_IMAGE_TYPES, QuizImageRejectedError } from "@/lib/media/quiz-image";
+import { QUIZ_IMAGE_TYPES } from "@/lib/media/quiz-image";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { readQuizImage } from "./read-quiz-image";
 
 export type ImageSize = { width: number; height: number };
 
@@ -22,13 +22,8 @@ export function QuestionImageSlot({ media, label, onChange }: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const take = async (file: File | undefined) => {
-    if (!file) return;
-    try {
-      const { dataUrl, width, height } = await prepareQuizImage(file);
-      onChange({ type: "image", src: dataUrl, alt: media?.alt ?? "", name: file.name }, { width, height });
-    } catch (error) {
-      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
-    }
+    const image = file && (await readQuizImage(file));
+    if (image) onChange({ type: "image", src: image.dataUrl, alt: media?.alt ?? "", name: file.name }, { width: image.width, height: image.height });
   };
   const onDrop = (event: DragEvent) => {
     event.preventDefault();
