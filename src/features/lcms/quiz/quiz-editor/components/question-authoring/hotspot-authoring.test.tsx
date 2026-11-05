@@ -30,7 +30,7 @@ let latest: Question;
 function Harness({ start }: { start: Question }) {
   const [q, setQ] = useState(start);
   useEffect(() => { latest = q; });
-  return <HotspotAuthoring onChange={setQ} onUpdate={(change) => setQ((current) => change(current))} question={q} />;
+  return <HotspotAuthoring onUpdate={(change) => setQ((current) => change(current))} question={q} />;
 }
 
 const canvas = () => screen.getByTestId("hotspot-draw-layer");

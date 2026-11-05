@@ -20,7 +20,6 @@ const HINT = "Mỗi hàng là một cặp đúng. Bấm vào chữ để sửa, 
 /** Teacher view of the matching puzzle (spec 7.1): every row is a correct pair, the pieces stand apart. */
 export function MatchingAuthoring({ question, onUpdate }: {
   question: Question;
-  onChange: (next: Question) => void;
   /** Applies a change to the latest question, so edits made in quick succession never overwrite each other. */
   onUpdate: (change: (latest: Question) => Question) => void;
 }) {

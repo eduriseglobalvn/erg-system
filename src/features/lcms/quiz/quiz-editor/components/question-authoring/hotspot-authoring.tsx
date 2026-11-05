@@ -23,7 +23,6 @@ const HINT = "Kéo trên ảnh để vẽ vùng. Bấm vào vùng: chọn Đúng
 /** Teacher view of a hotspot question (spec 7.1 card 13): draw areas on the image, mark each correct or a distractor. */
 export function HotspotAuthoring({ question, onUpdate }: {
   question: Question;
-  onChange: (next: Question) => void;
   /** Applies a change to the latest question, so an image picked while areas change keeps them. */
   onUpdate: (change: (latest: Question) => Question) => void;
 }) {

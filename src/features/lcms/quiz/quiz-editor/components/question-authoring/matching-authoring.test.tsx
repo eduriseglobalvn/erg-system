@@ -22,7 +22,7 @@ let latest: Question;
 function Harness({ start }: { start: Question }) {
   const [q, setQ] = useState(start);
   useEffect(() => { latest = q; });
-  return <MatchingAuthoring onChange={setQ} onUpdate={(change) => setQ((current) => change(current))} question={q} />;
+  return <MatchingAuthoring onUpdate={(change) => setQ((current) => change(current))} question={q} />;
 }
 
 const withPairs = (count: number): Question => ({
@@ -152,11 +152,9 @@ describe("MatchingAuthoring", () => {
   });
 
   it("never writes on render, even for a keyless new-shape question", () => {
-    const onChange = vi.fn();
     const onUpdate = vi.fn();
-    render(<MatchingAuthoring onChange={onChange} onUpdate={onUpdate} question={keyless()} />);
+    render(<MatchingAuthoring onUpdate={onUpdate} question={keyless()} />);
     expect(screen.getByRole("textbox", { name: "Vế phải hàng 2" })).toHaveValue("two");
-    expect(onChange).not.toHaveBeenCalled();
     expect(onUpdate).not.toHaveBeenCalled();
   });
 

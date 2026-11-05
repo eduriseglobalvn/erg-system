@@ -13,7 +13,7 @@ let latest: Question;
 function Harness({ start }: { start: Question }) {
   const [q, setQ] = useState(start);
   useEffect(() => { latest = q; });
-  return <EssayAuthoring onChange={setQ} onUpdate={(change) => setQ((l) => change(l))} question={q} />;
+  return <EssayAuthoring onUpdate={(change) => setQ((l) => change(l))} question={q} />;
 }
 
 const rubric = () => latest.essayRubric!.map(({ label, points }) => ({ label, points }));

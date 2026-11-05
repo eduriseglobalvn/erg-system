@@ -13,7 +13,6 @@ import { newRowId, usePendingFocus } from "./sortable-rows";
 /** A marking guide for the teacher: text criteria only. The server never sends it to learners. */
 export function EssayAuthoring({ question, onUpdate }: {
   question: Question;
-  onChange: (next: Question) => void;
   onUpdate: (change: (latest: Question) => Question) => void;
 }) {
   const rubric = question.essayRubric ?? [];
