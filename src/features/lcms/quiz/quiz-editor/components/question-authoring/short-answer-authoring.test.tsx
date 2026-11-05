@@ -12,9 +12,12 @@ const mk = (...blanks: string[][]): Question =>
 let last: Question;
 function Harness({ start }: { start: Question }) {
   const [q, setQ] = useState(start);
-  last = q;
-  return <ShortAnswerAuthoring onChange={setQ} question={q} />;
+  return <ShortAnswerAuthoring onChange={(next) => { last = next; setQ(next); }} question={q} />;
 }
+const show = (start: Question) => {
+  last = start;
+  return render(<Harness start={start} />);
+};
 const add = (text: string) => {
   const input = screen.getByRole("textbox", { name: "Thêm cách viết đúng" });
   fireEvent.change(input, { target: { value: text } });
@@ -24,7 +27,7 @@ const answers = () => last.textBlanks!.map((b) => b.correctAnswers);
 
 describe("ShortAnswerAuthoring", () => {
   it("collects every spelling in one blank", () => {
-    render(<Harness start={mk()} />);
+    show(mk());
     add("CONCAT");
     add("TEXTJOIN");
     expect(answers()).toEqual([["CONCAT", "TEXTJOIN"]]);
@@ -32,7 +35,7 @@ describe("ShortAnswerAuthoring", () => {
   });
 
   it("removes a spelling and reports no answer when none is left", () => {
-    render(<Harness start={mk(["CONCAT", "TEXTJOIN"])} />);
+    show(mk(["CONCAT", "TEXTJOIN"]));
     fireEvent.click(screen.getByTitle("Xoá “CONCAT”"));
     expect(answers()).toEqual([["TEXTJOIN"]]);
     fireEvent.click(screen.getByTitle("Xoá “TEXTJOIN”"));
@@ -48,7 +51,7 @@ describe("ShortAnswerAuthoring", () => {
     expect(screen.getByText("b")).toBeInTheDocument();
     expect(onChange).not.toHaveBeenCalled();
     unmount();
-    render(<Harness start={q} />);
+    show(q);
     add("c");
     expect(answers()).toEqual([["a", "b", "c"]]);
   });

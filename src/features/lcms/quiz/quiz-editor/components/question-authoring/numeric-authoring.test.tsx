@@ -12,34 +12,37 @@ const mk = (correctValue: number | null): Question =>
 let last: Question;
 function Harness({ start }: { start: Question }) {
   const [q, setQ] = useState(start);
-  last = q;
-  return <NumericAuthoring onChange={setQ} question={q} />;
+  return <NumericAuthoring onChange={(next) => { last = next; setQ(next); }} question={q} />;
 }
+const show = (start: Question) => {
+  last = start;
+  return render(<Harness start={start} />);
+};
 const type = (name: string, value: string) => fireEvent.change(screen.getByRole("textbox", { name }), { target: { value } });
 const codes = () => assessQuestionReadiness(last, { hasQuestionImage: false }).issues.map((i) => i.code);
 
 describe("NumericAuthoring", () => {
   it("stores a typed comma decimal", () => {
-    render(<Harness start={mk(1)} />);
+    show(mk(1));
     type("Đáp số", "2,6");
     expect(last.numericAnswer!.correctValue).toBe(2.6);
   });
 
   it("clearing the value is NaN and not ready", () => {
-    render(<Harness start={mk(1)} />);
+    show(mk(1));
     type("Đáp số", "");
     expect(last.numericAnswer!.correctValue).toBeNaN();
     expect(codes()).toContain("numeric-value");
   });
 
   it("draws the accepted range from the tolerance", () => {
-    render(<Harness start={mk(2.6)} />);
+    show(mk(2.6));
     type("Sai số", "0,05");
     expect(screen.getByRole("img", { name: "Được tính đúng từ 2,55 đến 2,65" })).toBeInTheDocument();
   });
 
   it("flags a tolerance that is not a number", () => {
-    render(<Harness start={mk(2.6)} />);
+    show(mk(2.6));
     type("Sai số", "abc");
     expect(codes()).toContain("numeric-tolerance");
   });
@@ -59,7 +62,7 @@ describe("NumericAuthoring", () => {
   });
 
   it("an empty tolerance is undefined and the line is a single point", () => {
-    render(<Harness start={mk(2.6)} />);
+    show(mk(2.6));
     type("Sai số", "0,1");
     type("Sai số", "");
     expect(last.numericAnswer!.tolerance).toBeUndefined();
