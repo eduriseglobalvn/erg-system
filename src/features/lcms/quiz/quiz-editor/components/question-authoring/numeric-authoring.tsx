@@ -20,19 +20,26 @@ const box = (width: number, correct = false) => ({
   fontFamily: tokens.font.mono,
 });
 
+const same = (a: number, b: number) => a === b || (Number.isNaN(a) && Number.isNaN(b));
+
 /** The correct number, how far off still counts, and a unit; every keystroke is written back to the question. */
 export function NumericAuthoring({ question, onChange }: { question: Question; onChange: (next: Question) => void }) {
   const answer = question.numericAnswer;
   const [valueText, setValueText] = useState(() => formatDecimal(answer?.correctValue as number));
   const [toleranceText, setToleranceText] = useState(() => formatDecimal(answer?.tolerance as number));
   const unit = answer?.unit ?? "";
+  // An undo or sync that changes the answer underneath replaces what was typed.
+  const propValue = typeof answer?.correctValue === "number" ? answer.correctValue : NaN;
+  const propTolerance = answer?.tolerance ?? NaN;
+  if (!same(parseDecimal(valueText), propValue)) setValueText(formatDecimal(propValue));
+  if (!same(parseDecimal(toleranceText), propTolerance)) setToleranceText(formatDecimal(propTolerance));
 
   const emit = (nextValue: string, nextTolerance: string, nextUnit: string) => {
     setValueText(nextValue);
     setToleranceText(nextTolerance);
     onChange({
       ...question,
-      numericAnswer: { correctValue: parseDecimal(nextValue), tolerance: nextTolerance.trim() ? parseDecimal(nextTolerance) : undefined, unit: nextUnit },
+      numericAnswer: { ...answer, correctValue: parseDecimal(nextValue), tolerance: nextTolerance.trim() ? parseDecimal(nextTolerance) : undefined, unit: nextUnit },
     });
   };
 

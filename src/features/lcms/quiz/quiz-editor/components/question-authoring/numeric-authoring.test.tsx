@@ -44,6 +44,13 @@ describe("NumericAuthoring", () => {
     expect(codes()).toContain("numeric-tolerance");
   });
 
+  it("follows an outside change to the answer", () => {
+    const { rerender } = render(<NumericAuthoring onChange={vi.fn()} question={mk(1)} />);
+    rerender(<NumericAuthoring onChange={vi.fn()} question={{ ...mk(5), numericAnswer: { correctValue: 5, tolerance: 0.5 } }} />);
+    expect(screen.getByRole("textbox", { name: "Đáp số" })).toHaveValue("5");
+    expect(screen.getByRole("textbox", { name: "Sai số" })).toHaveValue("0,5");
+  });
+
   it("shows an empty value for null and does not emit while rendering", () => {
     const onChange = vi.fn();
     render(<NumericAuthoring onChange={onChange} question={mk(null)} />);
