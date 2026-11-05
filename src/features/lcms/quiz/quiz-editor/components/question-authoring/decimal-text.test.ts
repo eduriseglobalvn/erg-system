@@ -9,6 +9,9 @@ describe("decimal-text", () => {
   it("accepts plain decimals", () => {
     expect(parseDecimal("1.5")).toBe(1.5);
     expect(parseDecimal(",5")).toBe(0.5);
+    expect(parseDecimal("0.125")).toBe(0.125);
+    expect(parseDecimal(".500")).toBe(0.5);
+    expect(parseDecimal("1.2345")).toBe(1.2345);
     expect(Object.is(parseDecimal("-0"), 0)).toBe(true);
     expect(formatDecimal(-0)).toBe("0");
   });
