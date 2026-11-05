@@ -3,6 +3,7 @@ import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ChoiceAuthoring } from "./choice-authoring";
+import { DragWordsAuthoring } from "./drag-words-authoring";
 import { FillBlankAuthoring } from "./fill-blank-authoring";
 import { LikertAuthoring } from "./likert-authoring";
 import { NumericAuthoring } from "./numeric-authoring";
@@ -29,6 +30,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "sequence") return <SequenceAuthoring onChange={onChange} onUpdate={onUpdate} question={question} />;
   if (slide.kind === "fill-in-the-blanks") return <FillBlankAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "select-from-lists") return <SelectListsAuthoring key={question.id} onChange={onChange} question={question} />;
+  if (slide.kind === "drag-the-words") return <DragWordsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "numeric") return <NumericAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "short-answer") return <ShortAnswerAuthoring key={question.id} onChange={onChange} question={question} />;
   return (

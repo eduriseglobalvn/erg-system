@@ -31,7 +31,7 @@ describe("AnswerArea", () => {
     expect(screen.getByRole("button", { name: "Bỏ đánh dấu B là đáp án đúng" })).toBeInTheDocument();
   });
 
-  it.each(["fill-in-the-blanks", "select-from-lists"] as const)("authors a %s slide in a sentence", (kind) => {
+  it.each(["fill-in-the-blanks", "select-from-lists", "drag-the-words"] as const)("authors a %s slide in a sentence", (kind) => {
     const question = readSlideQuestion(build(kind), t)!;
     render(<Harness kind={kind} question={question} />);
     expect(screen.getByRole("textbox", { name: "Câu có ô trống" })).toBeInTheDocument();
