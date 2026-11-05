@@ -76,7 +76,7 @@ export function PortableExamPage({ workspace }: PortableExamPageProps) {
               href={workspace === "STUDENT" ? "/student" : "/teacher"}
               size="small"
               startIcon={<ArrowBack />}
-              sx={{ alignSelf: "flex-start" }}
+              sx={{ alignSelf: "flex-start", minHeight: 44 }}
               variant="text"
             >
               Về trang chủ

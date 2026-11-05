@@ -6,7 +6,7 @@ import Button from "@mui/material/Button";
 export function BackToWorkspaceBar({ href }: { href: string }) {
   return (
     <Box sx={{ bgcolor: "background.default", px: { xs: 2, md: 3 }, pt: 2 }}>
-      <Button href={href} size="small" startIcon={<ArrowBack />} variant="text">
+      <Button href={href} size="small" startIcon={<ArrowBack />} sx={{ minHeight: 44 }} variant="text">
         Về trang chủ
       </Button>
     </Box>

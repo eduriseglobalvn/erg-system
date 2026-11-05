@@ -66,6 +66,7 @@ export function StudentInstallBanner({ meta: bannerMeta, onDismiss: handleDismis
               display: "flex",
               flex: 1,
               gap: 1.25,
+              minHeight: 44,
               minWidth: 0,
               textAlign: "left",
             }}
@@ -96,9 +97,9 @@ export function StudentInstallBanner({ meta: bannerMeta, onDismiss: handleDismis
             sx={{
               color: "#94A3B8",
               flexShrink: 0,
-              height: 28,
+              height: 44,
               p: 0.5,
-              width: 28,
+              width: 44,
               "&:hover": { bgcolor: "rgba(0, 0, 0, 0.05)", color: "#0F172A" },
             }}
           >

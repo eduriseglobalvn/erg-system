@@ -38,10 +38,15 @@ export function resolveActiveMenuItem(pathname: string) {
   const exact = FLAT_MENU_ITEMS.find((item) => item.path === normalized);
   if (exact) return exact;
 
+  const home = FLAT_MENU_ITEMS[0];
+  const section = normalized.split("/").slice(0, 3).join("/");
   return (
     FLAT_MENU_ITEMS
-      .filter((item) => item.path && item.path !== "/" && normalized.startsWith(item.path))
-      .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))[0] ?? FLAT_MENU_ITEMS[0]
+      .filter((item) => item.path && item.path !== "/" && item !== home && normalized.startsWith(item.path))
+      .sort((left, right) => (right.path?.length ?? 0) - (left.path?.length ?? 0))[0]
+    // Screens reached inside a flow (e.g. /admin/schools/classes) have no menu entry: show their menu group, not "Trang chủ".
+    ?? FLAT_MENU_ITEMS.find((item) => item.children?.some((child) => child.path?.startsWith(`${section}/`)))
+    ?? home
   );
 }
 

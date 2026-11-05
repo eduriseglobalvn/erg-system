@@ -50,7 +50,7 @@ export function DesktopReleaseDownloadPage({ workspace }: { workspace: DesktopRe
             <Typography variant="overline" color="primary" sx={{ fontWeight: 600, letterSpacing: 1.2 }}>
               ERG · {workspace === "TEACHER" ? "Dành cho giáo viên" : "Dành cho học viên"}
             </Typography>
-            <Typography variant="h4" sx={{ fontWeight: 600, letterSpacing: -1 }}>
+            <Typography component="h1" variant="h4" sx={{ fontWeight: 600, letterSpacing: -1 }}>
               Tải ứng dụng ERG cho Windows và macOS
             </Typography>
             <Typography color="text.secondary" sx={{ maxWidth: 780 }}>
@@ -58,7 +58,7 @@ export function DesktopReleaseDownloadPage({ workspace }: { workspace: DesktopRe
             </Typography>
           </Stack>
 
-          {error ? <Alert severity="error" action={<Button color="inherit" size="small" variant="text" onClick={load}>Thử lại</Button>}>{error}</Alert> : null}
+          {error ? <Alert severity="error" action={<Button color="inherit" size="small" variant="text" onClick={load} sx={{ minHeight: 44 }}>Thử lại</Button>}>{error}</Alert> : null}
           {!manifest && !error ? <LoadingReleaseCards /> : null}
           {manifest ? (
             <Stack spacing={2}>

@@ -27,7 +27,7 @@ export function EnterpriseConnectorTable({ connectors, isLoading, isError, canSy
   return (
     <ErgDataTableShell toolbar={<ErgTableToolbar title="Enterprise connectors" meta={`${connectors.length} connector trong tenant hiện tại`} />}>
       {isLoading ? <ErgLoadingSkeleton rows={5} /> : isError ? (
-        <ErgEmptyState title="Không tải được connectors" description="Kiểm tra enterprise.connectors.read hoặc thử lại." action={<Button variant="contained" onClick={onRetry}>Thử lại</Button>} />
+        <ErgEmptyState title="Không tải được connectors" description="Kiểm tra enterprise.connectors.read hoặc thử lại." action={<Button variant="outlined" onClick={onRetry}>Thử lại</Button>} />
       ) : connectors.length === 0 ? (
         <ErgEmptyState title="Chưa có connector" description="Đăng ký SIS, HRIS hoặc SCIM bằng secret reference do secret manager cấp." />
       ) : (
