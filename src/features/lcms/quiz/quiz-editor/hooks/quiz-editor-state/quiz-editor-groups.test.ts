@@ -97,6 +97,12 @@ describe("mutations", () => {
     expect(out[0]!.slides[2]).toMatchObject({ title: "Beta (Bản sao)", status: "unsaved" });
     expect(out[1]!.slides).toHaveLength(1);
   });
+  it("gives a duplicate its own runtime question id, leaving the source alone", () => {
+    const source = { ...slide("b", "Beta"), questionId: "q-9", runtimeQuestion: { id: "b", kind: "essay", title: "Beta" } } as unknown as QuizEditorSlide;
+    const out = duplicateSlidesInGroups([group("g1", [source])], ["b"], () => "slide-7");
+    expect(out[0]!.slides[1]).toMatchObject({ id: "slide-7", questionId: "q-9", runtimeQuestion: { id: "slide-7" } });
+    expect(source.runtimeQuestion!.id).toBe("b");
+  });
   it("marks drafts and published", () => {
     const g = [group("g", [slide("a", "a", "multiple-choice", "unsaved"), slide("b"), slide("c", "c", "x", "published")])];
     expect(markUnsavedSlidesAsDraft(g)[0]!.slides.map((s) => s.status)).toEqual(["draft", "draft", "published"]);

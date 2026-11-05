@@ -141,6 +141,13 @@ describe("useQuizEditorState - duplicate / delete / move / copy / paste", () => 
     expect(result.current.selectedNode).toEqual({ type: "slide", groupId: "g1", slideId: slides[3]!.id });
   });
 
+  it("duplicateSelected gives the copy its own runtime question id", () => {
+    const { result } = setup([group("g1", [slide("a", { runtimeQuestion: { id: "a", kind: "essay", title: "a" } as never })])]);
+    act(() => result.current.duplicateSelected());
+    const copy = slidesOf(result, "g1")[1]!;
+    expect(copy.runtimeQuestion?.id).toBe(copy.id);
+  });
+
   it("duplicateSelected on a group appends a copy with fresh slide ids", () => {
     const { result } = setup();
     act(() => result.current.selectGroup("g1"));

@@ -157,6 +157,11 @@ export function removeSlidesFromGroups(groups: QuizEditorGroup[], slideIds: stri
   }));
 }
 
+// A copy is its own question: the runtime question follows the new slide id (the try runner keys answers by it).
+export function copySlideAs(slide: QuizEditorSlide, id: string): QuizEditorSlide {
+  return { ...slide, id, ...(slide.runtimeQuestion ? { runtimeQuestion: { ...slide.runtimeQuestion, id } } : {}) };
+}
+
 export function duplicateSlidesInGroups(
   groups: QuizEditorGroup[],
   slideIds: string[],
@@ -166,8 +171,7 @@ export function duplicateSlidesInGroups(
     const slidesToDup = group.slides.filter((s) => slideIds.includes(s.id));
     if (!slidesToDup.length) return group;
     const copies = slidesToDup.map((s) => ({
-      ...s,
-      id: createId("slide"),
+      ...copySlideAs(s, createId("slide")),
       title: s.title ? `${s.title} (Bản sao)` : s.title,
       status: "unsaved" as const,
     }));

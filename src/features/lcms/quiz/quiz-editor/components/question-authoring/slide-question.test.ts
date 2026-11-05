@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { readSlideQuestion, writeSlideQuestion } from "./slide-question";
+import { readSlideQuestion, readSlideReadiness, writeSlideQuestion } from "./slide-question";
 
 const t = ((key: string) => key) as never;
 const img = { type: "image", src: "data:image/png;base64,AAAA", alt: "A" };
@@ -39,5 +39,26 @@ describe("slide question adapter", () => {
     const q = readSlideQuestion(slide, t)!;
     const edited = { ...q, choices: [{ ...q.choices![1], image: { url: "data:image/png;base64,AA", alt: "x" } }, q.choices![0]] };
     expect(writeSlideQuestion(slide, edited).choices?.[0].media?.src).toBe("data:image/png;base64,AA");
+  });
+
+  it("does not save the hotspot placeholder as the question image", () => {
+    const hotspot = { id: "h1", title: "", kind: "hotspot" } as unknown as QuizEditorSlide;
+    const next = writeSlideQuestion(hotspot, { ...readSlideQuestion(hotspot, t)!, title: "Tìm Hà Nội" });
+    expect(next.media).toBeUndefined();
+    expect(readSlideReadiness(next, t).issues.map((issue) => issue.message)).toContain("Chưa có ảnh");
+  });
+
+  it("keeps the hotspot image description and file name across title edits", () => {
+    const media = { type: "image", src: img.src, alt: "Bản đồ", name: "ban-do.png" } as const;
+    const hotspot = { id: "h1", title: "", kind: "hotspot", media } as unknown as QuizEditorSlide;
+    const once = writeSlideQuestion(hotspot, { ...readSlideQuestion(hotspot, t)!, title: "A" });
+    const twice = writeSlideQuestion(once, { ...readSlideQuestion(once, t)!, title: "AB" });
+    expect(twice.media).toEqual(media);
+  });
+
+  it("keeps the content image file name across title edits", () => {
+    const media = { type: "image", src: img.src, alt: "Hình", name: "hinh.png", x: 0.5 } as const;
+    const next = writeSlideQuestion({ ...slide, media }, { ...readSlideQuestion({ ...slide, media }, t)!, title: "new" });
+    expect(next.media).toEqual(media);
   });
 });

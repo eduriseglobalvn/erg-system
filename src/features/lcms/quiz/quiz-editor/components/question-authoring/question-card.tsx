@@ -83,7 +83,7 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
           value={createInitialAnswer(question)}
         />
       ) : null}
-      <QuestionFeedbackLine onChange={(feedbackRows) => onReplaceSlide({ ...slide, feedbackRows })} slide={slide} />
+      <QuestionFeedbackLine onChange={(feedbackRows) => onReplaceSlide({ ...slide, feedbackRows })} points={question?.points ?? 0} slide={slide} />
     </Box>
   );
 }

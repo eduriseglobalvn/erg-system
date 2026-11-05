@@ -2,7 +2,8 @@ import type { useI18n } from "@/platform/i18n";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorChoice, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
-const hotspotPlaceholderImage =
+// Shown until the teacher adds a hotspot image; never saved as the slide image.
+export const HOTSPOT_PLACEHOLDER_IMAGE =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%23eff6ff'/%3E%3Cstop offset='1' stop-color='%23dbeafe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='675' fill='url(%23g)'/%3E%3Ccircle cx='880' cy='250' r='130' fill='%23bfdbfe'/%3E%3Crect x='210' y='200' width='520' height='270' rx='32' fill='%23ffffff' stroke='%2393c5fd' stroke-width='8'/%3E%3Cpath d='M300 410l120-120 98 90 92-72 90 102z' fill='%2393c5fd'/%3E%3Ccircle cx='360' cy='275' r='36' fill='%23f97316'/%3E%3C/svg%3E";
 
 export function buildPreviewQuestion(
@@ -134,7 +135,7 @@ function buildLearnerQuestion(
         ...base,
         kind: "hotspot",
         hotspotImage: {
-          url: slide.media?.src ?? hotspotPlaceholderImage,
+          url: slide.media?.src ?? HOTSPOT_PLACEHOLDER_IMAGE,
           width: 1200,
           height: 675,
         },

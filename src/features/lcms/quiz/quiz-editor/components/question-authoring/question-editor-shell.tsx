@@ -12,10 +12,9 @@ import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { QuestionCard } from "./question-card";
 import { QuestionEditorRail, type RailEntry } from "./question-editor-rail";
 import { QuestionEditorTitlebar } from "./question-editor-titlebar";
-import { assessQuestionReadiness } from "./question-readiness";
 import { questionTypeLabel } from "./question-type-catalog";
 import type { QuestionView } from "./question-view-toggle";
-import { readSlideQuestion } from "./slide-question";
+import { readSlideQuestion, readSlideReadiness } from "./slide-question";
 import { QuizTryRunner } from "./try-run/quiz-try-runner";
 import { defaultTryRunMode } from "./try-run/try-run-model";
 
@@ -44,7 +43,7 @@ export function QuestionEditorShell(props: Props) {
   );
   const index = entries.findIndex((entry) => entry.slide.id === slide.id);
   const question = readSlideQuestion(slide, t);
-  const readiness = assessQuestionReadiness(question, { hasQuestionImage: Boolean(slide.media?.src) });
+  const readiness = readSlideReadiness(slide, t);
   const typeLabel = isQuestionType(slide.kind) ? questionTypeLabel(slide.kind) : t(getSlideKindLabelKey(slide.kind));
 
   const deleteQuestion = () => {
@@ -55,10 +54,13 @@ export function QuestionEditorShell(props: Props) {
     else onClose();
   };
 
-  const runnable = entries.flatMap(({ slide: item }) => {
-    const runtime = readSlideQuestion(item, t);
-    return runtime ? [{ slide: item, question: runtime }] : [];
-  });
+  const runnable =
+    view === "learner"
+      ? entries.flatMap(({ slide: item }) => {
+          const runtime = readSlideQuestion(item, t);
+          return runtime ? [{ slide: item, question: runtime }] : [];
+        })
+      : [];
   const feedback = Object.fromEntries(
     runnable.map(({ slide: item, question: runtime }) => [
       runtime.id,

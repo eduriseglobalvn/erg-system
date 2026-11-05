@@ -15,7 +15,9 @@ const KINDS = [
   { kind: "incorrect", button: "+ Khi sai", label: "Lời nhắn khi sai" },
 ] as const;
 
-export function QuestionFeedbackLine({ slide, onChange }: { slide: QuizEditorSlide; onChange: (rows: QuizEditorFeedbackRow[]) => void }) {
+type Props = { slide: QuizEditorSlide; points: number; onChange: (rows: QuizEditorFeedbackRow[]) => void };
+
+export function QuestionFeedbackLine({ slide, points, onChange }: Props) {
   const [opened, setOpened] = useState<Record<string, boolean>>({});
   const shown = KINDS.filter(({ kind }) => opened[kind] || Boolean(getFeedbackText(slide, kind)));
   const hidden = KINDS.filter((entry) => !shown.includes(entry));
@@ -37,7 +39,7 @@ export function QuestionFeedbackLine({ slide, onChange }: { slide: QuizEditorSli
           label={label}
           minRows={2}
           multiline
-          onChange={(event) => onChange(updateFeedbackText(slide.feedbackRows, kind, event.target.value))}
+          onChange={(event) => onChange(updateFeedbackText(slide.feedbackRows, kind, event.target.value, points))}
           size="small"
           value={getFeedbackText(slide, kind) ?? ""}
         />

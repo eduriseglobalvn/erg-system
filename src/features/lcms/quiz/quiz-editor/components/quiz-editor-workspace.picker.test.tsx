@@ -58,8 +58,9 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-manager-table", ()
   ),
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
-  QuestionEditorShell: ({ onChangeType }: { onChangeType: () => void }) => (
+  QuestionEditorShell: ({ onChangeType, selectedSlide }: { onChangeType: () => void; selectedSlide: { kind: string } }) => (
     <div role="dialog" aria-label="editor-open">
+      <output data-testid="kind">{selectedSlide.kind}</output>
       <button type="button" onClick={onChangeType}>change-type</button>
     </div>
   ),
@@ -113,10 +114,12 @@ describe("QuizEditorWorkspace add-question picker", () => {
     fireEvent.click(await screen.findByRole("button", { name: "change-type" }));
     const picker = await screen.findByRole("dialog", { name: "Đổi dạng câu hỏi" });
     fireEvent.click(within(picker).getByRole("option", { name: /Ghép cặp/ }));
-    fireEvent.click(within(picker).getByRole("button", { name: "Tạo câu Ghép cặp" }));
+    fireEvent.click(within(picker).getByRole("button", { name: "Đổi sang Ghép cặp" }));
 
     const confirm = await screen.findByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" });
+    expect(screen.getByTestId("kind").textContent).toBe("multiple-choice");
     fireEvent.click(within(confirm).getByRole("button", { name: "Đổi dạng" }));
     expect(screen.getByTestId("count").textContent).toBe(count);
+    expect(screen.getByTestId("kind").textContent).toBe("matching");
   });
 });

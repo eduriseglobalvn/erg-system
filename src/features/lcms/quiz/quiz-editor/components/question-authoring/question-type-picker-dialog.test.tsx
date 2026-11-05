@@ -92,4 +92,11 @@ describe("QuestionTypePickerDialog", () => {
     expect(onClose).toHaveBeenCalledTimes(2);
     expect(onPick).not.toHaveBeenCalled();
   });
+
+  it("uses the caller confirm label for the active type", () => {
+    render(
+      <QuestionTypePickerDialog open title="Đổi dạng câu hỏi" onPick={vi.fn()} onClose={vi.fn()} confirmLabel={(label) => `Đổi sang ${label}`} />,
+    );
+    expect(screen.getByRole("button", { name: "Đổi sang Một đáp án" })).toBeInTheDocument();
+  });
 });

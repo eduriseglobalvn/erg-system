@@ -2,6 +2,7 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
+import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { QuestionEditorShell } from "./question-editor-shell";
 
@@ -94,5 +95,54 @@ describe("QuestionEditorShell", () => {
   it("has exactly one contained button in author mode", () => {
     renderShell();
     expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
+  });
+
+  it("names the back button with its visible text", () => {
+    renderShell();
+    expect(screen.getByRole("button", { name: "Quay lại danh sách câu hỏi" })).toBeInTheDocument();
+  });
+
+  function deleteVia(selectedSlide: QuizEditorSlide, list = groups) {
+    const props = renderShell({ selectedSlide, groups: list });
+    fireEvent.click(screen.getByRole("button", { name: "Thêm thao tác" }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Xoá câu hỏi" }));
+    const confirm = screen.getByRole("dialog", { name: "Xoá câu hỏi này?" });
+    fireEvent.click(within(confirm).getByRole("button", { name: "Xoá" }));
+    expect(props.onDelete).toHaveBeenCalledTimes(1);
+    return props;
+  }
+
+  it("selects the next question after deleting", () => {
+    expect(deleteVia(blank).onSelectSlide).toHaveBeenCalledWith("g2", "s3");
+  });
+
+  it("selects the previous question after deleting the last one", () => {
+    expect(deleteVia(third).onSelectSlide).toHaveBeenCalledWith("g1", "s2");
+  });
+
+  it("closes after deleting the only question", () => {
+    const props = deleteVia(blank, [{ ...groups[0]!, slides: [blank] }]);
+    expect(props.onSelectSlide).not.toHaveBeenCalled();
+    expect(props.onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes on Esc, but Esc in the open menu only closes the menu", () => {
+    const { onClose } = renderShell();
+    fireEvent.click(screen.getByRole("button", { name: "Thêm thao tác" }));
+    fireEvent.keyDown(screen.getByRole("menu", { name: "Thao tác câu hỏi" }), { key: "Escape" });
+    expect(onClose).not.toHaveBeenCalled();
+    fireEvent.keyDown(screen.getByRole("dialog", { name: "Soạn câu hỏi" }), { key: "Escape" });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("writes the correct-answer message into feedbackRows without changing the points", () => {
+    const onReplaceSlide = vi.fn();
+    renderShell({ onReplaceSlide });
+    fireEvent.click(screen.getByRole("button", { name: "+ Khi đúng" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Lời nhắn khi đúng" }), { target: { value: "Giỏi lắm" } });
+    const next = onReplaceSlide.mock.calls.at(-1)![0] as QuizEditorSlide;
+    expect(next.feedbackRows?.find((row) => row.kind === "correct")?.feedback).toBe("Giỏi lắm");
+    const t = ((key: string) => key) as never;
+    expect(buildPreviewQuestion(next, t)?.points).toBe(buildPreviewQuestion(blank, t)?.points);
   });
 });

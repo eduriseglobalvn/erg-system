@@ -38,7 +38,7 @@ export function QuestionEditorTitlebar({ number, total, typeLabel, readiness, sy
 
   return (
     <Box sx={{ alignItems: "center", bgcolor: "background.paper", borderBottom: 1, borderColor: "divider", display: "flex", flexWrap: "wrap", gap: 1.5, px: 2, py: 1 }}>
-      <Button aria-label="Quay lại danh sách" onClick={onBack} startIcon={<ChevronLeftIcon />} sx={{ color: "text.secondary" }} variant="text">
+      <Button aria-label="Quay lại danh sách câu hỏi" onClick={onBack} startIcon={<ChevronLeftIcon />} sx={{ color: "text.secondary" }} variant="text">
         Danh sách câu hỏi
       </Button>
       <Divider flexItem orientation="vertical" sx={{ my: 0.5 }} />

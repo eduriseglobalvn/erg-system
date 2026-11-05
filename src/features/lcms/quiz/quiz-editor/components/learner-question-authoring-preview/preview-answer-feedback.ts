@@ -67,12 +67,14 @@ export function updateFeedbackText(
   rows: QuizEditorFeedbackRow[] | undefined,
   previewMode: PreviewMode,
   feedback: string,
+  /** Score for a correct row created here; callers pass the current points so a message never changes them. */
+  correctScore = 10,
 ) {
   const targetKind: QuizEditorFeedbackRow["kind"] = previewMode === "correct" ? "correct" : "incorrect";
   const sourceRows: QuizEditorFeedbackRow[] = rows?.length
     ? rows
     : [
-        { id: "feedback-correct", kind: "correct" as const, feedback: "", score: 10, branching: "By Result" as const },
+        { id: "feedback-correct", kind: "correct" as const, feedback: "", score: correctScore, branching: "By Result" as const },
         { id: "feedback-incorrect", kind: "incorrect" as const, feedback: "", score: 0, branching: "By Result" as const },
       ];
 
@@ -86,7 +88,7 @@ export function updateFeedbackText(
       id: `feedback-${targetKind}`,
       kind: targetKind,
       feedback,
-      score: targetKind === "correct" ? 10 : 0,
+      score: targetKind === "correct" ? correctScore : 0,
       branching: "By Result" as const,
     },
   ];

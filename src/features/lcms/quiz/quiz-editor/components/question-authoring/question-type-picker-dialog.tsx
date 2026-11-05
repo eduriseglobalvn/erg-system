@@ -52,9 +52,16 @@ const TYPE_ICONS: Record<QuestionType, ElementType> = {
 const DEFAULT_TYPE: QuestionType = "multiple-choice";
 const optionId = (type: QuestionType) => `question-type-option-${type}`;
 
-type Props = { open: boolean; title: string; onPick: (type: QuestionType) => void; onClose: () => void };
+type Props = {
+  open: boolean;
+  title: string;
+  onPick: (type: QuestionType) => void;
+  onClose: () => void;
+  /** Footer button text for the active type; defaults to "Tạo câu {type}". */
+  confirmLabel?: (typeLabel: string) => string;
+};
 
-export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props) {
+export function QuestionTypePickerDialog({ open, title, onPick, onClose, confirmLabel = (label) => `Tạo câu ${label}` }: Props) {
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<QuestionType>(DEFAULT_TYPE);
 
@@ -108,7 +115,7 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
             Hủy
           </Button>
           <ErgButton variant="contained" disabled={!active} onClick={() => active && pick(active.type)}>
-            {active ? `Tạo câu ${questionTypeLabel(active.type)}` : "Tạo câu"}
+            {active ? confirmLabel(questionTypeLabel(active.type)) : "Tạo câu"}
           </ErgButton>
         </>
       }

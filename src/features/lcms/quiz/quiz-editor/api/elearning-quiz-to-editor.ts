@@ -6,15 +6,19 @@ import type {
   QuestionType,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { Question, QuestionImage, QuestionKind } from "@/domain/quiz/types";
+import { HOTSPOT_PLACEHOLDER_IMAGE } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 
 export function syncQuizEditorSlideFromRuntimeQuestion(
   slide: QuizEditorSlide,
   question: Question,
 ): QuizEditorSlide {
   const kind = mapRuntimeKindToEditorKind(question.kind);
+  // An unchanged image keeps the stored slide media (name, position); only alt text follows the question.
   const runtimeMedia = question.contentImage
-    ? mapQuestionImage(question.contentImage, question.title)
-    : mapHotspotImage(question);
+    ? slide.media?.src === question.contentImage.url
+      ? { ...slide.media, alt: question.contentImage.alt ?? slide.media.alt }
+      : mapQuestionImage(question.contentImage, question.title)
+    : mapHotspotImage(question, slide.media);
 
   return {
     ...slide,
@@ -179,11 +183,13 @@ function mapRuntimeHotspotAreas(question: Question): QuizEditorHotspotArea[] | u
   }));
 }
 
-function mapHotspotImage(question: Question) {
-  if (!question.hotspotImage?.url) return undefined;
+function mapHotspotImage(question: Question, existing: QuizEditorSlide["media"]) {
+  const url = question.hotspotImage?.url;
+  if (!url || url === HOTSPOT_PLACEHOLDER_IMAGE) return undefined;
+  if (existing?.src === url) return existing;
   return {
     type: "image" as const,
-    src: question.hotspotImage.url,
+    src: url,
     alt: question.title,
     name: `${question.id}-hotspot`,
   };

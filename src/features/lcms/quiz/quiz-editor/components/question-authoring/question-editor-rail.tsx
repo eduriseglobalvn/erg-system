@@ -24,6 +24,7 @@ type Props = {
 
 export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect, onAdd }: Props) {
   const { t } = useI18n();
+  const numbered = entries.map((entry, index) => ({ ...entry, number: index + 1 }));
   const statusOf = (slide: QuizEditorSlide): keyof typeof DOT =>
     !readSlideReadiness(slide, t).ready ? "missing" : slide.status === "published" ? "ready" : "unpublished";
 
@@ -34,15 +35,14 @@ export function QuestionEditorRail({ groups, entries, selectedSlideId, onSelect,
       sx={{ bgcolor: "background.paper", borderColor: "divider", borderRight: 1, display: "flex", flexDirection: "column", flexShrink: 0, gap: 1.5, overflowY: "auto", p: 1.5, width: 240 }}
     >
       {groups.map((group) => {
-        const rows = entries.filter((entry) => entry.groupId === group.id);
+        const rows = numbered.filter((entry) => entry.groupId === group.id);
         if (!rows.length) return null;
         return (
           <Box key={group.id}>
             <Typography color="text.secondary" component="h3" sx={{ letterSpacing: ".04em", px: 1, textTransform: "uppercase" }} variant="caption">
               {`${group.title} · ${rows.length} câu`}
             </Typography>
-            {rows.map(({ slide }) => {
-              const number = entries.findIndex((entry) => entry.slide.id === slide.id) + 1;
+            {rows.map(({ slide, number }) => {
               const selected = slide.id === selectedSlideId;
               const status = statusOf(slide);
               return (

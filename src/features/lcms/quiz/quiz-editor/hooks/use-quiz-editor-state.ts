@@ -17,6 +17,7 @@ import {
   appendSlidesToGroup,
   buildSlideNumberMap,
   countQuestionsByGroup,
+  copySlideAs,
   duplicateSlidesInGroups,
   filterGroupsByKeyword,
   getFirstNode,
@@ -194,10 +195,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
 
     if (selectedNode.type === "group") {
       const nextGroupId = createId("group");
-      const duplicatedSlides = selectedGroup.slides.map((slide) => ({
-        ...slide,
-        id: createId("slide"),
-      }));
+      const duplicatedSlides = selectedGroup.slides.map((slide) => copySlideAs(slide, createId("slide")));
 
       const duplicatedGroup: QuizEditorGroup = {
         ...selectedGroup,
@@ -214,8 +212,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     if (!selectedSlide) return;
 
     const duplicatedSlide: QuizEditorSlide = {
-      ...selectedSlide,
-      id: createId("slide"),
+      ...copySlideAs(selectedSlide, createId("slide")),
       title: `${selectedSlide.title} Copy`,
     };
 
@@ -314,7 +311,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
         ...clipboard.payload,
         id: nextGroupId,
         title: `${clipboard.payload.title} Copy`,
-        slides: clipboard.payload.slides.map((slide) => ({ ...slide, id: createId("slide") })),
+        slides: clipboard.payload.slides.map((slide) => copySlideAs(slide, createId("slide"))),
       };
 
       setGroups((currentGroups) => insertGroupAfter(currentGroups, selectedGroup.id, duplicatedGroup));
@@ -323,8 +320,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     }
 
     const duplicatedSlide: QuizEditorSlide = {
-      ...clipboard.payload,
-      id: createId("slide"),
+      ...copySlideAs(clipboard.payload, createId("slide")),
       title: clipboard.payload.title,
     };
 
