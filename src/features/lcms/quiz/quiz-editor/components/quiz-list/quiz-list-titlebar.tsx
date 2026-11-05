@@ -66,6 +66,8 @@ export function QuizListTitlebar({
             <span>
               <ErgButton
                 aria-disabled={publishReadinessOnly || undefined}
+                aria-expanded={publishReadinessOnly ? Boolean(popoverAnchor) : undefined}
+                aria-haspopup={publishReadinessOnly ? "dialog" : undefined}
                 disabled={hardBlocked}
                 loading={isPublishing}
                 onClick={(event) => (publishReadinessOnly ? setPopoverAnchor(event.currentTarget) : onPublish())}
@@ -79,8 +81,9 @@ export function QuizListTitlebar({
         </Box>
       </Box>
       {publishFailure ? (
-        <Alert onClose={onDismissPublishFailure} severity="error" sx={{ borderRadius: 0 }}>
-          {publishFailure.message}
+        <Alert closeText="Đóng" onClose={onDismissPublishFailure} severity="error" sx={{ borderRadius: 0 }}>
+          <Box>Máy chủ chưa cho xuất bản.</Box>
+          <Box>{publishFailure.message}</Box>
           {publishFailure.items.length ? (
             <Box component="ul" sx={{ m: 0, pl: 2 }}>
               {publishFailure.items.map((item, index) => <li key={`${index}:${item}`}>{item}</li>)}

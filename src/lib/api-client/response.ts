@@ -9,7 +9,7 @@ type ApiErrorBody = {
 export type ApiEnvelope<T> = {
   data?: T;
   error?: ApiErrorBody | string;
-  errors?: ApiErrorBody | string;
+  errors?: ApiErrorBody | string | unknown[];
   message?: string;
   request_id?: string;
   statusCode?: number;
@@ -111,6 +111,11 @@ export function getErrorBody(value: unknown) {
     return typeof value.errors === "string"
       ? { code: value.errors, message: value.message, details: value.errors, requestId: value.request_id }
       : { code: value.errors.code, message: value.message, details: value.errors, requestId: value.request_id };
+  }
+
+  // Validation failures list their entries (field, message, ...) in an array; an empty one is not an error.
+  if (Array.isArray(value.errors) && value.errors.length > 0 && value.success !== true) {
+    return { code: undefined, message: value.message, details: value.errors, requestId: value.request_id };
   }
 
   if (value.success === false) {

@@ -508,3 +508,27 @@ test("copies the Retry-After header into error details for lockout messages", as
     details: expect.objectContaining({ retryAfterSeconds: 60 }),
   });
 });
+
+test("keeps the entries of a 422 envelope whose errors is an array as ApiClientError details", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  const errors = [{ field: "questions[2].answerKey", tag: "required", actual_tag: "required", message: "Câu 3 thiếu đáp án" }];
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ statusCode: 422, message: "quiz failed publish validation", errors, request_id: "req-1" }),
+    { status: 422, headers: { "Content-Type": "application/json" } },
+  )));
+
+  const error = await apiRequest("/api/v1/lcms/quizzes/q1/publish", { auth: "public", method: "POST" }).catch((e: unknown) => e);
+
+  expect(error).toBeInstanceOf(ApiClientError);
+  expect(error).toMatchObject({ message: "quiz failed publish validation", code: "HTTP_422", status: 422, details: errors, requestId: "req-1" });
+});
+
+test("does not treat an empty errors array on a successful response as a failure", async () => {
+  vi.stubEnv("VITE_API_BASE", "https://api.erg.test");
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(
+    JSON.stringify({ statusCode: 200, data: { ok: true }, errors: [] }),
+    { status: 200, headers: { "Content-Type": "application/json" } },
+  )));
+
+  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ ok: true });
+});

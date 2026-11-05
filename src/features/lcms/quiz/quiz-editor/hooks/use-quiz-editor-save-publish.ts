@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type SetStateAction } from "react";
+import { useLayoutEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import { toast } from "sonner";
 
 import { ApiClientError } from "@/lib/api-client/errors";
@@ -41,11 +41,12 @@ export type NotReadyQuestion = { slideId: string; number: number; title: string;
 /** What the server said when it refused to publish: its message, and the per-question lines it sent along. */
 export type PublishFailure = { message: string; items: string[] };
 
-function blockedReason(status: QuizDraftSyncStatus, questionCount: number, notReadyCount: number): string | null {
-  if (!questionCount) return "Chưa có câu hỏi để xuất bản.";
-  if (status.kind === "offline") return "Cần có mạng để xuất bản.";
-  if (status.kind === "conflict") return "Cần chọn bản để giữ trước khi xuất bản.";
-  return notReadyCount ? `Còn ${notReadyCount} câu chưa sẵn sàng` : null;
+/** `readinessOnly`: nothing but unfinished questions blocks it, so the button explains instead of going dead. */
+function blockedReason(status: QuizDraftSyncStatus, questionCount: number, notReadyCount: number): { text: string; readinessOnly: boolean } | null {
+  if (!questionCount) return { text: "Chưa có câu hỏi để xuất bản.", readinessOnly: false };
+  if (status.kind === "offline") return { text: "Cần có mạng để xuất bản.", readinessOnly: false };
+  if (status.kind === "conflict") return { text: "Cần chọn bản để giữ trước khi xuất bản.", readinessOnly: false };
+  return notReadyCount ? { text: `Còn ${notReadyCount} câu chưa sẵn sàng`, readinessOnly: true } : null;
 }
 
 function toPublishFailure(error: unknown): PublishFailure {
@@ -87,13 +88,17 @@ export function useQuizEditorPublish({ sync, draftId, questionSlides, setSlidesP
     latest.current = sync;
   });
   // Intro and instruction slides stay in the draft but are never counted or listed.
-  const questions = fingerprintedSlides(questionSlides);
-  const notReady = questions.flatMap((slide, index) => {
-    const readiness = readSlideReadiness(slide, t);
-    return readiness.ready ? [] : [{ slideId: slide.id, number: index + 1, title: slide.title, label: readinessLabel(readiness) }];
-  });
-  const publishBlockedReason = blockedReason(sync.status, questions.length, notReady.length);
-  const publishReadinessOnly = notReady.length > 0 && publishBlockedReason === `Còn ${notReady.length} câu chưa sẵn sàng`;
+  const questions = useMemo(() => fingerprintedSlides(questionSlides), [questionSlides]);
+  const notReady = useMemo(
+    () => questions.flatMap((slide, index) => {
+      const readiness = readSlideReadiness(slide, t);
+      return readiness.ready ? [] : [{ slideId: slide.id, number: index + 1, title: slide.title, label: readinessLabel(readiness) }];
+    }),
+    [questions, t],
+  );
+  const blocked = blockedReason(sync.status, questions.length, notReady.length);
+  const publishBlockedReason = blocked?.text ?? null;
+  const publishReadinessOnly = blocked?.readinessOnly ?? false;
 
   async function handlePublish() {
     if (publishBlockedReason || publishingRef.current) return;
