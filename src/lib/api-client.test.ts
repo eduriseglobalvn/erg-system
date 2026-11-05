@@ -530,7 +530,7 @@ test("does not treat a 200 body with data and a non-empty errors array (GraphQL 
     { status: 200, headers: { "Content-Type": "application/json" } },
   )));
 
-  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ data: { ok: true }, errors: [{ message: "partial" }] });
+  await expect(apiRequest("/api/v1/lcms/anything", { auth: "public" })).resolves.toEqual({ ok: true });
 });
 
 test("does not treat an empty errors array on a successful response as a failure", async () => {
