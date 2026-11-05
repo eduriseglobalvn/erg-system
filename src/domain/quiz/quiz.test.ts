@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { isAnswerComplete } from "@/domain/quiz/quiz";
+import { createInitialAnswer, isAnswerComplete } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 
 const matchingQuestion: Question = {
@@ -29,5 +29,9 @@ describe("isAnswerComplete", () => {
         },
       }),
     ).toBe(true);
+  });
+
+  test("an untouched matching question is not answered", () => {
+    expect(isAnswerComplete(matchingQuestion, createInitialAnswer(matchingQuestion))).toBe(false);
   });
 });

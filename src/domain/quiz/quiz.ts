@@ -7,6 +7,7 @@ import type {
   Question,
   Quiz,
 } from "@/domain/quiz/types";
+import { shuffleAway } from "@/domain/quiz/shuffle-away";
 
 export function getAllQuestions(quiz: Quiz): Question[] {
   return quiz.sections.flatMap((section) => section.questions);
@@ -74,7 +75,7 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
       // Unknown key (secured body, server-graded) => no local correctness: "" never counts as a hit.
       const correctOrder = (question.matching ?? []).map((pair) => matchingKey?.[pair.id] ?? "");
       result.correctMatchingOrder = correctOrder;
-      const currentOrder = normalizeMatchingOrder(question.matching ?? [], answer);
+      const currentOrder = matchingRowOrder(question, answer);
       if (matchingKey && correctOrder.length > 0 && JSON.stringify(currentOrder) === JSON.stringify(correctOrder)) {
         result.correct = true;
         result.awardedPoints = question.points;
@@ -235,8 +236,7 @@ export function scoreQuestion(question: Question, answer: AnswerPayload): Answer
     }
     case "hotspot": {
       const point = answer.hotspotPoint;
-      const area = question.hotspotAreas?.find((candidate) => candidate.correct);
-      if (point && area && pointInArea(point, area)) {
+      if (point && question.hotspotAreas?.some((area) => area.correct && pointInArea(point, area))) {
         result.correct = true;
         result.awardedPoints = question.points;
         result.message = question.feedback.correct;
@@ -260,7 +260,13 @@ export function isAnswerComplete(question: Question, answer?: AnswerPayload | nu
     case "multiple_response":
       return (answer.choiceIds?.length ?? 0) > 0;
     case "matching":
-      return (question.matching ?? []).every((pair) => Boolean(answer.matchingAssignments?.[pair.id])) || (answer.matchingOrder?.length ?? 0) > 0;
+      return (
+        (question.matching ?? []).every((pair) => Boolean(answer.matchingAssignments?.[pair.id])) ||
+        // Old answers carry no connection state: a non-empty order still counts as answered.
+        (Array.isArray(answer.matchingConnectedRows)
+          ? answer.matchingConnectedRows.length > 0
+          : (answer.matchingOrder?.length ?? 0) > 0)
+      );
     case "sequence":
       return (answer.sequenceOrder?.length ?? 0) > 0;
     case "inline_choice":
@@ -292,7 +298,7 @@ export function normalizeAnswerForSubmission(question: Question, answer?: Answer
   if (question.kind === "matching") {
     if (safeAnswer.matchingOrder?.length) {
       // Server prefers matchingAssignments {promptId: responseId}; matchingOrder kept for older servers.
-      const order = safeAnswer.matchingOrder;
+      const order = matchingRowOrder(question, safeAnswer);
       return {
         ...safeAnswer,
         matchingAssignments: Object.fromEntries(
@@ -338,17 +344,26 @@ export function createInitialAnswer(question: Question): AnswerPayload {
   switch (question.kind) {
     case "multiple_response":
       return { choiceIds: [] };
-    case "matching":
+    case "matching": {
+      // Deterministic per question id: this runs on every render until the first answer.
+      const pairs = question.matching ?? [];
+      const key = question.matchingKey;
+      const responseIds = question.matchingResponses?.map((response) => response.id);
+      const pairIds = pairs.map((pair) => pair.id);
       return {
-        matchingOrder: question.matchingResponses
-          ? question.matchingResponses.map((response) => response.id)
-          : [...(question.matching ?? [])].map((pair) => pair.id).reverse(),
+        matchingOrder: !responseIds
+          ? shuffleAway(pairIds, pairIds, question.id)
+          : key
+            ? shuffleAway(responseIds, pairs.map((pair) => key[pair.id] ?? ""), question.id)
+            : responseIds, // keyless secured body: the server already shuffled it away from the key
         matchingConnectedRows: [],
       };
-    case "sequence":
-      return {
-        sequenceOrder: [...(question.sequenceItems ?? [])].map((item) => item.id).reverse(),
-      };
+    }
+    case "sequence": {
+      const itemIds = (question.sequenceItems ?? []).map((item) => item.id);
+      const correct = getSequenceCorrectOrder(question);
+      return { sequenceOrder: correct.length > 0 ? shuffleAway(itemIds, correct, question.id) : itemIds };
+    }
     case "inline_choice":
     case "select_from_lists":
       return { inlineSelections: {} };
@@ -395,6 +410,15 @@ export function getMatchingKey(question: Question): Record<string, string> | und
 /** Correct item ids in order. [] = unknown (server-graded); the received item order is only trusted for old-shape quizzes. */
 export function getSequenceCorrectOrder(question: Question): string[] {
   return question.sequenceCorrectOrder ?? question.sequenceItems?.map((item) => item.id) ?? [];
+}
+
+/** Response id per row; "" for a row the learner has not connected (only when the answer carries matchingConnectedRows). */
+export function matchingRowOrder(question: Question, answer: AnswerPayload): string[] {
+  const pairs = question.matching ?? [];
+  const order = normalizeMatchingOrder(pairs, answer);
+  const connected = answer.matchingConnectedRows;
+  if (!Array.isArray(connected)) return order;
+  return order.map((id, index) => (connected.includes(pairs[index]?.id ?? "") ? id : ""));
 }
 
 export function normalizeMatchingOrder(pairs: MatchingPair[], answer: AnswerPayload): string[] {

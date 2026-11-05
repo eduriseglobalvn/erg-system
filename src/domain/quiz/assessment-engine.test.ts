@@ -34,6 +34,12 @@ const dnd = q("drag_drop", { dragDropItems: [{ id: "d1", label: "", correctTarge
 const likert = q("likert_scale", { likertRows: [{ id: "r1", label: "" }, { id: "r2", label: "" }] });
 const essay = q("essay", {});
 const rect = q("hotspot", { hotspotAreas: [{ id: "h", shape: "rect", x: 10, y: 10, width: 20, height: 20, correct: true }] });
+const twoRects = q("hotspot", {
+  hotspotAreas: [
+    { id: "h1", shape: "rect", x: 0, y: 0, width: 10, height: 10, correct: true },
+    { id: "h2", shape: "rect", x: 50, y: 50, width: 10, height: 10, correct: true },
+  ],
+});
 const ellipse = q("hotspot", { hotspotAreas: [{ id: "h", shape: "ellipse", x: 0, y: 0, width: 20, height: 10, correct: true }] });
 
 const rows: Row[] = [
@@ -86,6 +92,7 @@ const rows: Row[] = [
   ["hotspot rect edge", rect, { hotspotPoint: { x: 30, y: 30 } }, 10, "correct"],
   ["hotspot outside rect", rect, { hotspotPoint: { x: 31, y: 20 } }, 0, "wrong"],
   ["hotspot no point", rect, {}, 0, "wrong"],
+  ["hotspot inside the second correct area", twoRects, { hotspotPoint: { x: 55, y: 55 } }, 10, "correct"],
   ["hotspot ellipse centre", ellipse, { hotspotPoint: { x: 10, y: 5 } }, 10, "correct"],
   ["hotspot ellipse bbox corner", ellipse, { hotspotPoint: { x: 0.5, y: 0.5 } }, 0, "wrong"],
 ];

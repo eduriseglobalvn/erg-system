@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { createInitialAnswer, normalizeAnswerForSubmission, scoreQuestion } from "@/domain/quiz/quiz";
+import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 
 const feedback = { correct: "OK", incorrect: "NO", partial: "PART" };
@@ -42,6 +42,35 @@ describe("matching scoring", () => {
     expect(createInitialAnswer(newMatching).matchingOrder).toEqual(["r-9f", "r-1c"]);
     expect(createInitialAnswer(oldMatching).matchingOrder).toEqual(["m2", "m1"]);
   });
+
+  it("initial answer starts shuffled away from the answer, with nothing connected", () => {
+    expect(createInitialAnswer(oldMatching)).toEqual({ matchingOrder: ["m2", "m1"], matchingConnectedRows: [] });
+    const keyOrder = ["r-1c", "r-9f"];
+    const keyedFirst = { ...keyed, matchingResponses: [{ id: "r-1c", response: "Meow" }, { id: "r-9f", response: "Woof" }] };
+    expect(createInitialAnswer(keyedFirst).matchingOrder).not.toEqual(keyOrder);
+    expect(createInitialAnswer(keyedFirst).matchingConnectedRows).toEqual([]);
+  });
+});
+
+describe("matching with connected rows (only connected pairs count)", () => {
+  const halfConnected = { matchingOrder: ["m1", "m2"], matchingConnectedRows: ["m1"] };
+
+  it("scores only the connected rows", () => {
+    expect(scoreQuestion(oldMatching, halfConnected).awardedPoints).toBe(5);
+    expect(scoreQuestion(oldMatching, { ...halfConnected, matchingConnectedRows: ["m1", "m2"] }).correct).toBe(true);
+    expect(scoreQuestion(oldMatching, { ...halfConnected, matchingConnectedRows: [] }).awardedPoints).toBe(0);
+  });
+
+  it("nothing connected is not an answer", () => {
+    expect(isAnswerComplete(oldMatching, { ...halfConnected, matchingConnectedRows: [] })).toBe(false);
+    expect(isAnswerComplete(oldMatching, halfConnected)).toBe(true);
+  });
+
+  it("submits assignments for connected rows only", () => {
+    const submitted = normalizeAnswerForSubmission(oldMatching, halfConnected);
+    expect(submitted.matchingAssignments).toEqual({ m1: "m1" });
+    expect(submitted.matchingOrder).toEqual(["m1", "m2"]);
+  });
 });
 
 describe("matching submission payload", () => {
@@ -80,5 +109,21 @@ describe("sequence scoring with shuffled items", () => {
   it("old shape (no key field): item order is the answer", () => {
     const old = { ...shuffled, sequenceCorrectOrder: undefined };
     expect(scoreQuestion(old, { sequenceOrder: ["s2", "s3", "s1"] }).correct).toBe(true);
+  });
+});
+
+describe("sequence initial answer", () => {
+  const items = [{ id: "s1", label: "A" }, { id: "s2", label: "B" }, { id: "s3", label: "C" }];
+  const plain: Question = { ...base, id: "seq-plain", kind: "sequence", sequenceItems: items };
+
+  it("no key field: a stable shuffle that is never the item order", () => {
+    const first = createInitialAnswer(plain).sequenceOrder;
+    expect(createInitialAnswer(plain).sequenceOrder).toEqual(first);
+    expect(first).not.toEqual(["s1", "s2", "s3"]);
+    expect([...(first ?? [])].sort()).toEqual(["s1", "s2", "s3"]);
+  });
+
+  it("unknown key (secured body): keeps the received order", () => {
+    expect(createInitialAnswer({ ...plain, sequenceCorrectOrder: [] }).sequenceOrder).toEqual(["s1", "s2", "s3"]);
   });
 });
