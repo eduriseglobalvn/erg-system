@@ -1,6 +1,6 @@
 import type { QuizEditorDraftDocument, QuizEditorSummary } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { fingerprintedSlides, quizLifecycle, type QuizLifecycle } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
-import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 export type TopicRow = {
   id: string;
@@ -10,6 +10,9 @@ export type TopicRow = {
   lifecycle: QuizLifecycle;
   slides: QuizEditorSlide[];
 };
+
+/** The quiz open in the editor: its live state, ahead of the server draft until the next autosave lands. */
+export type OpenQuiz = { quizId: string; settings: QuizProjectSettings; slides: QuizEditorSlide[] };
 
 /** The topic's current quiz: the latest non-deleted one (ISO timestamps compare as text). */
 function latestQuizByTopic(summaries: readonly QuizEditorSummary[]) {
@@ -26,20 +29,22 @@ export function buildTopicRail(
   topics: readonly { id: string; label: string }[],
   summaries: readonly QuizEditorSummary[],
   drafts: Readonly<Record<string, QuizEditorDraftDocument | undefined>>,
+  openQuiz: OpenQuiz | null = null,
 ): TopicRow[] {
   const latest = latestQuizByTopic(summaries);
   return topics.map(({ id, label }) => {
     const summary = latest.get(id);
     if (!summary) return { id, label, quizId: null, questionCount: 0, lifecycle: "none", slides: [] };
     const draft = drafts[summary.id];
-    const slides = fingerprintedSlides(draft?.tree.flatMap((group) => group.slides) ?? []);
+    const open = openQuiz?.quizId === summary.id ? openQuiz : null;
+    const slides = fingerprintedSlides(open?.slides ?? draft?.tree.flatMap((group) => group.slides) ?? []);
     return {
       id,
       label,
       quizId: summary.id,
-      questionCount: draft ? slides.length : summary.questionCount,
+      questionCount: open || draft ? slides.length : summary.questionCount,
       // Before the draft loads, the server status is all there is.
-      lifecycle: quizLifecycle({ quizId: summary.id, serverStatus: summary.status ?? null, settings: draft?.settings ?? {}, slides }),
+      lifecycle: quizLifecycle({ quizId: summary.id, serverStatus: summary.status ?? null, settings: open?.settings ?? draft?.settings ?? {}, slides }),
       slides,
     };
   });

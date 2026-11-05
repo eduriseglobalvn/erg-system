@@ -6,6 +6,7 @@ import { QuizEditorWorkspace } from "@/features/lcms/quiz/quiz-editor/components
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
 const syncState = vi.hoisted(() => ({ status: "idle" as unknown }));
+const levelTopicQuizzes = vi.hoisted(() => vi.fn());
 
 // Only the add-question wiring is under test: the data hooks and the heavy children are stubbed.
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope", async (importOriginal) => ({
@@ -48,16 +49,13 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer
   QuizEditorSyncLayer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-chip", () => ({ QuizEditorSyncChip: () => null }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-banners", () => ({ QuizEditorWorkspaceBanners: () => null }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-status-bar", () => ({ QuizEditorWorkspaceStatusBar: () => null }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-editor-ribbon", () => ({
-  QuizEditorRibbon: ({ onAddQuestion }: { onAddQuestion: () => void }) => (
-    <button type="button" onClick={onAddQuestion}>ribbon-add</button>
-  ),
-}));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/question-manager-table", () => ({
-  QuestionManagerTable: ({ groups }: { groups: { slides: unknown[] }[] }) => (
-    <output data-testid="count">{groups.reduce((sum, group) => sum + group.slides.length, 0)}</output>
+vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-level-topic-quizzes", () => ({ useLevelTopicQuizzes: levelTopicQuizzes }));
+vi.mock("@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table", () => ({
+  QuestionTable: ({ rows, onAdd }: { rows: unknown[]; onAdd: () => void }) => (
+    <>
+      <output data-testid="count">{rows.length}</output>
+      <button type="button" onClick={onAdd}>table-add</button>
+    </>
   ),
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
@@ -71,6 +69,7 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question
 }));
 
 const leaf = {} as DashboardLeaf;
+levelTopicQuizzes.mockReturnValue({ rows: [{ id: "t1", label: "Phân số", quizId: "q1", questionCount: 0, lifecycle: "draft", slides: [] }], isLoading: false });
 
 describe("QuizEditorWorkspace add-question picker", () => {
   it("creates nothing when the picker is cancelled", () => {
@@ -81,7 +80,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
     );
     const before = screen.getByTestId("count").textContent;
 
-    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
     expect(screen.getByRole("dialog", { name: "Thêm câu hỏi vào “Phân số”" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
 
@@ -97,7 +96,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
     );
     const before = Number(screen.getByTestId("count").textContent);
 
-    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
     fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
 
     expect(Number(screen.getByTestId("count").textContent)).toBe(before + 1);
@@ -111,7 +110,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
         <QuizEditorWorkspace activeLeaf={leaf} />
       </I18nProvider>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
     fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
     const count = screen.getByTestId("count").textContent;
 
@@ -133,7 +132,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
         <QuizEditorWorkspace activeLeaf={leaf} />
       </I18nProvider>,
     );
-    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
     const picker = screen.getByRole("dialog", { name: "Thêm câu hỏi vào “Phân số”" });
     fireEvent.click(within(picker).getByRole("option", { name: new RegExp(type) }));
     fireEvent.click(within(picker).getByRole("button", { name: `Tạo câu ${type}` }));
@@ -148,6 +147,32 @@ describe("QuizEditorWorkspace add-question picker", () => {
     fireEvent.click(within(picker).getByRole("button", { name: "Đổi sang Ghép cặp" }));
     expect(screen.queryByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" })).toBeNull();
     expect(screen.getByTestId("kind").textContent).toBe("matching");
+  });
+
+  it("shows one contained button, Xuất bản, and the topic rail", () => {
+    render(
+      <I18nProvider>
+        <QuizEditorWorkspace activeLeaf={leaf} />
+      </I18nProvider>,
+    );
+    expect(screen.getByRole("button", { name: "Xuất bản" })).toHaveClass("MuiButton-contained");
+    expect(document.querySelectorAll(".MuiButton-contained")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeInTheDocument();
+    expect(within(screen.getByRole("navigation", { name: "Chủ đề" })).getByRole("button", { name: /Phân số/ })).toHaveAttribute("aria-current", "true");
+  });
+
+  it("feeds the open quiz's live slides to the topic rail", () => {
+    render(
+      <I18nProvider>
+        <QuizEditorWorkspace activeLeaf={leaf} quizId="q1" />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "table-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
+    const { openQuiz } = levelTopicQuizzes.mock.lastCall![0] as { openQuiz: { quizId: string; slides: { kind: string }[] } };
+    expect(openQuiz.quizId).toBe("q1");
+    expect(openQuiz.slides.filter((slide) => slide.kind === "multiple-choice").length).toBeGreaterThan(0);
+    expect(Number(screen.getByTestId("count").textContent)).toBe(openQuiz.slides.filter((slide) => slide.kind === "multiple-choice").length);
   });
 
   it("shows the offline banner inside the open editor", async () => {

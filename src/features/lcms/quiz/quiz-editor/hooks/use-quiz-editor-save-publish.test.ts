@@ -18,7 +18,9 @@ vi.mock("@/features/lcms/quiz/quiz-editor/api/quiz-editor-api", async (importOri
 }));
 vi.mock("sonner", () => ({ toast }));
 
-import { useQuizEditorPublish } from "./use-quiz-editor-save-publish";
+import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import type { QuestionBankSubject } from "@/features/question-bank/types/question-bank-types";
+import { buildQuizCreateInput, useQuizEditorPublish } from "./use-quiz-editor-save-publish";
 
 const fakeSync = (overrides: Partial<UseQuizDraftSyncResult> = {}): UseQuizDraftSyncResult => ({
   status: { kind: "saved", at: "2026-11-05T03:00:00.000Z" },
@@ -214,5 +216,16 @@ describe("useQuizEditorPublish", () => {
 
     expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
     expect(result.current.isPublishing).toBe(false);
+  });
+});
+
+describe("buildQuizCreateInput", () => {
+  const subjects = [{ id: "s1", label: "Toán", description: "", levels: [{ id: "l1", label: "Lớp 5", description: "" }], categories: [{ id: "t1", label: "Phân số", levelId: "l1" }] }] as unknown as QuestionBankSubject[];
+  const doc = (title: string) => ({ quizId: "", draftId: "d", docVersion: 0, settings: createNewQuizProjectSettings(title), playerTemplate: {}, tree: [] }) as unknown as QuizEditorDraftDocument;
+
+  it("names a new topic quiz after its topic until the teacher gives it a title", () => {
+    expect(buildQuizCreateInput({ doc: doc("Bài kiểm tra mới"), subjects, courseId: "s1", levelId: "l1", topicId: "t1" }).title).toBe("Phân số");
+    expect(buildQuizCreateInput({ doc: doc("Ôn tập"), subjects, courseId: "s1", levelId: "l1", topicId: "t1" }).title).toBe("Ôn tập");
+    expect(buildQuizCreateInput({ doc: doc("Bài kiểm tra mới"), subjects, courseId: "s1", levelId: "l1", topicId: "all" }).title).toBe("Bài kiểm tra mới");
   });
 });

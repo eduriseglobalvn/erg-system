@@ -19,8 +19,10 @@ export function buildQuizCreateInput({ doc, subjects, courseId, levelId, topicId
   topicId: string;
 }): Omit<QuizEditorCreateInput, "idempotencyKey"> {
   const scope = resolveNewQuizScope(subjects, courseId, levelId, topicId);
+  const title = doc.settings.info?.title?.trim();
   return {
-    title: doc.settings.info?.title?.trim() || "Bài kiểm tra mới",
+    // A blank draft is titled "Bài kiểm tra mới"; a topic quiz takes the topic name until the teacher renames it.
+    title: (title && title !== "Bài kiểm tra mới" ? title : scope.subtitle) || "Bài kiểm tra mới",
     subtitle: scope.subtitle,
     kind: "train",
     subjectId: scope.subjectId,
