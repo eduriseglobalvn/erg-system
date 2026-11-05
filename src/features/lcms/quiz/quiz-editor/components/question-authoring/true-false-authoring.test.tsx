@@ -59,4 +59,40 @@ describe("TrueFalseAuthoring", () => {
     expect(screen.getByText("Đúng")).toBeInTheDocument();
     expect(screen.getByText("Sai")).toBeInTheDocument();
   });
+
+  it("Enter commit returns focus to the label", () => {
+    render(<Harness />);
+    fireEvent.keyDown(screen.getByText("Đúng"), { key: "Enter" });
+    const input = screen.getByRole("textbox", { name: "Nội dung phương án 1" });
+    fireEvent.change(input, { target: { value: "Có" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(document.activeElement).toBe(screen.getByText("Có"));
+  });
+
+  it("Space on the focused label opens editing", () => {
+    render(<Harness />);
+    fireEvent.keyDown(screen.getByText("Sai"), { key: " " });
+    expect(screen.getByRole("textbox", { name: "Nội dung phương án 2" })).toBeInTheDocument();
+  });
+
+  it("Esc then blur keeps the old label and does not bubble", () => {
+    let bubbled = false;
+    render(<div onKeyDown={() => { bubbled = true; }}><Harness /></div>);
+    fireEvent.doubleClick(screen.getByText("Đúng"));
+    const input = screen.getByRole("textbox", { name: "Nội dung phương án 1" });
+    fireEvent.change(input, { target: { value: "Xyz" } });
+    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.blur(input);
+    expect(screen.getByText("Đúng")).toBeInTheDocument();
+    expect(bubbled).toBe(false);
+  });
+
+  it("Enter during IME composition does not commit", () => {
+    render(<Harness />);
+    fireEvent.doubleClick(screen.getByText("Đúng"));
+    const input = screen.getByRole("textbox", { name: "Nội dung phương án 1" });
+    fireEvent.change(input, { target: { value: "Có" } });
+    fireEvent.keyDown(input, { key: "Enter", isComposing: true });
+    expect(screen.getByRole("textbox", { name: "Nội dung phương án 1" })).toBeInTheDocument();
+  });
 });

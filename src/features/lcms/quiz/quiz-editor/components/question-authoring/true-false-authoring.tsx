@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import InputBase from "@mui/material/InputBase";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { Question } from "@/domain/quiz/types";
 import { ChoiceMarker, choiceTileSx } from "./choice-tile";
@@ -11,16 +11,27 @@ const YES_NO = ["Có", "Không"];
 
 function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabel: string; onCommit: (next: string) => void }) {
   const [draft, setDraft] = useState<string | null>(null);
-  const finish = (save: boolean) => {
+  const labelRef = useRef<HTMLDivElement>(null);
+  const cancelled = useRef(false);
+  const refocus = useRef(false);
+  // Enter/Esc unmount the input, so focus returns to the label once it is back.
+  useEffect(() => {
+    if (draft === null && refocus.current) { refocus.current = false; labelRef.current?.focus(); }
+  }, [draft]);
+  const open = () => { cancelled.current = false; setDraft(label); };
+  const finish = (save: boolean, keepFocus: boolean) => {
     const text = draft?.trim();
-    if (save && text) onCommit(text);
+    if (save && !cancelled.current && text) onCommit(text);
+    refocus.current = keepFocus;
     setDraft(null);
   };
   if (draft === null) {
     return (
       <Box
-        onDoubleClick={() => setDraft(label)}
-        onKeyDown={(e) => { if (e.key === "Enter") setDraft(label); }}
+        aria-label={`${label}, nhấn Enter để sửa`}
+        onDoubleClick={open}
+        onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && !e.nativeEvent.isComposing) { e.preventDefault(); open(); } }}
+        ref={labelRef}
         role="button"
         sx={{ typography: "body1", fontWeight: "fontWeightMedium", cursor: "text", py: 0.5 }}
         tabIndex={0}
@@ -34,12 +45,12 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
       autoFocus
       fullWidth
       inputProps={{ "aria-label": ariaLabel }}
-      onBlur={() => finish(true)}
+      onBlur={() => finish(true, false)}
       onChange={(e) => setDraft(e.target.value)}
       onKeyDown={(e) => {
         if (e.nativeEvent.isComposing) return;
-        if (e.key === "Enter") { e.preventDefault(); finish(true); }
-        if (e.key === "Escape") finish(false);
+        if (e.key === "Enter") { e.preventDefault(); finish(true, true); }
+        if (e.key === "Escape") { e.stopPropagation(); cancelled.current = true; finish(false, true); }
       }}
       sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
       value={draft}
