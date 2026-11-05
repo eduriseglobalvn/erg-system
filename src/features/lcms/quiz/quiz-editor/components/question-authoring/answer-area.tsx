@@ -6,6 +6,7 @@ import { ChoiceAuthoring } from "./choice-authoring";
 import { DragWordsAuthoring } from "./drag-words-authoring";
 import { FillBlankAuthoring } from "./fill-blank-authoring";
 import { LikertAuthoring } from "./likert-authoring";
+import { MatchingAuthoring } from "./matching-authoring";
 import { NumericAuthoring } from "./numeric-authoring";
 import { SelectListsAuthoring } from "./select-lists-authoring";
 import { SequenceAuthoring } from "./sequence-authoring";
@@ -32,6 +33,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "select-from-lists") return <SelectListsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "drag-the-words") return <DragWordsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "numeric") return <NumericAuthoring key={question.id} onChange={onChange} question={question} />;
+  if (slide.kind === "matching") return <MatchingAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
   if (slide.kind === "short-answer") return <ShortAnswerAuthoring key={question.id} onChange={onChange} question={question} />;
   return (
     <div data-testid="answer-fallback">
