@@ -62,6 +62,7 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
         blanks.some(
           (blank) =>
             blank.options.filter((option) => option.trim()).length < 2 ||
+            !blank.correctOptionId ||
             !blank.options.includes(blank.correctOptionId),
         )
       ) {
@@ -69,20 +70,32 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       }
       break;
     }
-    case "drag_words":
-      if (!(question.wordSlots ?? []).length) add("no-blank", "Chưa có ô trống");
+    case "drag_words": {
+      const slots = question.wordSlots ?? [];
+      const bank = question.wordBank ?? [];
+      if (!slots.length) add("no-blank", "Chưa có ô trống");
+      else if (slots.some((slot) => !bank.some((word) => word.id === slot.correctWordId && word.label.trim()))) {
+        add("blank-word", "Ô trống chưa có từ đúng");
+      }
       break;
-    case "short_answer":
-      if (!(question.textBlanks ?? []).some((blank) => blank.correctAnswers.some((answer) => answer.trim()))) {
+    }
+    case "short_answer": {
+      // The client grader requires every blank, so one empty blank makes the question unanswerable.
+      const blanks = question.textBlanks ?? [];
+      if (!blanks.length || blanks.some((blank) => !blank.correctAnswers.some((answer) => answer.trim()))) {
         add("no-answer", "Chưa có đáp án đúng");
       }
       break;
+    }
     case "numeric": {
       const answer = question.numericAnswer;
       if (!answer || typeof answer.correctValue !== "number" || !Number.isFinite(answer.correctValue)) {
         add("numeric-value", "Đáp số phải là số");
       }
-      if (answer && (answer.tolerance ?? 0) < 0) add("numeric-tolerance", "Sai số không được âm");
+      const tolerance = answer?.tolerance ?? 0;
+      if (answer && !(Number.isFinite(tolerance) && tolerance >= 0)) {
+        add("numeric-tolerance", "Sai số phải là số ≥ 0");
+      }
       break;
     }
     case "sequence": {
@@ -113,6 +126,12 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       }
       if (!(question.dragDropItems ?? []).some((item) => filled(item.label, item.image))) {
         add("min-items", "Cần ít nhất 1 mục");
+      }
+      {
+        const targetIds = new Set((question.dropTargets ?? []).map((target) => target.id));
+        if ((question.dragDropItems ?? []).some((item) => !targetIds.has(item.correctTargetId))) {
+          add("item-group", "Mỗi mục cần thuộc một nhóm");
+        }
       }
       break;
     case "hotspot":

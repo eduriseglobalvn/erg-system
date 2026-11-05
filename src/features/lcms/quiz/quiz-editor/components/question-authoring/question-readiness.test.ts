@@ -127,13 +127,21 @@ describe("assessQuestionReadiness", () => {
       expect(codes(q({ kind, inlineBlanks: [blank(["a", " "], "a")] }))).toEqual(["blank-options"]);
       expect(codes(q({ kind, inlineBlanks: [blank(["a", "b"], "z")] }))).toEqual(["blank-options"]);
     });
+    it("blank-options: empty correct option", () => {
+      expect(codes(q({ kind, inlineBlanks: [blank(["a", "b"], "")] }))).toEqual(["blank-options"]);
+    });
   });
 
   describe("drag_words", () => {
+    const k = { kind: "drag_words" as const };
+    const slots = [{ id: "s", label: "", correctWordId: "w" }];
     it("ready / no-blank", () => {
-      const k = { kind: "drag_words" as const };
-      expect(codes(q({ ...k, wordSlots: [{ id: "s", label: "", correctWordId: "w" }] }))).toEqual([]);
+      expect(codes(q({ ...k, wordSlots: slots, wordBank: [{ id: "w", label: "số" }] }))).toEqual([]);
       expect(codes(q({ ...k, wordSlots: [] }))).toEqual(["no-blank"]);
+    });
+    it("blank-word: word missing from the bank, or with an empty label", () => {
+      expect(codes(q({ ...k, wordSlots: slots, wordBank: [] }))).toEqual(["blank-word"]);
+      expect(codes(q({ ...k, wordSlots: slots, wordBank: [{ id: "w", label: " " }] }))).toEqual(["blank-word"]);
     });
   });
 
@@ -145,6 +153,14 @@ describe("assessQuestionReadiness", () => {
         "no-answer",
       ]);
     });
+    it("no-answer: any blank without an answer, or no blank", () => {
+      const blanks = [
+        { id: "a", label: "", correctAnswers: ["x"] },
+        { id: "b", label: "", correctAnswers: [" "] },
+      ];
+      expect(codes(q({ ...k, textBlanks: blanks }))).toEqual(["no-answer"]);
+      expect(codes(q({ ...k, textBlanks: [] }))).toEqual(["no-answer"]);
+    });
   });
 
   describe("numeric", () => {
@@ -155,6 +171,15 @@ describe("assessQuestionReadiness", () => {
     it("numeric-value: missing or not finite", () => {
       expect(codes(q(k))).toEqual(["numeric-value"]);
       expect(codes(q({ ...k, numericAnswer: { correctValue: Number.NaN } }))).toEqual(["numeric-value"]);
+    });
+    it("a saved NaN (null) is not a number; a null tolerance counts as 0", () => {
+      expect(codes(q({ ...k, numericAnswer: { correctValue: null } as never }))).toEqual(["numeric-value"]);
+      expect(codes(q({ ...k, numericAnswer: { correctValue: 1, tolerance: null } as never }))).toEqual([]);
+    });
+    it("numeric-tolerance: NaN", () => {
+      expect(codes(q({ ...k, numericAnswer: { correctValue: 1, tolerance: Number.NaN } }))).toEqual([
+        "numeric-tolerance",
+      ]);
     });
     it("numeric-tolerance", () => {
       expect(codes(q({ ...k, numericAnswer: { correctValue: 1, tolerance: -1 } }))).toEqual([
@@ -225,6 +250,10 @@ describe("assessQuestionReadiness", () => {
       expect(
         codes(q({ ...k, dropTargets: [targets[0], { id: "t2", label: " " }], dragDropItems: items })),
       ).toEqual(["min-groups"]);
+    });
+    it("item-group: item points at a group that is gone", () => {
+      const lost = [{ id: "i", label: "x", correctTargetId: "gone" }];
+      expect(codes(q({ ...k, dropTargets: targets, dragDropItems: lost }))).toContain("item-group");
     });
     it("min-items", () => {
       expect(codes(q({ ...k, dropTargets: targets, dragDropItems: [{ ...items[0], label: " " }] }))).toEqual([
