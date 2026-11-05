@@ -141,7 +141,7 @@ export function AuthFormPanel({
               action={
                 <ButtonBase
                   aria-label={t("auth.showHidePassword")}
-                  sx={{ borderRadius: 1, color: "text.secondary", display: "grid", height: 44, placeItems: "center", width: 44, "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}
+                  sx={{ borderRadius: 1, color: "text.secondary", display: "grid", flexShrink: 0, height: 44, placeItems: "center", width: 44, "&:hover": { bgcolor: "action.hover", color: "text.primary" } }}
                   onClick={onShowPasswordToggle}
                 >
                   {showPassword ? <VisibilityOffRoundedIcon fontSize="small" /> : <VisibilityRoundedIcon fontSize="small" />}
