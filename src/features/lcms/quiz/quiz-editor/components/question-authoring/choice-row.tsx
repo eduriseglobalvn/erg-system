@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
 import { useDraggable, useDroppable } from "@dnd-kit/core";
 import { CSS } from "@dnd-kit/utilities";
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 
 import type { Choice } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
@@ -26,20 +26,21 @@ export function ChoiceRow(props: {
   const { choice, index, canDelete } = props;
   const letter = String.fromCharCode(65 + (index % 26));
   const fileRef = useRef<HTMLInputElement>(null);
-  const drag = useDraggable({ id: choice.id });
-  const drop = useDroppable({ id: choice.id });
+  const { setNodeRef: setDragRef, setActivatorNodeRef, attributes, listeners, transform, isDragging } = useDraggable({ id: choice.id });
+  const { setNodeRef: setDropRef, isOver } = useDroppable({ id: choice.id });
+  const setRef = useCallback((node: HTMLElement | null) => { setDragRef(node); setDropRef(node); }, [setDragRef, setDropRef]);
   const ok = choice.correct;
   const n = index + 1;
 
   return (
     <Box
-      ref={(node: HTMLElement | null) => { drag.setNodeRef(node); drop.setNodeRef(node); }}
-      style={{ transform: CSS.Translate.toString(drag.transform) }}
+      ref={setRef}
+      style={{ transform: CSS.Translate.toString(transform) }}
       sx={{
         display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 1.5, alignItems: "start", p: "12px 14px",
-        border: "1.5px solid", borderRadius: 1.5, bgcolor: ok ? tokens.statusTint.success.bg : "background.paper",
-        borderColor: ok ? "success.main" : drop.isOver ? "primary.main" : tokens.color.border,
-        opacity: drag.isDragging ? 0.6 : 1,
+        border: "1.5px solid", borderRadius: `${tokens.radius.card}px`, bgcolor: ok ? tokens.statusTint.success.bg : "background.paper",
+        borderColor: ok ? "success.main" : isOver ? "primary.main" : tokens.color.border,
+        opacity: isDragging ? 0.6 : 1,
         "&:hover .reveal, &:focus-within .reveal": { opacity: 1 },
       }}
     >
@@ -60,7 +61,7 @@ export function ChoiceRow(props: {
           fullWidth
           inputProps={{ "aria-label": `Nội dung phương án ${n}` }}
           onChange={(e) => props.onPatch({ label: e.target.value })}
-          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); props.onEnter(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); props.onEnter(); } }}
           placeholder={`Phương án ${n}`}
           sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
           value={choice.label}
@@ -83,8 +84,8 @@ export function ChoiceRow(props: {
           </Box>
         )}
       </Box>
-      <Box className="reveal" sx={{ display: "flex", alignItems: "center", opacity: 0, transition: "opacity 160ms" }}>
-        <IconButton aria-label={`Kéo để sắp xếp phương án ${n}`} ref={drag.setActivatorNodeRef} size="small" sx={{ cursor: "grab" }} {...drag.attributes} {...drag.listeners}>
+      <Box className="reveal" sx={{ display: "flex", alignItems: "center", opacity: 0, transition: `opacity ${tokens.motion.duration.fast}ms`, "@media (hover: none)": { opacity: 1 } }}>
+        <IconButton aria-label={`Kéo để sắp xếp phương án ${n}`} ref={setActivatorNodeRef} size="small" sx={{ cursor: "grab" }} {...attributes} {...listeners}>
           <DragIndicatorIcon fontSize="small" />
         </IconButton>
         {!choice.image && (

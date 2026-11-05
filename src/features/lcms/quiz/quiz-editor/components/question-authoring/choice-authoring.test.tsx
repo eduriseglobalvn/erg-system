@@ -19,7 +19,7 @@ const base = (correct: string[] = [], n = 3): Question =>
 function setup(question: Question, mode: "single" | "multiple" = "single") {
   const onChange = vi.fn();
   render(<ChoiceAuthoring question={question} mode={mode} onChange={onChange} />);
-  return { last: () => onChange.mock.calls.at(-1)![0] as Question };
+  return { onChange, last: () => onChange.mock.calls.at(-1)![0] as Question };
 }
 
 beforeEach(() => vi.clearAllMocks());
@@ -53,6 +53,12 @@ describe("ChoiceAuthoring", () => {
     fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
     expect(last().choices).toHaveLength(4);
     expect(last().choices![3]).toMatchObject({ label: "", correct: false });
+  });
+
+  it("does not append while an IME composition is active", () => {
+    const { onChange } = setup(base([], 3));
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter", isComposing: true });
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("disables delete at two options", () => {

@@ -18,6 +18,14 @@ const docWith = (src: string) =>
   ({ ...base, tree: [{ id: "g", slides: [{ id: "s", media: { type: "image", src, alt: "" }, choices: [{ id: "c", media: { src } }] }] }] }) as unknown as QuizEditorDraftDocument;
 
 describe("uploadInlineImages", () => {
+  it("uploads a data URL that lives only in choices[].media.src", async () => {
+    const uploader = makeUploader();
+    const doc = { ...base, tree: [{ id: "g", slides: [{ id: "s", choices: [{ id: "c", media: { type: "image", src: img, alt: "" } }] }] }] } as unknown as QuizEditorDraftDocument;
+    const out = await uploadInlineImages(doc, uploader, async () => "sha", size);
+    expect(JSON.stringify(out)).not.toContain("data:image");
+    expect(JSON.stringify(out)).toContain("https://cdn/x.png");
+  });
+
   it("replaces every data:image string anywhere in the tree and uploads each image once", async () => {
     const uploader = makeUploader();
     const out = await uploadInlineImages(docWith(img), uploader, async () => "sha", size);
