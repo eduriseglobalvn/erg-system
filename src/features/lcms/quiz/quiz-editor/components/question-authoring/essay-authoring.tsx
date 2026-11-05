@@ -30,7 +30,7 @@ export function EssayAuthoring({ question, onUpdate }: {
 
   const remove = (index: number) => {
     const neighbour = rubric[index + 1] ?? rubric[index - 1];
-    if (neighbour) focusLater(`[data-input-id="${neighbour.id}"]`);
+    focusLater(neighbour ? `[data-input-id="${neighbour.id}"]` : "[data-add-criterion]");
     update((list) => list.filter((c) => c.id !== rubric[index].id));
   };
 
@@ -64,7 +64,18 @@ export function EssayAuthoring({ question, onUpdate }: {
         );
       })}
       <Box>
-        <Button onClick={append} startIcon={<AddIcon />} sx={{ border: "1.5px dashed", borderColor: tokens.color.borderStrong }} variant="text">Thêm tiêu chí</Button>
+        <Button
+          data-add-criterion
+          onClick={append}
+          startIcon={<AddIcon />}
+          sx={{
+            justifyContent: "flex-start", height: 44, width: "min(420px, 100%)", px: 2, color: "primary.main",
+            border: "1.5px dashed", borderColor: tokens.color.border, borderRadius: `${tokens.radius.card}px`,
+          }}
+          variant="text"
+        >
+          Thêm tiêu chí
+        </Button>
       </Box>
     </Box>
   );

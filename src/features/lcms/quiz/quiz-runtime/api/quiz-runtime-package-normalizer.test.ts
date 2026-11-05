@@ -59,6 +59,14 @@ describe("answer key stripping (4.4 #18)", () => {
     expect(kept.sections[0].questions[0].choices?.[0].correct).toBe(true);
   });
 
+  it("drops an essay's marking guide, even from a package published before the server stripped it", () => {
+    const original = quiz("testing");
+    original.sections[0].questions.push({ id: "8", kind: "essay", title: "", points: 1, feedback, essayRubric: [{ id: "c", label: "Nêu đủ ý", points: 2 }] });
+    const essay = stripQuizAnswerKey(original).sections[0].questions[7];
+    expect(essay.essayRubric).toBeUndefined();
+    expect(keyLeaks(essay)).not.toContain("Nêu đủ ý");
+  });
+
   it("does not mutate its input", () => {
     const original = quiz("testing");
     stripQuizAnswerKey(original);

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect, useState } from "react";
 import { describe, expect, it } from "vitest";
 
@@ -51,5 +51,13 @@ describe("EssayAuthoring", () => {
 
   it("a titled essay with a blank criterion is ready", () => {
     expect(readinessLabel(assessQuestionReadiness(base([{ id: "c", label: "", points: 0 }]), { hasQuestionImage: false }))).toBe("Sẵn sàng");
+  });
+});
+
+describe("EssayAuthoring focus", () => {
+  it("focuses the add button after the last criterion is deleted", async () => {
+    render(<Harness start={base([{ id: "c1", label: "Một", points: 0 }])} />);
+    fireEvent.click(screen.getByRole("button", { name: "Xoá tiêu chí 1" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Thêm tiêu chí" })).toHaveFocus());
   });
 });

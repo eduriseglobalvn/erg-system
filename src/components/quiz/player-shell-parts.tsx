@@ -162,7 +162,7 @@ function getAnswerKeyLines(question: Question): string[] {
     case "likert_scale":
       return ["Câu khảo sát ghi nhận mức độ lựa chọn, không có đáp án đúng sai tuyệt đối."];
     case "essay":
-      return (question.essayRubric ?? []).map((item) => `${item.label}: ${item.points}đ`);
+      return (question.essayRubric ?? []).map((item) => item.label).filter(Boolean);
     default:
       return [];
   }

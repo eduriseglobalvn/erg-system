@@ -71,4 +71,15 @@ describe("AnswerKeyCard", () => {
     const { container } = render(<AnswerKeyCard question={question} />);
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("lists an essay's guide criteria as plain labels, without points", () => {
+    const question = {
+      id: "q", kind: "essay", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" },
+      essayRubric: [{ id: "c1", label: "Nêu đủ ý", points: 0 }, { id: "c2", label: "Có ví dụ", points: 2 }],
+    } as Question;
+    render(<AnswerKeyCard question={question} />);
+    expect(screen.getByText("Nêu đủ ý")).toBeInTheDocument();
+    expect(screen.getByText("Có ví dụ")).toBeInTheDocument();
+    expect(screen.queryByText(/dđ/)).toBeNull();
+  });
 });

@@ -66,6 +66,7 @@ export function stripQuizAnswerKey(quiz: Quiz): Quiz {
     ...(question.hotspotAreas ? { hotspotAreas: [] } : {}),
     ...(question.matchingKey ? { matchingKey: undefined } : {}),
     ...(question.sequenceCorrectOrder ? { sequenceCorrectOrder: [] } : {}),
+    ...(question.essayRubric ? { essayRubric: undefined } : {}),
   });
   return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(strip) })) };
 }
