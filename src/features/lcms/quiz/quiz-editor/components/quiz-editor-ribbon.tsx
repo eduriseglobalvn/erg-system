@@ -27,6 +27,7 @@ type RibbonProps = {
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
   publishBlockedReason: string | null;
+  isPublishing: boolean;
 };
 
 export function QuizEditorRibbon(props: RibbonProps) {
@@ -48,6 +49,7 @@ export function QuizEditorRibbon(props: RibbonProps) {
       onOpenPlayerTemplate={props.onOpenPlayerTemplate}
       onOpenPublish={props.onOpenPublish}
       publishBlockedReason={props.publishBlockedReason}
+      isPublishing={props.isPublishing}
     />
   );
 }

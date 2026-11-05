@@ -9,6 +9,7 @@ import { buildQuizCreateInput, useQuizEditorPublish } from "@/features/lcms/quiz
 import type { useQuizEditorScope } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope";
 import type { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { createBlankDraft, NEW_QUIZ_PREFIX, newQuizDraftKey } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-initial-document";
+import { classifySyncError } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-sync-engine";
 import { useQuizDraftSync } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
 
 const blankDraft = () => createBlankDraft("", "local-new-quiz");
@@ -36,8 +37,12 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, sel
   const draftQuery = useQuery({ ...quizEditorDraftQueryOptions(quizId), staleTime: 0 });
   const { refetch } = draftQuery;
   const [retrying, setRetrying] = useState(false);
+  // Offline the query pauses (or fails on the network): open from the device copy instead (spec §9).
+  const serverUnreachable =
+    draftQuery.fetchStatus === "paused" || (draftQuery.isError && classifySyncError(draftQuery.error) === "network");
   const serverDraftSettled =
-    !retrying && (quizId ? draftQuery.isSuccess && draftQuery.isFetchedAfterMount : !scope.questionBankQuery.isPending);
+    !retrying &&
+    (quizId ? serverUnreachable || (draftQuery.isSuccess && draftQuery.isFetchedAfterMount) : !scope.questionBankQuery.isPending);
 
   // quizId/draftId/docVersion of the last hydrated document. Not the hook's live docVersion: it changes on every save,
   // and a changed document counts as an edit, so each save would schedule the next one.
@@ -58,7 +63,7 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, sel
 
   const sync = useQuizDraftSync({
     draftKey,
-    serverDraft: draftQuery.data,
+    serverDraft: serverUnreachable ? undefined : draftQuery.data,
     serverDraftSettled,
     document,
     hydrate: hydrateNow,
@@ -86,17 +91,20 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, sel
     void flushNow();
   }, [flushNow, selectedSlideId, questionEditorOpen]);
 
-  // Settled goes false for one commit, so a failed start is retried even when the refetch returns the same data.
+  // Settled goes false for one commit, so a failed start is retried even when nothing else changed. Not awaiting the
+  // refetch: offline it stays paused until the network returns, and the error must come back meanwhile.
   useEffect(() => {
     if (!retrying) return;
-    void (quizId ? refetch() : Promise.resolve()).finally(() => setRetrying(false));
+    if (quizId) void refetch();
+    const timer = setTimeout(() => setRetrying(false));
+    return () => clearTimeout(timer);
   }, [retrying, quizId, refetch]);
 
   const publish = useQuizEditorPublish({ sync, questionSlideIds, setSlidesPublished, onPublished });
   return {
     sync,
     ...publish,
-    loadFailed: !sync.ready && (sync.status.kind === "error" || draftQuery.isError),
+    loadFailed: !sync.ready && (sync.status.kind === "error" || (draftQuery.isError && !serverUnreachable)),
     retrying,
     retry: () => setRetrying(true),
   };

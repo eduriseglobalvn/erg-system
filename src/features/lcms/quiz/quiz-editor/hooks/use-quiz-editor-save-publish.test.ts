@@ -34,7 +34,7 @@ const fakeSync = (overrides: Partial<UseQuizDraftSyncResult> = {}): UseQuizDraft
 });
 
 /** Serves `sync` the way useQuizDraftSync does: an external store that changes before flushNow resolves. */
-function setup(initial: UseQuizDraftSyncResult) {
+function setup(initial: UseQuizDraftSyncResult, questionSlideIds = ["s1", "s2", "s3"]) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
   let snapshot = initial;
@@ -52,7 +52,7 @@ function setup(initial: UseQuizDraftSyncResult) {
   const view = renderHook(
     () => useQuizEditorPublish({
       sync: useSyncExternalStore(subscribe, () => snapshot),
-      questionSlideIds: ["s1", "s2", "s3"],
+      questionSlideIds,
       setSlidesPublished,
       onPublished,
     }),
@@ -127,6 +127,38 @@ describe("useQuizEditorPublish", () => {
     expect(publishQuizEditorDraft).not.toHaveBeenCalled();
     expect(view.setSlidesPublished).not.toHaveBeenCalled();
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
+  });
+
+  it("publishes when the device is full but every change reached the server", async () => {
+    const view = setup(fakeSync({ status: { kind: "storage-full" }, hasUnsyncedChanges: true }));
+    const flushNow = flushTo(view.setSync, { status: { kind: "storage-full" }, hasUnsyncedChanges: false });
+    act(() => view.setSync(fakeSync({ status: { kind: "storage-full" }, hasUnsyncedChanges: true, flushNow })));
+
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+
+    expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
+  });
+
+  it("does not publish from a full device while changes are still unsent", async () => {
+    const view = setup(fakeSync({ status: { kind: "storage-full" }, hasUnsyncedChanges: true }));
+    const flushNow = flushTo(view.setSync, { status: { kind: "storage-full" }, hasUnsyncedChanges: true });
+    act(() => view.setSync(fakeSync({ status: { kind: "storage-full" }, hasUnsyncedChanges: true, flushNow })));
+
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+
+    expect(publishQuizEditorDraft).not.toHaveBeenCalled();
+    expect(toast.error).toHaveBeenCalledWith("Chưa gửi được thay đổi lên máy chủ nên chưa xuất bản.");
+    await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
+  });
+
+  it("blocks publish with a reason when there is no question", async () => {
+    const { result } = setup(fakeSync(), []);
+    expect(result.current.publishBlockedReason).toBe("Chưa có câu hỏi để xuất bản.");
+    await act(() => result.current.handlePublish());
+    expect(publishQuizEditorDraft).not.toHaveBeenCalled();
   });
 
   it("ignores a second click while publishing", async () => {

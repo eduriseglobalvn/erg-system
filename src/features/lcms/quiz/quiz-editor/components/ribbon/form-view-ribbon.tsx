@@ -65,6 +65,7 @@ type FormViewRibbonProps = {
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
   publishBlockedReason: string | null;
+  isPublishing: boolean;
 };
 
 export function FormViewRibbon({
@@ -84,6 +85,7 @@ export function FormViewRibbon({
   onOpenPlayerTemplate,
   onOpenPublish,
   publishBlockedReason,
+  isPublishing,
 }: FormViewRibbonProps) {
   const { t } = useI18n();
   const [openMenu, setOpenMenu] = useState<"question" | "introduction" | null>(null);
@@ -185,6 +187,7 @@ export function FormViewRibbon({
           onOpenPlayerTemplate={onOpenPlayerTemplate}
           onOpenPublish={onOpenPublish}
           publishBlockedReason={publishBlockedReason}
+          isPublishing={isPublishing}
           playerLabel={t("quiz.playerTemplate")}
           publishLabel={t("common.publish")}
         />
@@ -246,12 +249,14 @@ function RibbonUtilitySection({
   onOpenPlayerTemplate,
   onOpenPublish,
   publishBlockedReason,
+  isPublishing,
 }: {
   playerLabel: string;
   publishLabel: string;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
   publishBlockedReason: string | null;
+  isPublishing: boolean;
 }) {
   return (
     <Box component="section" className="classic-editor__ribbon-utilities" aria-label={`${playerLabel} / ${publishLabel}`}>
@@ -270,7 +275,7 @@ function RibbonUtilitySection({
           <button
             type="button"
             className="classic-editor__ribbon-publish-action"
-            disabled={Boolean(publishBlockedReason)}
+            disabled={Boolean(publishBlockedReason) || isPublishing}
             onClick={onOpenPublish}
           >
             <PublishIcon sx={{ fontSize: "1em" }} />

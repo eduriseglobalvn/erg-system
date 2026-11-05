@@ -62,7 +62,8 @@ export function QuizEditorWorkspace({
   const [playerTemplateOpen, setPlayerTemplateOpen] = useState(false);
   const [previewMode, setPreviewMode] = useState<SlidePreviewDialogMode | null>(null);
 
-  const effectiveQuizId = (activeQuizId ?? quizId ?? "").trim();
+  // The route quizId is copied into activeQuizId above; falling back to it here would undo "new quiz" and scope changes.
+  const effectiveQuizId = (activeQuizId ?? "").trim();
   const workspaceQuery = useQuizEditorWorkspaceQuery({ size: 20 });
   const quizItems = workspaceQuery.data?.quizzes.items;
 
@@ -123,7 +124,7 @@ export function QuizEditorWorkspace({
     onQuizCreated?.(targetId);
   }
 
-  const { sync, handlePublish, publishBlockedReason, loadFailed, retrying, retry } = useQuizEditorSync({
+  const { sync, handlePublish, isPublishing, publishBlockedReason, loadFailed, retrying, retry } = useQuizEditorSync({
     quizId: effectiveQuizId,
     scope,
     editor: editorState,
@@ -181,6 +182,7 @@ export function QuizEditorWorkspace({
           onOpenPlayerTemplate={() => setPlayerTemplateOpen(true)}
           onOpenPublish={() => void handlePublish()}
           publishBlockedReason={publishBlockedReason}
+          isPublishing={isPublishing}
         />
 
         <QuizEditorWorkspaceBanners
@@ -214,6 +216,7 @@ export function QuizEditorWorkspace({
             onDeleteSlides={deleteSlides}
             onPublish={() => void handlePublish()}
             publishBlockedReason={publishBlockedReason}
+            isPublishing={isPublishing}
             syncChip={<QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />}
             isSavedOnServer={Boolean(effectiveQuizId)}
           />

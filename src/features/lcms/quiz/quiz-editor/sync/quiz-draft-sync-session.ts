@@ -8,11 +8,12 @@ import { getDefaultTenantId } from "@/lib/graphql-client";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 import { createQuizDraftDeviceStore, quizDraftScope, type DeviceDraftBackup, type QuizDraftDeviceStore } from "./quiz-draft-device-store";
-import { migrateLegacyLocalDrafts } from "./quiz-draft-initial-document";
+import { migrateLegacyLocalDrafts, NEW_QUIZ_PREFIX } from "./quiz-draft-initial-document";
 import { QuizDraftSyncEngine, type QuizDraftSyncApi, type QuizDraftSyncDeps, type QuizDraftSyncStatus } from "./quiz-draft-sync-engine";
 import { createQuizImageUploader, uploadInlineImages } from "./upload-inline-images";
 
 export const EDIT_DEBOUNCE_MS = 300;
+const NO_COPY_OFFLINE_MESSAGE = "Cần có mạng để mở bài này lần đầu trên máy này.";
 
 export type QuizDraftSyncSessionOptions = {
   hydrate: (doc: QuizEditorDraftDocument) => void;
@@ -261,6 +262,13 @@ export class QuizDraftSyncSession {
       return;
     }
     if (this.slot !== slot) return;
+    // A saved quiz with no copy on this device and none from the server (offline): opening it would make whatever the
+    // editor still shows this quiz's draft. Fail like a broken start, so the next open retries.
+    if (!document && !slot.keys[0]!.startsWith(NEW_QUIZ_PREFIX)) {
+      slot.failed = true;
+      this.publishStatus({ kind: "error", message: NO_COPY_OFFLINE_MESSAGE });
+      return;
+    }
     if (document) this.latest.hydrate(document);
     slot.ready = true;
     let lastKind = slot.engine.status.kind;

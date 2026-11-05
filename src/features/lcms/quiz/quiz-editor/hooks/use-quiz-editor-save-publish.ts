@@ -28,7 +28,8 @@ export function buildQuizCreateInput({ doc, subjects, courseId, levelId, topicId
   };
 }
 
-function blockedReason(status: QuizDraftSyncStatus): string | null {
+function blockedReason(status: QuizDraftSyncStatus, questionCount: number): string | null {
+  if (!questionCount) return "Chưa có câu hỏi để xuất bản.";
   if (status.kind === "offline") return "Cần có mạng để xuất bản.";
   if (status.kind === "conflict") return "Cần chọn bản để giữ trước khi xuất bản.";
   return null;
@@ -49,20 +50,18 @@ export function useQuizEditorPublish({ sync, questionSlideIds, setSlidesPublishe
   useLayoutEffect(() => {
     latest.current = sync;
   });
-  const publishBlockedReason = blockedReason(sync.status);
+  const publishBlockedReason = blockedReason(sync.status, questionSlideIds.length);
 
   async function handlePublish() {
     if (publishBlockedReason || publishingRef.current) return;
-    if (!questionSlideIds.length) {
-      toast.error("Thêm ít nhất 1 câu hỏi trước khi xuất bản.");
-      return;
-    }
     publishingRef.current = true;
     setIsPublishing(true);
     try {
       await latest.current.flushNow();
-      const { status, quizId, docVersion } = latest.current;
-      if (status.kind !== "saved" || !quizId) {
+      const { status, quizId, docVersion, hasUnsyncedChanges } = latest.current;
+      // A full device still publishes when every change reached the server.
+      const sent = status.kind === "saved" || (status.kind === "storage-full" && !hasUnsyncedChanges);
+      if (!sent || !quizId) {
         toast.error("Chưa gửi được thay đổi lên máy chủ nên chưa xuất bản.");
         return;
       }

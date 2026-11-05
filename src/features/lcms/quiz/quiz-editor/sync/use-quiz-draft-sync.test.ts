@@ -357,6 +357,29 @@ describe("useQuizDraftSync", () => {
     expect(hydrate).toHaveBeenCalledWith(doc("server"));
   });
 
+  it("opens the device copy of a saved quiz when no server draft could be loaded (offline)", async () => {
+    await store.put(scope, rec());
+    const { result } = setup({ serverDraft: undefined });
+    await settle();
+    expect(result.current.ready).toBe(true);
+    expect(hydrate).toHaveBeenCalledWith(doc("device"));
+  });
+
+  it("refuses to open a saved quiz with neither a device nor a server copy, then retries", async () => {
+    const { result, rerender } = setup({ serverDraft: undefined, document: doc("previous quiz", "q0") });
+    await settle();
+    expect(result.current.ready).toBe(false);
+    expect(result.current.status).toEqual({ kind: "error", message: "Cần có mạng để mở bài này lần đầu trên máy này." });
+    expect(hydrate).not.toHaveBeenCalled();
+    await settle(5000);
+    expect(await store.get(scope, "q1")).toBeNull();
+
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("previous quiz", "q0") }); // back online
+    await settle();
+    expect(result.current.ready).toBe(true);
+    expect(hydrate).toHaveBeenCalledWith(doc("server"));
+  });
+
   it("sends nothing from any trigger once another account signed in", async () => {
     const { result, rerender } = setup();
     await settle();

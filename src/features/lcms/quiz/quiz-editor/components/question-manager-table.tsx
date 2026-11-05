@@ -40,6 +40,7 @@ type QuestionManagerTableProps = {
   /** Publishes the whole quiz: the server compiles every question, never a selection. */
   onPublish?: () => void;
   publishBlockedReason?: string | null;
+  isPublishing?: boolean;
   syncChip: ReactNode;
   isSavedOnServer?: boolean;
   onDeleteSlides?: (slideIds: string[]) => void;
@@ -68,6 +69,7 @@ export function QuestionManagerTable({
   onAddNewQuestion,
   onPublish,
   publishBlockedReason,
+  isPublishing,
   syncChip,
   isSavedOnServer,
   onDeleteSlides,
@@ -211,7 +213,7 @@ export function QuestionManagerTable({
                     <button
                       type="button"
                       className="classic-editor__manager-action is-publish"
-                      disabled={Boolean(publishBlockedReason) || rows.length === 0}
+                      disabled={Boolean(publishBlockedReason) || isPublishing}
                       onClick={onPublish}
                     >
                       <PublishIcon sx={{ fontSize: 16 }} />
