@@ -35,7 +35,7 @@ export function SequenceStepRow(props: {
       ref={setDropRef}
       sx={{
         display: "grid", gridTemplateColumns: "32px 1fr", alignItems: "start", gap: 1, p: 0.5, borderRadius: `${tokens.radius.card}px`,
-        border: "1.5px dashed", borderColor: isOver ? "primary.main" : "transparent", bgcolor: isOver ? "primary.light" : "transparent",
+        border: "1.5px dashed", borderColor: isOver && !isDragging ? "primary.main" : "transparent", bgcolor: isOver && !isDragging ? "primary.light" : "transparent",
       }}
     >
       <Box component="span" sx={{ typography: "body1", fontWeight: "fontWeightMedium", color: "text.secondary", pt: "10px", textAlign: "right" }}>{n}.</Box>
@@ -48,7 +48,8 @@ export function SequenceStepRow(props: {
         }}
       >
         <IconButton
-          aria-label={`Kéo để sắp xếp bước ${n}`}
+          aria-label={`Kéo để đổi thứ tự bước ${n}, Alt+mũi tên để di chuyển`}
+          data-handle-id={item.id}
           ref={setActivatorNodeRef}
           size="small"
           sx={{ cursor: "grab" }}
@@ -65,9 +66,9 @@ export function SequenceStepRow(props: {
           <InputBase
             autoFocus={props.autoFocus}
             fullWidth
-            inputProps={{ "aria-label": `Nội dung bước ${n}` }}
+            inputProps={{ "aria-label": `Nội dung bước ${n}`, "data-input-id": item.id }}
             onChange={(e) => props.onPatch({ label: e.target.value })}
-            onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (!e.repeat) props.onEnter(); } }}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (!e.repeat && item.label.trim()) props.onEnter(); } }}
             placeholder={`Bước ${n}`}
             sx={{ typography: "body1" }}
             value={item.label}
@@ -84,8 +85,8 @@ export function SequenceStepRow(props: {
                   sx={{ typography: "body2", borderBottom: "1px solid", borderColor: tokens.color.border }}
                   value={item.image.alt ?? ""}
                 />
-                <Button onClick={() => fileRef.current?.click()} size="small" variant="text">Đổi ảnh</Button>
-                <Button color="error" onClick={() => props.onPatch({ image: undefined })} size="small" variant="text">Xoá ảnh</Button>
+                <Button onClick={() => fileRef.current?.click()} size="small" variant="text">Đổi ảnh bước {n}</Button>
+                <Button color="error" onClick={() => props.onPatch({ image: undefined })} size="small" variant="text">Xoá ảnh bước {n}</Button>
               </Box>
             </Box>
           )}
