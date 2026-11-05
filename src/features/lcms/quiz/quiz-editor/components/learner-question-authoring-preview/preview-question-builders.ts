@@ -2,6 +2,7 @@ import type { useI18n } from "@/platform/i18n";
 import type { Question, QuestionImage } from "@/domain/quiz/types";
 import { isHotspotPlaceholder } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import type { QuizEditorChoice, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { parseDecimal } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/decimal-text";
 
 export function buildPreviewQuestion(
   slide: QuizEditorSlide,
@@ -223,7 +224,7 @@ function buildWordSlots(slide: QuizEditorSlide) {
 
 export function buildNumericAnswer(slide: QuizEditorSlide) {
   const rawValue = slide.choices?.find((choice) => choice.correct)?.label ?? slide.choices?.[0]?.label ?? "";
-  const parsedValue = Number.parseFloat(rawValue.replace(/[^\d.-]/g, ""));
+  const parsedValue = parseDecimal(rawValue);
 
   return Number.isFinite(parsedValue) ? { correctValue: parsedValue, tolerance: 0, unit: "" } : undefined;
 }

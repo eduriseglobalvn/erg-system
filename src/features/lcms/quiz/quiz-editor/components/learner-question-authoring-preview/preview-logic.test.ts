@@ -79,10 +79,11 @@ describe("question builders", () => {
     expect(normalizeChoices(undefined)).toEqual([]);
   });
 
-  test("buildNumericAnswer parses first correct label", () => {
-    const slide = slideOf({ choices: [{ id: "a", label: "x 12.5 kg", correct: true }] });
-    expect(buildNumericAnswer(slide)?.correctValue).toBe(12.5);
-    expect(buildNumericAnswer(slideOf({ choices: [{ id: "a", label: "abc", correct: true }] }))).toBeUndefined();
+  test("buildNumericAnswer reads the correct label as a Vietnamese decimal", () => {
+    const value = (label: string) => buildNumericAnswer(slideOf({ choices: [{ id: "a", label, correct: true }] }))?.correctValue;
+    expect(value("12.5")).toBe(12.5);
+    expect(value("2,6")).toBe(2.6);
+    for (const label of ["1.000", "x 12.5 kg", "abc"]) expect(value(label)).toBeUndefined();
   });
 
   test("createDragDropTargetId strips Vietnamese diacritics", () => {
