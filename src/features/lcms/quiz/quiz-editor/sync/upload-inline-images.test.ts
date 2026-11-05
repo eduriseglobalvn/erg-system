@@ -18,6 +18,14 @@ const docWith = (src: string) =>
   ({ ...base, tree: [{ id: "g", slides: [{ id: "s", media: { type: "image", src, alt: "" }, choices: [{ id: "c", media: { src } }] }] }] }) as unknown as QuizEditorDraftDocument;
 
 describe("uploadInlineImages", () => {
+  it("leaves a non-raster data URL (the SVG hotspot placeholder) alone instead of failing the save", async () => {
+    const uploader = makeUploader();
+    const svg = "data:image/svg+xml,%3Csvg%3E%3C/svg%3E";
+    const doc = docWith(svg);
+    expect(await uploadInlineImages(doc, uploader, async () => "sha", size)).toBe(doc);
+    expect(uploader.presign).not.toHaveBeenCalled();
+  });
+
   it("uploads a data URL that lives only in choices[].media.src", async () => {
     const uploader = makeUploader();
     const doc = { ...base, tree: [{ id: "g", slides: [{ id: "s", choices: [{ id: "c", media: { type: "image", src: img, alt: "" } }] }] }] } as unknown as QuizEditorDraftDocument;

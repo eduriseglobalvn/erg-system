@@ -75,14 +75,14 @@ describe("feedback helpers", () => {
 });
 
 describe("question builders", () => {
-  test("normalizeChoices falls back to two default options", () => {
-    expect(normalizeChoices(undefined, t)).toHaveLength(2);
+  test("normalizeChoices invents no options", () => {
+    expect(normalizeChoices(undefined)).toEqual([]);
   });
 
   test("buildNumericAnswer parses first correct label", () => {
     const slide = slideOf({ choices: [{ id: "a", label: "x 12.5 kg", correct: true }] });
-    expect(buildNumericAnswer(slide).correctValue).toBe(12.5);
-    expect(buildNumericAnswer(slideOf({ choices: [{ id: "a", label: "abc", correct: true }] })).correctValue).toBe(0);
+    expect(buildNumericAnswer(slide)?.correctValue).toBe(12.5);
+    expect(buildNumericAnswer(slideOf({ choices: [{ id: "a", label: "abc", correct: true }] }))).toBeUndefined();
   });
 
   test("createDragDropTargetId strips Vietnamese diacritics", () => {
@@ -90,7 +90,7 @@ describe("question builders", () => {
     expect(createDragDropTargetId("!!!", 4)).toBe("drop-target-5");
   });
 
-  test("drag-drop items map to deduped targets", () => {
+  test("drag-drop items map to deduped targets; an item without a group gets none invented", () => {
     const slide = slideOf({
       dragDropItems: [
         { id: "i1", label: "A", target: "Z1" },
@@ -98,10 +98,10 @@ describe("question builders", () => {
         { id: "i3", label: "C", target: "" },
       ],
     });
-    expect(buildDragDropTargets(slide).map((x) => x.label)).toEqual(["Z1", "Vùng thả 1"]);
-    const items = buildDragDropItems(slide, t);
+    expect(buildDragDropTargets(slide).map((x) => x.label)).toEqual(["Z1"]);
+    const items = buildDragDropItems(slide);
     expect(items[0].correctTargetId).toBe(items[1].correctTargetId);
-    expect(items[2].correctTargetId).not.toBe(items[0].correctTargetId);
+    expect(items[2].correctTargetId).toBe("");
   });
 });
 
@@ -137,7 +137,7 @@ describe("buildPreviewQuestion images", () => {
 
   test("drag item media becomes image", () => {
     const slide = slideOf({ kind: "drag-and-drop", dragDropItems: [{ id: "d1", label: "D", emoji: "", target: "Z", media: img }] });
-    expect(buildDragDropItems(slide, t)[0].image).toEqual({ url: "https://x/a.png", alt: "A" });
+    expect(buildDragDropItems(slide)[0].image).toEqual({ url: "https://x/a.png", alt: "A" });
   });
 
   test("round trip keeps choice media", () => {
@@ -150,9 +150,9 @@ describe("buildPreviewQuestion images", () => {
 describe("round trip fidelity", () => {
   const rq = { id: "s1", kind: "single_choice", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" } };
 
-  test("empty matching label falls back to a numbered option", () => {
+  test("an empty matching label stays empty", () => {
     const slide = slideOf({ kind: "matching", choices: [{ id: "c1", label: "", correct: true }, { id: "c2", label: "B", correct: false }] });
-    expect(buildPreviewQuestion(slide, t)?.matching?.map((m) => m.prompt)).toEqual(["common.option 1", "B"]);
+    expect(buildPreviewQuestion(slide, t)?.matching?.map((m) => m.prompt)).toEqual(["", "B"]);
   });
 
   test("slide.media position survives the sync", () => {

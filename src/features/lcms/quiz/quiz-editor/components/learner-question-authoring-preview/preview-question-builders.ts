@@ -1,10 +1,7 @@
 import type { useI18n } from "@/platform/i18n";
-import type { Question } from "@/domain/quiz/types";
+import type { Question, QuestionImage } from "@/domain/quiz/types";
+import { isHotspotPlaceholder } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import type { QuizEditorChoice, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-
-// Shown until the teacher adds a hotspot image; never saved as the slide image.
-export const HOTSPOT_PLACEHOLDER_IMAGE =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 675'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop stop-color='%23eff6ff'/%3E%3Cstop offset='1' stop-color='%23dbeafe'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='675' fill='url(%23g)'/%3E%3Ccircle cx='880' cy='250' r='130' fill='%23bfdbfe'/%3E%3Crect x='210' y='200' width='520' height='270' rx='32' fill='%23ffffff' stroke='%2393c5fd' stroke-width='8'/%3E%3Cpath d='M300 410l120-120 98 90 92-72 90 102z' fill='%2393c5fd'/%3E%3Ccircle cx='360' cy='275' r='36' fill='%23f97316'/%3E%3C/svg%3E";
 
 export function buildPreviewQuestion(
   slide: QuizEditorSlide,
@@ -12,7 +9,7 @@ export function buildPreviewQuestion(
 ): Question | null {
   if (slide.runtimeQuestion) {
     return {
-      ...slide.runtimeQuestion,
+      ...withSlideImages(slide, slide.runtimeQuestion),
       title: slide.title,
       instructions: slide.description ?? slide.runtimeQuestion.instructions,
       contentImage: slide.media
@@ -22,6 +19,28 @@ export function buildPreviewQuestion(
   }
 
   return buildLearnerQuestion(slide, t);
+}
+
+// Answer images written before runtime questions carried them live only on the slide; show them instead of dropping them.
+function withSlideImages(slide: QuizEditorSlide, question: Question): Question {
+  const choice = (id: string) => mediaImage(slide.choices?.find((entry) => entry.id === id)?.media);
+  const item = (id: string) => slide.dragDropItems?.find((entry) => entry.id === id);
+  return {
+    ...question,
+    ...(question.choices && { choices: question.choices.map((c) => fill(c, "image", choice(c.id))) }),
+    ...(question.sequenceItems && { sequenceItems: question.sequenceItems.map((s) => fill(s, "image", choice(s.id))) }),
+    ...(question.dragDropItems && { dragDropItems: question.dragDropItems.map((d) => fill(d, "image", mediaImage(item(d.id)?.media))) }),
+    ...(question.matching && {
+      matching: question.matching.map((pair) =>
+        fill(fill(pair, "promptImage", mediaImage(item(pair.id)?.targetMedia)), "responseImage", mediaImage(item(pair.id)?.media)),
+      ),
+    }),
+    ...(isHotspotPlaceholder(question.hotspotImage?.url) && { hotspotImage: undefined }),
+  };
+}
+
+function fill<T extends object>(value: T, key: keyof T & string, image: QuestionImage | undefined): T {
+  return value[key] || !image ? value : { ...value, [key]: image };
 }
 
 function slideContentImage(slide: QuizEditorSlide) {
@@ -52,17 +71,22 @@ function buildLearnerQuestion(
 
   switch (slide.kind) {
     case "multiple-choice":
-    case "true-false":
       return {
         ...base,
         kind: "single_choice",
-        choices: normalizeChoices(slide.choices, t),
+        choices: normalizeChoices(slide.choices),
+      };
+    case "true-false":
+      return {
+        ...base,
+        kind: "true_false",
+        choices: normalizeChoices(slide.choices),
       };
     case "multiple-response":
       return {
         ...base,
         kind: "multiple_response",
-        choices: normalizeChoices(slide.choices, t),
+        choices: normalizeChoices(slide.choices),
       };
     case "matching":
       return {
@@ -75,41 +99,42 @@ function buildLearnerQuestion(
         ...base,
         kind: "drag_drop",
         dropTargets: buildDragDropTargets(slide),
-        dragDropItems: buildDragDropItems(slide, t),
+        dragDropItems: buildDragDropItems(slide),
       };
     case "sequence":
       return {
         ...base,
         kind: "sequence",
-        sequenceItems: normalizeChoices(slide.choices, t).map((choice) => ({
+        sequenceItems: normalizeChoices(slide.choices).map((choice) => ({
           id: choice.id,
           label: choice.label,
+          ...(choice.image && { image: choice.image }),
         })),
       };
     case "fill-in-the-blanks":
       return {
         ...base,
         kind: "fill_blank",
-        textBlanks: buildTextBlanks(slide, t),
+        textBlanks: buildTextBlanks(slide),
       };
     case "select-from-lists":
       return {
         ...base,
         kind: "select_from_lists",
-        inlineBlanks: buildInlineBlanks(slide, t),
+        inlineBlanks: buildInlineBlanks(slide),
       };
     case "drag-the-words":
       return {
         ...base,
         kind: "drag_words",
-        wordBank: buildWordBank(slide, t),
-        wordSlots: buildWordSlots(slide, t),
+        wordBank: buildWordBank(slide),
+        wordSlots: buildWordSlots(slide),
       };
     case "short-answer":
       return {
         ...base,
         kind: "short_answer",
-        textBlanks: buildTextBlanks(slide, t),
+        textBlanks: buildTextBlanks(slide),
       };
     case "numeric":
       return {
@@ -121,108 +146,72 @@ function buildLearnerQuestion(
       return {
         ...base,
         kind: "essay",
-        essayRubric: buildEssayRubric(slide, t),
+        essayRubric: buildEssayRubric(slide),
       };
     case "likert-scale":
       return {
         ...base,
         kind: "likert_scale",
-        likertRows: buildLikertRows(slide, t),
-        likertScale: buildLikertScale(),
+        likertRows: buildLikertRows(slide),
+        likertScale: [],
       };
     case "hotspot":
       return {
         ...base,
         kind: "hotspot",
-        hotspotImage: {
-          url: slide.media?.src ?? HOTSPOT_PLACEHOLDER_IMAGE,
-          width: 1200,
-          height: 675,
-        },
-        hotspotAreas: slide.hotspotAreas?.length
-          ? slide.hotspotAreas
-          : [
-              {
-                id: `${slide.id}-hotspot-1`,
-                shape: "rect",
-                x: 0.36,
-                y: 0.3,
-                width: 0.28,
-                height: 0.28,
-                correct: true,
-              },
-            ],
+        // No image yet means no hotspot image: a placeholder must never be saved.
+        ...(slide.media?.src && !isHotspotPlaceholder(slide.media.src) && {
+          hotspotImage: { url: slide.media.src, width: 1200, height: 675 },
+        }),
+        hotspotAreas: slide.hotspotAreas ?? [],
       };
     default:
       return null;
   }
 }
 
-export function normalizeChoices(
-  choices: QuizEditorChoice[] | undefined,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  const source: QuizEditorChoice[] = choices?.length
-    ? choices
-    : [
-        { id: "choice-a", label: `${t("common.option")} 1`, correct: true },
-        { id: "choice-b", label: `${t("common.option")} 2`, correct: false },
-      ];
-
-  return source.map((choice, index) => ({
+// Builders read only what the teacher wrote: an empty slide gives empty answers, never sample content.
+export function normalizeChoices(choices: QuizEditorChoice[] | undefined) {
+  return (choices ?? []).map((choice, index) => ({
     id: choice.id || `choice-${index + 1}`,
-    label: choices?.length ? choice.label : `${t("common.option")} ${index + 1}`,
+    label: choice.label,
     correct: choice.correct,
     image: mediaImage(choice.media),
   }));
 }
 
-function buildTextBlanks(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  return normalizeChoices(slide.choices, t)
+const written = (slide: QuizEditorSlide) => normalizeChoices(slide.choices).filter((choice) => choice.label.trim());
+
+function buildTextBlanks(slide: QuizEditorSlide) {
+  return written(slide)
     .filter((choice) => slide.kind !== "short-answer" || choice.correct)
     .map((choice, index) => ({
       id: choice.id || `${slide.id}-blank-${index + 1}`,
       label: slide.kind === "fill-in-the-blanks" ? `Blank ${index + 1}` : "Answer",
       placeholder: "......",
-      correctAnswers: [choice.label || `${t("common.option")} ${index + 1}`],
+      correctAnswers: [choice.label],
     }));
 }
 
-function buildInlineBlanks(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  return normalizeChoices(slide.choices, t).map((choice, index) => ({
+function buildInlineBlanks(slide: QuizEditorSlide) {
+  return written(slide).map((choice) => ({
     id: choice.id,
-    statement: choice.label || `${t("common.option")} ${index + 1}`,
+    statement: choice.label,
     options: ["yes", "no"],
     correctOptionId: choice.correct ? "yes" : "no",
     selectPosition: "after" as const,
   }));
 }
 
-function buildWordBank(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  const choices = normalizeChoices(slide.choices, t);
-  return choices.map((choice, index) => ({
+function buildWordBank(slide: QuizEditorSlide) {
+  return written(slide).map((choice, index) => ({
     id: choice.id || `${slide.id}-word-${index + 1}`,
-    label: choice.label || `${t("common.option")} ${index + 1}`,
+    label: choice.label,
   }));
 }
 
-function buildWordSlots(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  const bank = buildWordBank(slide, t);
-  const source = bank.length ? bank : [{ id: `${slide.id}-word-1`, label: t("common.option") }];
-
-  return source.slice(0, Math.max(1, Math.min(2, source.length))).map((word, index) => ({
+function buildWordSlots(slide: QuizEditorSlide) {
+  return buildWordBank(slide).slice(0, 2).map((word, index) => ({
     id: `${slide.id}-slot-${index + 1}`,
     label: index === 0 ? "Fill the blank with" : "then choose",
     correctWordId: word.id,
@@ -230,44 +219,25 @@ function buildWordSlots(
 }
 
 export function buildNumericAnswer(slide: QuizEditorSlide) {
-  const rawValue = slide.choices?.find((choice) => choice.correct)?.label ?? slide.choices?.[0]?.label ?? "0";
+  const rawValue = slide.choices?.find((choice) => choice.correct)?.label ?? slide.choices?.[0]?.label ?? "";
   const parsedValue = Number.parseFloat(rawValue.replace(/[^\d.-]/g, ""));
 
-  return {
-    correctValue: Number.isFinite(parsedValue) ? parsedValue : 0,
-    tolerance: 0,
-    unit: "",
-  };
+  return Number.isFinite(parsedValue) ? { correctValue: parsedValue, tolerance: 0, unit: "" } : undefined;
 }
 
-function buildEssayRubric(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  const choices = normalizeChoices(slide.choices, t);
-  return choices.map((choice, index) => ({
+function buildEssayRubric(slide: QuizEditorSlide) {
+  return written(slide).map((choice, index) => ({
     id: choice.id || `${slide.id}-rubric-${index + 1}`,
-    label: choice.label || `${t("common.option")} ${index + 1}`,
+    label: choice.label,
     points: index === 0 ? Math.max(1, extractCorrectScore(slide)) : 1,
   }));
 }
 
-function buildLikertRows(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  return normalizeChoices(slide.choices, t).map((choice, index) => ({
+function buildLikertRows(slide: QuizEditorSlide) {
+  return written(slide).map((choice, index) => ({
     id: choice.id || `${slide.id}-likert-row-${index + 1}`,
-    label: choice.label || `${t("common.option")} ${index + 1}`,
+    label: choice.label,
   }));
-}
-
-function buildLikertScale() {
-  return [
-    { id: "scale-1", label: "Low", value: 1 },
-    { id: "scale-2", label: "Medium", value: 2 },
-    { id: "scale-3", label: "High", value: 3 },
-  ];
 }
 
 export function buildMatchingPairs(
@@ -277,65 +247,41 @@ export function buildMatchingPairs(
   if (slide.dragDropItems?.length) {
     return slide.dragDropItems.map((item, index) => ({
       id: item.id || `match-${index + 1}`,
-      prompt: item.target || t("common.dropTarget"),
-      response: item.label || t("common.dragItem"),
-      promptImage: item.targetMedia?.src
-        ? {
-            url: item.targetMedia.src,
-            alt: item.targetMedia.alt || item.target,
-          }
-        : undefined,
-      responseImage: item.media?.src
-        ? {
-            url: item.media.src,
-            alt: item.media.alt || item.label,
-          }
-        : undefined,
+      prompt: item.target ?? "",
+      response: item.label ?? "",
+      promptImage: mediaImage(item.targetMedia),
+      responseImage: mediaImage(item.media),
     }));
   }
 
-  return normalizeChoices(slide.choices, t).map((choice, index) => ({
+  return normalizeChoices(slide.choices).map((choice, index) => ({
     id: choice.id || `match-${index + 1}`,
-    prompt: choice.label || `${t("common.option")} ${index + 1}`,
+    prompt: choice.label,
     response: choice.correct ? t("common.correct") : t("common.incorrect"),
   }));
 }
 
 export function buildDragDropTargets(slide: QuizEditorSlide) {
   const targetLabels = Array.from(
-    new Set((slide.dragDropItems ?? []).map((item) => normalizeTargetLabel(item.target))),
+    new Set((slide.dragDropItems ?? []).map((item) => item.target?.trim() ?? "").filter(Boolean)),
   );
-  const source = targetLabels.length ? targetLabels : ["Vùng thả 1"];
 
-  return source.map((label, index) => ({
+  return targetLabels.map((label, index) => ({
     id: createDragDropTargetId(label, index),
     label,
   }));
 }
 
-export function buildDragDropItems(
-  slide: QuizEditorSlide,
-  t: ReturnType<typeof useI18n>["t"],
-) {
-  const targets = buildDragDropTargets(slide);
-  const targetIdByLabel = new Map(targets.map((target) => [target.label, target.id]));
-  const source = slide.dragDropItems?.length
-    ? slide.dragDropItems
-    : [{ id: "drag-item-1", label: t("common.dragItem"), emoji: "", target: targets[0]?.label ?? "Vùng thả 1" }];
+export function buildDragDropItems(slide: QuizEditorSlide) {
+  const targetIdByLabel = new Map(buildDragDropTargets(slide).map((target) => [target.label, target.id]));
 
-  return source.map((item, index) => {
-    const targetLabel = normalizeTargetLabel(item.target);
-    return {
-      id: item.id || `drag-item-${index + 1}`,
-      label: item.label || `${t("common.dragItem")} ${index + 1}`,
-      correctTargetId: targetIdByLabel.get(targetLabel) ?? targets[0]?.id ?? "drop-target-1",
-      image: mediaImage("media" in item ? item.media : undefined),
-    };
-  });
-}
-
-function normalizeTargetLabel(target: string | undefined) {
-  return target?.trim() || "Vùng thả 1";
+  return (slide.dragDropItems ?? []).map((item, index) => ({
+    id: item.id || `drag-item-${index + 1}`,
+    label: item.label ?? "",
+    // An item without a group stays unassigned rather than joining an invented one.
+    correctTargetId: targetIdByLabel.get(item.target?.trim() ?? "") ?? "",
+    image: mediaImage(item.media),
+  }));
 }
 
 export function createDragDropTargetId(label: string, index: number) {

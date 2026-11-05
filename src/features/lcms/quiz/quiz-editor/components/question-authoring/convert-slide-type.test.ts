@@ -55,4 +55,9 @@ describe("convertSlideType", () => {
     expect(out.slide.feedbackRows).toEqual(slide.feedbackRows);
     expect(out.slide.status).toBe("draft");
   });
+
+  it.each(["multiple-response", "matching"] as const)("keeps the question-set points and shuffle setting when changing to %s", (next) => {
+    const slide = { ...make("multiple-choice", 2, [0]), questionSetSettings: { points: 7, shuffleChoices: false } } as QuizEditorSlide;
+    expect(convertSlideType(slide, next, fresh(next)).slide.questionSetSettings).toEqual({ points: 7, shuffleChoices: false });
+  });
 });

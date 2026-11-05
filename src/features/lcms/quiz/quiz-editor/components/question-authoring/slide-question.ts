@@ -1,6 +1,6 @@
 import type { useI18n } from "@/platform/i18n";
 import type { Question } from "@/domain/quiz/types";
-import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
+import { isHotspotPlaceholder, syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { assessQuestionReadiness, type QuestionReadiness } from "./question-readiness";
@@ -18,5 +18,6 @@ export function writeSlideQuestion(slide: QuizEditorSlide, question: Question): 
 }
 
 export function readSlideReadiness(slide: QuizEditorSlide, t: Translate): QuestionReadiness {
-  return assessQuestionReadiness(readSlideQuestion(slide, t), { hasQuestionImage: Boolean(slide.media?.src) });
+  const hasQuestionImage = Boolean(slide.media?.src) && !isHotspotPlaceholder(slide.media?.src);
+  return assessQuestionReadiness(readSlideQuestion(slide, t), { hasQuestionImage });
 }

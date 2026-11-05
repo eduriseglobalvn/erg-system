@@ -8,7 +8,7 @@ import {
   type QuizEditorMediaPresignResult,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { ApiClientError } from "@/lib/api-client";
-import { readImageSize } from "@/lib/media/quiz-image";
+import { QUIZ_IMAGE_TYPES, readImageSize } from "@/lib/media/quiz-image";
 
 export type QuizImageUploader = {
   presign: (input: QuizEditorMediaPresignInput) => Promise<QuizEditorMediaPresignResult>;
@@ -33,7 +33,9 @@ export function createQuizImageUploader(): QuizImageUploader {
   };
 }
 
-const INLINE_IMAGE = /^data:image\//;
+// Only raster types the server accepts are uploaded: one rejected type (an SVG placeholder) would fail every save.
+const isUploadableImage = (value: string) =>
+  QUIZ_IMAGE_TYPES.some((type) => value.startsWith(`data:${type};`) || value.startsWith(`data:${type},`));
 
 export function dataUrlToBlob(dataUrl: string): Blob {
   const comma = dataUrl.indexOf(",");
@@ -61,7 +63,7 @@ async function sha256Hex(blob: Blob): Promise<string> {
 
 function collect(value: unknown, found: Set<string>): void {
   if (typeof value === "string") {
-    if (INLINE_IMAGE.test(value)) found.add(value);
+    if (isUploadableImage(value)) found.add(value);
   } else if (Array.isArray(value)) {
     value.forEach((item) => collect(item, found));
   } else if (value && typeof value === "object") {

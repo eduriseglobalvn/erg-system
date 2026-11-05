@@ -12,9 +12,10 @@ const RUNTIME_KIND: Partial<Record<QuestionType, QuestionKind>> = {
 const FIRST_CORRECT_ONLY: readonly QuestionType[] = ["multiple-choice", "true-false"];
 
 // Identity, settings and scoring stay with the slide; kind and answer content come from `fresh`.
+// The settings bags are every one the server's QuestionBodyCompiler.applyQuestionSettings merges.
 const KEPT_KEYS = [
   "id", "title", "description", "media", "feedbackRows", "options", "settings", "questionSettings",
-  "settingsOverride", "overrideSettings", "status", "questionId", "bankQuestionId",
+  "questionSetSettings", "settingsOverride", "overrideSettings", "status", "questionId", "bankQuestionId",
 ] as const;
 
 export function convertSlideType(
