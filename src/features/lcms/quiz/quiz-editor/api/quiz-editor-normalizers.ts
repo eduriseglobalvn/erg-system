@@ -141,7 +141,8 @@ function normalizeQuizEditorSlide(value: unknown, index: number) {
   return {
     ...source,
     id: stringValue(source.id ?? source.slideId, `slide-${index + 1}`),
-    title: stringValue(source.title, `Question ${index + 1}`),
+    // A blank title stays blank: readiness flags it, and an invented one would count as authored.
+    title: typeof source.title === "string" ? source.title : "",
     kind: stringValue(source.kind, "multiple-choice"),
     status: normalizedStatus as "unsaved" | "draft" | "published",
   } as QuizEditorGroup["slides"][number];
