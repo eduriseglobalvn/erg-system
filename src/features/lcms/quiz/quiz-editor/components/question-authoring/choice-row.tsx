@@ -11,6 +11,7 @@ import { useCallback, useRef } from "react";
 
 import type { Choice } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { ChoiceMarker, choiceTileSx } from "./choice-tile";
 
 export function ChoiceRow(props: {
   choice: Choice;
@@ -37,24 +38,12 @@ export function ChoiceRow(props: {
       ref={setRef}
       style={{ transform: CSS.Translate.toString(transform) }}
       sx={{
-        display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 1.5, alignItems: "start", p: "12px 14px",
-        border: "1.5px solid", borderRadius: `${tokens.radius.card}px`, bgcolor: ok ? tokens.statusTint.success.bg : "background.paper",
-        borderColor: ok ? "success.main" : isOver ? "primary.main" : tokens.color.border,
+        display: "grid", gridTemplateColumns: "28px 1fr auto", gap: 1.5, alignItems: "start", p: "12px 14px", ...choiceTileSx(ok, isOver),
         opacity: isDragging ? 0.6 : 1,
         "&:hover .reveal, &:focus-within .reveal": { opacity: 1 },
       }}
     >
-      <IconButton
-        aria-label={`${ok ? "Bỏ đánh dấu" : "Đánh dấu"} ${letter} là đáp án đúng`}
-        onClick={props.onToggleCorrect}
-        sx={{
-          width: 28, height: 28, borderRadius: 0.75, border: "1.5px solid", typography: "body2", fontWeight: "fontWeightMedium",
-          borderColor: ok ? "success.main" : tokens.color.borderStrong, bgcolor: ok ? "success.main" : "transparent",
-          color: ok ? "common.white" : "text.secondary", "&:hover": { bgcolor: ok ? "success.main" : "action.hover" },
-        }}
-      >
-        {letter}
-      </IconButton>
+      <ChoiceMarker letter={letter} ok={ok} onClick={props.onToggleCorrect} />
       <Box sx={{ minWidth: 0 }}>
         <InputBase
           autoFocus={props.autoFocus}

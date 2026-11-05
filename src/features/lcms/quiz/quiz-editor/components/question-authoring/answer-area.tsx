@@ -3,6 +3,7 @@ import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ChoiceAuthoring } from "./choice-authoring";
+import { TrueFalseAuthoring } from "./true-false-authoring";
 
 type Props = {
   slide: QuizEditorSlide;
@@ -17,6 +18,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "multiple-choice" || slide.kind === "multiple-response") {
     return <ChoiceAuthoring mode={slide.kind === "multiple-choice" ? "single" : "multiple"} onChange={onChange} onUpdate={onUpdate} question={question} />;
   }
+  if (slide.kind === "true-false") return <TrueFalseAuthoring onChange={onChange} question={question} />;
   return (
     <div data-testid="answer-fallback">
       {/* The image slot above owns the content image, so the renderer does not draw it a second time. */}
