@@ -44,10 +44,11 @@ describe("AnswerArea", () => {
     expect(screen.queryByTestId("answer-fallback")).toBeNull();
   });
 
-  it("falls back to the renderer for kinds without an authoring surface", () => {
+  it("an essay slide renders the marking guide", () => {
     const question = readSlideQuestion(build("essay"), t)!;
     render(<Harness kind="essay" question={question} />);
-    expect(screen.getByTestId("answer-fallback")).toBeInTheDocument();
+    expect(screen.getByText("Gợi ý chấm cho giáo viên (học viên không thấy)")).toBeInTheDocument();
+    expect(screen.queryByTestId("answer-fallback")).toBeNull();
   });
 });
 

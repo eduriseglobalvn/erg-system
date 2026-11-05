@@ -243,18 +243,6 @@ export function EssayQuestion({
           }}
           placeholder="Viết câu trả lời của em..."
         />
-        <div className="rounded-lg border border-slate-200 bg-white px-4 py-4">
-          <div className="text-sm font-semibold text-slate-500">
-            Rubric gợi ý
-          </div>
-          <div className="mt-3 grid gap-2 sm:grid-cols-3">
-            {(question.essayRubric ?? []).map((item) => (
-              <div key={item.id} className="rounded-lg bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700">
-                {item.label}: {item.points}đ
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </QuestionBodyWithImage>
   );

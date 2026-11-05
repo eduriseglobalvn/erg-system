@@ -1,8 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
-import type { QuizResultDisplay } from "@/domain/quiz/types";
+import { AnswerKeyCard, SubmitConfirmDialog } from "@/components/quiz/player-shell-parts";
+import type { Question, QuizResultDisplay } from "@/domain/quiz/types";
 
 const resultDisplay: QuizResultDisplay = {
   passMessage: "Đạt",
@@ -62,5 +62,13 @@ describe("SubmitConfirmDialog MUI migration", () => {
       <SubmitConfirmDialog mode="all-answered" resultDisplay={resultDisplay} submitting={false} onCancel={vi.fn()} onConfirm={vi.fn()} onGoToUnanswered={vi.fn()} />,
     );
     expect(screen.queryByRole("button", { name: "Đến câu chưa làm" })).toBeNull();
+  });
+});
+
+describe("AnswerKeyCard", () => {
+  it("renders nothing when an essay has no marking guide to show", () => {
+    const question = { id: "q", kind: "essay", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" } } as Question;
+    const { container } = render(<AnswerKeyCard question={question} />);
+    expect(container).toBeEmptyDOMElement();
   });
 });
