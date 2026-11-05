@@ -41,6 +41,8 @@ export type QuizDraftSyncDeps = {
   now: () => Date;
   buildCreateInput: (doc: QuizEditorDraftDocument) => Omit<QuizEditorCreateInput, "idempotencyKey">;
   onQuizCreated?: (quizId: string) => void;
+  /** False when the signed-in account is not the one that owns these edits: nothing is sent until it is true again. */
+  canSend?: () => boolean;
 };
 
 export function classifySyncError(error: unknown): "network" | "stale" | "auth" | "other" {
@@ -265,6 +267,10 @@ export class QuizDraftSyncEngine {
     const record = this.record;
     if (this.disposed || this.currentStatus.kind === "conflict") return false;
     if (!record?.dirty) return true;
+    if (this.deps.canSend && !this.deps.canSend()) {
+      this.setStatus({ kind: "signed-out" }); // no retry timer: the next flush after the right sign-in sends
+      return false;
+    }
     if (!this.deps.isOnline()) {
       this.setStatus({ kind: "offline", pendingEdits: pendingEdits(record) });
       return false;

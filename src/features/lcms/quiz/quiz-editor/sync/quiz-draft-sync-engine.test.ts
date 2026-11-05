@@ -232,6 +232,24 @@ describe("QuizDraftSyncEngine", () => {
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
   });
 
+  it("sends nothing while canSend is false, then sends once it is true", async () => {
+    let allowed = false;
+    engine.dispose();
+    engine = new QuizDraftSyncEngine({ ...deps, canSend: () => allowed }, "q1");
+    await engine.edit(doc("A"));
+    await vi.advanceTimersByTimeAsync(60_000); // the edit timer
+    await engine.flushNow();
+    expect(api.saveDraft).not.toHaveBeenCalled();
+    expect(api.createQuiz).not.toHaveBeenCalled();
+    expect(engine.status).toEqual({ kind: "signed-out" });
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+
+    allowed = true;
+    await engine.flushNow();
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(engine.hasUnsyncedChanges).toBe(false);
+  });
+
   it("pauses on 401 and resumes on the next flush", async () => {
     api.saveDraft.mockRejectedValueOnce(new ApiClientError("x", "HTTP_401", 401));
     await engine.edit(doc("A")); await vi.advanceTimersByTimeAsync(2000);

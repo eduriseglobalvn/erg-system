@@ -141,6 +141,8 @@ export class QuizDraftSyncSession {
         isOnline: deps.isOnline ?? (() => navigator.onLine),
         now: deps.now ?? (() => new Date()),
         buildCreateInput: (doc) => this.latest.buildCreateInput(doc),
+        // A shared computer: another account signed in here must never send these edits; they stay on the device.
+        canSend: () => currentScope() === scope,
         onQuizCreated: (quizId) => {
           if (this.slot?.engine === engine) this.slot.keys.push(quizId);
           this.publish();
@@ -187,11 +189,9 @@ export class QuizDraftSyncSession {
       this.flushPending();
       void this.slot?.engine.flushNow();
     };
-    // Signing in again usually happens in another tab or page, so retry when this one comes back, but only as the
-    // same account: on a shared computer the edits stay on the device under the account that made them.
+    // Signing in again usually happens in another tab or page, so retry when this one comes back.
     const resume = () => {
-      const slot = this.slot;
-      if (slot?.engine.status.kind === "signed-out" && currentScope() === slot.scope) void slot.engine.flushNow();
+      if (this.slot?.engine.status.kind === "signed-out") void this.slot.engine.flushNow();
     };
     const onVisibility = () => (target.document.visibilityState === "hidden" ? leave() : resume());
     const onOnline = () => this.slot?.engine.notifyOnline();

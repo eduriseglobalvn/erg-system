@@ -356,4 +356,29 @@ describe("useQuizDraftSync", () => {
     expect(result.current.ready).toBe(true);
     expect(hydrate).toHaveBeenCalledWith(doc("server"));
   });
+
+  it("sends nothing from any trigger once another account signed in", async () => {
+    const { result, rerender } = setup();
+    await settle();
+    auth.accountId = "someone-else";
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("made by the first account") });
+    await settle(5000); // the edit and its send timer
+    await act(async () => { window.dispatchEvent(new Event("pagehide")); await vi.advanceTimersByTimeAsync(0); });
+    await act(async () => { window.dispatchEvent(new Event("online")); await vi.advanceTimersByTimeAsync(60_000); });
+    expect(api.saveDraft).not.toHaveBeenCalled();
+    expect(result.current.status.kind).toBe("signed-out");
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+  });
+
+  it("does not create a new quiz once another account signed in", async () => {
+    const newKey = "new-quiz:c:all:t";
+    const { rerender } = setup({ draftKey: newKey, serverDraft: undefined, document: doc("blank", newKey) });
+    await settle();
+    auth.accountId = "someone-else";
+    rerender({ draftKey: newKey, serverDraft: undefined, settled: true, document: doc("typed", newKey) });
+    await settle(5000);
+    await act(async () => { window.dispatchEvent(new Event("pagehide")); await vi.advanceTimersByTimeAsync(0); });
+    expect(api.createQuiz).not.toHaveBeenCalled();
+    expect(api.saveDraft).not.toHaveBeenCalled();
+  });
 });
