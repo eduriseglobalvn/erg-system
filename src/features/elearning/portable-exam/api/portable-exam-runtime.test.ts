@@ -45,6 +45,14 @@ test("normalizes a verified portable payload into the shared QuizPackage consume
     source: "tauri-cache",
     gradingMode: "server-authoritative",
   });
-  expect(normalized.quiz).toEqual(sampleQuiz);
+  // The essay marking guide is teacher-only: no learner package keeps it (spec §7).
+  const withoutGuide = {
+    ...sampleQuiz,
+    sections: sampleQuiz.sections.map((section) => ({
+      ...section,
+      questions: section.questions.map((question) => (question.essayRubric ? { ...question, essayRubric: undefined } : question)),
+    })),
+  };
+  expect(normalized.quiz).toEqual(withoutGuide);
 });
 
