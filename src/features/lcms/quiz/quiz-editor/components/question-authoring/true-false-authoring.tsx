@@ -12,16 +12,19 @@ const YES_NO = ["Có", "Không"];
 function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabel: string; onCommit: (next: string) => void }) {
   const [draft, setDraft] = useState<string | null>(null);
   const labelRef = useRef<HTMLDivElement>(null);
-  const cancelled = useRef(false);
+  // Enter/Esc end the edit; a blur fired as the input unmounts must not end it again.
+  const done = useRef(false);
   const refocus = useRef(false);
   // Enter/Esc unmount the input, so focus returns to the label once it is back.
   useEffect(() => {
     if (draft === null && refocus.current) { refocus.current = false; labelRef.current?.focus(); }
   }, [draft]);
-  const open = () => { cancelled.current = false; setDraft(label); };
+  const open = () => { done.current = false; setDraft(label); };
   const finish = (save: boolean, keepFocus: boolean) => {
+    if (done.current) return;
+    done.current = true;
     const text = draft?.trim();
-    if (save && !cancelled.current && text) onCommit(text);
+    if (save && text) onCommit(text);
     refocus.current = keepFocus;
     setDraft(null);
   };
@@ -50,7 +53,7 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
       onKeyDown={(e) => {
         if (e.nativeEvent.isComposing) return;
         if (e.key === "Enter") { e.preventDefault(); finish(true, true); }
-        if (e.key === "Escape") { e.stopPropagation(); cancelled.current = true; finish(false, true); }
+        if (e.key === "Escape") { e.stopPropagation(); finish(false, true); }
       }}
       sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
       value={draft}
