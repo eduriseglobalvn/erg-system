@@ -10,7 +10,9 @@ const TRUE_FALSE = ["Đúng", "Sai"];
 const YES_NO = ["Có", "Không"];
 
 function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabel: string; onCommit: (next: string) => void }) {
-  const [draft, setDraft] = useState<string | null>(null);
+  const [draft, setDraft] = useState<{ text: string; from: string } | null>(null);
+  // An undo or sync that changes the label underneath abandons the edit without committing it.
+  if (draft && draft.from !== label) setDraft(null);
   const labelRef = useRef<HTMLDivElement>(null);
   // Enter/Esc end the edit; a blur fired as the input unmounts must not end it again.
   const done = useRef(false);
@@ -19,11 +21,11 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
   useEffect(() => {
     if (draft === null && refocus.current) { refocus.current = false; labelRef.current?.focus(); }
   }, [draft]);
-  const open = () => { done.current = false; setDraft(label); };
+  const open = () => { done.current = false; setDraft({ text: label, from: label }); };
   const finish = (save: boolean, keepFocus: boolean) => {
     if (done.current) return;
     done.current = true;
-    const text = draft?.trim();
+    const text = draft?.text.trim();
     if (save && text) onCommit(text);
     refocus.current = keepFocus;
     setDraft(null);
@@ -49,14 +51,14 @@ function EditableLabel({ label, ariaLabel, onCommit }: { label: string; ariaLabe
       fullWidth
       inputProps={{ "aria-label": ariaLabel }}
       onBlur={() => finish(true, false)}
-      onChange={(e) => setDraft(e.target.value)}
+      onChange={(e) => setDraft({ text: e.target.value, from: label })}
       onKeyDown={(e) => {
         if (e.nativeEvent.isComposing) return;
         if (e.key === "Enter") { e.preventDefault(); finish(true, true); }
         if (e.key === "Escape") { e.stopPropagation(); finish(false, true); }
       }}
       sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
-      value={draft}
+      value={draft.text}
     />
   );
 }

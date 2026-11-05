@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
 import { TrueFalseAuthoring } from "./true-false-authoring";
@@ -85,6 +85,19 @@ describe("TrueFalseAuthoring", () => {
     fireEvent.blur(input);
     expect(screen.getByText("Đúng")).toBeInTheDocument();
     expect(bubbled).toBe(false);
+  });
+
+  it("a label changed underneath (undo) abandons the open edit", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<TrueFalseAuthoring onChange={onChange} question={start} />);
+    fireEvent.doubleClick(screen.getByText("Đúng"));
+    const input = screen.getByRole("textbox", { name: "Nội dung phương án 1" });
+    fireEvent.change(input, { target: { value: "Xyz" } });
+    const undone = { ...start, choices: [{ ...start.choices![0], label: "Có" }, start.choices![1]] };
+    rerender(<TrueFalseAuthoring onChange={onChange} question={undone} />);
+    fireEvent.blur(input);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByText("Có")).toBeInTheDocument();
   });
 
   it("Enter during IME composition does not commit", () => {
