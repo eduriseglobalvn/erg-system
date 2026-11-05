@@ -21,6 +21,7 @@ export function ChoiceRow(props: {
   onPatch: (patch: Partial<Choice>) => void;
   onToggleCorrect: () => void;
   onEnter: () => void;
+  onMove: (delta: -1 | 1) => void;
   onDelete: () => void;
   onPickImage: (file: File) => void;
 }) {
@@ -48,9 +49,9 @@ export function ChoiceRow(props: {
         <InputBase
           autoFocus={props.autoFocus}
           fullWidth
-          inputProps={{ "aria-label": `Nội dung phương án ${n}` }}
+          inputProps={{ "aria-label": `Nội dung phương án ${n}`, "data-input-id": choice.id }}
           onChange={(e) => props.onPatch({ label: e.target.value })}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (!e.repeat) props.onEnter(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.nativeEvent.isComposing) { e.preventDefault(); if (!e.repeat && choice.label.trim()) props.onEnter(); } }}
           placeholder={`Phương án ${n}`}
           sx={{ typography: "body1", fontWeight: "fontWeightMedium" }}
           value={choice.label}
@@ -74,7 +75,19 @@ export function ChoiceRow(props: {
         )}
       </Box>
       <Box className="reveal" sx={{ display: "flex", alignItems: "center", opacity: 0, transition: `opacity ${tokens.motion.duration.fast}ms`, "@media (hover: none)": { opacity: 1 } }}>
-        <IconButton aria-label={`Kéo để sắp xếp phương án ${n}`} ref={setActivatorNodeRef} size="small" sx={{ cursor: "grab" }} {...attributes} {...listeners}>
+        <IconButton
+          aria-label={`Kéo để sắp xếp phương án ${n}, Alt+mũi tên để di chuyển`}
+          data-handle-id={choice.id}
+          ref={setActivatorNodeRef}
+          size="small"
+          sx={{ cursor: "grab" }}
+          {...attributes}
+          {...listeners}
+          onKeyDown={(e) => {
+            if (e.altKey && (e.key === "ArrowUp" || e.key === "ArrowDown")) { e.preventDefault(); props.onMove(e.key === "ArrowUp" ? -1 : 1); return; }
+            listeners?.onKeyDown?.(e);
+          }}
+        >
           <DragIndicatorIcon fontSize="small" />
         </IconButton>
         {!choice.image && (

@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
@@ -22,6 +23,14 @@ function setup(question: Question, mode: "single" | "multiple" = "single") {
   render(<ChoiceAuthoring question={question} mode={mode} onChange={onChange} onUpdate={onUpdate} />);
   return { onChange, last: () => onChange.mock.calls.at(-1)![0] as Question };
 }
+
+/** Keeps the question in state so reordering and deleting really re-render the rows. */
+function Harness({ start }: { start: Question }) {
+  const [q, setQ] = useState(start);
+  return <ChoiceAuthoring mode="single" onChange={setQ} onUpdate={(change) => setQ((latest) => change(latest))} question={q} />;
+}
+
+const handle = (n: number) => screen.getByRole("button", { name: new RegExp(`^Kéo để sắp xếp phương án ${n}`) });
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -47,13 +56,51 @@ describe("ChoiceAuthoring", () => {
 
   it("types a label and appends an option on Enter in the last one", () => {
     const q = base([], 3);
-    q.choices!.forEach((c) => (c.label = ""));
+    q.choices!.slice(0, 2).forEach((c) => (c.label = ""));
     const { last } = setup(q);
     fireEvent.change(screen.getByPlaceholderText("Phương án 2"), { target: { value: "Hai" } });
     expect(last().choices![1].label).toBe("Hai");
     fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
     expect(last().choices).toHaveLength(4);
     expect(last().choices![3]).toMatchObject({ label: "", correct: false });
+  });
+
+  it("does not append a blank option on Enter in an empty last option", () => {
+    const q = base([], 3);
+    q.choices![2].label = "  ";
+    const { onChange } = setup(q);
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("moves focus to the next option after a delete, or the previous one for the last", () => {
+    render(<Harness start={base([], 4)} />);
+    fireEvent.click(screen.getByRole("button", { name: "Xoá phương án 2" }));
+    expect(document.activeElement).toBe(screen.getByLabelText("Nội dung phương án 2"));
+    expect(document.activeElement).toHaveValue("L3");
+    fireEvent.click(screen.getByRole("button", { name: "Xoá phương án 3" }));
+    expect(document.activeElement).toHaveValue("L3");
+  });
+
+  it("moves an option with Alt+Arrow on its handle and keeps focus on that handle", () => {
+    render(<Harness start={base(["c1"], 3)} />);
+    fireEvent.keyDown(handle(1), { key: "ArrowDown", altKey: true });
+    expect(screen.getAllByRole("textbox", { name: /^Nội dung phương án/ }).map((el) => (el as HTMLInputElement).value)).toEqual(["L2", "L1", "L3"]);
+    expect(document.activeElement).toBe(handle(2));
+    fireEvent.keyDown(handle(1), { key: "ArrowUp", altKey: true });
+    expect(screen.getAllByRole("textbox", { name: /^Nội dung phương án/ }).map((el) => (el as HTMLInputElement).value)).toEqual(["L2", "L1", "L3"]);
+  });
+
+  it("writes every edit through onUpdate", () => {
+    const onChange = vi.fn();
+    const onUpdate = vi.fn();
+    render(<ChoiceAuthoring mode="multiple" onChange={onChange} onUpdate={onUpdate} question={base([], 3)} />);
+    fireEvent.click(screen.getByRole("button", { name: "Đánh dấu A là đáp án đúng" }));
+    fireEvent.change(screen.getByPlaceholderText("Phương án 1"), { target: { value: "X" } });
+    fireEvent.click(screen.getByRole("button", { name: "Xoá phương án 1" }));
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
+    expect(onUpdate).toHaveBeenCalledTimes(4);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("does not append while an IME composition is active", () => {

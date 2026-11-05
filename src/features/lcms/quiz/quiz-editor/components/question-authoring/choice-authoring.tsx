@@ -1,7 +1,7 @@
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent, type KeyboardCoordinateGetter, type Modifier } from "@dnd-kit/core";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -10,56 +10,59 @@ import { prepareQuizImage, QuizImageRejectedError } from "@/lib/media/quiz-image
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { moveChoice } from "./move-choice";
 import { ChoiceRow } from "./choice-row";
+import { moveRowBy, newRowId, usePendingFocus, useRowSensors, verticalOnly } from "./sortable-rows";
 
-// Rows have no sortable layout, so arrow keys step a fixed 56px vertically.
-const verticalKeyboardCoordinates: KeyboardCoordinateGetter = (event, { currentCoordinates }) => {
-  const step = event.code === "ArrowDown" ? 56 : event.code === "ArrowUp" ? -56 : 0;
-  if (!step) return undefined;
-  event.preventDefault();
-  return { x: currentCoordinates.x, y: currentCoordinates.y + step };
-};
 const MIN_CHOICES = 2;
-const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
-let nextId = 0;
 
-export function ChoiceAuthoring({ question, mode, onChange, onUpdate }: {
+export function ChoiceAuthoring({ question, mode, onUpdate }: {
   question: Question;
   mode: "single" | "multiple";
   onChange: (next: Question) => void;
-  /** Applies a change to the latest question; used once an async step (image processing) finishes. */
+  /** Applies a change to the latest question, so edits made in quick succession never overwrite each other. */
   onUpdate: (change: (latest: Question) => Question) => void;
 }) {
   const choices = question.choices ?? [];
   const [focusId, setFocusId] = useState<string | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: verticalKeyboardCoordinates }));
-  const commit = (next: Choice[]) => onChange({ ...question, choices: next });
-  const patch = (id: string, change: Partial<Choice>) => commit(choices.map((c) => (c.id === id ? { ...c, ...change } : c)));
+  const sensors = useRowSensors();
+  const { rootRef, focusLater } = usePendingFocus();
+  const update = (change: (latest: Choice[]) => Choice[]) => onUpdate((latest) => ({ ...latest, choices: change(latest.choices ?? []) }));
+  const patch = (id: string, change: Partial<Choice>) => update((list) => list.map((c) => (c.id === id ? { ...c, ...change } : c)));
 
   const toggleCorrect = (id: string) =>
-    commit(choices.map((c) => (c.id === id ? { ...c, correct: !c.correct } : mode === "single" ? { ...c, correct: false } : c)));
+    update((list) => list.map((c) => (c.id === id ? { ...c, correct: !c.correct } : mode === "single" ? { ...c, correct: false } : c)));
 
   const append = () => {
-    const id = `choice-${Date.now().toString(36)}-${nextId++}`;
+    const id = newRowId("choice");
     setFocusId(id);
-    commit([...choices, { id, label: "", correct: false }]);
+    update((list) => [...list, { id, label: "", correct: false }]);
+  };
+
+  const move = (id: string, delta: -1 | 1) => {
+    focusLater(`[data-handle-id="${id}"]`);
+    update((list) => moveRowBy(list, id, delta));
+  };
+
+  const remove = (index: number) => {
+    const neighbour = choices[index + 1] ?? choices[index - 1];
+    if (neighbour) focusLater(`[data-input-id="${neighbour.id}"]`);
+    update((list) => list.filter((c) => c.id !== choices[index].id));
   };
 
   const pickImage = async (id: string, file: File) => {
     try {
       const { dataUrl } = await prepareQuizImage(file);
-      const image = { url: dataUrl, alt: "" };
-      onUpdate((latest) => ({ ...latest, choices: latest.choices?.map((c) => (c.id === id ? { ...c, image } : c)) }));
+      patch(id, { image: { url: dataUrl, alt: "" } });
     } catch (error) {
       toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
     }
   };
 
   const onDragEnd = ({ active, over }: DragEndEvent) => {
-    if (over) commit(moveChoice(choices, String(active.id), String(over.id)));
+    if (over && active.id !== over.id) update((list) => moveChoice(list, String(active.id), String(over.id)));
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+    <Box ref={rootRef} sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
       <DndContext modifiers={[verticalOnly]} onDragEnd={onDragEnd} sensors={sensors}>
         {choices.map((choice, index) => (
           <ChoiceRow
@@ -68,8 +71,9 @@ export function ChoiceAuthoring({ question, mode, onChange, onUpdate }: {
             choice={choice}
             index={index}
             key={choice.id}
-            onDelete={() => commit(choices.filter((c) => c.id !== choice.id))}
+            onDelete={() => remove(index)}
             onEnter={() => { if (index === choices.length - 1) append(); }}
+            onMove={(delta) => move(choice.id, delta)}
             onPatch={(change) => patch(choice.id, change)}
             onPickImage={(file) => void pickImage(choice.id, file)}
             onToggleCorrect={() => toggleCorrect(choice.id)}

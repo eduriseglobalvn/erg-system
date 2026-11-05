@@ -1,25 +1,17 @@
 import AddIcon from "@mui/icons-material/Add";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { DndContext, KeyboardSensor, PointerSensor, useSensor, useSensors, type DragEndEvent, type KeyboardCoordinateGetter, type Modifier } from "@dnd-kit/core";
-import { useEffect, useRef, useState } from "react";
+import { DndContext, type DragEndEvent } from "@dnd-kit/core";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import type { Question, SequenceItem } from "@/domain/quiz/types";
 import { prepareQuizImage, QuizImageRejectedError } from "@/lib/media/quiz-image";
 import { moveChoice } from "./move-choice";
 import { SequenceStepRow } from "./sequence-step-row";
+import { moveRowBy, newRowId, usePendingFocus, useRowSensors, verticalOnly } from "./sortable-rows";
 
 const MIN_STEPS = 2;
-const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
-// Rows have no sortable layout, so arrow keys step a fixed 56px vertically.
-const verticalKeyboardCoordinates: KeyboardCoordinateGetter = (event, { currentCoordinates }) => {
-  const step = event.code === "ArrowDown" ? 56 : event.code === "ArrowUp" ? -56 : 0;
-  if (!step) return undefined;
-  event.preventDefault();
-  return { x: currentCoordinates.x, y: currentCoordinates.y + step };
-};
-let nextId = 0;
 
 /** Every edit writes the new item order and keeps the grading order identical to it. */
 const withItems = (question: Question, sequenceItems: SequenceItem[]): Question =>
@@ -33,32 +25,24 @@ export function SequenceAuthoring({ question, onUpdate }: {
 }) {
   const items = question.sequenceItems ?? [];
   const [focusId, setFocusId] = useState<string | null>(null);
-  const [pendingFocus, setPendingFocus] = useState<{ selector: string } | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }), useSensor(KeyboardSensor, { coordinateGetter: verticalKeyboardCoordinates }));
-  const rootRef = useRef<HTMLDivElement>(null);
-  // Reordering or deleting remounts or moves DOM nodes, which drops focus; put it back once the new order has rendered.
-  useEffect(() => {
-    if (pendingFocus) rootRef.current?.querySelector<HTMLElement>(pendingFocus.selector)?.focus();
-  }, [pendingFocus]);
+  const sensors = useRowSensors();
+  const { rootRef, focusLater } = usePendingFocus();
   const update = (change: (latest: SequenceItem[]) => SequenceItem[]) => onUpdate((latest) => withItems(latest, change(latest.sequenceItems ?? [])));
 
   const append = () => {
-    const id = `step-${Date.now().toString(36)}-${nextId++}`;
+    const id = newRowId("step");
     setFocusId(id);
     update((list) => [...list, { id, label: "" }]);
   };
 
   const move = (id: string, delta: -1 | 1) => {
-    setPendingFocus({ selector: `[data-handle-id="${id}"]` });
-    update((list) => {
-      const target = list[list.findIndex((i) => i.id === id) + delta];
-      return target ? moveChoice(list, id, target.id) : list;
-    });
+    focusLater(`[data-handle-id="${id}"]`);
+    update((list) => moveRowBy(list, id, delta));
   };
 
   const remove = (index: number) => {
     const neighbour = items[index + 1] ?? items[index - 1];
-    if (neighbour) setPendingFocus({ selector: `[data-input-id="${neighbour.id}"]` });
+    if (neighbour) focusLater(`[data-input-id="${neighbour.id}"]`);
     update((list) => list.filter((i) => i.id !== items[index].id));
   };
 
