@@ -3,13 +3,11 @@ import Box from "@mui/material/Box";
 import InputBase from "@mui/material/InputBase";
 import Typography from "@mui/material/Typography";
 
-import { QuestionRenderer } from "@/components/quiz/question-renderer";
-import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide, QuizEditorSlideMedia, QuizEditorSlideUpdate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-import { ChoiceAuthoring } from "./choice-authoring";
+import { AnswerArea } from "./answer-area";
 import { QuestionFeedbackLine } from "./question-feedback-line";
 import { QuestionImageSlot, type ImageSize } from "./question-image-slot";
 import type { QuestionReadiness } from "./question-readiness";
@@ -83,18 +81,7 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
           </Box>
         </Box>
       ) : null}
-      {question && slide.kind === "multiple-choice" ? (
-        <ChoiceAuthoring mode="single" onChange={write} onUpdate={updateLatest} question={question} />
-      ) : question ? (
-        // The slot above owns the content image, so the renderer does not draw it a second time.
-        <QuestionRenderer
-          editable
-          onChange={() => {}}
-          onQuestionChange={(next) => write({ ...next, contentImage: question.contentImage })}
-          question={{ ...question, contentImage: undefined }}
-          value={createInitialAnswer(question)}
-        />
-      ) : null}
+      {question ? <AnswerArea onChange={write} onUpdate={updateLatest} question={question} slide={slide} /> : null}
       <QuestionFeedbackLine onChange={(feedbackRows) => onReplaceSlide({ ...slide, feedbackRows })} points={question?.points ?? 0} slide={slide} />
     </Box>
   );

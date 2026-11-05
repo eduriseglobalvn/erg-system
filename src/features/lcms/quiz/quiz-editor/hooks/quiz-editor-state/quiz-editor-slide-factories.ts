@@ -1,4 +1,6 @@
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
+import type { Question } from "@/domain/quiz/types";
+import { likertPresetLabels } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/likert-presets";
 import { tr } from "@/platform/i18n";
 import {
   createMockChoice,
@@ -54,7 +56,10 @@ export function buildQuestionSlide(
 
   // A new question starts empty so placeholder text can never count as authored content.
   const choiceLabels = type === "true-false" ? ["Đúng", "Sai"] : ["", "", ""];
-  const choices = choiceLabels.map((label) => createChoice(createId("choice"), label));
+  // A sequence slide mirrors its steps as choices (all "correct"), matching what the runtime sync writes back.
+  const choices = type === "sequence"
+    ? choiceLabels.map((label) => createChoice(createId("step"), label, true))
+    : choiceLabels.map((label) => createChoice(createId("choice"), label));
 
   const isMatchQuestion = type === "matching" || type === "drag-and-drop";
   const matchItems: QuizEditorDragDropItem[] = [
@@ -68,8 +73,11 @@ export function buildQuestionSlide(
     },
   ];
 
+  const id = createId("slide");
+  const runtimeQuestion = buildRuntimeQuestion(type, id, choices, quizProject.questionDefaults.positivePoints, createId);
+
   return {
-    id: createId("slide"),
+    id,
     title: "",
     kind: type,
     textStyle: {
@@ -89,7 +97,39 @@ export function buildQuestionSlide(
       shuffleAnswers: quizProject.questionDefaults.shuffleAnswers,
       matchingAuthoringMode: isMatchQuestion ? "edit" : undefined,
     }),
+    ...(runtimeQuestion ? { runtimeQuestion } : {}),
   };
+}
+
+// Only kinds that have an authoring surface get a runtime question up front.
+function buildRuntimeQuestion(
+  type: QuestionType,
+  id: string,
+  choices: QuizEditorChoice[],
+  points: number,
+  createId: CreateId,
+): Question | undefined {
+  const base = { id, title: "", points, feedback: { correct: "", incorrect: "", partial: "" } };
+  const runtimeChoices = choices.map(({ id: choiceId, label, correct }) => ({ id: choiceId, label, correct }));
+  switch (type) {
+    case "multiple-response":
+      return { ...base, kind: "multiple_response", choices: runtimeChoices };
+    case "true-false":
+      return { ...base, kind: "true_false", choices: runtimeChoices };
+    case "likert-scale":
+      return {
+        ...base,
+        kind: "likert_scale",
+        likertScale: likertPresetLabels("agree", 5).map((label, index) => ({ id: `scale-${index + 1}`, label, value: index + 1 })),
+        likertRows: [{ id: createId("row"), label: "" }],
+      };
+    case "sequence": {
+      const sequenceItems = choices.map(({ id: stepId, label }) => ({ id: stepId, label }));
+      return { ...base, kind: "sequence", sequenceItems, sequenceCorrectOrder: sequenceItems.map((item) => item.id) };
+    }
+    default:
+      return undefined;
+  }
 }
 
 export function buildIntroductionSlide(type: IntroSlideKind, createId: CreateId): QuizEditorSlide {
