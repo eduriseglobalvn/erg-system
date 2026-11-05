@@ -8,7 +8,7 @@ import { createClientIdempotencyKey, isLegacyMockDraft } from "@/features/lcms/q
 
 import type { DeviceDraftRecord, QuizDraftDeviceStore } from "./quiz-draft-device-store";
 
-// Same prefix as api/quiz-editor-local-draft.ts, which Task 7 deletes.
+// Prefix of the old localStorage drafts, moved into the device store once.
 const LEGACY_PREFIX = "erg:quiz-editor:recovery:v1";
 export const NEW_QUIZ_PREFIX = "new-quiz:";
 const OLD_PLACEHOLDER_KEY = "default-quiz-draft";

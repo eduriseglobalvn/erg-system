@@ -9,6 +9,7 @@ import {
   Select,
   Typography,
 } from "@mui/material";
+import Tooltip from "@mui/material/Tooltip";
 import BookOpenIcon from "@mui/icons-material/AutoStories";
 import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import ArrowDropDownIcon from "@mui/icons-material/ExpandMore";
@@ -63,6 +64,7 @@ type FormViewRibbonProps = {
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
+  publishBlockedReason: string | null;
 };
 
 export function FormViewRibbon({
@@ -81,6 +83,7 @@ export function FormViewRibbon({
   onAddIntroduction,
   onOpenPlayerTemplate,
   onOpenPublish,
+  publishBlockedReason,
 }: FormViewRibbonProps) {
   const { t } = useI18n();
   const [openMenu, setOpenMenu] = useState<"question" | "introduction" | null>(null);
@@ -181,6 +184,7 @@ export function FormViewRibbon({
         <RibbonUtilitySection
           onOpenPlayerTemplate={onOpenPlayerTemplate}
           onOpenPublish={onOpenPublish}
+          publishBlockedReason={publishBlockedReason}
           playerLabel={t("quiz.playerTemplate")}
           publishLabel={t("common.publish")}
         />
@@ -241,11 +245,13 @@ function RibbonUtilitySection({
   publishLabel,
   onOpenPlayerTemplate,
   onOpenPublish,
+  publishBlockedReason,
 }: {
   playerLabel: string;
   publishLabel: string;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
+  publishBlockedReason: string | null;
 }) {
   return (
     <Box component="section" className="classic-editor__ribbon-utilities" aria-label={`${playerLabel} / ${publishLabel}`}>
@@ -258,14 +264,20 @@ function RibbonUtilitySection({
       >
         <PaletteOutlinedIcon sx={{ fontSize: "1em" }} />
       </button>
-      <button
-        type="button"
-        className="classic-editor__ribbon-publish-action"
-        onClick={onOpenPublish}
-      >
-        <PublishIcon sx={{ fontSize: "1em" }} />
-        <span>{publishLabel}</span>
-      </button>
+      {/* A disabled button fires no events; the span keeps the reason visible. */}
+      <Tooltip title={publishBlockedReason ?? ""}>
+        <span>
+          <button
+            type="button"
+            className="classic-editor__ribbon-publish-action"
+            disabled={Boolean(publishBlockedReason)}
+            onClick={onOpenPublish}
+          >
+            <PublishIcon sx={{ fontSize: "1em" }} />
+            <span>{publishLabel}</span>
+          </button>
+        </span>
+      </Tooltip>
     </Box>
   );
 }

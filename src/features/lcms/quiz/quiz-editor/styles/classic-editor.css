@@ -20911,25 +20911,6 @@
   flex-shrink: 0 !important;
 }
 
-/* Action Button: Lưu nháp (Save Draft) */
-.classic-editor__manager-action.is-save-draft {
-  border-color: #0071E3 !important;
-  background: #FFFFFF !important;
-  color: #0071E3 !important;
-  font-weight: 600 !important;
-}
-
-.classic-editor__manager-action.is-save-draft:hover:not(:disabled) {
-  background: rgba(0, 113, 227, 0.08) !important;
-  color: #0058B0 !important;
-  border-color: #0058B0 !important;
-}
-
-.classic-editor__manager-action.is-save-draft:disabled {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
-}
-
 /* Unsaved status badge */
 .classic-editor__status-badge.is-unsaved {
   background: #FEF2F2 !important;
@@ -20939,32 +20920,6 @@
 
 .classic-editor__status-badge.is-unsaved .classic-editor__status-dot {
   background: #EF4444 !important;
-}
-
-/* Cloud Sync Badge Indicator in Manager Strip */
-.classic-editor__sync-badge {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 5px !important;
-  padding: 2px 9px !important;
-  border-radius: 999px !important;
-  font-size: 11.5px !important;
-  font-weight: 600 !important;
-  line-height: 1.4 !important;
-  user-select: none !important;
-  white-space: nowrap !important;
-}
-
-.classic-editor__sync-badge.is-unsaved {
-  background: #FEF2F2 !important;
-  color: #B91C1C !important;
-  border: 1px solid #FECACA !important;
-}
-
-.classic-editor__sync-badge.is-saved {
-  background: #F0FDF4 !important;
-  color: #15803D !important;
-  border: 1px solid #BBF7D0 !important;
 }
 
 /* Status Filter Bar & Tabs */
@@ -21066,15 +21021,3 @@
   background: #10B981 !important;
 }
 
-.classic-editor__manager-action.is-save-draft.has-unsaved {
-  border-color: #EF4444 !important;
-  background: #FEF2F2 !important;
-  color: #B91C1C !important;
-  font-weight: 700 !important;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15) !important;
-}
-
-.classic-editor__manager-action.is-save-draft.has-unsaved:hover:not(:disabled) {
-  background: #FEE2E2 !important;
-  border-color: #B91C1C !important;
-}

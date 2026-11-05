@@ -1,13 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import Checkbox from "@mui/material/Checkbox";
+import Tooltip from "@mui/material/Tooltip";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import OpenInFullIcon from "@mui/icons-material/OpenInFull";
 import PublishIcon from "@mui/icons-material/Publish";
-import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-import CloudDoneOutlinedIcon from "@mui/icons-material/CloudDoneOutlined";
-import CloudOffOutlinedIcon from "@mui/icons-material/CloudOffOutlined";
 
 import { useI18n } from "@/platform/i18n";
 import type {
@@ -39,11 +37,11 @@ type QuestionManagerTableProps = {
   onDuplicateSelected: () => void;
   onRemoveSelected: () => void;
   onAddNewQuestion?: (type?: QuestionType, preset?: QuestionCreationPreset) => void;
-  onPublishSelected?: (slideIds: string[]) => void;
-  onSaveDraft?: () => void;
-  isSavingDraft?: boolean;
+  /** Publishes the whole quiz: the server compiles every question, never a selection. */
+  onPublish?: () => void;
+  publishBlockedReason?: string | null;
+  syncChip: ReactNode;
   isSavedOnServer?: boolean;
-  lastSavedTime?: string | null;
   onDeleteSlides?: (slideIds: string[]) => void;
   onDuplicateSlides?: (slideIds: string[]) => void;
   onSelectSlide?: (groupId: string, slideId: string) => void;
@@ -68,11 +66,10 @@ export function QuestionManagerTable({
   onDuplicateSelected,
   onRemoveSelected,
   onAddNewQuestion,
-  onPublishSelected,
-  onSaveDraft,
-  isSavingDraft,
+  onPublish,
+  publishBlockedReason,
+  syncChip,
   isSavedOnServer,
-  lastSavedTime,
   onDeleteSlides,
   onDuplicateSlides,
   onSelectSlide,
@@ -194,22 +191,7 @@ export function QuestionManagerTable({
               ) : null}
 
               <span className="classic-editor__manager-strip-divider">•</span>
-              {unsavedCount > 0 ? (
-                <span className="classic-editor__sync-badge is-unsaved" title="Có câu hỏi mới tạo hoặc sửa chỉ mới lưu ở máy này (localStorage), bấm Lưu nháp để đồng bộ lên máy chủ">
-                  <CloudOffOutlinedIcon sx={{ fontSize: 14 }} />
-                  <span>Chưa lưu máy chủ ({unsavedCount})</span>
-                </span>
-              ) : isSavedOnServer || lastSavedTime ? (
-                <span className="classic-editor__sync-badge is-saved" title={lastSavedTime ? `Đã đồng bộ an toàn với máy chủ lúc ${lastSavedTime}` : "Đã đồng bộ an toàn với máy chủ"}>
-                  <CloudDoneOutlinedIcon sx={{ fontSize: 14 }} />
-                  <span>Đã lưu máy chủ</span>
-                </span>
-              ) : (
-                <span className="classic-editor__sync-badge is-unsaved" title="Bản ghi chưa được lưu lên cơ sở dữ liệu máy chủ">
-                  <CloudOffOutlinedIcon sx={{ fontSize: 14 }} />
-                  <span>Chưa lưu máy chủ</span>
-                </span>
-              )}
+              {syncChip}
             </div>
 
             <div className="classic-editor__manager-toolbar">
@@ -222,39 +204,21 @@ export function QuestionManagerTable({
                 <span>Tạo câu hỏi</span>
               </button>
 
-              {onSaveDraft ? (
-                <button
-                  type="button"
-                  className={cn(
-                    "classic-editor__manager-action is-save-draft",
-                    unsavedCount > 0 && "has-unsaved",
-                  )}
-                  disabled={isSavingDraft || rows.length === 0}
-                  onClick={onSaveDraft}
-                  title="Lưu tất cả thay đổi vào bản nháp trên cơ sở dữ liệu máy chủ"
-                >
-                  <SaveOutlinedIcon sx={{ fontSize: 16 }} />
+              {onPublish ? (
+                // A disabled button fires no events; the span keeps the reason visible.
+                <Tooltip title={publishBlockedReason ?? ""}>
                   <span>
-                    {isSavingDraft
-                      ? "Đang lưu..."
-                      : unsavedCount > 0
-                        ? `Lưu nháp (${unsavedCount})`
-                        : "Lưu nháp"}
+                    <button
+                      type="button"
+                      className="classic-editor__manager-action is-publish"
+                      disabled={Boolean(publishBlockedReason) || rows.length === 0}
+                      onClick={onPublish}
+                    >
+                      <PublishIcon sx={{ fontSize: 16 }} />
+                      <span>Xuất bản</span>
+                    </button>
                   </span>
-                </button>
-              ) : null}
-
-              {onPublishSelected ? (
-                <button
-                  type="button"
-                  className="classic-editor__manager-action is-publish"
-                  disabled={selectedSlideIds.length === 0}
-                  onClick={() => onPublishSelected(selectedSlideIds)}
-                  title="Xuất bản các câu hỏi đã chọn vào bài thi"
-                >
-                  <PublishIcon sx={{ fontSize: 16 }} />
-                  <span>Xuất bản ({selectedSlideIds.length})</span>
-                </button>
+                </Tooltip>
               ) : null}
 
               <button
@@ -311,7 +275,7 @@ export function QuestionManagerTable({
                   aria-selected={statusFilter === "unsaved"}
                   className={cn("classic-editor__filter-tab is-unsaved-tab", statusFilter === "unsaved" && "is-active")}
                   onClick={() => setStatusFilter("unsaved")}
-                  title="Các câu hỏi mới tạo hoặc sửa chỉ mới lưu ở máy này (localStorage)"
+                  title="Các câu hỏi mới tạo hoặc sửa chưa gửi lên máy chủ"
                 >
                   <span className="classic-editor__filter-tab-dot is-unsaved" />
                   <span>Chưa lưu máy chủ</span>

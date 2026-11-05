@@ -26,6 +26,7 @@ type RibbonProps = {
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
+  publishBlockedReason: string | null;
 };
 
 export function QuizEditorRibbon(props: RibbonProps) {
@@ -46,6 +47,7 @@ export function QuizEditorRibbon(props: RibbonProps) {
       onAddIntroduction={props.onAddIntroduction}
       onOpenPlayerTemplate={props.onOpenPlayerTemplate}
       onOpenPublish={props.onOpenPublish}
+      publishBlockedReason={props.publishBlockedReason}
     />
   );
 }
