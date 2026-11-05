@@ -1,22 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { DashboardPageShell } from "@/components/dashboard/dashboard-page-shell";
+import { adminContentPathForSection } from "@/features/lcms/admin-content/admin-content-route";
 import type { CreateQuizFromBankOptions } from "@/features/lcms/create-quiz-from-bank";
-import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
 import type { ContentScope } from "@/types/scope-types";
-import { QuestionBankCompactHeader } from "./question-bank-compact-header";
 import { enCopy, type QuestionBankCopy, viCopy, viPackageCopy } from "./question-bank-copy";
 import { normalizeAutoCount } from "./question-bank-primitives";
-import { QuestionBankStructurePanel as QuestionStructurePanel } from "./question-bank-structure-panel";
-import { QuestionLibrary } from "./question-library";
+import { QuestionBankQuestionsView } from "./question-bank-questions-view";
 import { QuestionBankSyncNotice, QuestionFormDialog } from "./question-form-dialog";
-import { QuizBuilderPanel } from "./quiz-builder-panel";
+import { QuizAutoPickDialog } from "./quiz-auto-pick-dialog";
 import { QuizBankPanel } from "./quiz-bank-panel";
 import { QuizCreatePackageDialog } from "./quiz-create-package-dialog";
 import { useQuestionBankWorkspaceController } from "./use-question-bank-workspace";
 import { PortablePackageExportDialog } from "@/features/portable-package-export/components/portable-package-export-dialog";
-import type { QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 
 export function QuestionBankWorkspace({
   activeLeaf,
@@ -29,6 +28,8 @@ export function QuestionBankWorkspace({
   onOpenQuiz?: (quizId: string) => void;
 }) {
   const [portableQuiz, setPortableQuiz] = useState<QuizBankItem | null>(null);
+  const [autoPickOpen, setAutoPickOpen] = useState(false);
+  const navigate = useNavigate();
   const { locale } = useI18n();
   const copy: QuestionBankCopy = locale === "vi"
     ? {
@@ -40,27 +41,22 @@ export function QuestionBankWorkspace({
       }
     : enCopy;
   const {
-    activeLevel, activeSubject, autoCount, autoPickedQuestions, autoTopicIds, changeSearch, createQuestionMutation,
-    createQuizFromSelection, deleteQuiz, deleteQuizMutation, getTopicQuestionCount, isQuestionBankFetching,
-    levelTopics, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject, pickTopic, questionBankData,
-    questionBankQuery, questionForm, quizCreateDraft, quizKind, quizPackageEdit, quizPackageEditQuestions,
-    selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuizCreateDraft,
-    setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage,
-    searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, useAutoPick,
-    updateQuestionMutation, view, visibleQuestions, visibleQuizzes,
+    activeLevel, activeSubject, autoCount, autoPickAvailableCount, autoTopicIds, changeSearch, clearSelection,
+    createQuestionMutation, createQuizFromSelection, deleteQuiz, deleteQuizMutation, isQuestionBankFetching,
+    levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject,
+    pickTopic, questionBankData, questionBankQuery, questionForm, quizCreateDraft, quizKind, quizPackageEdit,
+    quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
+    setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
+    submitUpdateQuizPackage, searchValue, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions,
+    topicId, applyAutoPick, updateQuestionMutation, view, visibleQuestions, visibleQuizzes,
   } = useQuestionBankWorkspaceController({ activeLeaf, contentScope, copy, onCreateQuiz });
 
   return (
     <DashboardPageShell
       title={activeLeaf.title}
-      description={view === "questions" ? undefined : copy.description}
-      breadcrumbs={view === "questions" ? [] : activeLeaf.breadcrumb}
-      hideHeader={view === "questions" || view === "quizzes"}
-      contentClassName={
-        view === "questions" || view === "quizzes"
-          ? "mx-0 w-full !max-w-none px-3 sm:px-4 lg:px-4 2xl:px-5"
-          : undefined
-      }
+      breadcrumbs={[]}
+      hideHeader
+      contentClassName="mx-0 w-full !max-w-none px-3 sm:px-4 lg:px-6"
     >
       {questionBankQuery.isError ? (
         <QuestionBankSyncNotice
@@ -70,59 +66,39 @@ export function QuestionBankWorkspace({
       ) : null}
 
       {view === "questions" ? (
-        <div className="space-y-3">
-          <QuestionBankCompactHeader
-            title={activeLeaf.title}
-          >
-            <QuestionStructurePanel
-              activeLevel={activeLevel}
-              activeSubject={activeSubject}
-              copy={copy}
-              getTopicQuestionCount={getTopicQuestionCount}
-              levelTopics={levelTopics}
-              onLevelChange={pickLevel}
-              onSubjectChange={pickSubject}
-              onTopicChange={pickTopic}
-              subjectId={subjectId}
-              subjects={subjects}
-              topicId={topicId}
-            />
-          </QuestionBankCompactHeader>
-          <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_300px] 2xl:grid-cols-[minmax(0,1fr)_320px]">
-            <QuestionLibrary
-              copy={copy}
-              contentScope={contentScope}
-              onQuestionSelectAll={toggleVisibleQuestions}
-              onQuestionToggle={toggleQuestion}
-              isLoading={isQuestionBankFetching}
-              loadFailed={questionBankQuery.isError}
-              onEditQuestion={openEditQuestionForm}
-              onSearchChange={changeSearch}
-              onPageChange={setQuestionPage}
-              page={questionBankData.questionPage}
-              searchValue={searchValue}
-              selectedIds={selectedIds}
-              visibleQuestions={visibleQuestions}
-            />
-            <QuizBuilderPanel
-              autoCount={autoCount}
-              autoPickedQuestions={autoPickedQuestions}
-              autoTopicIds={autoTopicIds}
-              copy={copy}
-              getTopicQuestionCount={(topicId) => getTopicQuestionCount(topicId, activeLevel.id)}
-              levelTopics={levelTopics}
-              onAutoCountChange={(value) => setAutoCount(normalizeAutoCount(value))}
-              onAutoPick={useAutoPick}
-              onCreateQuiz={createQuizFromSelection}
-              onTopicToggle={toggleAutoTopic}
-              selectedQuestions={selectedQuestions}
-            />
-          </div>
-        </div>
+        <QuestionBankQuestionsView
+          activeLevel={activeLevel}
+          activeSubject={activeSubject}
+          copy={copy}
+          isLoading={isQuestionBankFetching}
+          levelTopics={levelTopics}
+          loadFailed={questionBankQuery.isError}
+          onAddQuestion={openCreateQuestionForm}
+          onClearSelection={clearSelection}
+          onCreateQuiz={createQuizFromSelection}
+          onEditQuestion={openEditQuestionForm}
+          onLevelChange={pickLevel}
+          onOpenAutoPick={() => setAutoPickOpen(true)}
+          onPageChange={setQuestionPage}
+          onSearchChange={changeSearch}
+          onSelectAll={toggleVisibleQuestions}
+          onSubjectChange={pickSubject}
+          onToggleQuestion={toggleQuestion}
+          onTopicChange={pickTopic}
+          page={questionBankData.questionPage}
+          searchValue={searchValue}
+          selectedIds={selectedIds}
+          subjects={subjects}
+          title={activeLeaf.title}
+          topicId={topicId}
+          visibleQuestions={visibleQuestions}
+        />
       ) : (
         <QuizBankPanel
           contentScope={contentScope}
           copy={copy}
+          // B1 "Create quiz" starts in the question bank, where questions are picked.
+          onCreateQuiz={() => void navigate({ href: adminContentPathForSection("questions") })}
           onKindChange={setQuizKind}
           onDeleteQuiz={deleteQuiz}
           onExportPortable={setPortableQuiz}
@@ -133,8 +109,22 @@ export function QuestionBankWorkspace({
           deletingQuizId={deleteQuizMutation.isPending ? deleteQuizMutation.variables : undefined}
           quizzes={visibleQuizzes}
           searchValue={searchValue}
+          title={activeLeaf.title}
         />
       )}
+      {autoPickOpen ? (
+        <QuizAutoPickDialog
+          availableCount={autoPickAvailableCount}
+          copy={copy}
+          count={autoCount}
+          onClose={() => setAutoPickOpen(false)}
+          onCountChange={(value) => setAutoCount(normalizeAutoCount(value))}
+          onPick={() => { if (applyAutoPick()) setAutoPickOpen(false); }}
+          onTopicToggle={toggleAutoTopic}
+          topicIds={autoTopicIds}
+          topics={levelTopics}
+        />
+      ) : null}
       {questionForm ? (
         <QuestionFormDialog
           copy={copy}
@@ -170,12 +160,7 @@ export function QuestionBankWorkspace({
         />
       ) : null}
       {portableQuiz ? (
-        <PortablePackageExportDialog
-          onClose={() => setPortableQuiz(null)}
-          open
-          portal="lcms"
-          quiz={portableQuiz}
-        />
+        <PortablePackageExportDialog onClose={() => setPortableQuiz(null)} open portal="lcms" quiz={portableQuiz} />
       ) : null}
     </DashboardPageShell>
   );

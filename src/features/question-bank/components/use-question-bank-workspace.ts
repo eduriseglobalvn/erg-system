@@ -19,6 +19,7 @@ import type { QuizCreateDraft } from "./quiz-create-package-dialog";
 
 type QuizKindFilter = "all" | QuizBankKind;
 
+const EMPTY_QUESTION_DRAFT: QuestionFormDraft = { stem: "", objective: "", type: "multiple-choice", difficulty: "core", status: "ready", tagsText: "", choiceA: "", choiceB: "", choiceC: "", choiceD: "", answer: "a" };
 const EMPTY_QUESTION_BANK_DATA: QuestionBankApiData = { questions: [], quizzes: [], subjects: [], questionPage: { page: 0, size: 50, totalItems: 0, totalPages: 0, hasNext: false, hasPrevious: false } };
 
 export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, copy, onCreateQuiz }: {
@@ -91,7 +92,9 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   const levelTopics = useMemo(() => activeSubject.categories.filter((category) => category.levelId === activeLevel.id), [activeLevel.id, activeSubject.categories]);
   const visibleQuestions = useMemo(() => questions.filter((question) => (!subjectId || question.subjectId === subjectId) && (!activeLevel.id || question.levelId === activeLevel.id) && (topicId === "all" || question.categoryId === topicId) && canUseInScope(question.scope, contentScope)), [activeLevel.id, contentScope, questions, subjectId, topicId]);
   const selectedQuestions = useMemo(() => selectedIds.map((id) => questionCache[id]).filter((question): question is QuestionBankQuestion => Boolean(question) && canUseInScope(question.scope, contentScope)), [contentScope, questionCache, selectedIds]);
-  const autoPickedQuestions = useMemo(() => questions.filter((question) => question.subjectId === subjectId && question.levelId === activeLevel.id && question.status === "ready" && canUseInScope(question.scope, contentScope) && autoTopicIds.includes(question.categoryId)).sort((left, right) => pseudoRandomScore(left.id) - pseudoRandomScore(right.id)).slice(0, autoCount), [activeLevel.id, autoCount, autoTopicIds, contentScope, questions, subjectId]);
+  // shortcut: picks only from the loaded page (up to 50 questions of the current filter); move to a server-side random pick when the API offers one.
+  const autoPickCandidates = useMemo(() => questions.filter((question) => question.subjectId === subjectId && question.levelId === activeLevel.id && question.status === "ready" && canUseInScope(question.scope, contentScope) && autoTopicIds.includes(question.categoryId)).sort((left, right) => pseudoRandomScore(left.id) - pseudoRandomScore(right.id)), [activeLevel.id, autoTopicIds, contentScope, questions, subjectId]);
+  const autoPickedQuestions = useMemo(() => autoPickCandidates.slice(0, autoCount), [autoCount, autoPickCandidates]);
   const visibleQuizzes = useMemo(() => quizzes.filter((quiz) => {
     const normalizedSearch = debouncedSearchValue.trim().toLowerCase();
     return (quizKind === "all" || quiz.kind === quizKind) && (!normalizedSearch || `${quiz.title} ${quiz.subjectLabel} ${quiz.levelLabel} ${quiz.topicLabels.join(" ")}`.toLowerCase().includes(normalizedSearch)) && canUseInScope(quiz.scope, contentScope);
@@ -109,7 +112,9 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
     setSelectedIds((current) => { const visibleIdSet = new Set(visibleIds); return visibleIds.every((id) => current.includes(id)) ? current.filter((id) => !visibleIdSet.has(id)) : Array.from(new Set([...current, ...visibleIds])); });
   };
   const toggleAutoTopic = (topicIdToToggle: string) => setAutoTopicIds((current) => current.includes(topicIdToToggle) ? current.filter((id) => id !== topicIdToToggle) : [...current, topicIdToToggle]);
-  const useAutoPick = () => { if (autoPickedQuestions.length >= autoCount) setSelectedIds(autoPickedQuestions.map((question) => question.id)); };
+  const applyAutoPick = () => { if (autoPickedQuestions.length < autoCount) return false; setSelectedIds(autoPickedQuestions.map((question) => question.id)); return true; };
+  const clearSelection = () => setSelectedIds([]);
+  const openCreateQuestionForm = () => setQuestionForm({ mode: "create", draft: EMPTY_QUESTION_DRAFT });
   const createQuizFromSelection = () => {
     if (!selectedQuestions.length) return; const firstQuestion = selectedQuestions[0]; const totalPoints = getQuestionBankPackageTotalPoints(selectedQuestions);
     setQuizCreateDraft({ kind: "train", title: `${firstQuestion.subjectLabel} - ${firstQuestion.levelLabel}`, passingRate: 80, passingScoreMode: "percent", passingScorePoints: Math.round(totalPoints * 0.8 * 100) / 100, playerSize: "standard", shuffleAnswers: true, shuffleQuestions: false, templateLayout: "classic", timeLimitEnabled: true, timeLimitMinutes: 20 });
@@ -130,7 +135,7 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   };
   const deleteQuiz = async (quiz: QuizBankItem) => { if (!window.confirm(copy.confirmDeleteQuiz(quiz.title))) return; try { await deleteQuizMutation.mutateAsync(quiz.id); toast.success(copy.deleteQuizSuccess); } catch (error) { toast.error(error instanceof Error ? error.message : copy.deleteQuizError); } };
 
-  return { activeLevel, activeSubject, autoCount, autoPickedQuestions, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuiz, deleteQuizMutation, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quizCreateDraft, quizKind, quizPackageEdit, quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, useAutoPick, view, visibleQuestions, visibleQuizzes };
+  return { activeLevel, activeSubject, autoCount, autoPickAvailableCount: autoPickCandidates.length, autoPickedQuestions, clearSelection, openCreateQuestionForm, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuiz, deleteQuizMutation, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quizCreateDraft, quizKind, quizPackageEdit, quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, applyAutoPick, view, visibleQuestions, visibleQuizzes };
 }
 
 function canUseInScope(itemScope: ContentScope, activeScope: ContentScope) { if (activeScope.type === "global") return itemScope.type === "global"; return itemScope.type === "global" || itemScope.centerId === activeScope.centerId; }

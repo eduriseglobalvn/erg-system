@@ -1,4 +1,3 @@
-import type { ComponentProps, ReactNode } from "react";
 import Box from "@mui/material/Box";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -7,10 +6,6 @@ import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
-import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
-import type { ContentScope } from "@/types/scope-types";
-
-type BadgeTone = "primary" | "secondary" | "success" | "warning" | "danger" | "outline";
 
 export const QUESTION_BANK_SELECT_MENU_PROPS = {
   disableScrollLock: true,
@@ -28,27 +23,6 @@ export const QUESTION_BANK_SELECT_MENU_PROPS = {
   },
   transitionDuration: 90,
 };
-
-export const ERG_SHEET_COLORS = {
-  frame: "#FAFAFC",
-  header: "#f1f5f9",
-  rowOdd: "#ffffff",
-  rowEven: "#fbfdff",
-  hover: "#f0f7ff",
-  hoverBorder: "#e11d48",
-  selected: "#eef6ff",
-  selectedHover: "#e6f2ff",
-};
-
-const ERG_TONE = { primary: "info", secondary: "neutral", success: "success", warning: "warning", danger: "error", outline: "neutral" } as const;
-
-export function toErgTone(tone: BadgeTone): ComponentProps<typeof ErgStatusChip>["tone"] {
-  return ERG_TONE[tone];
-}
-
-export function Badge({ tone, className, children }: { tone: BadgeTone; className?: string; children: ReactNode }) {
-  return <ErgStatusChip className={className} label={children} tone={toErgTone(tone)} />;
-}
 
 export function SelectControl({
   hideDescription = false,
@@ -105,14 +79,6 @@ export function SelectControl({
       ) : null}
     </Box>
   );
-}
-
-export function getScopeTone(itemScope: ContentScope, activeScope: ContentScope) {
-  if (itemScope.type === "global") {
-    return "primary";
-  }
-
-  return itemScope.type === activeScope.type && itemScope.centerId === activeScope.centerId ? "secondary" : "outline";
 }
 
 export function normalizeAutoCount(value: number) {
