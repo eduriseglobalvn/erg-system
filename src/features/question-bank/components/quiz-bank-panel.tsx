@@ -24,7 +24,7 @@ import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuestionBankPageHeader } from "./question-bank-page-header";
 import type { QuizKindFilter } from "./question-bank-workspace-types";
 
-const STATUS_TONE: Record<QuizBankStatus, "success" | "warning" | "neutral"> = {
+export const QUIZ_STATUS_TONE: Record<QuizBankStatus, "success" | "warning" | "neutral"> = {
   ready: "success",
   reviewing: "warning",
   draft: "neutral",
@@ -32,7 +32,7 @@ const STATUS_TONE: Record<QuizBankStatus, "success" | "warning" | "neutral"> = {
 
 const wideOnly = { display: { xs: "none", md: "table-cell" } } as const;
 
-/** B1: quiz bank list. Rows open the package settings; export and delete sit at the row end. */
+/** B1: quiz bank list. Rows open the quick view (B2); export and delete sit at the row end. */
 export function QuizBankPanel({
   copy,
   deletingQuizId,
@@ -164,7 +164,7 @@ export function QuizBankPanel({
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{quiz.durationLabel}</TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary }}>{copy.sourceMode[quiz.sourceMode]}</TableCell>
                   <TableCell>
-                    <ErgStatusChip label={copy.quizStatus[quiz.status]} tone={STATUS_TONE[quiz.status]} />
+                    <ErgStatusChip label={copy.quizStatus[quiz.status]} tone={QUIZ_STATUS_TONE[quiz.status]} />
                   </TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary, whiteSpace: "nowrap" }}>
                     {formatDateTimeVi(quiz.updatedAt)}

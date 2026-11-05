@@ -14,6 +14,8 @@ import { QuestionBankSyncNotice, QuestionFormDialog } from "./question-form-dial
 import { QuizAutoPickDialog } from "./quiz-auto-pick-dialog";
 import { QuizBankPanel } from "./quiz-bank-panel";
 import { QuizCreatePackageDialog } from "./quiz-create-package-dialog";
+import { QuestionQuickViewDrawer } from "./question-quick-view-drawer";
+import { QuizQuickViewDrawer } from "./quiz-quick-view-drawer";
 import { useQuestionBankWorkspaceController } from "./use-question-bank-workspace";
 import { PortablePackageExportDialog } from "@/features/portable-package-export/components/portable-package-export-dialog";
 
@@ -21,6 +23,7 @@ export function QuestionBankWorkspace({
   activeLeaf,
   contentScope,
   onCreateQuiz,
+  onOpenQuiz,
 }: {
   activeLeaf: DashboardLeaf;
   contentScope: ContentScope;
@@ -42,11 +45,12 @@ export function QuestionBankWorkspace({
     : enCopy;
   const {
     activeLevel, activeSubject, autoCount, autoPickAvailableCount, autoTopicIds, changeSearch, clearSelection,
-    createQuestionMutation, createQuizFromSelection, deleteQuiz, deleteQuizMutation, isQuestionBankFetching,
+    createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation,
+    duplicateQuestion, isQuestionBankFetching,
     levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject,
-    pickTopic, questionBankData, questionBankQuery, questionForm, quizCreateDraft, quizKind, quizPackageEdit,
+    pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizPackageEdit,
     quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
-    setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
+    setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
     submitUpdateQuizPackage, searchValue, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions,
     topicId, applyAutoPick, updateQuestionMutation, view, visibleQuestions, visibleQuizzes,
   } = useQuestionBankWorkspaceController({ activeLeaf, contentScope, copy, onCreateQuiz });
@@ -79,6 +83,7 @@ export function QuestionBankWorkspace({
           onEditQuestion={openEditQuestionForm}
           onLevelChange={pickLevel}
           onOpenAutoPick={() => setAutoPickOpen(true)}
+          onOpenQuestion={setQuickViewQuestion}
           onPageChange={setQuestionPage}
           onSearchChange={changeSearch}
           onSelectAll={toggleVisibleQuestions}
@@ -102,7 +107,7 @@ export function QuestionBankWorkspace({
           onKindChange={setQuizKind}
           onDeleteQuiz={deleteQuiz}
           onExportPortable={setPortableQuiz}
-          onPreviewQuiz={openUpdateQuizPackage}
+          onPreviewQuiz={setQuickViewQuiz}
           onSearchChange={changeSearch}
           isLoading={isQuestionBankFetching}
           quizKind={quizKind}
@@ -112,6 +117,31 @@ export function QuestionBankWorkspace({
           title={activeLeaf.title}
         />
       )}
+      {quickViewQuestion ? (
+        <QuestionQuickViewDrawer
+          copy={copy}
+          deleting={deleteQuestionMutation.isPending}
+          duplicating={createQuestionMutation.isPending}
+          onClose={() => setQuickViewQuestion(null)}
+          onDelete={deleteQuestion}
+          onDuplicate={(question) => void duplicateQuestion(question)}
+          onEdit={openEditQuestionForm}
+          question={quickViewQuestion}
+        />
+      ) : null}
+      {quickViewQuiz ? (
+        <QuizQuickViewDrawer
+          copy={copy}
+          deleting={deleteQuizMutation.isPending}
+          onClose={() => setQuickViewQuiz(null)}
+          onDelete={(quiz) => deleteQuiz(quiz, true)}
+          onEdit={onOpenQuiz ? (quiz) => onOpenQuiz(quiz.id) : undefined}
+          onExportPortable={setPortableQuiz}
+          onOpenSettings={openUpdateQuizPackage}
+          questions={quickViewQuizQuestions}
+          quiz={quickViewQuiz}
+        />
+      ) : null}
       {autoPickOpen ? (
         <QuizAutoPickDialog
           availableCount={autoPickAvailableCount}
@@ -149,11 +179,9 @@ export function QuestionBankWorkspace({
       {quizPackageEdit ? (
         <QuizCreatePackageDialog
           copy={copy}
-          description={copy.updatePackageDialogDescription(quizPackageEdit.quiz.questionCount)}
           draft={quizPackageEdit.draft}
+          mode="update"
           questions={quizPackageEditQuestions}
-          submitLabel={copy.updatePackageConfirm}
-          title={copy.updatePackageDialogTitle}
           onChange={(draft) => setQuizPackageEdit((current) => (current ? { ...current, draft } : current))}
           onClose={() => setQuizPackageEdit(null)}
           onSubmit={submitUpdateQuizPackage}

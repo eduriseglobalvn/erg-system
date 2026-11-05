@@ -20,7 +20,7 @@ import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 
-const DIFFICULTY_TONE: Record<QuestionBankDifficulty, "neutral" | "info" | "warning"> = {
+export const DIFFICULTY_TONE: Record<QuestionBankDifficulty, "neutral" | "info" | "warning"> = {
   core: "neutral",
   stretch: "info",
   challenge: "warning",
@@ -34,6 +34,7 @@ export function QuestionLibrary({
   isLoading,
   loadFailed = false,
   onEditQuestion,
+  onOpenQuestion,
   onPageChange,
   onQuestionSelectAll,
   onQuestionToggle,
@@ -48,6 +49,8 @@ export function QuestionLibrary({
   /** The load failed: the sync notice explains it, so no misleading "no matching questions". */
   loadFailed?: boolean;
   onEditQuestion: (question: QuestionBankQuestion) => void;
+  /** Row click / Enter: quick view (A2). Selection stays on the checkbox. */
+  onOpenQuestion: (question: QuestionBankQuestion) => void;
   onPageChange: (page: number) => void;
   onQuestionSelectAll: () => void;
   onQuestionToggle: (questionId: string) => void;
@@ -152,7 +155,14 @@ export function QuestionLibrary({
                   key={question.id}
                   hover
                   selected={isSelected}
-                  onClick={() => onQuestionToggle(question.id)}
+                  aria-label={`${copy.questionQuickViewTitle}: ${question.stem}`}
+                  onClick={() => onOpenQuestion(question)}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" || event.target !== event.currentTarget) return;
+                    event.preventDefault();
+                    onOpenQuestion(question);
+                  }}
+                  tabIndex={0}
                   sx={{ cursor: "pointer" }}
                 >
                   <TableCell padding="checkbox" onClick={(event) => event.stopPropagation()}>

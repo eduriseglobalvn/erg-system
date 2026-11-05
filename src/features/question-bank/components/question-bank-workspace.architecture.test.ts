@@ -17,6 +17,8 @@ describe("QuestionBankWorkspace architecture", () => {
       "./question-form-dialog",
       "./quiz-auto-pick-dialog",
       "./quiz-bank-panel",
+      "./question-quick-view-drawer",
+      "./quiz-quick-view-drawer",
       "./question-bank-copy",
     ]) {
       expect(compositionSource).toContain(owner);

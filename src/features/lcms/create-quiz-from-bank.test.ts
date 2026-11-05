@@ -1,6 +1,8 @@
 import { describe, expect, test, vi } from "vitest";
 
 import { createQuizFromBankQuestions } from "@/features/lcms/create-quiz-from-bank";
+import { applyQuizThemePreset, quizThemePresets } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
+import { createQuestionBankPlayerTemplate } from "@/features/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 const question: QuestionBankQuestion = {
@@ -102,10 +104,8 @@ describe("createQuizFromBankQuestions", () => {
     await createQuizFromBankQuestions([question], deps, {
       kind: "test",
       passingRate: 75,
-      playerSize: "wide",
       shuffleAnswers: false,
       shuffleQuestions: true,
-      templateLayout: "split",
       timeLimitMinutes: 35,
       title: "Package A",
     });
@@ -113,7 +113,7 @@ describe("createQuizFromBankQuestions", () => {
     expect(deps.createQuiz).toHaveBeenCalledWith(expect.objectContaining({ kind: "test", title: "Package A" }));
     expect(deps.saveDraft).toHaveBeenCalledWith(
       expect.objectContaining({
-        playerTemplate: expect.objectContaining({ layout: "split", playerSize: "wide" }),
+        playerTemplate: createQuestionBankPlayerTemplate(),
         settings: expect.objectContaining({
           questionDefaults: expect.objectContaining({ shuffleAnswers: false, shuffleQuestions: true }),
           settings: expect.objectContaining({
@@ -181,6 +181,63 @@ describe("createQuizFromBankQuestions", () => {
             ],
           }),
         ],
+      }),
+    );
+  });
+
+  test("equal split of an uneven count still adds up to exactly 1000", async () => {
+    const deps = dependencies();
+    const three = ["qb-a", "qb-b", "qb-c"].map((id) => ({ ...question, id }));
+
+    await createQuizFromBankQuestions(three, deps);
+
+    const draft = vi.mocked(deps.saveDraft).mock.calls[0]?.[0];
+    const points = draft?.tree[0]?.slides.map((slide) => slide.questionSetSettings?.points);
+    expect(points).toEqual([333.34, 333.33, 333.33]);
+  });
+
+  test("writes custom per-question points and derives the passing rate from their sum", async () => {
+    const deps = dependencies();
+    const secondQuestion: QuestionBankQuestion = { ...question, id: "qb-b", stem: "Question B" };
+
+    await createQuizFromBankQuestions([question, secondQuestion], deps, {
+      passingScoreMode: "points",
+      passingScorePoints: 6,
+      pointsMode: "custom",
+      questionPoints: { "qb-a": 3, "qb-b": 7 },
+    });
+
+    expect(deps.saveDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        settings: expect.objectContaining({ settings: expect.objectContaining({ passingRate: 60 }) }),
+        tree: [
+          expect.objectContaining({
+            slides: [
+              expect.objectContaining({
+                questionSetSettings: expect.objectContaining({ points: 3 }),
+                feedbackRows: expect.arrayContaining([expect.objectContaining({ kind: "correct", score: 3 })]),
+              }),
+              expect.objectContaining({
+                questionSetSettings: expect.objectContaining({ points: 7 }),
+                feedbackRows: expect.arrayContaining([expect.objectContaining({ kind: "correct", score: 7 })]),
+              }),
+            ],
+          }),
+        ],
+      }),
+    );
+  });
+
+  test("passes acceptPartial onto every slide and the chosen theme into the player template", async () => {
+    const deps = dependencies();
+    const theme = applyQuizThemePreset(createQuestionBankPlayerTemplate(), quizThemePresets[4]);
+
+    await createQuizFromBankQuestions([question], deps, { acceptPartial: true, playerTemplate: theme });
+
+    expect(deps.saveDraft).toHaveBeenCalledWith(
+      expect.objectContaining({
+        playerTemplate: theme,
+        tree: [expect.objectContaining({ slides: [expect.objectContaining({ options: expect.objectContaining({ acceptPartial: true }) })] })],
       }),
     );
   });

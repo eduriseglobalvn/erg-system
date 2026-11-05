@@ -32,6 +32,7 @@ export function QuestionBankQuestionsView({
   onEditQuestion,
   onLevelChange,
   onOpenAutoPick,
+  onOpenQuestion,
   onPageChange,
   onSearchChange,
   onSelectAll,
@@ -58,6 +59,7 @@ export function QuestionBankQuestionsView({
   onEditQuestion: (question: QuestionBankQuestion) => void;
   onLevelChange: (levelId: string) => void;
   onOpenAutoPick: () => void;
+  onOpenQuestion: (question: QuestionBankQuestion) => void;
   onPageChange: (page: number) => void;
   onSearchChange: (value: string) => void;
   onSelectAll: () => void;
@@ -129,6 +131,7 @@ export function QuestionBankQuestionsView({
           isLoading={isLoading}
           loadFailed={loadFailed}
           onEditQuestion={onEditQuestion}
+          onOpenQuestion={onOpenQuestion}
           onPageChange={onPageChange}
           onQuestionSelectAll={onSelectAll}
           onQuestionToggle={onToggleQuestion}

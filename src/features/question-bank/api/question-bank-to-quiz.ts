@@ -11,6 +11,7 @@ import type {
   QuizPlayerTemplate,
   QuizProjectSettings,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { applyQuizThemePreset, defaultQuizThemePreset } from "@/features/lcms/quiz/quiz-theme/quiz-theme-presets";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 
 type QuizImportDefaults = {
@@ -19,11 +20,16 @@ type QuizImportDefaults = {
   positivePoints: number;
   negativePoints: number;
   shuffleAnswers: boolean;
+  acceptPartial?: boolean;
   correctFeedback: string;
   incorrectFeedback: string;
 };
 
-export const QUESTION_BANK_PACKAGE_TOTAL_POINTS = 1000;
+const QUESTION_BANK_PACKAGE_TOTAL_POINTS = 1000;
+/** Starting value of a question in "custom" points mode until the teacher types one. */
+const QUESTION_BANK_CUSTOM_DEFAULT_POINTS = 10;
+
+export type QuizPointsMode = "equal" | "custom";
 
 export type CreateQuizFromBankOptions = {
   kind?: "train" | "test";
@@ -32,11 +38,17 @@ export type CreateQuizFromBankOptions = {
   passingScoreMode?: "percent" | "points";
   passingScorePoints?: number;
   passingRate?: number;
-  templateLayout?: QuizPlayerTemplate["layout"];
-  playerSize?: QuizPlayerTemplate["playerSize"];
+  playerTemplate?: QuizPlayerTemplate;
   shuffleQuestions?: boolean;
   shuffleAnswers?: boolean;
+  /** "equal" splits QUESTION_BANK_PACKAGE_TOTAL_POINTS; "custom" reads questionPoints (questionId -> points). */
+  pointsMode?: QuizPointsMode;
+  questionPoints?: Record<string, number>;
+  /** Multi-answer questions score per correct answer instead of all-or-nothing. */
+  acceptPartial?: boolean;
 };
+
+type QuizPointsOptions = Pick<CreateQuizFromBankOptions, "pointsMode" | "questionPoints">;
 
 export type QuizDraftFromBankQuestions = {
   settings: QuizProjectSettings;
@@ -49,14 +61,13 @@ export function createQuizDraftFromBankQuestions(
   options: CreateQuizFromBankOptions = {},
 ): QuizDraftFromBankQuestions {
   const settings = createMockQuizProjectSettings();
-  const playerTemplate = createMockPlayerTemplate();
   const firstQuestion = questions[0] ?? null;
   const timeLimitMinutes = normalizeNumberOption(options.timeLimitMinutes, 0, 240, 20);
-  const totalPoints = getQuestionBankPackageTotalPoints(questions);
+  const totalPoints = getQuestionBankPackageMaxPoints(questions, options);
   const passingRate = resolvePassingRate(options, totalPoints, settings.settings.passingRate);
   const shuffleAnswers = options.shuffleAnswers ?? settings.questionDefaults.shuffleAnswers;
   const shuffleQuestions = options.shuffleQuestions ?? settings.settings.randomizeQuestionOrder;
-  const questionPoints = getQuestionBankAutoQuestionPoints(questions.length);
+  const acceptPartial = options.acceptPartial ?? false;
   let nextId = 0;
   const createId = (prefix: string) => {
     nextId += 1;
@@ -94,24 +105,23 @@ export function createQuizDraftFromBankQuestions(
         shuffleQuestions,
       },
     },
-    playerTemplate: {
-      ...playerTemplate,
-      layout: options.templateLayout ?? playerTemplate.layout,
-      playerSize: options.playerSize ?? playerTemplate.playerSize,
-    },
+    playerTemplate: options.playerTemplate ?? createQuestionBankPlayerTemplate(),
     tree: [
       {
         id: "group-question-bank-selection",
         title: firstQuestion?.categoryLabel ?? "Question bank selection",
         rule: "all",
         randomCount: 0,
-        slides: questions.map((question) =>
+        slides: questions.map((question, index) =>
           createQuizSlideFromBankQuestion(question, createId, {
             questionFont: settings.questionDefaults.questionFont,
             answerFont: settings.questionDefaults.answerFont,
-            positivePoints: questionPoints,
+            positivePoints: options.pointsMode === "custom"
+              ? getQuestionBankQuestionPoints(question.id, questions.length, options)
+              : getQuestionBankEqualShare(questions.length, index),
             negativePoints: settings.questionDefaults.negativePoints,
             shuffleAnswers,
+            acceptPartial,
             correctFeedback: settings.questionDefaults.correctFeedback,
             incorrectFeedback: settings.questionDefaults.incorrectFeedback,
           }),
@@ -150,8 +160,35 @@ export function getQuestionBankAutoQuestionPoints(questionCount: number) {
   return Math.round((QUESTION_BANK_PACKAGE_TOTAL_POINTS / questionCount) * 100) / 100;
 }
 
-export function getQuestionBankPackageTotalPoints(questions: QuestionBankQuestion[]) {
+/** Equal shares in cents that add up to exactly the package total; leftover cents go to the first questions, like the backend split. */
+function getQuestionBankEqualShare(questionCount: number, index: number) {
+  const cents = QUESTION_BANK_PACKAGE_TOTAL_POINTS * 100;
+  return (Math.floor(cents / questionCount) + (index < cents % questionCount ? 1 : 0)) / 100;
+}
+
+function getQuestionBankPackageTotalPoints(questions: QuestionBankQuestion[]) {
   return questions.length > 0 ? QUESTION_BANK_PACKAGE_TOTAL_POINTS : 0;
+}
+
+/** Points of one question; invalid custom values fall back to the custom default. */
+export function getQuestionBankQuestionPoints(questionId: string, questionCount: number, options: QuizPointsOptions) {
+  if (options.pointsMode !== "custom") return getQuestionBankAutoQuestionPoints(questionCount);
+  const points = options.questionPoints?.[questionId];
+  return typeof points === "number" && Number.isFinite(points) && points > 0
+    ? Math.round(points * 100) / 100
+    : QUESTION_BANK_CUSTOM_DEFAULT_POINTS;
+}
+
+/** Equal mode keeps the fixed package total; custom mode is the sum of the question points. */
+export function getQuestionBankPackageMaxPoints(questions: QuestionBankQuestion[], options: QuizPointsOptions) {
+  if (options.pointsMode !== "custom") return getQuestionBankPackageTotalPoints(questions);
+  const sum = questions.reduce((total, question) => total + getQuestionBankQuestionPoints(question.id, questions.length, options), 0);
+  return Math.round(sum * 100) / 100;
+}
+
+/** The player template a new package starts with: ERG Xanh. */
+export function createQuestionBankPlayerTemplate(): QuizPlayerTemplate {
+  return applyQuizThemePreset(createMockPlayerTemplate(), defaultQuizThemePreset);
 }
 
 export function createQuizSlideFromBankQuestion(
@@ -200,6 +237,7 @@ export function createQuizSlideFromBankQuestion(
     feedbackRows,
     options: {
       shuffleAnswers: defaults.shuffleAnswers,
+      acceptPartial: defaults.acceptPartial,
     },
     questionSettings: question.settings ?? {},
     questionSetSettings: {
