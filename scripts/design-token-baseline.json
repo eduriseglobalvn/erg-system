@@ -216,8 +216,8 @@
     "font": 4
   },
   "src/components/shared/erg-calendar-navigator.tsx": {
-    "hex": 6,
-    "font": 5
+    "hex": 5,
+    "font": 3
   },
   "src/components/shared/erg-calendar-scope-picker.tsx": {
     "hex": 7,

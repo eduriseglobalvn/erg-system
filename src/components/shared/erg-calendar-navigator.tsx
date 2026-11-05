@@ -55,7 +55,7 @@ export function CalendarNavigatorPanel({
 
       <Divider sx={{ my: 0.75, borderColor: "#E0E3E7" }} />
       <Stack spacing={0.25} sx={miniCalendarListSx}>
-        <Typography sx={{ color: "#172033", fontSize: 11.75, fontWeight: 950, letterSpacing: 0, textTransform: "uppercase" }}>
+        <Typography variant="caption" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>
           {calendarListTitle}
         </Typography>
         {laneSummaries.map((calendar) => (

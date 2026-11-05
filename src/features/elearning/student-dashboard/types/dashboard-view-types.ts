@@ -34,6 +34,8 @@ export type DashboardCopy = {
   heroDescription: (taskTitle: string, dueDate: string) => string;
   heroAllDone: string;
   heroEmpty: string;
+  todayEmptyDescription: string;
+  todayDoneDescription: string;
   primaryAction: string;
   secondaryAction: string;
   stats: {

@@ -51,7 +51,9 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
         <SectionCard action={<Button variant="text" onClick={() => onPageChange("assignments")} size="small">Xem tất cả</Button>} title={copy.todayTitle}>
           <Stack spacing={1.25}>
             {assignmentsLoading ? Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />) : openAssignments.slice(0, 3).map((assignment) => <AssignmentListItem key={assignment.id} assignment={assignment} copy={copy} onOpenAssignment={onOpenAssignment} />)}
-            {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? <EmptyPanel description="Tất cả bài tập đã được nộp. Tuyệt vời!" title="Không có bài tập cần làm" /> : null}
+            {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? (completedAssignments.length > 0
+              ? <EmptyPanel description={copy.todayDoneDescription} title={copy.heroAllDone} />
+              : <EmptyPanel description={copy.todayEmptyDescription} title={copy.heroEmpty} />) : null}
           </Stack>
         </SectionCard>
         <Stack spacing={2.5}>
@@ -62,6 +64,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
           ) : null}
           <SectionCard action={<Button variant="text" onClick={() => onPageChange("discussion")} size="small">Mở diễn đàn</Button>} title={copy.discussionTitle}>
             <Stack spacing={1}>
+              {discussionPreview.length === 0 ? <EmptyPanel description={copy.discussionEmptyDescription} title={copy.discussionEmptyTitle} /> : null}
               {discussionPreview.map((post) => (
                 <Paper key={post.id} sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">

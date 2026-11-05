@@ -8,6 +8,10 @@ import "@fontsource/be-vietnam-pro/700.css";
 // Phones get 44px touch targets on every button and input; desktop keeps the dense 40/34px sizes.
 const phone = "@media (max-width: 599.95px)";
 const phoneTarget = { [phone]: { minHeight: 44 } };
+const { duration, easing } = t.motion;
+const fast = (property: string) => `${property} ${duration.fast}ms ${easing.standard}`;
+type TintColor = "success" | "warning" | "error" | "info";
+const tintColors = new Set<string>(["success", "warning", "error", "info"]);
 
 export const ergEnterpriseTheme = createTheme({
   palette: {
@@ -45,8 +49,26 @@ export const ergEnterpriseTheme = createTheme({
       disabled: t.color.textSoft,
     },
   },
+  // shape.borderRadius stays 8: it is the multiplier for every numeric sx borderRadius in the app.
   shape: {
     borderRadius: t.radius.sm,
+  },
+  transitions: {
+    duration: {
+      shortest: duration.instant,
+      shorter: duration.fast,
+      short: duration.base,
+      standard: duration.base,
+      complex: duration.slow,
+      enteringScreen: duration.slow,
+      leavingScreen: duration.base,
+    },
+    easing: {
+      easeInOut: easing.standard,
+      easeOut: easing.emphasized,
+      easeIn: easing.exit,
+      sharp: easing.standard,
+    },
   },
   typography: {
     fontFamily: t.font.body,
@@ -73,7 +95,7 @@ export const ergEnterpriseTheme = createTheme({
           textRendering: "optimizeLegibility",
         },
         "strong, b": {
-          fontWeight: 750,
+          fontWeight: 700,
         },
         "@media (prefers-reduced-motion: reduce)": {
           "*, *::before, *::after": {
@@ -91,7 +113,7 @@ export const ergEnterpriseTheme = createTheme({
       },
       styleOverrides: {
         root: {
-          transition: "background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease, opacity 160ms ease, transform 160ms ease",
+          transition: ["background-color", "border-color", "box-shadow", "color", "opacity", "transform"].map(fast).join(", "),
           "&.Mui-focusVisible": {
             boxShadow: t.shadow.focus,
           },
@@ -107,7 +129,7 @@ export const ergEnterpriseTheme = createTheme({
         root: {
           minHeight: t.size.controlMd,
           ...phoneTarget,
-          borderRadius: t.radius.xs,
+          borderRadius: t.radius.control,
           fontWeight: 600,
           letterSpacing: 0,
           paddingInline: 18,
@@ -164,7 +186,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           [phone]: { minHeight: 44, minWidth: 44 },
-          borderRadius: t.radius.md,
+          borderRadius: t.radius.control,
           color: t.color.textMuted,
           "&:hover": {
             backgroundColor: t.color.surfaceMuted,
@@ -183,7 +205,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           borderColor: t.color.border,
-          borderRadius: t.radius.sm,
+          borderRadius: t.radius.card,
           boxShadow: "none", // shadows only for menu/popover/dialog (plan 7.1)
         },
       },
@@ -191,7 +213,7 @@ export const ergEnterpriseTheme = createTheme({
     MuiPopover: {
       styleOverrides: {
         paper: {
-          boxShadow: t.shadow.sm,
+          boxShadow: t.shadow.float,
         },
       },
     },
@@ -199,7 +221,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         root: {
           border: `1px solid ${t.color.border}`,
-          borderRadius: t.radius.sm,
+          borderRadius: t.radius.card,
           backgroundImage: "none",
           boxShadow: "none", // cards are separated by border only (plan 7.1); shadows are for menus/dialogs
         },
@@ -210,7 +232,7 @@ export const ergEnterpriseTheme = createTheme({
         root: {
           minHeight: t.size.controlMd,
           ...phoneTarget,
-          borderRadius: t.radius.md,
+          borderRadius: t.radius.control,
           backgroundColor: t.color.surface,
           fontWeight: 400,
           "& .MuiOutlinedInput-notchedOutline": {
@@ -281,18 +303,23 @@ export const ergEnterpriseTheme = createTheme({
         },
       },
     },
+    // Status chips: soft tint + dark text of the same hue, never solid colour with white text (plan 2.1 S12).
     MuiChip: {
       styleOverrides: {
-        root: {
-          borderRadius: t.radius.sm,
-          fontWeight: 600,
+        root: ({ ownerState }) => {
+          const base = { borderRadius: t.radius.chip, fontWeight: 600 };
+          const color = ownerState.color ?? "default";
+          if (ownerState.variant === "outlined") return base;
+          const tint = tintColors.has(color) ? t.statusTint[color as TintColor] : color === "default" ? t.statusTint.neutral : null;
+          if (!tint) return base;
+          return { ...base, backgroundColor: tint.bg, color: tint.color, "& .MuiChip-icon": { color: tint.dot } };
         },
       },
     },
     MuiDialog: {
       styleOverrides: {
         paper: {
-          borderRadius: t.radius.xl,
+          borderRadius: t.radius.shell,
           border: `1px solid ${t.color.border}`,
           boxShadow: t.shadow.md,
         },
@@ -312,7 +339,7 @@ export const ergEnterpriseTheme = createTheme({
           backgroundColor: t.color.surface,
           backgroundImage: "none",
           borderColor: t.color.border,
-          boxShadow: t.shadow.sm,
+          boxShadow: t.shadow.float,
         },
       },
     },
@@ -323,8 +350,8 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         paper: {
           border: `1px solid ${t.color.border}`,
-          borderRadius: t.radius.md,
-          boxShadow: t.shadow.sm,
+          borderRadius: t.radius.card,
+          boxShadow: t.shadow.float,
           marginTop: 6,
         },
         list: {
@@ -373,7 +400,7 @@ export const ergEnterpriseTheme = createTheme({
       styleOverrides: {
         tooltip: {
           borderRadius: t.radius.sm,
-          fontWeight: 700,
+          fontWeight: 500,
         },
       },
     },
@@ -391,10 +418,10 @@ export const ergEnterpriseTheme = createTheme({
         root: {
           "& .MuiSnackbarContent-root": {
             backgroundColor: t.color.text,
-            borderRadius: t.radius.md,
-            boxShadow: t.shadow.sm,
+            borderRadius: t.radius.control,
+            boxShadow: t.shadow.float,
             color: t.color.surface,
-            fontWeight: 650,
+            fontWeight: 600,
           },
         },
       },

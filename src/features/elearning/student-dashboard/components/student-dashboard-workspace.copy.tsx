@@ -20,6 +20,8 @@ export const viCopy: DashboardCopy = {
   heroDescription: (taskTitle: string, dueDate: string) => (dueDate ? `${taskTitle} · hạn ${dueDate}` : taskTitle),
   heroAllDone: "Bạn đã xong hết bài",
   heroEmpty: "Chưa có bài nào được giao",
+  todayEmptyDescription: "Khi giáo viên giao bài, bài sẽ hiện ở đây.",
+  todayDoneDescription: "Bạn đã nộp tất cả bài được giao.",
   primaryAction: "Làm bài ưu tiên",
   secondaryAction: "Xem bài tập",
   stats: {
@@ -116,6 +118,8 @@ export const enCopy: DashboardCopy = {
   heroDescription: (taskTitle: string, dueDate: string) => (dueDate ? `${taskTitle} · due ${dueDate}` : taskTitle),
   heroAllDone: "You are all caught up",
   heroEmpty: "No assignments yet",
+  todayEmptyDescription: "Assignments from your teacher will appear here.",
+  todayDoneDescription: "You have submitted every assignment.",
   primaryAction: "Open priority task",
   secondaryAction: "View assignments",
   stats: {

@@ -35,11 +35,13 @@
 ### Design System: ERG operational UI tokens
 - **Primary:** `#0F6CBD` (xanh, token `primary` trong `erg-enterprise-tokens.ts`). Quyết định 11/2026 theo `KE_HOACH_TRIEN_KHAI.md` mục 7.1. `#696CFF` (tím) chỉ còn ở code cũ, đang thay dần bằng token — KHÔNG thêm mới.
 - **Typography:** MỘT họ duy nhất **Be Vietnam Pro** (weight 400/500/600/700, subset latin + vietnamese), JetBrains Mono (mono). KHÔNG thêm họ font khác vào theme.
-- **Sidebar (admin/giáo viên):** thẻ sáng bo góc, viền 1px, không bóng; mục đang chọn là nút `primary` đặc chữ trắng; nhóm xổ xuống có mục con thụt vào; huy hiệu số nền nhạt; 280px. Học viên: menu phẳng + bottom nav trên mobile (hằng số màu trong `portal-sidebar-styles.ts`).
+- **Sidebar (admin/giáo viên):** thẻ sáng nổi (bo `radius.shell` 20, bóng `shadow.float` — vật nổi duy nhất đứng yên); mục đang chọn là nút `primary` đặc chữ trắng; nhóm xổ xuống có mục con thụt vào; huy hiệu số nền nhạt; 264px (`size.sidebar`). Học viên: menu phẳng + bottom nav trên mobile (hằng số màu trong `portal-sidebar-styles.ts`).
 - **Bảng:** Header bg neutral-50, cell padding 12px 16px, border neutral-200
-- **Button:** border-radius sm (6px). Mỗi trang đúng 1 nút `contained`; phụ `outlined`/`text`; nguy hiểm `color="error"`.
+- **Bo góc theo vai trò** (`radius` trong tokens): `shell` 20 (sidebar, sheet, dialog), `card` 14 (card, menu, popover), `control` 10 (nút, ô nhập), `chip` 999. `shape.borderRadius` giữ 8 vì là hệ số nhân của `sx borderRadius: n`.
+- **Chuyển động:** dùng `motion.duration` (100/160/220/320) và `motion.easing` (standard/emphasized/exit) trong tokens; `theme.transitions` đã map sẵn.
+- **Button:** bo `radius.control`. Mỗi trang đúng 1 nút `contained`; phụ `outlined`/`text`; nguy hiểm `color="error"`.
 - **Badge:** Pill shape, 4 status colors (success/warning/danger/info)
-- **Card:** chỉ viền 1px (neutral-200), không shadow; shadow chỉ cho menu/popover/dialog. p-6, radius-md (8px).
+- **Card:** chỉ viền 1px (neutral-200), không shadow; shadow chỉ cho menu/popover/dialog/sidebar (`shadow.float`). p-6, bo `radius.card`.
 - **Màu/cỡ chữ/độ đậm:** dùng token, không hex hay `fontSize`/`fontWeight` số viết tay trong code mới. Tiêu đề trang 24/600, body 14/400. Chi tiết: `KE_HOACH_TRIEN_KHAI.md` mục 7.1.
 
 ---

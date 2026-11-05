@@ -5,7 +5,7 @@ import { ergEnterpriseTokens } from "./erg-enterprise-tokens";
 describe("ERG enterprise theme", () => {
   it("uses the approved operational dimensions and typography", () => {
     expect(ergEnterpriseTokens.size.header).toBe(64);
-    expect(ergEnterpriseTokens.size.sidebar).toBe(280);
+    expect(ergEnterpriseTokens.size.sidebar).toBe(264);
     expect(ergEnterpriseTheme.shape.borderRadius).toBe(8);
     expect(ergEnterpriseTheme.palette.primary.main).toBe("#0F6CBD");
     expect(ergEnterpriseTheme.typography.fontFamily).toContain("Be Vietnam Pro");

@@ -9,11 +9,11 @@ export const NAV_BORDER = ergEnterpriseTokens.color.border;
 export const NAV_ACTIVE_GRADIENT = `linear-gradient(135deg, ${NAV_PRIMARY} 0%, ${lighten(NAV_PRIMARY, 0.28)} 100%)`;
 export const NAV_ACTIVE_SHADOW = `0 8px 18px ${alpha(NAV_PRIMARY, 0.35)}`;
 export const NAV_HOVER_BG = alpha(NAV_PRIMARY, 0.08);
-export const NAV_CARD_SHADOW = "0 10px 30px rgba(15, 23, 42, 0.08)";
+export const NAV_CARD_SHADOW = ergEnterpriseTokens.shadow.float;
 export const NAV_RAISED_SHADOW = "0 6px 16px rgba(15, 23, 42, 0.08)";
 
-export const NAV_CARD_RADIUS = "20px";
-export const NAV_RAISED_RADIUS = "14px";
+export const NAV_CARD_RADIUS = `${ergEnterpriseTokens.radius.shell}px`;
+export const NAV_RAISED_RADIUS = `${ergEnterpriseTokens.radius.card}px`;
 export const NAV_ITEM_RADIUS = "12px";
 export const NAV_ITEM_HEIGHT = 44;
 export const NAV_CHILD_HEIGHT = 40;

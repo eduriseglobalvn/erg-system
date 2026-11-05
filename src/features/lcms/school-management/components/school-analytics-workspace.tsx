@@ -45,7 +45,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
             Báo cáo vận hành theo trường
           </Typography>
           <Typography sx={{ color: ergEnterpriseTokens.color.textMuted, fontSize: "0.825rem", mt: 0.35 }}>
-            Các chỉ số dưới đây lấy trực tiếp từ schoolOperations và chịu scope của phiên quản trị backend.
+            {school.name} · {summary.classCount} lớp · {summary.studentCount} học sinh
           </Typography>
         </Box>
         <Button
@@ -81,7 +81,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
       {/* 4 Apple KPI Cards */}
       <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)", xl: "repeat(4, 1fr)" } }}>
         <AnalyticsMetricCard
-          detail="Số lượng do backend trả về"
+          detail="Đang theo học tại trường"
           icon={<GroupsRoundedIcon sx={{ fontSize: 20 }} />}
           iconBg={alpha(ergEnterpriseTokens.color.primary, 0.08)}
           iconColor={ergEnterpriseTokens.color.primary}
@@ -89,7 +89,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
           value={summary.studentCount}
         />
         <AnalyticsMetricCard
-          detail="Lớp trong scope hiện tại"
+          detail="Đang hoạt động"
           icon={<ClassRoundedIcon sx={{ fontSize: 20 }} />}
           iconBg="rgba(175, 82, 222, 0.12)"
           iconColor="#7E22CE"
@@ -105,7 +105,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
           value={summary.subjectCount}
         />
         <AnalyticsMetricCard
-          detail={summary.averageScore === null ? "Backend chưa trả điểm" : `${summary.scoredStudentCount} học sinh có điểm`}
+          detail={summary.averageScore === null ? "Chưa có bài được chấm" : `${summary.scoredStudentCount} học sinh có điểm`}
           icon={<ScoreboardRoundedIcon sx={{ fontSize: 20 }} />}
           iconBg={alpha(ergEnterpriseTokens.color.warning, 0.12)}
           iconColor="#B45309"
@@ -127,7 +127,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
             "& .MuiAlert-icon": { color: ergEnterpriseTokens.color.warning },
           }}
         >
-          Có {summary.atRiskCount} học sinh đang có trạng thái cần theo dõi theo dữ liệu backend. Hãy mở workspace học sinh để xử lý.
+          Có {summary.atRiskCount} học sinh cần theo dõi. Mở danh sách học sinh để xử lý.
         </Alert>
       ) : (
         <Alert
@@ -231,7 +231,7 @@ export function SchoolAnalyticsWorkspace({ school }: { school: PartnerSchool }) 
         </TableContainer>
         {!school.classes.length ? (
           <Typography color="text.secondary" sx={{ p: 4, textAlign: "center" }} variant="body2">
-            Backend chưa trả danh sách lớp cho scope này.
+            Trường chưa có lớp nào.
           </Typography>
         ) : null}
       </Paper>

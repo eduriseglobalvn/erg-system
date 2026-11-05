@@ -19,8 +19,17 @@ export async function loadTeachingCalendarSessionCatalog(portal: GraphQlPortal =
 export async function loadTeachingCalendarReferenceCatalog(portal: GraphQlPortal = "lms", signal?: AbortSignal) {
   if (!hasApiBase()) return emptyErgScheduleCatalog();
   const scopedSchools = await loadScopedEducationUnitSchools(portal, signal);
-  if (scopedSchools.length) return mapSchoolsToErgScheduleCatalog(scopedSchools);
-  const organizationSchools = await loadOrganizationEducationUnitSchools(portal, signal);
+  // The LMS list only knows school ids (name === id); take display names from the organization list.
+  if (scopedSchools.length && scopedSchools.every((school) => school.name !== school.id)) return mapSchoolsToErgScheduleCatalog(scopedSchools);
+  const organizationUnits = await loadOrganizationEducationUnits(portal, signal);
+  const organizationSchools = mapEducationUnitsToScheduleSchools(organizationUnits);
+  if (scopedSchools.length) {
+    // Use every unit for names: some schools carry a level type ("SECONDARY") that the school filter drops.
+    const names = new Map(organizationUnits.map((unit) => [unit.id, unit.name?.trim() || unit.label?.trim() || unit.id]));
+    return mapSchoolsToErgScheduleCatalog(scopedSchools
+      .map((school) => ({ id: school.id, name: school.name === school.id ? names.get(school.id) ?? school.name : school.name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "vi")));
+  }
   if (organizationSchools.length) return mapSchoolsToErgScheduleCatalog(organizationSchools);
   return loadTeachingCalendarSessionCatalog(portal, signal);
 }
@@ -49,10 +58,10 @@ async function loadScopedEducationUnitSchools(portal: GraphQlPortal, signal?: Ab
   }
 }
 
-async function loadOrganizationEducationUnitSchools(portal: GraphQlPortal, signal?: AbortSignal) {
+async function loadOrganizationEducationUnits(portal: GraphQlPortal, signal?: AbortSignal): Promise<EducationUnitDTO[]> {
   try {
     const response = await apiRequest<OrganizationEducationUnitListResponseDTO>(API_ENDPOINTS.legacy.v1EducationUnits, { portal, signal });
-    return mapEducationUnitsToScheduleSchools(response.educationUnits ?? response.items ?? []);
+    return response.educationUnits ?? response.items ?? [];
   } catch (error) {
     if (signal?.aborted) throw signal.reason ?? error;
     return [];

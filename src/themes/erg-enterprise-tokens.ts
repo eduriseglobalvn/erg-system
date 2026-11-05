@@ -37,25 +37,40 @@ export const ergEnterpriseTokens = {
     body: '"Be Vietnam Pro", "Public Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
     mono: '"JetBrains Mono", "SFMono-Regular", Consolas, monospace',
   },
+  // Role radii follow the floating sidebar (KE_HOACH_REFACTOR_UI.md 3.1); xs–xl stay for older code.
   radius: {
     xs: 6,
     sm: 8,
     md: 10,
     lg: 14,
     xl: 18,
+    shell: 20,
+    card: 14,
+    control: 10,
+    chip: 999,
   },
   shadow: {
     xs: "0 1px 2px rgba(15, 23, 42, 0.04)",
     sm: "0 8px 24px rgba(15, 23, 42, 0.06)",
     md: "0 18px 48px rgba(15, 23, 42, 0.1)",
+    // The only resting elevation: sidebar card, menus, popovers, phone dock, toasts.
+    float: "0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.08)",
     focus: "0 0 0 3px rgba(15, 108, 189, 0.16)",
+  },
+  motion: {
+    duration: { instant: 100, fast: 160, base: 220, slow: 320 },
+    easing: {
+      standard: "cubic-bezier(0.2, 0, 0, 1)",
+      emphasized: "cubic-bezier(0.16, 1, 0.3, 1)",
+      exit: "cubic-bezier(0.3, 0, 1, 1)",
+    },
   },
   size: {
     controlSm: 34,
     controlMd: 40,
     controlLg: 46,
     header: 64,
-    sidebar: 280,
+    sidebar: 264,
   },
 } as const;
 

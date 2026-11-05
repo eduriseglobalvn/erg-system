@@ -50,6 +50,8 @@ export function QuestionBankCompactHeader({
             }}
           >
             <Box component="span" sx={{ display: "block" }}>{titleLines[0]}</Box>
+            {/* Space keeps the accessible name "Ngân hàng câu hỏi" when the lines are block spans. */}
+            {titleLines[1] ? " " : null}
             {titleLines[1] ? <Box component="span" sx={{ display: "block", color: ergEnterpriseTokens.color.primary }}>{titleLines[1]}</Box> : null}
           </Typography>
         </Stack>
