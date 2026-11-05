@@ -1,8 +1,10 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { createElement, useSyncExternalStore, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { I18nProvider } from "@/platform/i18n";
+import { ApiClientError } from "@/lib/api-client/errors";
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import { slideFingerprint } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
 import type { UseQuizDraftSyncResult } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
@@ -38,7 +40,12 @@ const fakeSync = (overrides: Partial<UseQuizDraftSyncResult> = {}): UseQuizDraft
 });
 
 /** Serves `sync` the way useQuizDraftSync does: an external store that changes before flushNow resolves. */
-const slides: QuizEditorSlide[] = ["s1", "s2", "s3"].map((id) => ({ id, title: `Câu ${id}`, kind: "multiple-choice" }));
+const slides: QuizEditorSlide[] = ["s1", "s2", "s3"].map((id) => ({
+  id,
+  title: `Câu ${id}`,
+  kind: "multiple-choice",
+  choices: [{ id: "a", label: "4", correct: true }, { id: "b", label: "5", correct: false }],
+}));
 
 /** Applies what the hook handed to the quizProject setter, as React would. */
 function settingsAfter(updateQuizProject: ReturnType<typeof vi.fn>, current: QuizProjectSettings) {
@@ -46,9 +53,12 @@ function settingsAfter(updateQuizProject: ReturnType<typeof vi.fn>, current: Qui
   return typeof update === "function" ? update(current) : update;
 }
 
+const globalMutationError = vi.fn();
+
 function setup(initial: UseQuizDraftSyncResult, questionSlides = slides) {
-  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
-  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
+  const client = new QueryClient({ defaultOptions: { mutations: { retry: false } }, mutationCache: new MutationCache({ onError: globalMutationError }) });
+  const wrapper = ({ children }: { children: ReactNode }) =>
+    createElement(QueryClientProvider, { client }, createElement(I18nProvider, null, children));
   let snapshot = initial;
   const listeners = new Set<() => void>();
   const subscribe = (listener: () => void) => {
@@ -61,7 +71,6 @@ function setup(initial: UseQuizDraftSyncResult, questionSlides = slides) {
   };
   const setSlidesPublished = vi.fn();
   const updateQuizProject = vi.fn();
-  const onPublished = vi.fn();
   const view = renderHook(
     () => useQuizEditorPublish({
       sync: useSyncExternalStore(subscribe, () => snapshot),
@@ -69,11 +78,10 @@ function setup(initial: UseQuizDraftSyncResult, questionSlides = slides) {
       questionSlides,
       setSlidesPublished,
       updateQuizProject,
-      onPublished,
     }),
     { wrapper },
   );
-  return { ...view, setSync, setSlidesPublished, updateQuizProject, onPublished };
+  return { ...view, setSync, setSlidesPublished, updateQuizProject };
 }
 
 /** Like the session: the engine sends, then the snapshot changes, then flushNow resolves. No act(), so React schedules as in the app. */
@@ -128,8 +136,7 @@ describe("useQuizEditorPublish", () => {
     const next = settingsAfter(view.updateQuizProject, current);
     expect(next.publishedFingerprints).toEqual(Object.fromEntries(slides.map((slide) => [slide.id, slideFingerprint(slide)])));
     expect(next.info).toEqual(current.info);
-    expect(view.onPublished).toHaveBeenCalledTimes(1);
-    expect(toast.success).toHaveBeenCalled();
+    expect(toast.success).toHaveBeenCalledWith("Đã xuất bản");
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
   });
 
@@ -155,11 +162,63 @@ describe("useQuizEditorPublish", () => {
 
     actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
     await view.result.current.handlePublish();
+    await waitFor(() => expect(view.result.current.publishFailure).not.toBeNull());
 
     expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
     expect(view.updateQuizProject).not.toHaveBeenCalled();
     expect(view.setSlidesPublished).not.toHaveBeenCalled();
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
+  });
+
+  it("keeps a server rejection in place: message and detail lines, no toast, cleared on the next publish", async () => {
+    publishQuizEditorDraft.mockRejectedValueOnce(
+      new ApiClientError("Không xuất bản được", "VALIDATION", 422, ["Câu 2 thiếu đáp án", { message: "Câu 3 thiếu đề bài" }, 7]),
+    );
+    const view = setup(fakeSync());
+
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+
+    await waitFor(() =>
+      expect(view.result.current.publishFailure).toEqual({ message: "Không xuất bản được", items: ["Câu 2 thiếu đáp án", "Câu 3 thiếu đề bài"] }),
+    );
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(globalMutationError.mock.calls[0]?.[3]).toMatchObject({ meta: { silent: true } });
+    expect(view.updateQuizProject).not.toHaveBeenCalled();
+
+    await view.result.current.handlePublish();
+    await waitFor(() => expect(view.result.current.publishFailure).toBeNull());
+    expect(view.updateQuizProject).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the failure on dismiss", async () => {
+    publishQuizEditorDraft.mockRejectedValueOnce(new Error("Máy chủ bận"));
+    const view = setup(fakeSync());
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+    await waitFor(() => expect(view.result.current.publishFailure).toEqual({ message: "Máy chủ bận", items: [] }));
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = true;
+    act(() => view.result.current.dismissPublishFailure());
+    expect(view.result.current.publishFailure).toBeNull();
+  });
+
+  it("counts only unfinished question slides, with their number in the quiz, and blocks publish", async () => {
+    const intro: QuizEditorSlide = { id: "i1", title: "", kind: "intro-slide" };
+    const blank: QuizEditorSlide = { ...slides[1]!, id: "s2", title: "" };
+    const { result } = setup(fakeSync(), [intro, slides[0]!, blank]);
+
+    expect(result.current.publishBlockedReason).toBe("Còn 1 câu chưa sẵn sàng");
+    expect(result.current.publishReadinessOnly).toBe(true);
+    expect(result.current.notReady).toEqual([{ slideId: "s2", number: 2, title: "", label: "Chưa có đề bài" }]);
+    await act(() => result.current.handlePublish());
+    expect(publishQuizEditorDraft).not.toHaveBeenCalled();
+  });
+
+  it("gives offline and conflict priority over readiness, as a hard block", () => {
+    const blank: QuizEditorSlide = { ...slides[1]!, title: "" };
+    const { result } = setup(fakeSync({ status: { kind: "offline", pendingEdits: 0 } }), [blank]);
+    expect(result.current.publishBlockedReason).toBe("Cần có mạng để xuất bản.");
+    expect(result.current.publishReadinessOnly).toBe(false);
   });
 
   it("publishes when the device is full but every change reached the server", async () => {

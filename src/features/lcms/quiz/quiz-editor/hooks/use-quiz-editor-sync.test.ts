@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { ApiClientError } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
+import { I18nProvider } from "@/platform/i18n";
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 
 import {
@@ -46,7 +47,7 @@ const settle = (ms = 0) => act(async () => { await vi.advanceTimersByTimeAsync(m
 
 function setup(quizId: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, createElement(I18nProvider, null, children));
   return renderHook(
     ({ id }: { id: string }) => {
       const editor = useQuizEditorState(null);
@@ -64,7 +65,6 @@ function setup(quizId: string) {
         selectedSlideId: null,
         questionEditorOpen: false,
         onQuizCreated: vi.fn(),
-        onPublished: vi.fn(),
       });
       return { editor, sync };
     },

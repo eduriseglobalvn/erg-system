@@ -16,7 +16,7 @@ import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/qui
 const blankDraft = () => createBlankDraft("", "local-new-quiz");
 
 /** Autosave, server sync and publish for the quiz editor: what the workspace renders around the editor state. */
-export function useQuizEditorSync({ quizId, scope, editor, questionSlides, selectedSlideId, questionEditorOpen, onQuizCreated, onPublished }: {
+export function useQuizEditorSync({ quizId, scope, editor, questionSlides, selectedSlideId, questionEditorOpen, onQuizCreated }: {
   quizId: string;
   scope: Pick<ReturnType<typeof useQuizEditorScope>, "questionBankQuery" | "questionBankSubjects" | "selectedCourseId" | "selectedLevelId" | "selectedTopicId">;
   editor: Pick<
@@ -27,7 +27,6 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlides, selec
   selectedSlideId: string | null;
   questionEditorOpen: boolean;
   onQuizCreated: (quizId: string) => void;
-  onPublished: () => void;
 }) {
   const { quizProject, playerTemplate, groups, hydrateDraftDocument, markAllAsSavedDraft, setSlidesPublished, updateQuizProject } = editor;
   const { questionBankSubjects, selectedCourseId, selectedLevelId, selectedTopicId } = scope;
@@ -107,7 +106,6 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlides, selec
     questionSlides,
     setSlidesPublished,
     updateQuizProject,
-    onPublished,
   });
   return {
     sync,

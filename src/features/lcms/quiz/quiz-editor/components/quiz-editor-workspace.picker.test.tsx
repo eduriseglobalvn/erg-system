@@ -6,7 +6,7 @@ import { I18nProvider } from "@/platform/i18n";
 import { QuizEditorWorkspace } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
-const syncState = vi.hoisted(() => ({ status: "idle" as unknown, ready: true }));
+const syncState = vi.hoisted(() => ({ status: "idle" as unknown, ready: true, loadFailed: false }));
 const levelTopicQuizzes = vi.hoisted(() => vi.fn());
 
 // Only the add-question wiring is under test: the data hooks and the heavy children are stubbed.
@@ -37,7 +37,11 @@ vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync", () => ({
     handlePublish: vi.fn(),
     isPublishing: false,
     publishBlockedReason: null,
-    loadFailed: false,
+    publishReadinessOnly: false,
+    notReady: [],
+    publishFailure: null,
+    dismissPublishFailure: vi.fn(),
+    loadFailed: syncState.loadFailed,
     retrying: false,
     retry: vi.fn(),
   }),
@@ -192,6 +196,26 @@ describe("QuizEditorWorkspace add-question picker", () => {
       expect((levelTopicQuizzes.mock.lastCall![0] as { openQuiz: unknown }).openQuiz).toBeNull();
     } finally {
       syncState.ready = true;
+    }
+  });
+
+  it("says why Xuất bản waits: the draft is opening, or it failed to open", async () => {
+    syncState.ready = false;
+    try {
+      for (const [loadFailed, reason] of [[false, "Đang mở bản nháp"], [true, "Chưa mở được bản nháp"]] as const) {
+        syncState.loadFailed = loadFailed;
+        const { unmount } = render(
+          <QueryClientProvider client={client}><I18nProvider>
+            <QuizEditorWorkspace activeLeaf={leaf} />
+          </I18nProvider></QueryClientProvider>,
+        );
+        fireEvent.mouseOver(screen.getByRole("button", { name: "Xuất bản" }).parentElement!);
+        expect(await screen.findByRole("tooltip")).toHaveTextContent(reason);
+        unmount();
+      }
+    } finally {
+      syncState.ready = true;
+      syncState.loadFailed = false;
     }
   });
 

@@ -191,6 +191,8 @@ export function usePublishQuizEditorDraftMutation() {
   return useMutation({
     mutationFn: (input: QuizEditorPublishInput) => publishQuizEditorDraft(input),
     mutationKey: quizEditorMutationKeys.publish,
+    // The publish hook shows the server's reason in place.
+    meta: { silent: true },
     onSuccess: (_result, input) => {
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.draft(input.quizId) });
       void queryClient.invalidateQueries({ queryKey: quizEditorQueryKeys.versions(input.quizId) });
