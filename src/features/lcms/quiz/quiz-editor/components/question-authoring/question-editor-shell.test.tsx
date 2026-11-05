@@ -68,6 +68,15 @@ describe("QuestionEditorShell", () => {
     expect(row.querySelector("[data-status]")?.getAttribute("data-status")).toBe("missing");
   });
 
+  it.each([
+    ["multiple-response", "Bấm ô chữ cái để đánh dấu các đáp án đúng"],
+    ["true-false", "Bấm ô chữ cái để chọn đáp án đúng"],
+  ] as const)("a %s card without a correct answer says how to mark one", (kind, hint) => {
+    const slide: QuizEditorSlide = { ...ready, id: "s9", kind, choices: [choice("a", "Đúng"), choice("b", "Sai")] };
+    renderShell({ groups: [{ ...groups[0], slides: [slide] }], selectedSlide: slide });
+    expect(screen.getAllByRole("status").map((el) => el.textContent).join(" | ")).toContain(hint);
+  });
+
   it("writes a typed title through onReplaceSlide and leaves options alone", () => {
     const onReplaceSlide = vi.fn();
     renderShell({ onReplaceSlide });

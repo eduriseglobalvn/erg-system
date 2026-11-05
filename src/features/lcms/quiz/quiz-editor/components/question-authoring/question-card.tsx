@@ -13,10 +13,12 @@ import { QuestionImageSlot, type ImageSize } from "./question-image-slot";
 import type { QuestionReadiness } from "./question-readiness";
 import { readSlideQuestion, writeSlideQuestion } from "./slide-question";
 
-// Letter tiles and Enter-to-add exist only on the single-choice card.
-const CHOICE_HINTS: Record<string, string> = {
-  "no-correct": "Chưa có phương án đúng. Bấm vào ô chữ cái để đánh dấu.",
-  "min-options": "Cần ít nhất 2 phương án có chữ. Gõ vào ô trống hoặc nhấn Enter để thêm.",
+// Action hints for the kinds whose card has letter tiles; true/false has two fixed options, so no Enter-to-add.
+const MIN_OPTIONS_HINT = "Cần ít nhất 2 phương án có chữ. Gõ vào ô trống hoặc nhấn Enter để thêm.";
+const ACTION_HINTS: Partial<Record<string, Record<string, string>>> = {
+  "multiple-choice": { "no-correct": "Chưa có phương án đúng. Bấm vào ô chữ cái để đánh dấu.", "min-options": MIN_OPTIONS_HINT },
+  "multiple-response": { "no-correct": "Chưa có phương án đúng. Bấm ô chữ cái để đánh dấu các đáp án đúng.", "min-options": MIN_OPTIONS_HINT },
+  "true-false": { "no-correct": "Chưa có phương án đúng. Bấm ô chữ cái để chọn đáp án đúng." },
 };
 
 type Props = {
@@ -30,7 +32,7 @@ type Props = {
 export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide }: Props) {
   const { t } = useI18n();
   const hotspot = slide.kind === "hotspot";
-  const hints: Record<string, string> = slide.kind === "multiple-choice" ? CHOICE_HINTS : {};
+  const hints = ACTION_HINTS[slide.kind] ?? {};
   const titleIssue = readiness.issues.find((issue) => issue.area === "title");
   const answerIssues = readiness.issues.filter((issue) => issue.area === "answers");
   const write = (next: Question) => onReplaceSlide(writeSlideQuestion(slide, next));
