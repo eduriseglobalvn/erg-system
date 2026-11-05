@@ -38,6 +38,12 @@ describe("AnswerArea", () => {
     expect(screen.queryByTestId("answer-fallback")).toBeNull();
   });
 
+  it("authors a hotspot slide on its own surface", () => {
+    const question = readSlideQuestion(build("hotspot"), t)!;
+    render(<Harness kind="hotspot" question={question} />);
+    expect(screen.queryByTestId("answer-fallback")).toBeNull();
+  });
+
   it("falls back to the renderer for kinds without an authoring surface", () => {
     const question = readSlideQuestion(build("essay"), t)!;
     render(<Harness kind="essay" question={question} />);

@@ -6,6 +6,7 @@ import { ChoiceAuthoring } from "./choice-authoring";
 import { ClassifyAuthoring } from "./classify-authoring";
 import { DragWordsAuthoring } from "./drag-words-authoring";
 import { FillBlankAuthoring } from "./fill-blank-authoring";
+import { HotspotAuthoring } from "./hotspot-authoring";
 import { LikertAuthoring } from "./likert-authoring";
 import { MatchingAuthoring } from "./matching-authoring";
 import { NumericAuthoring } from "./numeric-authoring";
@@ -37,6 +38,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "matching") return <MatchingAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
   if (slide.kind === "drag-and-drop") return <ClassifyAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
   if (slide.kind === "short-answer") return <ShortAnswerAuthoring key={question.id} onChange={onChange} question={question} />;
+  if (slide.kind === "hotspot") return <HotspotAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
   return (
     <div data-testid="answer-fallback">
       {/* The image slot above owns the content image, so the renderer does not draw it a second time. */}
