@@ -78,6 +78,20 @@ describe("SelectListsAuthoring", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it("marks only the first copy of a repeated correct option as correct, and lets the copy be removed", () => {
+    const old = {
+      ...base,
+      inlineBlanks: [{ id: "i1", statement: "Chọn", selectPosition: "after", options: ["yes", "no", "yes"], correctOptionId: "yes" }],
+    } as Question;
+    const onChange = vi.fn();
+    render(<SelectListsAuthoring onChange={onChange} question={old} />);
+    const textarea = screen.getByRole("textbox", { name: "Câu có ô trống" }) as HTMLTextAreaElement;
+    textarea.setSelectionRange(6, 6);
+    fireEvent.keyDown(textarea, { key: "Enter" });
+    fireEvent.click(screen.getByRole("img", { name: "Xoá “yes”" }));
+    expect(onChange.mock.lastCall![0].inlineBlanks[0]).toMatchObject({ options: ["yes", "no"], correctOptionId: "yes" });
+  });
+
   it("lets only wrong options be removed", () => {
     openBlank();
     add("MIN");

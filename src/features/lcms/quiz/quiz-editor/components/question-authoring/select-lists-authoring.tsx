@@ -23,7 +23,8 @@ export function SelectListsAuthoring({ question, onChange }: { question: Questio
         <ChipInput
           inputLabel="Thêm lựa chọn"
           items={options.map((option, index): ChipItem => {
-            const correct = option === stored?.correctOptionId;
+            // Old data may repeat the correct option; only its first copy is the answer, the rest are removable.
+            const correct = index === options.indexOf(stored?.correctOptionId ?? "");
             return {
               // Old data may repeat an option, so the position is the key.
               key: String(index),
