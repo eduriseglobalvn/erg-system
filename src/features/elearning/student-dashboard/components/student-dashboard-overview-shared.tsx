@@ -20,6 +20,7 @@ export function OverviewMetrics({
   openAssignments,
   overdueAssignments,
   profile,
+  unavailable = false,
 }: {
   columns: Record<string, string>;
   completedAssignments: StudentDashboardAssignment[];
@@ -28,14 +29,16 @@ export function OverviewMetrics({
   openAssignments: StudentDashboardAssignment[];
   overdueAssignments: StudentDashboardAssignment[];
   profile: StudentDashboardProfile;
+  /** The load failed: show "—" instead of zeros that look like real numbers. */
+  unavailable?: boolean;
 }) {
   const total = openAssignments.length + completedAssignments.length;
   return (
     <Box sx={{ display: "grid", gap, gridTemplateColumns: columns }}>
-      <MetricCard icon={<AssignmentRoundedIcon fontSize="small" />} label={copy.stats.open} value={openAssignments.length} />
-      <MetricCard icon={<ScheduleRoundedIcon fontSize="small" />} label={copy.stats.overdue} tone="error" value={overdueAssignments.length} />
-      <MetricCard icon={<SchoolRoundedIcon fontSize="small" />} label={copy.stats.average} tone="info" value={formatAverageScore(profile.averageScore, completedAssignments.length)} />
-      <MetricCard icon={<CheckCircleRoundedIcon fontSize="small" />} label={copy.stats.completed} tone="success" value={`${completedAssignments.length}/${total}`} />
+      <MetricCard icon={<AssignmentRoundedIcon fontSize="small" />} label={copy.stats.open} value={unavailable ? "—" : openAssignments.length} />
+      <MetricCard icon={<ScheduleRoundedIcon fontSize="small" />} label={copy.stats.overdue} tone="error" value={unavailable ? "—" : overdueAssignments.length} />
+      <MetricCard icon={<SchoolRoundedIcon fontSize="small" />} label={copy.stats.average} tone="info" value={unavailable ? "—" : formatAverageScore(profile.averageScore, completedAssignments.length)} />
+      <MetricCard icon={<CheckCircleRoundedIcon fontSize="small" />} label={copy.stats.completed} tone="success" value={unavailable ? "—" : `${completedAssignments.length}/${total}`} />
     </Box>
   );
 }

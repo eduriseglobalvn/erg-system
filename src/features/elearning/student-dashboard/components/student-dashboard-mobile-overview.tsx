@@ -90,6 +90,7 @@ export function StudentDashboardMobileOverview({
       </Paper>
 
       <OverviewMetrics
+        unavailable={assignmentsFailed}
         columns={{ xs: "repeat(2, minmax(0, 1fr))" }}
         completedAssignments={completedAssignments}
         copy={copy}

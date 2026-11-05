@@ -39,6 +39,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
         </CardContent>
       </Card>
       <OverviewMetrics
+        unavailable={assignmentsFailed}
         columns={{ xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" }}
         completedAssignments={completedAssignments}
         copy={copy}
