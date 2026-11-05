@@ -1,31 +1,16 @@
 import { useEffect, useMemo, useRef } from "react";
 
-import {
-  createEmptyQuizEditorGroups,
-  createMockPlayerTemplate,
-  createNewQuizProjectSettings,
-} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
   clearLocalQuizDraft,
   loadLocalQuizDraft,
   saveLocalQuizDraft,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-local-draft";
+import { createBlankDraft } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-initial-document";
 import { isLegacyMockDraft } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-utils";
 import type { QuizEditorGroup, QuizPlayerTemplate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { AUTH_SESSION_INVALID_EVENT, AUTH_SESSION_REPLACED_EVENT } from "@/lib/api-client";
 import { getDefaultTenantId } from "@/lib/graphql-client";
-
-export function createBlankDraft(quizId: string, draftId: string): QuizEditorDraftDocument {
-  return {
-    quizId,
-    draftId,
-    docVersion: 0,
-    settings: createNewQuizProjectSettings("Bài kiểm tra mới"),
-    playerTemplate: createMockPlayerTemplate(),
-    tree: createEmptyQuizEditorGroups(),
-  };
-}
 
 /** Local draft used to seed the editor state; must run before useQuizEditorState. */
 export function useInitialLocalDraft(activeDraftKey: string) {

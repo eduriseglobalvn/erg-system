@@ -16,8 +16,8 @@ import {
   useQuizEditorDraftQuery,
   useQuizEditorWorkspaceQuery,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
+import { createBlankDraft } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-initial-document";
 import {
-  createBlankDraft,
   useInitialLocalDraft,
   useQuizEditorDraftRecovery,
 } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-draft-recovery";
