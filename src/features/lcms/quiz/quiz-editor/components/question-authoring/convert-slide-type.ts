@@ -1,4 +1,5 @@
 import type { Choice, QuestionKind } from "@/domain/quiz/types";
+import { extractCorrectScore } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import type {
   QuestionType,
   QuizEditorSlide,
@@ -29,8 +30,14 @@ export function convertSlideType(
   const nextKind = RUNTIME_KIND[nextType];
   const carries =
     !!nextKind && !!RUNTIME_KIND[slide.kind as QuestionType] && (nextType !== "true-false" || source.length === 2);
-  // runtimeQuestion is dropped here; points then come from feedbackRows, which stay untouched.
-  if (!carries) return { slide: next, dropsAnswers: true };
+  // The fresh question starts empty but stays this slide's question: same id, and the points readSlideQuestion gives.
+  if (!carries) {
+    if (fresh.runtimeQuestion) {
+      const points = slide.runtimeQuestion?.points ?? extractCorrectScore(slide);
+      next.runtimeQuestion = { ...fresh.runtimeQuestion, id: slide.id, points };
+    }
+    return { slide: next, dropsAnswers: true };
+  }
 
   const firstOnly = FIRST_CORRECT_ONLY.includes(nextType);
   let seenCorrect = false;
@@ -48,6 +55,10 @@ export function convertSlideType(
       ...(c.media?.src ? { image: { url: c.media.src, alt: c.media.alt } } : {}),
     }));
     next.runtimeQuestion = { ...slide.runtimeQuestion, kind: nextKind, choices: runtimeChoices };
+  } else {
+    // Bank-imported and legacy slides keep their answers only on slide.choices; without the fresh empty
+    // question, readSlideQuestion rebuilds from them.
+    delete next.runtimeQuestion;
   }
   return { slide: next, dropsAnswers: firstOnly && source.filter((c) => c.correct).length > 1 };
 }
