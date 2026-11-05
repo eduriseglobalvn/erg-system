@@ -13,7 +13,7 @@ const question: Question = {
   title: "Chọn vị trí",
   points: 1,
   feedback: { correct: "", incorrect: "", partial: "" },
-  hotspotImage: { url: "data:image/png;base64,AAAA" },
+  hotspotImage: { url: "data:image/png;base64,AAAA", width: 400, height: 200 },
   hotspotAreas: [],
 };
 
