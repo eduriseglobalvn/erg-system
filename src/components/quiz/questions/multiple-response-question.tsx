@@ -110,6 +110,7 @@ export function MultipleResponseQuestion({
             <ChoiceOption
               key={choice.id}
               disabled={submitted}
+              image={choice.image}
               mode="multiple"
               onClick={() => {
                 const next = new Set(value.choiceIds ?? []);

@@ -22,7 +22,11 @@ export function syncQuizEditorSlideFromRuntimeQuestion(
     kind,
     runtimeQuestion: question,
     description: question.instructions,
-    media: runtimeMedia ?? slide.media,
+    media: runtimeMedia
+      ? question.contentImage && slide.media
+        ? { ...runtimeMedia, x: slide.media.x, y: slide.media.y, width: slide.media.width }
+        : runtimeMedia
+      : slide.media,
     choices: mapRuntimeChoices(question),
     choiceControlType: kind === "multiple-response" ? "checkbox" : "radio",
     dragDropItems: mapRuntimeDragDropItems(question),
@@ -70,6 +74,7 @@ function mapRuntimeChoices(question: Question): QuizEditorChoice[] | undefined {
       id: choice.id,
       label: choice.label,
       correct: choice.correct,
+      ...(choice.image ? { media: imageToMedia(choice.image) } : {}),
     }));
   }
 
@@ -153,6 +158,7 @@ function mapRuntimeDragDropItems(question: Question): QuizEditorDragDropItem[] |
       label: item.label,
       emoji: "",
       target: targetById.get(item.correctTargetId) ?? item.correctTargetId,
+      ...(item.image ? { media: imageToMedia(item.image) } : {}),
     }));
   }
 
@@ -181,6 +187,10 @@ function mapHotspotImage(question: Question) {
     alt: question.title,
     name: `${question.id}-hotspot`,
   };
+}
+
+function imageToMedia(image: QuestionImage) {
+  return { type: "image" as const, src: image.url, alt: image.alt ?? "" };
 }
 
 function mapQuestionImage(image: QuestionImage, fallbackAlt: string) {

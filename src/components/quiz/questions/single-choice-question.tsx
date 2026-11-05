@@ -108,6 +108,7 @@ export function SingleChoiceQuestion({
             <ChoiceOption
               key={choice.id}
               disabled={submitted}
+              image={choice.image}
               mode="single"
               onClick={() => {
                 onChange({ choiceId: choice.id });

@@ -2,11 +2,13 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
+import type { QuestionImage } from "@/domain/quiz/types";
 import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 type ChoiceOptionProps = {
   children: ReactNode;
   disabled?: boolean;
+  image?: QuestionImage;
   mode: "single" | "multiple";
   onClick: () => void;
   reviewMode?: boolean;
@@ -30,6 +32,7 @@ const visuallyHiddenSx = { border: 0, clip: "rect(0 0 0 0)", height: 1, margin: 
 export function ChoiceOption({
   children,
   disabled = false,
+  image,
   mode,
   onClick,
   reviewMode = false,
@@ -109,7 +112,10 @@ export function ChoiceOption({
         {isMultiple && markerChecked ? <CheckIcon sx={{ color: "common.white", fontSize: { xs: 16, sm: 20 } }} /> : markerChecked ? <Box component="span" sx={{ bgcolor: accentColor, borderRadius: innerRadius, height: { xs: 8, sm: 10 }, width: { xs: 8, sm: 10 } }} /> : null}
       </Box>
 
-      <Box component="span" sx={{ color: textColor, fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>{children}</Box>
+      <Box component="span" sx={{ color: textColor, fontSize: "var(--quiz-readable-size-lg)", fontWeight: 600, lineHeight: 1.38, minWidth: 0 }}>
+        {image ? <Box component="img" src={image.url} alt={image.alt ?? ""} sx={{ display: "block", maxHeight: 160, maxWidth: "100%", mb: 1, objectFit: "contain" }} /> : null}
+        {children}
+      </Box>
     </ButtonBase>
   );
 }

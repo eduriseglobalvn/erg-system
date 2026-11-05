@@ -52,6 +52,7 @@ export type Choice = {
   id: string;
   label: string;
   correct: boolean;
+  image?: QuestionImage;
 };
 
 export type MatchingPair = {
@@ -122,6 +123,7 @@ export type DragDropItem = {
   id: string;
   label: string;
   correctTargetId: string;
+  image?: QuestionImage;
 };
 
 export type LikertScalePoint = {

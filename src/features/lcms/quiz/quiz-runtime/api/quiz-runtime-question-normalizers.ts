@@ -74,6 +74,7 @@ function normalizeChoices(value: unknown, key?: Record<string, unknown>): Choice
       id,
       label: stringValue(record.label ?? record.text, `Đáp án ${index + 1}`),
       correct: booleanValue(record.correct ?? record.isCorrect, correctIds.has(id)),
+      ...imageField(record),
     };
   });
 }
@@ -147,6 +148,7 @@ function normalizeDragDropItems(value: unknown, key?: Record<string, unknown>): 
       id,
       label: stringValue(record.label, ""),
       correctTargetId: stringValue(record.correctTargetId ?? targetMap.get(id), ""),
+      ...imageField(record),
     };
   });
 }
@@ -167,6 +169,12 @@ function normalizeHotspotAreas(value: unknown, key?: Record<string, unknown>): H
       visible: typeof record.visible === "boolean" ? record.visible : undefined,
     };
   });
+}
+
+// Backend sends the option picture as media.src; the runtime model calls it image.
+function imageField(record: Record<string, unknown>) {
+  const image = normalizeQuestionImage(record.image ?? record.media);
+  return image ? { image } : {};
 }
 
 function normalizeQuestionImage(value: unknown): Question["contentImage"] {

@@ -8,12 +8,14 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import {
   buildDragDropItems,
+  buildPreviewQuestion,
   buildDragDropTargets,
   buildNumericAnswer,
   createDragDropTargetId,
   normalizeChoices,
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import { clampUnit } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/draggable-slide-media";
+import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
@@ -108,5 +110,39 @@ describe("clampUnit", () => {
     expect(clampUnit(-1)).toBe(0.08);
     expect(clampUnit(2)).toBe(0.92);
     expect(clampUnit(0.5)).toBe(0.5);
+  });
+});
+
+describe("buildPreviewQuestion images", () => {
+  const img = { type: "image", src: "https://x/a.png", alt: "A" };
+
+  test("choice media becomes choice image", () => {
+    const slide = slideOf({ kind: "multiple-choice", choices: [{ id: "c1", label: "A", correct: true, media: img }, { id: "c2", label: "B", correct: false }] });
+    expect(buildPreviewQuestion(slide, t)?.choices?.[0].image).toEqual({ url: "https://x/a.png", alt: "A" });
+  });
+
+  test("empty label stays empty", () => {
+    const slide = slideOf({ kind: "multiple-choice", choices: [{ id: "c1", label: "", correct: false }, { id: "c2", label: "B", correct: true }] });
+    expect(buildPreviewQuestion(slide, t)?.choices?.map((c) => c.label)).toEqual(["", "B"]);
+  });
+
+  test("slide media becomes contentImage with and without runtimeQuestion; hotspot has none", () => {
+    const media = { type: "image", src: "https://x/q.png", alt: "Q" };
+    const base = { kind: "multiple-choice", media, choices: [{ id: "c1", label: "A", correct: true }] };
+    expect(buildPreviewQuestion(slideOf(base), t)?.contentImage?.url).toBe("https://x/q.png");
+    const rq = { id: "s1", kind: "single_choice", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" } };
+    expect(buildPreviewQuestion(slideOf({ ...base, runtimeQuestion: rq }), t)?.contentImage?.url).toBe("https://x/q.png");
+    expect(buildPreviewQuestion(slideOf({ kind: "hotspot", media }), t)?.contentImage).toBeUndefined();
+  });
+
+  test("drag item media becomes image", () => {
+    const slide = slideOf({ kind: "drag-and-drop", dragDropItems: [{ id: "d1", label: "D", emoji: "", target: "Z", media: img }] });
+    expect(buildDragDropItems(slide, t)[0].image).toEqual({ url: "https://x/a.png", alt: "A" });
+  });
+
+  test("round trip keeps choice media", () => {
+    const slide = slideOf({ kind: "multiple-choice", choices: [{ id: "c1", label: "A", correct: true, media: img }, { id: "c2", label: "B", correct: false }] });
+    const back = syncQuizEditorSlideFromRuntimeQuestion(slide, buildPreviewQuestion(slide, t)!);
+    expect(back.choices?.[0].media?.src).toBe("https://x/a.png");
   });
 });

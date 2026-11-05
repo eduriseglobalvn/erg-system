@@ -15,12 +15,22 @@ export function buildPreviewQuestion(
       title: slide.title,
       instructions: slide.description ?? slide.runtimeQuestion.instructions,
       contentImage: slide.media
-        ? undefined
+        ? slideContentImage(slide)
         : slide.runtimeQuestion.contentImage,
     };
   }
 
   return buildLearnerQuestion(slide, t);
+}
+
+function slideContentImage(slide: QuizEditorSlide) {
+  return slide.media?.src && slide.kind !== "hotspot"
+    ? { url: slide.media.src, alt: slide.media.alt }
+    : undefined;
+}
+
+function mediaImage(media: QuizEditorSlide["media"]) {
+  return media?.src ? { url: media.src, alt: media.alt } : undefined;
 }
 
 function buildLearnerQuestion(
@@ -29,9 +39,7 @@ function buildLearnerQuestion(
 ): Question | null {
   const feedback = buildFeedback(slide, t);
   const points = extractCorrectScore(slide);
-  const contentImage = slide.media
-    ? undefined
-    : undefined;
+  const contentImage = slideContentImage(slide);
   const base = {
     id: slide.id,
     title: slide.title,
@@ -153,7 +161,7 @@ export function normalizeChoices(
   choices: QuizEditorChoice[] | undefined,
   t: ReturnType<typeof useI18n>["t"],
 ) {
-  const source = choices?.length
+  const source: QuizEditorChoice[] = choices?.length
     ? choices
     : [
         { id: "choice-a", label: `${t("common.option")} 1`, correct: true },
@@ -162,8 +170,9 @@ export function normalizeChoices(
 
   return source.map((choice, index) => ({
     id: choice.id || `choice-${index + 1}`,
-    label: choice.label || `${t("common.option")} ${index + 1}`,
+    label: choices?.length ? choice.label : `${t("common.option")} ${index + 1}`,
     correct: choice.correct,
+    image: mediaImage(choice.media),
   }));
 }
 
@@ -319,6 +328,7 @@ export function buildDragDropItems(
       id: item.id || `drag-item-${index + 1}`,
       label: item.label || `${t("common.dragItem")} ${index + 1}`,
       correctTargetId: targetIdByLabel.get(targetLabel) ?? targets[0]?.id ?? "drop-target-1",
+      image: mediaImage("media" in item ? item.media : undefined),
     };
   });
 }
