@@ -30,6 +30,9 @@ describe("chooseInitialDocument", () => {
   it("uses the device copy when there is no server draft yet (new quiz)", () => {
     expect(chooseInitialDocument(rec({ quizId: null, dirty: true }), undefined).source).toBe("device");
   });
+  it("prefers a clean device copy that is newer than a stale server draft", () => {
+    expect(chooseInitialDocument(rec({ dirty: false, baseDocVersion: 4 }), serverDoc(3)).source).toBe("device");
+  });
   it("returns none when nothing exists", () => {
     expect(chooseInitialDocument(null, undefined)).toEqual({ document: null, source: "none" });
   });

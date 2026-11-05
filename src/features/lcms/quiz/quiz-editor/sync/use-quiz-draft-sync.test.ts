@@ -235,17 +235,42 @@ describe("useQuizDraftSync", () => {
     expect(start).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps an edit still in the debounce when the hook unmounts", async () => {
+  it("sends an edit still in the debounce once when the hook unmounts", async () => {
     const { rerender, unmount } = setup();
     await settle();
     rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("last words") });
     unmount();
     await settle();
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(titleOf(api.saveDraft.mock.calls[0][0])).toBe("last words");
     const stored = await store.get(scope, "q1");
     expect(titleOf(stored?.document)).toBe("last words");
-    expect(stored?.dirty).toBe(true);
+    expect(stored).toMatchObject({ dirty: false, baseDocVersion: 4 });
     await settle(5000);
-    expect(api.saveDraft).not.toHaveBeenCalled(); // a disposed engine never sends
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends the last edit when switching quiz, and reopening waits for that send", async () => {
+    let finish!: (v: { docVersion: number }) => void;
+    api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
+    const { rerender } = setup();
+    await settle();
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("before switch") });
+    rerender({ draftKey: "q2", serverDraft: doc("server", "q2"), settled: true, document: doc("before switch") });
+    await settle();
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(titleOf(api.saveDraft.mock.calls[0][0])).toBe("before switch");
+
+    // Back to q1 while that send is still in flight: the new engine must start from what it stores.
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("server", "q2") });
+    await settle();
+    finish({ docVersion: 4 });
+    await settle();
+    expect(hydrate).toHaveBeenLastCalledWith(doc("before switch"));
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("after reopen") });
+    await settle(2300);
+    expect(api.saveDraft).toHaveBeenCalledTimes(2);
+    expect(api.saveDraft).toHaveBeenLastCalledWith(expect.objectContaining({ quizId: "q1", docVersion: 4 }));
   });
 
   it("writes the pending edit and sends it at once on pagehide", async () => {

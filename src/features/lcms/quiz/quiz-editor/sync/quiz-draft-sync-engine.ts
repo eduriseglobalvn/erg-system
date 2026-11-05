@@ -75,6 +75,8 @@ export class QuizDraftSyncEngine {
   private retryIndex = 0;
   private storageFull = false;
   private disposed = false;
+  /** closeAndFlush() runs: the last send may still go out, but nothing is scheduled or reported any more. */
+  private closing = false;
   /** `writerId:revision` of the last other-tab record backed up, so the same record is never backed up twice. */
   private lastBackup = "";
   private queue: Promise<unknown> = Promise.resolve();
@@ -103,7 +105,7 @@ export class QuizDraftSyncEngine {
   start(serverDraft: QuizEditorDraftDocument | undefined): Promise<QuizEditorDraftDocument | null> {
     return this.serial(async () => {
       const device = await this.deps.store.get(this.deps.scope, this.key);
-      if (this.disposed) return null; // disposed while starting: write nothing, arm no timer
+      if (this.disposed || this.closing) return null; // closed while starting: write nothing, arm no timer
       const { document, source } = chooseInitialDocument(device, serverDraft);
       this.recoveredEdits = null;
       if (source === "device" && device) {
@@ -167,8 +169,8 @@ export class QuizDraftSyncEngine {
         syncedAt: base?.syncedAt ?? null,
         writerId,
       };
-      // Disposed while queued (unmount): still keep the edit on the device, but never send it from here.
-      const sends = !this.disposed && this.currentStatus.kind !== "conflict";
+      // Closed while queued: still keep the edit on the device; closeAndFlush sends it, no timer does.
+      const sends = !this.disposed && !this.closing && this.currentStatus.kind !== "conflict";
       if (sends) this.schedule(SAVE_DEBOUNCE_MS);
       const backup = otherTab && (async () => {
         await store.addBackup(scope, { key: this.key, reason: "other-tab", document: otherTab.document, createdAt: now });
@@ -239,6 +241,23 @@ export class QuizDraftSyncEngine {
     this.listeners.clear();
   }
 
+  /**
+   * Sends the last pending state once (after any send in flight and queued edits), then disposes. Offline, signed
+   * out or on a failure the edits stay dirty on the device: nothing retries and no listener hears about it.
+   */
+  async closeAndFlush(): Promise<void> {
+    if (this.disposed || this.closing) return;
+    this.closing = true;
+    this.clearTimer();
+    this.listeners.clear();
+    try {
+      await this.serial(async () => undefined); // let queued edits land first
+      await this.send(); // joins a send in flight (`again`), so two never run at once
+    } finally {
+      this.dispose();
+    }
+  }
+
   private send(): Promise<void> {
     if (this.sending) {
       this.again = true;
@@ -285,7 +304,8 @@ export class QuizDraftSyncEngine {
         try {
           await this.serial(() => this.rekey(created));
         } finally {
-          if (!this.disposed) this.deps.onQuizCreated?.(created.quizId); // the quiz exists on the server even if the device write failed
+          // The quiz exists on the server even if the device write failed. A closed editor is not told.
+          if (!this.disposed && !this.closing) this.deps.onQuizCreated?.(created.quizId);
         }
         if (this.disposed) return false;
         quizId = created.quizId;
@@ -338,10 +358,12 @@ export class QuizDraftSyncEngine {
   private async markSynced(revision: number, docVersion: number, sent: QuizEditorDraftDocument): Promise<void> {
     const synced = { baseDocVersion: docVersion, syncedRevision: revision, syncedAt: this.nowIso() };
     if (this.disposed) {
-      // Only when the stored record is still exactly what this engine sent; anything newer belongs to someone else.
+      // Compare-and-set on this tab's record: newer edits stay dirty, but must rebase on the version just saved.
       const { store, scope, writerId } = this.deps;
       const stored = await store.get(scope, this.key);
-      if (stored?.writerId === writerId && stored.revision === revision) await store.put(scope, { ...stored, ...synced, dirty: false, document: sent });
+      if (stored?.writerId !== writerId || stored.syncedRevision >= revision || revision > stored.revision) return;
+      const caughtUp = stored.revision === revision;
+      await store.put(scope, { ...stored, ...synced, ...(caughtUp ? { dirty: false, document: sent } : {}) });
       return;
     }
     const current = this.record;
@@ -389,6 +411,7 @@ export class QuizDraftSyncEngine {
 
   private schedule(ms: number): void {
     this.clearTimer();
+    if (this.disposed || this.closing) return; // no retry after close
     this.timer = setTimeout(() => {
       this.timer = null;
       void this.send();
@@ -401,7 +424,7 @@ export class QuizDraftSyncEngine {
   }
 
   private setStatus(status: QuizDraftSyncStatus): void {
-    if (this.disposed) return;
+    if (this.disposed || this.closing) return;
     this.currentStatus = status;
     for (const listener of this.listeners) listener(status);
   }

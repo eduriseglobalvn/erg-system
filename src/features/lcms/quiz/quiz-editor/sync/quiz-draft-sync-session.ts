@@ -100,6 +100,8 @@ export class QuizDraftSyncSession {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private snapshot = LOADING_SNAPSHOT;
   private readonly listeners = new Set<() => void>();
+  /** Closed engines still sending their last edit, by draft key: reopening that key waits, or it would send a stale docVersion. */
+  private readonly closing = new Map<string, Promise<void>>();
 
   constructor(options: QuizDraftSyncSessionOptions) {
     this.latest = options;
@@ -177,12 +179,19 @@ export class QuizDraftSyncSession {
     this.timer = setTimeout(() => this.flushPending(), EDIT_DEBOUNCE_MS);
   }
 
-  /** Writes the debounced edit, then disposes the engine; a disposed engine still stores that edit on the device. */
+  /** Writes the debounced edit, then lets the engine send it once and dispose (spec §9.2: send on leaving the editor). */
   close(): void {
     this.flushPending();
-    this.slot?.engine.dispose();
+    const slot = this.slot;
     this.slot = null;
     this.publish();
+    if (!slot) return;
+    const keys = [...slot.keys];
+    const run = slot.engine.closeAndFlush().catch((error: unknown) => console.error("Cannot send the last quiz draft edit", error));
+    for (const key of keys) this.closing.set(key, run);
+    void run.then(() => {
+      for (const key of keys) if (this.closing.get(key) === run) this.closing.delete(key);
+    });
   }
 
   listen(target: Window): () => void {
@@ -250,7 +259,7 @@ export class QuizDraftSyncSession {
   };
 
   private async load(slot: Slot, tenantId: string, serverDraft: QuizEditorDraftDocument | undefined): Promise<void> {
-    await migrateOnce(slot.store, slot.scope, tenantId);
+    await Promise.all([migrateOnce(slot.store, slot.scope, tenantId), this.closing.get(slot.keys[0]!)]);
     if (this.slot !== slot) return;
     let document: QuizEditorDraftDocument | null;
     try {

@@ -383,30 +383,117 @@ describe("QuizDraftSyncEngine", () => {
     expect(await store.get(scope, "q1")).toMatchObject({ dirty: false, baseDocVersion: 4, syncedRevision: 1 });
   });
 
-  it("leaves a newer record alone when a save finishes after dispose", async () => {
+  it("keeps a newer edit but records the new server version when a save finishes after dispose", async () => {
     let finish: (v: { docVersion: number }) => void = () => undefined;
     api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
     await engine.edit(doc("A"));
     const flushing = engine.flushNow();
     await vi.advanceTimersByTimeAsync(0);
     engine.dispose();
-    await store.put(scope, rec({ dirty: true, revision: 2, syncedRevision: 0, writerId: "tab-1", document: doc("newer") }));
+    await store.put(scope, rec({ dirty: true, revision: 2, syncedRevision: 0, syncedAt: null, writerId: "tab-1", document: doc("newer") }));
     finish({ docVersion: 4 });
     await flushing;
-    expect(await store.get(scope, "q1")).toMatchObject({ dirty: true, revision: 2, document: doc("newer") });
+    const stored = await store.get(scope, "q1");
+    expect(stored).toMatchObject({ dirty: true, revision: 2, document: doc("newer"), baseDocVersion: 4, syncedRevision: 1 });
+    expect(stored?.syncedAt).not.toBeNull();
   });
 
-  it("an edit queued before dispose is kept on the device but never sent", async () => {
+  it("leaves a record already synced past the sent revision alone when a save finishes after dispose", async () => {
+    let finish: (v: { docVersion: number }) => void = () => undefined;
+    api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
+    await engine.edit(doc("A"));
+    const flushing = engine.flushNow();
+    await vi.advanceTimersByTimeAsync(0);
+    engine.dispose();
+    await store.put(scope, rec({ revision: 2, syncedRevision: 2, baseDocVersion: 7, writerId: "tab-1" }));
+    finish({ docVersion: 4 });
+    await flushing;
+    expect(await store.get(scope, "q1")).toMatchObject({ baseDocVersion: 7, syncedRevision: 2 });
+  });
+
+  it("closeAndFlush sends an edit queued before close once, then nothing more", async () => {
     const listener = vi.fn();
     engine.subscribe(listener);
     const pending = engine.edit(doc("A"));
-    engine.dispose();
+    const closing = engine.closeAndFlush();
     await pending;
-    expect(await store.get(scope, "q1")).toMatchObject({ dirty: true, revision: 1, document: doc("A") });
+    await closing;
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(titleOf(api.saveDraft.mock.calls[0][0])).toBe("A");
+    expect(await store.get(scope, "q1")).toMatchObject({ dirty: false, revision: 1, baseDocVersion: 4, document: doc("A") });
+    expect(vi.getTimerCount()).toBe(0);
+    await engine.edit(doc("after close"));
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("closeAndFlush waits for a save in flight, then sends the newer edit, never two at once", async () => {
+    let active = 0;
+    let peak = 0;
+    const finishers: Array<(v: { docVersion: number }) => void> = [];
+    api.saveDraft.mockImplementation(() => {
+      active += 1;
+      peak = Math.max(peak, active);
+      return new Promise((r) => finishers.push((v) => { active -= 1; r(v); }));
+    });
+    await engine.edit(doc("A"));
+    const first = engine.flushNow();
+    await vi.advanceTimersByTimeAsync(0);
+    const edit = engine.edit(doc("B"));
+    const closing = engine.closeAndFlush();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    finishers[0]!({ docVersion: 4 });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(api.saveDraft).toHaveBeenCalledTimes(2);
+    expect(api.saveDraft.mock.calls[1][0]).toMatchObject({ docVersion: 4 });
+    expect(titleOf(api.saveDraft.mock.calls[1][0])).toBe("B");
+    finishers[1]!({ docVersion: 5 });
+    await Promise.all([first, edit, closing]);
+    expect(peak).toBe(1);
+    expect(await store.get(scope, "q1")).toMatchObject({ dirty: false, revision: 2, syncedRevision: 2, baseDocVersion: 5 });
+  });
+
+  it("closeAndFlush keeps the edit on the device while offline and arms no retry", async () => {
+    online = false;
+    await engine.edit(doc("A"));
+    await engine.closeAndFlush();
+    expect(api.saveDraft).not.toHaveBeenCalled();
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("closeAndFlush does not retry a send that failed on the network", async () => {
+    api.saveDraft.mockRejectedValue(new ApiClientError("x", "NETWORK_ERROR", 0));
+    await engine.edit(doc("A"));
+    await engine.closeAndFlush();
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
     expect(vi.getTimerCount()).toBe(0);
     await vi.advanceTimersByTimeAsync(60_000);
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+  });
+
+  it("closeAndFlush sends nothing while canSend is false", async () => {
+    engine.dispose();
+    engine = new QuizDraftSyncEngine({ ...deps, canSend: () => false }, "q1");
+    await engine.edit(doc("A"));
+    await engine.closeAndFlush();
     expect(api.saveDraft).not.toHaveBeenCalled();
-    expect(listener).not.toHaveBeenCalled();
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+  });
+
+  it("closeAndFlush creates a new quiz and saves it, without reporting it to the closed editor", async () => {
+    engine = new QuizDraftSyncEngine(deps, "new-quiz:c:l:t");
+    await engine.start(undefined);
+    await engine.edit(doc("A"));
+    await engine.closeAndFlush();
+    expect(api.createQuiz).toHaveBeenCalledTimes(1);
+    expect(api.saveDraft).toHaveBeenCalledWith(expect.objectContaining({ quizId: "quiz-new", docVersion: 0 }));
+    expect(await store.get(scope, "new-quiz:c:l:t")).toBeNull();
+    expect(await store.get(scope, "quiz-new")).toMatchObject({ dirty: false, baseDocVersion: 4 });
+    expect(deps.onQuizCreated).not.toHaveBeenCalled();
   });
 
   it("does not report a created quiz after dispose", async () => {

@@ -28,12 +28,15 @@ export function newQuizDraftKey(courseId: string, levelId: string | null, topicI
   return `${NEW_QUIZ_PREFIX}${courseId}:${levelId ?? "all"}:${topicId}`;
 }
 
-/** A dirty device copy holds unsent edits and wins; otherwise the server copy is the truth. */
+/**
+ * A dirty device copy holds unsent edits and wins; so does a clean one saved past the server copy (a fetch that raced
+ * the closing editor's last send). Otherwise the server copy is the truth.
+ */
 export function chooseInitialDocument(
   device: DeviceDraftRecord | null,
   server: QuizEditorDraftDocument | undefined,
 ): { document: QuizEditorDraftDocument | null; source: "device" | "server" | "none" } {
-  if (device && (device.dirty || !server)) return { document: device.document, source: "device" };
+  if (device && (device.dirty || !server || device.baseDocVersion > server.docVersion)) return { document: device.document, source: "device" };
   if (server) return { document: server, source: "server" };
   return { document: null, source: "none" };
 }
