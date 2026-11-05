@@ -73,6 +73,8 @@ export class QuizDraftSyncEngine {
   private retryIndex = 0;
   private storageFull = false;
   private disposed = false;
+  /** `writerId:revision` of the last other-tab record backed up, so the same record is never backed up twice. */
+  private lastBackup = "";
   private queue: Promise<unknown> = Promise.resolve();
 
   constructor(deps: QuizDraftSyncDeps, key: string) {
@@ -136,6 +138,7 @@ export class QuizDraftSyncEngine {
   edit(document: QuizEditorDraftDocument): Promise<void> {
     if (this.disposed) return Promise.resolve();
     return this.serial(async () => {
+      if (this.disposed) return;
       const current = this.record;
       if (current && document === current.document) return;
       const json = JSON.stringify(document);
@@ -144,7 +147,9 @@ export class QuizDraftSyncEngine {
       const { store, scope, writerId } = this.deps;
       const stored = await store.get(scope, this.key);
       // Another tab's unsent edits that this engine never saw: keep a copy before overwriting them.
-      const otherTab = stored?.dirty && stored.writerId !== writerId && JSON.stringify(stored.document) !== this.recordJson ? stored : null;
+      const storedId = stored ? `${stored.writerId}:${stored.revision}` : "";
+      const otherTab =
+        stored?.dirty && stored.writerId !== writerId && storedId !== this.lastBackup && JSON.stringify(stored.document) !== this.recordJson ? stored : null;
       const base = current ?? stored;
       const now = this.nowIso();
       const next: DeviceDraftRecord = {
@@ -162,7 +167,11 @@ export class QuizDraftSyncEngine {
       };
       const inConflict = this.currentStatus.kind === "conflict";
       if (!inConflict) this.schedule(SAVE_DEBOUNCE_MS);
-      await this.write(next, json, otherTab && (() => store.addBackup(scope, { key: this.key, reason: "other-tab", document: otherTab.document, createdAt: now })));
+      const backup = otherTab && (async () => {
+        await store.addBackup(scope, { key: this.key, reason: "other-tab", document: otherTab.document, createdAt: now });
+        this.lastBackup = storedId;
+      });
+      await this.write(next, json, backup);
       if (!inConflict && this.currentStatus.kind !== "conflict") this.setStatus(this.idleStatus());
     });
   }
@@ -259,24 +268,27 @@ export class QuizDraftSyncEngine {
       this.setStatus({ kind: "offline", pendingEdits: pendingEdits(record) });
       return false;
     }
-    this.setStatus({ kind: "saving" });
     const { api } = this.deps;
     try {
+      this.setStatus({ kind: "saving" });
       let { quizId, baseDocVersion } = record;
       if (quizId === null) {
         const created = await api.createQuiz({ ...this.deps.buildCreateInput(record.document), idempotencyKey: record.createIdempotencyKey });
         if (this.disposed) return false;
-        await this.serial(() => this.rekey(created));
+        try {
+          await this.serial(() => this.rekey(created));
+        } finally {
+          this.deps.onQuizCreated?.(created.quizId); // the quiz exists on the server even if the device write failed
+        }
         if (this.disposed) return false;
         quizId = created.quizId;
         baseDocVersion = created.docVersion;
-        this.deps.onQuizCreated?.(quizId);
       }
       const sent = await api.uploadImages(record.document);
       if (this.disposed) return false;
       const result = await api.saveDraft({ quizId, docVersion: baseDocVersion, settings: sent.settings, playerTemplate: sent.playerTemplate, tree: sent.tree });
-      if (this.disposed) return false;
-      this.retryIndex = 0;
+      if (!this.disposed) this.retryIndex = 0;
+      // Runs after dispose too (compare-and-set), so the next engine does not resend a stale docVersion.
       await this.serial(() => this.markSynced(record.revision, result.docVersion, sent));
       if (this.disposed) return false;
       this.setStatus(this.idleStatus());
@@ -317,18 +329,20 @@ export class QuizDraftSyncEngine {
   }
 
   private async markSynced(revision: number, docVersion: number, sent: QuizEditorDraftDocument): Promise<void> {
+    const synced = { baseDocVersion: docVersion, syncedRevision: revision, syncedAt: this.nowIso() };
+    if (this.disposed) {
+      // Only when the stored record is still exactly what this engine sent; anything newer belongs to someone else.
+      const { store, scope, writerId } = this.deps;
+      const stored = await store.get(scope, this.key);
+      if (stored?.writerId === writerId && stored.revision === revision) await store.put(scope, { ...stored, ...synced, dirty: false, document: sent });
+      return;
+    }
     const current = this.record;
-    if (this.disposed || !current) return;
+    if (!current) return;
     const caughtUp = current.revision === revision;
-    await this.write({
-      ...current,
-      baseDocVersion: docVersion,
-      syncedRevision: revision,
-      dirty: !caughtUp,
-      syncedAt: this.nowIso(),
-      // Server image URLs replace data URLs locally too, unless a newer edit arrived meanwhile.
-      document: caughtUp ? sent : current.document,
-    });
+    // Server image URLs replace data URLs locally too, unless a newer edit arrived meanwhile. recordJson keeps the
+    // pre-upload JSON, because the UI still holds the data URLs and would otherwise never match again.
+    await this.write({ ...current, ...synced, dirty: !caughtUp, document: caughtUp ? sent : current.document }, this.recordJson);
   }
 
   /** Keeps the record in memory, then stores it. Returns false when the device is full (the edit stays in memory). */

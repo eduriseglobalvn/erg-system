@@ -7,6 +7,7 @@ import {
   type QuizEditorMediaPresignInput,
   type QuizEditorMediaPresignResult,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
+import { ApiClientError } from "@/lib/api-client";
 import { readImageSize } from "@/lib/media/quiz-image";
 
 export type QuizImageUploader = {
@@ -20,7 +21,13 @@ export function createQuizImageUploader(): QuizImageUploader {
     presign: presignQuizEditorMedia,
     commit: commitQuizEditorMedia,
     async put(uploadUrl, blob, mimeType) {
-      const response = await fetch(uploadUrl, { method: "PUT", body: blob, headers: { "Content-Type": mimeType } });
+      let response: Response;
+      try {
+        response = await fetch(uploadUrl, { method: "PUT", body: blob, headers: { "Content-Type": mimeType } });
+      } catch (error) {
+        // A dropped connection must read as a network error so the sync engine retries it.
+        throw new ApiClientError(error instanceof Error && error.message ? error.message : "Tải ảnh lên thất bại (mất kết nối).", "NETWORK_ERROR", 0);
+      }
       if (!response.ok) throw new Error(`Tải ảnh lên thất bại (${response.status}).`);
     },
   };
@@ -76,6 +83,8 @@ export async function uploadInlineImages(
   uploader: QuizImageUploader,
   digest: (blob: Blob) => Promise<string> = sha256Hex,
   readSize: (dataUrl: string) => Promise<{ width: number; height: number }> = readImageSize,
+  /** Long-lived data URL → server URL map, so a later save skips images already uploaded. */
+  cache?: Map<string, string>,
 ): Promise<QuizEditorDraftDocument> {
   const inline = new Set<string>();
   collect(doc, inline);
@@ -84,6 +93,11 @@ export async function uploadInlineImages(
   const urls = new Map<string, string>();
   const bySha = new Map<string, string>(); // identical bytes under different strings upload once
   for (const dataUrl of inline) {
+    const cached = cache?.get(dataUrl);
+    if (cached) {
+      urls.set(dataUrl, cached);
+      continue;
+    }
     const blob = dataUrlToBlob(dataUrl);
     const sha256 = await digest(blob);
     let url = bySha.get(sha256);
@@ -95,6 +109,7 @@ export async function uploadInlineImages(
       bySha.set(sha256, url);
     }
     urls.set(dataUrl, url);
+    cache?.set(dataUrl, url);
   }
   return replace(doc, urls) as QuizEditorDraftDocument;
 }

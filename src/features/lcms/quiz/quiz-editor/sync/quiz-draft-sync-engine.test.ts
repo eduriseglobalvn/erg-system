@@ -84,6 +84,7 @@ describe("QuizDraftSyncEngine", () => {
     expect(engine.hasUnsyncedChanges).toBe(true);
     await vi.advanceTimersByTimeAsync(2000);
     expect(api.saveDraft).toHaveBeenLastCalledWith(expect.objectContaining({ docVersion: 4 }));
+    expect(titleOf(api.saveDraft.mock.calls[1][0])).toBe("A2");
   });
 
   it("never runs two saves at once", async () => {
@@ -108,8 +109,29 @@ describe("QuizDraftSyncEngine", () => {
     api.saveDraft.mockRejectedValue(new ApiClientError("x", "NETWORK_ERROR", 0));
     await engine.edit(doc("A")); await vi.advanceTimersByTimeAsync(2000);
     expect(engine.status).toEqual({ kind: "offline", pendingEdits: 1 });
-    for (const ms of [2000, 5000, 15000, 30000, 30000]) await vi.advanceTimersByTimeAsync(ms);
-    expect(api.saveDraft).toHaveBeenCalledTimes(6);
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    let calls = 1;
+    for (const ms of [2000, 5000, 15000, 30000, 30000]) {
+      await vi.advanceTimersByTimeAsync(ms - 1);
+      expect(api.saveDraft).toHaveBeenCalledTimes(calls);
+      await vi.advanceTimersByTimeAsync(1);
+      expect(api.saveDraft).toHaveBeenCalledTimes((calls += 1));
+    }
+    expect(calls).toBe(6);
+  });
+
+  it("starts the retry delays over after a successful save", async () => {
+    const offline = new ApiClientError("x", "NETWORK_ERROR", 0);
+    api.saveDraft.mockRejectedValueOnce(offline).mockResolvedValueOnce({ docVersion: 4 }).mockRejectedValueOnce(offline);
+    await engine.edit(doc("A")); await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(engine.status).toMatchObject({ kind: "saved" });
+    await engine.edit(doc("B")); await vi.advanceTimersByTimeAsync(2000);
+    expect(api.saveDraft).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(1999);
+    expect(api.saveDraft).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(api.saveDraft).toHaveBeenCalledTimes(4);
   });
 
   it("does not call the server while the browser reports offline, and flushes on notifyOnline", async () => {
@@ -146,6 +168,30 @@ describe("QuizDraftSyncEngine", () => {
     const [first, second] = api.createQuiz.mock.calls.map((c) => c[0].idempotencyKey);
     expect(second).toBe(first);
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect(deps.onQuizCreated).toHaveBeenCalledTimes(1);
+  });
+
+  it("a new engine on the same store reuses the idempotency key after a lost create response", async () => {
+    api.createQuiz.mockRejectedValueOnce(new ApiClientError("x", "NETWORK_ERROR", 0));
+    engine = new QuizDraftSyncEngine(deps, "new-quiz:c:l:t");
+    await engine.start(undefined); await engine.edit(doc("A"));
+    await vi.advanceTimersByTimeAsync(2000);
+    engine.dispose();
+    engine = new QuizDraftSyncEngine(deps, "new-quiz:c:l:t");
+    await engine.start(undefined);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(api.createQuiz).toHaveBeenCalledTimes(2);
+    const [first, second] = api.createQuiz.mock.calls.map((c) => c[0].idempotencyKey);
+    expect(second).toBe(first);
+    expect(deps.onQuizCreated).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports the created quiz even when the re-keyed record cannot be stored", async () => {
+    engine = new QuizDraftSyncEngine(deps, "new-quiz:c:l:t");
+    await engine.start(undefined); await engine.edit(doc("A"));
+    store.put = vi.fn().mockRejectedValue(new Error("idb broke"));
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(deps.onQuizCreated).toHaveBeenCalledWith("quiz-new");
   });
 
   it("moves to conflict on 409 STALE_DRAFT and stops retrying", async () => {
@@ -223,6 +269,15 @@ describe("QuizDraftSyncEngine", () => {
     expect((await store.get(scope, "q1"))).toMatchObject({ writerId: "tab-1", document: doc("mine") });
   });
 
+  it("backs up the same other-tab record only once", async () => {
+    await store.put(scope, rec({ key: "q1", dirty: true, writerId: "tab-OTHER", revision: 5, document: doc("from other tab") }));
+    store.put = vi.fn().mockRejectedValue(new DeviceStorageFullError("full")); // our write fails, the other tab's record stays
+    await engine.edit(doc("mine"));
+    await vi.advanceTimersByTimeAsync(1000); // distinct createdAt, so a second backup would not overwrite the first
+    await engine.edit(doc("mine again"));
+    expect(await store.listBackups(scope, "q1")).toHaveLength(1);
+  });
+
   it("does not back up a dirty record it recovered on start", async () => {
     await store.put(scope, rec({ dirty: true, revision: 3, syncedRevision: 1, writerId: "tab-OLD" }));
     online = false;
@@ -239,6 +294,17 @@ describe("QuizDraftSyncEngine", () => {
     expect(api.uploadImages).toHaveBeenCalledWith(doc("data-url"));
     expect(titleOf(api.saveDraft.mock.calls[0][0])).toBe("uploaded");
     expect((await store.get(scope, "q1"))?.document).toEqual(uploaded);
+  });
+
+  it("treats the UI's pre-upload copy as unchanged after its images were uploaded", async () => {
+    api.uploadImages.mockResolvedValue(doc("uploaded"));
+    await engine.edit(doc("data-url"));
+    await engine.flushNow();
+    await engine.edit(doc("data-url"));
+    expect((await store.get(scope, "q1"))?.revision).toBe(1);
+    expect(engine.hasUnsyncedChanges).toBe(false);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
   });
 
   it("classifySyncError", () => {
@@ -283,7 +349,7 @@ describe("QuizDraftSyncEngine", () => {
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
   });
 
-  it("ignores a save that finishes after dispose", async () => {
+  it("records a save that finishes after dispose, without notifying anyone", async () => {
     let finish: (v: { docVersion: number }) => void = () => undefined;
     api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
     const listener = vi.fn();
@@ -296,6 +362,35 @@ describe("QuizDraftSyncEngine", () => {
     finish({ docVersion: 4 });
     await flushing;
     expect(listener).not.toHaveBeenCalled();
-    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+    expect(await store.get(scope, "q1")).toMatchObject({ dirty: false, baseDocVersion: 4, syncedRevision: 1 });
+  });
+
+  it("leaves a newer record alone when a save finishes after dispose", async () => {
+    let finish: (v: { docVersion: number }) => void = () => undefined;
+    api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
+    await engine.edit(doc("A"));
+    const flushing = engine.flushNow();
+    await vi.advanceTimersByTimeAsync(0);
+    engine.dispose();
+    await store.put(scope, rec({ dirty: true, revision: 2, syncedRevision: 0, writerId: "tab-1", document: doc("newer") }));
+    finish({ docVersion: 4 });
+    await flushing;
+    expect(await store.get(scope, "q1")).toMatchObject({ dirty: true, revision: 2, document: doc("newer") });
+  });
+
+  it("an edit queued before dispose neither writes nor arms a timer", async () => {
+    const pending = engine.edit(doc("A"));
+    engine.dispose();
+    await pending;
+    expect(await store.get(scope, "q1")).toBeNull();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it("survives a status listener that throws", async () => {
+    engine.subscribe((s) => {
+      if (s.kind === "saving") throw new Error("listener");
+    });
+    await engine.edit(doc("A"));
+    await expect(engine.flushNow()).resolves.toBeUndefined();
   });
 });

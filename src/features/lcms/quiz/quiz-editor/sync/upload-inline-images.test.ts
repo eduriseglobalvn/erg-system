@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { createQuizImageUploader, dataUrlToBlob, uploadInlineImages } from "@/features/lcms/quiz/quiz-editor/sync/upload-inline-images";
+import { ApiClientError } from "@/lib/api-client";
 
 const img = "data:image/png;base64,iVBORw0KGgo=";
 const base = { quizId: "q", draftId: "d" };
@@ -87,8 +88,30 @@ describe("uploadInlineImages", () => {
   });
 });
 
+describe("uploadInlineImages with a shared cache", () => {
+  it("uploads an image once across calls that share one cache", async () => {
+    const uploader = makeUploader();
+    const digest = vi.fn(async () => "sha");
+    const cache = new Map<string, string>();
+    const first = await uploadInlineImages(docWith(img), uploader, digest, size, cache);
+    const second = await uploadInlineImages(docWith(img), uploader, digest, size, cache);
+    expect(uploader.presign).toHaveBeenCalledTimes(1);
+    expect(uploader.commit).toHaveBeenCalledTimes(1);
+    expect(digest).toHaveBeenCalledTimes(1);
+    expect(second).toEqual(first);
+    expect(cache.get(img)).toBe("https://cdn/x.png");
+  });
+});
+
 describe("createQuizImageUploader.put", () => {
   afterEach(() => vi.unstubAllGlobals());
+
+  it("rethrows a dropped connection as a network ApiClientError", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new TypeError("Failed to fetch")));
+    const error = await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png").catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(ApiClientError);
+    expect(error).toMatchObject({ code: "NETWORK_ERROR", status: 0 });
+  });
 
   it("rejects on a non-2xx response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
