@@ -7,7 +7,7 @@ import { LikertAuthoring } from "./likert-authoring";
 
 const mk = (labels: string[], rows = ["r1"]): Question =>
   ({
-    id: "q", kind: "likert_scale", prompt: "",
+    id: "q", kind: "likert_scale", prompt: "", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" },
     likertScale: labels.map((label, i) => ({ id: `scale-${i + 1}`, label, value: i + 1 })),
     likertRows: rows.map((id) => ({ id, label: id })),
   }) as Question;

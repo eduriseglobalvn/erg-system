@@ -6,7 +6,7 @@ import type { Question } from "@/domain/quiz/types";
 import { TrueFalseAuthoring } from "./true-false-authoring";
 
 const start: Question = {
-  id: "q", kind: "true_false", prompt: "",
+  id: "q", kind: "true_false", prompt: "", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" },
   choices: [{ id: "a", label: "Đúng", correct: true }, { id: "b", label: "Sai", correct: false }],
 } as Question;
 
