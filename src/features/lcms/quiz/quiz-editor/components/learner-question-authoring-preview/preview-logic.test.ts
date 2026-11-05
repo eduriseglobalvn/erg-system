@@ -146,3 +146,30 @@ describe("buildPreviewQuestion images", () => {
     expect(back.choices?.[0].media?.src).toBe("https://x/a.png");
   });
 });
+
+describe("round trip fidelity", () => {
+  const rq = { id: "s1", kind: "single_choice", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" } };
+
+  test("empty matching label falls back to a numbered option", () => {
+    const slide = slideOf({ kind: "matching", choices: [{ id: "c1", label: "", correct: true }, { id: "c2", label: "B", correct: false }] });
+    expect(buildPreviewQuestion(slide, t)?.matching?.map((m) => m.prompt)).toEqual(["common.option 1", "B"]);
+  });
+
+  test("slide.media position survives the sync", () => {
+    const slide = slideOf({ kind: "multiple-choice", media: { type: "image", src: "https://x/q.png", alt: "Q", x: 0.1, y: 0.2, width: 0.3 }, runtimeQuestion: rq });
+    const back = syncQuizEditorSlideFromRuntimeQuestion(slide, buildPreviewQuestion(slide, t) as Question);
+    expect(back.media).toMatchObject({ x: 0.1, y: 0.2, width: 0.3 });
+  });
+
+  test("choice and drag item media keep name and position; only alt follows an edit", () => {
+    const media = { type: "image", src: "https://x/a.png", alt: "A", name: "a.png", x: 1, y: 2, width: 3 };
+    const slide = slideOf({ kind: "multiple-choice", choices: [{ id: "c1", label: "A", correct: true, media }] });
+    const question = buildPreviewQuestion(slide, t)!;
+    expect(syncQuizEditorSlideFromRuntimeQuestion(slide, question).choices?.[0].media).toEqual(media);
+    const edited = { ...question, choices: [{ ...question.choices![0], image: { url: "https://x/a.png", alt: "mới" } }] };
+    expect(syncQuizEditorSlideFromRuntimeQuestion(slide, edited).choices?.[0].media).toEqual({ ...media, alt: "mới" });
+
+    const dd = slideOf({ kind: "drag-and-drop", dragDropItems: [{ id: "d1", label: "D", emoji: "", target: "Z", media }] });
+    expect(syncQuizEditorSlideFromRuntimeQuestion(dd, buildPreviewQuestion(dd, t)!).dragDropItems?.[0].media).toEqual(media);
+  });
+});

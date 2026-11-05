@@ -27,9 +27,9 @@ export function syncQuizEditorSlideFromRuntimeQuestion(
         ? { ...runtimeMedia, x: slide.media.x, y: slide.media.y, width: slide.media.width }
         : runtimeMedia
       : slide.media,
-    choices: mapRuntimeChoices(question),
+    choices: mapRuntimeChoices(question, slide),
     choiceControlType: kind === "multiple-response" ? "checkbox" : "radio",
-    dragDropItems: mapRuntimeDragDropItems(question),
+    dragDropItems: mapRuntimeDragDropItems(question, slide),
     hotspotAreas: mapRuntimeHotspotAreas(question),
   };
 }
@@ -68,13 +68,13 @@ function mapRuntimeKindToEditorKind(kind: QuestionKind): QuestionType {
   }
 }
 
-function mapRuntimeChoices(question: Question): QuizEditorChoice[] | undefined {
+function mapRuntimeChoices(question: Question, slide: QuizEditorSlide): QuizEditorChoice[] | undefined {
   if (question.choices?.length) {
     return question.choices.map((choice) => ({
       id: choice.id,
       label: choice.label,
       correct: choice.correct,
-      ...(choice.image ? { media: imageToMedia(choice.image) } : {}),
+      ...(choice.image ? { media: imageToMedia(choice.image, slide.choices?.find((c) => c.id === choice.id)?.media) } : {}),
     }));
   }
 
@@ -139,7 +139,7 @@ function mapRuntimeChoices(question: Question): QuizEditorChoice[] | undefined {
   return undefined;
 }
 
-function mapRuntimeDragDropItems(question: Question): QuizEditorDragDropItem[] | undefined {
+function mapRuntimeDragDropItems(question: Question, slide: QuizEditorSlide): QuizEditorDragDropItem[] | undefined {
   if (question.matching?.length) {
     return question.matching.map((pair) => ({
       id: pair.id,
@@ -158,7 +158,7 @@ function mapRuntimeDragDropItems(question: Question): QuizEditorDragDropItem[] |
       label: item.label,
       emoji: "",
       target: targetById.get(item.correctTargetId) ?? item.correctTargetId,
-      ...(item.image ? { media: imageToMedia(item.image) } : {}),
+      ...(item.image ? { media: imageToMedia(item.image, slide.dragDropItems?.find((d) => d.id === item.id)?.media) } : {}),
     }));
   }
 
@@ -189,7 +189,9 @@ function mapHotspotImage(question: Question) {
   };
 }
 
-function imageToMedia(image: QuestionImage) {
+// An unchanged image keeps its stored name and position; only the alt text follows the editor.
+function imageToMedia(image: QuestionImage, existing?: QuizEditorSlide["media"]) {
+  if (existing && existing.src === image.url) return { ...existing, alt: image.alt ?? "" };
   return { type: "image" as const, src: image.url, alt: image.alt ?? "" };
 }
 

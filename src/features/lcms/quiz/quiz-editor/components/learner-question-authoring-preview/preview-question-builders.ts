@@ -295,7 +295,7 @@ export function buildMatchingPairs(
 
   return normalizeChoices(slide.choices, t).map((choice, index) => ({
     id: choice.id || `match-${index + 1}`,
-    prompt: choice.label,
+    prompt: choice.label || `${t("common.option")} ${index + 1}`,
     response: choice.correct ? t("common.correct") : t("common.incorrect"),
   }));
 }

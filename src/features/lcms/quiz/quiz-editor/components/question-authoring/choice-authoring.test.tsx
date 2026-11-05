@@ -1,0 +1,84 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { Question } from "@/domain/quiz/types";
+import { QuizImageRejectedError } from "@/lib/media/quiz-image";
+import { ChoiceAuthoring } from "./choice-authoring";
+
+const prepare = vi.hoisted(() => vi.fn());
+const toastError = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/media/quiz-image", async (orig) => ({ ...(await orig<object>()), prepareQuizImage: prepare }));
+vi.mock("sonner", () => ({ toast: { error: toastError } }));
+
+const base = (correct: string[] = [], n = 3): Question =>
+  ({
+    id: "q", kind: "single_choice", title: "T", points: 1, feedback: { correct: "", incorrect: "", partial: "" },
+    choices: Array.from({ length: n }, (_, i) => ({ id: `c${i + 1}`, label: `L${i + 1}`, correct: correct.includes(`c${i + 1}`) })),
+  }) as Question;
+
+function setup(question: Question, mode: "single" | "multiple" = "single") {
+  const onChange = vi.fn();
+  render(<ChoiceAuthoring question={question} mode={mode} onChange={onChange} />);
+  return { last: () => onChange.mock.calls.at(-1)![0] as Question };
+}
+
+beforeEach(() => vi.clearAllMocks());
+
+describe("ChoiceAuthoring", () => {
+  it("single mode moves the correct mark", () => {
+    const { last } = setup(base(["c1"]));
+    expect(screen.getByRole("button", { name: "Bỏ đánh dấu A là đáp án đúng" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Đánh dấu B là đáp án đúng" }));
+    expect(last().choices!.map((c) => c.correct)).toEqual([false, true, false]);
+  });
+
+  it("single mode clears the mark on a second click", () => {
+    const { last } = setup(base(["c2"]));
+    fireEvent.click(screen.getByRole("button", { name: "Bỏ đánh dấu B là đáp án đúng" }));
+    expect(last().choices!.every((c) => !c.correct)).toBe(true);
+  });
+
+  it("multiple mode toggles independently", () => {
+    const { last } = setup(base(["c1"]), "multiple");
+    fireEvent.click(screen.getByRole("button", { name: "Đánh dấu C là đáp án đúng" }));
+    expect(last().choices!.map((c) => c.correct)).toEqual([true, false, true]);
+  });
+
+  it("types a label and appends an option on Enter in the last one", () => {
+    const q = base([], 3);
+    q.choices!.forEach((c) => (c.label = ""));
+    const { last } = setup(q);
+    fireEvent.change(screen.getByPlaceholderText("Phương án 2"), { target: { value: "Hai" } });
+    expect(last().choices![1].label).toBe("Hai");
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
+    expect(last().choices).toHaveLength(4);
+    expect(last().choices![3]).toMatchObject({ label: "", correct: false });
+  });
+
+  it("disables delete at two options", () => {
+    setup(base([], 2));
+    expect(screen.getByRole("button", { name: "Xoá phương án 1" })).toBeDisabled();
+  });
+
+  it("stores a prepared image on the choice and toasts a rejection", async () => {
+    prepare.mockResolvedValueOnce({ dataUrl: "data:image/png;base64,AAAA", width: 1, height: 1 });
+    const { last } = setup(base([], 3));
+    const file = new File(["x"], "a.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("Ảnh phương án 1"), { target: { files: [file] } });
+    await waitFor(() => expect(last().choices![0].image).toEqual({ url: "data:image/png;base64,AAAA", alt: "" }));
+
+    prepare.mockRejectedValueOnce(new QuizImageRejectedError("size"));
+    fireEvent.change(screen.getByLabelText("Ảnh phương án 2"), { target: { files: [file] } });
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith("Ảnh lớn hơn 5 MB."));
+  });
+
+  it("edits alt text and removes an existing image", () => {
+    const q = base([], 3);
+    q.choices![0].image = { url: "https://x/a.png", alt: "" };
+    const { last } = setup(q);
+    fireEvent.change(screen.getByRole("textbox", { name: "Mô tả ảnh" }), { target: { value: "mèo" } });
+    expect(last().choices![0].image).toEqual({ url: "https://x/a.png", alt: "mèo" });
+    fireEvent.click(screen.getByRole("button", { name: "Xoá ảnh" }));
+    expect(last().choices![0].image).toBeUndefined();
+  });
+});
