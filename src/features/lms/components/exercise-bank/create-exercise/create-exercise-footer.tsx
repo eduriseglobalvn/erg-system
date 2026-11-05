@@ -1,6 +1,12 @@
-import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 import DialogActions from "@mui/material/DialogActions";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock3 } from "lucide-react";
+import Typography from "@mui/material/Typography";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import CheckIcon from "@mui/icons-material/Check";
+import ScheduleIcon from "@mui/icons-material/Schedule";
+import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import type { Exercise } from "../exercise-bank-model";
 import type { CreateExerciseStep } from "./types";
 
@@ -28,155 +34,98 @@ export function CreateExerciseFooter({
   onClose: () => void;
 }) {
   return (
-        <DialogActions
-          sx={{
-            px: { xs: 2, sm: 3.5 },
-            py: { xs: 1.5, sm: 1.8 },
-            borderTop: "1px solid #E2E8F0",
-            display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            alignItems: { xs: "stretch", sm: "center" },
-            justifyContent: "space-between",
-            gap: 1.5,
-            bgcolor: "#FFFFFF",
-          }}
-        >
-          {/* Thống kê số câu đã chọn */}
-          <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-            {selectedQuestionIds.length > 0 ? (
-              <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
-                <span className="flex items-center gap-1.5 rounded-full bg-blue-50 text-[#0F6CBD] border border-blue-200 px-2.5 sm:px-3 py-1 text-[11.5px] sm:text-[12px] font-bold">
-                  <CheckCircle2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#0F6CBD]" />
-                  Đã chọn {selectedQuestionIds.length} câu
-                </span>
-                <span className="text-slate-300 hidden sm:inline">•</span>
-                <span className="flex items-center gap-1 text-[11.5px] sm:text-[12px] font-medium text-slate-600">
-                  <Clock3 className="h-3.5 w-3.5 text-slate-400" />
-                  Thời lượng: ~{Math.round(selectedQuestionIds.length * 2)} phút
-                </span>
-              </div>
-            ) : (
-              <span className="text-[11.5px] sm:text-[12px] text-slate-400 font-medium italic">
-                * Chưa bốc câu hỏi nào (chọn ít nhất 1 câu)
-              </span>
-            )}
-          </div>
+    <DialogActions
+      sx={{
+        px: { xs: 2, sm: 3.5 },
+        py: { xs: 1.5, sm: 1.75 },
+        borderTop: 1,
+        borderColor: "divider",
+        display: "flex",
+        flexDirection: { xs: "column", sm: "row" },
+        alignItems: { xs: "stretch", sm: "center" },
+        justifyContent: "space-between",
+        gap: 1.5,
+        bgcolor: "background.paper",
+      }}
+    >
+      {/* Thống kê số câu đã chọn */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: { xs: 1, sm: 1.5 }, flexWrap: "wrap" }}>
+        {selectedQuestionIds.length > 0 ? (
+          <>
+            <ErgStatusChip label={`Đã chọn ${selectedQuestionIds.length} câu`} tone="info" />
+            <Typography variant="caption" sx={{ display: "flex", alignItems: "center", gap: 0.5, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+              <ScheduleIcon fontSize="inherit" />
+              Thời lượng: ~{Math.round(selectedQuestionIds.length * 2)} phút
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="caption" sx={{ color: "text.secondary", fontStyle: "italic", fontWeight: "fontWeightMedium" }}>
+            * Chưa bốc câu hỏi nào (chọn ít nhất 1 câu)
+          </Typography>
+        )}
+      </Box>
 
-          {/* Nút hành động */}
-          <div className="flex items-center justify-end gap-2 w-full sm:w-auto">
-            {activeStep === "pick" ? (
-              <>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  onClick={onClose}
-                  sx={{
-                    height: 36,
-                    borderRadius: "8px",
-                    px: 2,
-                    fontSize: "12px",
-                    textTransform: "none",
-                    borderColor: "#CBD5E1",
-                    color: "#334155",
-                    fontWeight: 600,
-                    flex: { xs: 1, sm: "initial" },
-                    "&:hover": { borderColor: "#94A3B8", bgcolor: "#F8FAFC" },
-                  }}
-                >
-                  Hủy bỏ
-                </Button>
+      {/* Nút hành động */}
+      <Box sx={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 1, width: { xs: "100%", sm: "auto" } }}>
+        {activeStep === "pick" ? (
+          <>
+            <ErgButton type="button" variant="outlined" onClick={onClose} sx={{ flex: { xs: 1, sm: "initial" } }}>
+              Hủy bỏ
+            </ErgButton>
 
-                <Button
-                  type="button"
-                  variant="contained"
-                  disabled={selectedQuestionIds.length === 0}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    if (selectedQuestionIds.length === 0) {
-                      setError("Vui lòng chọn ít nhất 1 câu hỏi từ ngân hàng trước khi cấu hình");
-                      return;
-                    }
-                    if (!title.trim()) {
-                      setTitle(`${subjectName} - Bài tập ôn luyện (${selectedQuestionIds.length} câu)`);
-                    }
-                    setError("");
-                    setActiveStep("setup");
-                  }}
-                  endIcon={<ArrowRight className="h-4 w-4" />}
-                  sx={{
-                    height: 36,
-                    borderRadius: "8px",
-                    px: { xs: 2, sm: 2.5 },
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    flex: { xs: 2, sm: "initial" },
-                    bgcolor: selectedQuestionIds.length > 0 ? "#0F6CBD" : "#94A3B8",
-                    boxShadow:
-                      selectedQuestionIds.length > 0
-                        ? "0 1px 3px rgba(15, 108, 189, 0.25)"
-                        : "none",
-                    "&:hover": {
-                      bgcolor: selectedQuestionIds.length > 0 ? "#0B5CAB" : "#94A3B8",
-                    },
-                  }}
-                >
-                  {selectedQuestionIds.length > 0
-                    ? `Tiếp tục (${selectedQuestionIds.length} câu) →`
-                    : "Chọn câu hỏi để tiếp tục"}
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  onClick={() => setActiveStep("pick")}
-                  startIcon={<ArrowLeft className="h-4 w-4" />}
-                  sx={{
-                    height: 36,
-                    borderRadius: "8px",
-                    px: 2,
-                    fontSize: "12px",
-                    textTransform: "none",
-                    borderColor: "#CBD5E1",
-                    color: "#334155",
-                    fontWeight: 600,
-                    flex: { xs: 1, sm: "initial" },
-                    "&:hover": { borderColor: "#94A3B8", bgcolor: "#F8FAFC" },
-                  }}
-                >
-                  Quay lại chọn câu
-                </Button>
+            <ErgButton
+              type="button"
+              variant="contained"
+              disabled={selectedQuestionIds.length === 0}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (selectedQuestionIds.length === 0) {
+                  setError("Vui lòng chọn ít nhất 1 câu hỏi từ ngân hàng trước khi cấu hình");
+                  return;
+                }
+                if (!title.trim()) {
+                  setTitle(`${subjectName} - Bài tập ôn luyện (${selectedQuestionIds.length} câu)`);
+                }
+                setError("");
+                setActiveStep("setup");
+              }}
+              endIcon={<ArrowForwardIcon fontSize="small" />}
+              sx={{ flex: { xs: 2, sm: "initial" } }}
+            >
+              {selectedQuestionIds.length > 0
+                ? `Tiếp tục (${selectedQuestionIds.length} câu) →`
+                : "Chọn câu hỏi để tiếp tục"}
+            </ErgButton>
+          </>
+        ) : (
+          <>
+            <ErgButton
+              type="button"
+              variant="outlined"
+              onClick={() => setActiveStep("pick")}
+              startIcon={<ArrowBackIcon fontSize="small" />}
+              sx={{ flex: { xs: 1, sm: "initial" } }}
+            >
+              Quay lại chọn câu
+            </ErgButton>
 
-                <Button
-                  type="button"
-                  variant="contained"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleSubmit();
-                  }}
-                  endIcon={<Check className="h-4 w-4 stroke-[3]" />}
-                  sx={{
-                    height: 36,
-                    borderRadius: "8px",
-                    px: { xs: 2, sm: 2.5 },
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    textTransform: "none",
-                    flex: { xs: 2, sm: "initial" },
-                    bgcolor: "#0F6CBD",
-                    boxShadow: "0 1px 3px rgba(15, 108, 189, 0.25)",
-                    "&:hover": { bgcolor: "#0B5CAB" },
-                  }}
-                >
-                  {initialExercise ? "Lưu thay đổi bài tập" : `Tạo bài tập (${selectedQuestionIds.length} câu)`}
-                </Button>
-              </>
-            )}
-          </div>
-        </DialogActions>
+            <ErgButton
+              type="button"
+              variant="contained"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleSubmit();
+              }}
+              endIcon={<CheckIcon fontSize="small" />}
+              sx={{ flex: { xs: 2, sm: "initial" } }}
+            >
+              {initialExercise ? "Lưu thay đổi bài tập" : `Tạo bài tập (${selectedQuestionIds.length} câu)`}
+            </ErgButton>
+          </>
+        )}
+      </Box>
+    </DialogActions>
   );
 }

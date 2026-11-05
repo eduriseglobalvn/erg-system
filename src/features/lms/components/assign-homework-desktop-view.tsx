@@ -1,3 +1,7 @@
+import CloseIcon from "@mui/icons-material/Close";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgPageHeader } from "@/components/erg-mui/erg-page-header";
 import { AssignHomeworkFooter } from "@/features/lms/components/assign-homework-footer";
 import { MobileAssignProgress } from "@/features/lms/components/assign-homework-parts";
@@ -26,29 +30,25 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
     handleNext,
     handleFinish,
   } = model;
+  const errorBanner = validationError ? (
+    <Box
+      sx={{ flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "space-between", borderRadius: 1, border: 1, borderColor: "error.main", bgcolor: "error.light", px: 2, py: 1.5, color: "error.main", boxShadow: 1 }}
+    >
+      <Typography component="span" variant="body2" sx={{ fontWeight: "fontWeightMedium" }}>{validationError}</Typography>
+      <ErgIconButton label="Đóng thông báo" size="small" onClick={() => setValidationError("")} sx={{ ml: 1.5, color: "error.main" }}>
+        <CloseIcon fontSize="small" />
+      </ErgIconButton>
+    </Box>
+  ) : null;
   return (
-    <div className="w-full h-full flex flex-col bg-[#f3f6fb] overflow-hidden text-slate-900 md:bg-[#f8fafc]">
-
-      {/* Main workspace body - flex flex-col to enable layout flexing */}
-      <div className="flex-1 flex flex-col min-h-0">
+    <Box sx={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", bgcolor: "background.default", overflow: "hidden", color: "text.primary" }}>
+      <Box sx={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
         {isMobile ? (
           <MobileAssignProgress step={step} targetType={targetType} selectedCount={selectedStudentIds.size} />
         ) : null}
         {step === 1 ? (
-          <div className="w-full h-full px-4 py-4 space-y-4 flex flex-col min-h-0 md:px-8 md:py-6">
-            {validationError ? (
-              <div className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-700 flex items-center justify-between shadow-xs">
-                <span>{validationError}</span>
-                <button
-                  type="button"
-                  onClick={() => setValidationError("")}
-                  className="ml-3 font-bold text-rose-500 hover:text-rose-700 cursor-pointer text-sm"
-                  aria-label="Đóng thông báo"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : null}
+          <Box sx={{ width: "100%", height: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
+            {errorBanner}
 
             {isMobile ? null : (
               <ErgPageHeader description="Chọn đối tượng, thiết lập thời hạn rồi chọn bài tập để giao." title="Giao bài" />
@@ -65,26 +65,14 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
             ) : (
               <GradeTargetCard model={model} />
             )}
-          </div>
+          </Box>
         ) : (
-          <div className="w-full h-full px-4 py-4 flex flex-col min-h-0 md:px-8 md:py-6">
-            {validationError ? (
-              <div className="shrink-0 mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-[13px] font-semibold text-rose-700 flex items-center justify-between shadow-xs">
-                <span>{validationError}</span>
-                <button
-                  type="button"
-                  onClick={() => setValidationError("")}
-                  className="ml-3 font-bold text-rose-500 hover:text-rose-700 cursor-pointer text-sm"
-                  aria-label="Đóng thông báo"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : null}
+          <Box sx={{ width: "100%", height: "100%", px: { xs: 2, md: 4 }, py: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2, minHeight: 0 }}>
+            {errorBanner}
             <ResourceSelectionStep model={model} />
-          </div>
+          </Box>
         )}
-      </div>
+      </Box>
 
       <AssignHomeworkFooter
         step={step}
@@ -97,6 +85,6 @@ export function AssignHomeworkDesktopView({ model }: AssignHomeworkDesktopViewPr
         }}
         isSubmitting={isSubmitting}
       />
-    </div>
+    </Box>
   );
 }

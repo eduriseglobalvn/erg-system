@@ -1,11 +1,17 @@
 import { useMemo } from "react";
-import { BarChart3, TrendingUp, Trophy } from "lucide-react";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
 import { DashboardMetricCard } from "@/components/dashboard/dashboard-metric-card";
 import { DashboardPageShell, DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
+import Box from "@mui/material/Box";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
 import LinearProgress from "@mui/material/LinearProgress";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import type { ClassroomSnapshot, LeaderboardEntry, LeaderboardScope } from "@/domain/school/classroom-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { useI18n } from "@/platform/i18n";
@@ -51,13 +57,13 @@ export function ClassReportsWorkspace({
         </Button>
       }
     >
-      <div className="grid gap-4 xl:grid-cols-4">
+      <Box sx={{ display: "grid", gap: 2, gridTemplateColumns: { lg: "repeat(4, minmax(0, 1fr))" } }}>
         <DashboardMetricCard
           label={copy.metrics.completion}
           value={averageCompletion === null ? copy.noData : `${averageCompletion}%`}
           detail={copy.metrics.completionDetail}
           delta={strongestClass ? copy.metrics.strongest(strongestClass.className) : "-"}
-          icon={<TrendingUp className="h-4 w-4" />}
+          icon={<TrendingUpIcon fontSize="small" />}
           tone="emerald"
         />
         <DashboardMetricCard
@@ -65,7 +71,7 @@ export function ClassReportsWorkspace({
           value={averageScore === null ? copy.noData : `${averageScore}`}
           detail={copy.metrics.scoreDetail}
           delta={leader ? copy.metrics.leader(leader.name) : copy.noData}
-          icon={<Trophy className="h-4 w-4" />}
+          icon={<EmojiEventsIcon fontSize="small" />}
           tone="amber"
         />
         <DashboardMetricCard
@@ -73,7 +79,7 @@ export function ClassReportsWorkspace({
           value={supportTotal === null ? copy.noData : `${supportTotal}`}
           detail={copy.metrics.supportDetail}
           delta={classNeedingCare ? copy.metrics.watch(classNeedingCare.className) : "-"}
-          icon={<BarChart3 className="h-4 w-4" />}
+          icon={<BarChartIcon fontSize="small" />}
           tone="rose"
         />
         <DashboardMetricCard
@@ -81,37 +87,53 @@ export function ClassReportsWorkspace({
           value={`${leaderboard.length}`}
           detail={copy.metrics.scopeSizeDetail(scope)}
           delta={copy.metrics.scopeSizeDelta}
-          icon={<Trophy className="h-4 w-4" />}
+          icon={<EmojiEventsIcon fontSize="small" />}
           tone="violet"
         />
-      </div>
+      </Box>
 
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.85fr)]">
+      <Box
+        component="section"
+        sx={{ display: "grid", gap: 2, gridTemplateColumns: { lg: "minmax(0, 1.25fr) minmax(340px, 0.85fr)" } }}
+      >
         <DashboardSectionCard
           title={copy.leaderboardTitle}
           description={copy.leaderboardDescription}
           action={
-              <span className="rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-semibold text-slate-500">{copy.metricsUnavailable}</span>
+            <Typography
+              component="span"
+              variant="caption"
+              sx={{ border: 1, borderColor: "divider", borderRadius: 1, borderStyle: "dashed", color: "text.secondary", fontWeight: "fontWeightBold", px: 1.5, py: 1 }}
+            >
+              {copy.metricsUnavailable}
+            </Typography>
           }
         >
-          <div className="space-y-3">
+          <Stack spacing={1.5}>
             {leaderboard.length ? leaderboard.map((entry, index) => (
               <LeaderboardRow key={entry.id} copy={copy} entry={entry} rank={index + 1} />
-            )) : <div className="rounded-lg border border-dashed border-slate-300 bg-[#f8fbff] p-6 text-sm font-medium text-slate-500">{copy.metricsUnavailable}</div>}
-          </div>
+            )) : (
+              <Typography
+                variant="body2"
+                sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, borderStyle: "dashed", color: "text.secondary", fontWeight: "fontWeightMedium", p: 3 }}
+              >
+                {copy.metricsUnavailable}
+              </Typography>
+            )}
+          </Stack>
         </DashboardSectionCard>
 
-        <div className="space-y-4">
+        <Stack spacing={2}>
           <DashboardSectionCard title={copy.breakdownTitle} description={copy.breakdownDescription}>
-            <div className="space-y-3">
+            <Stack spacing={1.5}>
               {selectedClass ? [selectedClass].map((snapshot) => (
                 <ClassBreakdown key={snapshot.id} copy={copy} snapshot={snapshot} />
               )) : null}
-            </div>
+            </Stack>
           </DashboardSectionCard>
 
           <DashboardSectionCard title={copy.insightTitle} description={copy.insightDescription}>
-            <div className="space-y-3">
+            <Stack spacing={1.5}>
               <InsightCard title={copy.insights.publishTitle} body={copy.insights.publishBody(scope)} />
               <InsightCard
                 title={copy.insights.coachTitle}
@@ -121,10 +143,10 @@ export function ClassReportsWorkspace({
                 title={copy.insights.rewardTitle}
                 body={leader ? copy.insights.rewardBody(leader.name) : copy.noData}
               />
-            </div>
+            </Stack>
           </DashboardSectionCard>
-        </div>
-      </section>
+        </Stack>
+      </Box>
     </DashboardPageShell>
   );
 }
@@ -139,65 +161,69 @@ function LeaderboardRow({
   rank: number;
 }) {
   return (
-    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[var(--erg-blue)] text-sm font-semibold text-white">
+    <Paper component="article" variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+      <Stack direction={{ xs: "column", sm: "row" }} spacing={2} sx={{ alignItems: { sm: "center" } }}>
+        <Box
+          sx={{ bgcolor: "primary.main", borderRadius: 1, color: "primary.contrastText", display: "grid", flexShrink: 0, height: 40, placeItems: "center", typography: "subtitle2", width: 40 }}
+        >
           #{rank}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="text-base font-semibold text-slate-950">{entry.name}</div>
-          <div className="mt-1 text-sm text-slate-500">
+        </Box>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="h5">{entry.name}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {entry.className} • {entry.schoolName}
-          </div>
-        </div>
+          </Typography>
+        </Box>
         <Chip label={entry.badge} size="small" color={rank === 1 ? "success" : "secondary"} />
-      </div>
+      </Stack>
 
-      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+      <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: { sm: "repeat(3, minmax(0, 1fr))" }, mt: 2 }}>
         <MiniMetric label={copy.scoreLabel} value={`${entry.score}`} />
         <MiniMetric label={copy.completionLabel} value={`${entry.completionRate}%`} />
         <MiniMetric label={copy.momentumLabel} value={`+${entry.momentum}`} />
-      </div>
-    </article>
+      </Box>
+    </Paper>
   );
 }
 
 function ClassBreakdown({ copy, snapshot }: { copy: ReportCopy; snapshot: ClassroomSnapshot }) {
   return (
-    <article className="rounded-lg border border-[#cbd7e6] bg-white p-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <div className="text-sm font-semibold text-slate-950">{snapshot.className}</div>
-          <div className="mt-1 text-sm text-slate-500">{snapshot.gradeLabel}</div>
-        </div>
+    <Paper component="article" variant="outlined" sx={{ borderRadius: 1, p: 2 }}>
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start", justifyContent: "space-between" }}>
+        <Box>
+          <Typography variant="subtitle2">{snapshot.className}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>{snapshot.gradeLabel}</Typography>
+        </Box>
         <Chip label={snapshot.metricsAvailable === false ? copy.noData : `${snapshot.riskStudents} ${copy.supportUnit}`} size="small" color={snapshot.metricsAvailable === false ? "default" : snapshot.riskStudents >= 5 ? "warning" : "success"} />
-      </div>
-      <div className="mt-4">
-        <div className="flex justify-between text-sm">
-          <span className="text-slate-500">{copy.completionLabel}</span>
-          <span className="font-semibold text-slate-950">{snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`}</span>
-        </div>
-        {snapshot.metricsAvailable === false ? <div className="mt-2 text-sm font-medium text-slate-500">{copy.metricsUnavailable}</div> : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 2, height: 8, borderRadius: 1 }} />}
-      </div>
-    </article>
+      </Stack>
+      <Box sx={{ mt: 2 }}>
+        <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+          <Typography variant="body2" color="text.secondary">{copy.completionLabel}</Typography>
+          <Typography variant="subtitle2">{snapshot.metricsAvailable === false ? copy.noData : `${snapshot.completionRate}%`}</Typography>
+        </Stack>
+        {snapshot.metricsAvailable === false ? (
+          <Typography variant="body2" color="text.secondary" sx={{ fontWeight: "fontWeightMedium", mt: 1 }}>{copy.metricsUnavailable}</Typography>
+        ) : <LinearProgress variant="determinate" value={snapshot.completionRate} sx={{ mt: 2, height: 8, borderRadius: 1 }} />}
+      </Box>
+    </Paper>
   );
 }
 
 function MiniMetric({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg bg-[#f8fbff] px-3 py-2">
-      <div className="text-[13px] font-bold text-slate-600">{label}</div>
-      <div className="mt-1 text-lg font-semibold text-slate-950">{value}</div>
-    </div>
+    <Box sx={{ bgcolor: "background.default", borderRadius: 1, px: 1.5, py: 1 }}>
+      <Typography variant="caption" color="text.secondary" sx={{ display: "block", fontWeight: "fontWeightBold" }}>{label}</Typography>
+      <Typography variant="h4" sx={{ mt: 0.5 }}>{value}</Typography>
+    </Box>
   );
 }
 
 function InsightCard({ body, title }: { body: string; title: string }) {
   return (
-    <div className="rounded-lg border border-[#cbd7e6] bg-[#f8fbff] p-4">
-      <div className="text-sm font-semibold text-slate-950">{title}</div>
-      <div className="mt-1 text-sm leading-6 text-slate-500">{body}</div>
-    </div>
+    <Box sx={{ bgcolor: "background.default", border: 1, borderColor: "divider", borderRadius: 1, p: 2 }}>
+      <Typography variant="subtitle2">{title}</Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ lineHeight: 1.7, mt: 0.5 }}>{body}</Typography>
+    </Box>
   );
 }
 

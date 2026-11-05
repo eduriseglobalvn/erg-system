@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Stack from "@mui/material/Stack";
 
 import {
   LearningResourceExplorerTreePane,
@@ -115,7 +116,7 @@ export function CategoryTree({
         />
 
         {hasChildren && isExpanded ? (
-          <div className="mt-0.5 space-y-0.5">
+          <Stack spacing={0.25} sx={{ mt: 0.25 }}>
             {children.map((child) => renderCategory(child, depth + 1))}
             {categoryResources.map((resource) => (
               <LearningResourceExplorerTreeRow
@@ -127,14 +128,14 @@ export function CategoryTree({
                 onSelect={() => onOpenResource(resource)}
               />
             ))}
-          </div>
+          </Stack>
         ) : null}
       </div>
     );
   }
 
   return (
-    <LearningResourceExplorerTreePane className="lms-resource-tree">
+    <LearningResourceExplorerTreePane>
       {topLevelCategories.map((category) => renderCategory(category))}
     </LearningResourceExplorerTreePane>
   );

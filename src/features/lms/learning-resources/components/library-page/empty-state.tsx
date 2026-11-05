@@ -1,13 +1,32 @@
-import { Search } from "lucide-react";
+import SearchIcon from "@mui/icons-material/Search";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import { alpha } from "@mui/material/styles";
 
 export function EmptyState() {
   return (
-    <div className="rounded-lg border border-dashed border-[#cbd7e6] bg-white p-10 text-center">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-[var(--erg-blue-light)] text-[var(--erg-blue)]">
-        <Search className="h-5 w-5" />
-      </div>
-      <h3 className="mt-4 text-lg font-semibold text-slate-950">Không tìm thấy tài liệu phù hợp</h3>
-      <p className="mt-2 text-[14px] font-semibold text-slate-600">Hãy đổi bộ lọc lớp, môn, nhóm học liệu hoặc từ khóa tìm kiếm.</p>
-    </div>
+    <Box sx={{ bgcolor: "background.paper", border: 1, borderColor: "divider", borderRadius: 1, borderStyle: "dashed", p: 5, textAlign: "center" }}>
+      <Box
+        sx={{
+          alignItems: "center",
+          bgcolor: (theme) => alpha(theme.palette.primary.main, 0.08),
+          borderRadius: 1,
+          color: "primary.main",
+          display: "flex",
+          height: 48,
+          justifyContent: "center",
+          mx: "auto",
+          width: 48,
+        }}
+      >
+        <SearchIcon fontSize="small" />
+      </Box>
+      <Typography component="h3" variant="h4" sx={{ mt: 2 }}>
+        Không tìm thấy tài liệu phù hợp
+      </Typography>
+      <Typography variant="subtitle2" sx={{ color: "text.secondary", mt: 1 }}>
+        Hãy đổi bộ lọc lớp, môn, nhóm học liệu hoặc từ khóa tìm kiếm.
+      </Typography>
+    </Box>
   );
 }

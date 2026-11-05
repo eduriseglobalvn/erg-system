@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
-import { Download, Search } from "lucide-react";
+import DownloadIcon from "@mui/icons-material/Download";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Typography from "@mui/material/Typography";
+import { alpha, type Theme } from "@mui/material/styles";
 
-import TextField from "@mui/material/TextField";
+import { ErgButton, ErgIconButton, ErgSearchField } from "@/components/erg-mui";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import {
   attendanceLabel,
@@ -12,8 +16,8 @@ import {
   type AttendanceStatus,
   type CurriculumItem,
 } from "@/features/lms/components/attendance/attendance-sheet-model";
-import { cn } from "@/lib/utils";
 import { formatDateVi } from "@/domain/formatters/format-date";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { AttendanceDateField } from "./attendance-date-field";
 
 type MobileAttendanceMode = "today" | "week" | "program";
@@ -37,6 +41,10 @@ type MobileAttendanceSheetPanelProps = {
   visibleColumns: AttendanceColumn[];
 };
 
+const primaryTint = (theme: Theme) => alpha(theme.palette.primary.main, 0.1);
+const cardSx = { border: 1, borderColor: "divider", borderRadius: 2, bgcolor: "background.paper", boxShadow: ergEnterpriseTokens.shadow.sm } as const;
+const gridCellSx = { borderBottom: 1, borderRight: 1, borderColor: "divider" } as const;
+const lineClamp2 = { display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as const;
 
 export function MobileAttendanceSheetPanel({
   attendanceSummary,
@@ -73,171 +81,193 @@ export function MobileAttendanceSheetPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f6fb]">
-      <section className="shrink-0 border-b border-white bg-white px-3 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03),0_8px_24px_rgba(15,23,42,0.03)]">
-        <div className="flex min-w-0 items-start gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-[15px] font-extrabold text-slate-950">{selectedClass?.className ?? "Lớp học"}</div>
-            <div className="mt-0.5 truncate text-[12px] font-semibold text-slate-500">
+    <Box sx={{ display: "flex", height: "100%", minHeight: 0, flexDirection: "column", overflow: "hidden", bgcolor: "background.default" }}>
+      <Box component="section" sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, py: 1.5, boxShadow: ergEnterpriseTokens.shadow.xs }}>
+        <Box sx={{ display: "flex", minWidth: 0, alignItems: "flex-start", gap: 1.5 }}>
+          <Box sx={{ minWidth: 0, flex: 1 }}>
+            <Typography variant="subtitle1" noWrap sx={{ fontWeight: "fontWeightBold" }}>{selectedClass?.className ?? "Lớp học"}</Typography>
+            <Typography variant="caption" component="div" noWrap sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
               {filteredStudents.length} học sinh · {formatDateVi(selectedDate)} · {primaryColumn?.session ?? "Tiết"}
-            </div>
-          </div>
-          <button
-            type="button"
+            </Typography>
+          </Box>
+          <ErgIconButton
+            label="Xuất Excel điểm danh"
             onClick={exportXlsx}
-            className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] bg-[var(--erg-blue)] text-white shadow-[0_8px_18px_rgba(15,108,189,0.24)]"
-            aria-label="Xuất Excel điểm danh"
+            sx={{ width: 44, height: 44, flexShrink: 0, borderRadius: 1.5, bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } }}
           >
-            <Download className="h-5 w-5" />
-          </button>
-        </div>
+            <DownloadIcon fontSize="small" />
+          </ErgIconButton>
+        </Box>
 
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_160px] gap-2">
-          <label className="relative block min-w-0">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <TextField
-              value={searchQuery}
-              onChange={(event) => onSearchQueryChange(event.target.value)}
-              placeholder="Tìm học sinh"
-              size="small"
-              fullWidth
-              sx={{
-                "& .MuiInputBase-root": {
-                  height: 44,
-                  bgcolor: "white",
-                  borderRadius: "14px",
-                  boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
-                },
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d9e2ef" },
-                "& .MuiInputBase-input": { pl: "36px", fontSize: "15px", fontWeight: 600 },
-              }}
-            />
-          </label>
+        <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "minmax(0,1fr) 160px", gap: 1 }}>
+          <ErgSearchField
+            value={searchQuery}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
+            placeholder="Tìm học sinh"
+            sx={{ minWidth: 0, "& .MuiInputBase-root": { height: 44, bgcolor: "background.paper" } }}
+          />
           <AttendanceDateField maxDate={todayInputDate} minHeight={44} onChange={onSelectedDateChange} value={selectedDate} />
-        </div>
+        </Box>
 
-        {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
+        {offlinePending ? (
+          <Typography variant="caption" component="div" sx={{ mt: 1, borderRadius: 1.5, bgcolor: "warning.light", color: "warning.main", px: 1.5, py: 1, fontWeight: "fontWeightBold" }}>
+            Đang chờ đồng bộ
+          </Typography>
+        ) : null}
 
-        <div className="mt-3 grid grid-cols-3 gap-1 rounded-[16px] bg-[#e9f0fb] p-1.5">
+        <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 0.5, borderRadius: 2, bgcolor: primaryTint, p: 0.75 }}>
           {[
             ["today", "Hôm nay"],
             ["week", "Tuần"],
             ["program", "CT"],
           ].map(([value, label]) => (
-            <button
+            <ButtonBase
               key={value}
-              type="button"
-              className={cn("min-h-11 rounded-[12px] px-2 text-[13px] font-bold text-slate-600 transition", mode === value && "bg-white text-[var(--erg-blue)] shadow-[0_1px_2px_rgba(15,23,42,0.08)]")}
               onClick={() => setMode(value as MobileAttendanceMode)}
+              sx={[
+                { minHeight: 44, borderRadius: 1.5, px: 1, typography: "body2", fontWeight: "fontWeightBold", color: "text.secondary", transition: "all 0.15s ease" },
+                mode === value && { bgcolor: "background.paper", color: "primary.main", boxShadow: ergEnterpriseTokens.shadow.xs },
+              ]}
             >
               {label}
-            </button>
+            </ButtonBase>
           ))}
-        </div>
-      </section>
+        </Box>
+      </Box>
 
       {mode === "today" ? (
-        <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
-          <div className="mb-3 grid grid-cols-2 gap-2">
-            <button type="button" className="min-h-11 rounded-[14px] border border-emerald-200 bg-emerald-50 px-3 text-[13px] font-bold text-emerald-700 shadow-[0_1px_2px_rgba(16,185,129,0.08)]" onClick={markAllPresent}>
+        <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", px: 1.5, py: 1.5 }}>
+          <Box sx={{ mb: 1.5, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
+            <ErgButton variant="contained" color="success" onClick={markAllPresent} sx={{ minHeight: 44, borderRadius: 1.5 }}>
               Tất cả có mặt
-            </button>
-            <button type="button" className="min-h-11 rounded-[14px] border border-[#d9e2ef] bg-white px-3 text-[13px] font-bold text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.04)]" onClick={exportXlsx}>
+            </ErgButton>
+            <ErgButton variant="outlined" onClick={exportXlsx} sx={{ minHeight: 44, borderRadius: 1.5 }}>
               Xuất Excel
-            </button>
-          </div>
-          <div className="grid gap-3">
+            </ErgButton>
+          </Box>
+          <Box sx={{ display: "grid", gap: 1.5 }}>
             {filteredStudents.map((student, studentIndex) => {
               const statuses = todayColumns.map((column, columnIndex) => getStatus(student.id, studentIndex, column, columnIndex));
               const summary = attendanceSummary(statuses);
               const currentStatus = statuses[0] ?? "";
               return (
-                <article key={student.id} className="flex min-h-14 items-center gap-2 rounded-[16px] border border-white bg-white p-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-                  <button type="button" className="min-h-11 min-w-0 flex-1 px-1 text-left" onClick={() => onOpenStudentDetail(student)} aria-label={`Mở hồ sơ ${student.name}`}>
-                    <span className="block truncate text-[15px] font-bold text-slate-950">{student.name}</span>
-                    <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">Có mặt {summary.present}/{summary.total} · Vắng {summary.absent}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className={cn("min-h-11 w-28 shrink-0 rounded-[12px] border px-2 text-[13px] font-bold transition", attendanceActiveClass(currentStatus))}
+                <Box component="article" key={student.id} sx={{ ...cardSx, display: "flex", minHeight: 56, alignItems: "center", gap: 1, p: 1 }}>
+                  <ButtonBase
+                    onClick={() => onOpenStudentDetail(student)}
+                    aria-label={`Mở hồ sơ ${student.name}`}
+                    sx={{ minHeight: 44, minWidth: 0, flex: 1, px: 0.5, display: "block", textAlign: "left" }}
+                  >
+                    <Typography variant="subtitle1" component="span" noWrap sx={{ display: "block", fontWeight: "fontWeightBold" }}>{student.name}</Typography>
+                    <Typography variant="caption" component="span" sx={{ mt: 0.25, display: "block", color: "text.secondary", fontWeight: "fontWeightMedium" }}>
+                      Có mặt {summary.present}/{summary.total} · Vắng {summary.absent}
+                    </Typography>
+                  </ButtonBase>
+                  <ButtonBase
                     onClick={() => setStatusForToday(student, nextAttendanceStatus(currentStatus))}
                     aria-label={`${student.name}: ${attendanceText(currentStatus)}. Chạm để đổi trạng thái`}
+                    sx={[
+                      { minHeight: 44, width: 112, flexShrink: 0, borderRadius: 1.5, border: 1, px: 1, typography: "body2", fontWeight: "fontWeightBold", transition: "all 0.15s ease" },
+                      attendanceToneSx(currentStatus),
+                    ]}
                   >
                     {attendanceLabel(currentStatus)} {attendanceText(currentStatus)}
-                  </button>
-                </article>
+                  </ButtonBase>
+                </Box>
               );
             })}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
 
       {mode === "week" ? (
-        <div className="min-h-0 flex-1 overflow-auto bg-white">
-          <div className="grid min-w-max" style={{ gridTemplateColumns: `150px repeat(${weekColumns.length}, 56px)` }}>
-            <div className="sticky left-0 top-0 z-20 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-2 py-2 text-[12px] font-bold text-slate-600">Học sinh</div>
+        <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", bgcolor: "background.paper" }}>
+          <Box sx={{ display: "grid", minWidth: "max-content", gridTemplateColumns: `150px repeat(${weekColumns.length}, 56px)` }}>
+            <Typography variant="caption" component="div" sx={{ ...gridCellSx, position: "sticky", left: 0, top: 0, zIndex: 20, bgcolor: "background.default", px: 1, py: 1, fontWeight: "fontWeightBold", color: "text.secondary" }}>
+              Học sinh
+            </Typography>
             {weekColumns.map((column) => (
-              <div key={column.id} className={cn("sticky top-0 z-10 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-1 py-2 text-center text-[11px] font-bold leading-4 text-slate-700", column.isFocusDate && "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]")}>
-                <span className="block">{column.date}</span>
-                <span className="block">{column.session.replace("Tiết ", "T")}</span>
-              </div>
+              <Typography
+                key={column.id}
+                variant="caption"
+                component="div"
+                sx={[
+                  { ...gridCellSx, position: "sticky", top: 0, zIndex: 10, bgcolor: "background.default", px: 0.5, py: 1, textAlign: "center", fontWeight: "fontWeightBold" },
+                  Boolean(column.isFocusDate) && { bgcolor: primaryTint, color: "primary.main" },
+                ]}
+              >
+                <Box component="span" sx={{ display: "block" }}>{column.date}</Box>
+                <Box component="span" sx={{ display: "block" }}>{column.session.replace("Tiết ", "T")}</Box>
+              </Typography>
             ))}
             {filteredStudents.map((student, studentIndex) => (
-              <div key={student.id} className="contents">
-                <button type="button" className="sticky left-0 z-10 min-h-12 border-b border-r border-[#d9e2ef] bg-white px-2 text-left text-[12px] font-bold text-[var(--erg-blue)]" onClick={() => onOpenStudentDetail(student)}>
-                  <span className="line-clamp-2">{student.name}</span>
-                </button>
+              <Box key={student.id} sx={{ display: "contents" }}>
+                <ButtonBase
+                  onClick={() => onOpenStudentDetail(student)}
+                  sx={{ ...gridCellSx, position: "sticky", left: 0, zIndex: 10, minHeight: 48, bgcolor: "background.paper", px: 1, justifyContent: "flex-start", textAlign: "left", typography: "caption", fontWeight: "fontWeightBold", color: "primary.main" }}
+                >
+                  <Box component="span" sx={lineClamp2}>{student.name}</Box>
+                </ButtonBase>
                 {weekColumns.map((column, columnIndex) => {
                   const status = getStatus(student.id, studentIndex, column, columnIndex);
                   return (
-                    <button
+                    <ButtonBase
                       key={`${student.id}-${column.id}`}
-                      type="button"
                       disabled={column.isFutureDate}
-                      className={cn("min-h-12 border-b border-r border-[#d9e2ef] text-[13px] font-bold disabled:bg-slate-100 disabled:text-slate-400", attendanceActiveClass(status))}
                       onClick={() => onSetAttendanceStatus(student.id, column.id, nextAttendanceStatus(status))}
                       aria-label={`${student.name} ${column.fullDate} ${column.session}`}
+                      sx={[
+                        { ...gridCellSx, minHeight: 48, typography: "body2", fontWeight: "fontWeightBold" },
+                        attendanceToneSx(status),
+                        { "&.Mui-disabled": { bgcolor: "action.disabledBackground", color: "text.disabled" } },
+                      ]}
                     >
                       {attendanceLabel(status)}
-                    </button>
+                    </ButtonBase>
                   );
                 })}
-              </div>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
 
       {mode === "program" ? (
-        <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
-          <div className="mb-3 rounded-[16px] border border-white bg-white p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-            <div className="text-[13px] font-bold text-slate-500">Số tiết đã dạy</div>
-            <div className="mt-1 text-2xl font-bold text-[var(--erg-blue)]">{taughtLessonCount}</div>
-          </div>
-          <div className="grid gap-2">
+        <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", px: 1.5, py: 1.5 }}>
+          <Box sx={{ ...cardSx, mb: 1.5, p: 1.5 }}>
+            <Typography variant="body2" sx={{ fontWeight: "fontWeightBold", color: "text.secondary" }}>Số tiết đã dạy</Typography>
+            <Typography variant="h5" sx={{ mt: 0.5, fontWeight: "fontWeightBold", color: "primary.main" }}>{taughtLessonCount}</Typography>
+          </Box>
+          <Box sx={{ display: "grid", gap: 1 }}>
             {currentProgramItems.map((item) => (
-              <article key={item.period} className={cn("rounded-[16px] border border-white bg-white p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]", item.period === taughtLessonCount && "border-[#b8d6fa] bg-[var(--erg-blue-light)]")}>
-                <div className="flex items-start gap-3">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-white text-[14px] font-bold text-[var(--erg-blue)] shadow-[0_1px_2px_rgba(15,23,42,0.04)]">{item.period}</span>
-                  <div className="min-w-0 flex-1">
-                    <div className="text-[12px] font-bold text-slate-500">{item.topic}</div>
-                    <div className="mt-1 text-[14px] font-bold leading-5 text-slate-950">{item.title}</div>
-                  </div>
-                </div>
-              </article>
+              <Box
+                component="article"
+                key={item.period}
+                sx={[{ ...cardSx, p: 1.5 }, item.period === taughtLessonCount && { borderColor: "primary.main", bgcolor: primaryTint }]}
+              >
+                <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1.5 }}>
+                  <Typography
+                    variant="body2"
+                    component="span"
+                    sx={{ display: "grid", width: 40, height: 40, flexShrink: 0, placeItems: "center", borderRadius: 1.5, bgcolor: "background.paper", fontWeight: "fontWeightBold", color: "primary.main", boxShadow: ergEnterpriseTokens.shadow.xs }}
+                  >
+                    {item.period}
+                  </Typography>
+                  <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Typography variant="caption" component="div" sx={{ fontWeight: "fontWeightBold", color: "text.secondary" }}>{item.topic}</Typography>
+                    <Typography variant="body2" sx={{ mt: 0.5, fontWeight: "fontWeightBold" }}>{item.title}</Typography>
+                  </Box>
+                </Box>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
-    </div>
+    </Box>
   );
 }
 
-function attendanceActiveClass(status: AttendanceStatus) {
-  if (status === "absent") return "border-rose-200 bg-rose-50 text-rose-700";
-  if (status === "late") return "border-amber-200 bg-amber-50 text-amber-700";
-  if (status === "excused") return "border-blue-200 bg-[var(--erg-blue-light)] text-[var(--erg-blue)]";
-  if (status === "present") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  return "border-slate-200 bg-white text-slate-400";
+function attendanceToneSx(status: AttendanceStatus) {
+  const tone = status === "absent" ? "error" : status === "late" ? "warning" : status === "excused" ? "info" : status === "present" ? "success" : null;
+  if (!tone) return { borderColor: "divider", bgcolor: "background.paper", color: "text.disabled" };
+  return { borderColor: `${tone}.main`, bgcolor: `${tone}.light`, color: `${tone}.main` };
 }
-

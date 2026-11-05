@@ -1,14 +1,19 @@
+import type { ComponentType } from "react";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Checkbox from "@mui/material/Checkbox";
+import Stack from "@mui/material/Stack";
+import type { SvgIconProps } from "@mui/material/SvgIcon";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import type { Users } from "lucide-react";
+import Typography from "@mui/material/Typography";
 
+import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import type { LmsStudentGroup, LmsStudentGroupInput } from "@/features/lms/api/lms-assignment-command-api";
 import type { ClassroomStudent } from "@/domain/school/classroom-types";
-import { cn } from "@/lib/utils";
 
 export type StudentGroup = {
   id: string;
@@ -19,6 +24,7 @@ export type StudentGroup = {
   serverBacked?: boolean;
 };
 
+// Persisted group colors (sent to the API as data), not styling tokens.
 export const groupColorOptions = [
   { label: "Xanh dương", value: "var(--erg-blue)" },
   { label: "Xanh biển", value: "#0ea5e9" },
@@ -52,35 +58,41 @@ export function resolveStudentGroupsError(error: unknown): string | null {
 
 export function GroupColorPicker({ value, onChange }: { value: string; onChange: (color: string) => void }) {
   return (
-    <div className="mb-3 rounded-lg border border-[#cbd7e6] bg-[#f8fbff] px-3 py-2.5">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <span className="text-[13px] font-semibold text-slate-600">Màu nhóm</span>
-        <span className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-slate-600">
-          <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: value }} />
-          Hiển thị ở danh sách nhóm
-        </span>
-      </div>
-      <div className="flex flex-wrap gap-2">
+    <Box sx={{ mb: 1.5, border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.default", px: 1.5, py: 1.25 }}>
+      <Stack direction="row" spacing={1.5} sx={{ mb: 1, alignItems: "center", justifyContent: "space-between" }}>
+        <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Màu nhóm</Typography>
+        <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
+          <Box component="span" sx={{ width: 10, height: 10, borderRadius: "50%", bgcolor: value }} />
+          <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Hiển thị ở danh sách nhóm</Typography>
+        </Stack>
+      </Stack>
+      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
         {groupColorOptions.map((option) => {
           const selected = option.value === value;
           return (
-            <button
+            <ButtonBase
               key={option.value}
-              type="button"
               aria-label={`Chọn màu ${option.label}`}
               aria-pressed={selected}
               onClick={() => onChange(option.value)}
-              className={cn(
-                "grid h-8 w-8 place-items-center rounded-full border bg-white transition",
-                selected ? "border-slate-900 shadow-sm" : "border-[#cbd7e6] hover:border-slate-500",
-              )}
+              sx={{
+                width: 32,
+                height: 32,
+                borderRadius: "50%",
+                border: 1,
+                borderColor: selected ? "text.primary" : "divider",
+                bgcolor: "background.paper",
+                boxShadow: selected ? 1 : 0,
+                transition: "border-color 0.15s ease",
+                "&:hover": selected ? undefined : { borderColor: "text.secondary" },
+              }}
             >
-              <span className="h-5 w-5 rounded-full" style={{ backgroundColor: option.value }} />
-            </button>
+              <Box component="span" sx={{ width: 20, height: 20, borderRadius: "50%", bgcolor: option.value }} />
+            </ButtonBase>
           );
         })}
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 }
 
@@ -112,19 +124,22 @@ export function notifyStudentGroupSyncError(error: unknown) {
   }
 }
 
-export function StudentGroupStat({ icon: Icon, label, value }: { icon: typeof Users; label: string; value: string }) {
+export function StudentGroupStat({ icon: Icon, label, value }: { icon: ComponentType<SvgIconProps>; label: string; value: string }) {
   return (
-    <div className="flex min-w-0 items-center gap-2 rounded-lg border border-[#dbe4f0] bg-[#f8fbff] px-2.5 py-1.5">
-      <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white text-[var(--erg-blue)] shadow-sm">
-        <Icon className="h-3.5 w-3.5" />
-      </span>
-      <span className="min-w-0">
-        <span className="block truncate text-[13px] font-bold tracking-normal text-slate-600">{label}</span>
-        <span className="block truncate text-sm font-semibold text-slate-950">{value}</span>
-      </span>
-    </div>
+    <Stack direction="row" spacing={1} sx={{ minWidth: 0, alignItems: "center", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.default", px: 1.25, py: 0.75 }}>
+      <Box sx={{ display: "grid", placeItems: "center", width: 28, height: 28, flexShrink: 0, borderRadius: 0.75, bgcolor: "background.paper", color: "primary.main", boxShadow: 1 }}>
+        <Icon fontSize="small" />
+      </Box>
+      <Box sx={{ minWidth: 0 }}>
+        <Typography variant="body2" noWrap sx={{ color: "text.secondary", fontWeight: "fontWeightBold" }}>{label}</Typography>
+        <Typography variant="body2" noWrap sx={{ color: "text.primary", fontWeight: "fontWeightMedium" }}>{value}</Typography>
+      </Box>
+    </Stack>
   );
 }
+
+const headCellSx = { typography: "body2", color: "text.secondary", fontWeight: "fontWeightMedium" } as const;
+const bodyCellSx = { typography: "body2", color: "text.primary" } as const;
 
 export function StudentSelectionTable({
   students,
@@ -146,11 +161,11 @@ export function StudentSelectionTable({
   mode: "members" | "available";
 }) {
   return (
-    <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#cbd7e6] bg-white shadow-[var(--shadow-xs)]">
-      <div className="min-h-0 flex-1 overflow-auto">
-        <ul className="divide-y divide-slate-200 xl:hidden">
+    <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column", overflow: "hidden", border: 1, borderColor: "divider", borderRadius: 1, bgcolor: "background.paper", boxShadow: 1 }}>
+      <Box sx={{ minHeight: 0, flex: 1, overflow: "auto" }}>
+        <Box component="ul" sx={{ m: 0, p: 0, listStyle: "none", display: { xs: "block", lg: "none" }, "& > li + li": { borderTop: 1, borderColor: "divider" } }}>
           <li>
-            <label className="flex min-h-11 cursor-pointer items-center gap-3 bg-slate-100 px-3">
+            <Box component="label" sx={{ display: "flex", minHeight: 44, cursor: "pointer", alignItems: "center", gap: 1.5, bgcolor: "action.hover", px: 1.5 }}>
               <Checkbox
                 slotProps={{ input: { "aria-label": headerCheckbox.ariaLabel } }}
                 checked={headerCheckbox.checked === true}
@@ -159,15 +174,15 @@ export function StudentSelectionTable({
                 size="small"
                 sx={{ p: 0 }}
               />
-              <span className="text-[13px] font-semibold text-slate-600">Chọn tất cả</span>
-            </label>
+              <Typography component="span" variant="body2" sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}>Chọn tất cả</Typography>
+            </Box>
           </li>
           {students.length > 0 ? (
             students.map((student) => {
               const checked = getChecked(student);
               return (
                 <li key={student.id}>
-                  <label className="flex min-h-14 cursor-pointer items-center gap-3 px-3 py-2">
+                  <Box component="label" sx={{ display: "flex", minHeight: 56, cursor: "pointer", alignItems: "center", gap: 1.5, px: 1.5, py: 1 }}>
                     <Checkbox
                       slotProps={{ input: { "aria-label": `${checked ? "Bỏ chọn" : "Chọn"} ${student.name}` } }}
                       checked={checked}
@@ -175,23 +190,23 @@ export function StudentSelectionTable({
                       size="small"
                       sx={{ p: 0 }}
                     />
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-slate-800">{student.name}</span>
-                      <span className="block truncate text-[13px] font-semibold text-slate-500">{student.className} · {student.gradeLabel}</span>
-                    </span>
+                    <Box component="span" sx={{ minWidth: 0, flex: 1 }}>
+                      <Typography component="span" variant="body2" noWrap sx={{ display: "block", fontWeight: "fontWeightMedium" }}>{student.name}</Typography>
+                      <Typography component="span" variant="body2" noWrap sx={{ display: "block", color: "text.secondary" }}>{student.className} · {student.gradeLabel}</Typography>
+                    </Box>
                     <StudentStatusBadge status={student.status} selected={mode === "available" && checked} />
-                  </label>
+                  </Box>
                 </li>
               );
             })
           ) : (
-            <li className="p-6 text-center text-sm font-semibold text-slate-600">{emptyLabel}</li>
+            <Box component="li" sx={{ p: 3, textAlign: "center", typography: "body2", color: "text.secondary", fontWeight: "fontWeightMedium" }}>{emptyLabel}</Box>
           )}
-        </ul>
-        <Table size="small" className="max-xl:hidden">
-          <TableHead className="sticky top-0 z-10 bg-[#eef4fb]">
-            <TableRow className="hover:bg-[#eef4fb]">
-              <TableCell className="w-11 px-3">
+        </Box>
+        <Table size="small" stickyHeader sx={{ display: { xs: "none", lg: "table" } }}>
+          <TableHead>
+            <TableRow>
+              <TableCell sx={{ width: 44, px: 1.5 }}>
                 <Checkbox
                   slotProps={{ input: { "aria-label": headerCheckbox.ariaLabel } }}
                   checked={headerCheckbox.checked === true}
@@ -201,10 +216,10 @@ export function StudentSelectionTable({
                   sx={{ p: 0 }}
                 />
               </TableCell>
-              <TableCell className="min-w-[220px] text-[13px] font-semibold text-slate-600">Học sinh</TableCell>
-              <TableCell className="min-w-[120px] text-[13px] font-semibold text-slate-600">Lớp</TableCell>
-              <TableCell className="min-w-[110px] text-[13px] font-semibold text-slate-600">Khối</TableCell>
-              <TableCell className="min-w-[150px] text-[13px] font-semibold text-slate-600">Trạng thái</TableCell>
+              <TableCell sx={{ ...headCellSx, minWidth: 220 }}>Học sinh</TableCell>
+              <TableCell sx={{ ...headCellSx, minWidth: 120 }}>Lớp</TableCell>
+              <TableCell sx={{ ...headCellSx, minWidth: 110 }}>Khối</TableCell>
+              <TableCell sx={{ ...headCellSx, minWidth: 150 }}>Trạng thái</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -212,8 +227,8 @@ export function StudentSelectionTable({
               students.map((student) => {
                 const checked = getChecked(student);
                 return (
-                  <TableRow key={student.id} data-state={checked ? "selected" : undefined}>
-                    <TableCell className="px-3">
+                  <TableRow key={student.id} selected={checked} data-state={checked ? "selected" : undefined}>
+                    <TableCell sx={{ px: 1.5 }}>
                       <Checkbox
                         slotProps={{ input: { "aria-label": `${checked ? "Bỏ chọn" : "Chọn"} ${student.name}` } }}
                         checked={checked}
@@ -222,15 +237,15 @@ export function StudentSelectionTable({
                         sx={{ p: 0 }}
                       />
                     </TableCell>
-                    <TableCell className="min-w-[220px]">
-                      <div className="max-w-[260px]">
-                        <div className="truncate text-sm font-semibold text-slate-800">{student.name}</div>
-                        <div className="mt-0.5 truncate text-[13px] font-semibold text-slate-500">{student.currentStage}</div>
-                      </div>
+                    <TableCell sx={{ minWidth: 220 }}>
+                      <Box sx={{ maxWidth: 260 }}>
+                        <Typography variant="body2" noWrap sx={{ fontWeight: "fontWeightMedium" }}>{student.name}</Typography>
+                        <Typography variant="body2" noWrap sx={{ mt: 0.25, color: "text.secondary" }}>{student.currentStage}</Typography>
+                      </Box>
                     </TableCell>
-                    <TableCell className="min-w-[120px] text-[13px] font-medium text-slate-700">{student.className}</TableCell>
-                    <TableCell className="min-w-[110px] text-[13px] font-medium text-slate-700">{student.gradeLabel}</TableCell>
-                    <TableCell className="min-w-[150px]">
+                    <TableCell sx={{ ...bodyCellSx, minWidth: 120 }}>{student.className}</TableCell>
+                    <TableCell sx={{ ...bodyCellSx, minWidth: 110 }}>{student.gradeLabel}</TableCell>
+                    <TableCell sx={{ minWidth: 150 }}>
                       <StudentStatusBadge status={student.status} selected={mode === "available" && checked} />
                     </TableCell>
                   </TableRow>
@@ -238,18 +253,18 @@ export function StudentSelectionTable({
               })
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="h-40 text-center text-sm font-semibold text-slate-600">
+                <TableCell colSpan={5} sx={{ height: 160, textAlign: "center", typography: "body2", color: "text.secondary", fontWeight: "fontWeightMedium" }}>
                   {emptyLabel}
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </div>
-      <div className="border-t border-[#dbe4f0] px-3 py-2 text-[13px] font-semibold text-slate-600">
+      </Box>
+      <Typography variant="body2" sx={{ borderTop: 1, borderColor: "divider", px: 1.5, py: 1, color: "text.secondary", fontWeight: "fontWeightMedium" }}>
         {students.length} học sinh{mode === "available" ? " trong danh sách" : " trong nhóm"}
-      </div>
-    </div>
+      </Typography>
+    </Box>
   );
 }
 
@@ -259,21 +274,7 @@ function StudentStatusBadge({ status, selected }: { status: ClassroomStudent["st
     steady: "Ổn định",
     support: "Cần hỗ trợ",
   } satisfies Record<ClassroomStudent["status"], string>;
+  const tone = selected ? "info" : status === "support" ? "warning" : status === "ahead" ? "success" : "neutral";
 
-  return (
-    <span
-      className={cn(
-        "inline-flex rounded-md px-2.5 py-1 text-[13px] font-bold",
-        selected
-          ? "bg-[var(--erg-blue-light)] text-[var(--erg-blue)]"
-          : status === "support"
-            ? "bg-amber-50 text-amber-600"
-            : status === "ahead"
-              ? "bg-emerald-50 text-emerald-600"
-              : "bg-slate-100 text-slate-500",
-      )}
-    >
-      {selected ? "Đã chọn" : statusCopy[status]}
-    </span>
-  );
+  return <ErgStatusChip dot={false} tone={tone} label={selected ? "Đã chọn" : statusCopy[status]} sx={{ flexShrink: 0 }} />;
 }

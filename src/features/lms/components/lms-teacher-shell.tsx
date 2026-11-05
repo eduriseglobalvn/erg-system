@@ -75,10 +75,9 @@ function LmsTeacherShellFrame({ model }: { model: ReturnType<typeof useLmsTeache
       notificationCount={model.unreadNotificationCount}
       portalInfo={model.lmsPortalInfo}
     >
-      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, bgcolor: "#FFFFFF" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0, bgcolor: "background.paper" }}>
         <Box
           component="main"
-          className="lms-teacher-shell"
           sx={{ flex: 1, minHeight: 0, overflow: "auto", overflowX: "hidden" }}
         >
           <Outlet />

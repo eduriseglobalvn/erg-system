@@ -1,11 +1,17 @@
-import { useMemo, useState } from "react";
-import { Edit3, History, Plus, Search, UserRound } from "lucide-react";
+import { useMemo, useState, type ChangeEvent, type FocusEvent, type KeyboardEvent } from "react";
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import HistoryIcon from "@mui/icons-material/History";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutlined";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import Typography from "@mui/material/Typography";
+import { alpha, type Theme } from "@mui/material/styles";
 
-import TextField from "@mui/material/TextField";
-import { ErgSelect } from "@/components/erg-mui";
+import { ErgButton, ErgIconButton, ErgSearchField, ErgSelect } from "@/components/erg-mui";
 import type { ClassroomSnapshot, ClassroomStudent } from "@/domain/school/classroom-types";
 import type { Classification, ScoreColumn, StudentState } from "@/features/lms/components/score/score-sheet-model";
-import { cn } from "@/lib/utils";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
 type MobileScoreMode = "student" | "column" | "sheet";
 
@@ -40,6 +46,24 @@ type MobileScoreSheetPanelProps = {
   onSelectedSubjectChange: (value: string) => void;
   subjectOptions: string[];
 };
+
+const primaryTint = (theme: Theme) => alpha(theme.palette.primary.main, 0.1);
+const cardSx = { border: 1, borderColor: "divider", bgcolor: "background.paper", boxShadow: ergEnterpriseTokens.shadow.sm } as const;
+const gridCellSx = { borderBottom: 1, borderRight: 1, borderColor: "divider" } as const;
+const lineClamp2 = { display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as const;
+const nativeInputSx = {
+  height: 44,
+  borderRadius: 1.5,
+  border: 1,
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  color: "text.primary",
+  px: 1,
+  font: "inherit",
+  outline: "none",
+  "&:focus": { borderColor: "primary.main", boxShadow: ergEnterpriseTokens.shadow.focus },
+} as const;
+const primaryIconButtonSx = { width: 44, height: 44, borderRadius: 1.5, bgcolor: "primary.main", color: "primary.contrastText", "&:hover": { bgcolor: "primary.dark" } } as const;
 
 export function MobileScoreSheetPanel({
   addOfflineColumn,
@@ -89,29 +113,20 @@ export function MobileScoreSheetPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-[#f3f6fb]">
-      <section className="shrink-0 border-b border-white bg-white px-3 py-3 shadow-[0_1px_0_rgba(15,23,42,0.03),0_8px_24px_rgba(15,23,42,0.03)]">
-        <div className="min-w-0">
-          <div className="truncate text-[15px] font-extrabold text-slate-950">Bảng điểm{selectedClass?.className ? ` · ${selectedClass.className}` : ""}</div>
-          <div className="mt-0.5 truncate text-[12px] font-semibold text-slate-500">{classSummary}</div>
-        </div>
+    <Box sx={{ display: "flex", height: "100%", minHeight: 0, flexDirection: "column", overflow: "hidden", bgcolor: "background.default" }}>
+      <Box component="section" sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, py: 1.5, boxShadow: ergEnterpriseTokens.shadow.xs }}>
+        <Box sx={{ minWidth: 0 }}>
+          <Typography variant="subtitle1" noWrap sx={{ fontWeight: "fontWeightBold" }}>Bảng điểm{selectedClass?.className ? ` · ${selectedClass.className}` : ""}</Typography>
+          <Typography variant="caption" component="div" noWrap sx={{ mt: 0.25, color: "text.secondary", fontWeight: "fontWeightMedium" }}>{classSummary}</Typography>
+        </Box>
 
-        <div className="mt-3 grid grid-cols-[minmax(0,1fr)_112px] gap-2">
-          <label className="relative block min-w-0">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--erg-blue)]" />
-            <TextField
-              value={searchQuery}
-              onChange={(event) => onSearchQueryChange(event.target.value)}
-              placeholder="Tìm học sinh"
-              size="small"
-              fullWidth
-              sx={{
-                "& .MuiInputBase-root": { height: 44, bgcolor: "white", borderRadius: "14px", boxShadow: "0 1px 2px rgba(15,23,42,0.04)" },
-                "& .MuiOutlinedInput-notchedOutline": { borderColor: "#d9e2ef" },
-                "& .MuiInputBase-input": { pl: "36px", fontSize: "15px", fontWeight: 600 },
-              }}
-            />
-          </label>
+        <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "minmax(0,1fr) 112px", gap: 1 }}>
+          <ErgSearchField
+            value={searchQuery}
+            onChange={(event) => onSearchQueryChange(event.target.value)}
+            placeholder="Tìm học sinh"
+            sx={{ minWidth: 0, "& .MuiInputBase-root": { height: 44, bgcolor: "background.paper" } }}
+          />
           <ErgSelect
             size="small"
             value={selectedSubject}
@@ -120,88 +135,112 @@ export function MobileScoreSheetPanel({
             slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn môn học" } } }}
             sx={{ "& .MuiInputBase-root": { minHeight: 44 } }}
           />
-        </div>
+        </Box>
 
-        {offlinePending ? <div className="mt-2 rounded-[12px] bg-amber-50 px-3 py-2 text-[12px] font-bold text-amber-800">Đang chờ đồng bộ</div> : null}
+        {offlinePending ? (
+          <Typography variant="caption" component="div" sx={{ mt: 1, borderRadius: 1.5, bgcolor: "warning.light", color: "warning.main", px: 1.5, py: 1, fontWeight: "fontWeightBold" }}>
+            Đang chờ đồng bộ
+          </Typography>
+        ) : null}
 
-        <div className="mt-3 grid grid-cols-3 gap-1 rounded-[16px] bg-[#e9f0fb] p-1.5">
+        <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: 0.5, borderRadius: 2, bgcolor: primaryTint, p: 0.75 }}>
           {[
             ["student", "Học sinh"],
             ["column", "Cột điểm"],
             ["sheet", "Sheet"],
           ].map(([value, label]) => (
-            <button
+            <ButtonBase
               key={value}
-              type="button"
-              className={cn("min-h-11 rounded-[12px] px-2 text-[13px] font-bold text-slate-600 transition", mode === value && "bg-white text-[var(--erg-blue)] shadow-[0_1px_2px_rgba(15,23,42,0.08)]")}
               onClick={() => setMode(value as MobileScoreMode)}
+              sx={[
+                { minHeight: 44, borderRadius: 1.5, px: 1, typography: "body2", fontWeight: "fontWeightBold", color: "text.secondary", transition: "all 0.15s ease" },
+                mode === value && { bgcolor: "background.paper", color: "primary.main", boxShadow: ergEnterpriseTokens.shadow.xs },
+              ]}
             >
               {label}
-            </button>
+            </ButtonBase>
           ))}
-        </div>
-      </section>
+        </Box>
+      </Box>
 
       {mode === "student" ? (
-        <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
-          <div className="grid gap-3">
+        <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", px: 1.5, py: 1.5 }}>
+          <Box sx={{ display: "grid", gap: 1.5 }}>
             {visibleStudents.map((student, studentIndex) => {
               const state = getStudentState(student);
               const classification = getClassification(student);
               return (
-                <article key={student.id} className={cn("rounded-[16px] border border-white bg-white p-3 shadow-[0_8px_24px_rgba(15,23,42,0.05)]", state === "disabled" && "bg-slate-50 text-slate-400")}>
-                  <div className="flex min-w-0 items-start gap-3">
-                    <button
-                      type="button"
-                      className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[#eef6ff] text-[var(--erg-blue)] shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+                <Box
+                  component="article"
+                  key={student.id}
+                  sx={[{ ...cardSx, borderRadius: 2, p: 1.5 }, state === "disabled" && { bgcolor: "background.default", color: "text.disabled" }]}
+                >
+                  <Box sx={{ display: "flex", minWidth: 0, alignItems: "flex-start", gap: 1.5 }}>
+                    <ErgIconButton
+                      label={`Mở hồ sơ ${studentNameFor(student)}`}
                       onClick={() => onOpenStudentDetail(student)}
-                      aria-label={`Mở hồ sơ ${studentNameFor(student)}`}
+                      sx={{ width: 44, height: 44, flexShrink: 0, bgcolor: primaryTint, color: "primary.main" }}
                     >
-                      <UserRound className="h-5 w-5" />
-                    </button>
-                    <div className="min-w-0 flex-1">
-                      <button type="button" className="block max-w-full truncate text-left text-[15px] font-bold text-slate-950" onClick={() => onOpenStudentDetail(student)}>
+                      <PersonOutlineIcon fontSize="small" />
+                    </ErgIconButton>
+                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                      <ButtonBase
+                        onClick={() => onOpenStudentDetail(student)}
+                        sx={{ display: "block", maxWidth: "100%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "left", typography: "subtitle1", fontWeight: "fontWeightBold", color: "inherit" }}
+                      >
                         {studentNameFor(student)}
-                      </button>
-                      <div className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <span className={cn("rounded-md border px-2 py-1 text-[12px] font-bold", classificationClass(classification))}>{classification}</span>
-                        <input
+                      </ButtonBase>
+                      <Box sx={{ mt: 0.5, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 0.75 }}>
+                        <Typography
+                          variant="caption"
+                          component="span"
+                          sx={[{ borderRadius: 0.75, border: 1, px: 1, py: 0.5, fontWeight: "fontWeightBold" }, classificationSx(classification)]}
+                        >
+                          {classification}
+                        </Typography>
+                        <Box
+                          component="input"
                           value={bonusScores[student.id] ?? ""}
-                          onChange={(event) => onUpdateBonusScore(student.id, event.target.value)}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) => onUpdateBonusScore(student.id, event.target.value)}
                           inputMode="decimal"
                           aria-label={`Điểm cộng trừ của ${studentNameFor(student)}`}
                           placeholder="+/-"
-                          className="h-10 w-20 rounded-[12px] border border-[#d9e2ef] bg-white px-2 text-center text-[13px] font-bold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                          sx={{ ...nativeInputSx, height: 40, width: 80, textAlign: "center", typography: "body2", fontWeight: "fontWeightBold" }}
                         />
-                      </div>
-                    </div>
-                    <button type="button" className="h-11 rounded-[12px] border border-[#d9e2ef] bg-[#f8fbff] px-3 text-[13px] font-bold text-slate-700" onClick={() => onRequestClassificationChange(student, nextClassification(classification))}>
+                      </Box>
+                    </Box>
+                    <ErgButton
+                      variant="outlined"
+                      onClick={() => onRequestClassificationChange(student, nextClassification(classification))}
+                      sx={{ height: 44, borderRadius: 1.5, px: 1.5, flexShrink: 0 }}
+                    >
                       Đổi loại
-                    </button>
-                  </div>
-                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    </ErgButton>
+                  </Box>
+                  <Box sx={{ mt: 1.5, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
                     {scoreColumns.slice(0, 4).map((column, columnIndex) => (
-                      <button
+                      <ButtonBase
                         key={column.id}
-                        type="button"
-                        className="min-h-14 rounded-[14px] border border-[#d9e2ef] bg-[#fbfdff] px-2 py-2 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]"
                         onClick={() => openEditor(column, student, studentIndex, columnIndex)}
+                        sx={{ minHeight: 56, borderRadius: 1.75, border: 1, borderColor: "divider", bgcolor: "background.default", px: 1, py: 1, display: "block", textAlign: "left" }}
                       >
-                        <span className="block truncate text-[11px] font-bold text-slate-500">{column.label}</span>
-                        <span className="mt-1 block text-[16px] font-bold text-slate-950">{scoreValueFor(student, column, studentIndex, columnIndex) || "-"}</span>
-                      </button>
+                        <Typography variant="caption" component="span" noWrap sx={{ display: "block", fontWeight: "fontWeightBold", color: "text.secondary" }}>{column.label}</Typography>
+                        <Typography variant="subtitle1" component="span" sx={{ mt: 0.5, display: "block", fontWeight: "fontWeightBold" }}>
+                          {scoreValueFor(student, column, studentIndex, columnIndex) || "-"}
+                        </Typography>
+                      </ButtonBase>
                     ))}
-                  </div>
-                </article>
+                  </Box>
+                </Box>
               );
             })}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
 
       {mode === "column" && activeColumn ? (
-        <div className="flex min-h-0 flex-1 flex-col">
-          <div className="shrink-0 border-b border-[#d9e2ef] bg-white px-3 py-2">
+        <Box sx={{ display: "flex", minHeight: 0, flex: 1, flexDirection: "column" }}>
+          <Box sx={{ flexShrink: 0, borderBottom: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, py: 1 }}>
             <ErgSelect
               size="small"
               label="Cột"
@@ -210,119 +249,147 @@ export function MobileScoreSheetPanel({
               options={scoreColumns.map((column) => ({ value: column.id, label: column.label }))}
               slotProps={{ select: { SelectDisplayProps: { "aria-label": "Chọn cột điểm" } } }}
             />
-          </div>
-          <div className="min-h-0 flex-1 overflow-auto px-3 py-3">
-            <div className="grid gap-2">
+          </Box>
+          <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", px: 1.5, py: 1.5 }}>
+            <Box sx={{ display: "grid", gap: 1 }}>
               {visibleStudents.map((student, studentIndex) => {
                 const columnIndex = Math.max(0, scoreColumns.findIndex((column) => column.id === activeColumn.id));
                 return (
-                  <div key={student.id} className="grid min-h-[58px] grid-cols-[minmax(0,1fr)_96px] items-center gap-2 rounded-[14px] border border-white bg-white px-3 py-2 shadow-[0_8px_24px_rgba(15,23,42,0.05)]">
-                    <button type="button" className="min-w-0 text-left" onClick={() => onOpenStudentDetail(student)}>
-                      <span className="block truncate text-[14px] font-bold text-slate-950">{studentNameFor(student)}</span>
-                      <span className="mt-0.5 block text-[12px] font-semibold text-slate-500">{activeColumn.label}</span>
-                    </button>
-                    <input
+                  <Box
+                    key={student.id}
+                    sx={{ ...cardSx, display: "grid", minHeight: 58, gridTemplateColumns: "minmax(0,1fr) 96px", alignItems: "center", gap: 1, borderRadius: 1.75, px: 1.5, py: 1 }}
+                  >
+                    <ButtonBase onClick={() => onOpenStudentDetail(student)} sx={{ minWidth: 0, display: "block", textAlign: "left" }}>
+                      <Typography variant="body2" component="span" noWrap sx={{ display: "block", fontWeight: "fontWeightBold" }}>{studentNameFor(student)}</Typography>
+                      <Typography variant="caption" component="span" sx={{ mt: 0.25, display: "block", fontWeight: "fontWeightMedium", color: "text.secondary" }}>{activeColumn.label}</Typography>
+                    </ButtonBase>
+                    <Box
+                      component="input"
                       value={scoreValueFor(student, activeColumn, studentIndex, columnIndex)}
-                      onChange={(event) => onUpdateManualScore(activeColumn.id, student.id, event.target.value)}
-                      onBlur={(event) => onCommitScore(activeColumn.id, student.id, event.currentTarget.value)}
-                      onKeyDown={(event) => {
+                      onChange={(event: ChangeEvent<HTMLInputElement>) => onUpdateManualScore(activeColumn.id, student.id, event.target.value)}
+                      onBlur={(event: FocusEvent<HTMLInputElement>) => onCommitScore(activeColumn.id, student.id, event.currentTarget.value)}
+                      onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
                         if (event.key === "Enter") event.currentTarget.blur();
                       }}
                       inputMode="decimal"
                       aria-label={`${studentNameFor(student)} ${activeColumn.label}`}
-                      className="h-11 rounded-[12px] border border-[#d9e2ef] px-2 text-center text-[15px] font-bold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+                      sx={{ ...nativeInputSx, minWidth: 0, textAlign: "center", typography: "subtitle1", fontWeight: "fontWeightBold" }}
                     />
-                  </div>
+                  </Box>
                 );
               })}
-            </div>
-          </div>
-        </div>
+            </Box>
+          </Box>
+        </Box>
       ) : null}
 
       {mode === "sheet" ? (
-        <div className="min-h-0 flex-1 overflow-auto bg-white">
-          <div className="grid min-w-max" style={{ gridTemplateColumns: `148px repeat(${scoreColumns.length}, 88px)` }}>
-            <div className="sticky left-0 top-0 z-20 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-2 py-2 text-[12px] font-bold text-slate-600">Học sinh</div>
+        <Box sx={{ minHeight: 0, flex: 1, overflow: "auto", bgcolor: "background.paper" }}>
+          <Box sx={{ display: "grid", minWidth: "max-content", gridTemplateColumns: `148px repeat(${scoreColumns.length}, 88px)` }}>
+            <Typography variant="caption" component="div" sx={{ ...gridCellSx, position: "sticky", left: 0, top: 0, zIndex: 20, bgcolor: "background.default", px: 1, py: 1, fontWeight: "fontWeightBold", color: "text.secondary" }}>
+              Học sinh
+            </Typography>
             {scoreColumns.map((column) => (
-              <div key={column.id} className="sticky top-0 z-10 border-b border-r border-[#d9e2ef] bg-[#f5f8fc] px-2 py-2 text-center text-[11px] font-bold leading-4 text-slate-700">
-                <span className="line-clamp-2">{column.label}</span>
-              </div>
+              <Typography
+                key={column.id}
+                variant="caption"
+                component="div"
+                sx={{ ...gridCellSx, position: "sticky", top: 0, zIndex: 10, bgcolor: "background.default", px: 1, py: 1, textAlign: "center", fontWeight: "fontWeightBold" }}
+              >
+                <Box component="span" sx={lineClamp2}>{column.label}</Box>
+              </Typography>
             ))}
             {visibleStudents.map((student, studentIndex) => (
-              <div key={student.id} className="contents">
-                <button type="button" className="sticky left-0 z-10 min-h-12 border-b border-r border-[#d9e2ef] bg-white px-2 text-left text-[12px] font-bold text-[var(--erg-blue)]" onClick={() => onOpenStudentDetail(student)}>
-                  <span className="line-clamp-2">{studentNameFor(student)}</span>
-                </button>
+              <Box key={student.id} sx={{ display: "contents" }}>
+                <ButtonBase
+                  onClick={() => onOpenStudentDetail(student)}
+                  sx={{ ...gridCellSx, position: "sticky", left: 0, zIndex: 10, minHeight: 48, bgcolor: "background.paper", px: 1, justifyContent: "flex-start", textAlign: "left", typography: "caption", fontWeight: "fontWeightBold", color: "primary.main" }}
+                >
+                  <Box component="span" sx={lineClamp2}>{studentNameFor(student)}</Box>
+                </ButtonBase>
                 {scoreColumns.map((column, columnIndex) => (
-                  <button
+                  <ButtonBase
                     key={`${student.id}-${column.id}`}
-                    type="button"
-                    className={cn("min-h-12 border-b border-r border-[#d9e2ef] px-1 text-center text-[13px] font-bold", scoreTone(scoreValueFor(student, column, studentIndex, columnIndex), column.maxScore))}
                     onClick={() => openEditor(column, student, studentIndex, columnIndex)}
+                    sx={[
+                      { ...gridCellSx, minHeight: 48, px: 0.5, textAlign: "center", typography: "body2", fontWeight: "fontWeightBold" },
+                      scoreToneSx(scoreValueFor(student, column, studentIndex, columnIndex), column.maxScore),
+                    ]}
                   >
                     {scoreValueFor(student, column, studentIndex, columnIndex) || "-"}
-                  </button>
+                  </ButtonBase>
                 ))}
-              </div>
+              </Box>
             ))}
-          </div>
-        </div>
+          </Box>
+        </Box>
       ) : null}
 
-        <div className="shrink-0 border-t border-[#d9e2ef] bg-white px-3 py-2 shadow-[0_-1px_0_rgba(15,23,42,0.03)]">
-          <div className="grid grid-cols-[minmax(0,1fr)_52px] gap-2">
-            <input
+      <Box sx={{ flexShrink: 0, borderTop: 1, borderColor: "divider", bgcolor: "background.paper", px: 1.5, py: 1 }}>
+        <Box sx={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 52px", gap: 1 }}>
+          <Box
+            component="input"
             value={offlineColumnName}
-            onChange={(event) => onOfflineColumnNameChange(event.target.value)}
+            onChange={(event: ChangeEvent<HTMLInputElement>) => onOfflineColumnNameChange(event.target.value)}
             placeholder="Tên cột offline"
-            className="h-11 min-w-0 rounded-[12px] border border-[#d9e2ef] px-3 text-[14px] font-semibold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
+            sx={{ ...nativeInputSx, minWidth: 0, px: 1.5, typography: "body2", fontWeight: "fontWeightMedium" }}
           />
-          <button type="button" className="grid h-11 w-11 place-items-center rounded-[12px] bg-[var(--erg-blue)] text-white shadow-[0_8px_18px_rgba(15,108,189,0.24)]" onClick={addOfflineColumn} aria-label="Tạo cột offline">
-            <Plus className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+          <ErgIconButton label="Tạo cột offline" onClick={addOfflineColumn} sx={primaryIconButtonSx}>
+            <AddIcon fontSize="small" />
+          </ErgIconButton>
+        </Box>
+      </Box>
 
       {editor ? (
-        <div className="fixed inset-0 z-[120] flex items-end bg-slate-950/35" role="dialog" aria-modal="true" aria-label="Chỉnh điểm">
-          <button type="button" className="absolute inset-0" aria-label="Đóng chỉnh điểm" onClick={() => setEditor(null)} />
-          <div className="relative w-full rounded-t-[20px] border border-[#d9e2ef] bg-white p-4 pb-[max(16px,env(safe-area-inset-bottom))] shadow-[0_-18px_42px_rgba(15,23,42,0.18)]">
-            <div className="mx-auto mb-3 h-1 w-12 rounded-full bg-slate-300" />
-            <div className="text-[13px] font-bold text-slate-500">{editor.column.label}</div>
-            <div className="mt-1 truncate text-[18px] font-bold text-slate-950">{studentNameFor(editor.student)}</div>
-            <label className="mt-4 block">
-              <span className="mb-1 block text-[13px] font-bold text-slate-600">Điểm</span>
-              <input
+        <Box
+          role="dialog"
+          aria-modal="true"
+          aria-label="Chỉnh điểm"
+          sx={(theme) => ({ position: "fixed", inset: 0, zIndex: 120, display: "flex", alignItems: "flex-end", bgcolor: alpha(theme.palette.text.primary, 0.35) })}
+        >
+          <Box
+            component="button"
+            type="button"
+            aria-label="Đóng chỉnh điểm"
+            onClick={() => setEditor(null)}
+            sx={{ position: "absolute", inset: 0, m: 0, p: 0, border: 0, bgcolor: "transparent", cursor: "default" }}
+          />
+          <Box
+            sx={{ position: "relative", width: "100%", borderTopLeftRadius: 20, borderTopRightRadius: 20, border: 1, borderColor: "divider", bgcolor: "background.paper", p: 2, pb: "max(16px, env(safe-area-inset-bottom))", boxShadow: ergEnterpriseTokens.shadow.md }}
+          >
+            <Box sx={{ mx: "auto", mb: 1.5, height: 4, width: 48, borderRadius: 9999, bgcolor: "divider" }} />
+            <Typography variant="body2" sx={{ fontWeight: "fontWeightBold", color: "text.secondary" }}>{editor.column.label}</Typography>
+            <Typography variant="h6" noWrap sx={{ mt: 0.5, fontWeight: "fontWeightBold" }}>{studentNameFor(editor.student)}</Typography>
+            <Box component="label" sx={{ mt: 2, display: "block" }}>
+              <Typography variant="body2" component="span" sx={{ mb: 0.5, display: "block", fontWeight: "fontWeightBold", color: "text.secondary" }}>Điểm</Typography>
+              <Box
+                component="input"
                 value={editor.value}
-                onChange={(event) => setEditor({ ...editor, value: event.target.value })}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => setEditor({ ...editor, value: event.target.value })}
                 inputMode="decimal"
-              className="h-12 w-full rounded-[12px] border border-[#d9e2ef] px-3 text-center text-xl font-bold outline-none focus:border-[var(--erg-blue)] focus:ring-2 focus:ring-[var(--erg-blue-ring)]"
-              autoFocus
-            />
-          </label>
-            <div className="mt-3 rounded-[14px] border border-[#d9e2ef] bg-[#fbfdff] p-3">
-              <div className="flex items-center gap-2 text-[13px] font-bold text-slate-600">
-                <History className="h-4 w-4 text-[var(--erg-blue)]" />
+                autoFocus
+                sx={{ ...nativeInputSx, height: 48, width: "100%", px: 1.5, textAlign: "center", typography: "h6", fontWeight: "fontWeightBold" }}
+              />
+            </Box>
+            <Box sx={{ mt: 1.5, borderRadius: 1.75, border: 1, borderColor: "divider", bgcolor: "background.default", p: 1.5 }}>
+              <Typography variant="body2" component="div" sx={{ display: "flex", alignItems: "center", gap: 1, fontWeight: "fontWeightBold", color: "text.secondary" }}>
+                <HistoryIcon fontSize="small" sx={{ color: "primary.main" }} />
                 Lịch sử gần đây
-              </div>
-              <div className="mt-2 text-[13px] font-semibold text-slate-500">Mobile dùng tap sheet thay hover. Dữ liệu lịch sử thật sẽ nối API sau.</div>
-            </div>
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              <button type="button" className="h-11 rounded-[12px] border border-[#d9e2ef] text-[14px] font-bold text-slate-700" onClick={() => setEditor(null)}>
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, fontWeight: "fontWeightMedium", color: "text.secondary" }}>Mobile dùng tap sheet thay hover. Dữ liệu lịch sử thật sẽ nối API sau.</Typography>
+            </Box>
+            <Box sx={{ mt: 2, display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 1 }}>
+              <ErgButton variant="outlined" onClick={() => setEditor(null)} sx={{ height: 44, borderRadius: 1.5 }}>
                 Hủy
-              </button>
-              <button type="button" className="h-11 rounded-[12px] bg-[var(--erg-blue)] text-[14px] font-bold text-white shadow-[0_8px_18px_rgba(15,108,189,0.24)]" onClick={saveEditor}>
-                <span className="inline-flex items-center gap-2">
-                  <Edit3 className="h-4 w-4" />
-                  Lưu
-                </span>
-              </button>
-            </div>
-          </div>
-        </div>
+              </ErgButton>
+              <ErgButton variant="contained" startIcon={<EditIcon fontSize="small" />} onClick={saveEditor} sx={{ height: 44, borderRadius: 1.5 }}>
+                Lưu
+              </ErgButton>
+            </Box>
+          </Box>
+        </Box>
       ) : null}
-    </div>
+    </Box>
   );
 }
 
@@ -334,19 +401,16 @@ function nextClassification(current: Classification): Classification {
   return "A";
 }
 
-function classificationClass(classification: Classification) {
-  if (classification === "A") return "border-emerald-200 bg-emerald-50 text-emerald-700";
-  if (classification === "B") return "border-blue-200 bg-blue-50 text-[var(--erg-blue)]";
-  if (classification === "C") return "border-yellow-200 bg-yellow-50 text-yellow-800";
-  if (classification === "D") return "border-orange-200 bg-orange-50 text-orange-700";
-  return "border-rose-200 bg-rose-50 text-rose-700";
+function classificationSx(classification: Classification) {
+  const tone = classification === "A" ? "success" : classification === "B" ? "info" : classification === "C" || classification === "D" ? "warning" : "error";
+  return { borderColor: `${tone}.main`, bgcolor: `${tone}.light`, color: `${tone}.main` };
 }
 
-function scoreTone(value: string, maxScore: number) {
+function scoreToneSx(value: string, maxScore: number) {
   const score = Number(value);
-  if (!Number.isFinite(score)) return "bg-white text-slate-300";
+  if (!Number.isFinite(score)) return { bgcolor: "background.paper", color: "text.disabled" };
   const rate = score / maxScore;
-  if (rate < 0.5) return "bg-rose-50 text-rose-700";
-  if (rate >= 0.8) return "bg-emerald-50 text-emerald-700";
-  return "bg-white text-slate-700";
+  if (rate < 0.5) return { bgcolor: "error.light", color: "error.main" };
+  if (rate >= 0.8) return { bgcolor: "success.light", color: "success.main" };
+  return { bgcolor: "background.paper", color: "text.primary" };
 }
