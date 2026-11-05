@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { ApiClientError } from "@/lib/api-client";
+import { getErrorBody } from "@/lib/api-client/response";
 
 import {
   createMemoryQuizDraftDeviceStore,
@@ -353,6 +354,33 @@ describe("QuizDraftSyncEngine", () => {
     expect(classifySyncError(new ApiClientError("x", "HTTP_401", 401))).toBe("auth");
     expect(classifySyncError(new ApiClientError("x", "HTTP_500", 500))).toBe("other");
     expect(classifySyncError(new Error("boom"))).toBe("other");
+  });
+
+  // The body GlobalExceptionHandler writes for a SyncConflictException, read by the client's real parser.
+  const syncConflict = (code: string, retryable: boolean) => {
+    const body = {
+      statusCode: 409, message: `${code} for quiz.draft/q1`, data: null, timestamp: "2026-11-05T00:00:00Z", path: "/x", request_id: "r1",
+      errors: { code, operationId: "op", idempotencyKey: "quiz-editor-save:q1:3:1", entityType: "quiz.draft", entityId: "q1", expectedVersion: 3, actualVersion: 3, serverTime: "2026-11-05T00:00:00Z", retryable },
+    };
+    const parsed = getErrorBody(body)!;
+    return new ApiClientError(parsed.message ?? "", parsed.code ?? "HTTP_409", 409, parsed.details, parsed.requestId);
+  };
+
+  it("classifies a save the server is still processing as retryable, and a key reused for other content as not", () => {
+    expect(classifySyncError(syncConflict("SYNC_PENDING", true))).toBe("network");
+    expect(classifySyncError(syncConflict("SOMETHING_NEW", true))).toBe("network");
+    expect(classifySyncError(syncConflict("IDEMPOTENCY_CONFLICT", false))).toBe("other");
+    expect(classifySyncError(new ApiClientError("x", "STALE_DRAFT", 409, { code: "STALE_DRAFT", retryable: true }))).toBe("stale");
+  });
+
+  it("retries a save answered with SYNC_PENDING with the same key", async () => {
+    api.saveDraft.mockRejectedValueOnce(syncConflict("SYNC_PENDING", true));
+    await engine.edit(doc("A")); await vi.advanceTimersByTimeAsync(2000);
+    expect(engine.status).toEqual({ kind: "offline", pendingEdits: 1 });
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(api.saveDraft).toHaveBeenCalledTimes(2);
+    expect(api.saveDraft.mock.calls[1][0].idempotencyKey).toBe(api.saveDraft.mock.calls[0][0].idempotencyKey);
+    expect(engine.status).toMatchObject({ kind: "saved" });
   });
 
   it("start() with a dirty device copy sends it without waiting for an edit", async () => {

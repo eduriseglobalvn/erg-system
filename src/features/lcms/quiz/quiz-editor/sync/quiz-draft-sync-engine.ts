@@ -49,6 +49,9 @@ export function classifySyncError(error: unknown): "network" | "stale" | "auth" 
   if (!(error instanceof ApiClientError)) return "other";
   if (error.code === "NETWORK_ERROR" || error.code === "REQUEST_TIMEOUT" || error.status === 0) return "network";
   if (error.status === 409 && error.code === "STALE_DRAFT") return "stale";
+  // The first request under this idempotency key is still running on the server: retry it later like a network error.
+  const retryable = (error.details as { retryable?: unknown } | undefined)?.retryable === true;
+  if (error.status === 409 && (error.code === "SYNC_PENDING" || retryable)) return "network";
   if (error.status === 401) return "auth";
   return "other";
 }
