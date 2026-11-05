@@ -45,8 +45,10 @@ type Slot = {
   scope: string;
   keys: string[];
   ready: boolean;
-  /** False until the first document after `ready` was seen; that one is never an edit (see `change`). */
-  seenDocument: boolean;
+  /** JSON of the first document after `ready` (undefined: not seen yet, null: an edit since); never an edit itself, see `change`. */
+  baselineJson: string | null | undefined;
+  /** `start()` threw; the next `open` for the same key tries again. */
+  failed: boolean;
   backups: DeviceDraftBackup[];
 };
 
@@ -71,6 +73,8 @@ function migrateOnce(store: QuizDraftDeviceStore, scope: string, tenantId: strin
   }
   return run;
 }
+
+const currentScope = () => quizDraftScope(getDefaultTenantId(), getAuthScope().accountId);
 
 function defaultApi(scope: string): QuizDraftSyncApi {
   const cache = imageCaches.get(scope) ?? new Map<string, string>();
@@ -117,7 +121,7 @@ export class QuizDraftSyncSession {
   /** Starts an engine for `draftKey`, unless the live one already answers to it (it created that quiz). */
   open(draftKey: string, serverDraft: QuizEditorDraftDocument | undefined, settled: boolean): void {
     const current = this.slot;
-    if (current?.keys.includes(draftKey)) {
+    if (current?.keys.includes(draftKey) && !current.failed) {
       if (draftKey === current.engine.quizId) current.keys = [draftKey]; // the new-quiz key may start a fresh quiz again
       return;
     }
@@ -126,7 +130,7 @@ export class QuizDraftSyncSession {
 
     const { deps = {} } = this.latest;
     const tenantId = getDefaultTenantId();
-    const scope = quizDraftScope(tenantId, getAuthScope().accountId);
+    const scope = currentScope();
     const store = deps.store ?? (defaultStore ??= createQuizDraftDeviceStore());
     const engine: QuizDraftSyncEngine = new QuizDraftSyncEngine(
       {
@@ -145,7 +149,7 @@ export class QuizDraftSyncSession {
       },
       draftKey,
     );
-    const slot: Slot = { engine, store, scope, keys: [draftKey], ready: false, seenDocument: false, backups: [] };
+    const slot: Slot = { engine, store, scope, keys: [draftKey], ready: false, baselineJson: undefined, failed: false, backups: [] };
     this.slot = slot;
     this.publish();
     void this.load(slot, tenantId, serverDraft);
@@ -156,10 +160,14 @@ export class QuizDraftSyncSession {
     const slot = this.slot;
     if (!slot?.ready || !slot.keys.includes(draftKey)) return;
     // The first document after load is the hydrated one, or with nothing to hydrate whatever the editor still shows
-    // (possibly the previous quiz). Neither is an edit of this draft.
-    if (!slot.seenDocument) {
-      slot.seenDocument = true;
-      return;
+    // (possibly the previous quiz, or a blank new quiz). Neither is an edit, nor is a re-rendered copy of it.
+    if (slot.baselineJson !== null) {
+      const json = JSON.stringify(document);
+      if (slot.baselineJson === undefined || json === slot.baselineJson) {
+        slot.baselineJson ??= json;
+        return;
+      }
+      slot.baselineJson = null;
     }
     this.pending = { engine: slot.engine, document };
     this.clearTimer();
@@ -179,9 +187,11 @@ export class QuizDraftSyncSession {
       this.flushPending();
       void this.slot?.engine.flushNow();
     };
-    // Signing in again usually happens in another tab or page, so retry when this one comes back.
+    // Signing in again usually happens in another tab or page, so retry when this one comes back, but only as the
+    // same account: on a shared computer the edits stay on the device under the account that made them.
     const resume = () => {
-      if (this.slot?.engine.status.kind === "signed-out") void this.slot.engine.flushNow();
+      const slot = this.slot;
+      if (slot?.engine.status.kind === "signed-out" && currentScope() === slot.scope) void slot.engine.flushNow();
     };
     const onVisibility = () => (target.document.visibilityState === "hidden" ? leave() : resume());
     const onOnline = () => this.slot?.engine.notifyOnline();
@@ -191,11 +201,13 @@ export class QuizDraftSyncSession {
       event.returnValue = ""; // Safari 15 and older Chrome only ask when returnValue is set
     };
     const events: Array<[string, (event: never) => void]> = [
-      ["pagehide", leave], ["visibilitychange", onVisibility], ["focus", resume], ["online", onOnline], ["beforeunload", onBeforeUnload],
+      ["pagehide", leave], ["focus", resume], ["online", onOnline], ["beforeunload", onBeforeUnload],
     ];
     for (const [name, handler] of events) target.addEventListener(name, handler as EventListener);
+    target.document.addEventListener("visibilitychange", onVisibility);
     return () => {
       for (const [name, handler] of events) target.removeEventListener(name, handler as EventListener);
+      target.document.removeEventListener("visibilitychange", onVisibility);
     };
   }
 
@@ -244,6 +256,7 @@ export class QuizDraftSyncSession {
       document = await slot.engine.start(serverDraft);
     } catch (error) {
       console.error("Cannot open quiz draft", error);
+      slot.failed = true;
       if (this.slot === slot) this.publishStatus({ kind: "error", message: error instanceof Error ? error.message : String(error) });
       return;
     }

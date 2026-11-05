@@ -11,6 +11,13 @@ import { createMemoryQuizDraftDeviceStore, quizDraftScope, type DeviceDraftRecor
 import { QuizDraftSyncEngine } from "./quiz-draft-sync-engine";
 import { useQuizDraftSync } from "./use-quiz-draft-sync";
 
+// The signed-in account can change while the editor stays open (a shared school computer).
+const auth = vi.hoisted(() => ({ accountId: undefined as string | undefined }));
+vi.mock("@/platform/auth/api/auth-storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/platform/auth/api/auth-storage")>();
+  return { ...actual, getAuthScope: () => ({ ...actual.getAuthScope(), accountId: auth.accountId }) };
+});
+
 const scope = quizDraftScope(getDefaultTenantId(), getAuthScope().accountId);
 const doc = (title: string, quizId = "q1", docVersion = 3) =>
   ({ quizId, draftId: `d-${quizId}`, docVersion, settings: { info: { title } }, playerTemplate: {}, tree: [] }) as unknown as QuizEditorDraftDocument;
@@ -19,6 +26,8 @@ const rec = (over: Partial<DeviceDraftRecord> = {}): DeviceDraftRecord => ({
   key: "q1", quizId: "q1", createIdempotencyKey: "quiz-editor-create:k", baseDocVersion: 3, document: doc("device"), dirty: false,
   revision: 1, syncedRevision: 1, editedAt: "2026-11-01T00:00:00.000Z", syncedAt: "2026-11-01T00:00:00.000Z", writerId: "other-tab", ...over,
 });
+const setVisibility = (state: DocumentVisibilityState) =>
+  Object.defineProperty(document, "visibilityState", { configurable: true, get: () => state });
 const settle = (ms = 0) => act(async () => { await vi.advanceTimersByTimeAsync(ms); });
 
 type Props = { draftKey: string; serverDraft: QuizEditorDraftDocument | undefined; settled: boolean; document: QuizEditorDraftDocument };
@@ -67,6 +76,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  auth.accountId = undefined;
+  Reflect.deleteProperty(document, "visibilityState");
   vi.restoreAllMocks();
   vi.useRealTimers();
 });
@@ -254,5 +265,95 @@ describe("useQuizDraftSync", () => {
     await settle(2300);
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
     expect(titleOf((await store.get(scope, "q1"))?.document)).toBe("strict edit");
+  });
+
+  it("never forwards a re-rendered copy of the document it became ready with", async () => {
+    const newKey = "new-quiz:c:all:t";
+    const blank = () => doc("blank", newKey);
+    const { rerender } = setup({ draftKey: newKey, serverDraft: undefined, document: blank() });
+    await settle();
+    for (let i = 0; i < 3; i += 1) {
+      rerender({ draftKey: newKey, serverDraft: undefined, settled: true, document: blank() }); // not memoized, same JSON
+      await settle(1000);
+    }
+    await settle(5000);
+    expect(api.createQuiz).not.toHaveBeenCalled();
+    expect(await store.get(scope, newKey)).toBeNull();
+
+    rerender({ draftKey: newKey, serverDraft: undefined, settled: true, document: doc("typed", newKey) });
+    await settle(300);
+    expect(titleOf((await store.get(scope, newKey))?.document)).toBe("typed");
+    rerender({ draftKey: newKey, serverDraft: undefined, settled: true, document: blank() }); // back to blank is an edit now
+    await settle(300);
+    expect(titleOf((await store.get(scope, newKey))?.document)).toBe("blank");
+  });
+
+  it("writes nothing for a key left while its engine was still starting", async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    const get = store.get.bind(store);
+    store.get = async (s, key) => {
+      if (key === "A") await gate;
+      return get(s, key);
+    };
+    const { rerender } = setup({ draftKey: "A", serverDraft: doc("A", "A"), document: doc("A", "A") });
+    await settle();
+    rerender({ draftKey: "B", serverDraft: doc("B", "B"), settled: true, document: doc("A", "A") });
+    await settle();
+    release();
+    await settle(5000);
+    expect(await get(scope, "A")).toBeNull();
+    expect(hydrate).not.toHaveBeenCalledWith(expect.objectContaining({ quizId: "A" }));
+    expect(api.saveDraft).not.toHaveBeenCalled();
+  });
+
+  it("writes the pending edit and sends it when the page is hidden", async () => {
+    const { rerender } = setup();
+    await settle();
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("hidden") });
+    setVisibility("hidden");
+    await act(async () => { document.dispatchEvent(new Event("visibilitychange")); await vi.advanceTimersByTimeAsync(0); });
+    expect(api.saveDraft).toHaveBeenCalledWith(expect.objectContaining({ settings: doc("hidden").settings }));
+  });
+
+  it("resumes after sign-in when the page becomes visible", async () => {
+    await store.put(scope, rec({ dirty: true, revision: 2, syncedRevision: 1 }));
+    api.saveDraft.mockRejectedValueOnce(new ApiClientError("Unauthorized", "UNAUTHORIZED", 401));
+    const { result } = setup();
+    await settle();
+    expect(result.current.status.kind).toBe("signed-out");
+    setVisibility("visible");
+    await act(async () => { document.dispatchEvent(new Event("visibilitychange")); await vi.advanceTimersByTimeAsync(0); });
+    expect(api.saveDraft).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not send one account's edits after another account signs in", async () => {
+    await store.put(scope, rec({ dirty: true, revision: 2, syncedRevision: 1 }));
+    api.saveDraft.mockRejectedValueOnce(new ApiClientError("Unauthorized", "UNAUTHORIZED", 401));
+    const { result } = setup();
+    await settle();
+    expect(result.current.status.kind).toBe("signed-out");
+
+    auth.accountId = "someone-else";
+    await act(async () => { window.dispatchEvent(new Event("focus")); await vi.advanceTimersByTimeAsync(0); });
+    setVisibility("visible");
+    await act(async () => { document.dispatchEvent(new Event("visibilitychange")); await vi.advanceTimersByTimeAsync(0); });
+    expect(api.saveDraft).toHaveBeenCalledTimes(1);
+    expect((await store.get(scope, "q1"))?.dirty).toBe(true);
+  });
+
+  it("restarts the engine for the same key after a failed start", async () => {
+    const get = store.get.bind(store);
+    store.get = vi.fn(get).mockRejectedValueOnce(new Error("IndexedDB is broken"));
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { result, rerender } = setup();
+    await settle();
+    expect(result.current.status.kind).toBe("error");
+    expect(result.current.ready).toBe(false);
+
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("server") }); // a refetched server draft
+    await settle();
+    expect(result.current.ready).toBe(true);
+    expect(hydrate).toHaveBeenCalledWith(doc("server"));
   });
 });

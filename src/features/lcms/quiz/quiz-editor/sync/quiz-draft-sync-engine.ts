@@ -101,6 +101,7 @@ export class QuizDraftSyncEngine {
   start(serverDraft: QuizEditorDraftDocument | undefined): Promise<QuizEditorDraftDocument | null> {
     return this.serial(async () => {
       const device = await this.deps.store.get(this.deps.scope, this.key);
+      if (this.disposed) return null; // disposed while starting: write nothing, arm no timer
       const { document, source } = chooseInitialDocument(device, serverDraft);
       this.recoveredEdits = null;
       if (source === "device" && device) {

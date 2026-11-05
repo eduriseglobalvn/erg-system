@@ -35,7 +35,12 @@ export type UseQuizDraftSyncResult = {
   restoreBackup: (createdAt: string) => void;
 };
 
-/** Device autosave and server sync for the quiz editor: one engine per draft key, see QuizDraftSyncSession. */
+/**
+ * Device autosave and server sync for the quiz editor: one engine per draft key, see QuizDraftSyncSession.
+ * Contract: keep the editor read-only until `ready`. The document rendered when it becomes ready (and any copy with the
+ * same JSON) is never saved, so anything typed before then would be lost.
+ * After a failed start (`status.kind === "error"`), the next change of `serverDraft`/`serverDraftSettled` retries.
+ */
 export function useQuizDraftSync(options: UseQuizDraftSyncOptions): UseQuizDraftSyncResult {
   const { draftKey, serverDraft, serverDraftSettled, document } = options;
   const [session] = useState(() => new QuizDraftSyncSession(options));
