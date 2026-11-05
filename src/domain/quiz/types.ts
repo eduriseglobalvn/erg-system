@@ -86,6 +86,8 @@ export type InlineBlank = {
   options: string[];
   correctOptionId: string;
   selectPosition?: "before" | "after";
+  /** Text after the last blank, like `TextBlank.suffix`. */
+  suffix?: string;
 };
 
 export type TextBlank = {
@@ -112,6 +114,8 @@ export type DragWordSlot = {
   id: string;
   label: string;
   correctWordId: string;
+  /** Text after the last blank, like `TextBlank.suffix`. */
+  suffix?: string;
 };
 
 export type DropTarget = {
@@ -194,6 +198,8 @@ export type Question = {
   /** Answer key for sequence (item ids in correct order). Empty = unknown (server-graded), never fall back to received order. */
   sequenceCorrectOrder?: string[];
   sequenceItems?: SequenceItem[];
+  /** Authoring only: the exact text around the blanks (blanks + 1 entries). Never holds an answer; learners read the per-blank fields. */
+  sentenceParts?: string[];
   inlineBlanks?: InlineBlank[];
   textBlanks?: TextBlank[];
   numericAnswer?: NumericAnswer;

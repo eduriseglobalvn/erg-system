@@ -27,4 +27,21 @@ describe("buildQuestionSlide", () => {
     expect(slide.choices!.some((choice) => choice.correct)).toBe(false);
   });
 
+  it.each([
+    ["fill-in-the-blanks", { kind: "fill_blank", textBlanks: [] }],
+    ["select-from-lists", { kind: "select_from_lists", inlineBlanks: [] }],
+    ["drag-the-words", { kind: "drag_words", wordSlots: [], wordBank: [] }],
+    ["short-answer", { kind: "short_answer", textBlanks: [] }],
+    ["numeric", { kind: "numeric" }],
+  ] as const)("starts %s with an empty runtime question", (type, shape) => {
+    const slide = build(type);
+    const { positivePoints } = createNewQuizProjectSettings().questionDefaults;
+    expect(slide.runtimeQuestion).toEqual({
+      id: slide.id,
+      title: "",
+      points: positivePoints,
+      feedback: { correct: "", incorrect: "", partial: "" },
+      ...shape,
+    });
+  });
 });

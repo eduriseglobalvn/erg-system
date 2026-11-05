@@ -38,7 +38,17 @@ describe("AnswerArea", () => {
   });
 });
 
-describe.each(["multiple-response", "true-false", "likert-scale", "sequence"] as const)("new %s slide", (kind) => {
+describe.each([
+  "multiple-response",
+  "true-false",
+  "likert-scale",
+  "sequence",
+  "fill-in-the-blanks",
+  "select-from-lists",
+  "drag-the-words",
+  "short-answer",
+  "numeric",
+] as const)("new %s slide", (kind) => {
   it("is not ready and has an answers issue beyond the title", () => {
     const slide = build(kind);
     expect(slide.runtimeQuestion).toBeDefined();

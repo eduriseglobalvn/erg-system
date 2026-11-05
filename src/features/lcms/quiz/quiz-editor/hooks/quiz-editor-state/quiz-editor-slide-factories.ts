@@ -127,6 +127,16 @@ function buildRuntimeQuestion(
       const sequenceItems = choices.map(({ id: stepId, label }) => ({ id: stepId, label }));
       return { ...base, kind: "sequence", sequenceItems, sequenceCorrectOrder: sequenceItems.map((item) => item.id) };
     }
+    case "fill-in-the-blanks":
+      return { ...base, kind: "fill_blank", textBlanks: [] };
+    case "select-from-lists":
+      return { ...base, kind: "select_from_lists", inlineBlanks: [] };
+    case "drag-the-words":
+      return { ...base, kind: "drag_words", wordSlots: [], wordBank: [] };
+    case "short-answer":
+      return { ...base, kind: "short_answer", textBlanks: [] };
+    case "numeric":
+      return { ...base, kind: "numeric" };
     default:
       return undefined;
   }
