@@ -152,7 +152,7 @@
     "font": 0
   },
   "src/components/quiz/questions/likert-question.tsx": {
-    "hex": 11,
+    "hex": 5,
     "font": 0
   },
   "src/components/quiz/questions/matching-question/matching-mobile.tsx": {
@@ -162,14 +162,6 @@
   "src/components/quiz/questions/multiple-response-question.tsx": {
     "hex": 3,
     "font": 3
-  },
-  "src/components/quiz/questions/sequence-question.tsx": {
-    "hex": 2,
-    "font": 0
-  },
-  "src/components/quiz/questions/sequence-question/sequence-card.tsx": {
-    "hex": 14,
-    "font": 0
   },
   "src/components/quiz/questions/shared.tsx": {
     "hex": 2,
@@ -759,85 +751,9 @@
     "hex": 2,
     "font": 0
   },
-  "src/features/lcms/quiz/quiz-editor/components/classic-editor-art.tsx": {
-    "hex": 44,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/learner-preview-shell.tsx": {
-    "hex": 4,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/player-template-dialog.tsx": {
-    "hex": 4,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor-dialog.tsx": {
-    "hex": 1,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor/feedback-scoring.tsx": {
-    "hex": 12,
-    "font": 7
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor/final-slide-settings.tsx": {
-    "hex": 11,
-    "font": 11
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor/inspector.tsx": {
-    "hex": 16,
-    "font": 9
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor/media-settings.tsx": {
-    "hex": 13,
-    "font": 8
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-editor/question-settings.tsx": {
-    "hex": 18,
-    "font": 22
-  },
-  "src/features/lcms/quiz/quiz-editor/components/question-manager-table.tsx": {
-    "hex": 4,
-    "font": 6
-  },
   "src/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style.ts": {
     "hex": 0,
     "font": 5
-  },
-  "src/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-banners.tsx": {
-    "hex": 14,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/quiz-properties-dialog.tsx": {
-    "hex": 1,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon.tsx": {
-    "hex": 8,
-    "font": 2
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/question-menu-glyphs.tsx": {
-    "hex": 62,
-    "font": 10
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus.tsx": {
-    "hex": 35,
-    "font": 20
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus/introduction-menu.tsx": {
-    "hex": 21,
-    "font": 9
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus/question-option-card.tsx": {
-    "hex": 14,
-    "font": 8
-  },
-  "src/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-primitives.tsx": {
-    "hex": 1,
-    "font": 0
-  },
-  "src/features/lcms/quiz/quiz-editor/components/slide-preview-dialog.tsx": {
-    "hex": 2,
-    "font": 0
   },
   "src/features/lcms/quiz/quiz-runtime/api/quiz-runtime-normalization-utils.ts": {
     "hex": 12,

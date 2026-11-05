@@ -5,8 +5,7 @@ import {
   buildSlideNumberMap,
   changeSlideQuestionType,
   countQuestionsByGroup,
-  duplicateSlidesInGroups,
-  filterGroupsByKeyword,
+  copySlideAs,
   getFirstNode,
   insertGroupAfter,
   insertSlideAfter,
@@ -15,7 +14,6 @@ import {
   moveGroupTo,
   moveSlideTo,
   removeSlideFromGroup,
-  removeSlidesFromGroups,
   replaceGroupSlides,
   updateSlideInGroups,
   withEditedStatus,
@@ -48,15 +46,6 @@ describe("derived maps", () => {
     expect(buildSlideNumberMap(sample())).toEqual({ a: 1, b: 2, c: 3 });
     expect(countQuestionsByGroup(sample())).toEqual({ g1: 2, g2: 0 });
   });
-  it("filters by keyword on group title or slide label", () => {
-    expect(filterGroupsByKeyword(sample(), "  ")).toHaveLength(2);
-    const byGroup = filterGroupsByKeyword(sample(), "G2");
-    expect(byGroup.map((g) => g.id)).toEqual(["g2"]);
-    const bySlide = filterGroupsByKeyword(sample(), "beta");
-    expect(bySlide).toHaveLength(1);
-    expect(bySlide[0]!.slides.map((s) => s.id)).toEqual(["b"]);
-    expect(filterGroupsByKeyword(sample(), "zzz")).toEqual([]);
-  });
 });
 
 describe("insertion", () => {
@@ -87,20 +76,12 @@ describe("insertion", () => {
 
 describe("mutations", () => {
   it("removes slides", () => {
-    expect(removeSlidesFromGroups(sample(), ["a", "c"]).map((g) => g.slides.length)).toEqual([1, 0]);
     expect(removeSlideFromGroup(sample(), "g1", "b")[0]!.slides.map((s) => s.id)).toEqual(["a"]);
   });
-  it("duplicates slides with fresh ids and unsaved status", () => {
-    let n = 0;
-    const out = duplicateSlidesInGroups(sample(), ["b"], (p) => `${p}-${++n}`);
-    expect(out[0]!.slides.map((s) => s.id)).toEqual(["a", "b", "slide-1"]);
-    expect(out[0]!.slides[2]).toMatchObject({ title: "Beta (Bản sao)", status: "unsaved" });
-    expect(out[1]!.slides).toHaveLength(1);
-  });
-  it("gives a duplicate its own runtime question id, leaving the source alone", () => {
+  it("gives a copy its own runtime question id, leaving the source alone", () => {
     const source = { ...slide("b", "Beta"), questionId: "q-9", runtimeQuestion: { id: "b", kind: "essay", title: "Beta" } } as unknown as QuizEditorSlide;
-    const out = duplicateSlidesInGroups([group("g1", [source])], ["b"], () => "slide-7");
-    expect(out[0]!.slides[1]).toMatchObject({ id: "slide-7", questionId: "q-9", runtimeQuestion: { id: "slide-7" } });
+    const copy = copySlideAs(source, "slide-7");
+    expect(copy).toMatchObject({ id: "slide-7", questionId: "q-9", runtimeQuestion: { id: "slide-7" } });
     expect(source.runtimeQuestion!.id).toBe("b");
   });
   it("marks drafts and published", () => {

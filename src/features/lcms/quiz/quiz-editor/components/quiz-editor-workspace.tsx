@@ -20,7 +20,6 @@ import { useQuizList } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-lis
 import { useI18n } from "@/platform/i18n";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { isQuestionManagerSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import "@/features/lcms/quiz/quiz-editor/styles/classic-editor.css";
 
 export function QuizEditorWorkspace({
   activeLeaf,
@@ -52,9 +51,7 @@ export function QuizEditorWorkspace({
 
   const editorState = useQuizEditorState(null);
   const {
-    filteredGroups,
     groups,
-    resultSlide,
     quizProject,
     playerTemplate,
     selectedNode,
@@ -70,7 +67,7 @@ export function QuizEditorWorkspace({
   } = editorState;
 
   const { questionManagerSlides } =
-    useQuizEditorSlideViews({ groups, filteredGroups, resultSlide, quizProject, playerTemplate, selectedThemeId: editorState.selectedThemeId });
+    useQuizEditorSlideViews({ groups });
 
   useQuizEditorScopeSync({ scope, effectiveQuizId, quizItems });
 
@@ -115,7 +112,7 @@ export function QuizEditorWorkspace({
   const syncChip = <QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />;
 
   return (
-    <div className="classic-editor flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+    <div className="flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <h1 className="sr-only">{quizProject.info.title || "Soạn bài kiểm tra"}</h1>
       <QuizListTitlebar
         courseOptions={scope.courseOptions}

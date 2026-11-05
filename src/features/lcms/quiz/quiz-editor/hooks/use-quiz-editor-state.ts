@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useRef, useState, type SetStateAction } from "react";
 
-import { defaultQuizTheme } from "@/features/lcms/quiz/quiz-theme";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { tr } from "@/platform/i18n";
 import { createQuizSlideFromBankQuestion } from "@/features/question-bank/api/question-bank-to-quiz";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
@@ -18,8 +16,6 @@ import {
   buildSlideNumberMap,
   countQuestionsByGroup,
   copySlideAs,
-  duplicateSlidesInGroups,
-  filterGroupsByKeyword,
   getFirstNode,
   insertGroupAfter,
   insertSlideAfter,
@@ -28,17 +24,14 @@ import {
   moveGroupTo,
   moveSlideTo,
   removeSlideFromGroup,
-  removeSlidesFromGroups,
   replaceGroupSlides,
   type QuizEditorClipboard,
 } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-groups";
 import {
-  buildIntroductionSlide,
   buildQuestionSlide,
 } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
 import { useSelectedSlideUpdaters } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/use-selected-slide-updaters";
 import type {
-  IntroSlideKind,
   QuestionType,
   QuizEditorGroup,
   QuizEditorSlide,
@@ -53,12 +46,9 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
   const [resultSlide, setResultSlide] = useState(createMockResultSlide);
   const [quizProject, setQuizProject] = useState<QuizProjectSettings>(() => initialDraftDocument?.settings ?? createNewQuizProjectSettings());
   const [playerTemplate, setPlayerTemplate] = useState<QuizPlayerTemplate>(() => initialDraftDocument?.playerTemplate ?? createMockPlayerTemplate());
-  const [selectedThemeId, setSelectedThemeId] = useState(defaultQuizTheme.id);
   const [selectedNode, setSelectedNode] = useState<SelectedEditorNode>(() =>
     getFirstNode(initialDraftDocument?.tree),
   );
-  const [searchValue, setSearchValue] = useState("");
-  const debouncedSearchValue = useDebouncedValue(searchValue);
   const [collapsedGroupIds, setCollapsedGroupIds] = useState<string[]>([]);
   const [clipboard, setClipboard] = useState<QuizEditorClipboard>(null);
 
@@ -169,10 +159,6 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     insertSlide(buildQuestionSlide(type, quizProject, createId));
   }
 
-  function addIntroduction(type: IntroSlideKind) {
-    insertSlide(buildIntroductionSlide(type, createId));
-  }
-
   function addQuestionGroup() {
     const questionGroups = groups.filter((group) => group.id !== "group-intro");
     const nextGroupNumber = questionGroups.length + 1;
@@ -245,16 +231,6 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
       type: "slide",
       payload: { ...selectedSlide },
     });
-  }
-
-  function deleteSlides(slideIds: string[]) {
-    if (!slideIds.length) return;
-    setGroups((currentGroups) => removeSlidesFromGroups(currentGroups, slideIds));
-  }
-
-  function duplicateSlides(slideIds: string[]) {
-    if (!slideIds.length) return;
-    setGroups((currentGroups) => duplicateSlidesInGroups(currentGroups, slideIds, createId));
   }
 
   function markAllAsSavedDraft() {
@@ -391,35 +367,25 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     setQuizProject(draft.settings);
     setPlayerTemplate(draft.playerTemplate);
     setResultSlide(createMockResultSlide());
-    setSelectedThemeId(defaultQuizTheme.id);
     setSelectedNode(getFirstNode(draft.tree));
   }, []);
 
   const questionCounts = useMemo(() => countQuestionsByGroup(groups), [groups]);
 
-  const filteredGroups = useMemo(
-    () => filterGroupsByKeyword(groups, debouncedSearchValue),
-    [debouncedSearchValue, groups],
-  );
-
   return {
     groups,
-    filteredGroups,
     resultSlide,
     quizProject,
     playerTemplate,
-    selectedThemeId,
     selectedNode,
     selectedGroup,
     selectedSlide,
-    searchValue,
     slideNumberMap,
     totalSlides,
     questionCounts,
     collapsedGroupIds,
     clipboard,
     createId,
-    setSearchValue,
     selectGroup,
     selectSlide,
     toggleGroupCollapsed,
@@ -428,15 +394,12 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     addQuestion,
     importQuestionBankQuestions,
     replaceWithQuestionBankQuestions,
-    addIntroduction,
     addQuestionGroup,
     copySelected,
     cutSelected,
     pasteIntoSelected,
     duplicateSelected,
     deleteSelected,
-    deleteSlides,
-    duplicateSlides,
     markAllAsSavedDraft,
     setSlidesPublished,
     moveSelected,
@@ -459,6 +422,5 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     updateQuizProject,
     updatePlayerTemplate,
     hydrateDraftDocument,
-    setSelectedThemeId,
   };
 }

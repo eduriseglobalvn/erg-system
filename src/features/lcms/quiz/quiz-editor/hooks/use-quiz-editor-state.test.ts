@@ -87,16 +87,6 @@ describe("useQuizEditorState - insertion", () => {
     expect(second!.choiceControlType).toBe("radio");
   });
 
-  it("addIntroduction inserts an introduction slide into the selected group", () => {
-    const { result } = setup();
-    act(() => result.current.selectGroup("g2"));
-    act(() => result.current.addIntroduction("instruction-slide"));
-
-    const added = slidesOf(result, "g2")[1]!;
-    expect(added.kind).toBe("instruction-slide");
-    expect(result.current.selectedNode).toEqual({ type: "slide", groupId: "g2", slideId: added.id });
-  });
-
   it("falls back to the first group when the target group is missing", () => {
     const { result } = setup();
     act(() => result.current.selectGroup("missing"));
@@ -269,27 +259,6 @@ describe("useQuizEditorState - duplicate / delete / move / copy / paste", () => 
 });
 
 describe("useQuizEditorState - bulk slide operations", () => {
-  it("deleteSlides removes by id across groups and ignores an empty list", () => {
-    const { result } = setup();
-    const before = result.current.groups;
-    act(() => result.current.deleteSlides([]));
-    expect(result.current.groups).toBe(before);
-
-    act(() => result.current.deleteSlides(["a", "d"]));
-    expect(slidesOf(result, "g1").map((s) => s.id)).toEqual(["b", "c"]);
-    expect(slidesOf(result, "g2")).toEqual([]);
-  });
-
-  it("duplicateSlides appends unsaved copies with a localized suffix", () => {
-    const { result } = setup();
-    act(() => result.current.duplicateSlides(["a", "c"]));
-    const slides = slidesOf(result, "g1");
-    expect(slides).toHaveLength(5);
-    expect(slides.slice(3).map((s) => s.title)).toEqual(["a (Bản sao)", "c (Bản sao)"]);
-    expect(slides.slice(3).every((s) => s.status === "unsaved")).toBe(true);
-    expect(new Set(slides.map((s) => s.id)).size).toBe(5);
-  });
-
   it("markAllAsSavedDraft and setSlidesPublished update statuses", () => {
     const { result } = setup([group("g1", [slide("a", { status: "unsaved" }), slide("b"), slide("c", { status: "published" })])]);
     act(() => result.current.markAllAsSavedDraft());
@@ -303,26 +272,6 @@ describe("useQuizEditorState - bulk slide operations", () => {
 describe("useQuizEditorState - search, collapse, hydrate", () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => vi.useRealTimers());
-
-  it("filters groups by debounced keyword (group title or slide title/kind)", () => {
-    const { result } = setup();
-    expect(result.current.filteredGroups).toBe(result.current.groups);
-
-    act(() => result.current.setSearchValue("welcome"));
-    expect(result.current.searchValue).toBe("welcome");
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-    expect(result.current.filteredGroups.map((g) => g.id)).toEqual(["g2"]);
-    expect(result.current.filteredGroups[0]!.slides.map((s) => s.id)).toEqual(["d"]);
-
-    act(() => result.current.setSearchValue("g1"));
-    act(() => {
-      vi.advanceTimersByTime(400);
-    });
-    expect(result.current.filteredGroups.map((g) => g.id)).toEqual(["g1"]);
-    expect(result.current.filteredGroups[0]!.slides).toHaveLength(3);
-  });
 
   it("toggles, collapses and expands groups", () => {
     const { result } = setup();

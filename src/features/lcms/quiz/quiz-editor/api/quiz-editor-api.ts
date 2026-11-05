@@ -2,13 +2,7 @@ import { API_ENDPOINTS } from "@/lib/api/api-endpoints";
 import { apiRequest, hasApiBase } from "@/lib/api-client";
 import { getDefaultTenantId, graphQlRequest, type GraphQlPage } from "@/lib/graphql-client";
 import { isObject, validateResponse } from "@/lib/validate-response";
-import { runtimeFixturesEnabled } from "@/lib/runtime-fixtures";
 import type { PortableExamPackageEnvelope } from "@/features/elearning/portable-exam/types/portable-exam-types";
-import {
-  createEmptyQuizEditorGroups,
-  createMockPlayerTemplate,
-  createNewQuizProjectSettings,
-} from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import {
   normalizeQuizEditorGroups,
   normalizeQuizPlayerTemplate,
@@ -331,10 +325,6 @@ export async function loadQuizEditorWorkspace(input: QuizEditorWorkspaceInput = 
 }
 
 export async function loadQuizEditorDraft(quizId: string, signal?: AbortSignal): Promise<QuizEditorDraftDocument> {
-  if (runtimeFixturesEnabled()) {
-    return mockDraft(quizId);
-  }
-
   const response = await graphQlRequest<QuizDraftResponse, { quizId: string }>({
     operationName: "LcmsQuizDraft",
     portal: "lcms",
@@ -541,17 +531,6 @@ function emptyWorkspace(tenantId: string): QuizEditorWorkspaceData {
     subjects: [],
     levels: [],
     categories: [],
-  };
-}
-
-function mockDraft(quizId: string): QuizEditorDraftDocument {
-  return {
-    quizId,
-    draftId: `draft-${quizId}`,
-    docVersion: 0,
-    settings: createNewQuizProjectSettings(),
-    playerTemplate: createMockPlayerTemplate(),
-    tree: createEmptyQuizEditorGroups(),
   };
 }
 

@@ -11,13 +11,6 @@ export type LevelScopeOption = {
   meta: string;
 };
 
-export type TopicOption = {
-  id: string;
-  label: string;
-  description: string;
-  count: number;
-};
-
 export const courseScopeOptions: CourseScopeOption[] = [
   {
     id: "ic3-gs6",

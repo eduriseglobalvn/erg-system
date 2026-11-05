@@ -33,7 +33,6 @@ describe("Quiz Editor Slide Render ownership", () => {
       .join("\n");
 
     expect(sources).not.toContain("matching-question");
-    expect(sources).not.toContain("classic-editor.css");
     expect(sources).not.toContain("src/styles/globals.css");
   });
 });

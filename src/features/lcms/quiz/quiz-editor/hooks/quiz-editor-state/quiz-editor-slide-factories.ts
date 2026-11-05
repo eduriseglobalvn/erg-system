@@ -1,7 +1,6 @@
 import { defaultQuizTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import type { Question } from "@/domain/quiz/types";
 import { likertPresetLabels } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/likert-presets";
-import { tr } from "@/platform/i18n";
 import {
   createMockChoice,
   createMockFeedbackRows,
@@ -9,7 +8,6 @@ import {
   createMockQuestionOptions,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type {
-  IntroSlideKind,
   QuestionType,
   QuizEditorChoice,
   QuizEditorDragDropItem,
@@ -155,28 +153,4 @@ function buildRuntimeQuestion(
     default:
       return undefined;
   }
-}
-
-export function buildIntroductionSlide(type: IntroSlideKind, createId: CreateId): QuizEditorSlide {
-  const titleByType: Record<IntroSlideKind, string> = {
-    "intro-slide": tr("quiz.introWelcome"),
-    "user-info": tr("quiz.userInfo"),
-    "instruction-slide": tr("quiz.introInstruction"),
-  };
-
-  return {
-    id: createId("slide"),
-    title: titleByType[type],
-    kind: type,
-    instructions: [
-      tr("quiz.instructionBullet1"),
-      tr("quiz.instructionBullet2"),
-      tr("quiz.instructionBullet3"),
-      tr("quiz.instructionBullet4"),
-    ],
-    textStyle: defaultQuizTextStyle,
-    options: {
-      displayQuizInstructions: true,
-    },
-  };
 }

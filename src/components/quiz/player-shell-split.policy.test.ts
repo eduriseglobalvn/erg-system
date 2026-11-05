@@ -35,7 +35,6 @@ describe("Quiz Player Shell ownership", () => {
     for (const file of [resolve(PLAYER, "player-shell.tsx"), ...RUNTIME_FILES.map((name) => resolve(PLAYER, name)), resolve(ROOT, "player-shell-runtime-model.ts")]) {
       const source = readFileSync(file, "utf8");
       expect(source).not.toContain("matching-question");
-      expect(source).not.toContain("classic-editor.css");
     }
   });
 });

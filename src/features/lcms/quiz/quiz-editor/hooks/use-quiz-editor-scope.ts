@@ -8,7 +8,6 @@ import {
   levelScopeOptions,
   type CourseScopeOption,
   type LevelScopeOption,
-  type TopicOption,
 } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-scope-options";
 import { hasApiBase } from "@/lib/api-client";
 
@@ -192,33 +191,4 @@ export function useQuizEditorScopeSync({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- deliberately limited to quiz switch / list refresh (as before extraction)
   }, [effectiveQuizId, quizItems]);
-}
-
-export function buildTopicOptions({
-  levelTopics,
-  questions,
-  fallbackCount,
-  courseLabel,
-  levelLabel,
-}: {
-  levelTopics: { id: string; label: string }[];
-  questions: { categoryId?: string | null }[] | undefined;
-  fallbackCount: number;
-  courseLabel: string;
-  levelLabel: string | null;
-}): TopicOption[] {
-  return [
-    {
-      id: "all",
-      label: "Tất cả chủ đề",
-      description: levelLabel ? `${courseLabel} · ${levelLabel}` : courseLabel,
-      count: questions?.length ?? fallbackCount,
-    },
-    ...levelTopics.map((topic) => ({
-      id: topic.id,
-      label: topic.label,
-      description: topic.label,
-      count: questions?.filter((question) => question.categoryId === topic.id).length ?? 0,
-    })),
-  ];
 }

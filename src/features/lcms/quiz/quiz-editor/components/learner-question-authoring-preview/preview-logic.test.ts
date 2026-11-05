@@ -14,7 +14,6 @@ import {
   createDragDropTargetId,
   normalizeChoices,
 } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
-import { clampUnit } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/draggable-slide-media";
 import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -106,13 +105,6 @@ describe("question builders", () => {
   });
 });
 
-describe("clampUnit", () => {
-  test("clamps to 0.08..0.92", () => {
-    expect(clampUnit(-1)).toBe(0.08);
-    expect(clampUnit(2)).toBe(0.92);
-    expect(clampUnit(0.5)).toBe(0.5);
-  });
-});
 
 describe("buildPreviewQuestion images", () => {
   const img = { type: "image", src: "https://x/a.png", alt: "A" };

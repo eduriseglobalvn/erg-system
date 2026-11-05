@@ -41,26 +41,6 @@ export function countQuestionsByGroup(groups: QuizEditorGroup[]): Record<string,
   }, {});
 }
 
-export function filterGroupsByKeyword(groups: QuizEditorGroup[], rawKeyword: string): QuizEditorGroup[] {
-  const keyword = rawKeyword.trim().toLowerCase();
-  if (!keyword) return groups;
-
-  return groups
-    .map((group) => {
-      const matchedSlides = group.slides.filter((slide) => {
-        const label = `${slide.title} ${slide.kind}`.toLowerCase();
-        return label.includes(keyword);
-      });
-
-      if (group.title.toLowerCase().includes(keyword)) {
-        return group;
-      }
-
-      return { ...group, slides: matchedSlides };
-    })
-    .filter((group) => group.title.toLowerCase().includes(keyword) || group.slides.length > 0);
-}
-
 /** Applies `update` to one slide of one group, leaving everything else untouched. */
 export function updateSlideInGroups(
   groups: QuizEditorGroup[],
@@ -150,36 +130,9 @@ export function replaceGroupSlides(
   ];
 }
 
-export function removeSlidesFromGroups(groups: QuizEditorGroup[], slideIds: string[]): QuizEditorGroup[] {
-  return groups.map((group) => ({
-    ...group,
-    slides: group.slides.filter((slide) => !slideIds.includes(slide.id)),
-  }));
-}
-
 // A copy is its own question: the runtime question follows the new slide id (the try runner keys answers by it).
 export function copySlideAs(slide: QuizEditorSlide, id: string): QuizEditorSlide {
   return { ...slide, id, ...(slide.runtimeQuestion ? { runtimeQuestion: { ...slide.runtimeQuestion, id } } : {}) };
-}
-
-export function duplicateSlidesInGroups(
-  groups: QuizEditorGroup[],
-  slideIds: string[],
-  createId: (prefix: string) => string,
-): QuizEditorGroup[] {
-  return groups.map((group) => {
-    const slidesToDup = group.slides.filter((s) => slideIds.includes(s.id));
-    if (!slidesToDup.length) return group;
-    const copies = slidesToDup.map((s) => ({
-      ...copySlideAs(s, createId("slide")),
-      title: s.title ? `${s.title} (Bản sao)` : s.title,
-      status: "unsaved" as const,
-    }));
-    return {
-      ...group,
-      slides: [...group.slides, ...copies],
-    };
-  });
 }
 
 export function markUnsavedSlidesAsDraft(groups: QuizEditorGroup[]): QuizEditorGroup[] {

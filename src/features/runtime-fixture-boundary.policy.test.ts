@@ -26,8 +26,7 @@ test("keeps quiz and authoring synthetic payloads behind the explicit dev gate",
   const authoringController = readFileSync(resolve(process.cwd(), "src/features/lcms/admin-operations/components/learning-resource-authoring-create-dialog-controller.ts"), "utf8");
   const teacherDashboard = readFileSync(resolve(process.cwd(), "src/features/lms/learning-resources/api/teacher-resource-dashboard-api.ts"), "utf8");
 
-  expect(quizEditor).toContain("runtimeFixturesEnabled()");
-  expect(quizEditor).not.toMatch(/if \(!hasApiBase\(\)\)\s*{\s*return mockDraft/s);
+  expect(quizEditor).not.toContain("runtimeFixturesEnabled");
   expect(quizPackage).toContain("runtimeFixturesEnabled()");
   expect(quizPackage).not.toMatch(/if \(!hasApiBase\(\)\)\s*{\s*return createQuizPackage/s);
   expect(attemptCommands).toContain("runtimeFixturesEnabled()");
