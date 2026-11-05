@@ -421,6 +421,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     questionCounts,
     collapsedGroupIds,
     clipboard,
+    createId,
     setSearchValue,
     selectGroup,
     selectSlide,

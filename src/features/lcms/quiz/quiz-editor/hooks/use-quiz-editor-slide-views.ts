@@ -44,18 +44,6 @@ export function useQuizEditorSlideViews({
     [questionManagerGroups],
   );
 
-  const questionEntries = useMemo(
-    () =>
-      questionManagerGroups.flatMap((group) =>
-        group.slides.map((slide) => ({
-          groupId: group.id,
-          slideId: slide.id,
-          title: slide.title,
-        })),
-      ),
-    [questionManagerGroups],
-  );
-
   const quizInformationSlide = useMemo(
     () => createQuizInformationSlide(quizProject),
     [quizProject],
@@ -94,7 +82,6 @@ export function useQuizEditorSlideViews({
 
   return {
     questionManagerSlides,
-    questionEntries,
     configuredResultSlide,
     previewSlides,
     managerGroups,

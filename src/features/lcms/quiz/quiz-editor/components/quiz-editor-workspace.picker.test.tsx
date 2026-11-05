@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
@@ -57,8 +57,12 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-manager-table", ()
     <output data-testid="count">{groups.reduce((sum, group) => sum + group.slides.length, 0)}</output>
   ),
 }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/question-editor-dialog", () => ({
-  QuestionEditorDialog: () => <div role="dialog" aria-label="editor-open" />,
+vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
+  QuestionEditorShell: ({ onChangeType }: { onChangeType: () => void }) => (
+    <div role="dialog" aria-label="editor-open">
+      <button type="button" onClick={onChangeType}>change-type</button>
+    </div>
+  ),
 }));
 
 const leaf = {} as DashboardLeaf;
@@ -94,5 +98,25 @@ describe("QuizEditorWorkspace add-question picker", () => {
     expect(Number(screen.getByTestId("count").textContent)).toBe(before + 1);
     // The closing picker still marks its siblings aria-hidden until its exit transition ends.
     expect(await screen.findByRole("dialog", { name: "editor-open" })).toBeInTheDocument();
+  });
+
+  it("confirms before a type change drops the answers, and keeps the slide count", async () => {
+    render(
+      <I18nProvider>
+        <QuizEditorWorkspace activeLeaf={leaf} />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tạo câu Một đáp án" }));
+    const count = screen.getByTestId("count").textContent;
+
+    fireEvent.click(await screen.findByRole("button", { name: "change-type" }));
+    const picker = await screen.findByRole("dialog", { name: "Đổi dạng câu hỏi" });
+    fireEvent.click(within(picker).getByRole("option", { name: /Ghép cặp/ }));
+    fireEvent.click(within(picker).getByRole("button", { name: "Tạo câu Ghép cặp" }));
+
+    const confirm = await screen.findByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" });
+    fireEvent.click(within(confirm).getByRole("button", { name: "Đổi dạng" }));
+    expect(screen.getByTestId("count").textContent).toBe(count);
   });
 });

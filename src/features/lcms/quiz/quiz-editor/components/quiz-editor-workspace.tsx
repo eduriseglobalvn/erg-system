@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { PlayerTemplateDialog } from "@/features/lcms/quiz/quiz-editor/components/player-template-dialog";
+import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
+import { convertSlideType } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/convert-slide-type";
+import { QuestionEditorShell } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell";
 import { QuestionTypePickerDialog } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-type-picker-dialog";
-import { QuestionEditorDialog } from "@/features/lcms/quiz/quiz-editor/components/question-editor-dialog";
 import { QuestionManagerTable } from "@/features/lcms/quiz/quiz-editor/components/question-manager-table";
 import { QuizEditorRibbon } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-ribbon";
 import { QuizEditorWorkspaceBanners } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-banners";
@@ -23,10 +25,11 @@ import {
   useQuizEditorScopeSync,
 } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope";
 import { useQuizEditorSlideViews } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-slide-views";
+import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
 import { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync";
 import { useI18n } from "@/platform/i18n";
-import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuestionType, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { isQuestionManagerSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import "@/features/lcms/quiz/quiz-editor/styles/classic-editor.css";
@@ -57,7 +60,8 @@ export function QuizEditorWorkspace({
   const scope = useQuizEditorScope(setActiveQuizId);
   const { selectedCourseId, selectedLevelId, selectedTopicId, selectedCourse, selectedLevel } = scope;
   const [questionEditorOpen, setQuestionEditorOpen] = useState(false);
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [picker, setPicker] = useState<"add" | "change" | null>(null);
+  const [pendingConversion, setPendingConversion] = useState<QuizEditorSlide | null>(null);
   const [playerTemplateOpen, setPlayerTemplateOpen] = useState(false);
   const [previewMode, setPreviewMode] = useState<SlidePreviewDialogMode | null>(null);
 
@@ -84,6 +88,7 @@ export function QuizEditorWorkspace({
     selectedNode,
     selectedSlide,
     totalSlides,
+    createId,
     setSearchValue,
     selectSlide,
     importQuestionBankQuestions,
@@ -98,7 +103,7 @@ export function QuizEditorWorkspace({
     setSelectedThemeId,
   } = editorState;
 
-  const { questionManagerSlides, questionEntries, configuredResultSlide, previewSlides, managerGroups, exportPayload } =
+  const { questionManagerSlides, configuredResultSlide, previewSlides, managerGroups, exportPayload } =
     useQuizEditorSlideViews({ groups, filteredGroups, resultSlide, quizProject, playerTemplate, selectedThemeId });
 
   useQuizEditorScopeSync({ scope, effectiveQuizId, quizItems });
@@ -156,12 +161,22 @@ export function QuizEditorWorkspace({
         : t("quiz.noQuestions");
 
   // The question only exists once a type is picked; cancelling the picker creates nothing.
+  // Change mode keeps the slide identity; answers that cannot carry over are confirmed before they are dropped.
   const handlePickQuestionType = (type: QuestionType) => {
-    setPickerOpen(false);
+    setPicker(null);
+    if (picker === "change") {
+      if (!selectedSlide) return;
+      const converted = convertSlideType(selectedSlide, type, buildQuestionSlide(type, quizProject, createId));
+      if (converted.dropsAnswers) setPendingConversion(converted.slide);
+      else replaceSelectedSlide(converted.slide);
+      return;
+    }
     addQuestion(type);
     setQuestionEditorOpen(true);
   };
-  const pickerTitle = selectedTopic.id === "all" ? "Thêm câu hỏi" : `Thêm câu hỏi vào “${selectedTopic.label}”`;
+  const pickerTitle =
+    picker === "change" ? "Đổi dạng câu hỏi" : selectedTopic.id === "all" ? "Thêm câu hỏi" : `Thêm câu hỏi vào “${selectedTopic.label}”`;
+  const syncChip = <QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />;
 
   return (
     <div className="classic-editor flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -179,7 +194,7 @@ export function QuizEditorWorkspace({
           onChangeLevel={scope.handleLevelChange}
           onChangeTopic={scope.handleTopicChange}
           onChangeSearch={setSearchValue}
-          onAddQuestion={() => setPickerOpen(true)}
+          onAddQuestion={() => setPicker("add")}
           onAddIntroduction={addIntroduction}
           onOpenPlayerTemplate={() => setPlayerTemplateOpen(true)}
           onOpenPublish={() => void handlePublish()}
@@ -205,7 +220,7 @@ export function QuizEditorWorkspace({
             lessonLabel={selectedLevelLabel ? `${selectedCourse.label} · ${selectedLevelLabel}` : selectedCourse.label}
             lessonMeta={selectedLevelMeta ?? selectedCourse.meta}
             topicLabel={selectedTopic.label}
-            onAddNewQuestion={() => setPickerOpen(true)}
+            onAddNewQuestion={() => setPicker("add")}
             onOpenEditor={() => setQuestionEditorOpen(true)}
             onOpenEditorFor={(groupId, slideId) => {
               selectSlide(groupId, slideId);
@@ -219,7 +234,7 @@ export function QuizEditorWorkspace({
             onPublish={() => void handlePublish()}
             publishBlockedReason={publishBlockedReason}
             isPublishing={isPublishing}
-            syncChip={<QuizEditorSyncChip onRetry={() => void sync.flushNow()} persistent={sync.persistent} status={sync.status} />}
+            syncChip={syncChip}
             isSavedOnServer={Boolean(effectiveQuizId)}
           />
         </div>
@@ -234,28 +249,37 @@ export function QuizEditorWorkspace({
         />
 
         <QuestionTypePickerDialog
-          open={pickerOpen}
+          open={picker !== null}
           title={pickerTitle}
           onPick={handlePickQuestionType}
-          onClose={() => setPickerOpen(false)}
+          onClose={() => setPicker(null)}
+        />
+
+        <ErgConfirmDialog
+          open={pendingConversion !== null}
+          title="Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?"
+          confirmLabel="Đổi dạng"
+          destructive
+          onCancel={() => setPendingConversion(null)}
+          onConfirm={() => {
+            if (pendingConversion) replaceSelectedSlide(pendingConversion);
+            setPendingConversion(null);
+          }}
         />
 
         {questionEditorOpen && selectedNode.type === "slide" && selectedSlide ? (
-          <QuestionEditorDialog
-            key={`question-editor-${selectedSlide.id}`}
-            open
-            slide={selectedSlide}
-            groupTitle={selectedGroup?.title ?? null}
-            entries={questionEntries}
-            selectedThemeId={selectedThemeId}
+          <QuestionEditorShell
+            groups={groups}
+            selectedSlide={selectedSlide}
+            onSelectSlide={selectSlide}
+            onReplaceSlide={replaceSelectedSlide}
+            onAddQuestion={() => setPicker("add")}
+            onChangeType={() => setPicker("change")}
+            onDuplicate={duplicateSelected}
+            onDelete={deleteSelected}
             onClose={() => setQuestionEditorOpen(false)}
-            onSave={replaceSelectedSlide}
-            onNavigate={selectSlide}
-            onOpenPlayerTemplate={() => setPlayerTemplateOpen(true)}
-            onPreview={(nextSlide) => {
-              replaceSelectedSlide(nextSlide);
-              setPreviewMode("preview");
-            }}
+            syncChip={syncChip}
+            quizKind="train"
           />
         ) : null}
 
