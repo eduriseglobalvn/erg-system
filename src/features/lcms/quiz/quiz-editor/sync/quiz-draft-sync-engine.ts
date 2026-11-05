@@ -316,7 +316,7 @@ export class QuizDraftSyncEngine {
         settings: sent.settings,
         playerTemplate: sent.playerTemplate,
         tree: sent.tree,
-        idempotencyKey: `quiz-editor-save:${quizId}:${baseDocVersion}:${record.revision}`,
+        idempotencyKey: `quiz-editor-save:${quizId}:${baseDocVersion}:${this.deps.writerId}:${record.revision}`,
       });
       if (!this.disposed) this.retryIndex = 0;
       // Runs after dispose too (compare-and-set), so the next engine does not resend a stale docVersion.

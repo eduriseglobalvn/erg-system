@@ -127,7 +127,8 @@ describe("QuizDraftSyncEngine", () => {
     await vi.advanceTimersByTimeAsync(2000); // the retry, after a response that never arrived
     await engine.edit(doc("B")); await vi.advanceTimersByTimeAsync(2000);
     const keys = api.saveDraft.mock.calls.map((c) => c[0].idempotencyKey);
-    expect(keys).toEqual(["quiz-editor-save:q1:3:1", "quiz-editor-save:q1:3:1", "quiz-editor-save:q1:4:2"]);
+    // The tab id keeps two tabs or devices at the same version and revision from sharing a key (backend: IDEMPOTENCY_CONFLICT).
+    expect(keys).toEqual(["quiz-editor-save:q1:3:tab-1:1", "quiz-editor-save:q1:3:tab-1:1", "quiz-editor-save:q1:4:tab-1:2"]);
   });
 
   it("starts the retry delays over after a successful save", async () => {
