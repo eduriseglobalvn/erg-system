@@ -55,7 +55,7 @@ function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & {
         ? {
             ...activator,
             role: "button", tabIndex: 0,
-            "aria-label": `Mảnh ${row.rightName}, dòng ${index + 1}, ${row.connected ? "đã ghép" : "chưa ghép"}`,
+            "aria-label": `Mảnh ${row.rightName}, hàng ${index + 1}, ${row.connected ? "đã ghép" : "chưa ghép"}`,
             "aria-disabled": locked,
             "data-piece-id": row.pieceId, "data-focus-row": row.id,
           }
@@ -83,7 +83,7 @@ function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & {
             ref={setActivatorNodeRef}
             {...activator}
             size="small"
-            aria-label={`Kéo vế phải dòng ${index + 1}, Alt+mũi tên để đổi dòng`}
+            aria-label={`Kéo vế phải hàng ${index + 1}, Alt+mũi tên để đổi hàng`}
             data-focus-row={row.id}
             disabled={locked}
             sx={{ cursor: "grab", touchAction: "manipulation" }}
@@ -157,7 +157,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
       sensors={sensors}
       accessibility={{
         announcements: puzzleAnnouncements(rows),
-        screenReaderInstructions: { draggable: mode === "learner" ? "Enter hoặc Space để ghép hoặc tách, mũi tên lên xuống để đổi dòng." : "Alt+mũi tên lên xuống để đổi dòng." },
+        screenReaderInstructions: { draggable: mode === "learner" ? "Enter hoặc Space để ghép hoặc tách, mũi tên lên xuống để đổi hàng." : "Alt+mũi tên lên xuống để đổi hàng." },
       }}
       collisionDetection={collision}
       onDragStart={({ active }) => setActiveId(String(active.id))}
