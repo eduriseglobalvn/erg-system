@@ -132,15 +132,15 @@
     "font": 17
   },
   "src/components/quiz/questions/choice-option.tsx": {
-    "hex": 22,
-    "font": 5
+    "hex": 12,
+    "font": 3
   },
   "src/components/quiz/questions/drag-drop-question.tsx": {
-    "hex": 14,
+    "hex": 7,
     "font": 0
   },
   "src/components/quiz/questions/drag-words-question.tsx": {
-    "hex": 26,
+    "hex": 17,
     "font": 0
   },
   "src/components/quiz/questions/hotspot-question/hotspot-mobile-answer.tsx": {
@@ -148,7 +148,7 @@
     "font": 0
   },
   "src/components/quiz/questions/inline-choice-question.tsx": {
-    "hex": 4,
+    "hex": 3,
     "font": 0
   },
   "src/components/quiz/questions/likert-question.tsx": {
@@ -159,17 +159,9 @@
     "hex": 2,
     "font": 0
   },
-  "src/components/quiz/questions/multiple-response-question.tsx": {
-    "hex": 3,
-    "font": 3
-  },
   "src/components/quiz/questions/shared.tsx": {
     "hex": 2,
     "font": 1
-  },
-  "src/components/quiz/questions/single-choice-question.tsx": {
-    "hex": 3,
-    "font": 3
   },
   "src/components/quiz/questions/text-response-question.tsx": {
     "hex": 7,
