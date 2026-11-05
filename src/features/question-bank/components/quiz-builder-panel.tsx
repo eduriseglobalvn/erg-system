@@ -146,24 +146,10 @@ export function QuizBuilderPanel({
 
             <Button
               fullWidth
-              variant="contained"
+              variant="outlined"
               onClick={onAutoPick}
               disabled={!canAutoPick}
-              sx={{
-                bgcolor: canAutoPick ? `${ergEnterpriseTokens.color.text} !important` : "rgba(0, 0, 0, 0.08) !important",
-                borderRadius: "10px",
-                boxShadow: "none",
-                color: canAutoPick ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
-                fontSize: "0.85rem",
-                fontWeight: 600,
-                py: 1,
-                textTransform: "none",
-                transition: "all 0.15s ease",
-                "&:hover": {
-                  bgcolor: canAutoPick ? "#2C2C2E !important" : "rgba(0, 0, 0, 0.08) !important",
-                  boxShadow: canAutoPick ? "0 2px 8px rgba(0, 0, 0, 0.12)" : "none",
-                },
-              }}
+              sx={{ py: 1 }}
             >
               {copy.autoPickAction}
             </Button>

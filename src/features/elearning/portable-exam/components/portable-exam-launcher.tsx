@@ -93,7 +93,7 @@ export function PortableExamLauncher({ onPackageReady, scope, verification }: Po
       <CardContent>
         <Stack spacing={1.5}>
           <Stack spacing={0.5}>
-            <Typography variant="subtitle1" component="h1">
+            <Typography variant="subtitle1" component="h2">
               Mở bài thi từ tệp
             </Typography>
             <Typography variant="body2" color="text.secondary">

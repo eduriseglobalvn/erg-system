@@ -1229,7 +1229,7 @@
   },
   "src/features/lms/components/lms-teacher-shell-frame.tsx": {
     "hex": 0,
-    "font": 15
+    "font": 10
   },
   "src/features/lms/components/lms-teacher-shell-presentation.tsx": {
     "hex": 6,
@@ -1400,8 +1400,8 @@
     "font": 13
   },
   "src/features/question-bank/components/quiz-builder-panel.tsx": {
-    "hex": 6,
-    "font": 10
+    "hex": 4,
+    "font": 9
   },
   "src/features/question-bank/components/quiz-create-package-dialog.tsx": {
     "hex": 4,

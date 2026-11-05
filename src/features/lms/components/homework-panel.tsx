@@ -62,17 +62,15 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
   }, [runs, query, subject, status]);
 
   const hasFilter = Boolean(query.trim()) || subject !== ALL || status !== ALL;
-  const assignButton = (
-    <ErgButton leadingIcon={<AddIcon />} onClick={onAssign} variant="contained">
-      Giao bài
-    </ErgButton>
-  );
-
   return (
     <>
       <ErgPageHeader
         description={selectedClass ? `Lớp ${selectedClass.className}` : undefined}
-        primaryAction={assignButton}
+        primaryAction={
+          <ErgButton leadingIcon={<AddIcon />} onClick={onAssign} variant="contained">
+            Giao bài
+          </ErgButton>
+        }
         title="Danh sách hoạt động"
       />
       <Box
@@ -101,7 +99,6 @@ export function HomeworkPanel({ selectedClass, runs, onAssign, onViewProgress }:
       </Box>
       {filtered.length === 0 ? (
         <ErgEmptyState
-          action={hasFilter ? undefined : assignButton}
           description={hasFilter ? "Thử đổi từ khóa hoặc bộ lọc." : "Giao bài đầu tiên để theo dõi tiến độ của học sinh."}
           icon={<AssignmentOutlinedIcon />}
           title={hasFilter ? "Không có hoạt động phù hợp" : "Chưa có hoạt động nào"}

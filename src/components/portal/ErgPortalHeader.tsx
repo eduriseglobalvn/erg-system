@@ -68,7 +68,7 @@ export default function ErgPortalHeader({
               aria-label="Mở menu"
               onClick={onMenuOpen}
               size="small"
-              sx={{ display: { xs: "inline-flex", lg: "none" }, flexShrink: 0, mr: 0.25 }}
+              sx={{ display: { xs: "inline-flex", lg: "none" }, flexShrink: 0, height: { xs: 44, md: "auto" }, mr: 0.25, width: { xs: 44, md: "auto" } }}
             >
               <MenuRoundedIcon sx={{ fontSize: 20 }} />
             </IconButton>
