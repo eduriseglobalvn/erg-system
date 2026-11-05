@@ -191,7 +191,7 @@ describe("QuizEditorWorkspace add-question picker", () => {
       );
       expect(screen.getByText("Đang mở bản nháp")).toBeInTheDocument();
       expect(screen.queryByTestId("count")).toBeNull();
-      expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeDisabled();
       expect(within(screen.getByRole("navigation", { name: "Chủ đề" })).getByRole("button", { name: /Phân số/ })).toBeInTheDocument();
       expect((levelTopicQuizzes.mock.lastCall![0] as { openQuiz: unknown }).openQuiz).toBeNull();
     } finally {

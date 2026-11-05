@@ -3,7 +3,6 @@ import Box from "@mui/material/Box";
 import { useEffect, useState } from "react";
 
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
-import { PlayerTemplateDialog } from "@/features/lcms/quiz/quiz-editor/components/player-template-dialog";
 import { QuestionEditorShell } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell";
 import { useQuestionTypeChange } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/use-question-type-change";
 import { QuestionTable } from "@/features/lcms/quiz/quiz-editor/components/quiz-list/question-table";
@@ -46,7 +45,6 @@ export function QuizEditorWorkspace({
 
   const scope = useQuizEditorScope(setActiveQuizId);
   const [questionEditorOpen, setQuestionEditorOpen] = useState(false);
-  const [playerTemplateOpen, setPlayerTemplateOpen] = useState(false);
 
   // The route quizId is copied into activeQuizId above; falling back to it here would undo "new quiz" and scope changes.
   const effectiveQuizId = (activeQuizId ?? "").trim();
@@ -59,7 +57,6 @@ export function QuizEditorWorkspace({
     resultSlide,
     quizProject,
     playerTemplate,
-    selectedThemeId,
     selectedNode,
     selectedSlide,
     createId,
@@ -70,11 +67,10 @@ export function QuizEditorWorkspace({
     deleteSelected,
     replaceSelectedSlide,
     updatePlayerTemplate,
-    setSelectedThemeId,
   } = editorState;
 
   const { questionManagerSlides } =
-    useQuizEditorSlideViews({ groups, filteredGroups, resultSlide, quizProject, playerTemplate, selectedThemeId });
+    useQuizEditorSlideViews({ groups, filteredGroups, resultSlide, quizProject, playerTemplate, selectedThemeId: editorState.selectedThemeId });
 
   useQuizEditorScopeSync({ scope, effectiveQuizId, quizItems });
 
@@ -129,7 +125,9 @@ export function QuizEditorWorkspace({
         onChangeCourse={scope.handleCourseChange}
         onChangeLevel={scope.handleLevelChange}
         syncChip={syncChip}
-        onOpenTheme={() => setPlayerTemplateOpen(true)}
+        playerTemplate={playerTemplate}
+        onApplyTheme={updatePlayerTemplate}
+        themeDisabled={!sync.ready}
         onPublish={() => void handlePublish()}
         publishBlockedReason={sync.ready ? publishBlockedReason : loadFailed ? "Chưa mở được bản nháp" : "Đang mở bản nháp"}
         publishReadinessOnly={sync.ready && publishReadinessOnly}
@@ -165,24 +163,6 @@ export function QuizEditorWorkspace({
                 banner={<QuizEditorSyncNotices sync={sync} />}
                 quizKind="train"
                 quizProject={quizProject}
-              />
-            ) : null}
-
-            {playerTemplateOpen ? (
-              <PlayerTemplateDialog
-                key={`player-template-${selectedThemeId}`}
-                open
-                selectedThemeId={selectedThemeId}
-                value={playerTemplate}
-                infoPage={quizProject.info.page}
-                previewQuestion={questionManagerSlides[0] ?? null}
-                questionCount={questionManagerSlides.length}
-                passingRate={quizProject.settings.passingRate}
-                onClose={() => setPlayerTemplateOpen(false)}
-                onSave={(themeId, nextTemplate) => {
-                  setSelectedThemeId(themeId);
-                  updatePlayerTemplate(nextTemplate);
-                }}
               />
             ) : null}
           </QuizEditorSyncLayer>

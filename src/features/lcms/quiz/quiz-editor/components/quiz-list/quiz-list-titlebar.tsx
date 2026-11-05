@@ -6,6 +6,8 @@ import { useState, type ReactNode } from "react";
 
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { ErgSelect } from "@/components/erg-mui/erg-form";
+import type { QuizPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { QuizThemeDialog } from "@/features/lcms/quiz/quiz-theme/quiz-theme-dialog";
 import type { NotReadyQuestion, PublishFailure } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-save-publish";
 import { PublishBlockedPopover } from "./publish-blocked-popover";
 
@@ -14,7 +16,7 @@ type Option = { id: string; label: string };
 /** Môn, Level, the save chip and the screen's one contained button, with the server's refusal right under it. */
 export function QuizListTitlebar({
   courseOptions, selectedCourseId, levelOptions, selectedLevelId, onChangeCourse, onChangeLevel,
-  syncChip, onOpenTheme, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
+  syncChip, playerTemplate, onApplyTheme, themeDisabled, onPublish, publishBlockedReason, publishReadinessOnly, notReady, onOpenQuestion,
   publishFailure, onDismissPublishFailure, isPublishing,
 }: {
   courseOptions: Option[];
@@ -24,7 +26,10 @@ export function QuizListTitlebar({
   onChangeCourse: (courseId: string) => void;
   onChangeLevel: (levelId: string) => void;
   syncChip: ReactNode;
-  onOpenTheme: () => void;
+  playerTemplate: QuizPlayerTemplate;
+  onApplyTheme: (next: QuizPlayerTemplate) => void;
+  /** The template is replaced when the draft loads, so a theme applied before that would be lost. */
+  themeDisabled: boolean;
   onPublish: () => void;
   publishBlockedReason: string | null;
   publishReadinessOnly: boolean;
@@ -34,6 +39,7 @@ export function QuizListTitlebar({
   onDismissPublishFailure: () => void;
   isPublishing: boolean;
 }) {
+  const [themeOpen, setThemeOpen] = useState(false);
   const [popoverAnchor, setPopoverAnchor] = useState<HTMLElement | null>(null);
   const select = (label: string, value: string, options: Option[], onChange: (value: string) => void) => (
     <ErgSelect
@@ -55,7 +61,7 @@ export function QuizListTitlebar({
         {select("Level", selectedLevelId ?? "", levelOptions, onChangeLevel)}
         {syncChip}
         <Box sx={{ display: "flex", gap: 1, ml: "auto" }}>
-          <Button onClick={onOpenTheme} variant="text">Giao diện bài</Button>
+          <Button disabled={themeDisabled} onClick={() => setThemeOpen(true)} variant="text">Giao diện bài</Button>
           <Tooltip title={publishBlockedReason ?? ""}>
             <span>
               <ErgButton
@@ -82,6 +88,15 @@ export function QuizListTitlebar({
           ) : null}
         </Alert>
       ) : null}
+      <QuizThemeDialog
+        onApply={(next) => {
+          onApplyTheme(next);
+          setThemeOpen(false);
+        }}
+        onClose={() => setThemeOpen(false)}
+        open={themeOpen}
+        value={playerTemplate}
+      />
       <PublishBlockedPopover
         anchorEl={popoverAnchor}
         notReady={notReady}

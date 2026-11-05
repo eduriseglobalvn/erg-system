@@ -1,20 +1,23 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import { createMockPlayerTemplate } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
+import { I18nProvider } from "@/platform/i18n";
 import { QuizListTitlebar } from "./quiz-list-titlebar";
 
+const playerTemplate = createMockPlayerTemplate();
 const notReady = [{ slideId: "s2", number: 2, title: "", label: "Chưa có đề bài" }];
 
 function renderBar(props: Partial<Parameters<typeof QuizListTitlebar>[0]> = {}) {
-  const handlers = { onPublish: vi.fn(), onOpenQuestion: vi.fn(), onDismissPublishFailure: vi.fn() };
+  const handlers = { onPublish: vi.fn(), onOpenQuestion: vi.fn(), onDismissPublishFailure: vi.fn(), onApplyTheme: vi.fn() };
   render(
+    <I18nProvider>
     <QuizListTitlebar
       courseOptions={[]}
       levelOptions={[]}
       notReady={[]}
       onChangeCourse={vi.fn()}
       onChangeLevel={vi.fn()}
-      onOpenTheme={vi.fn()}
       publishBlockedReason={null}
       publishFailure={null}
       publishReadinessOnly={false}
@@ -23,8 +26,11 @@ function renderBar(props: Partial<Parameters<typeof QuizListTitlebar>[0]> = {}) 
       selectedLevelId={null}
       syncChip={null}
       {...handlers}
+      playerTemplate={playerTemplate}
+      themeDisabled={false}
       {...props}
-    />,
+    />
+    </I18nProvider>,
   );
   return handlers;
 }
@@ -66,5 +72,21 @@ describe("QuizListTitlebar publish", () => {
     expect(alert).toHaveTextContent("Câu 3 thiếu đề bài");
     fireEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(onDismissPublishFailure).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("QuizListTitlebar theme", () => {
+  it("opens the shared theme dialog and hands the applied template to onApplyTheme", async () => {
+    const { onApplyTheme } = renderBar();
+    fireEvent.click(screen.getByRole("button", { name: "Giao diện bài" }));
+    fireEvent.click(await screen.findByRole("button", { name: "Áp dụng" }));
+    expect(onApplyTheme).toHaveBeenCalledTimes(1);
+    expect(onApplyTheme).toHaveBeenCalledWith(playerTemplate);
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  });
+
+  it("cannot be opened while the draft is not ready, so no dialog pops up later", () => {
+    renderBar({ themeDisabled: true });
+    expect(screen.getByRole("button", { name: "Giao diện bài" })).toBeDisabled();
   });
 });
