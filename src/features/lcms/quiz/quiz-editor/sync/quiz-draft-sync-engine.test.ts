@@ -378,12 +378,30 @@ describe("QuizDraftSyncEngine", () => {
     expect(await store.get(scope, "q1")).toMatchObject({ dirty: true, revision: 2, document: doc("newer") });
   });
 
-  it("an edit queued before dispose neither writes nor arms a timer", async () => {
+  it("an edit queued before dispose is kept on the device but never sent", async () => {
+    const listener = vi.fn();
+    engine.subscribe(listener);
     const pending = engine.edit(doc("A"));
     engine.dispose();
     await pending;
-    expect(await store.get(scope, "q1")).toBeNull();
+    expect(await store.get(scope, "q1")).toMatchObject({ dirty: true, revision: 1, document: doc("A") });
     expect(vi.getTimerCount()).toBe(0);
+    await vi.advanceTimersByTimeAsync(60_000);
+    expect(api.saveDraft).not.toHaveBeenCalled();
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it("does not report a created quiz after dispose", async () => {
+    engine = new QuizDraftSyncEngine(deps, "new-quiz:c:l:t");
+    await engine.start(undefined); await engine.edit(doc("A"));
+    const put = store.put.bind(store);
+    store.put = vi.fn(async (s: string, r: DeviceDraftRecord) => {
+      if (r.quizId === "quiz-new") engine.dispose(); // disposed while the re-keyed record is being written
+      await put(s, r);
+    });
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(api.createQuiz).toHaveBeenCalledTimes(1);
+    expect(deps.onQuizCreated).not.toHaveBeenCalled();
   });
 
   it("survives a status listener that throws", async () => {

@@ -138,7 +138,6 @@ export class QuizDraftSyncEngine {
   edit(document: QuizEditorDraftDocument): Promise<void> {
     if (this.disposed) return Promise.resolve();
     return this.serial(async () => {
-      if (this.disposed) return;
       const current = this.record;
       if (current && document === current.document) return;
       const json = JSON.stringify(document);
@@ -165,14 +164,15 @@ export class QuizDraftSyncEngine {
         syncedAt: base?.syncedAt ?? null,
         writerId,
       };
-      const inConflict = this.currentStatus.kind === "conflict";
-      if (!inConflict) this.schedule(SAVE_DEBOUNCE_MS);
+      // Disposed while queued (unmount): still keep the edit on the device, but never send it from here.
+      const sends = !this.disposed && this.currentStatus.kind !== "conflict";
+      if (sends) this.schedule(SAVE_DEBOUNCE_MS);
       const backup = otherTab && (async () => {
         await store.addBackup(scope, { key: this.key, reason: "other-tab", document: otherTab.document, createdAt: now });
         this.lastBackup = storedId;
       });
       await this.write(next, json, backup);
-      if (!inConflict && this.currentStatus.kind !== "conflict") this.setStatus(this.idleStatus());
+      if (sends && this.currentStatus.kind !== "conflict") this.setStatus(this.idleStatus());
     });
   }
 
@@ -278,7 +278,7 @@ export class QuizDraftSyncEngine {
         try {
           await this.serial(() => this.rekey(created));
         } finally {
-          this.deps.onQuizCreated?.(created.quizId); // the quiz exists on the server even if the device write failed
+          if (!this.disposed) this.deps.onQuizCreated?.(created.quizId); // the quiz exists on the server even if the device write failed
         }
         if (this.disposed) return false;
         quizId = created.quizId;
