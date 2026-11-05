@@ -36,7 +36,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "drag-the-words") return <DragWordsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "numeric") return <NumericAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "matching") return <MatchingAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
-  if (slide.kind === "drag-and-drop") return <ClassifyAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
+  if (slide.kind === "drag-and-drop") return <ClassifyAuthoring key={question.id} onUpdate={onUpdate} question={question} />;
   if (slide.kind === "short-answer") return <ShortAnswerAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "hotspot") return <HotspotAuthoring key={question.id} onChange={onChange} onUpdate={onUpdate} question={question} />;
   return (

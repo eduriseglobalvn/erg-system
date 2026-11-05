@@ -18,19 +18,30 @@ type ItemHandlers = {
   onShiftItem: (id: string, delta: -1 | 1) => void;
 };
 
-/** One group: its name, the items that belong in it, and "Thêm mục". The whole column is the drop target. */
+const UNASSIGNED = "classify-unassigned";
+
+/**
+ * One group: its name, the items that belong in it, and "Thêm mục". The whole column is the drop target.
+ * Without `group` it is the "Chưa thuộc nhóm" column of items whose group is gone: no name, no delete, no add, not a drop target.
+ */
 export function ClassifyColumn({ group, n, items, onRename, onDelete, onAppend, ...handlers }: ItemHandlers & {
-  group: DropTarget;
+  group?: DropTarget;
   /** 1-based column number. */
   n: number;
-  /** The items whose correct group is this one, in array order. */
+  /** The items shown in this column, in array order. */
   items: DragDropItem[];
-  onRename: (label: string) => void;
-  onDelete: () => void;
-  onAppend: () => void;
+  onRename?: (label: string) => void;
+  onDelete?: () => void;
+  onAppend?: () => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: group.id });
+  const { setNodeRef, isOver } = useDroppable({ id: group?.id ?? UNASSIGNED, disabled: !group });
   const holdsItems = items.length > 0;
+  const place = group ? `nhóm ${n}` : "chưa thuộc nhóm";
+  const remove = (
+    <IconButton aria-label={`Xoá nhóm ${n}`} disabled={holdsItems} onClick={onDelete} size="small">
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  );
   return (
     <Box
       ref={setNodeRef}
@@ -40,46 +51,46 @@ export function ClassifyColumn({ group, n, items, onRename, onDelete, onAppend, 
         bgcolor: isOver ? tokens.color.primarySofter : "transparent",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-        <InputBase
-          fullWidth
-          inputProps={{ "aria-label": `Tên nhóm ${n}`, "data-input-id": group.id }}
-          onChange={(e) => onRename(e.target.value)}
-          placeholder={`Nhóm ${n}`}
-          sx={{ typography: "body2", fontWeight: "fontWeightBold" }}
-          value={group.label}
-        />
-        <IconButton
-          aria-label={`Xoá nhóm ${n}`}
-          disabled={holdsItems}
-          onClick={onDelete}
-          size="small"
-          title={holdsItems ? "Chuyển hoặc xoá các mục trước" : undefined}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
-      </Box>
+      {group ? (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <InputBase
+            fullWidth
+            inputProps={{ "aria-label": `Tên nhóm ${n}`, "data-input-id": group.id }}
+            onChange={(e) => onRename?.(e.target.value)}
+            placeholder={`Nhóm ${n}`}
+            sx={{ typography: "body2", fontWeight: "fontWeightBold" }}
+            value={group.label}
+          />
+          {/* A disabled button gets no pointer events, so the hint sits on a wrapper. */}
+          {holdsItems ? <Box component="span" title="Chuyển hoặc xoá các mục trước">{remove}</Box> : remove}
+        </Box>
+      ) : (
+        <Box sx={{ typography: "body2", fontWeight: "fontWeightBold", color: "text.secondary", py: 0.5 }}>Chưa thuộc nhóm</Box>
+      )}
       {items.map((item, index) => (
         <ClassifyItemRow
           item={item}
           key={item.id}
           m={index + 1}
-          n={n}
           onEnter={index === items.length - 1 ? onAppend : undefined}
+          place={place}
           {...handlers}
         />
       ))}
-      <Box>
-        <Button onClick={onAppend} size="small" startIcon={<AddIcon />} variant="text">Thêm mục</Button>
-      </Box>
+      {onAppend && (
+        <Box>
+          <Button onClick={onAppend} size="small" startIcon={<AddIcon />} variant="text">Thêm mục</Button>
+        </Box>
+      )}
     </Box>
   );
 }
 
-function ClassifyItemRow({ item, m, n, onEnter, onPatchItem, onDeleteItem, onShiftItem }: ItemHandlers & {
+function ClassifyItemRow({ item, m, place, onEnter, onPatchItem, onDeleteItem, onShiftItem }: ItemHandlers & {
   item: DragDropItem;
   m: number;
-  n: number;
+  /** "nhóm 2" or "chưa thuộc nhóm", the end of every label in the row. */
+  place: string;
   /** Set on the column's last item only: Enter there adds the next item. */
   onEnter?: () => void;
 }) {
@@ -98,7 +109,7 @@ function ClassifyItemRow({ item, m, n, onEnter, onPatchItem, onDeleteItem, onShi
         data-handle-id={item.id}
         ref={setActivatorNodeRef}
         size="small"
-        sx={{ cursor: "grab" }}
+        sx={{ cursor: "grab", touchAction: "none" }}
         {...attributes}
         {...listeners}
         onKeyDown={(e) => {
@@ -111,7 +122,7 @@ function ClassifyItemRow({ item, m, n, onEnter, onPatchItem, onDeleteItem, onShi
       </IconButton>
       <InputBase
         fullWidth
-        inputProps={{ "aria-label": `Mục ${m} nhóm ${n}`, "data-input-id": item.id }}
+        inputProps={{ "aria-label": `Mục ${m} ${place}`, "data-input-id": item.id }}
         onChange={(e) => { const label = e.target.value; onPatchItem(item.id, (latest) => ({ ...latest, label })); }}
         onKeyDown={(e) => {
           if (e.key !== "Enter" || e.nativeEvent.isComposing || e.keyCode === 229) return;
@@ -124,10 +135,10 @@ function ClassifyItemRow({ item, m, n, onEnter, onPatchItem, onDeleteItem, onShi
       />
       <AnswerImage
         image={item.image}
-        name={`mục ${m} nhóm ${n}`}
+        name={`mục ${m} ${place}`}
         onChange={(change: ImageChange) => onPatchItem(item.id, (latest) => ({ ...latest, image: change(latest.image) }))}
       />
-      <IconButton aria-label={`Xoá mục ${m} nhóm ${n}`} onClick={() => onDeleteItem(item.id)} size="small">
+      <IconButton aria-label={`Xoá mục ${m} ${place}`} onClick={() => onDeleteItem(item.id)} size="small">
         <CloseIcon fontSize="small" />
       </IconButton>
     </Box>
