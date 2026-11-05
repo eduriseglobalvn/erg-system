@@ -4,11 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
 
 import type { DeviceDraftBackup } from "../../sync/quiz-draft-device-store";
+import type { UseQuizDraftSyncResult } from "../../sync/use-quiz-draft-sync";
 import type { QuizDraftSyncStatus } from "../../sync/quiz-draft-sync-engine";
 import { QuizEditorConflictDialog } from "./quiz-editor-conflict-dialog";
 import { QuizEditorOfflineBanner } from "./quiz-editor-offline-banner";
 import { QuizEditorRecoveryNotice } from "./quiz-editor-recovery-notice";
 import { QuizEditorSyncChip } from "./quiz-editor-sync-chip";
+import { QuizEditorSyncLayer, QuizEditorSyncNotices } from "./quiz-editor-sync-layer";
 
 const at = new Date(2026, 10, 5, 14, 7).toISOString();
 
@@ -68,22 +70,24 @@ describe("QuizEditorConflictDialog", () => {
   });
 });
 
+const none = { recovered: false, backups: false };
+
 describe("QuizEditorRecoveryNotice", () => {
   const backup = (createdAt: string) => ({ createdAt }) as DeviceDraftBackup;
 
   it("renders nothing when empty", () => {
-    const { container } = render(<QuizEditorRecoveryNotice backups={[]} onRestore={vi.fn()} recovered={null} />);
+    const { container } = render(<QuizEditorRecoveryNotice dismissed={none} onDismiss={vi.fn()} backups={[]} onRestore={vi.fn()} recovered={null} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it("shows the recovered line", () => {
-    render(<QuizEditorRecoveryNotice backups={[]} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />);
+    render(<QuizEditorRecoveryNotice dismissed={none} onDismiss={vi.fn()} backups={[]} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />);
     expect(screen.getByText("Có 3 thay đổi từ 14:07 chưa gửi. Đang gửi lên máy chủ.")).toBeInTheDocument();
   });
 
   it("restores the only backup directly", () => {
     const onRestore = vi.fn();
-    render(<QuizEditorRecoveryNotice backups={[backup("2026-11-05T01:00:00.000Z")]} onRestore={onRestore} recovered={null} />);
+    render(<QuizEditorRecoveryNotice dismissed={none} onDismiss={vi.fn()} backups={[backup("2026-11-05T01:00:00.000Z")]} onRestore={onRestore} recovered={null} />);
     expect(screen.getByText("Có 1 bản sao của bài này trên máy.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Khôi phục bản sao" }));
     expect(onRestore).toHaveBeenCalledWith("2026-11-05T01:00:00.000Z");
@@ -93,7 +97,7 @@ describe("QuizEditorRecoveryNotice", () => {
     const onRestore = vi.fn();
     const older = "2026-11-05T01:00:00.000Z";
     const newer = "2026-11-05T03:00:00.000Z";
-    render(<QuizEditorRecoveryNotice backups={[backup(older), backup(newer)]} onRestore={onRestore} recovered={null} />);
+    render(<QuizEditorRecoveryNotice dismissed={none} onDismiss={vi.fn()} backups={[backup(older), backup(newer)]} onRestore={onRestore} recovered={null} />);
     fireEvent.click(screen.getByRole("button", { name: "Khôi phục bản sao" }));
     const items = screen.getAllByRole("menuitem");
     expect(items[0]).toHaveTextContent(formatDateTimeVi(newer));
@@ -101,9 +105,41 @@ describe("QuizEditorRecoveryNotice", () => {
     expect(onRestore).toHaveBeenCalledWith(newer);
   });
 
-  it("can be dismissed", () => {
-    render(<QuizEditorRecoveryNotice backups={[]} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />);
+  it("hides a dismissed line and reports the dismissal", () => {
+    const onDismiss = vi.fn();
+    const { rerender } = render(
+      <QuizEditorRecoveryNotice backups={[]} dismissed={none} onDismiss={onDismiss} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />,
+    );
     fireEvent.click(screen.getByRole("button", { name: /close|đóng/i }));
+    expect(onDismiss).toHaveBeenCalledWith("recovered");
+    rerender(
+      <QuizEditorRecoveryNotice backups={[]} dismissed={{ ...none, recovered: true }} onDismiss={onDismiss} onRestore={vi.fn()} recovered={{ editedAt: at, pendingEdits: 3 }} />,
+    );
     expect(screen.queryByText(/chưa gửi/)).toBeNull();
+  });
+});
+
+describe("QuizEditorSyncLayer dismissals", () => {
+  const sync = (quizId: string) =>
+    ({
+      backups: [], quizId, ready: true, recovered: { editedAt: at, pendingEdits: 3 }, restoreBackup: vi.fn(),
+      status: { kind: "saved", at: null },
+    }) as unknown as UseQuizDraftSyncResult;
+  const tree = (quizId: string) => {
+    const s = sync(quizId);
+    return (
+      <QuizEditorSyncLayer loadFailed={false} onRetry={vi.fn()} retrying={false} sync={s}>
+        <QuizEditorSyncNotices sync={s} />
+      </QuizEditorSyncLayer>
+    );
+  };
+
+  it("dismissing in one mount hides every mount of that quiz only", () => {
+    const { rerender } = render(tree("a"));
+    expect(screen.getAllByText(/chưa gửi/)).toHaveLength(2);
+    fireEvent.click(screen.getAllByRole("button", { name: /close|đóng/i })[0]);
+    expect(screen.queryByText(/chưa gửi/)).toBeNull();
+    rerender(tree("b"));
+    expect(screen.getAllByText(/chưa gửi/)).toHaveLength(2);
   });
 });
