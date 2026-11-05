@@ -1,156 +1,123 @@
 import { useDraggable, useDroppable } from "@dnd-kit/core";
-import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
-import type { ButtonHTMLAttributes, ReactNode } from "react";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
+import { useId, type KeyboardEvent, type ReactNode } from "react";
 
 import type { SequenceItem } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
 import { SequenceInlineImage } from "./sequence-media";
+import { SEQUENCE_ROW } from "./sequence-order";
 
-export function SequenceRowTarget({
-  rowId,
-  children,
-}: {
-  rowId: string;
-  children: ReactNode;
-}) {
-  const { isOver, setNodeRef } = useDroppable({ id: `sequence-row:${rowId}` });
+/** Review state of a row: undefined while answering or when the correct order is unknown. */
+export type SequenceReview = { correctAt: number; right: boolean } | undefined;
 
+const reviewColor = (review: SequenceReview) => (review ? (review.right ? "success.main" : "error.main") : undefined);
+
+/** A drop row: the position number, then the card. A card dropped here is inserted at this row. */
+export function SequenceRow({ itemId, position, review, children }: { itemId: string; position: number; review: SequenceReview; children: ReactNode }) {
+  const { isOver, setNodeRef } = useDroppable({ id: `${SEQUENCE_ROW}${itemId}` });
   return (
-    <div
+    <Box
       ref={setNodeRef}
-      className="rounded-xl transition"
-      style={isOver ? { backgroundColor: "rgba(0,0,136,0.06)", outline: "2px dashed rgba(0,0,136,0.18)", outlineOffset: 2 } : undefined}
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "30px 1fr",
+        gap: 1,
+        alignItems: "center",
+        borderRadius: `${tokens.radius.card}px`,
+        ...(isOver ? { bgcolor: tokens.color.primarySofter, outline: `2px dashed ${tokens.color.primarySoft}`, outlineOffset: 2 } : null),
+      }}
     >
+      <Box sx={{ textAlign: "right", typography: "h6", fontWeight: "fontWeightBold", color: reviewColor(review) ?? "primary.main" }}>{position}</Box>
       {children}
-    </div>
+    </Box>
   );
 }
 
-export function DraggableSequenceItem({
-  item,
-  disabled,
-  active,
-  compact,
-  correct,
-  incorrect,
-  reviewIndex,
-}: {
+type CardProps = {
   item: SequenceItem;
-  disabled: boolean;
-  active: boolean;
+  position: number;
+  review: SequenceReview;
   compact: boolean;
-  correct?: boolean;
-  incorrect?: boolean;
-  reviewIndex?: number;
-}) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: item.id,
-    disabled,
-  });
+  locked: boolean;
+  onKeyDown: (event: KeyboardEvent<HTMLElement>) => void;
+};
 
-  return (
-    <div
-      ref={setNodeRef}
-      className="min-w-0 flex-1"
-      style={{
-        transform: CSS.Translate.toString(transform),
-      }}
-    >
-      <SequenceCard
-        item={item}
-        dragging={isDragging}
-        active={active}
-        compact={compact}
-        locked={disabled}
-        correct={correct}
-        incorrect={incorrect}
-        reviewIndex={reviewIndex}
-        dragProps={{
-          ...(attributes as ButtonHTMLAttributes<HTMLButtonElement>),
-          ...(listeners as ButtonHTMLAttributes<HTMLButtonElement>),
-        }}
-      />
-    </div>
-  );
+export function DraggableSequenceCard({ item, locked, ...rest }: CardProps) {
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id: item.id, disabled: locked, attributes: { roleDescription: "thẻ kéo được" } });
+  return <SequenceCard {...rest} item={item} locked={locked} dragging={isDragging} cardRef={setNodeRef} dragProps={{ ...attributes, ...listeners }} />;
 }
 
 export function SequenceCard({
   item,
+  position,
+  review,
+  compact,
+  locked = false,
   dragging = false,
   overlay = false,
-  locked = false,
-  active = false,
-  compact = false,
-  correct = false,
-  incorrect = false,
-  reviewIndex,
+  cardRef,
   dragProps,
-}: {
+  onKeyDown,
+}: Partial<CardProps> & {
   item: SequenceItem;
+  compact: boolean;
   dragging?: boolean;
   overlay?: boolean;
-  locked?: boolean;
-  active?: boolean;
-  compact?: boolean;
-  correct?: boolean;
-  incorrect?: boolean;
-  reviewIndex?: number;
-  dragProps?: ButtonHTMLAttributes<HTMLButtonElement>;
+  cardRef?: (node: HTMLElement | null) => void;
+  dragProps?: object;
 }) {
-  const stateClass =
-    overlay || active
-      ? "border-[#c6b66a] bg-[#fff0a8] shadow-[0_16px_30px_rgba(15,23,42,0.12)]"
-      : correct
-        ? "border-[#8fb37f] bg-[#f4fff0]"
-        : incorrect
-          ? "border-[#e1a6a0] bg-[#fff5f4]"
-          : "border-[#d1d5db] bg-white shadow-[0_8px_18px_rgba(15,23,42,0.06)] hover:border-[#b8bec8] hover:shadow-[0_12px_24px_rgba(15,23,42,0.09)]";
-
+  const captionId = useId();
+  const wrong = review && !review.right;
   return (
-    <button
-      type="button"
-      className={`touch-none flex w-full items-center justify-between gap-2 border text-left text-slate-900 shadow-sm transition ${
-        compact
-          ? "min-h-[48px] rounded-lg px-4 py-2.5 text-[16px] font-semibold leading-6"
-          : "min-h-[calc(var(--quiz-control-height)+12px)] rounded-[10px] px-7 py-4 text-[var(--quiz-readable-size-lg)] font-semibold leading-[1.35]"
-      } ${stateClass} ${dragging ? "opacity-15" : ""} ${locked ? "cursor-default" : "cursor-grab"}`}
-      style={
-        !overlay && !active && !correct && !incorrect
-          ? {
-              background: "linear-gradient(180deg, #ffffff, #fbfbfc)",
-              color: "#174f91",
-              paddingLeft: compact ? undefined : "34px",
-            }
-          : { paddingLeft: compact ? undefined : "34px" }
-      }
+    <ButtonBase
+      ref={cardRef}
+      disableRipple
       {...dragProps}
+      data-sequence-id={overlay ? undefined : item.id}
+      aria-label={overlay ? undefined : `${item.label}, vị trí ${position}`}
+      {...(wrong ? { "aria-describedby": captionId } : null)}
+      {...(overlay ? { "aria-hidden": true, tabIndex: -1 } : null)}
+      onKeyDown={onKeyDown}
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        gap: 1.25,
+        width: "100%",
+        minWidth: 0,
+        minHeight: 46,
+        p: compact ? "6px 8px 6px 12px" : "8px 10px 8px 14px",
+        border: "1.5px solid",
+        borderColor: reviewColor(review) ?? (overlay ? "primary.main" : tokens.color.border),
+        borderRadius: `${tokens.radius.card}px`,
+        bgcolor: review ? tokens.statusTint[review.right ? "success" : "error"].bg : "background.paper",
+        color: "text.primary",
+        typography: "body2",
+        fontWeight: "fontWeightMedium",
+        textAlign: "left",
+        cursor: locked ? "default" : "grab",
+        touchAction: "manipulation",
+        opacity: dragging ? 0.3 : 1,
+        ...(overlay ? { transform: "rotate(-1.5deg) scale(1.02)", boxShadow: tokens.shadow.float, cursor: "grabbing" } : null),
+        "&.Mui-focusVisible": { outline: (theme) => `2px solid ${theme.palette.primary.main}`, outlineOffset: 2 },
+        "@media (prefers-reduced-motion: no-preference)": {
+          transition: `border-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}, background-color ${tokens.motion.duration.fast}ms ${tokens.motion.easing.standard}`,
+        },
+      }}
     >
-      {reviewIndex ? (
-        <span
-          className="shrink-0 font-semibold"
-          style={{ color: correct ? "#78b816" : incorrect ? "#e65a4d" : "currentColor" }}
-        >
-          {reviewIndex}.
-        </span>
-      ) : null}
       <SequenceInlineImage image={item.image} label={item.label} />
-      <span className="min-w-0 flex-1 break-words">{item.label}</span>
-      {!overlay ? (
-        <span aria-hidden="true" className={compact ? "grid h-8 w-7 place-items-center text-slate-400" : "grid h-10 w-8 place-items-center text-slate-400"}>
-          {compact ? <GripVertical className="h-4 w-4" /> : <SequenceHandle />}
-        </span>
+      <Box component="span" sx={{ flex: 1, minWidth: 0, overflowWrap: "anywhere" }}>
+        {item.label}
+      </Box>
+      {wrong ? (
+        <Box component="span" id={captionId} sx={{ flex: "none", color: "error.main", fontWeight: "fontWeightBold" }}>
+          {`đúng: ${review.correctAt}`}
+        </Box>
       ) : null}
-    </button>
-  );
-}
-
-export function SequenceHandle() {
-  return (
-    <span className="grid h-[22px] w-3.5 grid-cols-2 grid-rows-3 place-items-center" aria-hidden="true">
-      {Array.from({ length: 6 }).map((_, index) => (
-        <span key={index} className="h-1 w-1 rounded-full bg-[#7b7f86]" />
-      ))}
-    </span>
+      <DragIndicatorIcon aria-hidden fontSize="small" sx={{ flex: "none", color: "text.secondary" }} />
+    </ButtonBase>
   );
 }
