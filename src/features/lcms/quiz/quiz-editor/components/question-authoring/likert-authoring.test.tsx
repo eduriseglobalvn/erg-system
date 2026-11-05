@@ -38,6 +38,14 @@ describe("LikertAuthoring", () => {
     expect(screen.getByRole("button", { name: "Thêm một mức" })).toBeDisabled();
   });
 
+  it("steps an old 9-level scale down to 8, keeping the first 8 labels", () => {
+    render(<Harness start={mk(["1", "2", "3", "4", "5", "6", "7", "8", "9"])} />);
+    fireEvent.click(screen.getByRole("button", { name: "Bớt một mức" }));
+    expect(screen.getAllByRole("textbox", { name: /^Nhãn mức/ }).map((el) => (el as HTMLInputElement).value)).toEqual(
+      ["1", "2", "3", "4", "5", "6", "7", "8"],
+    );
+  });
+
   it("adds a level and a statement", () => {
     render(<Harness start={mk(["a", "b", "c"])} />);
     fireEvent.click(screen.getByRole("button", { name: "Thêm một mức" }));

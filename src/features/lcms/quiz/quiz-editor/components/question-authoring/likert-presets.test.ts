@@ -32,6 +32,11 @@ describe("likert presets", () => {
     expect(resizeLikertScale(nine, 9, "agree")).toHaveLength(7);
   });
 
+  it("custom shrinks an old 9-level scale one level at a time", () => {
+    const nine = Array.from({ length: 9 }, (_, i) => point(i + 1, `L${i + 1}`));
+    expect(resizeLikertScale(nine, 8, "custom")).toEqual(nine.slice(0, 8));
+  });
+
   it("a preset replaces labels but keeps ids", () => {
     const out = resizeLikertScale(five, 3, "satisfied");
     expect(out.map((p) => p.label)).toEqual(["Không hài lòng", "Bình thường", "Hài lòng"]);

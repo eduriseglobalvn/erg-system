@@ -87,6 +87,12 @@ describe("assessQuestionReadiness", () => {
       ]);
       expect(codes(q({ ...k, likertRows: rows, likertScale: [scale[0]] }))).toEqual(["scale-label"]);
     });
+    it("scale-max: old data with more than 7 levels", () => {
+      const eight = Array.from({ length: 8 }, (_, i) => ({ id: `${i}`, label: `M${i}`, value: i + 1 }));
+      expect(assessQuestionReadiness(q({ ...k, likertRows: rows, likertScale: eight }), { hasQuestionImage: true }).issues).toEqual([
+        { code: "scale-max", area: "answers", message: "Thang chỉ có tối đa 7 mức" },
+      ]);
+    });
   });
 
   describe("fill_blank", () => {

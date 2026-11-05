@@ -43,6 +43,7 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       if (scale.length < 2 || scale.some((point) => !point.label.trim())) {
         add("scale-label", "Mọi mức cần có nhãn");
       }
+      if (scale.length > 7) add("scale-max", "Thang chỉ có tối đa 7 mức");
       break;
     }
     case "fill_blank": {

@@ -41,9 +41,12 @@ export function likertPresetLabels(preset: Exclude<LikertPresetId, "custom">, co
   return [...LABELS[preset][count]];
 }
 
-/** Keeps ids of retained positions; new points take the next unused `scale-n`; values are renumbered 1..count. */
+/**
+ * Keeps ids of retained positions; new points take the next unused `scale-n`; values are renumbered 1..count.
+ * Only a preset clamps to 7: custom labels of old data with more levels shrink one level at a time.
+ */
 export function resizeLikertScale(scale: LikertScalePoint[], rawCount: number, preset: LikertPresetId): LikertScalePoint[] {
-  const count = Math.min(7, Math.max(2, rawCount));
+  const count = Math.max(2, preset === "custom" ? rawCount : Math.min(7, rawCount));
   const labels = preset === "custom" ? null : likertPresetLabels(preset, count);
   const used = new Set(scale.slice(0, count).map((p) => p.id));
   let n = 1;
