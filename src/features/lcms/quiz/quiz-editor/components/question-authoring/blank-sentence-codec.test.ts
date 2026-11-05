@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
-import { setBlankText, type BlankSentence } from "./blank-sentence";
+import { rebaseBlanks, setBlankText, type BlankSentence } from "./blank-sentence";
 import { readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
 
 const TEXT = "Hàm tính trung bình là AVERAGE, hàm tính tổng là SUM.";
@@ -80,6 +80,42 @@ describe("old data", () => {
     const withAlt = { ...q, textBlanks: q.textBlanks!.map((b, i) => (i === 0 ? { ...b, correctAnswers: [...b.correctAnswers, "TRUNG BÌNH"] } : b)) };
     const out = writeBlankSentence(withAlt, setBlankText(readBlankSentence(withAlt), "b1", "MEAN"));
     expect(out.textBlanks![0].correctAnswers).toEqual(["MEAN", "TRUNG BÌNH"]);
+  });
+
+  it("keeps a fill blank's alternates while its word is emptied and retyped", () => {
+    const q = writeBlankSentence(fill, S);
+    let out: Question = { ...q, textBlanks: q.textBlanks!.map((b, i) => (i === 0 ? { ...b, correctAnswers: [...b.correctAnswers, "TRUNG BÌNH"] } : b)) };
+    const { start, end } = at("AVERAGE");
+    const edit = (text: string, caret: number) => { out = writeBlankSentence(out, rebaseBlanks(readBlankSentence(out), text, caret)); };
+    edit(TEXT.slice(0, start) + TEXT.slice(end), start);
+    expect(readBlankSentence(out).blanks.map((b) => b.end - b.start)).toEqual([0, 3]);
+    expect(out.textBlanks![0].correctAnswers).toEqual(["", "TRUNG BÌNH"]);
+    edit(`${TEXT.slice(0, start)}M${TEXT.slice(end)}`, start + 1);
+    expect(readBlankSentence(out)).toEqual({ ...S, text: TEXT.replace("AVERAGE", "M"), blanks: [{ id: "b1", start, end: start + 1 }, { id: "b2", start: S.blanks[1].start - 6, end: S.blanks[1].end - 6 }] });
+    expect(out.textBlanks![0].correctAnswers).toEqual(["M", "TRUNG BÌNH"]);
+  });
+
+  const emptyAndRetype = (q: Question) => {
+    const { start, end } = at("AVERAGE");
+    const emptied = writeBlankSentence(q, rebaseBlanks(readBlankSentence(q), TEXT.slice(0, start) + TEXT.slice(end), start));
+    const retyped = writeBlankSentence(emptied, rebaseBlanks(readBlankSentence(emptied), `${TEXT.slice(0, start)}M${TEXT.slice(end)}`, start + 1));
+    return { emptied, retyped };
+  };
+
+  it("keeps a select blank's options while its word is emptied and retyped", () => {
+    const q = writeBlankSentence(select, S);
+    const { emptied, retyped } = emptyAndRetype({ ...q, inlineBlanks: q.inlineBlanks!.map((b, i) => (i === 0 ? { ...b, options: ["AVERAGE", "MEAN"] } : b)) });
+    expect(readBlankSentence(emptied).blanks.map((b) => b.id)).toEqual(["b1", "b2"]);
+    expect(emptied.inlineBlanks![0].options).toEqual(["", "MEAN"]);
+    expect(retyped.inlineBlanks![0]).toMatchObject({ options: ["M", "MEAN"], correctOptionId: "M" });
+  });
+
+  it("keeps a drag slot and its word id while its word is emptied and retyped", () => {
+    const q = writeBlankSentence(drag, S);
+    const { emptied, retyped } = emptyAndRetype(q);
+    expect(emptied.wordSlots).toEqual(q.wordSlots);
+    expect(retyped.wordSlots).toEqual(q.wordSlots);
+    expect(retyped.wordBank![0]).toEqual({ id: q.wordSlots![0].correctWordId, label: "M" });
   });
 
   it("renames the correct option when the word is new", () => {

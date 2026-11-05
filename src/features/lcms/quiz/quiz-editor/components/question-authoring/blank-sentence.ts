@@ -1,3 +1,4 @@
+/** A word of `text` in [start, end); empty (start === end) only transiently, after a delete inside it. */
 export type SentenceBlank = { id: string; start: number; end: number };
 export type BlankSentence = { text: string; blanks: SentenceBlank[] };
 
@@ -30,15 +31,29 @@ function locateEdit(P: string, N: string, caret: number): { a: number; pEnd: num
   return { a: prefix, pEnd: P.length - suffix };
 }
 
+const LETTERS = /^[\p{L}\p{M}\p{N}]+$/u;
+
+/**
+ * Moves the blanks through one edit of the text. An edit inside a blank resizes it; letters typed at its end edge
+ * grow it (so retyping a selected word keeps the blank), while spaces and punctuation there stay outside.
+ * A blank emptied by a delete inside it survives empty, so the next letter refills it; one left whitespace-only,
+ * or cut by an edit across its edge, is dropped.
+ */
 export function rebaseBlanks(prev: BlankSentence, nextText: string, caret: number): BlankSentence {
   const d = nextText.length - prev.text.length;
   const { a, pEnd } = locateEdit(prev.text, nextText, caret);
+  const typedLetters = d > 0 && pEnd === a && LETTERS.test(nextText.slice(a, a + d));
+  // Only one blank grows, so two blanks never overlap; an emptied blank at the caret wins over the word before it.
+  const grows = typedLetters ? prev.blanks.filter((b) => b.end === a).pop() : undefined;
   const blanks: SentenceBlank[] = [];
   for (const b of prev.blanks) {
-    if (pEnd <= b.start) blanks.push({ ...b, start: b.start + d, end: b.end + d });
+    if (b === grows) blanks.push({ ...b, end: b.end + d });
+    // Checked before the shift, so an empty blank at the caret stays before whatever is typed there.
     else if (a >= b.end) blanks.push(b);
+    else if (pEnd <= b.start) blanks.push({ ...b, start: b.start + d, end: b.end + d });
     else if (b.start <= a && pEnd <= b.end) {
-      if (b.end + d > b.start) blanks.push({ ...b, end: b.end + d });
+      const end = b.end + d;
+      if (end === b.start || nextText.slice(b.start, end).trim()) blanks.push({ ...b, end });
     }
   }
   return { text: nextText, blanks };

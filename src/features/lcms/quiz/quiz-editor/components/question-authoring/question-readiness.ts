@@ -49,7 +49,8 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
     case "fill_blank": {
       const blanks = question.textBlanks ?? [];
       if (blanks.length === 0) add("no-blank", "Chưa có ô trống");
-      else if (blanks.some((blank) => !blank.correctAnswers.some((answer) => answer.trim()))) {
+      // Index 0 is the word in the sentence; an emptied one would make an empty reply count as correct.
+      else if (blanks.some((blank) => !blank.correctAnswers[0]?.trim())) {
         add("blank-answer", "Ô trống cần có đáp án");
       }
       break;

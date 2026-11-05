@@ -35,12 +35,12 @@ function storedBlanks(question: Question): StoredBlank[] {
 
 export function readBlankSentence(question: Question): BlankSentence {
   const all = storedBlanks(question);
-  const kept = all.filter((blank) => blank.word.trim());
   const parts = question.sentenceParts;
   const blanks: SentenceBlank[] = [];
-  if (parts?.length === kept.length + 1) {
+  // A blank the teacher just emptied is written with word "", so it is kept here; old data skips empty words.
+  if (parts?.length === all.length + 1) {
     let text = parts[0];
-    kept.forEach((blank, i) => {
+    all.forEach((blank, i) => {
       blanks.push({ id: blank.id, start: text.length, end: text.length + blank.word.length });
       text += blank.word + parts[i + 1];
     });

@@ -108,6 +108,9 @@ describe("assessQuestionReadiness", () => {
         "blank-answer",
       ]);
     });
+    it("blank-answer: the word in the sentence was emptied, even with other spellings left", () => {
+      expect(codes(q({ ...k, textBlanks: [{ id: "b", label: "", correctAnswers: ["", "x"] }] }))).toEqual(["blank-answer"]);
+    });
   });
 
   describe.each(["inline_choice", "select_from_lists"] as const)("%s", (kind) => {

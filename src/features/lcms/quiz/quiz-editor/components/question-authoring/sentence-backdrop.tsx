@@ -14,6 +14,8 @@ const blankSx = (style: "chip" | "underline", open: boolean) => ({
   ...(style === "chip"
     ? { bgcolor: tokens.color.primarySofter, borderRadius: `${tokens.radius.xs}px`, boxShadow: open ? CHIP_RING : SOFT }
     : { borderBottom: "2px solid", borderColor: "primary.main", boxShadow: open ? RING : "none" }),
+  // An emptied blank waits for its next letter; a caret-like bar marks it without taking any width.
+  "&:empty::before": { content: '""', position: "absolute", top: 0, bottom: 0, left: "-1px", width: "2px", bgcolor: "primary.main" },
   "&[data-badge]::after": {
     content: "attr(data-badge)",
     position: "absolute",

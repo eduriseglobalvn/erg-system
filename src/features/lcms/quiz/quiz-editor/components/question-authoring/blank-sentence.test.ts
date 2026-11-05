@@ -32,7 +32,8 @@ describe("rebaseBlanks", () => {
   it("grows the blank for a letter typed inside it, and uses the diff when the caret is wrong", () => {
     const next = `${TEXT.slice(0, END - 1)}E${TEXT.slice(END - 1)}`;
     expect(word(rebaseBlanks(S, next, END))).toBe("AVERAGEE");
-    expect(word(rebaseBlanks(S, next, next.length))).toBe("AVERAGE");
+    // The diff reads the letter as typed at the end edge, which grows the blank too.
+    expect(word(rebaseBlanks(S, next, next.length))).toBe("AVERAGEE");
   });
 
   it("replaces the word when it is selected and retyped", () => {
@@ -48,9 +49,9 @@ describe("rebaseBlanks", () => {
     expect(r.text).toBe(next);
   });
 
-  it("drops the blank when its whole word is deleted", () => {
+  it("keeps an empty blank when its whole word is deleted", () => {
     const next = TEXT.slice(0, START) + TEXT.slice(END);
-    expect(rebaseBlanks(S, next, START).blanks).toEqual([]);
+    expect(rebaseBlanks(S, next, START).blanks).toEqual([{ id: "b1", start: START, end: START }]);
   });
 
   it("keeps the range on a same-length replacement inside the word", () => {
@@ -109,6 +110,58 @@ describe("rebaseBlanks edge cases", () => {
       [5, 7],
       [10, 12],
     ]);
+  });
+});
+
+describe("retyping inside a blank", () => {
+  const type = (s: BlankSentence, at: number, text: string) =>
+    rebaseBlanks(s, s.text.slice(0, at) + text + s.text.slice(at), at + text.length);
+  const backspace = (s: BlankSentence, at: number) => rebaseBlanks(s, s.text.slice(0, at - 1) + s.text.slice(at), at - 1);
+
+  it("grows the blank one letter at a time after its word is selected and retyped", () => {
+    let s = rebaseBlanks(S, `${TEXT.slice(0, START)}S${TEXT.slice(END)}`, START + 1);
+    s = type(s, START + 1, "U");
+    s = type(s, START + 2, "M");
+    expect(word(s)).toBe("SUM");
+    expect(s.text).toBe("Hàm tính trung bình là SUM.");
+  });
+
+  it("grows the blank for a letter typed at its end edge, not for one typed at its start", () => {
+    const ca: BlankSentence = { text: "Con ca bơi.", blanks: [{ id: "c", start: 4, end: 6 }] };
+    expect(word(type(backspace(ca, 6), 5, "á"))).toBe("cá");
+    expect(type(ca, 4, "x").blanks[0]).toEqual({ id: "c", start: 5, end: 7 });
+  });
+
+  it("keeps a one-letter blank emptied by Backspace, and grows it again", () => {
+    const a: BlankSentence = { text: "Chữ a nhé", blanks: [{ id: "a", start: 4, end: 5 }] };
+    const emptied = backspace(a, 5);
+    expect(emptied.blanks).toEqual([{ id: "a", start: 4, end: 4 }]);
+    const retyped = type(emptied, 4, "á");
+    expect(retyped.text).toBe("Chữ á nhé");
+    expect(word(retyped)).toBe("á");
+  });
+
+  it("keeps an emptied blank empty when a space or punctuation is typed there", () => {
+    const empty: BlankSentence = { text: "A  B", blanks: [{ id: "e", start: 2, end: 2 }] };
+    for (const t of [" ", "."]) expect(type(empty, 2, t).blanks).toEqual([{ id: "e", start: 2, end: 2 }]);
+  });
+
+  it("grows only one blank when two end where a letter is typed, preferring the emptied one", () => {
+    const ab: BlankSentence = { text: "AB", blanks: [{ id: "a", start: 0, end: 1 }, { id: "b", start: 1, end: 2 }] };
+    const both = backspace(backspace(ab, 2), 1);
+    expect(both.blanks).toEqual([{ id: "a", start: 0, end: 0 }, { id: "b", start: 0, end: 0 }]);
+    const typed = type(both, 0, "c");
+    expect(typed.blanks).toEqual([{ id: "a", start: 0, end: 0 }, { id: "b", start: 0, end: 1 }]);
+    expect(sentenceParts(typed).join("")).toBe("");
+    expect(type(backspace(ab, 2), 1, "c").blanks).toEqual([{ id: "a", start: 0, end: 1 }, { id: "b", start: 1, end: 2 }]);
+  });
+
+  it("drops a blank whose word becomes whitespace only", () => {
+    const t = "Một  hai, ba";
+    const s: BlankSentence = { text: t, blanks: [{ id: "h", start: t.indexOf("hai"), end: t.indexOf("hai") + 3 }] };
+    const next = rebaseBlanks(s, "Một   , ba", t.indexOf("hai") + 1);
+    expect(next.blanks).toEqual([]);
+    expect(next.text).toBe("Một   , ba");
   });
 });
 

@@ -112,6 +112,20 @@ describe("SentenceBuilder", () => {
     expect(latest.text).toBe(typed + TEXT);
   });
 
+  it("keeps a blank whose word is deleted, and refills it as the teacher types", () => {
+    const { container, textarea } = setup();
+    const emptied = TEXT.replace("AVERAGE", "");
+    fireEvent.input(textarea, { target: { value: emptied, selectionStart: START, selectionEnd: START }, inputType: "deleteContentBackward" });
+    expect(latest.blanks).toEqual([{ id: "b1", start: START, end: START }]);
+    expect(container.querySelector('[data-blank-id="b1"]')).toHaveTextContent("");
+    for (const [i, typed] of ["S", "SU", "SUM"].entries()) {
+      const value = TEXT.replace("AVERAGE", typed);
+      fireEvent.input(textarea, { target: { value, selectionStart: START + i + 1, selectionEnd: START + i + 1 }, inputType: "insertText" });
+    }
+    expect(blankWord(latest, latest.blanks[0])).toBe("SUM");
+    expect(container.querySelector('[data-blank-id="b1"]')).toHaveTextContent("SUM");
+  });
+
   it("never calls onChange just by rendering", () => {
     const onChange = vi.fn();
     render(<SentenceBuilder blankStyle="underline" hint="h" onChange={onChange} sentence={S} />);

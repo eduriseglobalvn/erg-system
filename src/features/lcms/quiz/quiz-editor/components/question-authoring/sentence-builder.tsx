@@ -35,7 +35,7 @@ export function SentenceBuilder({ sentence, onChange, blankStyle, badge, hint, r
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
   const openBlank = sentence.blanks.find((b) => b.id === openId);
-  // The popover closes by itself when its blank is gone (removed, or its word deleted).
+  // The popover closes by itself when its blank is gone (removed, or cut by an edit across its edge).
   if (openId && !openBlank) setOpenId(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
