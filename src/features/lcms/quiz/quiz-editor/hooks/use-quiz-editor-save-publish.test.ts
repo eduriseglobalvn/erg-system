@@ -26,7 +26,6 @@ const fakeSync = (overrides: Partial<UseQuizDraftSyncResult> = {}): UseQuizDraft
   hasUnsyncedChanges: false,
   flushNow: vi.fn(async () => undefined),
   resolveConflict: vi.fn(),
-  setBaseDocVersion: vi.fn(async () => undefined),
   recovered: null,
   backups: [],
   restoreBackup: vi.fn(),
@@ -52,6 +51,7 @@ function setup(initial: UseQuizDraftSyncResult, questionSlideIds = ["s1", "s2", 
   const view = renderHook(
     () => useQuizEditorPublish({
       sync: useSyncExternalStore(subscribe, () => snapshot),
+      draftId: "draft-1",
       questionSlideIds,
       setSlidesPublished,
       onPublished,
@@ -95,7 +95,7 @@ describe("useQuizEditorPublish", () => {
     expect(result.current.publishBlockedReason).toBeNull();
   });
 
-  it("flushes pending changes first, then publishes the whole quiz with an idempotency key tied to the doc version", async () => {
+  it("flushes pending changes first, then publishes the whole quiz with an idempotency key tied to the draft and its version", async () => {
     const view = setup(fakeSync({ status: { kind: "pending" }, docVersion: 4 }));
     // The flush sends the last edit; the server answers with docVersion 5.
     const flushNow = flushTo(view.setSync, { docVersion: 5 });
@@ -106,7 +106,7 @@ describe("useQuizEditorPublish", () => {
 
     expect(flushNow.mock.invocationCallOrder[0]).toBeLessThan(publishQuizEditorDraft.mock.invocationCallOrder[0]!);
     expect(publishQuizEditorDraft).toHaveBeenCalledWith(
-      expect.objectContaining({ quizId: "quiz-1", docVersion: 5, idempotencyKey: "quiz-editor-publish:quiz-1:5" }),
+      expect.objectContaining({ quizId: "quiz-1", docVersion: 5, idempotencyKey: "quiz-editor-publish:quiz-1:draft-1:5" }),
     );
     expect(view.setSlidesPublished).toHaveBeenCalledWith(["s1", "s2", "s3"]);
     expect(view.onPublished).toHaveBeenCalledTimes(1);
@@ -183,13 +183,5 @@ describe("useQuizEditorPublish", () => {
 
     expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
     expect(result.current.isPublishing).toBe(false);
-  });
-
-  it("keeps the engine's doc version after publishing, because the server does not bump the draft", async () => {
-    const sync = fakeSync();
-    const { result } = setup(sync);
-    await act(() => result.current.handlePublish());
-    expect(publishQuizEditorDraft).toHaveBeenCalledTimes(1);
-    expect(sync.setBaseDocVersion).not.toHaveBeenCalled();
   });
 });

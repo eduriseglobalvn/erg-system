@@ -305,6 +305,18 @@ describe("QuizDraftSyncEngine", () => {
     expect(await store.listBackups(scope, "q1")).toHaveLength(1);
   });
 
+  it("backs up another tab's unsent record before a finished save overwrites it", async () => {
+    let finish: (v: { docVersion: number }) => void = () => undefined;
+    api.saveDraft.mockImplementationOnce(() => new Promise((r) => { finish = r; }));
+    await engine.edit(doc("mine"));
+    const flushing = engine.flushNow();
+    await vi.advanceTimersByTimeAsync(0);
+    await store.put(scope, rec({ dirty: true, revision: 5, writerId: "tab-OTHER", document: doc("from other tab") }));
+    finish({ docVersion: 4 });
+    await flushing;
+    expect(await store.listBackups(scope, "q1")).toEqual([expect.objectContaining({ reason: "other-tab", document: doc("from other tab") })]);
+  });
+
   it("does not back up a dirty record it recovered on start", async () => {
     await store.put(scope, rec({ dirty: true, revision: 3, syncedRevision: 1, writerId: "tab-OLD" }));
     online = false;
@@ -350,6 +362,15 @@ describe("QuizDraftSyncEngine", () => {
     expect(engine.recovered).toEqual({ pendingEdits: 2, editedAt: "2026-11-01T00:00:00.000Z" });
     await vi.advanceTimersByTimeAsync(0);
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
+  });
+
+  it("forgets the recovered edits once they reached the server", async () => {
+    await store.put(scope, rec({ dirty: true, revision: 3, syncedRevision: 1 }));
+    await engine.start(serverDoc(3));
+    expect(engine.recovered).not.toBeNull();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(engine.status).toMatchObject({ kind: "saved", at: expect.any(String) });
+    expect(engine.recovered).toBeNull();
   });
 
   it("start() with a clean device copy loads the server draft and keeps the create key", async () => {

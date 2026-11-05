@@ -100,7 +100,7 @@ export function useQuizEditorSync({ quizId, scope, editor, questionSlideIds, sel
     return () => clearTimeout(timer);
   }, [retrying, quizId, refetch]);
 
-  const publish = useQuizEditorPublish({ sync, questionSlideIds, setSlidesPublished, onPublished });
+  const publish = useQuizEditorPublish({ sync, draftId: base.draftId, questionSlideIds, setSlidesPublished, onPublished });
   return {
     sync,
     ...publish,

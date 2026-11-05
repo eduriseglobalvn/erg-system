@@ -57,7 +57,6 @@ type Slot = {
 const WRITER_ID: string =
   globalThis.crypto?.randomUUID?.() ?? `tab-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
 let defaultStore: QuizDraftDeviceStore | null = null;
-const imageCaches = new Map<string, Map<string, string>>();
 const migrations = new WeakMap<QuizDraftDeviceStore, Map<string, Promise<void>>>();
 
 function migrateOnce(store: QuizDraftDeviceStore, scope: string, tenantId: string): Promise<void> {
@@ -77,9 +76,9 @@ function migrateOnce(store: QuizDraftDeviceStore, scope: string, tenantId: strin
 
 const currentScope = () => quizDraftScope(getDefaultTenantId(), getAuthScope().accountId);
 
-function defaultApi(scope: string): QuizDraftSyncApi {
-  const cache = imageCaches.get(scope) ?? new Map<string, string>();
-  imageCaches.set(scope, cache);
+/** Called once per engine: its image cache (data URL → server URL, megabytes each) goes away with that engine. */
+function defaultApi(): QuizDraftSyncApi {
+  const cache = new Map<string, string>();
   const uploader = createQuizImageUploader();
   return {
     createQuiz: createQuizEditorQuiz,
@@ -139,7 +138,7 @@ export class QuizDraftSyncSession {
       {
         store,
         scope,
-        api: deps.api ?? defaultApi(scope),
+        api: deps.api ?? defaultApi(),
         writerId: WRITER_ID,
         isOnline: deps.isOnline ?? (() => navigator.onLine),
         now: deps.now ?? (() => new Date()),
@@ -201,17 +200,22 @@ export class QuizDraftSyncSession {
     };
     // Signing in again usually happens in another tab or page, so retry when this one comes back.
     const resume = () => {
-      if (this.slot?.engine.status.kind === "signed-out") void this.slot.engine.flushNow();
+      const engine = this.slot?.engine;
+      if (engine?.status.kind === "signed-out") void engine.flushNow();
+      else if (engine?.status.kind === "offline") engine.notifyOnline(); // in case the online event was missed
     };
     const onVisibility = () => (target.document.visibilityState === "hidden" ? leave() : resume());
     const onOnline = () => this.slot?.engine.notifyOnline();
+    const onOffline = () => this.slot?.engine.notifyOffline();
     const onBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (!this.pending && !this.slot?.engine.hasUnsyncedChanges) return;
+      const unsent = this.pending !== null || this.slot?.engine.hasUnsyncedChanges;
+      this.flushPending(); // the last edit inside the 300 ms debounce still reaches the device
+      if (!unsent) return;
       event.preventDefault();
       event.returnValue = ""; // Safari 15 and older Chrome only ask when returnValue is set
     };
     const events: Array<[string, (event: never) => void]> = [
-      ["pagehide", leave], ["focus", resume], ["online", onOnline], ["beforeunload", onBeforeUnload],
+      ["pagehide", leave], ["focus", resume], ["online", onOnline], ["offline", onOffline], ["beforeunload", onBeforeUnload],
     ];
     for (const [name, handler] of events) target.addEventListener(name, handler as EventListener);
     target.document.addEventListener("visibilitychange", onVisibility);
@@ -237,13 +241,6 @@ export class QuizDraftSyncSession {
     if (this.slot !== slot) return;
     if (server) this.latest.hydrate(server);
     await this.reloadBackups(slot);
-  };
-
-  setBaseDocVersion = async (version: number): Promise<void> => {
-    const slot = this.slot;
-    if (!slot) return;
-    await slot.engine.setBaseDocVersion(version);
-    this.refresh(slot);
   };
 
   restoreBackup = (createdAt: string): void => {

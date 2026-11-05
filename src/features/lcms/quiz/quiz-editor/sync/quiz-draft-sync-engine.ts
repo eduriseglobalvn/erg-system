@@ -150,10 +150,6 @@ export class QuizDraftSyncEngine {
 
       const { store, scope, writerId } = this.deps;
       const stored = await store.get(scope, this.key);
-      // Another tab's unsent edits that this engine never saw: keep a copy before overwriting them.
-      const storedId = stored ? `${stored.writerId}:${stored.revision}` : "";
-      const otherTab =
-        stored?.dirty && stored.writerId !== writerId && storedId !== this.lastBackup && JSON.stringify(stored.document) !== this.recordJson ? stored : null;
       const base = current ?? stored;
       const now = this.nowIso();
       const next: DeviceDraftRecord = {
@@ -172,11 +168,7 @@ export class QuizDraftSyncEngine {
       // Closed while queued: still keep the edit on the device; closeAndFlush sends it, no timer does.
       const sends = !this.disposed && !this.closing && this.currentStatus.kind !== "conflict";
       if (sends) this.schedule(SAVE_DEBOUNCE_MS);
-      const backup = otherTab && (async () => {
-        await store.addBackup(scope, { key: this.key, reason: "other-tab", document: otherTab.document, createdAt: now });
-        this.lastBackup = storedId;
-      });
-      await this.write(next, json, backup);
+      await this.write(next, json, this.otherTabBackup(stored, now));
       if (sends && this.currentStatus.kind !== "conflict") this.setStatus(this.idleStatus());
     });
   }
@@ -188,8 +180,16 @@ export class QuizDraftSyncEngine {
   }
 
   notifyOnline(): void {
-    if (this.disposed) return;
+    if (this.disposed || !this.deps.isOnline()) return;
+    if (this.currentStatus.kind === "offline") this.setStatus(this.idleStatus());
     void this.send();
+  }
+
+  /** The connection dropped: show it now (and block publish), not only at the next send. */
+  notifyOffline(): void {
+    const { kind } = this.currentStatus;
+    if (this.disposed || (kind !== "saved" && kind !== "pending" && kind !== "saving")) return;
+    this.setStatus({ kind: "offline", pendingEdits: this.record ? pendingEdits(this.record) : 0 });
   }
 
   async resolveConflict(choice: "mine" | "server"): Promise<QuizEditorDraftDocument | null> {
@@ -220,12 +220,6 @@ export class QuizDraftSyncEngine {
     this.setStatus({ kind: "pending" });
     await this.send();
     return null;
-  }
-
-  setBaseDocVersion(version: number): Promise<void> {
-    return this.serial(async () => {
-      if (this.record && !this.disposed) await this.write({ ...this.record, baseDocVersion: version });
-    });
   }
 
   subscribe(listener: (status: QuizDraftSyncStatus) => void): () => void {
@@ -375,10 +369,23 @@ export class QuizDraftSyncEngine {
     }
     const current = this.record;
     if (!current) return;
+    const stored = await this.deps.store.get(this.deps.scope, this.key);
     const caughtUp = current.revision === revision;
     // Server image URLs replace data URLs locally too, unless a newer edit arrived meanwhile. recordJson keeps the
     // pre-upload JSON, because the UI still holds the data URLs and would otherwise never match again.
-    await this.write({ ...current, ...synced, dirty: !caughtUp, document: caughtUp ? sent : current.document }, this.recordJson);
+    const next = { ...current, ...synced, dirty: !caughtUp, document: caughtUp ? sent : current.document };
+    await this.write(next, this.recordJson, this.otherTabBackup(stored, synced.syncedAt));
+  }
+
+  /** Another tab's unsent edits that this engine never saw: a copy to keep before overwriting them, once per record. */
+  private otherTabBackup(stored: DeviceDraftRecord | null, createdAt: string): (() => Promise<void>) | null {
+    if (!stored?.dirty || stored.writerId === this.deps.writerId) return null;
+    const id = `${stored.writerId}:${stored.revision}`;
+    if (id === this.lastBackup || JSON.stringify(stored.document) === this.recordJson) return null;
+    return async () => {
+      await this.deps.store.addBackup(this.deps.scope, { key: this.key, reason: "other-tab", document: stored.document, createdAt });
+      this.lastBackup = id;
+    };
   }
 
   /** Keeps the record in memory, then stores it. Returns false when the device is full (the edit stays in memory). */
@@ -432,6 +439,7 @@ export class QuizDraftSyncEngine {
 
   private setStatus(status: QuizDraftSyncStatus): void {
     if (this.disposed || this.closing) return;
+    if (status.kind === "saved" && status.at !== null) this.recoveredEdits = null; // they reached the server
     this.currentStatus = status;
     for (const listener of this.listeners) listener(status);
   }

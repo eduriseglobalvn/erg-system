@@ -36,8 +36,10 @@ function blockedReason(status: QuizDraftSyncStatus, questionCount: number): stri
 }
 
 /** Publishes the whole quiz (the server compiles every question), after the last edit reached the server. */
-export function useQuizEditorPublish({ sync, questionSlideIds, setSlidesPublished, onPublished }: {
+export function useQuizEditorPublish({ sync, draftId, questionSlideIds, setSlidesPublished, onPublished }: {
   sync: ReturnType<typeof useQuizDraftSync>;
+  /** Id of the server draft being edited: a fork starts a new draft whose docVersion counts from 0 again. */
+  draftId: string;
   questionSlideIds: string[];
   setSlidesPublished: (ids: string[]) => void;
   onPublished: () => void;
@@ -66,7 +68,8 @@ export function useQuizEditorPublish({ sync, questionSlideIds, setSlidesPublishe
         return;
       }
       // Same key for the same draft version, so a retried click cannot publish twice.
-      await publishMutation.mutateAsync({ quizId, docVersion, idempotencyKey: `quiz-editor-publish:${quizId}:${docVersion}` });
+      const idempotencyKey = `quiz-editor-publish:${quizId}:${draftId}:${docVersion}`;
+      await publishMutation.mutateAsync({ quizId, docVersion, idempotencyKey });
       // Publishing does not change the server draft's docVersion, so the engine's base stays as it is.
       setSlidesPublished(questionSlideIds);
       toast.success("Đã xuất bản bài kiểm tra.");

@@ -26,7 +26,6 @@ export type UseQuizDraftSyncResult = {
   flushNow: () => Promise<void>;
   /** Hydrates the server copy itself when choosing "server". */
   resolveConflict: (choice: "mine" | "server") => Promise<void>;
-  setBaseDocVersion: (version: number) => Promise<void>;
   /** Set when reopening found device edits that were never sent. */
   recovered: { pendingEdits: number; editedAt: string } | null;
   /** Copies of the open draft, newest first. */
@@ -58,7 +57,6 @@ export function useQuizDraftSync(options: UseQuizDraftSyncOptions): UseQuizDraft
     ...state,
     flushNow: session.flushNow,
     resolveConflict: session.resolveConflict,
-    setBaseDocVersion: session.setBaseDocVersion,
     restoreBackup: session.restoreBackup,
   };
 }

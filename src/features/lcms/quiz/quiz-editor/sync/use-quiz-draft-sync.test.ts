@@ -140,6 +140,33 @@ describe("useQuizDraftSync", () => {
     expect(api.saveDraft).toHaveBeenCalledTimes(1);
   });
 
+  it("shows offline when the connection drops while idle, and leaves it when it returns", async () => {
+    const { result } = setup();
+    await settle();
+    expect(result.current.status.kind).toBe("saved");
+    online = false;
+    await act(async () => { window.dispatchEvent(new Event("offline")); await vi.advanceTimersByTimeAsync(0); });
+    expect(result.current.status).toEqual({ kind: "offline", pendingEdits: 0 });
+    online = true;
+    await act(async () => { window.dispatchEvent(new Event("online")); await vi.advanceTimersByTimeAsync(0); });
+    expect(result.current.status.kind).toBe("saved");
+
+    online = false;
+    await act(async () => { window.dispatchEvent(new Event("offline")); await vi.advanceTimersByTimeAsync(0); });
+    online = true; // the online event was missed: coming back to the tab is enough
+    await act(async () => { window.dispatchEvent(new Event("focus")); await vi.advanceTimersByTimeAsync(0); });
+    expect(result.current.status.kind).toBe("saved");
+    expect(api.saveDraft).not.toHaveBeenCalled();
+  });
+
+  it("stores the edit still in the debounce when the page is about to unload", async () => {
+    const { rerender } = setup();
+    await settle();
+    rerender({ draftKey: "q1", serverDraft: doc("server"), settled: true, document: doc("closing the tab") });
+    await act(async () => { window.dispatchEvent(new Event("beforeunload", { cancelable: true })); await vi.advanceTimersByTimeAsync(0); });
+    expect(titleOf((await store.get(scope, "q1"))?.document)).toBe("closing the tab");
+  });
+
   it("asks before unload only when there are unsynced changes", async () => {
     const unload = () => {
       const event = new Event("beforeunload", { cancelable: true });
