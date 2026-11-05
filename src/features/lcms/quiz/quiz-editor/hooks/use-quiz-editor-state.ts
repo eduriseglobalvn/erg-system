@@ -40,8 +40,16 @@ import type {
   SelectedEditorNode,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
+/** Highest number ending an id in the tree. Ids made after loading it start past it, so a new question never shares an id with an old one. */
+function highestIdNumber(tree: QuizEditorGroup[] | undefined) {
+  let highest = 0;
+  for (const match of JSON.stringify(tree ?? []).matchAll(/"id":"[^"]*-(\d{1,15})"/g)) highest = Math.max(highest, Number(match[1]));
+  return highest;
+}
+
 export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocument | null) {
-  const nextIdRef = useRef(1000);
+  const [firstId] = useState(() => Math.max(1000, highestIdNumber(initialDraftDocument?.tree)));
+  const nextIdRef = useRef(firstId);
   const [groups, setGroups] = useState<QuizEditorGroup[]>(() => initialDraftDocument?.tree ?? createEmptyQuizEditorGroups());
   const [resultSlide, setResultSlide] = useState(createMockResultSlide);
   const [quizProject, setQuizProject] = useState<QuizProjectSettings>(() => initialDraftDocument?.settings ?? createNewQuizProjectSettings());
@@ -363,6 +371,7 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
   }
 
   const hydrateDraftDocument = useCallback((draft: QuizEditorDraftDocument) => {
+    nextIdRef.current = Math.max(nextIdRef.current, highestIdNumber(draft.tree));
     setGroups(draft.tree);
     setQuizProject(draft.settings);
     setPlayerTemplate(draft.playerTemplate);

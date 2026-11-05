@@ -48,16 +48,18 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
   }, [viewAll, topics, groups, quizId]);
 
   // A "Tất cả" row belongs to another quiz: open the editor once that quiz's draft has loaded (adjusted while rendering).
-  const [pendingSlideId, setPendingSlideId] = useState<string | null>(null);
-  const pendingGroup = pendingSlideId ? groups.find((item) => item.slides.some((slide) => slide.id === pendingSlideId)) : undefined;
-  if (pendingSlideId && pendingGroup) {
-    setPendingSlideId(null);
-    selectSlide(pendingGroup.id, pendingSlideId);
+  // Slide ids are unique only within a quiz, so wait for that very quiz.
+  const [pending, setPending] = useState<{ quizId: string; slideId: string } | null>(null);
+  const pendingGroup =
+    pending && ready && pending.quizId === quizId ? groups.find((item) => item.slides.some((slide) => slide.id === pending.slideId)) : undefined;
+  if (pending && pendingGroup) {
+    setPending(null);
+    selectSlide(pendingGroup.id, pending.slideId);
     openEditor();
   }
 
   function selectTopic(topic: TopicRow | null) {
-    setPendingSlideId(null);
+    setPending(null);
     // The rail reads the quizzes left behind from this cache; autosave never touches it.
     if (quizId && ready) queryClient.setQueryData<QuizEditorDraftDocument>(quizEditorDraftQueryOptions(quizId).queryKey, (old) => old && { ...old, settings: quizProject, tree: groups });
     handleTopicChange(topic?.id ?? "all");
@@ -71,9 +73,9 @@ export function useQuizList({ scope, quizId, ready, groups, quizProject, selectS
       openEditor();
       return;
     }
-    if (!row.topic) return;
+    if (!row.topic?.quizId) return;
     selectTopic(row.topic);
-    setPendingSlideId(row.slide.id);
+    setPending({ quizId: row.topic.quizId, slideId: row.slide.id });
   }
 
   return { topics, rows, topicLabel: viewAll ? null : (selectedTopic?.label ?? quizProject.info.title), selectTopic, openRow };

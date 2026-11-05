@@ -285,6 +285,34 @@ describe("useQuizEditorState - search, collapse, hydrate", () => {
     expect(result.current.collapsedGroupIds).toEqual([]);
   });
 
+  it("a question added after reloading a quiz never reuses an id already in it, and deleting it keeps the old one", () => {
+    const day1 = renderHook(() => useQuizEditorState());
+    act(() => day1.result.current.addQuestion("multiple-choice"));
+    const savedTree = day1.result.current.groups;
+    const oldId = savedTree[0]!.slides[0]!.id;
+
+    const { result } = renderHook(() => useQuizEditorState());
+    act(() => result.current.hydrateDraftDocument({ ...draft(savedTree), settings: day1.result.current.quizProject }));
+    act(() => result.current.addQuestion("multiple-choice"));
+    const [old, added] = slidesOf(result, savedTree[0]!.id);
+    expect(added!.id).not.toBe(oldId);
+    expect(JSON.stringify(savedTree)).not.toContain(`"${added!.id}"`);
+
+    act(() => result.current.deleteSelected());
+    expect(slidesOf(result, savedTree[0]!.id)).toEqual([old]);
+  });
+
+  it("ids stay unique against a draft given at mount", () => {
+    const day1 = renderHook(() => useQuizEditorState());
+    act(() => day1.result.current.addQuestion("multiple-choice"));
+    const savedTree = day1.result.current.groups;
+
+    const { result } = renderHook(() => useQuizEditorState(draft(savedTree)));
+    act(() => result.current.addQuestion("multiple-choice"));
+    const added = slidesOf(result, savedTree[0]!.id)[1]!;
+    expect(JSON.stringify(savedTree)).not.toContain(`"${added.id}"`);
+  });
+
   it("hydrateDraftDocument replaces the tree and reselects the first node", () => {
     const { result } = setup();
     act(() => result.current.hydrateDraftDocument(draft([group("z", [slide("zz")])])));

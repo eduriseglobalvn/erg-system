@@ -78,6 +78,18 @@ describe("QuestionTable", () => {
     expect(onOpenRow).toHaveBeenCalledWith(rows[1]);
   });
 
+  it("in Tất cả, two quizzes may hold the same slide id: both rows show, with no key clash", () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    const rows: QuestionListRow[] = [
+      { slide: ready, number: 1, groupId: null, topic: topic("t1", "Phân số"), onServer: true },
+      { slide: { ...ready, title: "Tam giác" }, number: 1, groupId: null, topic: topic("t2", "Hình học"), onServer: true },
+    ];
+    renderTable({ rows, topicLabel: null });
+    expect(bodyRows()).toHaveLength(2);
+    expect(errors.mock.calls.flat().join(" ")).not.toMatch(/same key/);
+    errors.mockRestore();
+  });
+
   it("a topic with no quiz yet: empty table, still with the add button", () => {
     renderTable({ rows: [], topicLabel: "Hình học" });
     expect(bodyRows()).toHaveLength(0);

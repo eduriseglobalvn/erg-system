@@ -23,8 +23,8 @@ function setup(selectedTopicId: string, groups: QuizEditorGroup[], quizId = "") 
   const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
   const calls = { handleTopicChange: vi.fn(), selectSlide: vi.fn(), openQuiz: vi.fn(), openEditor: vi.fn() };
   const scope = { selectedCourseId: "c", selectedLevelId: "l", selectedTopicId, levelTopics: [], handleTopicChange: calls.handleTopicChange };
-  const hook = renderHook((props: { groups: QuizEditorGroup[] }) =>
-    useQuizList({ scope, quizId, ready: true, groups: props.groups, quizProject: createNewQuizProjectSettings(), selectSlide: calls.selectSlide, openQuiz: calls.openQuiz, openEditor: calls.openEditor }),
+  const hook = renderHook((props: { groups: QuizEditorGroup[]; quizId?: string }) =>
+    useQuizList({ scope, quizId: props.quizId ?? quizId, ready: true, groups: props.groups, quizProject: createNewQuizProjectSettings(), selectSlide: calls.selectSlide, openQuiz: calls.openQuiz, openEditor: calls.openEditor }),
   { initialProps: { groups }, wrapper });
   return { ...calls, hook, client };
 }
@@ -64,8 +64,21 @@ describe("useQuizList", () => {
     expect(openQuiz).toHaveBeenCalledWith("q2");
     expect(openEditor).not.toHaveBeenCalled();
 
-    hook.rerender({ groups: [group("g9", [target])] });
+    hook.rerender({ groups: [group("g9", [target])], quizId: "q2" });
     expect(selectSlide).toHaveBeenCalledWith("g9", "x");
+    expect(openEditor).toHaveBeenCalledTimes(1);
+  });
+
+  it("in Tất cả, a row waits for its own quiz: the same slide id in the quiz still open does not open", () => {
+    const target = slide("slide-1004");
+    topics.rows = [topic("t2", "q2", [target])];
+    const { hook, selectSlide, openEditor } = setup("all", []);
+    act(() => hook.result.current.openRow(hook.result.current.rows[0]!));
+
+    hook.rerender({ groups: [group("g1", [slide("slide-1004", { title: "old quiz" })])], quizId: "q1" });
+    expect(selectSlide).not.toHaveBeenCalled();
+    hook.rerender({ groups: [group("g9", [target])], quizId: "q2" });
+    expect(selectSlide).toHaveBeenCalledWith("g9", "slide-1004");
     expect(openEditor).toHaveBeenCalledTimes(1);
   });
 

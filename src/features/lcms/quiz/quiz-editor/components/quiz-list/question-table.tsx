@@ -76,7 +76,7 @@ export function QuestionTable({ rows, topicLabel, onOpenRow, onAdd }: {
         </TableHead>
         <TableBody>
           {shown.map(({ row, readiness }) => (
-            <QuestionTableRow key={row.slide.id} onOpen={() => onOpenRow(row)} readiness={readiness} row={row} showTopic={showTopic} />
+            <QuestionTableRow key={`${row.topic?.quizId ?? ""}:${row.slide.id}`} onOpen={() => onOpenRow(row)} readiness={readiness} row={row} showTopic={showTopic} />
           ))}
         </TableBody>
       </ErgTable>
