@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
@@ -49,7 +49,9 @@ describe("LikertAuthoring", () => {
   it("Enter in the last statement appends a row; the only row cannot be deleted", () => {
     render(<Harness start={mk(["a", "b"])} />);
     expect(screen.getByRole("button", { name: "Xóa nhận định 1" })).toBeDisabled();
-    fireEvent.keyDown(screen.getAllByPlaceholderText("Nhập nhận định")[0], { key: "Enter" });
+    const input = screen.getAllByPlaceholderText("Nhập nhận định")[0];
+    fireEvent.change(input, { target: { value: "x" } });
+    fireEvent.keyDown(input, { key: "Enter" });
     expect(screen.getAllByPlaceholderText("Nhập nhận định")).toHaveLength(2);
   });
 
@@ -57,5 +59,27 @@ describe("LikertAuthoring", () => {
     render(<Harness start={mk(["Không đồng ý", "Đồng ý"])} />);
     fireEvent.change(screen.getByRole("textbox", { name: "Nhãn mức 1" }), { target: { value: "Xyz" } });
     expect(screen.getByRole("combobox", { name: "Mẫu nhãn" })).toHaveTextContent("Tự đặt");
+  });
+
+  it("follows outside writes: custom labels survive + after the select showed a preset", () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<LikertAuthoring onChange={onChange} question={mk(["Không đồng ý", "Đồng ý"])} />);
+    rerender(<LikertAuthoring onChange={onChange} question={mk(["X", "Y"])} />);
+    expect(screen.getByRole("combobox", { name: "Mẫu nhãn" })).toHaveTextContent("Tự đặt");
+    fireEvent.click(screen.getByRole("button", { name: "Thêm một mức" }));
+    expect(onChange.mock.calls[0][0].likertScale.map((p: { label: string }) => p.label)).toEqual(["X", "Y", ""]);
+  });
+
+  it("Enter on an empty last statement does not append a row", () => {
+    render(<Harness start={{ ...mk(["a", "b"]), likertRows: [{ id: "r1", label: "" }] } as Question} />);
+    fireEvent.keyDown(screen.getAllByPlaceholderText("Nhập nhận định")[0], { key: "Enter" });
+    expect(screen.getAllByPlaceholderText("Nhập nhận định")).toHaveLength(1);
+  });
+
+  it("picking a preset relabels the levels", () => {
+    render(<Harness start={mk(["a", "b", "c"])} />);
+    fireEvent.mouseDown(screen.getByRole("combobox", { name: "Mẫu nhãn" }));
+    fireEvent.click(within(screen.getByRole("listbox")).getByText("Hài lòng"));
+    expect(screen.getByRole("textbox", { name: "Nhãn mức 2" })).toHaveValue("Bình thường");
   });
 });

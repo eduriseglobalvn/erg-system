@@ -8,7 +8,7 @@ import InputBase from "@mui/material/InputBase";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useId } from "react";
 
 import type { LikertRow, Question } from "@/domain/quiz/types";
 import { detectLikertPreset, LIKERT_PRESETS, type LikertPresetId, resizeLikertScale } from "./likert-presets";
@@ -26,12 +26,10 @@ function nextRowId(rows: LikertRow[]) {
 export function LikertAuthoring({ question, onChange }: { question: Question; onChange: (next: Question) => void }) {
   const scale = question.likertScale ?? [];
   const rows = question.likertRows ?? [];
-  const [preset, setPreset] = useState<LikertPresetId>(() => detectLikertPreset(scale));
+  const preset = detectLikertPreset(scale);
+  const labelId = useId();
   const count = scale.length;
-  const setScale = (next: typeof scale, nextPreset: LikertPresetId = preset) => {
-    setPreset(nextPreset);
-    onChange({ ...question, likertScale: next });
-  };
+  const setScale = (next: typeof scale) => onChange({ ...question, likertScale: next });
   const setRows = (next: LikertRow[]) => onChange({ ...question, likertRows: next });
   const addRow = () => setRows([...rows, { id: nextRowId(rows), label: "" }]);
 
@@ -45,15 +43,14 @@ export function LikertAuthoring({ question, onChange }: { question: Question; on
           <IconButton aria-label="Thêm một mức" disabled={count >= MAX} onClick={() => setScale(resizeLikertScale(scale, count + 1, preset))} size="small"><AddIcon fontSize="small" /></IconButton>
         </Box>
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <Typography id="likert-preset-label" variant="body2">Mẫu nhãn</Typography>
+          <Typography id={labelId} variant="body2">Mẫu nhãn</Typography>
           <Select
-            inputProps={{ "aria-labelledby": "likert-preset-label" }}
+            inputProps={{ "aria-labelledby": labelId }}
             onChange={(e) => {
-              const next = e.target.value as LikertPresetId;
-              setScale(resizeLikertScale(scale, count, next), next);
+              setScale(resizeLikertScale(scale, count, e.target.value as LikertPresetId));
             }}
             size="small"
-            SelectDisplayProps={{ "aria-labelledby": "likert-preset-label" }}
+            SelectDisplayProps={{ "aria-labelledby": labelId }}
             value={preset}
           >
             {LIKERT_PRESETS.map((p) => <MenuItem key={p.id} value={p.id}>{p.label}</MenuItem>)}
@@ -69,7 +66,7 @@ export function LikertAuthoring({ question, onChange }: { question: Question; on
                 <Box component="th" key={point.id} sx={cellSx}>
                   <InputBase
                     inputProps={{ "aria-label": `Nhãn mức ${point.value}`, style: { textAlign: "center" } }}
-                    onChange={(e) => setScale(scale.map((p) => (p.id === point.id ? { ...p, label: e.target.value } : p)), "custom")}
+                    onChange={(e) => setScale(scale.map((p) => (p.id === point.id ? { ...p, label: e.target.value } : p)))}
                     placeholder={`Mức ${point.value}`}
                     value={point.label}
                   />
@@ -87,7 +84,7 @@ export function LikertAuthoring({ question, onChange }: { question: Question; on
                     inputProps={{ "aria-label": `Nhận định ${index + 1}` }}
                     onChange={(e) => setRows(rows.map((r) => (r.id === row.id ? { ...r, label: e.target.value } : r)))}
                     onKeyDown={(e) => {
-                      if (e.nativeEvent.isComposing || e.key !== "Enter" || index !== rows.length - 1) return;
+                      if (e.nativeEvent.isComposing || e.key !== "Enter" || index !== rows.length - 1 || !row.label.trim()) return;
                       e.preventDefault();
                       addRow();
                     }}

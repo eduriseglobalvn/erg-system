@@ -22,8 +22,14 @@ describe("likert presets", () => {
   });
 
   it("new ids skip ids already in use", () => {
-    const out = resizeLikertScale([point(1, "A"), { id: "scale-2", label: "B", value: 2 }].slice(0, 1).concat({ id: "scale-3", label: "C", value: 2 }), 4, "custom");
-    expect(new Set(out.map((p) => p.id)).size).toBe(4);
+    const out = resizeLikertScale([point(1, "A"), { id: "scale-3", label: "C", value: 2 }], 4, "custom");
+    expect(out.map((p) => p.id)).toEqual(["scale-1", "scale-3", "scale-2", "scale-4"]);
+  });
+
+  it("clamps count to 2..7 for presets", () => {
+    expect(resizeLikertScale([point(1, "A")], 1, "agree")).toHaveLength(2);
+    const nine = Array.from({ length: 9 }, (_, i) => point(i + 1, "x"));
+    expect(resizeLikertScale(nine, 9, "agree")).toHaveLength(7);
   });
 
   it("a preset replaces labels but keeps ids", () => {
