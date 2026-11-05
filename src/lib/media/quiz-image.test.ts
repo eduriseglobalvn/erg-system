@@ -6,6 +6,7 @@ describe("quiz-image", () => {
     expect(fitWithin(800, 600)).toEqual({ width: 800, height: 600 });
     expect(fitWithin(4000, 3000)).toEqual({ width: 1600, height: 1200 });
     expect(fitWithin(1000, 5000)).toEqual({ width: 320, height: 1600 });
+    expect(fitWithin(1, 10000)).toEqual({ width: 1, height: 1600 });
   });
 
   it("rejects heic and oversize files with Vietnamese messages", async () => {

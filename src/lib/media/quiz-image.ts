@@ -21,7 +21,7 @@ export function fitWithin(width: number, height: number, maxEdge = QUIZ_IMAGE_MA
   const longEdge = Math.max(width, height);
   if (longEdge <= maxEdge) return { width, height };
   const scale = maxEdge / longEdge;
-  return { width: Math.round(width * scale), height: Math.round(height * scale) };
+  return { width: Math.max(1, Math.round(width * scale)), height: Math.max(1, Math.round(height * scale)) };
 }
 
 export type ImageResizer = (file: File, target: { width: number; height: number }) => Promise<string>;
@@ -56,7 +56,9 @@ const resizeWithCanvas: ImageResizer = async (file, target) => {
   const canvas = document.createElement("canvas");
   canvas.width = target.width;
   canvas.height = target.height;
-  canvas.getContext("2d")?.drawImage(image, 0, 0, target.width, target.height);
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Không thu nhỏ được ảnh.");
+  context.drawImage(image, 0, 0, target.width, target.height);
   return canvas.toDataURL(file.type);
 };
 

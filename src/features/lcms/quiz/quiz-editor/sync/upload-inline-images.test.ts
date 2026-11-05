@@ -1,6 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
-import { dataUrlToBlob, uploadInlineImages } from "@/features/lcms/quiz/quiz-editor/sync/upload-inline-images";
+import { createQuizImageUploader, dataUrlToBlob, uploadInlineImages } from "@/features/lcms/quiz/quiz-editor/sync/upload-inline-images";
 
 const img = "data:image/png;base64,iVBORw0KGgo=";
 const base = { quizId: "q", draftId: "d" };
@@ -47,5 +47,58 @@ describe("uploadInlineImages", () => {
     const blob = dataUrlToBlob(img);
     expect(blob.type).toBe("image/png");
     expect(blob.size).toBe(8);
+  });
+
+  it("decodes a plain percent-encoded data URL without base64", async () => {
+    const blob = dataUrlToBlob("data:image/svg+xml,%3Csvg%2F%3E");
+    expect(blob.type).toBe("image/svg+xml");
+    expect(await blob.text()).toBe("<svg/>");
+  });
+
+  it("throws a clear error for malformed data URLs", () => {
+    expect(() => dataUrlToBlob("data:image/png;base64")).toThrow("Ảnh không hợp lệ");
+    expect(() => dataUrlToBlob("data:image/png;base64,@@@")).toThrow("Ảnh không hợp lệ");
+    expect(() => dataUrlToBlob("data:image/svg+xml,%E0%A4%A")).toThrow("Ảnh không hợp lệ");
+  });
+
+  it.each(["presign", "put", "commit"] as const)("rejects when %s fails and does not mutate the input", async (step) => {
+    const uploader = makeUploader();
+    uploader[step].mockRejectedValue(new Error("boom"));
+    const doc = docWith(img);
+    const before = structuredClone(doc);
+    await expect(uploadInlineImages(doc, uploader, async () => "sha", size)).rejects.toThrow("boom");
+    expect(doc).toEqual(before);
+  });
+
+  it("does not mutate the input on success", async () => {
+    const doc = docWith(img);
+    const before = structuredClone(doc);
+    await uploadInlineImages(doc, makeUploader(), async () => "sha", size);
+    expect(doc).toEqual(before);
+  });
+
+  it("uploads once when two different strings hash the same", async () => {
+    const other = "data:image/png;base64,AAAA";
+    const doc = { ...base, tree: [{ a: img, b: other }] } as unknown as QuizEditorDraftDocument;
+    const uploader = makeUploader();
+    const out = await uploadInlineImages(doc, uploader, async () => "same", size);
+    expect(uploader.presign).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(out)).not.toContain("data:image");
+  });
+});
+
+describe("createQuizImageUploader.put", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("rejects on a non-2xx response", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 403 }));
+    await expect(createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png")).rejects.toThrow("403");
+  });
+
+  it("sends a PUT with Content-Type on success", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({ ok: true, status: 200 });
+    vi.stubGlobal("fetch", fetchMock);
+    await createQuizImageUploader().put("https://up/x", new Blob(["x"]), "image/png");
+    expect(fetchMock).toHaveBeenCalledWith("https://up/x", expect.objectContaining({ method: "PUT", headers: { "Content-Type": "image/png" } }));
   });
 });

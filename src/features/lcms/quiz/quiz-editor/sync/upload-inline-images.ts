@@ -30,11 +30,21 @@ const INLINE_IMAGE = /^data:image\//;
 
 export function dataUrlToBlob(dataUrl: string): Blob {
   const comma = dataUrl.indexOf(",");
-  const mime = /^data:([^;,]+)/.exec(dataUrl)?.[1] ?? "application/octet-stream";
-  const binary = atob(dataUrl.slice(comma + 1));
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
-  return new Blob([bytes], { type: mime });
+  const header = /^data:([^;,]*)((?:;[^,]*)?)$/.exec(comma < 0 ? "" : dataUrl.slice(0, comma));
+  if (!header) throw new Error("Ảnh không hợp lệ (data URL sai định dạng).");
+  const mime = header[1] || "application/octet-stream";
+  const payload = dataUrl.slice(comma + 1);
+  try {
+    if (header[2].includes(";base64")) {
+      const binary = atob(payload);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+      return new Blob([bytes], { type: mime });
+    }
+    return new Blob([decodeURIComponent(payload)], { type: mime });
+  } catch {
+    throw new Error("Ảnh không hợp lệ (không giải mã được data URL).");
+  }
 }
 
 async function sha256Hex(blob: Blob): Promise<string> {
