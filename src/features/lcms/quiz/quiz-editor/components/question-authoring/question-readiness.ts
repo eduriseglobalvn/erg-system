@@ -19,11 +19,11 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
   switch (question.kind) {
     case "single_choice":
     case "multiple_response": {
-      const choices = question.choices ?? [];
+      // Readiness only: blanks stay in the data because the teacher may still be typing.
+      const choices = (question.choices ?? []).filter((choice) => filled(choice.label, choice.image));
       const correct = choices.filter((choice) => choice.correct).length;
-      if (choices.filter((choice) => filled(choice.label, choice.image)).length < 2) {
-        add("min-options", "Cần ít nhất 2 phương án có chữ");
-      }
+      if (choices.length < 2) add("min-options", "Cần ít nhất 2 phương án có chữ");
+      if (choices.length < (question.choices ?? []).length) add("blank-option", "Xoá phương án trống hoặc điền chữ");
       if (correct === 0) add("no-correct", "Chưa chọn đáp án đúng");
       else if (question.kind === "single_choice" && correct > 1) {
         add("many-correct", "Chỉ được chọn 1 đáp án đúng");
@@ -84,11 +84,13 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       if (answer && (answer.tolerance ?? 0) < 0) add("numeric-tolerance", "Sai số không được âm");
       break;
     }
-    case "sequence":
-      if ((question.sequenceItems ?? []).filter((item) => filled(item.label, item.image)).length < 2) {
-        add("min-steps", "Cần ít nhất 2 bước có chữ");
-      }
+    case "sequence": {
+      const items = question.sequenceItems ?? [];
+      const steps = items.filter((item) => filled(item.label, item.image)).length;
+      if (steps < 2) add("min-steps", "Cần ít nhất 2 bước có chữ");
+      if (steps < items.length) add("blank-step", "Xoá bước trống hoặc điền chữ");
       break;
+    }
     case "matching": {
       const pairs = question.matching ?? [];
       if (pairs.length < 2) add("min-pairs", "Cần ít nhất 2 cặp");

@@ -27,8 +27,14 @@ describe("assessQuestionReadiness", () => {
     it("ready, image-only option counts", () => {
       expect(codes(q({ ...k, choices: [ch("a", "A", true), ch("b", "", false, img)] }))).toEqual([]);
     });
-    it("min-options", () => {
-      expect(codes(q({ ...k, choices: [ch("a", "A", true), ch("b", " ")] }))).toEqual(["min-options"]);
+    it("min-options, and the blank option must be removed or filled", () => {
+      expect(codes(q({ ...k, choices: [ch("a", "A", true), ch("b", " ")] }))).toEqual(["min-options", "blank-option"]);
+    });
+    it("blank-option even when two options have text", () => {
+      const r = assessQuestionReadiness(q({ ...k, choices: [ch("a", "A", true), ch("b", "B"), ch("c", "")] }), {
+        hasQuestionImage: true,
+      });
+      expect(r.issues).toEqual([{ code: "blank-option", area: "answers", message: "Xoá phương án trống hoặc điền chữ" }]);
     });
     it("no-correct", () => {
       expect(codes(q({ ...k, choices: [ch("a", "A"), ch("b", "B")] }))).toEqual(["no-correct"]);
@@ -45,6 +51,12 @@ describe("assessQuestionReadiness", () => {
     });
     it("min-options and no-correct", () => {
       expect(codes(q({ ...k, choices: [ch("a", "A")] }))).toEqual(["min-options", "no-correct"]);
+    });
+    it("a blank option marked correct does not count as correct", () => {
+      expect(codes(q({ ...k, choices: [ch("a", "A"), ch("b", "B"), ch("c", " ", true)] }))).toEqual([
+        "blank-option",
+        "no-correct",
+      ]);
     });
   });
 
@@ -153,6 +165,13 @@ describe("assessQuestionReadiness", () => {
       ).toEqual([]);
       expect(codes(q({ ...k, sequenceItems: [{ id: "a", label: "A" }, { id: "b", label: " " }] }))).toEqual([
         "min-steps",
+        "blank-step",
+      ]);
+    });
+    it("blank-step even when two steps have text", () => {
+      const items = [{ id: "a", label: "A" }, { id: "b", label: "B" }, { id: "c", label: "" }];
+      expect(assessQuestionReadiness(q({ ...k, sequenceItems: items }), { hasQuestionImage: true }).issues).toEqual([
+        { code: "blank-step", area: "answers", message: "Xoá bước trống hoặc điền chữ" },
       ]);
     });
   });

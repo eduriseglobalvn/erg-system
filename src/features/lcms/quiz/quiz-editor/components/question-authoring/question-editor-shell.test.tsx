@@ -62,7 +62,7 @@ describe("QuestionEditorShell", () => {
 
   it("shows the readiness chip and a missing rail dot for a blank multiple-choice slide", () => {
     renderShell();
-    expect(screen.getByText("Chưa có đề bài · còn 2 chỗ khác")).toBeInTheDocument();
+    expect(screen.getByText("Chưa có đề bài · còn 3 chỗ khác")).toBeInTheDocument();
     const rail = screen.getByRole("navigation", { name: "Danh sách câu hỏi" });
     const row = within(rail).getByRole("button", { name: /\(Chưa có đề bài\)/ });
     expect(row.querySelector("[data-status]")?.getAttribute("data-status")).toBe("missing");
