@@ -250,12 +250,12 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
     id: question.id || template.id,
     scope: mapQuestionScope(question, template.scope),
     subjectId: subject.id,
-    subjectLabel: question.subjectLabel?.trim() || subject.label,
+    subjectLabel: readableLabel(question.subjectLabel, question.subjectId) || subject.label,
     levelId: level?.id ?? question.levelId ?? subject.levels[0]?.id ?? "level",
-    levelLabel: question.levelLabel?.trim() || level?.label || template.levelLabel,
+    levelLabel: readableLabel(question.levelLabel, question.levelId) || level?.label || template.levelLabel,
     categoryId: category?.id ?? question.topicId ?? subject.categories[0]?.id ?? "topic",
-    categoryLabel: question.categoryLabel?.trim() || category?.label || "Chu de",
-    gradeLabel: question.gradeLabel?.trim() || level?.label || subject.label,
+    categoryLabel: readableLabel(question.categoryLabel, question.topicId) || category?.label || "Chu de",
+    gradeLabel: readableLabel(question.gradeLabel, question.levelId, question.subjectId) || level?.label || subject.label,
     type: mapQuestionType(question.type ?? template.type),
     difficulty: mapQuestionDifficulty(question.difficulty ?? template.difficulty),
     status: mapQuestionStatus(question.status ?? template.status),
@@ -280,6 +280,12 @@ function mapQuestion(question: QuestionBankQuestionDTO, subjects: QuestionBankSu
         }))
       : template.choices,
   };
+}
+
+/** The API falls back to the id when a label is missing; an id is not a label. */
+function readableLabel(label: string | null | undefined, ...ids: (string | null | undefined)[]) {
+  const value = label?.trim();
+  return value && !ids.includes(value) ? value : "";
 }
 
 function mapQuiz(

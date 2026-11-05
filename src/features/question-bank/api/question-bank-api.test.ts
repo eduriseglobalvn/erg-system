@@ -227,6 +227,24 @@ describe("loadQuestionBankData", () => {
     ]);
   });
 
+  test("shows catalog labels when the API falls back to ids for missing labels", async () => {
+    graphQlRequestMock.mockResolvedValueOnce(
+      workspace({
+        questions: {
+          items: [{ id: "q-1", subjectId: "python", subjectLabel: "python", levelId: "python-foundation", levelLabel: "python-foundation", topicId: "topic-1", categoryLabel: "topic-1", gradeLabel: "python-foundation", title: "Q", type: "multiple-choice" }],
+          page: 0, size: 50, totalItems: 1, totalPages: 1, hasNext: false, hasPrevious: false,
+        },
+        subjects: [{ id: "python", label: "Python" }],
+        levels: [{ id: "python-foundation", label: "Foundation", subjectId: "python", categoryIds: ["topic-1"] }],
+        topics: [{ id: "topic-1", label: "Variables", levelId: "python-foundation" }],
+      }) as never,
+    );
+
+    const [question] = (await loadQuestionBankData("tenant-a")).questions;
+
+    expect(question).toMatchObject({ subjectLabel: "Python", levelLabel: "Foundation", categoryLabel: "Variables", gradeLabel: "Foundation" });
+  });
+
   test("passes scoped filters to the GraphQL question-bank workspace query", async () => {
     graphQlRequestMock.mockResolvedValueOnce(workspace() as never);
 

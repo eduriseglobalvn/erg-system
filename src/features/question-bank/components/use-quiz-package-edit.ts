@@ -36,7 +36,10 @@ export function useQuizPackageEdit(copy: QuestionBankCopy) {
     const title = draft.title.trim();
     if (!title) { toast.error(copy.quizTitleRequired); return; }
     try {
-      await saveDraftMutation.mutateAsync({ quizId: quiz.id, docVersion: doc.docVersion, ...applyQuizPackageDraft(doc, quiz, draft) });
+      const next = applyQuizPackageDraft(doc, quiz, draft);
+      const saved = await saveDraftMutation.mutateAsync({ quizId: quiz.id, docVersion: doc.docVersion, ...next });
+      // If the rename below fails, a retry must not reuse the docVersion this save used up (409).
+      setQuizPackageEdit((current) => current && { ...current, doc: { ...doc, ...next, docVersion: saved.docVersion } });
       if (title !== quiz.title || draft.kind !== quiz.kind) await updateMetaMutation.mutateAsync({ quizId: quiz.id, title, kind: draft.kind });
       toast.success(copy.updatePackageSuccess);
       setQuizPackageEdit(null);
