@@ -1,8 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
+import { normalizeQuizEditorGroups, normalizeQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-normalizers";
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
-import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { lifecycleLabel, quizLifecycle, recordPublished, slideFingerprint, slidePublishState } from "./quiz-publish-state";
+import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import {
+  fingerprintedSlides,
+  lifecycleLabel,
+  quizLifecycle,
+  recordPublished,
+  slideFingerprint,
+  slidePublishState,
+} from "./quiz-publish-state";
 
 const slide = (id: string, title: string): QuizEditorSlide => ({
   id,
@@ -12,6 +20,7 @@ const slide = (id: string, title: string): QuizEditorSlide => ({
 });
 const s1 = slide("s1", "2 + 2 = ?");
 const s2 = slide("s2", "3 + 3 = ?");
+const intro: QuizEditorSlide = { id: "i1", title: "Giới thiệu", kind: "intro-slide", instructions: ["Làm bài trong 10 phút"] };
 const published = recordPublished(createNewQuizProjectSettings(), [s1, s2]);
 
 describe("slideFingerprint", () => {
@@ -29,6 +38,54 @@ describe("slideFingerprint", () => {
       id: "s1",
     } as QuizEditorSlide;
     expect(slideFingerprint(reordered)).toBe(slideFingerprint(s1));
+  });
+});
+
+describe("slideFingerprint cost and strength", () => {
+  it("hashes a slide object once and reuses the result", () => {
+    const fresh = slide("s9", "9 + 9 = ?");
+    const stringify = vi.spyOn(JSON, "stringify");
+    try {
+      slideFingerprint(fresh);
+      slideFingerprint(fresh);
+      expect(stringify).toHaveBeenCalledTimes(1);
+    } finally {
+      stringify.mockRestore();
+    }
+  });
+
+  it("is a 53-bit hash, wider than 32 bits", () => {
+    expect(Number.parseInt(slideFingerprint(s1), 16)).toBeGreaterThan(2 ** 32);
+  });
+});
+
+describe("question slides only", () => {
+  it("keeps question kinds and leaves intro, instruction and result slides out", () => {
+    const instruction: QuizEditorSlide = { ...intro, id: "i2", kind: "instruction-slide" };
+    const result: QuizEditorSlide = { id: "r1", title: "Kết quả", kind: "result-slide" };
+    expect(fingerprintedSlides([intro, s1, instruction, s2, result])).toEqual([s1, s2]);
+  });
+
+  it("records no intro slide, and adding or removing one does not flip the status", () => {
+    const withIntro = recordPublished(createNewQuizProjectSettings(), [intro, s1, s2]);
+    expect(Object.keys(withIntro.publishedFingerprints ?? {})).toEqual(["s1", "s2"]);
+    const base = { quizId: "q1", serverStatus: "draft" };
+    expect(quizLifecycle({ ...base, settings: withIntro, slides: [s1, s2] })).toBe("published");
+    expect(quizLifecycle({ ...base, settings: published, slides: [intro, s1, s2] })).toBe("published");
+  });
+});
+
+describe("save and reload", () => {
+  it("still reads published after the draft goes through the server and the normalizers", () => {
+    const blankTitle: QuizEditorSlide = { ...slide("s3", ""), status: "published" };
+    const groups: QuizEditorGroup[] = [{ id: "g1", title: "Phân số", rule: "all", randomCount: 0, slides: [intro, s1, blankTitle, s2] }];
+    const slides = groups.flatMap((group) => group.slides);
+    const settings = recordPublished(createNewQuizProjectSettings(), slides);
+
+    const reloadedSettings = normalizeQuizProjectSettings(JSON.parse(JSON.stringify(settings)));
+    const reloadedSlides = normalizeQuizEditorGroups(JSON.parse(JSON.stringify(groups))).flatMap((group) => group.slides);
+
+    expect(quizLifecycle({ quizId: "q1", serverStatus: "published", settings: reloadedSettings, slides: reloadedSlides })).toBe("published");
   });
 });
 
