@@ -9,7 +9,7 @@ import { useI18n } from "@/platform/i18n";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { AnswerArea } from "./answer-area";
 import { QuestionFeedbackLine } from "./question-feedback-line";
-import { QuestionImageSlot, type ImageSize } from "./question-image-slot";
+import { QuestionImageSlot } from "./question-image-slot";
 import type { QuestionReadiness } from "./question-readiness";
 import { readSlideQuestion, writeSlideQuestion } from "./slide-question";
 
@@ -31,7 +31,6 @@ type Props = {
 
 export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide }: Props) {
   const { t } = useI18n();
-  const hotspot = slide.kind === "hotspot";
   const hints = ACTION_HINTS[slide.kind] ?? {};
   const titleIssue = readiness.issues.find((issue) => issue.area === "title");
   const answerIssues = readiness.issues.filter((issue) => issue.area === "answers");
@@ -46,14 +45,12 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
   const setTitle = (title: string) => (question ? write({ ...question, title }) : onReplaceSlide({ ...slide, title }));
 
   // The image lives on the slide and in the runtime question; the slide keeps its file name.
-  const setMedia = (media: QuizEditorSlideMedia | null, size?: ImageSize) =>
+  // A hotspot image is the answer canvas, so its authoring surface owns it.
+  const setMedia = (media: QuizEditorSlideMedia | null) =>
     onReplaceSlide((current) => {
       const latest = readSlideQuestion(current, t);
       if (!latest) return { ...current, media };
-      const next: Question = current.kind === "hotspot"
-        ? { ...latest, hotspotImage: media ? { url: media.src, width: size?.width ?? latest.hotspotImage?.width ?? 1200, height: size?.height ?? latest.hotspotImage?.height ?? 675 } : undefined }
-        : { ...latest, contentImage: media ? { url: media.src, alt: media.alt } : undefined };
-      return { ...writeSlideQuestion(current, next), media };
+      return { ...writeSlideQuestion(current, { ...latest, contentImage: media ? { url: media.src, alt: media.alt } : undefined }), media };
     });
 
   return (
@@ -74,7 +71,7 @@ export function QuestionCard({ slide, question, meta, readiness, onReplaceSlide 
         />
         {titleIssue ? <Typography color="warning.main" sx={{ px: 1.5 }} variant="caption">{titleIssue.message}</Typography> : null}
       </Box>
-      <QuestionImageSlot label={hotspot ? "Ảnh của câu hỏi điểm nóng" : "Thêm ảnh cho câu hỏi"} media={slide.media} onChange={setMedia} />
+      {slide.kind === "hotspot" ? null : <QuestionImageSlot label="Thêm ảnh cho câu hỏi" media={slide.media} onChange={setMedia} />}
       {answerIssues.length ? (
         <Box role="status" sx={{ bgcolor: tokens.statusTint.warning.bg, borderRadius: `${tokens.radius.control}px`, color: tokens.statusTint.warning.color, display: "flex", gap: 1, px: 1.5, py: 1, typography: "body2" }}>
           <WarningAmberIcon fontSize="small" />
