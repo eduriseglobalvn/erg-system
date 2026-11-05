@@ -1,10 +1,14 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { I18nProvider } from "@/platform/i18n";
 import { buildPreviewQuestion } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-question-builders";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { QuestionEditorShell } from "./question-editor-shell";
+
+const prepare = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/media/quiz-image", async (orig) => ({ ...(await orig<object>()), prepareQuizImage: prepare }));
 
 const choice = (id: string, label: string, correct = false) => ({ id, label, correct });
 const ready: QuizEditorSlide = {
@@ -39,6 +43,7 @@ function renderShell(overrides: Partial<Parameters<typeof QuestionEditorShell>[0
     onDelete: vi.fn(),
     onClose: vi.fn(),
     syncChip: <span>sync-chip</span>,
+    banner: null,
     ...overrides,
   };
   render(
@@ -144,5 +149,83 @@ describe("QuestionEditorShell", () => {
     expect(next.feedbackRows?.find((row) => row.kind === "correct")?.feedback).toBe("Giỏi lắm");
     const t = ((key: string) => key) as never;
     expect(buildPreviewQuestion(next, t)?.points).toBe(buildPreviewQuestion(blank, t)?.points);
+  });
+
+  it("shows the sync banner inside the editor, above the card", () => {
+    renderShell({ banner: <div>Mất kết nối</div> });
+    const dialog = screen.getByRole("dialog", { name: "Soạn câu hỏi" });
+    const banner = within(dialog).getByText("Mất kết nối");
+    expect(banner.compareDocumentPosition(within(dialog).getByPlaceholderText("Nhập đề bài")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+});
+
+const intro: QuizEditorSlide = { id: "i1", title: "Chào mừng", kind: "intro-slide", instructions: ["Đọc kỹ đề"] };
+const withIntro: QuizEditorGroup[] = [{ ...groups[0]!, slides: [intro, ready, blank] }, groups[1]!];
+
+describe("QuestionEditorShell with intro slides", () => {
+  it("leaves intro slides out of the count and the rail", () => {
+    renderShell({ groups: withIntro });
+    expect(screen.getByText("Câu 2 / 3")).toBeInTheDocument();
+    const rail = screen.getByRole("navigation", { name: "Danh sách câu hỏi" });
+    expect(within(rail).queryByText("Chào mừng")).toBeNull();
+  });
+
+  it("edits an intro slide's title and instructions, without readiness or a type change", () => {
+    const onReplaceSlide = vi.fn();
+    renderShell({ groups: withIntro, selectedSlide: intro, onReplaceSlide });
+    expect(screen.queryByText(/^Câu \d/)).toBeNull();
+    expect(screen.queryByText("Câu hỏi chưa có nội dung")).toBeNull();
+    fireEvent.change(screen.getByRole("textbox", { name: "Tiêu đề" }), { target: { value: "Xin chào" } });
+    expect(onReplaceSlide.mock.calls.at(-1)![0]).toMatchObject({ title: "Xin chào", kind: "intro-slide" });
+    expect(screen.getByDisplayValue("Đọc kỹ đề")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Thêm thao tác" }));
+    expect(screen.queryByRole("menuitem", { name: "Đổi dạng câu hỏi…" })).toBeNull();
+  });
+});
+
+describe("QuestionEditorShell images added while the teacher keeps typing", () => {
+  let latest: QuizEditorSlide = ready;
+  function Stateful({ initial }: { initial: QuizEditorSlide }) {
+    const [slide, setSlide] = useState(initial);
+    latest = slide;
+    return (
+      <I18nProvider>
+        <QuestionEditorShell
+          {...{ onSelectSlide: vi.fn(), onAddQuestion: vi.fn(), onChangeType: vi.fn(), onDuplicate: vi.fn(), onDelete: vi.fn(), onClose: vi.fn() }}
+          banner={null}
+          groups={[{ ...groups[0]!, slides: [slide] }]}
+          onReplaceSlide={(update) => setSlide((current) => (typeof update === "function" ? update(current) : update))}
+          selectedSlide={slide}
+          syncChip={null}
+        />
+      </I18nProvider>
+    );
+  }
+  const pending = () => {
+    let resolve!: (value: unknown) => void;
+    prepare.mockReturnValueOnce(new Promise((r) => (resolve = r)));
+    return (dataUrl: string) => act(async () => resolve({ dataUrl, width: 4, height: 3 }));
+  };
+  const file = new File(["x"], "a.png", { type: "image/png" });
+
+  it("keeps a title typed while an option image is processed", async () => {
+    render(<Stateful initial={ready} />);
+    const finish = pending();
+    fireEvent.change(screen.getByLabelText("Ảnh phương án 1"), { target: { files: [file] } });
+    fireEvent.change(screen.getByPlaceholderText("Nhập đề bài"), { target: { value: "Mới" } });
+    await finish("data:image/png;base64,AAAA");
+    await waitFor(() => expect(latest.choices?.[0].media?.src).toBe("data:image/png;base64,AAAA"));
+    expect(latest.title).toBe("Mới");
+  });
+
+  it("keeps a title typed while the question image is processed", async () => {
+    render(<Stateful initial={ready} />);
+    const finish = pending();
+    const input = Array.from(document.querySelectorAll<HTMLInputElement>('input[type="file"]')).find((el) => !el.getAttribute("aria-label"))!;
+    fireEvent.change(input, { target: { files: [file] } });
+    fireEvent.change(screen.getByPlaceholderText("Nhập đề bài"), { target: { value: "Mới" } });
+    await finish("data:image/png;base64,BBBB");
+    await waitFor(() => expect(latest.media?.src).toBe("data:image/png;base64,BBBB"));
+    expect(latest.title).toBe("Mới");
   });
 });

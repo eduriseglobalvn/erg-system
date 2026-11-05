@@ -15,21 +15,21 @@ import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { readinessLabel, type QuestionReadiness } from "./question-readiness";
 import { QuestionViewToggle, type QuestionView } from "./question-view-toggle";
 
+// An intro slide has no position, readiness or type change: those props are null / absent.
 type Props = {
-  number: number;
-  total: number;
+  position: string | null;
   typeLabel: string;
-  readiness: QuestionReadiness;
+  readiness: QuestionReadiness | null;
   syncChip: ReactNode;
   view: QuestionView;
   onViewChange: (view: QuestionView) => void;
   onBack: () => void;
-  onChangeType: () => void;
+  onChangeType?: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 };
 
-export function QuestionEditorTitlebar({ number, total, typeLabel, readiness, syncChip, view, onViewChange, onBack, onChangeType, onDuplicate, onDelete }: Props) {
+export function QuestionEditorTitlebar({ position, typeLabel, readiness, syncChip, view, onViewChange, onBack, onChangeType, onDuplicate, onDelete }: Props) {
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const run = (action: () => void) => () => {
     setMenuAnchor(null);
@@ -42,9 +42,9 @@ export function QuestionEditorTitlebar({ number, total, typeLabel, readiness, sy
         Danh sách câu hỏi
       </Button>
       <Divider flexItem orientation="vertical" sx={{ my: 0.5 }} />
-      <Typography component="h2" variant="subtitle2">{`Câu ${number} / ${total}`}</Typography>
+      {position ? <Typography component="h2" variant="subtitle2">{position}</Typography> : null}
       <ErgStatusChip dot={false} label={typeLabel} sx={{ border: 1, borderColor: tokens.color.border }} tone="neutral" />
-      {readiness.ready ? (
+      {!readiness ? null : readiness.ready ? (
         <ErgStatusChip label={readinessLabel(readiness)} tone="success" />
       ) : (
         <ErgStatusChip icon={<WarningAmberIcon sx={{ color: "inherit !important", fontSize: tokens.size.iconSm }} />} label={readinessLabel(readiness)} tone="warning" />
@@ -63,7 +63,7 @@ export function QuestionEditorTitlebar({ number, total, typeLabel, readiness, sy
         slotProps={{ list: { "aria-label": "Thao tác câu hỏi" }, paper: { sx: { minWidth: 240 } } }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
       >
-        <MenuItem onClick={run(onChangeType)}>Đổi dạng câu hỏi…</MenuItem>
+        {onChangeType ? <MenuItem onClick={run(onChangeType)}>Đổi dạng câu hỏi…</MenuItem> : null}
         <MenuItem onClick={run(onDuplicate)}>Nhân bản</MenuItem>
         <Divider />
         <MenuItem onClick={run(onDelete)} sx={{ color: "error.main" }}>Xoá câu hỏi</MenuItem>

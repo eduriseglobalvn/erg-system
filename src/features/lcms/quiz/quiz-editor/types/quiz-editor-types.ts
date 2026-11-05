@@ -202,6 +202,9 @@ export type QuizEditorSlide = {
   status?: "unsaved" | "draft" | "published";
 };
 
+/** A replacement slide, or a function of the latest slide for results that arrive after an async step. */
+export type QuizEditorSlideUpdate = QuizEditorSlide | ((current: QuizEditorSlide) => QuizEditorSlide);
+
 export type QuizProjectSettings = {
   info: {
     title: string;

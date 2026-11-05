@@ -5,10 +5,11 @@ import Typography from "@mui/material/Typography";
 
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { useI18n } from "@/platform/i18n";
-import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import { getSlideKindLabelKey, isQuestionManagerSlideKind, isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuizEditorGroup, QuizEditorSlide, QuizEditorSlideUpdate } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import { getSlideKindLabelKey, isQuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { getFeedbackText } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview/preview-answer-feedback";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { IntroSlideCard } from "./intro-slide-card";
 import { QuestionCard } from "./question-card";
 import { QuestionEditorRail, type RailEntry } from "./question-editor-rail";
 import { QuestionEditorTitlebar } from "./question-editor-titlebar";
@@ -22,13 +23,15 @@ type Props = {
   groups: QuizEditorGroup[];
   selectedSlide: QuizEditorSlide;
   onSelectSlide: (groupId: string, slideId: string) => void;
-  onReplaceSlide: (slide: QuizEditorSlide) => void;
+  onReplaceSlide: (update: QuizEditorSlideUpdate) => void;
   onAddQuestion: () => void;
   onChangeType: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
   onClose: () => void;
   syncChip: ReactNode;
+  /** Sync notices (offline, recovery) shown under the title bar; the full-screen editor covers the page's copy. */
+  banner: ReactNode;
   quizKind?: string;
 };
 
@@ -38,12 +41,14 @@ export function QuestionEditorShell(props: Props) {
   const [view, setView] = useState<QuestionView>("author");
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // Intro slides are not questions: they are not counted, numbered, checked for readiness or retyped.
+  const isQuestion = isQuestionType(slide.kind);
   const entries: RailEntry[] = groups.flatMap((group) =>
-    group.slides.filter((item) => isQuestionManagerSlideKind(item.kind)).map((item) => ({ groupId: group.id, slide: item })),
+    group.slides.filter((item) => isQuestionType(item.kind)).map((item) => ({ groupId: group.id, slide: item })),
   );
   const index = entries.findIndex((entry) => entry.slide.id === slide.id);
-  const question = readSlideQuestion(slide, t);
-  const readiness = readSlideReadiness(slide, t);
+  const question = isQuestion ? readSlideQuestion(slide, t) : null;
+  const readiness = isQuestion ? readSlideReadiness(slide, t) : null;
   const typeLabel = isQuestionType(slide.kind) ? questionTypeLabel(slide.kind) : t(getSlideKindLabelKey(slide.kind));
 
   const deleteQuestion = () => {
@@ -76,35 +81,41 @@ export function QuestionEditorShell(props: Props) {
       slotProps={{ paper: { "aria-label": "Soạn câu hỏi", sx: { bgcolor: tokens.color.surfaceSubtle } } }}
     >
       <QuestionEditorTitlebar
-        number={index + 1}
         onBack={onClose}
-        onChangeType={props.onChangeType}
+        onChangeType={isQuestion ? props.onChangeType : undefined}
         onDelete={() => setConfirmingDelete(true)}
         onDuplicate={props.onDuplicate}
         onViewChange={setView}
         readiness={readiness}
+        position={isQuestion ? `Câu ${index + 1} / ${entries.length}` : null}
         syncChip={props.syncChip}
-        total={entries.length}
         typeLabel={typeLabel}
         view={view}
       />
+      {props.banner}
       <Box sx={{ display: "flex", flex: 1, flexWrap: "wrap", minHeight: 0, overflow: "auto" }}>
         {view === "author" ? (
           <>
             <QuestionEditorRail entries={entries} groups={groups} onAdd={props.onAddQuestion} onSelect={onSelectSlide} selectedSlideId={slide.id} />
             <Box sx={{ flex: "1 1 560px", minWidth: 0, px: 4, py: 3.5 }}>
               <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mx: "auto", maxWidth: 720 }}>
-                <QuestionCard
-                  key={slide.id}
-                  meta={`Câu ${index + 1} · ${typeLabel}`}
-                  onReplaceSlide={onReplaceSlide}
-                  question={question}
-                  readiness={readiness}
-                  slide={slide}
-                />
-                <Typography color="text.secondary" variant="caption">
-                  Điểm, thời gian, trộn đáp án đặt ở Thuộc tính bài tập, không đặt ở từng câu.
-                </Typography>
+                {readiness ? (
+                  <>
+                    <QuestionCard
+                      key={slide.id}
+                      meta={`Câu ${index + 1} · ${typeLabel}`}
+                      onReplaceSlide={onReplaceSlide}
+                      question={question}
+                      readiness={readiness}
+                      slide={slide}
+                    />
+                    <Typography color="text.secondary" variant="caption">
+                      Điểm, thời gian, trộn đáp án đặt ở Thuộc tính bài tập, không đặt ở từng câu.
+                    </Typography>
+                  </>
+                ) : (
+                  <IntroSlideCard key={slide.id} onReplaceSlide={onReplaceSlide} slide={slide} />
+                )}
               </Box>
             </Box>
           </>

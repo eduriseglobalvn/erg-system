@@ -11,6 +11,16 @@ import { QuizEditorConflictDialog } from "./quiz-editor-conflict-dialog";
 import { QuizEditorOfflineBanner } from "./quiz-editor-offline-banner";
 import { QuizEditorRecoveryNotice } from "./quiz-editor-recovery-notice";
 
+/** The offline strip and the unsent-changes / backup notices; the full-screen question editor shows its own copy. */
+export function QuizEditorSyncNotices({ sync }: { sync: UseQuizDraftSyncResult }) {
+  return (
+    <>
+      <QuizEditorOfflineBanner status={sync.status} />
+      <QuizEditorRecoveryNotice backups={sync.backups} onRestore={sync.restoreBackup} recovered={sync.recovered} />
+    </>
+  );
+}
+
 /** Keeps the editor out until the draft is ready (anything typed before would be lost), then adds the sync notices. */
 export function QuizEditorSyncLayer({ children, loadFailed, onRetry, retrying, sync }: {
   sync: UseQuizDraftSyncResult;
@@ -44,8 +54,7 @@ export function QuizEditorSyncLayer({ children, loadFailed, onRetry, retrying, s
 
   return (
     <>
-      <QuizEditorOfflineBanner status={sync.status} />
-      <QuizEditorRecoveryNotice backups={sync.backups} onRestore={sync.restoreBackup} recovered={sync.recovered} />
+      <QuizEditorSyncNotices sync={sync} />
       {children}
       <QuizEditorConflictDialog
         busy={resolving}

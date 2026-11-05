@@ -5,6 +5,8 @@ import { I18nProvider } from "@/platform/i18n";
 import { QuizEditorWorkspace } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 
+const syncState = vi.hoisted(() => ({ status: "idle" as unknown }));
+
 // Only the add-question wiring is under test: the data hooks and the heavy children are stubbed.
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-scope")>()),
@@ -29,7 +31,7 @@ vi.mock("@/features/lcms/quiz/quiz-editor/api/quiz-editor-query", () => ({
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync", () => ({
   useQuizEditorSync: () => ({
-    sync: { ready: true, status: "idle", persistent: true, flushNow: vi.fn() },
+    sync: { ready: true, status: syncState.status, persistent: true, flushNow: vi.fn(), backups: [], recovered: null, restoreBackup: vi.fn() },
     handlePublish: vi.fn(),
     isPublishing: false,
     publishBlockedReason: null,
@@ -41,7 +43,8 @@ vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync", () => ({
 vi.mock("@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-imported-questions", () => ({
   useQuizEditorImportedQuestions: () => 0,
 }));
-vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer", () => ({
+vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer")>()),
   QuizEditorSyncLayer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-chip", () => ({ QuizEditorSyncChip: () => null }));
@@ -58,8 +61,9 @@ vi.mock("@/features/lcms/quiz/quiz-editor/components/question-manager-table", ()
   ),
 }));
 vi.mock("@/features/lcms/quiz/quiz-editor/components/question-authoring/question-editor-shell", () => ({
-  QuestionEditorShell: ({ onChangeType, selectedSlide }: { onChangeType: () => void; selectedSlide: { kind: string } }) => (
+  QuestionEditorShell: ({ banner, onChangeType, selectedSlide }: { banner: React.ReactNode; onChangeType: () => void; selectedSlide: { kind: string } }) => (
     <div role="dialog" aria-label="editor-open">
+      {banner}
       <output data-testid="kind">{selectedSlide.kind}</output>
       <button type="button" onClick={onChangeType}>change-type</button>
     </div>
@@ -121,5 +125,39 @@ describe("QuizEditorWorkspace add-question picker", () => {
     fireEvent.click(within(confirm).getByRole("button", { name: "Đổi dạng" }));
     expect(screen.getByTestId("count").textContent).toBe(count);
     expect(screen.getByTestId("kind").textContent).toBe("matching");
+  });
+
+  function openNew(type: string) {
+    render(
+      <I18nProvider>
+        <QuizEditorWorkspace activeLeaf={leaf} />
+      </I18nProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "ribbon-add" }));
+    const picker = screen.getByRole("dialog", { name: "Thêm câu hỏi vào “Phân số”" });
+    fireEvent.click(within(picker).getByRole("option", { name: new RegExp(type) }));
+    fireEvent.click(within(picker).getByRole("button", { name: `Tạo câu ${type}` }));
+  }
+
+  it("changes nothing when the question's own type is picked again", async () => {
+    openNew("Ghép cặp");
+    fireEvent.click(await screen.findByRole("button", { name: "change-type" }));
+    const picker = await screen.findByRole("dialog", { name: "Đổi dạng câu hỏi" });
+    expect(within(picker).getByText("Chọn dạng mới cho câu này.")).toBeInTheDocument();
+    fireEvent.click(within(picker).getByRole("option", { name: /Ghép cặp/ }));
+    fireEvent.click(within(picker).getByRole("button", { name: "Đổi sang Ghép cặp" }));
+    expect(screen.queryByRole("dialog", { name: "Đổi dạng sẽ bỏ phần đáp án hiện tại. Tiếp tục?" })).toBeNull();
+    expect(screen.getByTestId("kind").textContent).toBe("matching");
+  });
+
+  it("shows the offline banner inside the open editor", async () => {
+    syncState.status = { kind: "offline" };
+    try {
+      openNew("Một đáp án");
+      const editor = await screen.findByRole("dialog", { name: "editor-open" });
+      expect(within(editor).getByText(/Mất kết nối/)).toBeInTheDocument();
+    } finally {
+      syncState.status = "idle";
+    }
   });
 });

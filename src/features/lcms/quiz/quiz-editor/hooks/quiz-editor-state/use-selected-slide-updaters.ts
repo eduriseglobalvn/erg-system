@@ -21,6 +21,7 @@ import type {
   QuizEditorGroup,
   QuizEditorSlide,
   QuizEditorSlideOptions,
+  QuizEditorSlideUpdate,
   QuizEditorTextStyle,
   QuizEditorTextStyles,
   SelectedEditorNode,
@@ -104,15 +105,16 @@ export function useSelectedSlideUpdaters({
     updateSelectedGroupSlide((slide) => ({ ...slide, feedbackRows: nextRows }));
   }
 
-  function replaceSelectedSlide(nextSlide: QuizEditorSlide) {
+  function replaceSelectedSlide(update: QuizEditorSlideUpdate) {
     if (!selectedSlide) return;
+    const apply = (current: QuizEditorSlide) => (typeof update === "function" ? update(current) : update);
 
     if (selectedNode.type === "result") {
-      setResultSlide(nextSlide);
+      setResultSlide(apply);
       return;
     }
 
-    updateSelectedGroupSlide(() => withEditedStatus(nextSlide));
+    updateSelectedGroupSlide((current) => withEditedStatus(apply(current)));
   }
 
   function updateSelectedSlideTextStyle(patch: Partial<QuizEditorTextStyle>) {

@@ -8,7 +8,7 @@ import { QuestionManagerTable } from "@/features/lcms/quiz/quiz-editor/component
 import { QuizEditorRibbon } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-ribbon";
 import { QuizEditorWorkspaceBanners } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-banners";
 import { QuizEditorSyncChip } from "@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-chip";
-import { QuizEditorSyncLayer } from "@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer";
+import { QuizEditorSyncLayer, QuizEditorSyncNotices } from "@/features/lcms/quiz/quiz-editor/components/sync/quiz-editor-sync-layer";
 import { QuizEditorWorkspaceStatusBar } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-status-bar";
 import { findScopeMatchingDraft } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-utils";
 import {
@@ -249,6 +249,7 @@ export function QuizEditorWorkspace({
             onDelete={deleteSelected}
             onClose={() => setQuestionEditorOpen(false)}
             syncChip={syncChip}
+            banner={<QuizEditorSyncNotices sync={sync} />}
             quizKind="train"
           />
         ) : null}

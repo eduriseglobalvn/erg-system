@@ -213,7 +213,8 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
 
     const duplicatedSlide: QuizEditorSlide = {
       ...copySlideAs(selectedSlide, createId("slide")),
-      title: `${selectedSlide.title} Copy`,
+      // A blank question's copy stays blank, so it still reads as missing its title.
+      title: selectedSlide.title.trim() ? `${selectedSlide.title} (Bản sao)` : selectedSlide.title,
     };
 
     setGroups((currentGroups) => appendSlidesToGroup(currentGroups, selectedGroup.id, [duplicatedSlide]));

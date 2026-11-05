@@ -59,9 +59,13 @@ type Props = {
   onClose: () => void;
   /** Footer button text for the active type; defaults to "Tạo câu {type}". */
   confirmLabel?: (typeLabel: string) => string;
+  description?: string;
 };
 
-export function QuestionTypePickerDialog({ open, title, onPick, onClose, confirmLabel = (label) => `Tạo câu ${label}` }: Props) {
+export function QuestionTypePickerDialog({
+  open, title, onPick, onClose, confirmLabel = (label) => `Tạo câu ${label}`,
+  description = "Câu chỉ được tạo khi đã chọn dạng. Hủy thì không để lại gì.",
+}: Props) {
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<QuestionType>(DEFAULT_TYPE);
 
@@ -105,7 +109,7 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose, confirm
       onClose={onClose}
       maxWidth="lg"
       title={title}
-      description="Câu chỉ được tạo khi đã chọn dạng. Hủy thì không để lại gì."
+      description={description}
       actions={
         <>
           <Typography variant="caption" color="text.secondary" sx={{ mr: "auto" }}>

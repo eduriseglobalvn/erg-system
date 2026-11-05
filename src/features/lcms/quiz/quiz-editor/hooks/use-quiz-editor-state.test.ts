@@ -136,7 +136,7 @@ describe("useQuizEditorState - duplicate / delete / move / copy / paste", () => 
     act(() => result.current.duplicateSelected());
 
     const slides = slidesOf(result, "g1");
-    expect(slides.map((s) => s.title)).toEqual(["a", "b", "c", "b Copy"]);
+    expect(slides.map((s) => s.title)).toEqual(["a", "b", "c", "b (Bản sao)"]);
     expect(slides[3]!.id).not.toBe("b");
     expect(result.current.selectedNode).toEqual({ type: "slide", groupId: "g1", slideId: slides[3]!.id });
   });

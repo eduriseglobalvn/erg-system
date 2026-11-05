@@ -22,10 +22,12 @@ const MIN_CHOICES = 2;
 const verticalOnly: Modifier = ({ transform }) => ({ ...transform, x: 0 });
 let nextId = 0;
 
-export function ChoiceAuthoring({ question, mode, onChange }: {
+export function ChoiceAuthoring({ question, mode, onChange, onUpdate }: {
   question: Question;
   mode: "single" | "multiple";
   onChange: (next: Question) => void;
+  /** Applies a change to the latest question; used once an async step (image processing) finishes. */
+  onUpdate: (change: (latest: Question) => Question) => void;
 }) {
   const choices = question.choices ?? [];
   const [focusId, setFocusId] = useState<string | null>(null);
@@ -45,10 +47,10 @@ export function ChoiceAuthoring({ question, mode, onChange }: {
   const pickImage = async (id: string, file: File) => {
     try {
       const { dataUrl } = await prepareQuizImage(file);
-      patch(id, { image: { url: dataUrl, alt: "" } });
+      const image = { url: dataUrl, alt: "" };
+      onUpdate((latest) => ({ ...latest, choices: latest.choices?.map((c) => (c.id === id ? { ...c, image } : c)) }));
     } catch (error) {
-      if (error instanceof QuizImageRejectedError) toast.error(error.message);
-      else throw error;
+      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
     }
   };
 

@@ -18,7 +18,8 @@ const base = (correct: string[] = [], n = 3): Question =>
 
 function setup(question: Question, mode: "single" | "multiple" = "single") {
   const onChange = vi.fn();
-  render(<ChoiceAuthoring question={question} mode={mode} onChange={onChange} />);
+  const onUpdate = vi.fn((change: (latest: Question) => Question) => onChange(change(question)));
+  render(<ChoiceAuthoring question={question} mode={mode} onChange={onChange} onUpdate={onUpdate} />);
   return { onChange, last: () => onChange.mock.calls.at(-1)![0] as Question };
 }
 
@@ -59,6 +60,21 @@ describe("ChoiceAuthoring", () => {
     const { onChange } = setup(base([], 3));
     fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter", isComposing: true });
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("adds one option for a held Enter, not one per key repeat", () => {
+    const q = base([], 3);
+    const { onChange } = setup(q);
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter" });
+    fireEvent.keyDown(screen.getByPlaceholderText("Phương án 3"), { key: "Enter", repeat: true });
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it("toasts an unreadable image instead of failing silently", async () => {
+    prepare.mockRejectedValueOnce(new Error("decode"));
+    setup(base([], 3));
+    fireEvent.change(screen.getByLabelText("Ảnh phương án 1"), { target: { files: [new File(["x"], "a.png", { type: "image/png" })] } });
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith("Không đọc được ảnh."));
   });
 
   it("disables delete at two options", () => {

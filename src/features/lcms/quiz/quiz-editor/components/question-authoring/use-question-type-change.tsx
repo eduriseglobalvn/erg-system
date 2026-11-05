@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
-import type { QuestionType, QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuestionType, QuizEditorSlide, QuizEditorSlideUpdate, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { convertSlideType } from "./convert-slide-type";
 import { QuestionTypePickerDialog } from "./question-type-picker-dialog";
 
@@ -11,7 +11,7 @@ type Args = {
   quizProject: QuizProjectSettings;
   createId: (prefix: string) => string;
   addQuestion: (type: QuestionType) => void;
-  replaceSelectedSlide: (slide: QuizEditorSlide) => void;
+  replaceSelectedSlide: (update: QuizEditorSlideUpdate) => void;
   addTitle: string;
   onAdded: () => void;
 };
@@ -32,7 +32,8 @@ export function useQuestionTypeChange({ selectedSlide, quizProject, createId, ad
       onAdded();
       return;
     }
-    if (!selectedSlide) return;
+    // Picking the current type again is not a change; converting would drop the answers.
+    if (!selectedSlide || type === selectedSlide.kind) return;
     const converted = convertSlideType(selectedSlide, type, buildQuestionSlide(type, quizProject, createId));
     if (converted.dropsAnswers) setPendingConversion(converted.slide);
     else replaceSelectedSlide(converted.slide);
@@ -43,6 +44,7 @@ export function useQuestionTypeChange({ selectedSlide, quizProject, createId, ad
       <QuestionTypePickerDialog
         open={open}
         title={mode === "change" ? "Đổi dạng câu hỏi" : addTitle}
+        description={mode === "change" ? "Chọn dạng mới cho câu này." : undefined}
         confirmLabel={mode === "change" ? (label) => `Đổi sang ${label}` : undefined}
         onPick={handlePick}
         onClose={() => setOpen(false)}
