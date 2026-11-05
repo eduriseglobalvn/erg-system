@@ -101,6 +101,8 @@ export type QuizEditorSaveDraftInput = {
   settings?: QuizProjectSettings;
   playerTemplate?: QuizPlayerTemplate;
   tree?: QuizEditorGroup[];
+  /** Same key for the same edit, so a retry after a lost response replays the first save instead of a 409. */
+  idempotencyKey?: string;
 };
 
 export type QuizEditorSaveDraftResult = {
@@ -421,6 +423,7 @@ export async function saveQuizEditorDraft(input: QuizEditorSaveDraftInput): Prom
       playerTemplate: input.playerTemplate,
       tree: input.tree,
     }),
+    ...(input.idempotencyKey ? { headers: { "X-Idempotency-Key": input.idempotencyKey } } : {}),
     method: "PUT",
     portal: "lcms",
   });

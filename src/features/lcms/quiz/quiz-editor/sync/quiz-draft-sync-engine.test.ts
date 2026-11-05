@@ -120,6 +120,15 @@ describe("QuizDraftSyncEngine", () => {
     expect(calls).toBe(6);
   });
 
+  it("keeps the save idempotency key for a retried revision and changes it for a new one", async () => {
+    api.saveDraft.mockRejectedValueOnce(new ApiClientError("x", "REQUEST_TIMEOUT", 408));
+    await engine.edit(doc("A")); await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000); // the retry, after a response that never arrived
+    await engine.edit(doc("B")); await vi.advanceTimersByTimeAsync(2000);
+    const keys = api.saveDraft.mock.calls.map((c) => c[0].idempotencyKey);
+    expect(keys).toEqual(["quiz-editor-save:q1:3:1", "quiz-editor-save:q1:3:1", "quiz-editor-save:q1:4:2"]);
+  });
+
   it("starts the retry delays over after a successful save", async () => {
     const offline = new ApiClientError("x", "NETWORK_ERROR", 0);
     api.saveDraft.mockRejectedValueOnce(offline).mockResolvedValueOnce({ docVersion: 4 }).mockRejectedValueOnce(offline);

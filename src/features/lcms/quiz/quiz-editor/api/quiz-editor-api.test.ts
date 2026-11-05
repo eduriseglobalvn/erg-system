@@ -7,6 +7,7 @@ import {
   loadQuizEditorDraft,
   loadQuizEditorWorkspace,
   reorderQuizEditorSlides,
+  saveQuizEditorDraft,
   upsertQuizEditorSlide,
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import {
@@ -206,6 +207,20 @@ test("creates quiz with selected question ids so quiz bank metadata stays DB-bac
     method: "POST",
     portal: "lcms",
   }));
+});
+
+test("saves the draft with its idempotency key as a header, and none when no key is given", async () => {
+  apiRequestMock.mockResolvedValue({ docVersion: 4 } as never);
+
+  await saveQuizEditorDraft({ quizId: "quiz-a", docVersion: 3, tree: [], idempotencyKey: "quiz-editor-save:quiz-a:3:7" });
+  await saveQuizEditorDraft({ quizId: "quiz-a", docVersion: 3, tree: [] });
+
+  expect(apiRequestMock).toHaveBeenNthCalledWith(1, "/api/v1/lcms/quizzes/quiz-a/draft", expect.objectContaining({
+    body: JSON.stringify({ docVersion: 3, tree: [] }),
+    headers: { "X-Idempotency-Key": "quiz-editor-save:quiz-a:3:7" },
+    method: "PUT",
+  }));
+  expect(apiRequestMock.mock.calls[1]![1]).not.toHaveProperty("headers");
 });
 
 test("deletes quiz through the BE authoring endpoint", async () => {
