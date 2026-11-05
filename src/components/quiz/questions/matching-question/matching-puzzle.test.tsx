@@ -21,6 +21,11 @@ function setup(props: { mode?: "learner" | "author"; locked?: boolean } = {}) {
 }
 
 describe("MatchingPuzzle learner keys", () => {
+  test("row numbers are hidden from screen readers, the piece already names its row", () => {
+    setup();
+    for (const n of ["1", "2", "3"]) expect(screen.getByText(n)).toHaveAttribute("aria-hidden", "true");
+  });
+
   test("Enter connects the piece in its own row", () => {
     const onDrop = setup();
     fireEvent.keyDown(screen.getByRole("button", { name: "Mảnh Phải A, hàng 1, chưa ghép" }), { key: "Enter" });

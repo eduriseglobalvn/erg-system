@@ -5,6 +5,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 
+import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
 import { MatchingPuzzle, type PuzzleRow } from "@/components/quiz/questions/matching-question/matching-puzzle";
 import type { MatchingPair, Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
@@ -50,7 +51,7 @@ export function MatchingAuthoring({ question, onUpdate }: {
       id: pair.id,
       pieceId: pair.id,
       connected: false,
-      rightName: pair.response || pair.responseImage?.alt || "ảnh",
+      rightName: pieceName(pair.response, pair.responseImage, pair.responseIcon),
       left: (
         <>
           <AnswerImage image={pair.promptImage} name={`vế trái hàng ${n}`} onChange={setImage("promptImage", () => pair.id)} />

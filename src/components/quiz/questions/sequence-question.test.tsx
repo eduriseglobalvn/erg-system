@@ -59,6 +59,11 @@ describe("SequenceQuestion", () => {
     expect(document.activeElement).toBe(screen.getByRole("button", { name: `${labels[id]}, vị trí 2` }));
   });
 
+  test("row numbers are hidden from screen readers, the card already names its position", () => {
+    render(<SequenceQuestion question={question} value={{ sequenceOrder: ["s2", "s1", "s3"] }} onChange={vi.fn()} />);
+    for (const n of ["1", "2", "3"]) expect(screen.getByText(n)).toHaveAttribute("aria-hidden", "true");
+  });
+
   test("arrows do nothing at the edges", () => {
     const onChange = vi.fn();
     render(<SequenceQuestion question={question} value={{ sequenceOrder: ["s2", "s1", "s3"] }} onChange={onChange} />);

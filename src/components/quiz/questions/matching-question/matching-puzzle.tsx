@@ -171,7 +171,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
         >
           {rows.map((row, index) => (
             <Fragment key={row.id}>
-              <Box sx={{ typography: "caption", fontFamily: tokens.font.mono, color: "text.secondary", alignSelf: "center" }}>{index + 1}</Box>
+              <Box aria-hidden sx={{ typography: "caption", fontFamily: tokens.font.mono, color: "text.secondary", alignSelf: "center" }}>{index + 1}</Box>
               <LeftCell row={row} />
               {row.pieceId ? (
                 <RightCell key={row.id} row={{ ...row, pieceId: row.pieceId }} index={index} mode={mode} locked={locked} onMoveKey={handleMoveKey} />

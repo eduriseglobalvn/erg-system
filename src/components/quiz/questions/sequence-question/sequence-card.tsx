@@ -30,7 +30,7 @@ export function SequenceRow({ itemId, position, review, children }: { itemId: st
         ...(isOver ? { bgcolor: tokens.color.primarySofter, outline: `2px dashed ${tokens.color.primarySoft}`, outlineOffset: 2 } : null),
       }}
     >
-      <Box sx={{ textAlign: "right", typography: "h6", fontWeight: "fontWeightBold", color: reviewColor(review) ?? "primary.main" }}>{position}</Box>
+      <Box aria-hidden sx={{ textAlign: "right", typography: "h6", fontWeight: "fontWeightBold", color: reviewColor(review) ?? "primary.main" }}>{position}</Box>
       {children}
     </Box>
   );

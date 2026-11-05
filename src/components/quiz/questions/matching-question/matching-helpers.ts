@@ -1,4 +1,4 @@
-import type { MatchingPair } from "@/domain/quiz/types";
+import type { MatchingPair, QuestionImage } from "@/domain/quiz/types";
 
 export type DisplayMatchingPair = MatchingPair & {
   leftText: string;
@@ -8,6 +8,9 @@ export type DisplayMatchingPair = MatchingPair & {
   leftImage?: MatchingPair["promptImage"];
   rightImage?: MatchingPair["responseImage"];
 };
+
+/** What a screen reader calls a piece: its text, then its image's alt, then its old icon, then "ảnh". */
+export const pieceName = (text: string | undefined, image?: QuestionImage, icon?: string) => text || image?.alt || icon || "ảnh";
 
 export function createNextMatchingAssignments(
   currentAssignments: Record<string, string>,

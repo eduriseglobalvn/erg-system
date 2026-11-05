@@ -103,6 +103,19 @@ describe("MatchingQuestion desktop puzzle", () => {
     expect(pieces()[0]).toHaveTextContent("📋");
   });
 
+  test("an icon-only piece is named by its icon, on both sides", () => {
+    const icons: Question = {
+      ...question,
+      matching: [
+        { id: "m1", prompt: "", promptIcon: "⌨", response: "", responseIcon: "📋" },
+        { id: "m2", prompt: "Ctrl + V", response: "Dán" },
+      ],
+    };
+    setup({ matchingOrder: ["m1", "m2"] }, { q: icons });
+    expect(screen.getByRole("img", { name: "⌨" })).toBeInTheDocument();
+    expect(pieceNames()).toEqual(["📋", "Dán"]);
+  });
+
   test("a keyed new-shape question starts away from its key and emits response ids", () => {
     const keyed: Question = {
       ...question,

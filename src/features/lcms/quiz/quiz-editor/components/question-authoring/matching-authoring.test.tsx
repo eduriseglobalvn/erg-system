@@ -170,6 +170,19 @@ describe("MatchingAuthoring", () => {
   });
 });
 
+describe("MatchingAuthoring icon pieces", () => {
+  it("names an icon-only right piece by its icon while it is dragged", async () => {
+    const start = withPairs(2);
+    start.matching![0] = { ...start.matching![0], response: "", responseIcon: "📋" };
+    render(<Harness start={start} />);
+    fireEvent.pointerDown(screen.getByRole("button", { name: /^Kéo vế phải hàng 1/ }), { isPrimary: true, button: 0, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(document, { isPrimary: true, clientX: 20, clientY: 20 });
+    await act(async () => {});
+    expect(document.body).toHaveTextContent("Mảnh “📋”");
+    fireEvent.pointerUp(document);
+  });
+});
+
 describe("AnswerArea matching", () => {
   it("authors a matching slide on the puzzle", () => {
     const s = slide();

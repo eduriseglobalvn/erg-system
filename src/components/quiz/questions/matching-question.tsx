@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 
 import { dropPiece, readBoard } from "@/components/quiz/questions/matching-question/matching-board";
+import { pieceName } from "@/components/quiz/questions/matching-question/matching-helpers";
 import { MatchingMobile } from "@/components/quiz/questions/matching-question/matching-mobile";
 import { MatchingPuzzle, type PuzzleRow } from "@/components/quiz/questions/matching-question/matching-puzzle";
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
@@ -15,10 +16,14 @@ const VERDICT = {
   missing: { text: "Chưa ghép", color: "warning.main" },
 } as const;
 
-// An image without alt next to text is decorative; alone it still needs a name. Old icons stand in when there is no image.
+// An image or icon next to text is decorative; alone it names the piece. Old icons stand in when there is no image.
 const side = (text: string, image?: QuestionImage, icon?: string) => (
   <>
-    {image?.url ? <img src={image.url} alt={image.alt || (text ? "" : "ảnh")} /> : icon ? <span aria-hidden>{icon}</span> : null}
+    {image?.url ? (
+      <img src={image.url} alt={image.alt || (text ? "" : pieceName(text, image, icon))} />
+    ) : icon ? (
+      text ? <span aria-hidden>{icon}</span> : <span role="img" aria-label={icon}>{icon}</span>
+    ) : null}
     <span>{text}</span>
   </>
 );
@@ -46,7 +51,7 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
       connected,
       left: side(pair.prompt, pair.promptImage, pair.promptIcon),
       right: response ? side(response.response, response.responseImage, response.responseIcon) : null,
-      rightName: response?.response || response?.responseImage?.alt || "ảnh",
+      rightName: pieceName(response?.response, response?.responseImage, response?.responseIcon),
       state,
       trailing: state ? <Box sx={{ typography: "caption", fontWeight: "fontWeightBold", color: VERDICT[state].color }}>{VERDICT[state].text}</Box> : undefined,
     };
