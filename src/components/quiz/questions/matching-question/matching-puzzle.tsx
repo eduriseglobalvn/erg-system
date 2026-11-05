@@ -16,8 +16,9 @@ import { Fragment, useEffect, useRef, useState, type KeyboardEvent, type ReactNo
 
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
+import { puzzleAnnouncements } from "./matching-board";
 import { PUZZLE, rowAtPoint } from "./puzzle-geometry";
-import { PuzzlePiece } from "./puzzle-piece";
+import { GripDots, PuzzlePiece } from "./puzzle-piece";
 
 export type PuzzleRow = {
   id: string;
@@ -33,24 +34,18 @@ export type PuzzleRow = {
 type Props = { rows: PuzzleRow[]; mode: "learner" | "author"; locked?: boolean; onDrop: (from: number, to: number | null) => void };
 type MoveKey = (event: KeyboardEvent, index: number) => void;
 
-const GripDots = () => (
-  <Box component="svg" aria-hidden viewBox="0 0 10 16" sx={{ width: 10, height: 16, flex: "none", color: "text.secondary" }}>
-    {[3, 8, 13].flatMap((cy) => [2, 8].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={1.5} fill="currentColor" />))}
-  </Box>
-);
-
 function LeftCell({ row }: { row: PuzzleRow }) {
   const { isOver, setNodeRef } = useDroppable({ id: row.id });
-  const tone = isOver ? "over" : row.state === "missing" ? "idle" : (row.state ?? "idle");
+  // display grid stretches the piece to the row height, so a wrapped row draws both pieces with the same h
   return (
-    <Box ref={setNodeRef} data-row-id={row.id}>
-      <PuzzlePiece side="left" tone={tone}>{row.left}</PuzzlePiece>
+    <Box ref={setNodeRef} sx={{ display: "grid" }}>
+      <PuzzlePiece side="left" tone={isOver ? "over" : (row.state ?? "idle")}>{row.left}</PuzzlePiece>
     </Box>
   );
 }
 
 function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & { pieceId: string }; index: number; mode: Props["mode"]; locked: boolean; onMoveKey: MoveKey }) {
-  const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({ id: row.pieceId, disabled: locked });
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({ id: row.pieceId, disabled: locked, attributes: { roleDescription: "mảnh ghép" } });
   const learner = mode === "learner";
   const activator = { ...attributes, ...listeners, onKeyDown: (event: KeyboardEvent) => onMoveKey(event, index) };
   return (
@@ -62,10 +57,11 @@ function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & {
             role: "button", tabIndex: 0,
             "aria-label": `Mảnh ${row.rightName}, dòng ${index + 1}, ${row.connected ? "đã ghép" : "chưa ghép"}`,
             "aria-disabled": locked,
-            "data-piece-id": row.pieceId, "data-piece-row": row.id,
+            "data-piece-id": row.pieceId, "data-focus-row": row.id,
           }
         : {})}
       sx={{
+        display: "grid",
         ml: `${PUZZLE.gap}px`,
         transform: row.connected ? `translateX(-${PUZZLE.gap + PUZZLE.knob}px)` : "none",
         opacity: isDragging ? 0.3 : 1,
@@ -88,7 +84,7 @@ function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & {
             {...activator}
             size="small"
             aria-label={`Kéo vế phải dòng ${index + 1}, Alt+mũi tên để đổi dòng`}
-            data-grip-row={row.id}
+            data-focus-row={row.id}
             disabled={locked}
             sx={{ cursor: "grab", touchAction: "manipulation" }}
           >
@@ -104,20 +100,20 @@ function RightCell({ row, index, mode, locked, onMoveKey }: { row: PuzzleRow & {
 export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [pendingFocus, setPendingFocus] = useState<string | null>(null);
+  const pendingFocus = useRef<{ row: string; piece?: string; rows: PuzzleRow[] } | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 120, tolerance: 6 } }),
   );
 
-  // Moving swaps DOM content under a fixed row, so focus is put back once the moved piece has rendered in its new row.
+  // A move swaps content under fixed rows, so focus follows the piece once the next rows render; a rejected move matches nothing.
   useEffect(() => {
-    if (!pendingFocus) return;
-    const target = gridRef.current?.querySelector<HTMLElement>(pendingFocus);
-    if (!target) return;
-    target.focus();
-    setPendingFocus(null);
-  }, [pendingFocus, rows]);
+    const pending = pendingFocus.current;
+    if (!pending || pending.rows === rows) return;
+    pendingFocus.current = null;
+    const cells = Array.from(gridRef.current?.querySelectorAll<HTMLElement>("[data-focus-row]") ?? []);
+    cells.find((cell) => cell.dataset.focusRow === pending.row && cell.dataset.pieceId === pending.piece)?.focus();
+  }, [rows]);
 
   const collision: CollisionDetection = ({ pointerCoordinates, droppableRects }) => {
     const grid = gridRef.current?.getBoundingClientRect();
@@ -151,8 +147,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
     const to = event.key === "ArrowUp" ? index - 1 : index + 1;
     if (to < 0 || to >= rows.length) return;
     onDrop(index, to);
-    const target = rows[to].id;
-    setPendingFocus(learner ? `[data-piece-row="${target}"][data-piece-id="${rows[index].pieceId}"]` : `[data-grip-row="${target}"]`);
+    pendingFocus.current = { row: rows[to].id, piece: learner ? (rows[index].pieceId ?? undefined) : undefined, rows };
   };
 
   const activeRow = activeId ? rows.find((row) => row.pieceId === activeId) : undefined;
@@ -160,7 +155,10 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
   return (
     <DndContext
       sensors={sensors}
-      accessibility={{ screenReaderInstructions: { draggable: mode === "learner" ? "Enter hoặc Space để ghép hoặc tách, mũi tên lên xuống để đổi dòng." : "Alt+mũi tên lên xuống để đổi dòng." } }}
+      accessibility={{
+        announcements: puzzleAnnouncements(rows),
+        screenReaderInstructions: { draggable: mode === "learner" ? "Enter hoặc Space để ghép hoặc tách, mũi tên lên xuống để đổi dòng." : "Alt+mũi tên lên xuống để đổi dòng." },
+      }}
       collisionDetection={collision}
       onDragStart={({ active }) => setActiveId(String(active.id))}
       onDragEnd={handleDragEnd}

@@ -92,3 +92,9 @@ export function PuzzlePiece({
     </Box>
   );
 }
+
+export const GripDots = () => (
+  <Box component="svg" aria-hidden viewBox="0 0 10 16" sx={{ width: 10, height: 16, flex: "none", color: "text.secondary" }}>
+    {[3, 8, 13].flatMap((cy) => [2, 8].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={1.5} fill="currentColor" />))}
+  </Box>
+);

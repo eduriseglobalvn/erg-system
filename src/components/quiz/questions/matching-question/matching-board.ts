@@ -1,3 +1,5 @@
+import type { Announcements, UniqueIdentifier } from "@dnd-kit/core";
+
 import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { AnswerPayload, Question } from "@/domain/quiz/types";
 
@@ -35,4 +37,16 @@ export function dropPiece(board: MatchingBoard, rowIds: string[], from: number, 
   const target = rowIds[to];
   const connected = [...board.connected.filter((id) => id !== source && id !== target), target];
   return { order, connected };
+}
+
+/** Vietnamese live-region text for pointer drags, naming the piece and the row (dnd-kit's defaults read raw ids in English). */
+export function puzzleAnnouncements(rows: { id: string; pieceId: string | null; rightName: string }[]): Announcements {
+  const name = (id: UniqueIdentifier) => `“${rows.find((row) => row.pieceId === id)?.rightName ?? ""}”`;
+  const rowNo = (id: UniqueIdentifier) => rows.findIndex((row) => row.id === id) + 1;
+  return {
+    onDragStart: ({ active }) => `Đã nhấc mảnh ${name(active.id)}`,
+    onDragOver: ({ active, over }) => `Mảnh ${name(active.id)} ${over ? `đang ở hàng ${rowNo(over.id)}` : "đang ở ngoài bảng"}`,
+    onDragEnd: ({ active, over }) => (over ? `Đã đặt mảnh ${name(active.id)} vào hàng ${rowNo(over.id)}` : `Đã tách mảnh ${name(active.id)}`),
+    onDragCancel: ({ active }) => `Đã huỷ, mảnh ${name(active.id)} về chỗ cũ`,
+  };
 }

@@ -1,7 +1,8 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, test, vi } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
 import { MatchingPuzzle, type PuzzleRow } from "./matching-puzzle";
+import { pathLeft, pathRight } from "./puzzle-geometry";
 
 const rows: PuzzleRow[] = ["A", "B", "C"].map((name, index) => ({
   id: `m${index + 1}`,
@@ -58,5 +59,37 @@ describe("MatchingPuzzle author keys", () => {
     expect(onDrop).not.toHaveBeenCalled();
     fireEvent.keyDown(grip, { key: "ArrowDown", altKey: true });
     expect(onDrop).toHaveBeenCalledWith(0, 1);
+  });
+});
+
+describe("MatchingPuzzle focus and measurement", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  const swapped = [{ ...rows[0], pieceId: "r2", right: "Phải B", rightName: "Phải B" }, { ...rows[1], pieceId: "r1", right: "Phải A", rightName: "Phải A" }, rows[2]];
+
+  test("focus follows the moved piece to its new row", () => {
+    const onDrop = vi.fn();
+    const { rerender } = render(<MatchingPuzzle rows={rows} mode="learner" onDrop={onDrop} />);
+    fireEvent.keyDown(screen.getByRole("button", { name: /Mảnh Phải A, dòng 1/ }), { key: "ArrowDown" });
+    rerender(<MatchingPuzzle rows={swapped} mode="learner" onDrop={onDrop} />);
+    expect(screen.getByRole("button", { name: /Mảnh Phải A, dòng 2/ })).toHaveFocus();
+  });
+
+  test("a rejected move drops the pending focus", () => {
+    const onDrop = vi.fn();
+    const { rerender } = render(<MatchingPuzzle rows={rows} mode="learner" onDrop={onDrop} />);
+    fireEvent.keyDown(screen.getByRole("button", { name: /Mảnh Phải A, dòng 1/ }), { key: "ArrowDown" });
+    rerender(<MatchingPuzzle rows={[...rows]} mode="learner" onDrop={onDrop} />);
+    rerender(<MatchingPuzzle rows={swapped} mode="learner" onDrop={onDrop} />);
+    expect(screen.getByRole("button", { name: /Mảnh Phải A, dòng 2/ })).not.toHaveFocus();
+  });
+
+  test("both pieces of a row are drawn from the measured row height", () => {
+    vi.spyOn(HTMLElement.prototype, "offsetWidth", "get").mockReturnValue(200);
+    vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(80);
+    const { container } = render(<MatchingPuzzle rows={rows.slice(0, 1)} mode="learner" onDrop={vi.fn()} />);
+    const [left, right] = Array.from(container.querySelectorAll("path"), (path) => path.getAttribute("d"));
+    expect(left).toBe(pathLeft(200, 80));
+    expect(right).toBe(pathRight(200, 80));
   });
 });

@@ -23,6 +23,12 @@ describe("puzzle paths", () => {
   });
 });
 
+test("pieces of the same height share the knob centre, whatever their widths", () => {
+  // A wrapped row stretches both pieces to h = 81, so c = 41 on both sides.
+  expect(pathLeft(240, 81)).toContain("V36C233 36 236 31 230 31C224 31 221 35 221 41");
+  expect(pathRight(130, 81)).toContain("V46C12 46 15 51 9 51C3 51 0 47 0 41");
+});
+
 describe("rowAtPoint", () => {
   const rows = [
     { id: "a", top: 0, bottom: 50 },
