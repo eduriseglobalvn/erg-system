@@ -51,7 +51,7 @@ export function MobileLearningResourceExplorer({
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[12px] font-bold uppercase text-[var(--erg-blue)]">{displayText(activeSubject?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</p>
-            <h2 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</h2>
+            <h1 className="truncate text-base font-extrabold text-slate-950">{displayText(activeCategory?.label) || LEARNING_RESOURCE_WORKSPACE_LABEL}</h1>
           </div>
           <button type="button" onClick={onRefresh} className="grid h-11 w-11 shrink-0 place-items-center rounded-[14px] border border-[#dce6f1] bg-[#f8fbff] text-slate-700 shadow-[var(--shadow-xs)]" aria-label="Làm mới học liệu">
             <RefreshCw className="h-4 w-4" />

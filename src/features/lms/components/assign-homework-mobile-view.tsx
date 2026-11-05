@@ -115,6 +115,7 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
     return (
       <div className="flex min-h-full min-w-0 flex-col overflow-x-hidden bg-[#f3f6fb] text-slate-900">
         <div className="min-h-0 min-w-0 flex-1 pb-[calc(96px+env(safe-area-inset-bottom,0px))]">
+          <h1 className="sr-only">Giao bài</h1>
           <MobileAssignProgress selectedCount={mobileSelectedCount} step={step} targetType={targetType} />
 
           <div className="grid gap-2.5 p-3">
