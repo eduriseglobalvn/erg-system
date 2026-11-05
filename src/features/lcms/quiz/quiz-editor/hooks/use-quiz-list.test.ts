@@ -1,6 +1,10 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
+import { createElement, type ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import { quizEditorDraftQueryOptions } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-query";
+import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
 import type { QuizEditorGroup, QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -15,12 +19,14 @@ const topic = (id: string, quizId: string | null, slides: QuizEditorSlide[] = []
 const group = (id: string, slides: QuizEditorSlide[]): QuizEditorGroup => ({ id, title: id, rule: "all", randomCount: 0, slides });
 
 function setup(selectedTopicId: string, groups: QuizEditorGroup[], quizId = "") {
+  const client = new QueryClient();
+  const wrapper = ({ children }: { children: ReactNode }) => createElement(QueryClientProvider, { client }, children);
   const calls = { handleTopicChange: vi.fn(), selectSlide: vi.fn(), openQuiz: vi.fn(), openEditor: vi.fn() };
   const scope = { selectedCourseId: "c", selectedLevelId: "l", selectedTopicId, levelTopics: [], handleTopicChange: calls.handleTopicChange };
   const hook = renderHook((props: { groups: QuizEditorGroup[] }) =>
-    useQuizList({ scope, quizId, groups: props.groups, quizProject: createNewQuizProjectSettings(), selectSlide: calls.selectSlide, openQuiz: calls.openQuiz, openEditor: calls.openEditor }),
-  { initialProps: { groups } });
-  return { ...calls, hook };
+    useQuizList({ scope, quizId, ready: true, groups: props.groups, quizProject: createNewQuizProjectSettings(), selectSlide: calls.selectSlide, openQuiz: calls.openQuiz, openEditor: calls.openEditor }),
+  { initialProps: { groups }, wrapper });
+  return { ...calls, hook, client };
 }
 
 describe("useQuizList", () => {
@@ -61,5 +67,28 @@ describe("useQuizList", () => {
     hook.rerender({ groups: [group("g9", [target])] });
     expect(selectSlide).toHaveBeenCalledWith("g9", "x");
     expect(openEditor).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the questions of an open quiz that no topic claims, labelled with its title", () => {
+    topics.rows = [topic("t1", "q2", [slide("other")])];
+    const { hook } = setup("all", [group("g1", [slide("a")])], "q1");
+    expect(hook.result.current.rows.map((row) => row.slide.id)).toEqual(["a"]);
+    expect(hook.result.current.topicLabel).toBe(createNewQuizProjectSettings().info.title);
+  });
+
+  it("shows a question read from a server draft as on the server, even when still marked unsaved", () => {
+    topics.rows = [topic("t1", "q1", [slide("a", { status: "unsaved" })])];
+    const { hook } = setup("all", []);
+    expect(hook.result.current.rows[0]!.onServer).toBe(true);
+  });
+
+  it("leaving a quiz writes its live state to the draft cache the rail reads", () => {
+    topics.rows = [topic("t1", "q1"), topic("t2", "q2")];
+    const groups = [group("g1", [slide("a")])];
+    const { hook, client } = setup("t1", groups, "q1");
+    const key = quizEditorDraftQueryOptions("q1").queryKey;
+    client.setQueryData(key, { settings: {}, tree: [], version: 1 } as unknown as QuizEditorDraftDocument);
+    act(() => hook.result.current.selectTopic(topics.rows[1]!));
+    expect(client.getQueryData<QuizEditorDraftDocument>(key)!.tree).toEqual(groups);
   });
 });

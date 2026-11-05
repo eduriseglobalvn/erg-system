@@ -18,7 +18,7 @@ describe("TopicRail", () => {
   it("lists Tất cả first, then each topic with its count and status label", () => {
     render(<TopicRail onSelect={vi.fn()} rows={rows} selectedTopicId="all" />);
     const items = screen.getAllByRole("button");
-    expect(items.map((item) => item.textContent)).toEqual(["Tất cả3", "Phân số3Có sửa chưa xuất bản", "Hình học0Chưa có bài"]);
+    expect(items.map((item) => item.textContent)).toEqual(["Tất cả3 câu", "Phân số3 câuCó sửa chưa xuất bản", "Hình học0 câuChưa có bài"]);
     expect(items[0]).toHaveAttribute("aria-current", "true");
   });
 

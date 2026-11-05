@@ -52,10 +52,16 @@ describe("buildTopicRail", () => {
   it("reads the open quiz from the live editor, not its server draft", () => {
     const a = slide("a");
     const settings = recordPublished(createNewQuizProjectSettings(), [a]);
-    const live = { quizId: "q1", settings, slides: [{ ...a, title: "edited" }, slide("b"), slide("i", "info-slide")] };
+    const live = { quizId: "q1", topicId: "t1", settings, slides: [{ ...a, title: "edited" }, slide("b"), slide("i", "info-slide")] };
     const [open, other] = buildTopicRail(topics, [summary("q1"), summary("q2", { categoryId: "t2" })], { q1: draft("q1", [a], settings) }, live);
     expect([open!.questionCount, open!.lifecycle]).toEqual([2, "changed"]);
     expect(open!.slides.map((item) => item.id)).toEqual(["a", "b"]);
     expect([other!.questionCount, other!.lifecycle]).toEqual([7, "draft"]);
+  });
+
+  it("lets the open quiz claim its topic before the workspace lists it", () => {
+    const live = { quizId: "q9", topicId: "t1", settings: createNewQuizProjectSettings(), slides: [slide("a"), slide("b")] };
+    const [row] = buildTopicRail(topics, [], {}, live);
+    expect([row!.quizId, row!.questionCount, row!.lifecycle]).toEqual(["q9", 2, "draft"]);
   });
 });

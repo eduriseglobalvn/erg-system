@@ -44,6 +44,7 @@ function RailItem({ label, count, lifecycle, selected, onClick }: {
       </Typography>
       <Typography component="span" sx={{ color: selected ? "inherit" : "text.secondary", fontVariantNumeric: "tabular-nums" }} variant="caption">
         {count}
+        <Box component="span" sx={visuallyHidden}> câu</Box>
       </Typography>
       {lifecycle ? (
         <Box component="span" sx={{ bgcolor: DOT[lifecycle], border: 1, borderColor: selected ? tokens.color.surface : "transparent", borderRadius: "50%", height: 8, width: 8 }}>

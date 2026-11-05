@@ -88,7 +88,6 @@ export function QuizEditorWorkspace({
     onQuizCreated?.(targetId);
   }
   const openEditor = () => setQuestionEditorOpen(true);
-  const list = useQuizList({ scope, quizId: effectiveQuizId, groups, quizProject, selectSlide, openQuiz, openEditor });
 
   const { sync, handlePublish, isPublishing, publishBlockedReason, loadFailed, retrying, retry } = useQuizEditorSync({
     quizId: effectiveQuizId,
@@ -100,6 +99,7 @@ export function QuizEditorWorkspace({
     onQuizCreated: openQuiz,
     onPublished: () => setPreviewMode("publish"),
   });
+  const list = useQuizList({ scope, quizId: effectiveQuizId, ready: sync.ready, groups, quizProject, selectSlide, openQuiz, openEditor });
   const importNoticeCount = useQuizEditorImportedQuestions({
     ready: sync.ready,
     pendingImportedQuestions,
@@ -121,78 +121,80 @@ export function QuizEditorWorkspace({
   return (
     <div className="classic-editor flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <h1 className="sr-only">{quizProject.info.title || "Soạn bài kiểm tra"}</h1>
-      <QuizEditorSyncLayer loadFailed={loadFailed} onRetry={retry} retrying={retrying} sync={sync}>
-        <QuizListTitlebar
-          courseOptions={scope.courseOptions}
-          selectedCourseId={scope.selectedCourse.id}
-          levelOptions={scope.levelOptions}
-          selectedLevelId={scope.selectedLevel?.id ?? null}
-          onChangeCourse={scope.handleCourseChange}
-          onChangeLevel={scope.handleLevelChange}
-          syncChip={syncChip}
-          onOpenTheme={() => setPlayerTemplateOpen(true)}
-          onPublish={() => void handlePublish()}
-          publishBlockedReason={publishBlockedReason}
-          isPublishing={isPublishing}
-        />
-        {importNoticeCount > 0 ? (
-          <Alert severity="info" sx={{ borderRadius: 0 }}>
-            {t("sidebar.questionBank")}: {importNoticeCount} {t("common.questions").toLowerCase()} đã được đưa vào đề nháp hiện tại.
-          </Alert>
-        ) : null}
-        <Box sx={{ bgcolor: "background.default", display: "flex", flex: 1, gap: 2, minHeight: 0, p: 2 }}>
-          <TopicRail onSelect={list.selectTopic} rows={list.topics} selectedTopicId={scope.selectedTopicId} />
+      <QuizListTitlebar
+        courseOptions={scope.courseOptions}
+        selectedCourseId={scope.selectedCourse.id}
+        levelOptions={scope.levelOptions}
+        selectedLevelId={scope.selectedLevel?.id ?? null}
+        onChangeCourse={scope.handleCourseChange}
+        onChangeLevel={scope.handleLevelChange}
+        syncChip={syncChip}
+        onOpenTheme={() => setPlayerTemplateOpen(true)}
+        onPublish={() => void handlePublish()}
+        publishBlockedReason={sync.ready ? publishBlockedReason : "Đang mở bản nháp"}
+        isPublishing={isPublishing}
+      />
+      <Box sx={{ bgcolor: "background.default", display: "flex", flex: 1, gap: 2, minHeight: 0, p: 2 }}>
+        <TopicRail onSelect={list.selectTopic} rows={list.topics} selectedTopicId={scope.selectedTopicId} />
+        <Box sx={{ display: "flex", flex: 1, flexDirection: "column", minHeight: 0, minWidth: 0 }}>
+          <QuizEditorSyncLayer loadFailed={loadFailed} onRetry={retry} retrying={retrying} sync={sync}>
+          {importNoticeCount > 0 ? (
+            <Alert severity="info" sx={{ borderRadius: 0 }}>
+              {t("sidebar.questionBank")}: {importNoticeCount} {t("common.questions").toLowerCase()} đã được đưa vào đề nháp hiện tại.
+            </Alert>
+          ) : null}
           <QuestionTable onAdd={() => typeChange.openPicker("add")} onOpenRow={list.openRow} rows={list.rows} topicLabel={list.topicLabel} />
+          {typeChange.dialogs}
+          {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionManagerSlideKind(selectedSlide.kind) ? (
+            <QuestionEditorShell
+              groups={groups}
+              selectedSlide={selectedSlide}
+              onSelectSlide={selectSlide}
+              onReplaceSlide={replaceSelectedSlide}
+              onAddQuestion={() => typeChange.openPicker("add")}
+              onChangeType={() => typeChange.openPicker("change")}
+              onDuplicate={duplicateSelected}
+              onDelete={deleteSelected}
+              onClose={() => setQuestionEditorOpen(false)}
+              syncChip={syncChip}
+              banner={<QuizEditorSyncNotices sync={sync} />}
+              quizKind="train"
+              quizProject={quizProject}
+            />
+          ) : null}
+
+          {playerTemplateOpen ? (
+            <PlayerTemplateDialog
+              key={`player-template-${selectedThemeId}`}
+              open
+              selectedThemeId={selectedThemeId}
+              value={playerTemplate}
+              infoPage={quizProject.info.page}
+              previewQuestion={questionManagerSlides[0] ?? null}
+              questionCount={questionManagerSlides.length}
+              passingRate={quizProject.settings.passingRate}
+              onClose={() => setPlayerTemplateOpen(false)}
+              onSave={(themeId, nextTemplate) => {
+                setSelectedThemeId(themeId);
+                updatePlayerTemplate(nextTemplate);
+              }}
+            />
+          ) : null}
+
+          {previewMode ? (
+            <SlidePreviewDialog
+              open
+              mode={previewMode}
+              slides={previewSlides}
+              selectedSlideId={selectedNode.type === "result" ? configuredResultSlide.id : selectedSlide?.id}
+              selectedThemeId={selectedThemeId}
+              exportPayload={exportPayload}
+              onClose={() => setPreviewMode(null)}
+            />
+          ) : null}
+          </QuizEditorSyncLayer>
         </Box>
-        {typeChange.dialogs}
-        {questionEditorOpen && selectedNode.type === "slide" && selectedSlide && isQuestionManagerSlideKind(selectedSlide.kind) ? (
-          <QuestionEditorShell
-            groups={groups}
-            selectedSlide={selectedSlide}
-            onSelectSlide={selectSlide}
-            onReplaceSlide={replaceSelectedSlide}
-            onAddQuestion={() => typeChange.openPicker("add")}
-            onChangeType={() => typeChange.openPicker("change")}
-            onDuplicate={duplicateSelected}
-            onDelete={deleteSelected}
-            onClose={() => setQuestionEditorOpen(false)}
-            syncChip={syncChip}
-            banner={<QuizEditorSyncNotices sync={sync} />}
-            quizKind="train"
-            quizProject={quizProject}
-          />
-        ) : null}
-
-        {playerTemplateOpen ? (
-          <PlayerTemplateDialog
-            key={`player-template-${selectedThemeId}`}
-            open
-            selectedThemeId={selectedThemeId}
-            value={playerTemplate}
-            infoPage={quizProject.info.page}
-            previewQuestion={questionManagerSlides[0] ?? null}
-            questionCount={questionManagerSlides.length}
-            passingRate={quizProject.settings.passingRate}
-            onClose={() => setPlayerTemplateOpen(false)}
-            onSave={(themeId, nextTemplate) => {
-              setSelectedThemeId(themeId);
-              updatePlayerTemplate(nextTemplate);
-            }}
-          />
-        ) : null}
-
-        {previewMode ? (
-          <SlidePreviewDialog
-            open
-            mode={previewMode}
-            slides={previewSlides}
-            selectedSlideId={selectedNode.type === "result" ? configuredResultSlide.id : selectedSlide?.id}
-            selectedThemeId={selectedThemeId}
-            exportPayload={exportPayload}
-            onClose={() => setPreviewMode(null)}
-          />
-        ) : null}
-      </QuizEditorSyncLayer>
+      </Box>
     </div>
   );
 }

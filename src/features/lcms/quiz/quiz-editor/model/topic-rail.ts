@@ -12,7 +12,7 @@ export type TopicRow = {
 };
 
 /** The quiz open in the editor: its live state, ahead of the server draft until the next autosave lands. */
-export type OpenQuiz = { quizId: string; settings: QuizProjectSettings; slides: QuizEditorSlide[] };
+export type OpenQuiz = { quizId: string; topicId: string; settings: QuizProjectSettings; slides: QuizEditorSlide[] };
 
 /** The topic's current quiz: the latest non-deleted one (ISO timestamps compare as text). */
 function latestQuizByTopic(summaries: readonly QuizEditorSummary[]) {
@@ -34,17 +34,19 @@ export function buildTopicRail(
   const latest = latestQuizByTopic(summaries);
   return topics.map(({ id, label }) => {
     const summary = latest.get(id);
-    if (!summary) return { id, label, quizId: null, questionCount: 0, lifecycle: "none", slides: [] };
-    const draft = drafts[summary.id];
-    const open = openQuiz?.quizId === summary.id ? openQuiz : null;
+    // A quiz this tab just created is open before the workspace refetch lists it: it claims its topic.
+    const open = openQuiz && (summary ? openQuiz.quizId === summary.id : openQuiz.topicId === id) ? openQuiz : null;
+    if (!summary && !open) return { id, label, quizId: null, questionCount: 0, lifecycle: "none", slides: [] };
+    const quizId = summary?.id ?? open!.quizId;
+    const draft = drafts[quizId];
     const slides = fingerprintedSlides(open?.slides ?? draft?.tree.flatMap((group) => group.slides) ?? []);
     return {
       id,
       label,
-      quizId: summary.id,
-      questionCount: open || draft ? slides.length : summary.questionCount,
+      quizId,
+      questionCount: open || draft ? slides.length : (summary?.questionCount ?? 0),
       // Before the draft loads, the server status is all there is.
-      lifecycle: quizLifecycle({ quizId: summary.id, serverStatus: summary.status ?? null, settings: open?.settings ?? draft?.settings ?? {}, slides }),
+      lifecycle: quizLifecycle({ quizId, serverStatus: summary?.status ?? null, settings: open?.settings ?? draft?.settings ?? {}, slides }),
       slides,
     };
   });

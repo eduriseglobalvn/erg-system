@@ -9,6 +9,7 @@ import { questionTypeLabel } from "@/features/lcms/quiz/quiz-editor/components/q
 import type { QuestionReadiness } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
 import { readinessLabel } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-readiness";
 import type { TopicRow } from "@/features/lcms/quiz/quiz-editor/model/topic-rail";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { isQuestionType, type QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 /** One question of the list. `groupId` is set for the open quiz; in "Tất cả" the row carries its own topic instead. */
@@ -38,7 +39,7 @@ export function QuestionTableRow({ row, readiness, showTopic, onOpen }: {
           onOpen();
         }
       }}
-      sx={{ cursor: "pointer" }}
+      sx={{ cursor: "pointer", "&:focus-visible": { boxShadow: tokens.shadow.focus } }}
       tabIndex={0}
     >
       <TableCell sx={{ color: "text.secondary", width: 48 }}>{row.number}</TableCell>
