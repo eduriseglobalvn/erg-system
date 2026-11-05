@@ -5,12 +5,17 @@ import IconButton from "@mui/material/IconButton";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
+import type { Theme } from "@mui/material/styles";
 import type { KeyboardEvent } from "react";
 
 import type { HotspotArea } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { areaToolbarPlacement } from "./hotspot-geometry";
 
 const pct = (value: number) => `${value * 100}%`;
+// Rings are box-shadows, not outlines: Safari before 16.4 draws an outline square around an ellipse.
+const selectedRing = (theme: Theme) => `0 0 0 2px ${theme.palette.primary.main}`;
+const focusRing = (theme: Theme) => `0 0 0 2px ${theme.palette.background.paper}, 0 0 0 4px ${theme.palette.primary.main}`;
 
 type MarkProps = {
   area: HotspotArea;
@@ -44,7 +49,8 @@ export function HotspotAreaMark({ area, n, selected, onSelect, onRemove, onClear
         border: area.correct ? "2px solid" : "2px dashed",
         borderColor: area.correct ? "success.main" : "error.main",
         bgcolor: area.correct ? tokens.color.successSoft : tokens.color.dangerSoft,
-        ...(selected ? { outline: "2px solid", outlineColor: "primary.main", outlineOffset: 2 } : null),
+        boxShadow: selected ? selectedRing : "none",
+        "&.Mui-focusVisible": { boxShadow: focusRing },
       }}
     >
       {area.correct ? <Typography color="success.main" variant="caption">✓</Typography> : null}
@@ -59,16 +65,14 @@ type ToolbarProps = {
   onRemove: () => void;
 };
 
-/** Sits under the selected area, or above it near the bottom edge of the image. */
+/** Floats by the selected area and stays on the image (see `areaToolbarPlacement`). */
 export function HotspotAreaToolbar({ area, n, onCorrectChange, onRemove }: ToolbarProps) {
-  const above = area.y + area.height > 0.85;
   return (
     <Box
       aria-label={`Vùng ${n}`}
       role="toolbar"
       sx={{
-        position: "absolute", left: pct(area.x), zIndex: 1, cursor: "default", display: "flex", alignItems: "center", gap: 0.5,
-        ...(above ? { top: `calc(${pct(area.y)} - 4px)`, transform: "translateY(-100%)" } : { top: `calc(${pct(area.y + area.height)} + 4px)` }),
+        position: "absolute", ...areaToolbarPlacement(area), zIndex: 1, cursor: "default", display: "flex", alignItems: "center", gap: 0.5, whiteSpace: "nowrap",
         bgcolor: "background.paper", boxShadow: tokens.shadow.float, borderRadius: `${tokens.radius.control}px`, p: 0.375,
       }}
     >

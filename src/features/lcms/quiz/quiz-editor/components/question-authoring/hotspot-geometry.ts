@@ -17,3 +17,18 @@ export function areaFromDrag(a: Fraction, b: Fraction): { x: number; y: number; 
   if (width < MIN_AREA || height < MIN_AREA) return null;
   return { x: Math.min(a.x, b.x), y: Math.min(a.y, b.y), width, height };
 }
+
+/**
+ * Where the selected area's toolbar sits, as CSS. It is centred on the area and shifted back by the same share of its own width,
+ * so it never leaves the image sideways; it goes under the area, else above it, else inside the area's bottom edge.
+ */
+// shortcut: room is judged in fractions of the image, not pixels, so a very short image can still clip the toolbar; measure it if that shows up.
+export function areaToolbarPlacement(area: { x: number; y: number; width: number; height: number }): { left: string; top: string; transform: string } {
+  const centre = (area.x + area.width / 2) * 100;
+  const bottom = (area.y + area.height) * 100;
+  const left = `${centre}%`;
+  const shift = `translateX(-${centre}%)`;
+  if (area.y + area.height <= 0.85) return { left, top: `calc(${bottom}% + 4px)`, transform: shift };
+  if (area.y >= 0.15) return { left, top: `calc(${area.y * 100}% - 4px)`, transform: `${shift} translateY(-100%)` };
+  return { left, top: `calc(${bottom}% - 4px)`, transform: `${shift} translateY(-100%)` };
+}

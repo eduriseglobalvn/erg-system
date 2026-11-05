@@ -1,8 +1,10 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { HotspotArea, Question } from "@/domain/quiz/types";
+import { QuizImageRejectedError } from "@/lib/media/quiz-image";
 import { createNewQuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/quiz-editor-slide-factories";
 import { I18nProvider } from "@/platform/i18n";
@@ -124,6 +126,97 @@ describe("HotspotAuthoring", () => {
       fireEvent.change(container.querySelector("input[type=file]")!, { target: { files: [png()] } });
     });
     expect(latest.hotspotImage).toEqual({ url: "data:image/png;base64,AA", width: 640, height: 480 });
+  });
+});
+
+describe("HotspotAuthoring keyboard and pointer edges", () => {
+  const mark = (name: string) => screen.getByRole("button", { name });
+
+  it("moves focus to the next mark after Delete, else to the previous one", () => {
+    render(<Harness start={withImage([area("a1"), area("a2")])} />);
+    fireEvent.click(mark("Vùng 1 · Đúng"));
+    fireEvent.keyDown(mark("Vùng 1 · Đúng"), { key: "Delete" });
+    expect(areas().map((a) => a.id)).toEqual(["a2"]);
+    expect(mark("Vùng 1 · Đúng")).toHaveFocus();
+  });
+
+  it("moves focus to the previous mark after Xoá vùng on the last one", () => {
+    render(<Harness start={withImage([area("a1"), area("a2")])} />);
+    fireEvent.click(mark("Vùng 2 · Đúng"));
+    fireEvent.click(screen.getByRole("button", { name: "Xoá vùng" }));
+    expect(areas().map((a) => a.id)).toEqual(["a1"]);
+    expect(mark("Vùng 1 · Đúng")).toHaveFocus();
+  });
+
+  it("moves focus to Thêm vùng when Backspace removes the only area", () => {
+    render(<Harness start={withImage([area("a1")])} />);
+    fireEvent.click(mark("Vùng 1 · Đúng"));
+    fireEvent.keyDown(mark("Vùng 1 · Đúng"), { key: "Backspace" });
+    expect(areas()).toEqual([]);
+    expect(screen.getByRole("button", { name: "Thêm vùng" })).toHaveFocus();
+  });
+
+  it("clears the selection with Escape", () => {
+    render(<Harness start={withImage([area("a1")])} />);
+    fireEvent.click(mark("Vùng 1 · Đúng"));
+    fireEvent.keyDown(mark("Vùng 1 · Đúng"), { key: "Escape" });
+    expect(mark("Vùng 1 · Đúng")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByRole("toolbar", { name: "Vùng 1" })).not.toBeInTheDocument();
+  });
+
+  it("clears the selection with a click on the empty canvas", () => {
+    render(<Harness start={withImage([area("a1")])} />);
+    fireEvent.click(mark("Vùng 1 · Đúng"));
+    drag([180, 90], [180, 90]);
+    expect(mark("Vùng 1 · Đúng")).toHaveAttribute("aria-pressed", "false");
+    expect(areas()).toHaveLength(1);
+  });
+
+  it("draws nothing with a right-button drag", () => {
+    render(<Harness start={withImage()} />);
+    fireEvent.pointerDown(canvas(), { button: 2, clientX: 20, clientY: 10, pointerId: 1 });
+    fireEvent.pointerMove(canvas(), { button: 2, clientX: 120, clientY: 60, pointerId: 1 });
+    fireEvent.pointerUp(canvas(), { button: 2, clientX: 120, clientY: 60, pointerId: 1 });
+    expect(areas()).toEqual([]);
+  });
+
+  it("ignores a second pointer while one is drawing", () => {
+    render(<Harness start={withImage()} />);
+    fireEvent.pointerDown(canvas(), { clientX: 20, clientY: 10, pointerId: 1 });
+    fireEvent.pointerDown(canvas(), { clientX: 100, clientY: 50, pointerId: 2 });
+    fireEvent.pointerUp(canvas(), { clientX: 160, clientY: 90, pointerId: 2 });
+    expect(areas()).toEqual([]);
+    fireEvent.pointerUp(canvas(), { clientX: 120, clientY: 60, pointerId: 1 });
+    expect(areas()[0].x).toBeCloseTo(0.1);
+    expect(areas()[0].width).toBeCloseTo(0.5);
+  });
+
+  it("drops the draft when the pointer capture is lost", () => {
+    render(<Harness start={withImage()} />);
+    fireEvent.pointerDown(canvas(), { clientX: 20, clientY: 10, pointerId: 1 });
+    fireEvent(canvas(), new Event("lostpointercapture", { bubbles: true }));
+    fireEvent.pointerUp(canvas(), { clientX: 120, clientY: 60, pointerId: 1 });
+    expect(areas()).toEqual([]);
+  });
+
+  it("replaces the image from Đổi ảnh and keeps the areas", async () => {
+    prepare.mockResolvedValue({ dataUrl: "data:image/png;base64,CC", width: 300, height: 150 });
+    render(<Harness start={withImage([area("a1")])} />);
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText("Ảnh điểm nóng"), { target: { files: [png()] } });
+    });
+    expect(latest.hotspotImage).toEqual({ url: "data:image/png;base64,CC", width: 300, height: 150 });
+    expect(areas().map((a) => a.id)).toEqual(["a1"]);
+  });
+
+  it("says why a rejected file was refused and keeps the image", async () => {
+    prepare.mockRejectedValue(new QuizImageRejectedError("type"));
+    render(<Harness start={withImage([area("a1")])} />);
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText("Ảnh điểm nóng"), { target: { files: [png()] } });
+    });
+    expect(toast.error).toHaveBeenCalledWith(new QuizImageRejectedError("type").message);
+    expect(latest.hotspotImage).toEqual({ url: "map.png", width: 200, height: 100 });
   });
 });
 

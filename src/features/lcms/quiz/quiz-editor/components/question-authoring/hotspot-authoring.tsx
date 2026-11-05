@@ -29,7 +29,7 @@ export function HotspotAuthoring({ question, onUpdate }: {
 }) {
   const [shape, setShape] = useState<Shape>("rect");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [draft, setDraft] = useState<{ start: Fraction; end: Fraction } | null>(null);
+  const [draft, setDraft] = useState<{ pointerId: number; start: Fraction; end: Fraction } | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const { rootRef, focusLater } = usePendingFocus();
@@ -56,6 +56,9 @@ export function HotspotAuthoring({ question, onUpdate }: {
     return id;
   };
   const remove = (id: string) => {
+    const index = areas.findIndex((area) => area.id === id);
+    const neighbour = areas[index + 1] ?? areas[index - 1];
+    focusLater(neighbour ? `[data-area-id="${neighbour.id}"]` : "[data-add-area]");
     updateAreas((list) => list.filter((area) => area.id !== id));
     setSelectedId(null);
   };
@@ -66,14 +69,14 @@ export function HotspotAuthoring({ question, onUpdate }: {
 
   const pointAt = (event: PointerEvent) => toFraction(event.clientX, event.clientY, imageRef.current!.getBoundingClientRect());
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
-    // Presses on a mark or the area toolbar are theirs, not the start of a drawing.
-    if (event.target !== event.currentTarget) return;
+    // Presses on a mark or the area toolbar are theirs, not the start of a drawing; only one primary-button pointer draws.
+    if (event.target !== event.currentTarget || event.button !== 0 || (draft && draft.pointerId !== event.pointerId)) return;
     event.currentTarget.setPointerCapture?.(event.pointerId);
     const start = pointAt(event);
-    setDraft({ start, end: start });
+    setDraft({ pointerId: event.pointerId, start, end: start });
   };
   const onPointerUp = (event: PointerEvent) => {
-    if (!draft) return;
+    if (draft?.pointerId !== event.pointerId) return;
     const box = areaFromDrag(draft.start, pointAt(event));
     setDraft(null);
     if (box) append(box);
@@ -95,6 +98,7 @@ export function HotspotAuthoring({ question, onUpdate }: {
           <ToggleButton sx={{ gap: 0.5 }} value="ellipse"><PanoramaFishEyeIcon fontSize="small" />Elip</ToggleButton>
         </ToggleButtonGroup>
         <Button
+          data-add-area
           onClick={() => focusLater(`[data-area-id="${append({ x: 0.35, y: 0.4, width: 0.3, height: 0.2 })}"]`)}
           startIcon={<AddIcon />}
           variant="text"
@@ -125,9 +129,10 @@ export function HotspotAuthoring({ question, onUpdate }: {
           data-testid="hotspot-draw-layer"
           onDragOver={(event) => event.preventDefault()}
           onDrop={onDrop}
+          onLostPointerCapture={() => setDraft(null)}
           onPointerCancel={() => setDraft(null)}
           onPointerDown={onPointerDown}
-          onPointerMove={(event) => { if (draft) setDraft({ ...draft, end: pointAt(event) }); }}
+          onPointerMove={(event) => { if (draft?.pointerId === event.pointerId) setDraft({ ...draft, end: pointAt(event) }); }}
           onPointerUp={onPointerUp}
           sx={{ position: "absolute", inset: 0, cursor: "crosshair", touchAction: "none" }}
         >
