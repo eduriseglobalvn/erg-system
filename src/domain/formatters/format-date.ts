@@ -33,3 +33,10 @@ export function formatDateTimeVi(value: string | number | Date | null | undefine
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? "" : `${formatDateVi(d)} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
+
+/** HH:mm (24h); "" when unparsable. */
+export function formatTimeVi(value: string | number | Date | null | undefined): string {
+  if (value === null || value === undefined || value === "") return "";
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? "" : `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
