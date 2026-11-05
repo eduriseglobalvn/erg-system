@@ -178,7 +178,7 @@ export function HotspotMobileAnswer({
                     className="block h-auto w-full object-contain"
                   />
                   {reviewMode
-                    ? question.hotspotAreas?.map((area) => (
+                    ? question.hotspotAreas?.filter((area) => area.correct).map((area) => (
                         <HotspotReviewArea key={area.id} area={area} />
                       ))
                     : null}

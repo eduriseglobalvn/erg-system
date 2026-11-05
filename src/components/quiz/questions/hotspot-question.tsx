@@ -185,7 +185,7 @@ export function HotspotQuestion({
             style={{ display: "block", maxWidth: "100%", maxHeight: "min(64vh, 720px)", width: "auto", height: "auto" }}
           />
           {reviewMode
-            ? question.hotspotAreas?.map((area) => (
+            ? question.hotspotAreas?.filter((area) => area.correct).map((area) => (
                 <HotspotReviewArea key={area.id} area={area} />
               ))
             : null}
