@@ -28,7 +28,7 @@ export function ReviewStep({
       />
       <ReviewRow
         label="Phương thức cấp mật khẩu"
-        value={form.credentialDelivery === "EMAIL_INVITE" ? "Gửi thư mời qua Email" : "Tạo Temporary Credential một lần"}
+        value={form.credentialDelivery === "EMAIL_INVITE" ? "Gửi thư mời qua Email" : "Tạo mật khẩu tạm thời một lần"}
       />
     </Box>
   );

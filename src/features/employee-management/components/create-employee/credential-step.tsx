@@ -100,7 +100,7 @@ export function CredentialStep({ form, set }: { form: EmployeeForm; set: SetEmpl
         </Box>
         <Box sx={{ flex: 1 }}>
           <Typography sx={{ color: appleDesign.colors.textPrimary, fontSize: "0.875rem", fontWeight: 600 }}>
-            Tạo Temporary Credential (Mật khẩu tạm thời)
+            Tạo mật khẩu tạm thời
           </Typography>
           <Typography sx={{ color: appleDesign.colors.textSecondary, fontSize: "0.78rem", mt: 0.25 }}>
             Hiển thị mật khẩu trên màn hình để bàn giao ngay, đồng thời hệ thống gửi thông tin đăng nhập qua email.

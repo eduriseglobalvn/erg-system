@@ -1,6 +1,6 @@
 import type { CreateEmployeeRequest } from "@/features/employee-management/types/employee-management";
 
-export const steps = ["Định danh", "Thông tin nhân sự", "Role & scope", "Credential", "Review"];
+export const steps = ["Định danh", "Thông tin nhân sự", "Vai trò & phạm vi", "Đăng nhập", "Xem lại"];
 
 export const DEFAULT_CENTER_OPTIONS = [
   { code: "CS-01", id: "CS-QUAN-1", name: "Cơ sở Đào tạo ERG - Quận 1" },
