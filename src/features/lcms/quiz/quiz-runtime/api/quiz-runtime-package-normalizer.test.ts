@@ -67,6 +67,14 @@ describe("answer key stripping (4.4 #18)", () => {
     expect(keyLeaks(essay)).not.toContain("Nêu đủ ý");
   });
 
+  it.each(["client-first", "server-authoritative"] as const)("drops the essay guide from a training package too (%s)", (gradingMode) => {
+    const pkg = backend("training", gradingMode) as { quiz: Quiz };
+    pkg.quiz.sections[0].questions.push({ id: "8", kind: "essay", title: "", points: 1, feedback, essayRubric: [{ id: "c", label: "Nêu đủ ý", points: 2 }] });
+    const { quiz: kept } = normalizeQuizPackage(pkg as never);
+    expect(keyLeaks(kept)).not.toContain("Nêu đủ ý");
+    expect(kept.sections[0].questions[0].choices?.[0].correct).toBe(true);
+  });
+
   it("does not mutate its input", () => {
     const original = quiz("testing");
     stripQuizAnswerKey(original);

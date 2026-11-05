@@ -17,9 +17,9 @@ export function normalizeQuizPackage(value: BackendQuizPackage): QuizPackage {
   const gradingMode = value.gradingMode ?? "server-authoritative";
   const extractedQuiz = extractQuiz(value.quiz, value.answerKey ?? {}, gradingMode);
   // Training mode grades per question on the client, so only graded (testing) quizzes can lose the key.
-  const quiz = gradingMode === "server-authoritative" && extractedQuiz.settings.mode === "testing"
+  const quiz = withoutEssayGuide(gradingMode === "server-authoritative" && extractedQuiz.settings.mode === "testing"
     ? stripQuizAnswerKey(extractedQuiz)
-    : extractedQuiz;
+    : extractedQuiz);
   const quizVersion = String(value.quizVersion ?? value.version ?? quiz.version);
   const contentHash = value.contentHash ?? value.packageHash ?? createQuizPackage(quiz).contentHash;
 
@@ -69,6 +69,12 @@ export function stripQuizAnswerKey(quiz: Quiz): Quiz {
     ...(question.essayRubric ? { essayRubric: undefined } : {}),
   });
   return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(strip) })) };
+}
+
+/** The essay marking guide is for teachers only (spec §7); no learner package keeps it, whatever the mode. */
+function withoutEssayGuide(quiz: Quiz): Quiz {
+  const drop = (question: Question): Question => (question.essayRubric ? { ...question, essayRubric: undefined } : question);
+  return { ...quiz, sections: quiz.sections.map((section) => ({ ...section, questions: section.questions.map(drop) })) };
 }
 
 function extractQuiz(
