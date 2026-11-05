@@ -20,6 +20,8 @@ export function PieceTextInput({ value, onChange, label, placeholder, onEnter, i
     >
       <Box
         aria-label={label}
+        // cols={1} drops the default 20-column width, so the hidden copy alone sizes the cell
+        cols={1}
         component="textarea"
         data-input-id={inputId}
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value.replace(/\r?\n/g, " "))}
@@ -31,7 +33,7 @@ export function PieceTextInput({ value, onChange, label, placeholder, onEnter, i
         placeholder={placeholder}
         rows={1}
         sx={{
-          gridArea: "1 / 1", resize: "none", overflow: "hidden", border: 0, p: 0, m: 0, bgcolor: "transparent", font: "inherit", color: "inherit",
+          gridArea: "1 / 1", width: "100%", minWidth: 0, resize: "none", overflow: "hidden", border: 0, p: 0, m: 0, bgcolor: "transparent", font: "inherit", color: "inherit",
           "&::placeholder": { color: "text.secondary", opacity: 1 },
         }}
         value={value}

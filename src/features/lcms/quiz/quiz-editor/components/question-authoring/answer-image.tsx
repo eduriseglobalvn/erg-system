@@ -11,12 +11,17 @@ import type { QuestionImage } from "@/domain/quiz/types";
 import { QUIZ_IMAGE_TYPES } from "@/lib/media/quiz-image";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
-/** The image of one answer piece: add, describe, change or remove it. `name` reads like "vế trái dòng 1". */
-export function AnswerImage({ image, name, onChange }: { image?: QuestionImage; name: string; onChange: (image: QuestionImage | undefined) => void }) {
+export type ImageChange = (latest: QuestionImage | undefined) => QuestionImage | undefined;
+
+/**
+ * The image of one answer piece: add, describe, change or remove it. `name` reads like "vế trái hàng 1".
+ * Changes apply to the latest image, so alt text typed while a picked file loads survives.
+ */
+export function AnswerImage({ image, name, onChange }: { image?: QuestionImage; name: string; onChange: (change: ImageChange) => void }) {
   const fileRef = useRef<HTMLInputElement>(null);
   const pick = async (file: File) => {
     const url = await readImageAsDataUrl(file);
-    if (url !== null) onChange({ url, alt: image?.alt ?? "" });
+    if (url !== null) onChange((latest) => ({ url, alt: latest?.alt ?? "" }));
   };
   const input = (
     <input
@@ -44,7 +49,7 @@ export function AnswerImage({ image, name, onChange }: { image?: QuestionImage; 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
         <InputBase
           inputProps={{ "aria-label": `Mô tả ảnh ${name}` }}
-          onChange={(e) => onChange({ ...image, alt: e.target.value })}
+          onChange={(e) => { const alt = e.target.value; onChange((latest) => latest && { ...latest, alt }); }}
           placeholder="Mô tả ảnh"
           sx={{ typography: "caption", flex: 1, minWidth: 0, borderBottom: "1px solid", borderColor: tokens.color.border }}
           value={image.alt ?? ""}
@@ -52,7 +57,7 @@ export function AnswerImage({ image, name, onChange }: { image?: QuestionImage; 
         <IconButton aria-label={`Đổi ảnh ${name}`} onClick={() => fileRef.current?.click()} size="small">
           <ImageOutlinedIcon fontSize="small" />
         </IconButton>
-        <IconButton aria-label={`Xoá ảnh ${name}`} onClick={() => onChange(undefined)} size="small">
+        <IconButton aria-label={`Xoá ảnh ${name}`} onClick={() => onChange(() => undefined)} size="small">
           <CloseIcon fontSize="small" />
         </IconButton>
       </Box>

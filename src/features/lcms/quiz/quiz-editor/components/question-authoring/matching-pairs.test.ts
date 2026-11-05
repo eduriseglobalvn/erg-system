@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
-import { readPairs, swapRight, writePairs } from "./matching-pairs";
+import { readPairs, savePairs, swapRight, writePairs } from "./matching-pairs";
 
 const img = (url: string) => ({ url, alt: "" });
 const q = (extra: Partial<Question>): Question =>
@@ -23,6 +23,11 @@ describe("readPairs", () => {
     expect(pairs.map((p) => [p.prompt, p.response, p.responseImage?.url])).toEqual([["A", "two", undefined], ["B", "one", "1"]]);
   });
 
+  it("uses the pair's own response, then the index, when the key has no entry for it", () => {
+    const pairs = readPairs({ ...newShape, matching: [{ id: "p1", prompt: "A", response: "own" }, { id: "p2", prompt: "B" }], matchingKey: { p3: "r1" } });
+    expect(pairs.map((p) => p.response)).toEqual(["own", "two"]);
+  });
+
   it("aligns a keyless new shape by index", () => {
     expect(readPairs(newShape).map((p) => p.response)).toEqual(["one", "two"]);
   });
@@ -34,6 +39,22 @@ describe("writePairs", () => {
     expect(next.matching).toEqual([{ id: "p1", prompt: "A", response: "a" }]);
     expect(next.matchingResponses).toBeUndefined();
     expect(next.matchingKey).toBeUndefined();
+  });
+});
+
+describe("savePairs", () => {
+  it("keeps a keyless question unconfirmed: responses rebuilt in row order, ids kept by index, no key", () => {
+    const pairs = [...readPairs(newShape), { id: "p3", prompt: "C", response: "three" }];
+    const next = savePairs(newShape, pairs);
+    expect(next.matching).toEqual([{ id: "p1", prompt: "A" }, { id: "p2", prompt: "B" }, { id: "p3", prompt: "C" }]);
+    expect(next.matchingResponses!.map((r) => [r.id, r.response, r.responseImage?.url])).toEqual([["r1", "one", "1"], ["r2", "two", undefined], ["p3-r", "three", undefined]]);
+    expect(next.matchingKey).toBeUndefined();
+    expect(readPairs(next)).toEqual(pairs.map((p) => ({ ...p, responseIcon: undefined, responseImage: p.responseImage })));
+  });
+
+  it("writes keyed and old-shape questions in the old shape", () => {
+    const keyed = { ...newShape, matchingKey: { p1: "r2", p2: "r1" } };
+    expect(savePairs(keyed, readPairs(keyed))).toMatchObject({ matching: [{ id: "p1", response: "two" }, { id: "p2", response: "one" }], matchingResponses: undefined, matchingKey: undefined });
   });
 });
 

@@ -1,5 +1,6 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
@@ -7,13 +8,14 @@ import IconButton from "@mui/material/IconButton";
 import { MatchingPuzzle, type PuzzleRow } from "@/components/quiz/questions/matching-question/matching-puzzle";
 import type { MatchingPair, Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
-import { AnswerImage } from "./answer-image";
-import { readPairs, swapRight, writePairs } from "./matching-pairs";
+import { AnswerImage, type ImageChange } from "./answer-image";
+import { readPairs, rightOwner, savePairs, swapRight, writePairs } from "./matching-pairs";
 import { PieceTextInput } from "./piece-text-input";
+import { assessQuestionReadiness } from "./question-readiness";
 import { newRowId, usePendingFocus } from "./sortable-rows";
 
 const MIN_PAIRS = 2;
-const HINT = "Mỗi dòng là một cặp đúng. Bấm vào chữ để sửa, nút ảnh để gắn ảnh vào mảnh; kéo mảnh phải sang dòng khác để đổi vế phải giữa hai dòng.";
+const HINT = "Mỗi hàng là một cặp đúng. Bấm vào chữ để sửa, nút ảnh để gắn ảnh vào mảnh; kéo mảnh phải sang hàng khác để đổi vế phải giữa hai hàng.";
 
 /** Teacher view of the matching puzzle (spec 7.1): every row is a correct pair, the pieces stand apart. */
 export function MatchingAuthoring({ question, onUpdate }: {
@@ -24,8 +26,11 @@ export function MatchingAuthoring({ question, onUpdate }: {
 }) {
   const pairs = readPairs(question);
   const { rootRef, focusLater } = usePendingFocus();
-  const update = (change: (list: MatchingPair[]) => MatchingPair[]) => onUpdate((latest) => writePairs(latest, change(readPairs(latest))));
+  const update = (change: (list: MatchingPair[]) => MatchingPair[]) => onUpdate((latest) => savePairs(latest, change(readPairs(latest))));
   const patch = (id: string, change: Partial<MatchingPair>) => update((list) => list.map((pair) => (pair.id === id ? { ...pair, ...change } : pair)));
+  const setImage = (side: "promptImage" | "responseImage", owner: (list: MatchingPair[]) => string) => (change: ImageChange) =>
+    update((list) => { const id = owner(list); return list.map((pair) => (pair.id === id ? { ...pair, [side]: change(pair[side]) } : pair)); });
+  const unconfirmed = assessQuestionReadiness(question, { hasQuestionImage: false }).issues.find((issue) => issue.code === "pair-key");
 
   const append = () => {
     const id = newRowId("pair");
@@ -49,10 +54,10 @@ export function MatchingAuthoring({ question, onUpdate }: {
       rightName: pair.response || "ảnh",
       left: (
         <>
-          <AnswerImage image={pair.promptImage} name={`vế trái dòng ${n}`} onChange={(promptImage) => patch(pair.id, { promptImage })} />
+          <AnswerImage image={pair.promptImage} name={`vế trái hàng ${n}`} onChange={setImage("promptImage", () => pair.id)} />
           <PieceTextInput
             inputId={`${pair.id}-left`}
-            label={`Vế trái dòng ${n}`}
+            label={`Vế trái hàng ${n}`}
             onChange={(prompt) => patch(pair.id, { prompt })}
             placeholder={`Vế trái ${n}`}
             value={pair.prompt}
@@ -61,10 +66,10 @@ export function MatchingAuthoring({ question, onUpdate }: {
       ),
       right: (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, minWidth: 0 }}>
-          <AnswerImage image={pair.responseImage} name={`vế phải dòng ${n}`} onChange={(responseImage) => patch(pair.id, { responseImage })} />
+          <AnswerImage image={pair.responseImage} name={`vế phải hàng ${n}`} onChange={setImage("responseImage", (list) => rightOwner(list, pair))} />
           <PieceTextInput
             inputId={`${pair.id}-right`}
-            label={`Vế phải dòng ${n}`}
+            label={`Vế phải hàng ${n}`}
             onChange={(response) => patch(pair.id, { response })}
             onEnter={last ? append : undefined}
             placeholder={`Vế phải ${n}`}
@@ -89,6 +94,14 @@ export function MatchingAuthoring({ question, onUpdate }: {
   return (
     <Box ref={rootRef} sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
       <Box sx={{ typography: "caption", color: "text.secondary" }}>{HINT}</Box>
+      {unconfirmed && (
+        <Alert
+          action={<Button color="inherit" onClick={() => onUpdate((latest) => writePairs(latest, readPairs(latest)))} size="small" variant="text">Các cặp đã đúng</Button>}
+          severity="warning"
+        >
+          {unconfirmed.message}
+        </Alert>
+      )}
       <MatchingPuzzle mode="author" onDrop={(from, to) => { if (to !== null && to !== from) update((list) => swapRight(list, from, to)); }} rows={rows} />
       <Button
         onClick={append}
