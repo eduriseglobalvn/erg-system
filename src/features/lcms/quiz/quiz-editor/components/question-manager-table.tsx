@@ -9,8 +9,6 @@ import PublishIcon from "@mui/icons-material/Publish";
 
 import { useI18n } from "@/platform/i18n";
 import type {
-  QuestionCreationPreset,
-  QuestionType,
   QuizEditorGroup,
   QuizEditorSlide,
   SelectedEditorNode,
@@ -36,7 +34,7 @@ type QuestionManagerTableProps = {
   onOpenEditorFor: (groupId: string, slideId: string) => void;
   onDuplicateSelected: () => void;
   onRemoveSelected: () => void;
-  onAddNewQuestion?: (type?: QuestionType, preset?: QuestionCreationPreset) => void;
+  onAddNewQuestion?: () => void;
   /** Publishes the whole quiz: the server compiles every question, never a selection. */
   onPublish?: () => void;
   publishBlockedReason?: string | null;
@@ -200,7 +198,7 @@ export function QuestionManagerTable({
               <button
                 type="button"
                 className="classic-editor__manager-action is-primary"
-                onClick={() => onAddNewQuestion?.("multiple-choice")}
+                onClick={() => onAddNewQuestion?.()}
               >
                 <AddRoundedIcon sx={{ fontSize: 18 }} />
                 <span>Tạo câu hỏi</span>

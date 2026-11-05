@@ -20,12 +20,10 @@ import PublishIcon from "@mui/icons-material/Upload";
 import QuizOutlinedIcon from "@mui/icons-material/HelpOutlineOutlined";
 import SlideshowOutlinedIcon from "@mui/icons-material/Slideshow";
 
-import { IntroductionMenu, QuestionMenu } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus";
+import { IntroductionMenu } from "@/features/lcms/quiz/quiz-editor/components/ribbon/ribbon-menus/introduction-menu";
 import { useI18n } from "@/platform/i18n";
 import type {
   IntroSlideKind,
-  QuestionCreationPreset,
-  QuestionType,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
 export type CourseScopeOption = {
@@ -60,7 +58,7 @@ type FormViewRibbonProps = {
   onChangeLevel: (value: string) => void;
   onChangeTopic: (value: string) => void;
   onChangeSearch: (value: string) => void;
-  onAddQuestion: (type: QuestionType, preset?: QuestionCreationPreset) => void;
+  onAddQuestion: () => void;
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;
@@ -88,11 +86,10 @@ export function FormViewRibbon({
   isPublishing,
 }: FormViewRibbonProps) {
   const { t } = useI18n();
-  const [openMenu, setOpenMenu] = useState<"question" | "introduction" | null>(null);
+  const [openMenu, setOpenMenu] = useState<"introduction" | null>(null);
   const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
   const ribbonRef = useRef<HTMLDivElement | null>(null);
   const portalMenuRef = useRef<HTMLDivElement | null>(null);
-  const questionTriggerRef = useRef<HTMLDivElement | null>(null);
   const introductionTriggerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -113,11 +110,11 @@ export function FormViewRibbon({
     }
 
     function updateMenuPosition() {
-      const trigger = openMenu === "question" ? questionTriggerRef.current : introductionTriggerRef.current;
+      const trigger = introductionTriggerRef.current;
       if (!trigger) return;
 
       const rect = trigger.getBoundingClientRect();
-      const estimatedWidth = openMenu === "question" ? 640 : 380;
+      const estimatedWidth = 380;
       const viewportPadding = 12;
 
       setMenuPosition({
@@ -161,16 +158,12 @@ export function FormViewRibbon({
         }}
       >
         <RibbonSection label={t("common.new")}>
-          <Box ref={questionTriggerRef}>
-            <RibbonAction
-              label={t("common.question")}
-              icon={<QuizOutlinedIcon sx={{ fontSize: "1em" }} />}
-              active={openMenu === "question"}
-              caret
-              primary
-              onClick={() => setOpenMenu((current) => (current === "question" ? null : "question"))}
-            />
-          </Box>
+          <RibbonAction
+            label={t("common.question")}
+            icon={<QuizOutlinedIcon sx={{ fontSize: "1em" }} />}
+            primary
+            onClick={onAddQuestion}
+          />
           <Box ref={introductionTriggerRef}>
             <RibbonAction
               label={t("common.introduction")}
@@ -218,23 +211,13 @@ export function FormViewRibbon({
               className="fixed z-[200]"
               style={{ top: menuPosition.top, left: menuPosition.left }}
             >
-              {openMenu === "question" ? (
-                <QuestionMenu
-                  onSelect={(type, preset) => {
-                    onAddQuestion(type, preset);
-                    setOpenMenu(null);
-                  }}
-                  onClose={() => setOpenMenu(null)}
-                />
-              ) : (
-                <IntroductionMenu
-                  onSelect={(type) => {
-                    onAddIntroduction(type);
-                    setOpenMenu(null);
-                  }}
-                  onClose={() => setOpenMenu(null)}
-                />
-              )}
+              <IntroductionMenu
+                onSelect={(type) => {
+                  onAddIntroduction(type);
+                  setOpenMenu(null);
+                }}
+                onClose={() => setOpenMenu(null)}
+              />
             </div>,
             document.body,
           )

@@ -1,9 +1,5 @@
 import { FormViewRibbon } from "@/features/lcms/quiz/quiz-editor/components/ribbon/form-view-ribbon";
-import type {
-  IntroSlideKind,
-  QuestionCreationPreset,
-  QuestionType,
-} from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { IntroSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type {
   CourseScopeOption,
   LevelScopeOption,
@@ -22,7 +18,7 @@ type RibbonProps = {
   onChangeLevel: (value: string) => void;
   onChangeTopic: (value: string) => void;
   onChangeSearch: (value: string) => void;
-  onAddQuestion: (type: QuestionType, preset?: QuestionCreationPreset) => void;
+  onAddQuestion: () => void;
   onAddIntroduction: (type: IntroSlideKind) => void;
   onOpenPlayerTemplate: () => void;
   onOpenPublish: () => void;

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { PlayerTemplateDialog } from "@/features/lcms/quiz/quiz-editor/components/player-template-dialog";
+import { QuestionTypePickerDialog } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/question-type-picker-dialog";
 import { QuestionEditorDialog } from "@/features/lcms/quiz/quiz-editor/components/question-editor-dialog";
 import { QuestionManagerTable } from "@/features/lcms/quiz/quiz-editor/components/question-manager-table";
 import { QuizEditorRibbon } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-ribbon";
@@ -25,10 +26,7 @@ import { useQuizEditorSlideViews } from "@/features/lcms/quiz/quiz-editor/hooks/
 import { useQuizEditorState } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-state";
 import { useQuizEditorSync } from "@/features/lcms/quiz/quiz-editor/hooks/use-quiz-editor-sync";
 import { useI18n } from "@/platform/i18n";
-import type {
-  QuestionCreationPreset,
-  QuestionType,
-} from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
+import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
 import { isQuestionManagerSlideKind } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import "@/features/lcms/quiz/quiz-editor/styles/classic-editor.css";
@@ -59,6 +57,7 @@ export function QuizEditorWorkspace({
   const scope = useQuizEditorScope(setActiveQuizId);
   const { selectedCourseId, selectedLevelId, selectedTopicId, selectedCourse, selectedLevel } = scope;
   const [questionEditorOpen, setQuestionEditorOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [playerTemplateOpen, setPlayerTemplateOpen] = useState(false);
   const [previewMode, setPreviewMode] = useState<SlidePreviewDialogMode | null>(null);
 
@@ -156,10 +155,13 @@ export function QuizEditorWorkspace({
         })
         : t("quiz.noQuestions");
 
-  const handleAddQuestion = (type: QuestionType = "multiple-choice", preset?: QuestionCreationPreset) => {
-    addQuestion(type, preset);
+  // The question only exists once a type is picked; cancelling the picker creates nothing.
+  const handlePickQuestionType = (type: QuestionType) => {
+    setPickerOpen(false);
+    addQuestion(type);
     setQuestionEditorOpen(true);
   };
+  const pickerTitle = selectedTopic.id === "all" ? "Thêm câu hỏi" : `Thêm câu hỏi vào “${selectedTopic.label}”`;
 
   return (
     <div className="classic-editor flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
@@ -177,7 +179,7 @@ export function QuizEditorWorkspace({
           onChangeLevel={scope.handleLevelChange}
           onChangeTopic={scope.handleTopicChange}
           onChangeSearch={setSearchValue}
-          onAddQuestion={handleAddQuestion}
+          onAddQuestion={() => setPickerOpen(true)}
           onAddIntroduction={addIntroduction}
           onOpenPlayerTemplate={() => setPlayerTemplateOpen(true)}
           onOpenPublish={() => void handlePublish()}
@@ -203,7 +205,7 @@ export function QuizEditorWorkspace({
             lessonLabel={selectedLevelLabel ? `${selectedCourse.label} · ${selectedLevelLabel}` : selectedCourse.label}
             lessonMeta={selectedLevelMeta ?? selectedCourse.meta}
             topicLabel={selectedTopic.label}
-            onAddNewQuestion={handleAddQuestion}
+            onAddNewQuestion={() => setPickerOpen(true)}
             onOpenEditor={() => setQuestionEditorOpen(true)}
             onOpenEditorFor={(groupId, slideId) => {
               selectSlide(groupId, slideId);
@@ -229,6 +231,13 @@ export function QuizEditorWorkspace({
           courseLabel={selectedCourse.label}
           levelLabel={selectedLevelLabel}
           topicLabel={selectedTopic.label}
+        />
+
+        <QuestionTypePickerDialog
+          open={pickerOpen}
+          title={pickerTitle}
+          onPick={handlePickQuestionType}
+          onClose={() => setPickerOpen(false)}
         />
 
         {questionEditorOpen && selectedNode.type === "slide" && selectedSlide ? (

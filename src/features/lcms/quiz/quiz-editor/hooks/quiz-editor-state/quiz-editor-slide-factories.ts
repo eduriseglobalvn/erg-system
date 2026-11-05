@@ -54,17 +54,10 @@ export function buildQuestionSlide(
       : { ...row, score: quizProject.questionDefaults.negativePoints },
   );
 
-  const choices =
-    preset === "yes-no"
-      ? [
-          createChoice(createId("choice"), tr("player.yes"), true),
-          createChoice(createId("choice"), tr("player.no"), false),
-        ]
-      : [
-          createChoice(createId("choice"), tr("quiz.sampleOption1"), true),
-          createChoice(createId("choice"), tr("quiz.sampleOption2"), false),
-          createChoice(createId("choice"), tr("quiz.sampleOption3"), false),
-        ];
+  // A new question starts empty so placeholder text can never count as authored content.
+  const choiceLabels =
+    type === "true-false" ? ["Đúng", "Sai"] : preset === "yes-no" ? [tr("player.yes"), tr("player.no")] : ["", "", ""];
+  const choices = choiceLabels.map((label) => createChoice(createId("choice"), label));
 
   const isMatchQuestion = type === "matching" || type === "drag-and-drop";
   const matchItems: QuizEditorDragDropItem[] = [
@@ -80,7 +73,7 @@ export function buildQuestionSlide(
 
   return {
     id: createId("slide"),
-    title: isMatchQuestion ? "" : tr("quiz.newQuestionTitle"),
+    title: "",
     kind: type,
     textStyle: {
       ...defaultQuizTextStyle,

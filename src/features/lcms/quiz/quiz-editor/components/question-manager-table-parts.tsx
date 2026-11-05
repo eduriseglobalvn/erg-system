@@ -3,8 +3,6 @@ import QuizOutlinedIcon from "@mui/icons-material/QuizOutlined";
 
 import type { MessageKey } from "@/platform/i18n";
 import type {
-  QuestionCreationPreset,
-  QuestionType,
   QuizEditorSlide,
   SlideKind,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
@@ -39,7 +37,7 @@ export function QuestionManagerEmptyState({
   onAddNewQuestion,
 }: {
   statusFilter: QuestionManagerStatusFilter;
-  onAddNewQuestion?: (type?: QuestionType, preset?: QuestionCreationPreset) => void;
+  onAddNewQuestion?: () => void;
 }) {
   return (
     <div className="classic-editor__manager-empty">
@@ -64,31 +62,12 @@ export function QuestionManagerEmptyState({
       </div>
       <button
         type="button"
-        onClick={() => onAddNewQuestion?.("multiple-choice")}
+        onClick={() => onAddNewQuestion?.()}
         className="classic-editor__manager-action is-primary"
       >
         <AddRoundedIcon />
         <span>Tạo câu hỏi mới</span>
       </button>
-      <div className="classic-editor__manager-empty-presets">
-        <span className="classic-editor__manager-empty-presets-label">Dạng câu hỏi:</span>
-        {[
-          { label: "Trắc nghiệm (1 đáp án)", type: "multiple-choice" as const },
-          { label: "Trắc nghiệm (Nhiều đáp án)", type: "multiple-response" as const },
-          { label: "Đúng / Sai", type: "true-false" as const },
-          { label: "Điền chỗ trống", type: "fill-in-the-blanks" as const },
-          { label: "Ghép nối", type: "matching" as const },
-        ].map((item) => (
-          <button
-            key={item.type}
-            type="button"
-            onClick={() => onAddNewQuestion?.(item.type)}
-            className="classic-editor__manager-empty-preset"
-          >
-            + {item.label}
-          </button>
-        ))}
-      </div>
     </div>
   );
 }
