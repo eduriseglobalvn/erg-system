@@ -51,7 +51,7 @@ export function MatchingAuthoring({ question, onUpdate }: {
       id: pair.id,
       pieceId: pair.id,
       connected: false,
-      rightName: pair.response || "ảnh",
+      rightName: pair.response || pair.responseImage?.alt || "ảnh",
       left: (
         <>
           <AnswerImage image={pair.promptImage} name={`vế trái hàng ${n}`} onChange={setImage("promptImage", () => pair.id)} />

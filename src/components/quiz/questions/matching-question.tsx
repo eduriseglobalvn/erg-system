@@ -15,9 +15,10 @@ const VERDICT = {
   missing: { text: "Chưa ghép", color: "warning.main" },
 } as const;
 
-const side = (text: string, image?: QuestionImage) => (
+// An image without alt next to text is decorative; alone it still needs a name. Old icons stand in when there is no image.
+const side = (text: string, image?: QuestionImage, icon?: string) => (
   <>
-    {image?.url ? <img src={image.url} alt={image.alt ?? text} /> : null}
+    {image?.url ? <img src={image.url} alt={image.alt || (text ? "" : "ảnh")} /> : icon ? <span aria-hidden>{icon}</span> : null}
     <span>{text}</span>
   </>
 );
@@ -31,7 +32,7 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
   const pairs = question.matching ?? [];
   const key = getMatchingKey(question);
   // Old shape: each pair is also the response with the same id.
-  const responses = question.matchingResponses ?? pairs.map((pair) => ({ id: pair.id, response: pair.response ?? "", responseImage: pair.responseImage }));
+  const responses = question.matchingResponses ?? pairs.map((pair) => ({ id: pair.id, response: pair.response ?? "", responseIcon: pair.responseIcon, responseImage: pair.responseImage }));
 
   const rows: PuzzleRow[] = pairs.map((pair, index) => {
     const pieceId = board.order[index] || null;
@@ -43,9 +44,9 @@ export function MatchingQuestion({ question, value, submitted = false, reviewMod
       id: pair.id,
       pieceId,
       connected,
-      left: side(pair.prompt, pair.promptImage),
-      right: response ? side(response.response, response.responseImage) : null,
-      rightName: response?.response || "ảnh",
+      left: side(pair.prompt, pair.promptImage, pair.promptIcon),
+      right: response ? side(response.response, response.responseImage, response.responseIcon) : null,
+      rightName: response?.response || response?.responseImage?.alt || "ảnh",
       state,
       trailing: state ? <Box sx={{ typography: "caption", fontWeight: "fontWeightBold", color: VERDICT[state].color }}>{VERDICT[state].text}</Box> : undefined,
     };

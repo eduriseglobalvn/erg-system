@@ -171,10 +171,6 @@
     "hex": 14,
     "font": 0
   },
-  "src/components/quiz/questions/sequence-question/sequence-editable-item.tsx": {
-    "hex": 6,
-    "font": 0
-  },
   "src/components/quiz/questions/shared.tsx": {
     "hex": 2,
     "font": 1

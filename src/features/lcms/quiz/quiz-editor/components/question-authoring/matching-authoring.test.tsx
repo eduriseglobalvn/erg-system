@@ -159,6 +159,17 @@ describe("MatchingAuthoring", () => {
     expect(onChange).not.toHaveBeenCalled();
     expect(onUpdate).not.toHaveBeenCalled();
   });
+
+  it("names an image-only right piece by its alt text while it is dragged", async () => {
+    const start = withPairs(2);
+    start.matching![0] = { ...start.matching![0], response: "", responseImage: { url: "data:image/png;base64,A", alt: "Con mèo" } };
+    render(<Harness start={start} />);
+    fireEvent.pointerDown(screen.getByRole("button", { name: /^Kéo vế phải hàng 1/ }), { isPrimary: true, button: 0, clientX: 0, clientY: 0 });
+    fireEvent.pointerMove(document, { isPrimary: true, clientX: 20, clientY: 20 });
+    await act(async () => {});
+    expect(document.body).toHaveTextContent("Mảnh “Con mèo”");
+    fireEvent.pointerUp(document);
+  });
 });
 
 describe("AnswerArea matching", () => {

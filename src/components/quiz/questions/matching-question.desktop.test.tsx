@@ -76,6 +76,53 @@ describe("MatchingQuestion desktop puzzle", () => {
     expect(verdicts()).toEqual(["✓ Đúng", "✕ Sai"]);
   });
 
+  test("image pieces show the image and an image-only piece is named by its alt", () => {
+    const pictures: Question = {
+      ...question,
+      matching: [
+        { id: "m1", prompt: "", promptImage: { url: "data:image/png;base64,L", alt: "" }, response: "", responseImage: { url: "data:image/png;base64,R", alt: "Con mèo" } },
+        { id: "m2", prompt: "Ctrl + V", response: "Dán" },
+      ],
+    };
+    setup({ matchingOrder: ["m1", "m2"] }, { q: pictures });
+    expect(pieceNames()).toEqual(["Con mèo", "Dán"]);
+    expect(screen.getAllByRole("img", { name: "Con mèo" }).length).toBeGreaterThan(0);
+    expect(screen.getByRole("img", { name: "ảnh" })).toHaveAttribute("src", "data:image/png;base64,L");
+  });
+
+  test("an old icon shows on a piece without an image", () => {
+    const icons: Question = {
+      ...question,
+      matching: [
+        { id: "m1", prompt: "", promptIcon: "⌨", response: "", responseIcon: "📋" },
+        { id: "m2", prompt: "Ctrl + V", response: "Dán" },
+      ],
+    };
+    setup({ matchingOrder: ["m1", "m2"] }, { q: icons });
+    expect(screen.getByText("⌨")).toBeInTheDocument();
+    expect(pieces()[0]).toHaveTextContent("📋");
+  });
+
+  test("a keyed new-shape question starts away from its key and emits response ids", () => {
+    const keyed: Question = {
+      ...question,
+      matching: question.matching!.map(({ id, prompt }) => ({ id, prompt })),
+      matchingResponses: [{ id: "x", response: "Bật / tắt bộ lọc" }, { id: "y", response: "Sao chép" }, { id: "z", response: "Dán" }],
+      matchingKey: { m1: "y", m2: "z", m3: "x" },
+    };
+    const start = createInitialAnswer(keyed);
+    const onChange = setup(start, { q: keyed });
+    expect(pieceNames()).not.toEqual(["Sao chép", "Dán", "Bật / tắt bộ lọc"]);
+    fireEvent.keyDown(pieces()[0], { key: "Enter" });
+    expect(onChange).toHaveBeenCalledWith({ matchingOrder: start.matchingOrder, matchingConnectedRows: ["m1"] });
+  });
+
+  test("an old answer with only matchingOrder resumes with every piece pushed in", () => {
+    setup({ matchingOrder: ["m2", "m1", "m3"] });
+    expect(pieceNames()).toEqual(["Dán", "Sao chép", "Bật / tắt bộ lọc"]);
+    for (const piece of pieces()) expect(piece.getAttribute("aria-label")).toMatch(/đã ghép$/);
+  });
+
   test("a submitted answer is locked", () => {
     const onChange = setup(initial, { submitted: true });
     fireEvent.keyDown(pieces()[0], { key: "Enter" });
