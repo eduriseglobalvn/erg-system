@@ -33,6 +33,13 @@ describe("describeCorrectAnswer", () => {
   it("single_choice", () => {
     expect(describeCorrectAnswer(single("1", "b"))).toBe("B");
   });
+  it.each(["fill_blank", "short_answer"] as const)("%s lists every accepted spelling of each blank", (kind) => {
+    const textBlanks = [
+      { id: "a", label: "", correctAnswers: ["hai lớp", "", "2 lớp"] },
+      { id: "b", label: "", correctAnswers: ["mạnh"] },
+    ];
+    expect(describeCorrectAnswer(q({ kind, textBlanks }))).toBe("hai lớp / 2 lớp; mạnh");
+  });
   it("numeric", () => {
     expect(describeCorrectAnswer(q({ kind: "numeric", numericAnswer: { correctValue: 12, tolerance: 0.5, unit: "cm" } }))).toBe(
       "12 ± 0.5 cm",
@@ -73,7 +80,7 @@ describe("describeCorrectAnswer", () => {
       describeCorrectAnswer(
         q({ kind: "fill_blank", textBlanks: [{ id: "t1", label: "", correctAnswers: ["x", "y"] }, { id: "t2", label: "", correctAnswers: ["z"] }] }),
       ),
-    ).toBe("x; z");
+    ).toBe("x / y; z");
     expect(
       describeCorrectAnswer(
         q({ kind: "drag_words", wordBank: [{ id: "w", label: "mèo" }], wordSlots: [{ id: "s", label: "", correctWordId: "w" }] }),

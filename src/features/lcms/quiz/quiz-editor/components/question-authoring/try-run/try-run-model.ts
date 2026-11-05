@@ -16,7 +16,7 @@ export function describeCorrectAnswer(question: Question): string {
       return (question.choices ?? []).filter((c) => c.correct).map((c) => c.label).join(", ");
     case "short_answer":
     case "fill_blank":
-      return (question.textBlanks ?? []).map((b) => b.correctAnswers[0] ?? "").join("; ");
+      return (question.textBlanks ?? []).map((b) => b.correctAnswers.filter((a) => a.trim()).join(" / ")).join("; ");
     case "numeric": {
       const n = question.numericAnswer;
       if (!n) return "";
