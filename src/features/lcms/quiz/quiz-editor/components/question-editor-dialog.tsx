@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import TextFieldsIcon from "@mui/icons-material/TextFields";
 import { Box, Button, IconButton, Typography } from "@mui/material";
+import { toast } from "sonner";
 
 import { LearnerQuestionAuthoringPreview } from "@/features/lcms/quiz/quiz-editor/components/learner-question-authoring-preview";
 import { QuestionEditorInspector } from "@/features/lcms/quiz/quiz-editor/components/question-editor/inspector";
@@ -15,6 +16,7 @@ import {
 import { QuestionEditorToolbar } from "@/features/lcms/quiz/quiz-editor/components/question-editor/toolbar";
 import { resolveSlideTextStyle } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { syncQuizEditorSlideFromRuntimeQuestion } from "@/features/lcms/quiz/quiz-editor/api/elearning-quiz-to-editor";
+import { prepareQuizImage, QuizImageRejectedError } from "@/lib/media/quiz-image";
 import { useI18n } from "@/platform/i18n";
 import type { Question } from "@/domain/quiz/types";
 import type {
@@ -143,33 +145,31 @@ export function QuestionEditorDialog({
     mediaInputRef.current?.click();
   }
 
-  function handleMediaInputChange(event: ChangeEvent<HTMLInputElement>) {
+  async function handleMediaInputChange(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const result = reader.result;
-      if (typeof result !== "string") return;
-      const target = pendingMediaTargetRef.current ?? { kind: "slide" as const };
-      const nextMedia = {
-        type: "image" as const,
-        src: result,
-        alt: file.name.replace(/\.[^/.]+$/, ""),
-        name: file.name,
-        x: target.kind === "slide" ? 0.74 : undefined,
-        y: target.kind === "slide" ? 0.48 : undefined,
-        width: target.kind === "slide" ? 0.34 : undefined,
-      };
-
-      setDraftSlide((current) =>
-        current ? applyInlineMedia(current, target, nextMedia)
-          : current,
-      );
-      pendingMediaTargetRef.current = null;
+    let src: string;
+    try {
+      src = (await prepareQuizImage(file)).dataUrl;
+    } catch (error) {
+      toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
+      return;
+    }
+    const target = pendingMediaTargetRef.current ?? { kind: "slide" as const };
+    const nextMedia = {
+      type: "image" as const,
+      src,
+      alt: file.name.replace(/\.[^/.]+$/, ""),
+      name: file.name,
+      x: target.kind === "slide" ? 0.74 : undefined,
+      y: target.kind === "slide" ? 0.48 : undefined,
+      width: target.kind === "slide" ? 0.34 : undefined,
     };
-    reader.readAsDataURL(file);
-    event.target.value = "";
+
+    setDraftSlide((current) => (current ? applyInlineMedia(current, target, nextMedia) : current));
+    pendingMediaTargetRef.current = null;
   }
 
   function handleRemoveMedia() {

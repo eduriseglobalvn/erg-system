@@ -1,6 +1,7 @@
 import { ImagePlus, X } from "lucide-react";
 import { useCallback, useRef, type ChangeEvent, type PointerEvent as ReactPointerEvent } from "react";
 
+import { readImageAsDataUrl } from "@/components/quiz/questions/matching-question/matching-helpers";
 import type { QuestionImage } from "@/domain/quiz/types";
 
 export function SequenceInlineImage({
@@ -49,6 +50,7 @@ export function SequenceImageControls({
     if (!file) return;
 
     const imageUrl = await readImageAsDataUrl(file);
+    if (!imageUrl) return;
     onChange({ url: imageUrl, alt: file.name, width: image?.width ?? 72 });
   }
 
@@ -124,13 +126,4 @@ function ImageResizeHandle({
       onPointerDown={handlePointerDown}
     />
   );
-}
-
-function readImageAsDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.onerror = () => reject(reader.error ?? new Error("Cannot read image file."));
-    reader.readAsDataURL(file);
-  });
 }

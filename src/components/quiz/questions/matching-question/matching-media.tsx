@@ -29,6 +29,7 @@ export function MatchingImageControls({
     if (!file) return;
 
     const imageUrl = await readImageAsDataUrl(file);
+    if (!imageUrl) return;
     onChange({ url: imageUrl, alt: file.name });
   }
 

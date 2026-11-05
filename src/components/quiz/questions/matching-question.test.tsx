@@ -1,8 +1,12 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, test, vi } from "vitest";
 
 import { MatchingQuestion } from "@/components/quiz/questions/matching-question";
+import { MatchingImageControls } from "@/components/quiz/questions/matching-question/matching-media";
 import type { Question } from "@/domain/quiz/types";
+
+const toastError = vi.hoisted(() => vi.fn());
+vi.mock("sonner", () => ({ toast: { error: toastError } }));
 
 vi.mock("@/hooks/use-mobile", () => ({
   useIsMobile: () => true,
@@ -47,5 +51,23 @@ describe("MatchingQuestion mobile", () => {
         "m-1": "m-1",
       },
     });
+  });
+});
+
+describe("MatchingImageControls", () => {
+  test.each([
+    ["image/heic", 1024, "Chỉ nhận ảnh PNG, JPG, GIF hoặc WebP."],
+    ["image/png", 5 * 1024 * 1024 + 1, "Ảnh lớn hơn 5 MB."],
+  ])("rejects %s of %i bytes with a toast and leaves the image alone", async (type, size, message) => {
+    toastError.mockClear();
+    const onChange = vi.fn();
+    render(<MatchingImageControls label="Ảnh" onChange={onChange} />);
+    const file = new File(["x"], "a.img", { type });
+    Object.defineProperty(file, "size", { value: size });
+
+    fireEvent.change(screen.getByLabelText("Ảnh"), { target: { files: [file] } });
+
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith(message));
+    expect(onChange).not.toHaveBeenCalled();
   });
 });
