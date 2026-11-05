@@ -21,7 +21,7 @@ export function TeachingPlanSummary({
         px: 2,
         py: 1,
         borderRadius: 1.5,
-        bgcolor: "#F4F7FB",
+        bgcolor: "#F5F5F7",
         border: "1px solid #D9E2EF",
       }}
     >
@@ -40,11 +40,11 @@ export function TeachingPlanSummary({
         />
       ) : null}
       <Typography sx={{ fontSize: 13, color: "#52606D" }}>
-        Số bài: <strong style={{ color: "#172033" }}>{rows.length}</strong> bài
+        Số bài: <strong style={{ color: "#1D1D1F" }}>{rows.length}</strong> bài
       </Typography>
       <Box sx={{ width: 1, height: 16, bgcolor: "#D9E2EF" }} />
       <Typography sx={{ fontSize: 13, color: "#52606D" }}>
-        Tổng thời lượng: <strong style={{ color: "#0F6CBD" }}>{totalSessions} tiết</strong>
+        Tổng thời lượng: <strong style={{ color: "#0071E3" }}>{totalSessions} tiết</strong>
       </Typography>
     </Box>
   );

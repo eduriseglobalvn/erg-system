@@ -83,14 +83,14 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
               justifyContent: "center",
             }}
           >
-            <Typography sx={{ fontSize: "9.5px", fontWeight: 600, color: "#1D4ED8" }}>Có</Typography>
+            <Typography sx={{ fontSize: "9.5px", fontWeight: 600, color: "#0058B0" }}>Có</Typography>
           </Box>
           <Box
             sx={{
               flex: 1,
               height: 22,
               borderRadius: "999px",
-              bgcolor: "#F8FAFC",
+              bgcolor: "#FAFAFC",
               border: "1px solid #CBD5E1",
               display: "flex",
               alignItems: "center",
@@ -116,8 +116,8 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
                   width: 12,
                   height: 12,
                   borderRadius: "50%",
-                  border: isSelected ? "2px solid #2563EB" : "1.5px solid #CBD5E1",
-                  bgcolor: isSelected ? "#2563EB" : "transparent",
+                  border: isSelected ? "2px solid #0071E3" : "1.5px solid #CBD5E1",
+                  bgcolor: isSelected ? "#0071E3" : "transparent",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -154,8 +154,8 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
                   width: 12,
                   height: 12,
                   borderRadius: "3px",
-                  border: isSelected ? "1.5px solid #2563EB" : "1.5px solid #CBD5E1",
-                  bgcolor: isSelected ? "#2563EB" : "transparent",
+                  border: isSelected ? "1.5px solid #0071E3" : "1.5px solid #CBD5E1",
+                  bgcolor: isSelected ? "#0071E3" : "transparent",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
@@ -198,14 +198,14 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
               height: 16,
               borderRadius: "4px",
               bgcolor: "#FFFFFF",
-              border: "1.5px solid #2563EB",
-              boxShadow: "0 1px 2px rgba(37,99,235,0.12)",
+              border: "1.5px solid #0071E3",
+              boxShadow: "0 1px 2px rgba(0, 113, 227,0.12)",
               display: "flex",
               alignItems: "center",
               px: "3px",
             }}
           >
-            <Box sx={{ width: 1.5, height: 9, bgcolor: "#2563EB", borderRadius: 1 }} />
+            <Box sx={{ width: 1.5, height: 9, bgcolor: "#0071E3", borderRadius: 1 }} />
             <Box sx={{ ml: "2px", height: 2, width: 12, bgcolor: "#93C5FD", borderRadius: 1 }} />
           </Box>
           <Box sx={{ width: 12, height: 4, borderRadius: 99, bgcolor: "#CBD5E1" }} />
@@ -233,17 +233,17 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
         </Box>
 
         <Box component="svg" viewBox="0 0 24 34" sx={{ gridColumn: 2, width: 24, height: 34 }}>
-          <path d="M2 8 C12 8 12 26 22 26" fill="none" stroke="#2563EB" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M2 8 C12 8 12 26 22 26" fill="none" stroke="#0071E3" strokeWidth="1.8" strokeLinecap="round" />
           <path d="M2 26 C12 26 12 8 22 8" fill="none" stroke="#93C5FD" strokeWidth="1.8" strokeLinecap="round" />
-          <circle cx="2" cy="8" r="2" fill="#2563EB" />
-          <circle cx="22" cy="26" r="2" fill="#2563EB" />
+          <circle cx="2" cy="8" r="2" fill="#0071E3" />
+          <circle cx="22" cy="26" r="2" fill="#0071E3" />
           <circle cx="2" cy="26" r="2" fill="#93C5FD" />
           <circle cx="22" cy="8" r="2" fill="#93C5FD" />
         </Box>
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.65, gridColumn: 3 }}>
-          <Box sx={{ height: 14, borderRadius: "4px", bgcolor: "#EFF6FF", border: "1.5px solid #2563EB" }} />
-          <Box sx={{ height: 14, borderRadius: "4px", bgcolor: "#EFF6FF", border: "1.5px solid #2563EB" }} />
+          <Box sx={{ height: 14, borderRadius: "4px", bgcolor: "#EFF6FF", border: "1.5px solid #0071E3" }} />
+          <Box sx={{ height: 14, borderRadius: "4px", bgcolor: "#EFF6FF", border: "1.5px solid #0071E3" }} />
         </Box>
       </Box>
     );
@@ -259,7 +259,7 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
                 width: 13,
                 height: 13,
                 borderRadius: "50%",
-                bgcolor: num === 1 ? "#2563EB" : "#E2E8F0",
+                bgcolor: num === 1 ? "#0071E3" : "#E2E8F0",
                 color: num === 1 ? "#FFFFFF" : "#64748B",
                 fontSize: "8.5px",
                 fontWeight: 600,
@@ -326,14 +326,14 @@ export function QuestionMenuGlyph({ kind }: { kind: QuestionMenuDemoKind }) {
             width: 16,
             height: 16,
             borderRadius: "50%",
-            border: "1.5px solid #2563EB",
-            bgcolor: "rgba(37, 99, 235, 0.15)",
+            border: "1.5px solid #0071E3",
+            bgcolor: "rgba(0, 113, 227, 0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}
         >
-          <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#2563EB" }} />
+          <Box sx={{ width: 4, height: 4, borderRadius: "50%", bgcolor: "#0071E3" }} />
         </Box>
       </Box>
     );

@@ -358,7 +358,7 @@ export function QuestionManagerTable({
                   sx={{
                     p: 0,
                     color: "#94A3B8",
-                    "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "#0F6CBD" },
+                    "&.Mui-checked, &.MuiCheckbox-indeterminate": { color: "#0071E3" },
                   }}
                   aria-label="Chọn tất cả câu hỏi"
                 />
@@ -413,7 +413,7 @@ export function QuestionManagerTable({
                           sx={{
                             p: 0,
                             color: "#CBD5E1",
-                            "&.Mui-checked": { color: "#0F6CBD" },
+                            "&.Mui-checked": { color: "#0071E3" },
                           }}
                           aria-label={`Chọn câu ${row.index}`}
                         />

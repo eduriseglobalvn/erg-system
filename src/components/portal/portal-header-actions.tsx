@@ -142,7 +142,7 @@ export function PortalHeaderActions({
 
       <Tooltip title={userName || "Tài khoản"}>
         <IconButton onClick={(e) => setMenuAnchor(e.currentTarget)} sx={{ bgcolor: "transparent", border: 0, borderRadius: "50%", boxShadow: "none", height: { xs: 44, md: 32 }, ml: 0.5, p: 0, width: { xs: 44, md: 32 }, "&:hover": { opacity: 0.88 } }}>
-          <Avatar sx={{ bgcolor: "#2563EB", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 30, width: 30 }}>{initial}</Avatar>
+          <Avatar sx={{ bgcolor: "#0071E3", color: "#FFFFFF", fontSize: 12, fontWeight: 600, height: 30, width: 30 }}>{initial}</Avatar>
         </IconButton>
       </Tooltip>
 
@@ -180,7 +180,7 @@ export function PortalHeaderActions({
 
         {!installed ? (
           <MenuItem onClick={() => { setMenuAnchor(null); handleInstallClick(); }} sx={{ borderRadius: "6px", gap: 1, py: 0.75 }}>
-            <DownloadRoundedIcon sx={{ fontSize: 17, color: "#2563EB" }} />
+            <DownloadRoundedIcon sx={{ fontSize: 17, color: "#0071E3" }} />
             <Typography variant="body2" sx={{ fontWeight: 600, fontSize: 13 }}>Cài đặt ứng dụng ERG</Typography>
           </MenuItem>
         ) : null}

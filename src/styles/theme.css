@@ -1,7 +1,7 @@
 /* ===========================================================================
    ERG LEGACY OPERATIONAL DESIGN TOKENS
    Font: Be Vietnam Pro (body, heading)
-   Primary: #696CFF (purple) — thay vì #0f6cbd (blue)
+   Primary: #0071E3 (purple) — thay vì #0071E3 (blue)
    =========================================================================== */
 
 @theme inline {
@@ -11,7 +11,7 @@
   --font-mono: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
 
   /* === COLORS — ERG legacy palette === */
-  --color-primary: #696CFF;
+  --color-primary: #0071E3;
   --color-primary-foreground: #FFFFFF;
   --color-primary-light: rgba(105, 108, 255, 0.08);
   --color-primary-hover: #585BE0;

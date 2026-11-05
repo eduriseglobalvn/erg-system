@@ -1,21 +1,26 @@
 export const ergEnterpriseTokens = {
   color: {
-    primary: "#0F6CBD",
-    primaryHover: "#0B5CAB",
-    primarySoft: "rgba(15, 108, 189, 0.1)",
-    primarySofter: "rgba(15, 108, 189, 0.06)",
+    // "Xanh Apple" palette chosen from the design canvas (11/2026); replaces the earlier ERG blue.
+    primary: "#0071E3",
+    primaryHover: "#0058B0",
+    primarySoft: "#D2E6FC",
+    primarySofter: "#EBF4FE",
     brandRed: "#D92D20",
     brandRedHover: "#B42318",
     brandRedSoft: "rgba(217, 45, 32, 0.09)",
     surface: "#FFFFFF",
     surfaceRaised: "#FFFFFF",
-    surfaceSubtle: "#F8FAFC",
-    surfaceMuted: "#F4F7FB",
-    border: "rgba(15, 23, 42, 0.1)",
-    borderStrong: "rgba(15, 23, 42, 0.16)",
-    text: "#172033",
-    textMuted: "#5B667A",
-    textSoft: "#7A8699",
+    // Page ground / raised fills / hairlines / ink from the same canvas palette.
+    surfaceSubtle: "#F5F5F7",
+    surfaceMuted: "#FAFAFC",
+    border: "#E3E3E8",
+    borderStrong: "#D0D0D6",
+    divider: "#EDEDF0",
+    text: "#1D1D1F",
+    textSecondary: "#424245",
+    textMuted: "#6E6E73",
+    textSoft: "#86868B",
+    navText: "#3A3A3C",
     success: "#16A34A",
     successSoft: "rgba(22, 163, 74, 0.11)",
     warning: "#D97706",
@@ -30,7 +35,7 @@ export const ergEnterpriseTokens = {
     success: { bg: "#DCFAE5", color: "#04250E", dot: "#16A34A" },
     warning: { bg: "#FFFBEB", color: "#92400E", dot: "#D97706" },
     error: { bg: "#FFEDEA", color: "#831C1E", dot: "#D92D20" },
-    info: { bg: "#E6F0FA", color: "#0B4A86", dot: "#0F6CBD" },
+    info: { bg: "#EBF4FE", color: "#004A94", dot: "#0071E3" },
     neutral: { bg: "#F1F3F5", color: "#4B5563", dot: "#9CA3AF" },
   },
   font: {
@@ -55,7 +60,7 @@ export const ergEnterpriseTokens = {
     md: "0 18px 48px rgba(15, 23, 42, 0.1)",
     // The only resting elevation: sidebar card, menus, popovers, phone dock, toasts.
     float: "0 1px 2px rgba(16, 24, 40, 0.04), 0 12px 32px rgba(16, 24, 40, 0.08)",
-    focus: "0 0 0 3px rgba(15, 108, 189, 0.16)",
+    focus: "0 0 0 3px rgba(0, 113, 227, 0.16)",
   },
   motion: {
     duration: { instant: 100, fast: 160, base: 220, slow: 320 },
@@ -71,6 +76,10 @@ export const ergEnterpriseTokens = {
     controlLg: 46,
     header: 64,
     sidebar: 264,
+    // Icon sizes: inline in text, menu rows, phone dock.
+    iconSm: 16,
+    iconMd: 20,
+    iconLg: 22,
   },
 } as const;
 

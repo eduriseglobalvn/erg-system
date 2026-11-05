@@ -35,7 +35,7 @@ export function PageHeader({ description, icon, title }: { description: string; 
     <Card sx={elevatedCardSx}>
       <CardContent sx={{ py: 2.2 }}>
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Box sx={{ bgcolor: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.14)", borderRadius: 2.5, color: MUI_PRIMARY, display: "grid", height: 44, placeItems: "center", width: 44 }}>
+          <Box sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.14)", borderRadius: 2.5, color: MUI_PRIMARY, display: "grid", height: 44, placeItems: "center", width: 44 }}>
             {icon}
           </Box>
           <Box sx={{ minWidth: 0 }}>
@@ -129,11 +129,11 @@ export function AssignmentListItem({ assignment, copy, primary = false, onOpenAs
 
 export function AnnouncementCard({ announcement, selected }: { announcement: StudentTeacherAnnouncement; selected: boolean }) {
   return (
-    <Paper id={`student-announcement-${announcement.id}`} sx={{ bgcolor: selected ? "rgba(37,99,235,0.035)" : "#fff", border: `1px solid ${selected ? "rgba(37,99,235,0.22)" : MUI_DIVIDER}`, borderLeft: `4px solid ${announcement.isPinned ? MUI_PRIMARY : "transparent"}`, borderRadius: "14px", boxShadow: "none", p: { xs: 1.4, md: 1.65 }, transition: "background 160ms ease, border-color 160ms ease", "&:hover": { bgcolor: "rgba(248,250,252,0.78)", borderColor: "rgba(37,99,235,0.18)" } }}>
+    <Paper id={`student-announcement-${announcement.id}`} sx={{ bgcolor: selected ? "rgba(0, 113, 227,0.035)" : "#fff", border: `1px solid ${selected ? "rgba(0, 113, 227,0.22)" : MUI_DIVIDER}`, borderLeft: `4px solid ${announcement.isPinned ? MUI_PRIMARY : "transparent"}`, borderRadius: "14px", boxShadow: "none", p: { xs: 1.4, md: 1.65 }, transition: "background 160ms ease, border-color 160ms ease", "&:hover": { bgcolor: "rgba(248,250,252,0.78)", borderColor: "rgba(0, 113, 227,0.18)" } }}>
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} justifyContent="space-between">
         <Box sx={{ minWidth: 0 }}>
           <Stack direction="row" spacing={1} sx={{ flexWrap: "wrap", rowGap: 0.75 }}>
-            {announcement.isPinned ? <Chip label="Pinned" size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", color: MUI_PRIMARY, fontWeight: 850 }} /> : null}
+            {announcement.isPinned ? <Chip label="Pinned" size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", color: MUI_PRIMARY, fontWeight: 850 }} /> : null}
             {announcement.targetLabel ? <Chip label={announcement.targetLabel} size="small" variant="outlined" /> : null}
           </Stack>
           <Typography variant="subtitle2" sx={{ mt: 1, color: MUI_TEXT, fontWeight: 600 }}>{announcement.title}</Typography>

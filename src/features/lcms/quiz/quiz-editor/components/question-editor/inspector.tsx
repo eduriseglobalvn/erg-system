@@ -73,11 +73,11 @@ export function QuestionEditorInspector({
             justifyContent: "center",
             gap: "6px",
             bgcolor: currentTab === "settings" ? "#FFFFFF" : "transparent",
-            color: currentTab === "settings" ? "#0F6CBD" : "#64748B",
+            color: currentTab === "settings" ? "#0071E3" : "#64748B",
             boxShadow: currentTab === "settings" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
             transition: "all 0.15s ease",
             "&:hover": {
-              color: "#0F6CBD",
+              color: "#0071E3",
             },
           }}
         >
@@ -100,18 +100,18 @@ export function QuestionEditorInspector({
               justifyContent: "center",
               gap: "6px",
               bgcolor: currentTab === "feedback" ? "#FFFFFF" : "transparent",
-              color: currentTab === "feedback" ? "#0F6CBD" : "#64748B",
+              color: currentTab === "feedback" ? "#0071E3" : "#64748B",
               boxShadow: currentTab === "feedback" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
               transition: "all 0.15s ease",
               "&:hover": {
-                color: "#0F6CBD",
+                color: "#0071E3",
               },
             }}
           >
             <ChatBubbleOutlineRoundedIcon sx={{ fontSize: 16 }} />
             <span>{t("quiz.feedbackAndScoring") || "Phản hồi"}</span>
             {hasCustomFeedback ? (
-              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#0F6CBD" }} />
+              <Box sx={{ width: 6, height: 6, borderRadius: "50%", bgcolor: "#0071E3" }} />
             ) : null}
           </ButtonBase>
         ) : null}
@@ -130,11 +130,11 @@ export function QuestionEditorInspector({
             justifyContent: "center",
             gap: "6px",
             bgcolor: currentTab === "media" ? "#FFFFFF" : "transparent",
-            color: currentTab === "media" ? "#0F6CBD" : "#64748B",
+            color: currentTab === "media" ? "#0071E3" : "#64748B",
             boxShadow: currentTab === "media" ? "0 1px 3px rgba(0,0,0,0.08)" : "none",
             transition: "all 0.15s ease",
             "&:hover": {
-              color: "#0F6CBD",
+              color: "#0071E3",
             },
           }}
         >

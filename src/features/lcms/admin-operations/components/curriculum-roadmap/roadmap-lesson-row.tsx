@@ -52,7 +52,7 @@ export function CurriculumLessonRow({
         py: 0.75,
         transition: "background-color 120ms ease",
         "&:hover": {
-          bgcolor: selected ? "#F0F7FF" : "#F8FAFC",
+          bgcolor: selected ? "#F0F7FF" : "#FAFAFC",
           "& .lesson-actions-group": {
             opacity: 1,
           },
@@ -72,7 +72,7 @@ export function CurriculumLessonRow({
           textAlign: "left",
           py: 0.25,
           borderRadius: 1,
-          "&:hover .lesson-title": { color: "#0F6CBD" },
+          "&:hover .lesson-title": { color: "#0071E3" },
         }}
       >
         {/* Monospaced Order Number */}
@@ -82,7 +82,7 @@ export function CurriculumLessonRow({
             height: 26,
             borderRadius: "6px",
             bgcolor: isReview ? "#EFF6FF" : isPractice ? "#FAF5FF" : "#F1F5F9",
-            color: isReview ? "#1D4ED8" : isPractice ? "#7E22CE" : "#475569",
+            color: isReview ? "#0058B0" : isPractice ? "#7E22CE" : "#475569",
             display: "grid",
             placeItems: "center",
             fontSize: 11.5,
@@ -151,14 +151,14 @@ export function CurriculumLessonRow({
                 e.stopPropagation();
                 onOpenFolder(lesson.folder);
               }}
-              icon={<AttachFileOutlined sx={{ fontSize: "13px !important", color: "#2563EB" }} />}
+              icon={<AttachFileOutlined sx={{ fontSize: "13px !important", color: "#0071E3" }} />}
               label={`${resourceCount} tài liệu`}
               sx={{
                 height: 24,
                 fontSize: 11,
                 fontWeight: 600,
                 bgcolor: "#EFF6FF",
-                color: "#1D4ED8",
+                color: "#0058B0",
                 border: "1px solid #BFDBFE",
                 borderRadius: "6px",
                 cursor: "pointer",
@@ -254,7 +254,7 @@ export function CurriculumLessonRow({
               <Button
                 size="small"
                 variant="outlined"
-                startIcon={<AttachFileOutlined sx={{ fontSize: 13, color: "#2563EB" }} />}
+                startIcon={<AttachFileOutlined sx={{ fontSize: 13, color: "#0071E3" }} />}
                 onClick={(e) => {
                   e.stopPropagation();
                   actions.onAddResource?.(lesson.folder);
@@ -273,7 +273,7 @@ export function CurriculumLessonRow({
                   whiteSpace: "nowrap",
                   transition: "all 120ms ease",
                   "&:hover": {
-                    color: "#1D4ED8",
+                    color: "#0058B0",
                     bgcolor: "#EFF6FF",
                     borderColor: "#93C5FD",
                   },
@@ -302,7 +302,7 @@ export function CurriculumLessonRow({
                 borderRadius: "6px",
                 color: "#64748B",
                 p: 0,
-                "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" },
+                "&:hover": { color: "#0071E3", bgcolor: "#EFF6FF" },
               }}
             >
               <EditOutlined sx={{ fontSize: 14 }} />

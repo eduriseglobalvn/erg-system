@@ -24,7 +24,7 @@ export function ResourceInspector({
         <h3 className="mt-4 text-base font-bold leading-6 text-[#1C252E]">{title}</h3>
         <p className="mt-2 text-[13px] leading-5 text-[#637381]">{description}</p>
         {content && onPrimaryAction ? (
-          <button type="button" onClick={onPrimaryAction} className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-[#0F6CBD] px-3 text-[13px] font-bold text-white hover:bg-[#0b5da5]">
+          <button type="button" onClick={onPrimaryAction} className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-[#0071E3] px-3 text-[13px] font-bold text-white hover:bg-[#0b5da5]">
             <LinkIcon className="h-4 w-4" />
             {content.actionLabel}
           </button>

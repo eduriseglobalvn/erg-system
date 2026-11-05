@@ -130,7 +130,7 @@ export function ShareDialog({
         <Typography variant="body2" sx={{ color: MUI_MUTED, mb: 1.5 }}>
           Link này chỉ xem được sau khi đăng nhập tài khoản ERG Elearning.
         </Typography>
-        <Paper sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: 2, p: 1.5 }}>
+        <Paper sx={{ bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: 2, p: 1.5 }}>
           <Typography variant="caption" sx={{ color: MUI_MUTED, display: "block", fontWeight: 600, mb: 0.5 }}>
             {title || "Bài thảo luận"}
           </Typography>

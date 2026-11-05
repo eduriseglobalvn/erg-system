@@ -106,7 +106,7 @@
 
 .teaching-calendar .fc .fc-day-today .fc-daygrid-day-number {
   align-items: center;
-  background: var(--erg-blue, #0f6cbd);
+  background: var(--erg-blue, #0071E3);
   border-radius: 999px;
   color: #ffffff;
   display: inline-flex;
@@ -264,7 +264,7 @@
   .teaching-calendar .fc .teaching-schedule-event {
     border-left-width: 4px;
     border-radius: 12px;
-    box-shadow: 0 8px 18px rgba(15, 108, 189, 0.12);
+    box-shadow: 0 8px 18px rgba(0, 113, 227, 0.12);
   }
 
   .teaching-calendar .fc .fc-timegrid-event .fc-event-main {

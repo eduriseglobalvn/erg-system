@@ -18,10 +18,10 @@
     <link rel="apple-touch-icon" sizes="180x180" href="https://media.erg.edu.vn/logo/pwa.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="msapplication-TileColor" content="#0f6cbd" />
+    <meta name="msapplication-TileColor" content="#0071e3" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="format-detection" content="telephone=no" />
-    <meta name="theme-color" content="#0f6cbd" />
+    <meta name="theme-color" content="#0071e3" />
     <meta name="color-scheme" content="light" />
     <meta name="application-name" content="ERG LMS" />
     <meta name="mobile-web-app-capable" content="yes" />
@@ -70,7 +70,7 @@
       html{background:var(--background)}
       #root:empty{min-height:100vh;background:var(--background)}
       /* Same 3px top bar as RoutePendingBar so boot -> route loading reads as one progress. */
-      #root:empty::after{content:"";position:fixed;top:0;left:0;height:3px;width:0;background:#696CFF;animation:erg-boot-bar 8s cubic-bezier(.1,.7,.2,1) forwards}
+      #root:empty::after{content:"";position:fixed;top:0;left:0;height:3px;width:0;background:#0071E3;animation:erg-boot-bar 8s cubic-bezier(.1,.7,.2,1) forwards}
       @keyframes erg-boot-bar{to{width:92%}}
     </style>
     <!-- CSS files are imported directly in src/main.tsx to enable Vite HMR and bundling -->

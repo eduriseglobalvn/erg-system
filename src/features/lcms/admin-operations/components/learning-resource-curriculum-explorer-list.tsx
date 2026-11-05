@@ -42,7 +42,7 @@ export function EnterpriseList({
             type="button"
             className={cn(
               "relative grid min-h-14 min-w-[880px] w-full grid-cols-[minmax(300px,1fr)_124px_124px_104px_128px_104px] items-center border-b text-left text-[13px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#75B6F2]",
-              targetsEqual(selectedTarget, folder.target) ? "bg-[#DCEEFF] shadow-[inset_4px_0_0_#0F6CBD]" : "bg-white hover:bg-[#F1F4F7]",
+              targetsEqual(selectedTarget, folder.target) ? "bg-[#DCEEFF] shadow-[inset_4px_0_0_#0071E3]" : "bg-white hover:bg-[#F1F4F7]",
             )}
             aria-selected={targetsEqual(selectedTarget, folder.target)}
             role="row"
@@ -69,7 +69,7 @@ export function EnterpriseList({
             type="button"
             className={cn(
               "relative grid min-h-14 min-w-[880px] w-full grid-cols-[minmax(300px,1fr)_124px_124px_104px_128px_104px] items-center border-b text-left text-[13px] transition focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#75B6F2]",
-              targetsEqual(selectedTarget, item.target) ? "bg-[#DCEEFF] shadow-[inset_4px_0_0_#0F6CBD]" : "bg-white hover:bg-[#F1F4F7]",
+              targetsEqual(selectedTarget, item.target) ? "bg-[#DCEEFF] shadow-[inset_4px_0_0_#0071E3]" : "bg-white hover:bg-[#F1F4F7]",
             )}
             aria-selected={targetsEqual(selectedTarget, item.target)}
             role="row"

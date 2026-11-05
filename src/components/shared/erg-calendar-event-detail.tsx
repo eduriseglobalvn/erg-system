@@ -69,7 +69,7 @@ export function EventDetailPopover({
           <Divider />
           <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", p: 2 }}>
             <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ color: "#172033", fontSize: 13, fontWeight: 600 }}>{event.attendees}</Typography>
+              <Typography sx={{ color: "#1D1D1F", fontSize: 13, fontWeight: 600 }}>{event.attendees}</Typography>
               <Typography sx={{ color: "#6B778C", fontSize: 12.25, mt: 0.25 }}>
                 {renderActions ? "Quản lý phòng học, ghi chú hoặc hủy sự kiện." : "Lịch đã được trung tâm xuất bản và chỉ đọc trên LMS."}
               </Typography>
@@ -89,7 +89,7 @@ function DetailItem({ icon, label, value }: { icon: ReactNode; label: string; va
         {icon}
       </Box>
       <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ color: "#172033", fontSize: 13, fontWeight: 850 }}>{label}</Typography>
+        <Typography sx={{ color: "#1D1D1F", fontSize: 13, fontWeight: 850 }}>{label}</Typography>
         <Typography noWrap sx={{ color: "#6B778C", fontSize: 12.5, fontWeight: 600, mt: 0.55 }}>{value}</Typography>
       </Box>
     </Box>

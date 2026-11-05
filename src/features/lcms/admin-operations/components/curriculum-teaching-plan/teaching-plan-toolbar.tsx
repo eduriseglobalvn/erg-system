@@ -44,12 +44,12 @@ export function TeachingPlanToolbar({
             textTransform: "none",
             fontSize: 12.5,
             fontWeight: 600,
-            bgcolor: "#0F6CBD",
+            bgcolor: "#0071E3",
             color: "#FFFFFF",
             borderRadius: 1.5,
             px: 1.5,
-            boxShadow: "0 1px 3px rgba(15, 108, 189, 0.2)",
-            "&:hover": { bgcolor: "#0B5594" },
+            boxShadow: "0 1px 3px rgba(0, 113, 227, 0.2)",
+            "&:hover": { bgcolor: "#0058B0" },
           }}
         >
           + Thêm chủ đề mới
@@ -146,20 +146,20 @@ export function TeachingPlanToolbar({
         <Button
           variant="outlined"
           size="small"
-          startIcon={<FormatListNumbered sx={{ color: "#0F6CBD", fontSize: 18 }} />}
+          startIcon={<FormatListNumbered sx={{ color: "#0071E3", fontSize: 18 }} />}
           onClick={renumberPeriods}
           disabled={isSaving || isSyncing}
           sx={{
             textTransform: "none",
             fontSize: 12.5,
             fontWeight: 600,
-            color: "#0F6CBD",
+            color: "#0071E3",
             bgcolor: "#EFF6FF",
             borderColor: "#BFDBFE",
             borderRadius: 1.5,
             px: 1.5,
             py: 0.5,
-            boxShadow: "0 1px 2px rgba(15, 108, 189, 0.08)",
+            boxShadow: "0 1px 2px rgba(0, 113, 227, 0.08)",
             "&:hover": {
               bgcolor: "#DBEAFE",
               borderColor: "#93C5FD",

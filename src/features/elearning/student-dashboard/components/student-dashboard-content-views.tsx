@@ -27,7 +27,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
         <CardContent sx={{ p: { xs: 2.4, md: 3 } }}>
           <Stack direction={{ xs: "column", md: "row" }} spacing={2.5} justifyContent="space-between">
             <Box sx={{ minWidth: 0, maxWidth: 840 }}>
-              <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(37,99,235,0.08)", border: "1px solid rgba(37,99,235,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
+              <Chip label={copy.heroEyebrow} size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.16)", color: MUI_PRIMARY, fontWeight: 600 }} />
               <Typography variant="h4" sx={{ mt: 1.25, color: MUI_TEXT, fontWeight: 600, lineHeight: 1.15, fontSize: { xs: 24, md: 30 } }}>{copy.heroTitle(profile.name)}</Typography>
               <Typography variant="body1" sx={{ mt: 1.25, color: MUI_MUTED, lineHeight: 1.65 }}>{hero.description}</Typography>
               <Box sx={{ mt: 2.5 }}>
@@ -66,7 +66,7 @@ export function OverviewView({ announcement, assignmentsFailed, assignmentsLoadi
             <Stack spacing={1}>
               {discussionPreview.length === 0 ? <EmptyPanel description={copy.discussionEmptyDescription} title={copy.discussionEmptyTitle} /> : null}
               {discussionPreview.map((post) => (
-                <Paper key={post.id} sx={{ bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
+                <Paper key={post.id} sx={{ bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px", p: 1.4 }}>
                   <Stack direction="row" spacing={1} alignItems="center">
                     <Avatar sx={{ bgcolor: MUI_PRIMARY, height: 28, width: 28, fontSize: 11, fontWeight: 600 }}>{post.authorName.slice(0, 1)}</Avatar>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
@@ -120,11 +120,11 @@ export function AccountView({ account, averageAssignmentScore, copy, openAssignm
             </Stack>
             <Divider sx={{ my: 2 }} />
             <Box sx={{ display: "grid", gap: 1.5, gridTemplateColumns: "repeat(2, 1fr)" }}>
-              <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
+              <Paper sx={{ p: 1.5, bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.average}</Typography>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>{formatAverageScore(averageAssignmentScore, profile.completedAssignments)}</Typography>
               </Paper>
-              <Paper sx={{ p: 1.5, bgcolor: "#F8FAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
+              <Paper sx={{ p: 1.5, bgcolor: "#FAFAFC", border: `1px solid ${MUI_DIVIDER}`, borderRadius: "12px" }}>
                 <Typography variant="caption" color="text.secondary">{copy.stats.open}</Typography>
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>{openAssignments.length}</Typography>
               </Paper>

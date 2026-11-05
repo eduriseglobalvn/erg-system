@@ -39,7 +39,7 @@ export function RoutePendingSkeleton() {
       <Box
         sx={{
           animation: `${topBarGrow} 8s cubic-bezier(.1,.7,.2,1) -${Math.round(offsetMs)}ms forwards`,
-          bgcolor: "#696CFF",
+          bgcolor: "#0071E3",
           height: 3,
           left: 0,
           position: "fixed",

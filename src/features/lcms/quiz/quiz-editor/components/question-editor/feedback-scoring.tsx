@@ -40,7 +40,7 @@ export function MuiFeedbackAndScoring({
         ) : isIncorrect ? (
           <ErrorOutlineIcon sx={{ fontSize: 16, color: "#DC2626" }} />
         ) : (
-          <RateReviewOutlinedIcon sx={{ fontSize: 16, color: "#0F6CBD" }} />
+          <RateReviewOutlinedIcon sx={{ fontSize: 16, color: "#0071E3" }} />
         );
 
         const borderCol = isCorrect

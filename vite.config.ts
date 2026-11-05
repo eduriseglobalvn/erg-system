@@ -145,6 +145,8 @@ export default defineConfig(({ command, mode }) => {
       "**/dist/**",
       "**/.agent-artifacts/**",
       "**/.codex-chrome-*/**",
+      // Agent worktrees are full repo copies with their own node_modules (two Reacts).
+      "**/.claude/**",
       "**/scripts/**",
       "src/test/e2e/**/*.spec.ts",
     ],

@@ -43,7 +43,7 @@ export function RoadmapSummaryBar({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Typography
               sx={{
-                color: "#0F6CBD",
+                color: "#0071E3",
                 fontSize: 11,
                 fontWeight: 600,
                 letterSpacing: ".06em",

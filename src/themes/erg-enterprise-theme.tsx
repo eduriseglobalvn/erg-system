@@ -18,7 +18,7 @@ export const ergEnterpriseTheme = createTheme({
     primary: {
       main: t.color.primary,
       dark: t.color.primaryHover,
-      light: "#3B82D6",
+      light: "#4D9BEB",
       contrastText: "#FFFFFF",
     },
     error: {

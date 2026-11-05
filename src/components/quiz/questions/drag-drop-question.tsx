@@ -133,7 +133,7 @@ export function DragDropQuestion({
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <input
-                    className="quiz-runtime-edit-input text-[var(--quiz-readable-size-lg)] font-bold text-[#172033]"
+                    className="quiz-runtime-edit-input text-[var(--quiz-readable-size-lg)] font-bold text-[#1D1D1F]"
                     value={item.label}
                     onChange={(event) => updateItem(item.id, { label: event.target.value })}
                     aria-label={item.label}
@@ -230,7 +230,7 @@ export function DragDropQuestion({
                 )}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="text-[var(--quiz-readable-size-lg)] font-bold text-[#172033]">{item.label}</span>
+                  <span className="text-[var(--quiz-readable-size-lg)] font-bold text-[#1D1D1F]">{item.label}</span>
                   {reviewMode && !isCorrect ? (
                     <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
                       Đúng: {correctTarget?.label}

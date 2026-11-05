@@ -104,10 +104,10 @@ export function LikertQuestion({
             <tbody>
               {rows.map((row) => (
                 <tr key={row.id} className="border-t border-[rgba(0,0,136,0.08)]">
-                  <td className="p-5 text-[var(--quiz-readable-size)] font-semibold text-[#172033]">
+                  <td className="p-5 text-[var(--quiz-readable-size)] font-semibold text-[#1D1D1F]">
                     <div className="flex items-center gap-2">
                       <input
-                        className="quiz-runtime-edit-input text-[var(--quiz-readable-size)] font-semibold text-[#172033]"
+                        className="quiz-runtime-edit-input text-[var(--quiz-readable-size)] font-semibold text-[#1D1D1F]"
                         value={row.label}
                         onChange={(event) => updateRow(row.id, { label: event.target.value })}
                         aria-label={row.label}
@@ -161,7 +161,7 @@ export function LikertQuestion({
           <tbody>
             {rows.map((row) => (
               <tr key={row.id} className="border-t border-[rgba(0,0,136,0.08)]">
-                <td className="p-5 text-[var(--quiz-readable-size)] font-semibold text-[#172033]">{row.label}</td>
+                <td className="p-5 text-[var(--quiz-readable-size)] font-semibold text-[#1D1D1F]">{row.label}</td>
                 {scale.map((point) => {
                   const active = responses[row.id] === point.id;
 

@@ -42,7 +42,7 @@ export function SchedulePreviewPanel({
           </Box>
           <Box sx={{ minWidth: 0 }}>
             <Typography sx={{ color: tone.text, fontSize: 14, fontWeight: 950 }}>{title}</Typography>
-            <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 600, mt: 0.25 }}>
+            <Typography sx={{ color: "#6E6E73", fontSize: 12.5, fontWeight: 600, mt: 0.25 }}>
               {result.previewEventCount} lịch · {result.teacherScheduleCount} phân công giáo viên · {result.totalPeriodCount} tiết
             </Typography>
           </Box>

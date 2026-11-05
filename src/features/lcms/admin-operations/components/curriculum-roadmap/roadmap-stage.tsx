@@ -82,12 +82,12 @@ export function RoadmapStage({
           height: 44,
           width: 44,
           placeItems: "center",
-          border: isLevelSelected ? "3px solid #0F6CBD" : "3px solid #FFFFFF",
+          border: isLevelSelected ? "3px solid #0071E3" : "3px solid #FFFFFF",
           borderRadius: "50%",
-          bgcolor: "#0F6CBD",
+          bgcolor: "#0071E3",
           color: "#FFFFFF",
           boxShadow: isLevelSelected
-            ? "0 0 0 2px #0F6CBD, 0 4px 12px rgba(15, 108, 189, 0.3)"
+            ? "0 0 0 2px #0071E3, 0 4px 12px rgba(0, 113, 227, 0.3)"
             : "0 2px 6px rgba(15, 35, 58, 0.12)",
           transition: "all 150ms ease",
         }}
@@ -101,7 +101,7 @@ export function RoadmapStage({
       <Box
         sx={{
           overflow: "hidden",
-          border: isLevelSelected ? "2px solid #0F6CBD" : "1px solid #E2E8F0",
+          border: isLevelSelected ? "2px solid #0071E3" : "1px solid #E2E8F0",
           borderRadius: 2.5,
           bgcolor: "#FFFFFF",
           boxShadow: "0 1px 4px rgba(15, 35, 58, 0.04)",
@@ -131,7 +131,7 @@ export function RoadmapStage({
               px: 2.5,
               py: 1.75,
               textAlign: "left",
-              "&:hover": { bgcolor: "rgba(15, 108, 189, 0.02)" },
+              "&:hover": { bgcolor: "rgba(0, 113, 227, 0.02)" },
             }}
           >
             <Box sx={{ display: "flex", minWidth: 0, alignItems: "center", gap: 1.5 }}>
@@ -144,7 +144,7 @@ export function RoadmapStage({
                   placeItems: "center",
                   borderRadius: 2,
                   bgcolor: "#EFF6FF",
-                  color: "#0F6CBD",
+                  color: "#0071E3",
                 }}
               >
                 <Layers sx={{ fontSize: 20 }} />
@@ -180,7 +180,7 @@ export function RoadmapStage({
               startIcon={<Add fontSize="small" />}
               onClick={() => actions.onCreateTopic(stage.level)}
               sx={{
-                color: "#0F6CBD",
+                color: "#0071E3",
                 borderColor: "#BFDBFE",
                 bgcolor: "#EFF6FF",
                 fontSize: 12,
@@ -201,7 +201,7 @@ export function RoadmapStage({
                 size="small"
                 aria-label={`Chỉnh sửa ${stage.level.title}`}
                 onClick={() => actions.onEditFolder(stage.level)}
-                sx={{ color: "#64748B", "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}
+                sx={{ color: "#64748B", "&:hover": { color: "#0071E3", bgcolor: "#EFF6FF" } }}
               >
                 <EditOutlined sx={{ fontSize: 16 }} />
               </IconButton>
@@ -222,7 +222,7 @@ export function RoadmapStage({
 
         {/* Level Body: Topics & Lessons */}
         {expanded && stage.topics.length ? (
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, bgcolor: "#F8FAFC", p: 2 }}>
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2, bgcolor: "#FAFAFC", p: 2 }}>
             {stage.topics.map((topic, topicIndex) => (
               <RoadmapTopicCard
                 key={topic.id}
@@ -243,7 +243,7 @@ export function RoadmapStage({
               onClick={() => actions.onCreateTopic(stage.level)}
               sx={{
                 alignSelf: "flex-start",
-                color: "#0F6CBD",
+                color: "#0071E3",
                 borderColor: "#BFDBFE",
                 bgcolor: "#FFFFFF",
                 fontSize: 12,
@@ -252,7 +252,7 @@ export function RoadmapStage({
                 borderRadius: 1.5,
                 px: 1.75,
                 py: 0.5,
-                "&:hover": { bgcolor: "#EFF6FF", borderColor: "#0F6CBD" },
+                "&:hover": { bgcolor: "#EFF6FF", borderColor: "#0071E3" },
               }}
             >
               Thêm chủ đề vào {stage.level.title}
@@ -284,13 +284,13 @@ export function RoadmapStage({
               startIcon={<Add />}
               onClick={() => actions.onCreateTopic(stage.level)}
               sx={{
-                bgcolor: "#0F6CBD",
+                bgcolor: "#0071E3",
                 fontSize: 12,
                 fontWeight: 600,
                 textTransform: "none",
                 mt: 0.5,
                 boxShadow: "none",
-                "&:hover": { bgcolor: "#0B5594" },
+                "&:hover": { bgcolor: "#0058B0" },
               }}
             >
               Thêm chủ đề đầu tiên

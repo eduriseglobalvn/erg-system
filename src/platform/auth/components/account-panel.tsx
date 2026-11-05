@@ -53,7 +53,7 @@ export function AccountPanel({
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      <Paper elevation={1} sx={{ bgcolor: "primary.main", border: "1px solid #0b5cab", color: "primary.contrastText", px: 3, py: 3 }}>
+      <Paper elevation={1} sx={{ bgcolor: "primary.main", border: "1px solid #0058B0", color: "primary.contrastText", px: 3, py: 3 }}>
         <Box sx={{ alignItems: { sm: "flex-start" }, display: "flex", flexDirection: { xs: "column", sm: "row" }, gap: 2.5, justifyContent: { sm: "space-between" } }}>
           <Box>
             <Box sx={{ bgcolor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 1, color: "rgba(255,255,255,0.75)", display: "inline-flex", fontSize: 12, fontWeight: 600, px: 1.5, py: 0.5 }}>

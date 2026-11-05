@@ -39,7 +39,7 @@ export function CurriculumActionBar({
   return (
     <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-between gap-3 border-b border-[#D9E2EF] bg-white px-4 py-2">
       <div className="min-w-0">
-        <div className="truncate text-sm font-bold text-[#172033]">{selectedLabel}</div>
+        <div className="truncate text-sm font-bold text-[#1D1D1F]">{selectedLabel}</div>
         <div className="text-[11.5px] text-[#637381]">
           {selectedKind === "topic"
             ? "Danh sách bài học trong chủ đề"
@@ -66,16 +66,16 @@ export function CurriculumActionBar({
             "& .MuiOutlinedInput-root": {
               height: 32,
               fontSize: 12,
-              bgcolor: "#F8FAFC",
+              bgcolor: "#FAFAFC",
               borderRadius: 1.5,
               "& fieldset": { borderColor: "#E2E8F0" },
               "&:hover fieldset": { borderColor: "#CBD5E1" },
-              "&.Mui-focused fieldset": { borderColor: "#0F6CBD" },
+              "&.Mui-focused fieldset": { borderColor: "#0071E3" },
             },
           }}
         />
         <Tooltip title="Làm mới dữ liệu">
-          <IconButton size="small" onClick={onRefresh} sx={{ color: "#64748B", p: 0.6, "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}>
+          <IconButton size="small" onClick={onRefresh} sx={{ color: "#64748B", p: 0.6, "&:hover": { color: "#0071E3", bgcolor: "#EFF6FF" } }}>
             <Refresh sx={{ fontSize: 18 }} />
           </IconButton>
         </Tooltip>
@@ -95,7 +95,7 @@ export function CurriculumActionBar({
             borderRadius: 1.5,
             borderColor: "#E2E8F0",
             color: "#1E293B",
-            "&:hover": { borderColor: "#0F6CBD", bgcolor: "#EFF6FF" },
+            "&:hover": { borderColor: "#0071E3", bgcolor: "#EFF6FF" },
           }}
         >
           Khung chương trình
@@ -109,11 +109,11 @@ export function CurriculumActionBar({
             height: 32,
             fontSize: 12,
             fontWeight: 600,
-            bgcolor: "#0F6CBD",
+            bgcolor: "#0071E3",
             boxShadow: "none",
             textTransform: "none",
             borderRadius: 1.5,
-            "&:hover": { bgcolor: "#0B5594" },
+            "&:hover": { bgcolor: "#0058B0" },
           }}
         >
           {createLabel}
@@ -126,7 +126,7 @@ export function CurriculumActionBar({
               disabled={!canEdit}
               onClick={() => onCommand("edit")}
               aria-label="Chỉnh sửa mục đang chọn"
-              sx={{ p: 0.6, color: "#64748B", "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}
+              sx={{ p: 0.6, color: "#64748B", "&:hover": { color: "#0071E3", bgcolor: "#EFF6FF" } }}
             >
               <Pencil sx={{ fontSize: 16 }} />
             </IconButton>

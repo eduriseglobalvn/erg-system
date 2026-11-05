@@ -99,7 +99,7 @@ export function ResourceTreeRow({
       {action || onAction ? (
         <button
           type="button"
-          className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#919EAB] opacity-0 transition hover:bg-[#EAF4FF] hover:text-[#0F6CBD] group-hover:opacity-100"
+          className="grid h-6 w-6 shrink-0 place-items-center rounded-md text-[#919EAB] opacity-0 transition hover:bg-[#EAF4FF] hover:text-[#0071E3] group-hover:opacity-100"
           onClick={(event) => {
             event.stopPropagation();
             onAction?.();

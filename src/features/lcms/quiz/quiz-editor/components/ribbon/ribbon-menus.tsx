@@ -64,8 +64,8 @@ export function QuestionMenu({
                 width: 36,
                 height: 36,
                 borderRadius: "10px",
-                bgcolor: "rgba(15, 108, 189, 0.08)",
-                color: "#0F6CBD",
+                bgcolor: "rgba(0, 113, 227, 0.08)",
+                color: "#0071E3",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -117,8 +117,8 @@ export function QuestionMenu({
                 "&:focus-within": {
                   width: 205,
                   bgcolor: "#FFFFFF",
-                  borderColor: "#0F6CBD",
-                  boxShadow: "0 0 0 3px rgba(15, 108, 189, 0.12)",
+                  borderColor: "#0071E3",
+                  boxShadow: "0 0 0 3px rgba(0, 113, 227, 0.12)",
                 },
               }}
             >
@@ -182,14 +182,14 @@ export function QuestionMenu({
                   height: 26,
                   fontSize: 11.5,
                   fontWeight: isSelected ? 700 : 550,
-                  bgcolor: isSelected ? "#0F6CBD" : "#F1F5F9",
+                  bgcolor: isSelected ? "#0071E3" : "#F1F5F9",
                   color: isSelected ? "#FFFFFF" : "#475569",
                   border: "1px solid",
-                  borderColor: isSelected ? "#0F6CBD" : "transparent",
+                  borderColor: isSelected ? "#0071E3" : "transparent",
                   cursor: "pointer",
                   transition: "all 140ms ease",
                   "&:hover": {
-                    bgcolor: isSelected ? "#0B5CAB" : "#E2E8F0",
+                    bgcolor: isSelected ? "#0058B0" : "#E2E8F0",
                   },
                 }}
               />
@@ -256,7 +256,7 @@ export function QuestionMenu({
                 py: 0.65,
                 borderRadius: "6px",
                 bgcolor: "#F1F5F9",
-                color: "#0F6CBD",
+                color: "#0071E3",
                 fontSize: 12,
                 fontWeight: 600,
                 "&:hover": { bgcolor: "#E2E8F0" },
@@ -281,7 +281,7 @@ export function QuestionMenu({
         }}
       >
         <Box sx={{ display: "flex", flexDirection: "row", alignItems: "center", gap: 0.75 }}>
-          <LightbulbOutlinedIcon sx={{ fontSize: 14, color: "#0F6CBD" }} />
+          <LightbulbOutlinedIcon sx={{ fontSize: 14, color: "#0071E3" }} />
           <Typography variant="caption" sx={{ color: "#64748B", fontSize: "11px", fontWeight: 500 }}>
             Nhấp vào dạng câu hỏi để thêm ngay vào vị trí hiện tại
           </Typography>

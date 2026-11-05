@@ -99,7 +99,7 @@ export function DiscussionPostCard({
                 </Typography>
                 <Chip label={post.className} size="small" sx={{ bgcolor: "#F0F2F5", borderRadius: "7px", fontWeight: 600, height: 24 }} />
                 {post.relatedAssignmentTitle ? (
-                  <Chip label={post.relatedAssignmentTitle} size="small" sx={{ bgcolor: "rgba(15,108,189,0.08)", borderRadius: "7px", color: MUI_TEXT, fontWeight: 600, height: 24 }} />
+                  <Chip label={post.relatedAssignmentTitle} size="small" sx={{ bgcolor: "rgba(0, 113, 227,0.08)", borderRadius: "7px", color: MUI_TEXT, fontWeight: 600, height: 24 }} />
                 ) : null}
               </Stack>
               <Typography variant="caption" sx={{ color: "#65676B", display: "block", mt: 0.15 }}>

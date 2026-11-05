@@ -154,7 +154,7 @@ export function CenterManagement({
       ) : null}
 
       <div className="grid min-h-0 flex-1 bg-[#f7f9fc] xl:grid-cols-[320px_minmax(0,1fr)]">
-        <aside className="flex min-h-0 flex-col border-b border-[#d9e2ef] bg-[#f4f7fb] xl:border-b-0 xl:border-r">
+        <aside className="flex min-h-0 flex-col border-b border-[#d9e2ef] bg-[#F5F5F7] xl:border-b-0 xl:border-r">
           <div className="shrink-0 border-b border-[#d9e2ef] p-3">
             <div className="grid gap-2">
               <TextField

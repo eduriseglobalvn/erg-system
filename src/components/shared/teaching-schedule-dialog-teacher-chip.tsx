@@ -15,7 +15,7 @@ export function teacherSelectSlotProps(teacherId: string, label: string, muted =
 }
 
 export function TeacherColorChip({ label, muted = false, teacherId }: { label: string; muted?: boolean; teacherId: string }) {
-  const tone = muted ? { bg: "#F8FAFC", border: "#D9E2EF", text: "#667085" } : getTeacherTone(teacherId);
+  const tone = muted ? { bg: "#FAFAFC", border: "#D9E2EF", text: "#6E6E73" } : getTeacherTone(teacherId);
 
   return (
     <Tooltip arrow title={label}>

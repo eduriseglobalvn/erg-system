@@ -7,8 +7,8 @@ type LcmsTone = "blue" | "violet" | "emerald" | "amber" | "rose" | "slate";
 const toneClasses: Record<LcmsTone, { card: string; icon: string; chip: string; border: string }> = {
   blue: {
     card: "border-[#d6e8ff] bg-[#f4f9ff]",
-    icon: "border-[#c7ddff] bg-white text-[#2563eb]",
-    chip: "border-[#c7ddff] bg-[#eff6ff] text-[#2563eb]",
+    icon: "border-[#c7ddff] bg-white text-[#0071E3]",
+    chip: "border-[#c7ddff] bg-[#eff6ff] text-[#0071E3]",
     border: "border-l-[#78a8ff]",
   },
   violet: {

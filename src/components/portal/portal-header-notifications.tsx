@@ -45,5 +45,5 @@ export function PortalHeaderNotifications({ activeTab, notifications, onClose, o
 }
 
 function NotificationTab({ active, label, onClick, spaced = false }: { active: boolean; label: string; onClick: () => void; spaced?: boolean }) {
-  return <Box onClick={onClick} sx={{ borderBottom: active ? "2px solid #696CFF" : "2px solid transparent", color: active ? "#1C252E" : "#637381", cursor: "pointer", fontSize: 14, fontWeight: active ? 600 : 400, ml: spaced ? 3 : 0, pb: 2, pt: 2 }}>{label}</Box>;
+  return <Box onClick={onClick} sx={{ borderBottom: active ? "2px solid #0071E3" : "2px solid transparent", color: active ? "#1C252E" : "#637381", cursor: "pointer", fontSize: 14, fontWeight: active ? 600 : 400, ml: spaced ? 3 : 0, pb: 2, pt: 2 }}>{label}</Box>;
 }

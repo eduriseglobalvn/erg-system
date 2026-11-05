@@ -55,7 +55,7 @@ export function MuiMediaSettings({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              bgcolor: "#F8FAFC",
+              bgcolor: "#FAFAFC",
               borderRadius: "8px",
               border: "1px solid #E2E8F0",
               overflow: "hidden",
@@ -122,7 +122,7 @@ export function MuiMediaSettings({
               mb: 0.5,
             }}
           >
-            <CloudUploadOutlinedIcon sx={{ fontSize: 26, color: "#0F6CBD" }} />
+            <CloudUploadOutlinedIcon sx={{ fontSize: 26, color: "#0071E3" }} />
           </Box>
           <Typography variant="subtitle2" sx={{ fontWeight: 600, color: "#1E293B", fontSize: "14px" }}>
             Chưa có hình ảnh
@@ -138,7 +138,7 @@ export function MuiMediaSettings({
             sx={{
               borderRadius: "8px",
               fontWeight: 600,
-              bgcolor: "#0F6CBD",
+              bgcolor: "#0071E3",
               "&:hover": { bgcolor: "#0D5CA0" },
             }}
           >

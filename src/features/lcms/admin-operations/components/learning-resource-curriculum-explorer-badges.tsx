@@ -21,10 +21,10 @@ export function StatusBadge({ status }: { status?: string }) {
 export function CompactSummary({ summary }: { summary: ContentSummary }) {
   return (
     <div className="hidden h-9 shrink-0 items-center gap-1.5 rounded-lg border bg-[#FBFCFE] px-3 text-[12px] font-bold text-[#637381] xl:flex" style={{ borderColor: resourcePalette.border }}>
-      <span className="text-[#0F6CBD]">{summary.levels}</span>
+      <span className="text-[#0071E3]">{summary.levels}</span>
       <span>level</span>
       <span className="text-[#C4CDD5]">/</span>
-      <span className="text-[#0F6CBD]">{summary.topics}</span>
+      <span className="text-[#0071E3]">{summary.topics}</span>
       <span>chủ đề</span>
       <span className="text-[#C4CDD5]">/</span>
       <span className="text-[#F35C6B]">{summary.exercises}</span>

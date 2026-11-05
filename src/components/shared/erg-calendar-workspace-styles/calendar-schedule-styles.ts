@@ -48,9 +48,9 @@ export const mobileScheduleDateRailSx = {
 };
 export const mobileScheduleDateCircleSx = (isToday: boolean) => ({
   alignItems: "center",
-  backgroundColor: isToday ? "#0F6CBD" : "transparent",
+  backgroundColor: isToday ? "#0071E3" : "transparent",
   borderRadius: "50%",
-  color: isToday ? "#FFFFFF" : "#172033",
+  color: isToday ? "#FFFFFF" : "#1D1D1F",
   display: "inline-flex",
   fontSize: 20,
   fontWeight: isToday ? 850 : 650,
@@ -103,7 +103,7 @@ export const scheduleTimeSx = {
 };
 export const scheduleEmptySx = {
   alignItems: "center",
-  color: "#667085",
+  color: "#6E6E73",
   display: "flex",
   flex: 1,
   flexDirection: "column",

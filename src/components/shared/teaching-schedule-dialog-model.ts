@@ -91,7 +91,7 @@ export const emptyScheduleCatalog: ErgScheduleCatalog = {
 
 export const previewToneMap = {
   error: { background: "#FFF5F4", border: "rgba(180,35,24,0.22)", icon: "#FEE4E2", text: "#B42318" },
-  info: { background: "#F3F8FF", border: "rgba(15,108,189,0.18)", icon: "#E8F2FF", text: "#0B5CAD" },
+  info: { background: "#F3F8FF", border: "rgba(0, 113, 227,0.18)", icon: "#E8F2FF", text: "#0B5CAD" },
   success: { background: "#F4FBF7", border: "rgba(34,197,94,0.18)", icon: "#DCFCE7", text: "#167242" },
   warning: { background: "#FFF8ED", border: "rgba(255,171,0,0.26)", icon: "#FEF0C7", text: "#A35200" },
 };
@@ -107,7 +107,7 @@ export const teacherChipPalette = [
 
 export function getTeacherTone(teacherId: string) {
   if (!teacherId || teacherId === "none") {
-    return { bg: "#F8FAFC", border: "#D9E2EF", text: "#667085" };
+    return { bg: "#FAFAFC", border: "#D9E2EF", text: "#6E6E73" };
   }
 
   const hash = Array.from(teacherId).reduce((total, char) => total + char.charCodeAt(0), 0);

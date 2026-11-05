@@ -31,7 +31,7 @@ export function CurriculumRoadmapView({
   const { topics: totalTopics, lessons: totalLessons } = countRoadmapTotals(visibleStages);
 
   return (
-    <Box sx={{ display: "flex", height: "100%", minHeight: 0, flexDirection: "column", bgcolor: "#F8FAFC" }}>
+    <Box sx={{ display: "flex", height: "100%", minHeight: 0, flexDirection: "column", bgcolor: "#FAFAFC" }}>
       <RoadmapSummaryBar
         subjectTitle={subjectTitle}
         levelCount={visibleStages.length}
@@ -82,7 +82,7 @@ export function CurriculumRoadmapView({
                 bgcolor: "#FFFFFF",
                 p: 2.5,
                 transition: "all 150ms ease",
-                "&:hover": { borderColor: "#0F6CBD", bgcolor: "#F0F7FF" },
+                "&:hover": { borderColor: "#0071E3", bgcolor: "#F0F7FF" },
               }}
             >
               <Button
@@ -92,15 +92,15 @@ export function CurriculumRoadmapView({
                 sx={{
                   borderColor: "#93C5FD",
                   bgcolor: "#FFFFFF",
-                  color: "#0F6CBD",
+                  color: "#0071E3",
                   fontWeight: 600,
                   fontSize: 13,
                   textTransform: "none",
                   borderRadius: 2,
                   px: 2.5,
                   py: 0.75,
-                  boxShadow: "0 1px 3px rgba(15, 108, 189, 0.08)",
-                  "&:hover": { bgcolor: "#EFF6FF", borderColor: "#0F6CBD" },
+                  boxShadow: "0 1px 3px rgba(0, 113, 227, 0.08)",
+                  "&:hover": { bgcolor: "#EFF6FF", borderColor: "#0071E3" },
                 }}
               >
                 Thêm chặng học (Level) tiếp theo cho {subjectTitle}

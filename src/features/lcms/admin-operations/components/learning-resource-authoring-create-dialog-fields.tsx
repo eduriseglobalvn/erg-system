@@ -106,7 +106,7 @@ export function LessonContainerFields({
   onTopicChange: (value: string) => void;
 }) {
   return (
-    <div className="grid gap-2.5 rounded-lg border border-[#D9E2EF] bg-[#F8FAFC] p-2.5">
+    <div className="grid gap-2.5 rounded-lg border border-[#D9E2EF] bg-[#FAFAFC] p-2.5">
       <div className="grid gap-2.5 md:grid-cols-3">
         <Field label="Môn học">
           <AppSelect
@@ -326,7 +326,7 @@ export function QuickIconPicker({
 }) {
   const resolvedIconId = getTaxonomyIconId(iconId, role);
   const resolvedColor = getTaxonomyIconColor(iconColor, role);
-  const quickColors = taxonomyIconColorOptions.filter((option) => ["#0F6CBD", "#2563EB", "#F35C6B", "#D73D50", "#475569"].includes(option.value));
+  const quickColors = taxonomyIconColorOptions.filter((option) => ["#0071E3", "#0071E3", "#F35C6B", "#D73D50", "#475569"].includes(option.value));
 
   return (
     <Field label="Icon hiển thị">
@@ -342,7 +342,7 @@ export function QuickIconPicker({
                 type="button"
                 className={cn(
                   "grid h-9 place-items-center rounded-lg border bg-white transition",
-                  resolvedIconId === getTaxonomyIconId(optionId, role) ? "ring-2 ring-[#0F6CBD]/25" : "hover:bg-[#F4F6F8]",
+                  resolvedIconId === getTaxonomyIconId(optionId, role) ? "ring-2 ring-[#0071E3]/25" : "hover:bg-[#F4F6F8]",
                 )}
                 style={{ borderColor: resolvedIconId === getTaxonomyIconId(optionId, role) ? RESOURCE_BLUE_BORDER : RESOURCE_BORDER }}
                 onClick={() => onIconChange(optionId)}

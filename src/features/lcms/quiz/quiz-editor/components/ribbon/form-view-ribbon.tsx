@@ -493,31 +493,31 @@ function RibbonAction({
         justifyContent: "center",
         border: "1px solid",
         borderColor: isPrimaryTone
-          ? "rgba(15, 108, 189, 0.78)"
+          ? "rgba(0, 113, 227, 0.78)"
           : active
-            ? "rgba(15, 108, 189, 0.36)"
+            ? "rgba(0, 113, 227, 0.36)"
             : "rgba(148, 163, 184, 0.2)",
         borderRadius: "10px",
         bgcolor: isPrimaryTone
-          ? "var(--erg-blue, #0f6cbd)"
+          ? "var(--erg-blue, #0071E3)"
           : active
-            ? "rgba(15, 108, 189, 0.09)"
+            ? "rgba(0, 113, 227, 0.09)"
             : "rgba(255, 255, 255, 0.78)",
-        color: isPrimaryTone ? "#ffffff" : active ? "var(--erg-blue, #0f6cbd)" : "#263445",
+        color: isPrimaryTone ? "#ffffff" : active ? "var(--erg-blue, #0071E3)" : "#263445",
         px: 1.25,
         fontSize: 12.5,
         fontWeight: 600,
         lineHeight: 1,
         boxShadow: isPrimaryTone
-          ? "0 8px 18px rgba(15, 108, 189, 0.16)"
+          ? "0 8px 18px rgba(0, 113, 227, 0.16)"
           : active
-            ? "inset 0 0 0 1px rgba(15, 108, 189, 0.08)"
+            ? "inset 0 0 0 1px rgba(0, 113, 227, 0.08)"
             : "none",
         transition: "background 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease",
         "&:hover": {
-          borderColor: isPrimaryTone ? "rgba(11, 92, 161, 0.95)" : "rgba(15, 108, 189, 0.34)",
-          bgcolor: isPrimaryTone ? "#0b5ca1" : "rgba(15, 108, 189, 0.06)",
-          color: isPrimaryTone ? "#ffffff" : "var(--erg-blue, #0f6cbd)",
+          borderColor: isPrimaryTone ? "rgba(11, 92, 161, 0.95)" : "rgba(0, 113, 227, 0.34)",
+          bgcolor: isPrimaryTone ? "#0b5ca1" : "rgba(0, 113, 227, 0.06)",
+          color: isPrimaryTone ? "#ffffff" : "var(--erg-blue, #0071E3)",
         },
         "&:active": {
           transform: "translateY(1px)",

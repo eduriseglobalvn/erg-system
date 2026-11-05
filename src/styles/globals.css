@@ -5,7 +5,7 @@
 
 /* =========================================================================
    ERG Design System — legacy operational tokens
-   Font: Be Vietnam Pro | Primary: #0F6CBD | Sidebar: #1C252E
+   Font: Be Vietnam Pro | Primary: #0071E3 | Sidebar: #1C252E
    ========================================================================= */
 
 /* ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@
     --popover: #FFFFFF;
     --popover-foreground: #1C252E;
 
-    --primary: #696CFF;
+    --primary: #0071E3;
     --primary-foreground: #FFFFFF;
 
     --secondary: #F4F6F8;
@@ -45,11 +45,11 @@
     --ring: rgba(105, 108, 255, 0.24);
 
     /* ERG operational tokens shared by the responsive LMS surfaces. */
-    --erg-blue: #0F6CBD;
-    --erg-blue-hover: #0B5CAB;
+    --erg-blue: #0071E3;
+    --erg-blue-hover: #0058B0;
     --erg-blue-light: #EEF6FF;
-    --erg-blue-ring: rgba(15, 108, 189, 0.18);
-    --erg-text: #172033;
+    --erg-blue-ring: rgba(0, 113, 227, 0.18);
+    --erg-text: #1D1D1F;
     --erg-border: #D9E2EF;
     --erg-muted: #637381;
     --erg-red: #D13438;
@@ -59,7 +59,7 @@
     /* Sidebar */
     --sidebar: #1C252E;
     --sidebar-foreground: #919EAB;
-    --sidebar-primary: #696CFF;
+    --sidebar-primary: #0071E3;
     --sidebar-primary-foreground: #FFFFFF;
     --sidebar-accent: rgba(105, 108, 255, 0.08);
     --sidebar-accent-foreground: #FFFFFF;
@@ -67,11 +67,11 @@
     --sidebar-ring: rgba(105, 108, 255, 0.24);
 
     /* Chart */
-    --chart-1: #696CFF;
+    --chart-1: #0071E3;
     --chart-2: #22C55E;
     --chart-3: #FFAB00;
     --chart-4: #FF5630;
-    --chart-5: #696CFF;
+    --chart-5: #0071E3;
 
     /* Native PWA & Device Safe Area Insets (iOS notch/home-bar, Android navigation, Desktop WCO) */
     --sat: env(safe-area-inset-top, 0px);
@@ -279,13 +279,13 @@ body {
   }
 
   .erg-tab.active {
-    color: #696CFF;
+    color: #0071E3;
     font-weight: 600;
-    border-bottom-color: #696CFF;
+    border-bottom-color: #0071E3;
   }
 
   .erg-tab:hover {
-    color: #696CFF;
+    color: #0071E3;
   }
 
   .erg-tab-badge {
@@ -305,7 +305,7 @@ body {
 
   .erg-tab.active .erg-tab-badge {
     background: rgba(105, 108, 255, 0.12);
-    color: #696CFF;
+    color: #0071E3;
   }
 
   /* Badge / Status — ERG legacy */
@@ -344,7 +344,7 @@ body {
   }
 
   .erg-input:focus {
-    border-color: #696CFF;
+    border-color: #0071E3;
     box-shadow: 0 0 0 3px rgba(105, 108, 255, 0.12);
   }
 
@@ -373,7 +373,7 @@ body {
   }
 
   .erg-btn.primary {
-    background: #696CFF;
+    background: #0071E3;
     color: #FFFFFF;
     box-shadow: 0 1px 2px rgba(105, 108, 255, 0.12);
   }
@@ -441,7 +441,7 @@ body {
   }
 
   .erg-select:focus {
-    border-color: #696CFF;
+    border-color: #0071E3;
     box-shadow: 0 0 0 3px rgba(105, 108, 255, 0.12);
   }
 
@@ -461,7 +461,7 @@ body {
   }
 
   .erg-breadcrumb a:hover {
-    color: #696CFF;
+    color: #0071E3;
   }
 
   .erg-breadcrumb .active {
@@ -516,8 +516,8 @@ body {
 
   .erg-checkbox:checked,
   .erg-checkbox[data-checked="true"] {
-    border-color: #696CFF;
-    background: #696CFF;
+    border-color: #0071E3;
+    background: #0071E3;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='4 12 10 18 20 6'/%3E%3C/svg%3E");
     background-position: center;
     background-repeat: no-repeat;
@@ -534,7 +534,7 @@ body {
   .erg-progress-fill {
     height: 100%;
     border-radius: 40px;
-    background: #696CFF;
+    background: #0071E3;
     transition: width 300ms ease;
   }
 
@@ -911,7 +911,7 @@ body {
   height: 16px;
   border: 2px solid #ffffff;
   border-radius: 999px;
-  background: #0f6cbd;
+  background: #0071E3;
   box-shadow: 0 6px 14px rgba(15, 23, 42, 0.22);
   cursor: nwse-resize;
 }

@@ -96,7 +96,7 @@ export function DesktopWorkspaceEntryPage() {
                     p: 2.5,
                     transition: "border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease",
                     width: "100%",
-                    "&:hover": { borderColor: "primary.main", boxShadow: "0 14px 30px rgba(15,108,189,0.12)", transform: "translateY(-2px)" },
+                    "&:hover": { borderColor: "primary.main", boxShadow: "0 14px 30px rgba(0, 113, 227,0.12)", transform: "translateY(-2px)" },
                   }}
                 >
                   <Box sx={{ alignItems: "center", bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", display: "flex", height: 46, justifyContent: "center", width: 46 }}>

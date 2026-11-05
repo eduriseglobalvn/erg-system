@@ -15,7 +15,7 @@ import {
   NAV_ICON_SIZE,
   NAV_PADDING,
   NAV_RAISED_RADIUS,
-  NAV_RAISED_SHADOW,
+  NAV_GROUP_BG,
   NAV_TRANSITION,
   navRowSx,
   REDUCED_MOTION,
@@ -43,10 +43,9 @@ export function SidebarBranchItem({ item, currentPath, onNavigate }: SidebarBran
     <Box component="li" className="erg-nav-node" sx={{ listStyle: "none", width: "100%" }}>
       <Box
         sx={{
-          bgcolor: isExpanded ? "background.paper" : "transparent",
+          bgcolor: isExpanded ? NAV_GROUP_BG : "transparent",
           border: `1px solid ${isExpanded ? NAV_BORDER : "transparent"}`,
           borderRadius: NAV_RAISED_RADIUS,
-          boxShadow: isExpanded ? NAV_RAISED_SHADOW : "none",
           m: isExpanded ? 0 : `-${NAV_BRANCH_INSET}px`,
           p: "6px",
           transition: `${NAV_TRANSITION}, border-color ${NAV_EASE}, margin ${NAV_EASE}`,

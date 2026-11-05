@@ -10,7 +10,7 @@ export const RESOURCE_DIALOG_TITLE_SX = {
   pb: 1,
   fontSize: 18,
   fontWeight: 600,
-  color: "#172033",
+  color: "#1D1D1F",
 };
 
 export const RESOURCE_DIALOG_CONTENT_SX = {

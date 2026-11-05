@@ -35,18 +35,18 @@ export function QuestionOptionCard({
             transition: "all 140ms cubic-bezier(0.4, 0, 0.2, 1)",
             cursor: "pointer",
             "&:hover": {
-              bgcolor: "#F8FAFC",
-              borderColor: "#0F6CBD",
-              boxShadow: "0 8px 24px -4px rgba(15, 108, 189, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04)",
+              bgcolor: "#FAFAFC",
+              borderColor: "#0071E3",
+              boxShadow: "0 8px 24px -4px rgba(0, 113, 227, 0.14), 0 2px 6px rgba(15, 23, 42, 0.04)",
               transform: "translateY(-1.5px)",
               "& .question-card__arrow": {
-                bgcolor: "#0F6CBD",
+                bgcolor: "#0071E3",
                 color: "#FFFFFF",
                 transform: "scale(1.05)",
               },
               "& .question-card__preview": {
-                borderColor: "rgba(15, 108, 189, 0.28)",
-                boxShadow: "0 4px 12px rgba(15, 108, 189, 0.08)",
+                borderColor: "rgba(0, 113, 227, 0.28)",
+                boxShadow: "0 4px 12px rgba(0, 113, 227, 0.08)",
               },
             },
           }}
@@ -59,7 +59,7 @@ export function QuestionOptionCard({
               height: 60,
               flexShrink: 0,
               borderRadius: "8px",
-              bgcolor: "#F8FAFC",
+              bgcolor: "#FAFAFC",
               border: "1px solid #E2E8F0",
               display: "flex",
               alignItems: "center",
@@ -92,7 +92,7 @@ export function QuestionOptionCard({
               <Typography
                 component="span"
                 sx={{
-                  color: "#0F6CBD",
+                  color: "#0071E3",
                   fontSize: "11px",
                   fontWeight: 600,
                   lineHeight: 1.2,

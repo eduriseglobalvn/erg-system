@@ -343,11 +343,10 @@ export function StudentDashboardWorkspaceRuntime() {
         <StudentPreviewBanner preview={studentPreview} />
         {announcementToast}
         <StudentDashboardMobileShell
-          activePage={activePage} announcementUnreadCount={unreadAnnouncementCount} className={dashboardProfile.className}
-          dockItems={mobileDockItems} notificationLabel={copy.notificationTitle} studentName={account?.name ?? dashboardProfile.name}
-          onAccountOpen={() => handlePageChange("account")} onAnnouncementsOpen={() => handlePageChange("announcements")} onPageChange={handlePageChange}
+          activePage={activePage} announcementUnreadCount={unreadAnnouncementCount}
+          dockItems={mobileDockItems} studentName={account?.name ?? dashboardProfile.name} onPageChange={handlePageChange}
         >
-          <Box sx={{ px: 2, py: 2.5 }}>{dashboardViews}</Box>
+          <Box sx={{ pb: 2.5, pt: 4, px: 2 }}>{dashboardViews}</Box>
         </StudentDashboardMobileShell>
       </Box>
     );

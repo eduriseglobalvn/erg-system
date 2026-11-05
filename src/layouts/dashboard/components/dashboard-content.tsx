@@ -208,7 +208,7 @@ function AccessDeniedWorkspace({ deniedSchoolName }: { deniedSchoolName: string 
       component="main"
       sx={{
         alignItems: "center",
-        bgcolor: "#F8FAFC",
+        bgcolor: "#FAFAFC",
         display: "flex",
         height: "100%",
         justifyContent: "center",

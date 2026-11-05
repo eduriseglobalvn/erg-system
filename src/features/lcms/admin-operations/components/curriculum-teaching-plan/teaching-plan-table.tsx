@@ -118,8 +118,8 @@ export function TeachingPlanTable({
                     rowSpan={group?.count}
                     style={{
                       verticalAlign: "middle",
-                      backgroundColor: selectedTopic === row.topic ? "#F0F7FF" : "#F8FAFC",
-                      borderLeft: selectedTopic === row.topic ? "3px solid #0F6CBD" : "1px solid #D9E2EF",
+                      backgroundColor: selectedTopic === row.topic ? "#F0F7FF" : "#FAFAFC",
+                      borderLeft: selectedTopic === row.topic ? "3px solid #0071E3" : "1px solid #D9E2EF",
                       padding: "8px 8px",
                       cursor: "pointer",
                       transition: "background-color 0.15s ease",
@@ -268,7 +268,7 @@ export function TeachingPlanTable({
               size="small"
               startIcon={<CreateNewFolder />}
               onClick={() => addNewTopic()}
-              sx={{ textTransform: "none", bgcolor: "#0F6CBD", fontWeight: 600 }}
+              sx={{ textTransform: "none", bgcolor: "#0071E3", fontWeight: 600 }}
             >
               Thêm chủ đề đầu tiên
             </Button>

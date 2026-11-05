@@ -1,15 +1,14 @@
-import AutoStoriesRoundedIcon from "@mui/icons-material/AutoStoriesRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
+import ScheduleRoundedIcon from "@mui/icons-material/ScheduleRounded";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonBase from "@mui/material/ButtonBase";
-import Chip from "@mui/material/Chip";
 import LinearProgress from "@mui/material/LinearProgress";
-import Paper from "@mui/material/Paper";
 import Skeleton from "@mui/material/Skeleton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
-import { OverviewHeroActions, OverviewMetrics } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
+import { OverviewHeroActions } from "@/features/elearning/student-dashboard/components/student-dashboard-overview-shared";
 import type { DashboardCopy, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import type {
   StudentDashboardAssignment,
@@ -17,18 +16,51 @@ import type {
   StudentTeacherAnnouncement,
 } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { resolveOverviewHero } from "@/features/elearning/student-dashboard/utils/student-overview-hero";
-import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
-const surfaceSx = {
+const panelSx = {
   bgcolor: "background.paper",
-  border: "1px solid",
-  borderColor: "divider",
-  borderRadius: `${ergEnterpriseTokens.radius.lg}px`,
-  boxShadow: "none",
+  border: `1px solid ${t.color.border}`,
+  borderRadius: `${t.radius.card}px`,
 } as const;
 
 const clampSx = { display: "-webkit-box", overflow: "hidden", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 } as const;
 
+/** Short tile text for a subject, e.g. "MOS Excel" -> "X", "IC3 GS6" -> "IC3". */
+export function subjectMark(label = "") {
+  const value = label.toLowerCase();
+  if (value.includes("ic3")) return "IC3";
+  if (value.includes("excel")) return "X";
+  if (value.includes("word")) return "W";
+  if (value.includes("powerpoint")) return "P";
+  return label.trim().charAt(0).toUpperCase() || "B";
+}
+
+function SubjectTile({ label, size = 40 }: { label?: string; size?: number }) {
+  const mark = subjectMark(label);
+  return (
+    <Box
+      aria-hidden
+      sx={{
+        alignItems: "center",
+        bgcolor: t.color.primarySofter,
+        borderRadius: `${t.radius.control}px`,
+        color: "primary.dark",
+        display: "flex",
+        flexShrink: 0,
+        height: size,
+        justifyContent: "center",
+        typography: mark.length > 1 ? "caption" : "subtitle1",
+        fontWeight: "fontWeightBold",
+        width: size,
+      }}
+    >
+      {mark}
+    </Box>
+  );
+}
+
+/** Phone overview (design canvas): greeting, the one task to continue, then what is due next. */
 export function StudentDashboardMobileOverview({
   announcement,
   assignmentsFailed,
@@ -36,7 +68,6 @@ export function StudentDashboardMobileOverview({
   completedAssignments,
   copy,
   openAssignments,
-  overdueAssignments,
   priorityAssignment,
   profile,
   onOpenAssignment,
@@ -56,84 +87,130 @@ export function StudentDashboardMobileOverview({
 }) {
   const hero = resolveOverviewHero(priorityAssignment, copy);
   const activeAssignment = priorityAssignment && priorityAssignment.status !== "submitted" ? priorityAssignment : undefined;
+  const upcoming = openAssignments.filter((assignment) => assignment.id !== activeAssignment?.id).slice(0, 3);
+  // Nothing assigned yet is not the same as "all handed in".
+  const greetingLine = assignmentsLoading || assignmentsFailed
+    ? hero.description
+    : openAssignments.length === 0 && completedAssignments.length === 0
+      ? copy.todayEmptyDescription
+      : copy.greetingOpen(openAssignments.length);
+  const name = profile.name.trim().split(/\s+/).slice(-2).join(" ") || copy.learnerFallbackName;
 
   return (
-    <Stack spacing={1.5}>
-      <Paper sx={{ ...surfaceSx, overflow: "hidden", p: 2, position: "relative" }}>
-        <Box aria-hidden sx={{ bgcolor: "primary.main", bottom: 0, left: 0, position: "absolute", top: 0, width: 4 }} />
-        <Chip color="primary" label={copy.heroEyebrow} size="small" variant="outlined" />
-        <Typography variant="h3" sx={{ mt: 1.25 }}>
-          {copy.heroTitle(profile.name.trim() || copy.learnerFallbackName)}
-        </Typography>
-        <Typography color="text.secondary" variant="body2" sx={{ ...clampSx, mt: 0.75 }}>
-          {hero.description}
-        </Typography>
+    <Stack spacing={2.5}>
+      <Typography component="h1" sx={{ typography: "h2" }}>
+        {copy.greetingLead(name)}
+        <Box component="span" sx={{ color: "text.secondary", display: "block", fontWeight: "fontWeightMedium" }}>
+          {greetingLine}
+        </Box>
+      </Typography>
 
+      <Stack component="section" aria-label={copy.heroEyebrow} spacing={1.75} sx={{ ...panelSx, p: 2 }}>
         {activeAssignment ? (
-          <Box sx={{ bgcolor: "background.default", borderRadius: 2, mt: 1.5, p: 1.25 }}>
-            <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <Box sx={{ bgcolor: "primary.main", borderRadius: 2, color: "primary.contrastText", display: "grid", flexShrink: 0, height: 44, placeItems: "center", width: 44 }}>
-                <AutoStoriesRoundedIcon />
-              </Box>
+          <>
+            <Stack direction="row" spacing={1.5} sx={{ alignItems: "center" }}>
+              <SubjectTile label={activeAssignment.subjectLabel} />
               <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Typography noWrap variant="subtitle2">{activeAssignment.title}</Typography>
-                <Typography color="text.secondary" noWrap variant="caption">{activeAssignment.statusLabel} · {activeAssignment.dueLabel}</Typography>
+                <Typography sx={{ ...clampSx, typography: "subtitle1" }}>{activeAssignment.title}</Typography>
+                <Typography color="text.secondary" noWrap variant="caption" component="p">
+                  {[activeAssignment.subjectLabel, activeAssignment.teacherName].filter(Boolean).join(" · ") || activeAssignment.statusLabel}
+                </Typography>
               </Box>
             </Stack>
-            {activeAssignment.progressRate !== null ? <LinearProgress variant="determinate" value={activeAssignment.progressRate} sx={{ borderRadius: 99, height: 5, mt: 1, "& .MuiLinearProgress-bar": { borderRadius: 99 } }} /> : null}
+            {activeAssignment.dueLabel ? (
+              <Box
+                sx={{
+                  alignItems: "center",
+                  alignSelf: "flex-start",
+                  bgcolor: t.statusTint.warning.bg,
+                  borderRadius: `${t.radius.chip}px`,
+                  color: t.statusTint.warning.color,
+                  display: "inline-flex",
+                  gap: 0.75,
+                  px: 1.25,
+                  py: 0.25,
+                  typography: "caption",
+                }}
+              >
+                <ScheduleRoundedIcon fontSize="inherit" />
+                {activeAssignment.dueLabel}
+              </Box>
+            ) : null}
+            {activeAssignment.progressRate !== null ? (
+              <Stack spacing={0.75}>
+                <Stack direction="row" sx={{ justifyContent: "space-between" }}>
+                  <Typography color="text.secondary" variant="caption">{activeAssignment.statusLabel}</Typography>
+                  <Typography variant="caption">{Math.round(activeAssignment.progressRate)}%</Typography>
+                </Stack>
+                <LinearProgress
+                  aria-label={activeAssignment.statusLabel}
+                  value={activeAssignment.progressRate}
+                  variant="determinate"
+                  sx={{ bgcolor: t.color.divider, borderRadius: 99, height: 6, "& .MuiLinearProgress-bar": { borderRadius: 99 } }}
+                />
+              </Stack>
+            ) : null}
+          </>
+        ) : (
+          <Typography sx={{ typography: "subtitle1" }}>{hero.description}</Typography>
+        )}
+        <OverviewHeroActions copy={copy} fullWidth hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
+      </Stack>
+
+      {assignmentsLoading || upcoming.length > 0 ? (
+        <Stack component="section" aria-labelledby="student-upcoming" spacing={1.5}>
+          <Stack direction="row" sx={{ alignItems: "center", justifyContent: "space-between" }}>
+            <Typography component="h2" id="student-upcoming" variant="h5">{copy.upcomingTitle}</Typography>
+            <Button onClick={() => onPageChange("assignments")} size="small" variant="text">{copy.secondaryAction}</Button>
+          </Stack>
+          <Box sx={panelSx}>
+            {assignmentsLoading
+              ? Array.from({ length: 2 }).map((_, index) => <Skeleton height={56} key={index} sx={{ mx: 2, my: 1 }} variant="rounded" />)
+              : upcoming.map((assignment, index) => (
+                <UpcomingRow assignment={assignment} divider={index > 0} key={assignment.id} onOpenAssignment={onOpenAssignment} />
+              ))}
           </Box>
-        ) : null}
-
-        <Box sx={{ mt: 1.5 }}>
-          <OverviewHeroActions copy={copy} fullWidth hero={hero} onOpenAssignment={onOpenAssignment} onPageChange={onPageChange} />
-        </Box>
-      </Paper>
-
-      <OverviewMetrics
-        unavailable={assignmentsFailed}
-        columns={{ xs: "repeat(2, minmax(0, 1fr))" }}
-        completedAssignments={completedAssignments}
-        copy={copy}
-        gap={1.25}
-        openAssignments={openAssignments}
-        overdueAssignments={overdueAssignments}
-        profile={profile}
-      />
-
-      <Paper sx={{ ...surfaceSx, overflow: "hidden" }}>
-        <Stack direction="row" sx={{ alignItems: "center", borderBottom: "1px solid", borderColor: "divider", justifyContent: "space-between", px: 1.75, py: 0.75 }}>
-          <Typography variant="subtitle1">{copy.todayTitle}</Typography>
-          <Button onClick={() => onPageChange("assignments")} sx={{ minHeight: 44 }} variant="text">{copy.secondaryAction}</Button>
         </Stack>
-        <Stack spacing={0.25} sx={{ p: 0.75 }}>
-          {assignmentsLoading ? Array.from({ length: 3 }).map((_, index) => <Skeleton height={62} key={index} sx={{ borderRadius: 2 }} variant="rounded" />) : null}
-          {!assignmentsLoading && !assignmentsFailed && openAssignments.length === 0 ? <Typography color="text.secondary" variant="body2" sx={{ px: 1, py: 2, textAlign: "center" }}>{copy.heroAllDone}</Typography> : null}
-          {!assignmentsLoading ? openAssignments.slice(0, 3).map((assignment) => <MobileAssignmentRow assignment={assignment} copy={copy} key={assignment.id} onOpenAssignment={onOpenAssignment} />) : null}
-        </Stack>
-      </Paper>
+      ) : null}
 
       {announcement ? (
-        <Paper sx={{ ...surfaceSx, p: 1.75 }}>
+        <Box component="section" aria-label={copy.announcementTitle} sx={{ ...panelSx, p: 2 }}>
           <Typography color="primary.main" variant="caption">{copy.announcementTitle}</Typography>
           <Typography variant="subtitle2" sx={{ mt: 0.5 }}>{announcement.title}</Typography>
-          <Typography color="text.secondary" variant="body2" sx={{ ...clampSx, mt: 0.4 }}>{announcement.content}</Typography>
-        </Paper>
+          <Typography color="text.secondary" variant="body2" sx={{ ...clampSx, mt: 0.5 }}>{announcement.content}</Typography>
+        </Box>
       ) : null}
     </Stack>
   );
 }
 
-function MobileAssignmentRow({ assignment, copy, onOpenAssignment }: { assignment: StudentDashboardAssignment; copy: DashboardCopy; onOpenAssignment: (assignmentId: string) => void }) {
+function UpcomingRow({ assignment, divider, onOpenAssignment }: { assignment: StudentDashboardAssignment; divider: boolean; onOpenAssignment: (assignmentId: string) => void }) {
+  const overdue = assignment.status === "overdue";
   return (
-    <ButtonBase disabled={!assignment.quizId} onClick={() => onOpenAssignment(assignment.id)} sx={{ borderRadius: 2, display: "flex", gap: 1.25, justifyContent: "flex-start", minHeight: 62, p: 1, textAlign: "left", width: "100%", "&:hover": { bgcolor: "action.hover" } }}>
-      <Box sx={{ bgcolor: assignment.status === "overdue" ? "error.light" : "info.light", borderRadius: 2, color: assignment.status === "overdue" ? "error.main" : "primary.main", display: "grid", flexShrink: 0, height: 44, placeItems: "center", width: 44 }}>
-        <AutoStoriesRoundedIcon />
-      </Box>
+    <ButtonBase
+      disabled={!assignment.quizId}
+      onClick={() => onOpenAssignment(assignment.id)}
+      sx={{
+        borderTop: divider ? `1px solid ${t.color.divider}` : "none",
+        display: "flex",
+        gap: 1.5,
+        justifyContent: "flex-start",
+        minHeight: 64,
+        px: 2,
+        py: 1.5,
+        textAlign: "left",
+        width: "100%",
+        "&:hover": { bgcolor: t.color.surfaceMuted },
+      }}
+    >
+      <SubjectTile label={assignment.subjectLabel} size={36} />
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Typography noWrap variant="subtitle2">{assignment.title}</Typography>
-        <Typography color="text.secondary" noWrap variant="caption">{assignment.subjectLabel ?? assignment.statusLabel} · {assignment.dueLabel}</Typography>
+        <Typography color={overdue ? "error.main" : "text.secondary"} noWrap variant="caption" component="p">
+          {[assignment.subjectLabel, assignment.dueLabel].filter(Boolean).join(" · ")}
+        </Typography>
       </Box>
-      <Typography color="primary.main" variant="caption">{copy.assignmentAction(assignment.status)}</Typography>
+      <ChevronRightRoundedIcon sx={{ color: "text.disabled", flexShrink: 0 }} />
     </ButtonBase>
   );
 }

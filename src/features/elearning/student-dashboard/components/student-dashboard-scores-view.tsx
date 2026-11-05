@@ -15,9 +15,9 @@ import type { DashboardCopy } from "@/features/elearning/student-dashboard/types
 import type { StudentDashboardAssignment } from "@/features/elearning/student-dashboard/types/student-dashboard-types";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-const MUI_PRIMARY = "#0F6CBD";
-const MUI_TEXT = "#172033";
-const MUI_MUTED = "#667085";
+const MUI_PRIMARY = "#0071E3";
+const MUI_TEXT = "#1D1D1F";
+const MUI_MUTED = "#6E6E73";
 const MUI_BORDER = "rgba(16, 24, 40, 0.1)";
 const MUI_DIVIDER = "rgba(16, 24, 40, 0.075)";
 const MUI_SURFACE = "#FFFFFF";
@@ -100,10 +100,10 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
               onClick={() => setCourseFilter(tab.key as any)}
               sx={{
                 alignItems: "center",
-                bgcolor: active ? "#2563EB" : "#FFFFFF",
-                border: `1px solid ${active ? "#2563EB" : "#E2E8F0"}`,
+                bgcolor: active ? "#0071E3" : "#FFFFFF",
+                border: `1px solid ${active ? "#0071E3" : "#E2E8F0"}`,
                 borderRadius: "99px",
-                boxShadow: active ? "0 2px 8px rgba(37, 99, 235, 0.25)" : "none",
+                boxShadow: active ? "0 2px 8px rgba(0, 113, 227, 0.25)" : "none",
                 color: active ? "#FFFFFF" : "#475569",
                 cursor: "pointer",
                 display: "inline-flex",
@@ -117,8 +117,8 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
                 transition: "all 140ms ease",
                 whiteSpace: "nowrap",
                 "&:hover": {
-                  bgcolor: active ? "#1D4ED8" : "#F8FAFC",
-                  borderColor: active ? "#1D4ED8" : "#CBD5E1",
+                  bgcolor: active ? "#0058B0" : "#FAFAFC",
+                  borderColor: active ? "#0058B0" : "#CBD5E1",
                   color: active ? "#FFFFFF" : "#0F172A",
                 },
               }}
@@ -158,7 +158,7 @@ export function ScoresView({ assignments, copy }: { assignments: StudentDashboar
           <Box
             sx={{
               alignItems: "center",
-              background: "linear-gradient(135deg, #0284C7 0%, #2563EB 50%, #4F46E5 100%)",
+              background: "linear-gradient(135deg, #0284C7 0%, #0071E3 50%, #4F46E5 100%)",
               borderRadius: "14px",
               color: "#FFFFFF",
               display: "flex",
@@ -289,7 +289,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
                     key={attempt.id}
                     sx={{
                       alignItems: "center",
-                      bgcolor: index % 2 ? "#fff" : "#F8FAFC",
+                      bgcolor: index % 2 ? "#fff" : "#FAFAFC",
                       borderTop: index ? `1px solid ${MUI_DIVIDER}` : "none",
                       display: "grid",
                       gap: 1,
@@ -311,7 +311,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
                 ))}
               </Box>
             ) : (
-              <Box sx={{ bgcolor: "#F8FAFC", border: `1px dashed ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 1.25, py: 1 }}>
+              <Box sx={{ bgcolor: "#FAFAFC", border: `1px dashed ${MUI_BORDER}`, borderRadius: `${ergEnterpriseTokens.radius.md}px`, px: 1.25, py: 1 }}>
                 <Typography variant="body2" sx={{ color: MUI_MUTED }}>
                   {copy.noRecentResults}
                 </Typography>
@@ -322,7 +322,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
         <Box
           sx={{
             alignSelf: "stretch",
-            bgcolor: "#F8FAFC",
+            bgcolor: "#FAFAFC",
             borderLeft: { md: `1px solid ${MUI_DIVIDER}` },
             borderTop: { xs: `1px solid ${MUI_DIVIDER}`, md: "none" },
             display: "flex",
@@ -346,7 +346,7 @@ function ScoreRow({ assignment, copy }: { assignment: StudentDashboardAssignment
               value={scorePercent}
               variant="determinate"
               sx={{
-                bgcolor: "rgba(15,108,189,0.1)",
+                bgcolor: "rgba(0, 113, 227,0.1)",
                 borderRadius: 99,
                 height: 8,
                 mt: 1.2,

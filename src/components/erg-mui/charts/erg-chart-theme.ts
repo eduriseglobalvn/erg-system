@@ -1,5 +1,5 @@
 export const ergChartPalette = {
-  blue: "#2563EB",
+  blue: "#0071E3",
   blueLight: "#7DB7F4",
   emerald: "#059669",
   amber: "#D97706",

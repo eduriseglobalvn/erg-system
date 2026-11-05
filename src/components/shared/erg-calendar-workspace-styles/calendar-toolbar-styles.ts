@@ -18,7 +18,7 @@ export const todayButtonSx = {
 export const calendarMonthDisclosureSx = {
   backgroundColor: "transparent !important",
   borderRadius: "999px",
-  color: "#172033",
+  color: "#1D1D1F",
   fontSize: 15,
   fontWeight: 900,
   justifyContent: "flex-start",
@@ -29,7 +29,7 @@ export const calendarMonthDisclosureSx = {
   whiteSpace: "nowrap",
   "& .MuiButton-endIcon": { ml: 0.25 },
   "&:hover": { backgroundColor: "#F1F5F9 !important" },
-  "&:focus-visible": { boxShadow: "0 0 0 3px rgba(15,108,189,0.18)" },
+  "&:focus-visible": { boxShadow: "0 0 0 3px rgba(0, 113, 227,0.18)" },
 };
 export const mobileScopeDrawerPaperSx = {
   border: "1px solid #D9E2EF",
@@ -45,7 +45,7 @@ export const mobileScopeOptionSx = {
   px: 1.25,
   "&.Mui-selected": { backgroundColor: "#EEF6FF" },
   "&.Mui-selected:hover": { backgroundColor: "#E2EFFF" },
-  "&:focus-visible": { boxShadow: "inset 0 0 0 2px #0F6CBD" },
+  "&:focus-visible": { boxShadow: "inset 0 0 0 2px #0071E3" },
 };
 export const mobileMiniCalendarPanelSx = {
   backgroundColor: "#FFFFFF",

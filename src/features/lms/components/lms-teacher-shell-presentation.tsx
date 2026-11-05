@@ -78,7 +78,7 @@ export function LmsHeaderClassControl({
         return (
           <Stack direction="row" spacing={0.85} sx={{ alignItems: "center", minWidth: 0 }}>
             <Box sx={scopeClassIconSx}>
-              <Class sx={{ color: "#0F6CBD", fontSize: 16 }} />
+              <Class sx={{ color: "#0071E3", fontSize: 16 }} />
             </Box>
             <Typography noWrap sx={{ color: "#1C252E", fontSize: 14, fontWeight: 600, lineHeight: "22px" }}>
               {classroom?.className ?? "Lớp"}
@@ -90,7 +90,7 @@ export function LmsHeaderClassControl({
       {classes.map((classroom) => (
         <MenuItem key={classroom.id} value={classroom.id} sx={scopeMenuItemSx}>
           <Box sx={scopeClassIconSx}>
-            <Class sx={{ color: "#0F6CBD", fontSize: 16 }} />
+            <Class sx={{ color: "#0071E3", fontSize: 16 }} />
           </Box>
           <Typography noWrap sx={{ color: "#1C252E", flex: 1, fontSize: 14, fontWeight: 600, minWidth: 0 }}>
             {classroom.className}

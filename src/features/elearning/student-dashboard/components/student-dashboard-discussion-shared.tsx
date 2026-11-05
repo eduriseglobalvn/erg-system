@@ -3,9 +3,9 @@ import MuiStack from "@mui/material/Stack";
 
 import type { StudentDiscussionReactionKey } from "@/features/elearning/student-dashboard/types/discussion-feed-types";
 
-export const MUI_PRIMARY = "#0F6CBD";
-export const MUI_TEXT = "#172033";
-export const MUI_MUTED = "#667085";
+export const MUI_PRIMARY = "#0071E3";
+export const MUI_TEXT = "#1D1D1F";
+export const MUI_MUTED = "#6E6E73";
 export const MUI_BORDER = "rgba(16, 24, 40, 0.1)";
 export const MUI_DIVIDER = "rgba(16, 24, 40, 0.075)";
 export const MUI_SURFACE = "#FFFFFF";
@@ -53,8 +53,8 @@ export const commentFieldSx = {
     fontSize: 13,
     "& fieldset": { borderColor: "transparent" },
     "&:hover fieldset": { borderColor: "transparent" },
-    "&.Mui-focused": { bgcolor: "#fff", boxShadow: "0 0 0 4px rgba(15,108,189,0.08)" },
-    "&.Mui-focused fieldset": { borderColor: "rgba(15,108,189,0.34)" },
+    "&.Mui-focused": { bgcolor: "#fff", boxShadow: "0 0 0 4px rgba(0, 113, 227,0.08)" },
+    "&.Mui-focused fieldset": { borderColor: "rgba(0, 113, 227,0.34)" },
   },
 };
 

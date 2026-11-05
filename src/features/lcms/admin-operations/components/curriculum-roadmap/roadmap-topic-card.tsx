@@ -43,7 +43,7 @@ export function RoadmapTopicCard({
     <Box
       sx={{
         overflow: "hidden",
-        border: isTopicSelected ? "2px solid #0F6CBD" : "1px solid #E2E8F0",
+        border: isTopicSelected ? "2px solid #0071E3" : "1px solid #E2E8F0",
         borderRadius: 2,
         bgcolor: "#FFFFFF",
         boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
@@ -58,7 +58,7 @@ export function RoadmapTopicCard({
           flexWrap: "wrap",
           gap: 1.5,
           borderBottom: "1px solid #E2E8F0",
-          bgcolor: isTopicSelected ? "#F0F7FF" : "#F8FAFC",
+          bgcolor: isTopicSelected ? "#F0F7FF" : "#FAFAFC",
           px: 2,
           py: 1,
         }}
@@ -71,8 +71,8 @@ export function RoadmapTopicCard({
               height: 22,
               fontSize: 11,
               fontWeight: 600,
-              bgcolor: isTopicSelected ? "#0F6CBD" : "#EFF6FF",
-              color: isTopicSelected ? "#FFFFFF" : "#1D4ED8",
+              bgcolor: isTopicSelected ? "#0071E3" : "#EFF6FF",
+              color: isTopicSelected ? "#FFFFFF" : "#0058B0",
               borderRadius: 1,
             }}
           />
@@ -98,11 +98,11 @@ export function RoadmapTopicCard({
                 py: 0.35,
                 px: 1.25,
                 textTransform: "none",
-                bgcolor: "#0F6CBD",
+                bgcolor: "#0071E3",
                 color: "#FFFFFF",
                 borderRadius: 1.25,
                 boxShadow: "none",
-                "&:hover": { bgcolor: "#0B5594" },
+                "&:hover": { bgcolor: "#0058B0" },
               }}
             >
               Bài học
@@ -116,7 +116,7 @@ export function RoadmapTopicCard({
                   size="small"
                   aria-label={`Chỉnh sửa ${topic.title}`}
                   onClick={() => actions.onEditFolder(topic.folder!)}
-                  sx={{ color: "#64748B", "&:hover": { color: "#0F6CBD", bgcolor: "#EFF6FF" } }}
+                  sx={{ color: "#64748B", "&:hover": { color: "#0071E3", bgcolor: "#EFF6FF" } }}
                 >
                   <EditOutlined sx={{ fontSize: 16 }} />
                 </IconButton>
@@ -159,12 +159,12 @@ export function RoadmapTopicCard({
                 startIcon={<Add fontSize="small" />}
                 onClick={() => actions.onCreateLesson(targetFolder)}
                 sx={{
-                  color: "#0F6CBD",
+                  color: "#0071E3",
                   fontSize: 11.5,
                   fontWeight: 600,
                   textTransform: "none",
                   py: 0.25,
-                  "&:hover": { bgcolor: "rgba(15, 108, 189, 0.06)" },
+                  "&:hover": { bgcolor: "rgba(0, 113, 227, 0.06)" },
                 }}
               >
                 Thêm bài học mới vào chủ đề
@@ -186,7 +186,7 @@ export function RoadmapTopicCard({
                 fontWeight: 600,
                 textTransform: "none",
                 borderColor: "#BFDBFE",
-                color: "#0F6CBD",
+                color: "#0071E3",
                 borderRadius: 1.25,
                 "&:hover": { bgcolor: "#EFF6FF" },
               }}

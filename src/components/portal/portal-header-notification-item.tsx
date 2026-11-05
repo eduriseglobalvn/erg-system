@@ -20,11 +20,11 @@ function NotificationIcon({ type }: { type: PortalNotification["type"] }) {
 }
 
 export function PortalHeaderNotificationItem({ notification, isLast }: PortalHeaderNotificationItemProps) {
-  const iconColors: Record<PortalNotification["type"], string> = { reminder: "#00B8D9", success: "#22C55E", info: "#696CFF", warning: "#FFAB00" };
+  const iconColors: Record<PortalNotification["type"], string> = { reminder: "#00B8D9", success: "#22C55E", info: "#0071E3", warning: "#FFAB00" };
   return (
     <Box>
       <ListItemButton sx={{ alignItems: "flex-start", px: 3, py: 2, "&:hover": { bgcolor: "#F8F9FA" } }}>
-        {!notification.isRead ? <Box sx={{ bgcolor: "#696CFF", borderRadius: "50%", flexShrink: 0, height: 6, left: 12, position: "absolute", top: 20, width: 6 }} /> : null}
+        {!notification.isRead ? <Box sx={{ bgcolor: "#0071E3", borderRadius: "50%", flexShrink: 0, height: 6, left: 12, position: "absolute", top: 20, width: 6 }} /> : null}
         <ListItemIcon sx={{ minWidth: 48 }}>
           <Box sx={{ alignItems: "center", bgcolor: iconColors[notification.type], borderRadius: "50%", display: "flex", height: 40, justifyContent: "center", width: 40 }}><NotificationIcon type={notification.type} /></Box>
         </ListItemIcon>

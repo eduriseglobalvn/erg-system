@@ -1,4 +1,4 @@
-import { alpha, lighten } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import type { SxProps, Theme } from "@mui/material/styles";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import { PORTAL_SIDEBAR_TRANSITION } from "./portal-sidebar-motion";
@@ -6,9 +6,11 @@ import { PORTAL_SIDEBAR_TRANSITION } from "./portal-sidebar-motion";
 export const NAV_PRIMARY = ergEnterpriseTokens.color.primary;
 export const NAV_ON_PRIMARY = ergEnterpriseTokens.color.surface;
 export const NAV_BORDER = ergEnterpriseTokens.color.border;
-export const NAV_ACTIVE_GRADIENT = `linear-gradient(135deg, ${NAV_PRIMARY} 0%, ${lighten(NAV_PRIMARY, 0.28)} 100%)`;
-export const NAV_ACTIVE_SHADOW = `0 8px 18px ${alpha(NAV_PRIMARY, 0.35)}`;
-export const NAV_HOVER_BG = alpha(NAV_PRIMARY, 0.08);
+// Active row and brand tile are solid primary with no glow (design canvas, plan D2).
+export const NAV_ACTIVE_BG = NAV_PRIMARY;
+export const NAV_HOVER_BG = ergEnterpriseTokens.color.primarySofter;
+export const NAV_TEXT = ergEnterpriseTokens.color.navText;
+export const NAV_GROUP_BG = ergEnterpriseTokens.color.surfaceMuted;
 export const NAV_CARD_SHADOW = ergEnterpriseTokens.shadow.float;
 export const NAV_RAISED_SHADOW = "0 6px 16px rgba(15, 23, 42, 0.08)";
 
@@ -31,12 +33,11 @@ export const NAV_EASE = PORTAL_SIDEBAR_TRANSITION;
 export const NAV_TRANSITION = `background-color ${NAV_EASE}, color ${NAV_EASE}, box-shadow ${NAV_EASE}`;
 export const REDUCED_MOTION = { "@media (prefers-reduced-motion: reduce)": { transition: "none" } } as const;
 
-/** Gradient square used for the brand tile and workspace icons. */
-export const gradientTileSx = (size: number): SxProps<Theme> => ({
+/** Solid primary square used for the brand tile and workspace icons. */
+export const brandTileSx = (size: number): SxProps<Theme> => ({
   alignItems: "center",
-  background: NAV_ACTIVE_GRADIENT,
+  background: NAV_ACTIVE_BG,
   borderRadius: NAV_ITEM_RADIUS,
-  boxShadow: NAV_ACTIVE_SHADOW,
   color: NAV_ON_PRIMARY,
   display: "flex",
   flexShrink: 0,
@@ -55,20 +56,19 @@ export const raisedCardSx = {
 } as const;
 
 /**
- * Shared row/button look: gradient pill when active, primary tint on hover.
+ * Shared row/button look: solid primary pill when active, soft primary tint on hover.
  * `bar` (px) adds the 4px accent bar on the card's far-left edge for an active row.
  */
 export function navRowSx(
   active: boolean,
   { bar, height = NAV_ITEM_HEIGHT, open = false }: { bar?: number; height?: number; open?: boolean } = {},
 ) {
-  const tinted = { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY };
+  const tinted = { bgcolor: NAV_HOVER_BG, color: "text.primary" };
   return {
     alignItems: "center",
-    background: active ? NAV_ACTIVE_GRADIENT : "transparent",
+    background: active ? NAV_ACTIVE_BG : "transparent",
     borderRadius: NAV_ITEM_RADIUS,
-    boxShadow: active ? NAV_ACTIVE_SHADOW : "none",
-    color: active ? NAV_ON_PRIMARY : "text.primary",
+    color: active ? NAV_ON_PRIMARY : NAV_TEXT,
     display: "flex",
     height,
     minHeight: height,
@@ -77,8 +77,8 @@ export function navRowSx(
     px: "12px",
     transition: NAV_TRANSITION,
     width: "100%",
-    ...(open && !active ? { color: NAV_PRIMARY } : {}),
-    "&:hover": active ? { background: NAV_ACTIVE_GRADIENT } : tinted,
+    ...(open && !active ? { color: ergEnterpriseTokens.color.primaryHover } : {}),
+    "&:hover": active ? { background: ergEnterpriseTokens.color.primaryHover } : tinted,
     "&.Mui-focusVisible": { outline: `2px solid ${alpha(NAV_PRIMARY, 0.5)}`, outlineOffset: 2 },
     "& .MuiSvgIcon-root": { color: "currentColor" },
     ...(active && bar !== undefined

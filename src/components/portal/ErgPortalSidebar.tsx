@@ -2,18 +2,21 @@
 
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import Box from "@mui/material/Box";
+import ButtonBase from "@mui/material/ButtonBase";
 import Drawer from "@mui/material/Drawer";
-import IconButton from "@mui/material/IconButton";
+import Tooltip from "@mui/material/Tooltip";
 import { useLocation } from "@tanstack/react-router";
+import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 import type { MenuGroup, PortalInfo } from "./ErgPortalLayout";
 import { EXPANDED_SIDEBAR_WIDTH, PORTAL_SIDEBAR_TRANSITION, SIDEBAR_GUTTER } from "./portal-sidebar-motion";
 import {
   NAV_BORDER,
   NAV_CARD_RADIUS,
   NAV_CARD_SHADOW,
-  NAV_HOVER_BG,
-  NAV_ICON_SIZE,
+  NAV_CHILD_ICON_SIZE,
+  NAV_ON_PRIMARY,
   NAV_PRIMARY,
+  NAV_TRANSITION,
   REDUCED_MOTION,
 } from "./portal-sidebar-styles";
 import { PortalSidebarWorkspaceHeader } from "./portal-sidebar-workspace-header";
@@ -82,32 +85,44 @@ export default function ErgPortalSidebar({
       }}
     >
       {!mobile ? (
-        <IconButton
-          aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
-          onClick={() => onCollapsedChange(!collapsed)}
-          sx={{
-            bgcolor: "background.paper",
-            border: `1px solid ${NAV_BORDER}`,
-            boxShadow: NAV_CARD_SHADOW,
-            color: "text.secondary",
-            height: 28,
-            position: "absolute",
-            right: -14,
-            top: 18,
-            width: 28,
-            zIndex: 2,
-            "&:hover": { bgcolor: NAV_HOVER_BG, color: NAV_PRIMARY },
-          }}
-        >
-          <ChevronLeftRoundedIcon
+        <Tooltip placement="right" title={collapsed ? "Mở rộng menu" : "Thu gọn menu"}>
+          <ButtonBase
+            aria-label={collapsed ? "Mở rộng menu" : "Thu gọn menu"}
+            onClick={() => onCollapsedChange(!collapsed)}
             sx={{
-              fontSize: NAV_ICON_SIZE,
-              transform: collapsed ? "rotate(180deg)" : "none",
-              transition: `transform ${PORTAL_SIDEBAR_TRANSITION}`,
+              // Round handle straddling the card's right edge, vertically centred.
+              alignItems: "center",
+              bgcolor: "background.paper",
+              border: `1px solid ${NAV_BORDER}`,
+              borderRadius: "50%",
+              boxShadow: ergEnterpriseTokens.shadow.xs,
+              color: "text.secondary",
+              display: "flex",
+              height: 24,
+              justifyContent: "center",
+              position: "absolute",
+              right: -SIDEBAR_GUTTER,
+              top: "50%",
+              transform: "translateY(-50%)",
+              transition: NAV_TRANSITION,
+              width: 24,
+              zIndex: 2,
+              "&:hover": { bgcolor: NAV_PRIMARY, borderColor: NAV_PRIMARY, color: NAV_ON_PRIMARY },
+              "&.Mui-focusVisible": { outline: `2px solid ${NAV_PRIMARY}`, outlineOffset: 2 },
               ...REDUCED_MOTION,
             }}
-          />
-        </IconButton>
+          >
+            <ChevronLeftRoundedIcon
+              sx={{
+                flexShrink: 0,
+                fontSize: NAV_CHILD_ICON_SIZE,
+                transform: collapsed ? "rotate(180deg)" : "none",
+                transition: `transform ${PORTAL_SIDEBAR_TRANSITION}`,
+                ...REDUCED_MOTION,
+              }}
+            />
+          </ButtonBase>
+        </Tooltip>
       ) : null}
 
       <Box sx={{ borderRadius: "inherit", display: "flex", flex: 1, flexDirection: "column", minHeight: 0, overflow: "hidden" }}>

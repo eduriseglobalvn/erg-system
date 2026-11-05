@@ -55,7 +55,7 @@ export function StudentAnnouncementPopup({
     >
       <Box component="div" sx={{"pointerEvents":"none","display":"flex","minHeight":"100%","alignItems":"center","justifyContent":"center","padding":"calc(0.25rem * 4)","@media (min-width: 40rem)":{"padding":"calc(0.25rem * 6)"}}}>
         <Box component="div"
-          sx={{"pointerEvents":"auto","width":"100%","maxWidth":"760px","cursor":"pointer","overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in oklab, #696CFF 10%, transparent)","backgroundColor":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms"}}
+          sx={{"pointerEvents":"auto","width":"100%","maxWidth":"760px","cursor":"pointer","overflow":"hidden","borderRadius":"0.5rem","borderStyle":"solid","borderWidth":"1px","borderColor":"color-mix(in oklab, #0071E3 10%, transparent)","backgroundColor":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)","transitionProperty":"color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events","transitionTimingFunction":"cubic-bezier(0.4, 0, 0.2, 1)","transitionDuration":"150ms"}}
           onClick={handleCardClick}
           role="button"
           tabIndex={0}
@@ -92,7 +92,7 @@ export function StudentAnnouncementPopup({
             </Box>
 
             <div>
-              <Box component="h2" sx={{"fontSize":"1.25rem","lineHeight":"1.25","fontWeight":"600","color":"#696CFF"}}>{announcement.title}</Box>
+              <Box component="h2" sx={{"fontSize":"1.25rem","lineHeight":"1.25","fontWeight":"600","color":"#0071E3"}}>{announcement.title}</Box>
               <Box component="p" sx={{"marginTop":"calc(0.25rem * 3)","fontSize":"1rem","lineHeight":"calc(0.25rem * 8)","color":"oklch(44.6% 0.043 257.281)","@media (min-width: 40rem)":{"fontSize":"1.125rem","lineHeight":"calc(1.75 / 1.125)"}}}>{announcement.content}</Box>
             </div>
 
@@ -111,7 +111,7 @@ export function StudentAnnouncementPopup({
                 </Box>
                 <Box component="div" sx={{"display":"flex","flexDirection":"column","gap":"calc(0.25rem * 3)","@media (min-width: 40rem)":{"flexDirection":"row","alignItems":"center"}}}>
                   <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","color":"oklch(55.4% 0.046 257.417)"}}>{autoDismissLabel}</Box>
-                  <Box component="div" sx={{"flexShrink":"0","borderRadius":"0.5rem","backgroundColor":"#696CFF","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 3)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
+                  <Box component="div" sx={{"flexShrink":"0","borderRadius":"0.5rem","backgroundColor":"#0071E3","paddingInline":"calc(0.25rem * 5)","paddingBlock":"calc(0.25rem * 3)","color":"#fff","boxShadow":"0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)"}}>
                     <Box component="div" sx={{"fontSize":"0.875rem","lineHeight":"calc(1.25 / 0.875)","fontWeight":"600"}}>{ctaLabel}</Box>
                   </Box>
                 </Box>
@@ -120,7 +120,7 @@ export function StudentAnnouncementPopup({
 
             <Box component="div" sx={{"height":"calc(0.25rem * 2)","overflow":"hidden","borderRadius":"9999px","backgroundColor":"oklch(96.8% 0.007 247.896)"}}>
               <Box
-                sx={{ bgcolor: "#696CFF", borderRadius: 999, height: "100%" }}
+                sx={{ bgcolor: "#0071E3", borderRadius: 999, height: "100%" }}
                 style={{ animation: "student-announcement-popup-countdown 30s linear forwards" }}
               />
             </Box>

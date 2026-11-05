@@ -62,10 +62,10 @@ export function TeachingPlanActions({
             textTransform: "none",
             fontWeight: 600,
             px: 2.5,
-            bgcolor: "#0F6CBD",
+            bgcolor: "#0071E3",
             borderRadius: 1.5,
-            boxShadow: "0 2px 4px rgba(15, 108, 189, 0.25)",
-            "&:hover": { bgcolor: "#0B5594" },
+            boxShadow: "0 2px 4px rgba(0, 113, 227, 0.25)",
+            "&:hover": { bgcolor: "#0058B0" },
             "&.Mui-disabled": {
               bgcolor: "#CBD5E1",
               color: "#94A3B8",

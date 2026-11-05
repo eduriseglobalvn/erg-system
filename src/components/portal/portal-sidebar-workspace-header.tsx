@@ -24,7 +24,7 @@ import { workspaceCapabilities, workspacesFromLegacyPortals } from "@/platform/w
 import { getAuthScope } from "@/platform/auth/api/auth-storage";
 import type { PortalInfo } from "./ErgPortalLayout";
 import {
-  gradientTileSx,
+  brandTileSx,
   NAV_BORDER,
   NAV_CARD_SHADOW,
   NAV_FS,
@@ -76,14 +76,14 @@ export const WORKSPACE_META: Record<
 
 function WorkspaceTile({ workspace, size }: { workspace: Workspace; size: number }) {
   return (
-    <Box sx={{ ...gradientTileSx(size), "& .MuiSvgIcon-root": { fontSize: NAV_ICON_SIZE } }}>
+    <Box sx={{ ...brandTileSx(size), "& .MuiSvgIcon-root": { fontSize: NAV_ICON_SIZE } }}>
       {WORKSPACE_META[workspace].icon}
     </Box>
   );
 }
 
 /**
- * Brand header of the sidebar and the only portal switcher: a gradient logo tile plus the current
+ * Brand header of the sidebar and the only portal switcher: a solid logo tile plus the current
  * portal name; clicking it opens the list of portals the user can access. Collapsed = tile only.
  */
 export function PortalSidebarWorkspaceHeader({

@@ -17,7 +17,7 @@ const hotspotMockImage = `data:image/svg+xml,${encodeURIComponent(`
     </defs>
     <rect width="1200" height="675" fill="url(#bg)"/>
     <rect x="135" y="105" width="930" height="465" rx="34" fill="#ffffff" stroke="#9cc7ff" stroke-width="8"/>
-    <rect x="180" y="160" width="840" height="64" rx="18" fill="#0f6cbd" opacity="0.9"/>
+    <rect x="180" y="160" width="840" height="64" rx="18" fill="#0071E3" opacity="0.9"/>
     <rect x="190" y="270" width="360" height="210" rx="24" fill="#f1f5f9"/>
     <rect x="625" y="284" width="300" height="150" rx="24" fill="#fff7ed" stroke="#f97316" stroke-width="6"/>
     <text x="215" y="200" font-family="Inter" font-size="30" font-weight="700" fill="#ffffff">Cài đặt hệ thống</text>

@@ -113,7 +113,7 @@ export function CalendarWorkspaceToolbar(props: CalendarToolbarProps) {
             >
               {mobileLayout ? mobileLaneLabel(lane, allLaneLabel) : lane}
               {mobileLayout && active && selectedScopeLabel ? (
-                <Box component="span" sx={{ color: "#0F6CBD", fontWeight: 600, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                <Box component="span" sx={{ color: "#0071E3", fontWeight: 600, maxWidth: 116, ml: 0.5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                   · {selectedScopeLabel}
                 </Box>
               ) : null}

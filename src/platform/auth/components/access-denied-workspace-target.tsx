@@ -88,7 +88,7 @@ function workspaceBgColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
 }
 
 function workspaceIconColor(workspace: AccessDeniedWorkspaceTarget["workspace"]) {
-  if (workspace === "ADMIN") return "#696CFF";
+  if (workspace === "ADMIN") return "#0071E3";
   if (workspace === "TEACHER") return ergEnterpriseTokens.color.primary;
   if (workspace === "STUDENT") return ergEnterpriseTokens.statusTint.success.color;
   return "#D97706";

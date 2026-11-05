@@ -103,7 +103,7 @@ export function DragWordsQuestion({
               <div className="text-sm font-extrabold uppercase tracking-[0.02em] text-[#000088]">Fill statement</div>
               <div className="h-1.5 w-24 rounded-full bg-[#e82828]" />
             </div>
-            <div className="rounded-2xl border border-[rgba(0,0,136,0.10)] bg-white px-6 py-7 text-[var(--quiz-readable-size-lg)] font-semibold leading-[2.6] text-[#172033] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_28px_rgba(23,32,51,0.05)] sm:px-8 sm:py-8">
+            <div className="rounded-2xl border border-[rgba(0,0,136,0.10)] bg-white px-6 py-7 text-[var(--quiz-readable-size-lg)] font-semibold leading-[2.6] text-[#1D1D1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_28px_rgba(23,32,51,0.05)] sm:px-8 sm:py-8">
               {slots.map((slot, index) => {
                 const selectableWords = normalizeEditableWordBank(wordBank, slot.correctWordId);
                 const correctWord = selectableWords.find((word) => word.id === slot.correctWordId);
@@ -191,7 +191,7 @@ export function DragWordsQuestion({
             <div className="text-sm font-extrabold uppercase tracking-[0.02em] text-[#000088]">Câu điền từ</div>
             <div className="h-1.5 w-24 rounded-full bg-[#e82828]" />
           </div>
-          <div className="rounded-2xl border border-[rgba(0,0,136,0.10)] bg-white px-6 py-7 text-[var(--quiz-readable-size-lg)] font-semibold leading-[2.6] text-[#172033] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_28px_rgba(23,32,51,0.05)] sm:px-8 sm:py-8">
+          <div className="rounded-2xl border border-[rgba(0,0,136,0.10)] bg-white px-6 py-7 text-[var(--quiz-readable-size-lg)] font-semibold leading-[2.6] text-[#1D1D1F] shadow-[inset_0_1px_0_rgba(255,255,255,0.8),0_10px_28px_rgba(23,32,51,0.05)] sm:px-8 sm:py-8">
             {slots.map((slot, index) => {
               const selectedWordId = placements[slot.id];
               const selectedWord = wordBank.find((word) => word.id === selectedWordId);

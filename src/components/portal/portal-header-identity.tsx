@@ -29,7 +29,7 @@ export function PortalHeaderIdentity({
         headerControls
       ) : !hideIdentity ? (
         <>
-          <Box sx={{ alignItems: "center", bgcolor: "transparent", border: 0, borderRadius: 0, color: "#0F6CBD", display: "flex", fontSize: 9.5, fontWeight: 900, height: 24, justifyContent: "center", letterSpacing: 0, width: 28 }}>
+          <Box sx={{ alignItems: "center", bgcolor: "transparent", border: 0, borderRadius: 0, color: "#0071E3", display: "flex", fontSize: 9.5, fontWeight: 900, height: 24, justifyContent: "center", letterSpacing: 0, width: 28 }}>
             ERG
           </Box>
           <Typography noWrap sx={{ color: "#1C252E", fontSize: { xs: 12, sm: 13.5 }, fontWeight: 600, lineHeight: "20px", maxWidth: { xs: 150, sm: 280 } }}>

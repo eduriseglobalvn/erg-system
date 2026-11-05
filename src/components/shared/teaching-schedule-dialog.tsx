@@ -197,7 +197,7 @@ export function TeachingScheduleDialog({
       </DialogContent>
       <DialogActions sx={{ borderTop: "1px solid #EEF2F7", px: 3, py: 1.5 }}>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography sx={{ color: "#667085", fontSize: 12.5, fontWeight: 600 }}>
+          <Typography sx={{ color: "#6E6E73", fontSize: 12.5, fontWeight: 600 }}>
             {scheduleRows.length} dòng · {totalPeriodCount} tiết
           </Typography>
           {submitError ? <Typography sx={{ color: "#B42318", fontSize: 12.25, fontWeight: 600, mt: 0.35 }}>{submitError}</Typography> : null}

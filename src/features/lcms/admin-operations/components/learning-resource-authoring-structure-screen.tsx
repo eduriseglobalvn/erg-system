@@ -418,10 +418,10 @@ export function StructureScreen({
           }}
         >
           {curriculumModel.selectedKind === "none" ? (
-            <div className="flex h-full items-center justify-center bg-[#F8FAFC] px-8 text-center">
+            <div className="flex h-full items-center justify-center bg-[#FAFAFC] px-8 text-center">
               <div className="max-w-sm">
-                <span className="mx-auto grid h-11 w-11 place-items-center rounded-lg bg-[#EAF4FF] text-[#0F6CBD]"><AutoStories className="h-5 w-5" /></span>
-                <h3 className="mt-3 text-sm font-bold text-[#172033]">Chọn một môn học</h3>
+                <span className="mx-auto grid h-11 w-11 place-items-center rounded-lg bg-[#EAF4FF] text-[#0071E3]"><AutoStories className="h-5 w-5" /></span>
+                <h3 className="mt-3 text-sm font-bold text-[#1D1D1F]">Chọn một môn học</h3>
                 <p className="mt-1 text-[13px] leading-5 text-[#637381]">Chọn môn ở danh sách bên trái để xem và chỉnh sửa level, chủ đề và nội dung học.</p>
               </div>
             </div>

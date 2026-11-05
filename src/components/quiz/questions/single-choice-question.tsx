@@ -69,12 +69,12 @@ export function SingleChoiceQuestion({
             startIcon={<AddRoundedIcon sx={{ fontSize: 18 }} />}
             sx={{
               alignSelf: "flex-start",
-              bgcolor: "rgba(15, 108, 189, 0.05)",
-              borderColor: "#0F6CBD",
+              bgcolor: "rgba(0, 113, 227, 0.05)",
+              borderColor: "#0071E3",
               borderStyle: "dashed",
               borderWidth: "1.5px",
               borderRadius: "10px",
-              color: "#0F6CBD",
+              color: "#0071E3",
               fontSize: 13.5,
               fontWeight: 600,
               minHeight: 42,
@@ -83,9 +83,9 @@ export function SingleChoiceQuestion({
               boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
               transition: "all 140ms ease",
               "&:hover": {
-                bgcolor: "rgba(15, 108, 189, 0.12)",
-                borderColor: "#0B5CAB",
-                boxShadow: "0 4px 14px rgba(15, 108, 189, 0.14)",
+                bgcolor: "rgba(0, 113, 227, 0.12)",
+                borderColor: "#0058B0",
+                boxShadow: "0 4px 14px rgba(0, 113, 227, 0.14)",
                 transform: "translateY(-1px)",
               },
             }}

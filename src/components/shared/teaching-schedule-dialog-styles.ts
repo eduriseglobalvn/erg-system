@@ -44,7 +44,7 @@ export const teachingDialogTitleSx = {
 };
 
 export const teachingDialogTitleTextSx = {
-  color: "#172033",
+  color: "#1D1D1F",
   fontSize: { xs: 20, md: 23 },
   fontWeight: 950,
   lineHeight: 1.25,
@@ -83,7 +83,7 @@ export const scheduleSectionSx = {
 };
 
 export const scheduleSectionTitleSx = {
-  color: "#172033",
+  color: "#1D1D1F",
   fontSize: 14,
   fontWeight: 900,
   mb: 0.55,
@@ -156,7 +156,7 @@ export const commonSettingsGridSx = {
     transition: "border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease",
   },
   "& .MuiInputBase-root.Mui-focused": {
-    boxShadow: "0 0 0 3px rgba(15,108,189,0.08)",
+    boxShadow: "0 0 0 3px rgba(0, 113, 227,0.08)",
   },
   "& .MuiOutlinedInput-notchedOutline": {
     borderColor: "#D9E2EF",
@@ -165,7 +165,7 @@ export const commonSettingsGridSx = {
     borderColor: "#B9C7DA",
   },
   "& .MuiInputBase-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#0F6CBD",
+    borderColor: "#0071E3",
     borderWidth: 1,
   },
   "& .MuiInputLabel-root": {
@@ -178,10 +178,10 @@ export const commonSettingsGridSx = {
     transform: "translate(12px, -8px) scale(0.84)",
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color: "#0F6CBD",
+    color: "#0071E3",
   },
   "& .MuiInputBase-input, & .MuiSelect-select": {
-    color: "#172033",
+    color: "#1D1D1F",
     fontSize: 13.5,
     fontWeight: 600,
     px: 1.45,
@@ -219,7 +219,7 @@ export const excelGridMinWidth = 1384;
 
 export const excelGridHeaderSx = {
   alignItems: "center",
-  backgroundColor: "#F4F7FB",
+  backgroundColor: "#F5F5F7",
   borderBottom: "1px solid #C9D4E3",
   color: "#536176",
   display: "grid",
@@ -299,7 +299,7 @@ export function excelGridRowSx(isExpandedNote: boolean, teacherId: string) {
     boxShadow: "inset 0 0 0 2px #2F80ED",
   },
   "& .MuiInputBase-input": {
-    color: "#172033",
+    color: "#1D1D1F",
     fontSize: 13,
     fontWeight: 600,
     lineHeight: "20px",

@@ -355,7 +355,7 @@ function ScheduleView({
           return (
             <Box key={group.date} sx={mobileScheduleGroupSx}>
               <Box sx={mobileScheduleDateRailSx}>
-                <Typography sx={{ color: isToday ? "#0F6CBD" : "#667085", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
+                <Typography sx={{ color: isToday ? "#0071E3" : "#6E6E73", fontSize: 12, fontWeight: 850, textTransform: "uppercase" }}>
                   {date.format("ddd")}
                 </Typography>
                 <Box sx={mobileScheduleDateCircleSx(isToday)}>{date.date()}</Box>
@@ -386,7 +386,7 @@ function ScheduleView({
                       <Typography sx={{ color: "#425466", fontSize: 12.25, fontWeight: 600, lineHeight: 1.45, mt: 0.2 }}>
                         {formatScheduleTimeRange(event)} · {event.className || event.attendees}
                       </Typography>
-                      {event.location ? <Typography sx={{ color: "#667085", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
+                      {event.location ? <Typography sx={{ color: "#6E6E73", fontSize: 12, fontWeight: 600, mt: 0.1 }}>{event.location}</Typography> : null}
                     </Box>
                   );
                 })}
@@ -403,7 +403,7 @@ function ScheduleView({
       {groupedEvents.map((group) => (
         <Box key={group.date} sx={scheduleDayGroupSx}>
           <Box sx={scheduleDateHeaderSx}>
-            <Typography sx={{ color: "#172033", fontSize: 15, fontWeight: 900, textTransform: "lowercase" }}>
+            <Typography sx={{ color: "#1D1D1F", fontSize: 15, fontWeight: 900, textTransform: "lowercase" }}>
               {formatScheduleDateHeader(group.date)}
             </Typography>
             <Box sx={scheduleDateDotSx} />
@@ -435,14 +435,14 @@ function ScheduleView({
                     tabIndex={0}
                   >
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography noWrap sx={{ color: "#172033", fontSize: 13.5, fontWeight: 900, lineHeight: 1.35 }}>
+                      <Typography noWrap sx={{ color: "#1D1D1F", fontSize: 13.5, fontWeight: 900, lineHeight: 1.35 }}>
                         {event.title}
                       </Typography>
-                      <Typography noWrap sx={{ color: "#667085", fontSize: 12.25, fontWeight: 600, lineHeight: 1.55, mt: 0.15 }}>
+                      <Typography noWrap sx={{ color: "#6E6E73", fontSize: 12.25, fontWeight: 600, lineHeight: 1.55, mt: 0.15 }}>
                         {formatScheduleClassLine(event)}
                       </Typography>
                       {event.location ? (
-                        <Typography noWrap sx={{ color: "#667085", fontSize: 12.1, fontWeight: 600, lineHeight: 1.5 }}>
+                        <Typography noWrap sx={{ color: "#6E6E73", fontSize: 12.1, fontWeight: 600, lineHeight: 1.5 }}>
                           phòng: {event.location}
                         </Typography>
                       ) : null}

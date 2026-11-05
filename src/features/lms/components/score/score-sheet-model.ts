@@ -93,7 +93,7 @@ export function getClassificationBg(classification: Classification) {
 export function getClassificationColor(classification: Classification) {
   const colors: Record<Classification, string> = {
     A: "#16a34a",
-    B: "#2563eb",
+    B: "#0071E3",
     C: "#d97706",
     D: "#ea580c",
     E: "#dc2626",

@@ -7,7 +7,7 @@ describe("ERG enterprise theme", () => {
     expect(ergEnterpriseTokens.size.header).toBe(64);
     expect(ergEnterpriseTokens.size.sidebar).toBe(264);
     expect(ergEnterpriseTheme.shape.borderRadius).toBe(8);
-    expect(ergEnterpriseTheme.palette.primary.main).toBe("#0F6CBD");
+    expect(ergEnterpriseTheme.palette.primary.main).toBe("#0071E3");
     expect(ergEnterpriseTheme.typography.fontFamily).toContain("Be Vietnam Pro");
     expect(ergEnterpriseTheme.typography.body2.fontSize).toBe(14);
   });

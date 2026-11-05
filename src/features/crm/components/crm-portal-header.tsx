@@ -53,7 +53,7 @@ export function CrmPortalHeader({ fullName, unreadCount }: { fullName?: string; 
             sx={{ height: 32, width: 80 }}
           >
             <text x="0" y="24" fontFamily="Manrope Variable, sans-serif" fontSize="22" fontWeight="800" fill="#1C252E">ERG</text>
-            <text x="0" y="36" fontFamily="Manrope Variable, sans-serif" fontSize="9" fontWeight="600" fill="#696CFF" letterSpacing="2">EDUCATION</text>
+            <text x="0" y="36" fontFamily="Manrope Variable, sans-serif" fontSize="9" fontWeight="600" fill="#0071E3" letterSpacing="2">EDUCATION</text>
           </Box>
           <Typography sx={{ color: '#1C252E', fontSize: 14, fontWeight: 600, lineHeight: '22px' }}>
             CRM ERG
@@ -177,7 +177,7 @@ export function CrmPortalHeader({ fullName, unreadCount }: { fullName?: string; 
           <IconButton sx={{ height: 48, ml: 0.5, width: 48 }}>
             <Avatar
               sx={{
-                bgcolor: '#696CFF',
+                bgcolor: '#0071E3',
                 border: '2px solid #FFD666',
                 color: '#FFFFFF',
                 fontSize: 13,

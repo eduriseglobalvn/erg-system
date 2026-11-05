@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import MuiStack from "@mui/material/Stack";
 import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 
-export const MUI_PRIMARY = "#2563EB";
-export const MUI_PRIMARY_DARK = "#1D4ED8";
+export const MUI_PRIMARY = "#0071E3";
+export const MUI_PRIMARY_DARK = "#0058B0";
 export const MUI_RED = "#E31B3F";
 export const MUI_NAVY = "#0F172A";
 export const MUI_TEXT = "#0F172A";
@@ -31,14 +31,14 @@ export const elevatedPaperSx = {
 
 export const primaryButtonSx = {
   bgcolor: MUI_PRIMARY,
-  boxShadow: "0 2px 8px rgba(37,99,235,0.25)",
+  boxShadow: "0 2px 8px rgba(0, 113, 227,0.25)",
   color: "#fff",
   fontWeight: 600,
   borderRadius: `${ergEnterpriseTokens.radius.md}px`,
   textTransform: "none",
   "&:hover": {
     bgcolor: MUI_PRIMARY_DARK,
-    boxShadow: "0 4px 14px rgba(37,99,235,0.35)",
+    boxShadow: "0 4px 14px rgba(0, 113, 227,0.35)",
   },
 };
 

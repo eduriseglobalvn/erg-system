@@ -37,7 +37,7 @@ import type {
 
 const waveConfig = {
   participation: { color: "#7DB7F4", label: "Tham gia học tập" },
-  competency: { color: "#2563EB", label: "Năng lực học sinh" },
+  competency: { color: "#0071E3", label: "Năng lực học sinh" },
   teaching: { color: "#D97706", label: "Thực thi giảng dạy" },
   intervention: { color: "#7C3AED", label: "Hiệu quả can thiệp" },
 } satisfies ErgChartConfig;
@@ -181,5 +181,5 @@ function centerLabel(viewBox: unknown, coverage: number) {
   if (!viewBox || typeof viewBox !== "object" || !("cx" in viewBox) || !("cy" in viewBox)) return null;
   const cx = Number(viewBox.cx);
   const cy = Number(viewBox.cy);
-  return <text dominantBaseline="middle" fill="#172033" fontSize={22} fontWeight={800} textAnchor="middle" x={cx} y={cy}>{coverage}%</text>;
+  return <text dominantBaseline="middle" fill="#1D1D1F" fontSize={22} fontWeight={800} textAnchor="middle" x={cx} y={cy}>{coverage}%</text>;
 }

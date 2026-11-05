@@ -40,7 +40,7 @@ export function MemberRow({ active, user, onClick }: { active: boolean; user: Ac
         p: 2,
         textAlign: "left",
         textTransform: "none",
-        boxShadow: active ? "0 1px 3px rgba(15, 108, 189, 0.12)" : "none",
+        boxShadow: active ? "0 1px 3px rgba(0, 113, 227, 0.12)" : "none",
         "&:hover": { bgcolor: active ? "primary.50" : "action.hover", borderColor: active ? "primary.light" : "text.disabled" },
       }}
     >

@@ -37,7 +37,7 @@ export function DiscussionPageHeader({
     <Card sx={elevatedCardSx}>
       <CardContent sx={{ px: { xs: 1.5, md: 2 }, py: { xs: 1.35, md: 1.45 } }}>
         <Stack direction="row" spacing={1.1} alignItems="center">
-          <Box sx={{ bgcolor: "rgba(15,108,189,0.08)", border: "1px solid rgba(15,108,189,0.14)", borderRadius: "12px", color: MUI_PRIMARY, display: "grid", height: 42, placeItems: "center", width: 42 }}>
+          <Box sx={{ bgcolor: "rgba(0, 113, 227,0.08)", border: "1px solid rgba(0, 113, 227,0.14)", borderRadius: "12px", color: MUI_PRIMARY, display: "grid", height: 42, placeItems: "center", width: 42 }}>
             {icon}
           </Box>
           <Box sx={{ minWidth: 0 }}>
@@ -46,8 +46,8 @@ export function DiscussionPageHeader({
                 label={studentClass}
                 size="small"
                 sx={{
-                  bgcolor: "rgba(15,108,189,0.08)",
-                  border: "1px solid rgba(15,108,189,0.14)",
+                  bgcolor: "rgba(0, 113, 227,0.08)",
+                  border: "1px solid rgba(0, 113, 227,0.14)",
                   borderRadius: "8px",
                   color: MUI_PRIMARY,
                   fontSize: 12,

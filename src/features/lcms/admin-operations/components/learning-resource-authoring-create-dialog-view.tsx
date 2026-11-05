@@ -110,7 +110,7 @@ export function TaxonomyCreateDialogView({ controller }: { controller: ReturnTyp
               </h2>
               {breadcrumbText ? (
                 <div className="mt-0.5 truncate text-xs font-semibold text-[#637381]">
-                  Vị trí: <span className="text-[#0F6CBD]">{breadcrumbText}</span>
+                  Vị trí: <span className="text-[#0071E3]">{breadcrumbText}</span>
                 </div>
               ) : null}
             </div>

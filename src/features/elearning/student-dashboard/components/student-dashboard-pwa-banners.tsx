@@ -15,9 +15,9 @@ export function StudentUpdateBanner({ onApply }: { onApply: () => void }) {
           onClick={onApply}
           sx={{
             alignItems: "center",
-            bgcolor: "rgba(37, 99, 235, 0.95)",
+            bgcolor: "rgba(0, 113, 227, 0.95)",
             borderRadius: "999px",
-            boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
+            boxShadow: "0 4px 14px rgba(0, 113, 227, 0.35)",
             color: "#FFFFFF",
             display: "flex",
             gap: 1,

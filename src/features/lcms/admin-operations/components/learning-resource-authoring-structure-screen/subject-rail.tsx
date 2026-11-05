@@ -57,11 +57,11 @@ export function SubjectRail({
               )}
               onClick={() => onSelectSubject(subject.id)}
             >
-              <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg", selected ? "bg-white text-[#0F6CBD]" : "bg-[#F1F4F7] text-[#52606D]") }>
+              <span className={cn("grid h-8 w-8 shrink-0 place-items-center rounded-lg", selected ? "bg-white text-[#0071E3]" : "bg-[#F1F4F7] text-[#52606D]") }>
                 <AutoStories className="h-[18px] w-[18px]" />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[13px] font-bold text-[#172033]">{subject.label}</span>
+                <span className="block truncate text-[13px] font-bold text-[#1D1D1F]">{subject.label}</span>
                 <span className="mt-0.5 block text-[11px] text-[#637381]">{subject.groupCount} level · {subject.lessonCount} bài học</span>
               </span>
             </button>
@@ -83,8 +83,8 @@ export function SubjectRail({
               fontWeight: 600,
               borderRadius: 1.5,
               borderColor: "#CBD5E1",
-              color: "#0F6CBD",
-              "&:hover": { borderColor: "#0F6CBD", bgcolor: "#F0F7FF" },
+              color: "#0071E3",
+              "&:hover": { borderColor: "#0071E3", bgcolor: "#F0F7FF" },
             }}
           >
             Thêm môn học

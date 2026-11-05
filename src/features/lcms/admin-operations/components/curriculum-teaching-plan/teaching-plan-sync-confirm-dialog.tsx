@@ -56,7 +56,7 @@ export function TeachingPlanSyncConfirmDialog({
             p: 1.5,
             mb: 1.5,
             border: "1px solid",
-            borderColor: syncMode === "append" ? "#0F6CBD" : "#E2E8F0",
+            borderColor: syncMode === "append" ? "#0071E3" : "#E2E8F0",
             borderRadius: 1.5,
             bgcolor: syncMode === "append" ? "#F0F7FF" : "#FFFFFF",
             cursor: "pointer",

@@ -70,7 +70,7 @@ export function TrainingMonitoringWorkspace({ school }: { school: PartnerSchool 
     </Paper>
 
     <Box sx={{ display: "grid", gap: 1.25, gridTemplateColumns: { xs: "1fr", sm: "repeat(2,1fr)", xl: "repeat(4,1fr)" }, mb: 1.5 }}>
-      <MetricCard color="#2563EB" icon={<AutoGraphRoundedIcon />} label="Sức khỏe lớp" value={averageHealth} />
+      <MetricCard color="#0071E3" icon={<AutoGraphRoundedIcon />} label="Sức khỏe lớp" value={averageHealth} />
       <MetricCard color="#059669" icon={<FactCheckRoundedIcon />} label="Năng lực học sinh" value={averageMastery} />
       <MetricCard color={riskStudents ? "error.main" : "success.main"} icon={<WarningAmberRoundedIcon />} label="Học sinh cần theo dõi" value={riskStudents} />
       <MetricCard color="#D97706" icon={<MenuBookRoundedIcon />} label="Giáo viên cần xem" value={teachersNeedReview} />

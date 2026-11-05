@@ -30,7 +30,7 @@ export const QUESTION_BANK_SELECT_MENU_PROPS = {
 };
 
 export const ERG_SHEET_COLORS = {
-  frame: "#f8fafc",
+  frame: "#FAFAFC",
   header: "#f1f5f9",
   rowOdd: "#ffffff",
   rowEven: "#fbfdff",
@@ -82,8 +82,8 @@ export function SelectControl({
             fontWeight: 600,
             boxShadow: "0 1px 2px rgba(15,23,42,0.04)",
             "& .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#64748b", 0.22) },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#0f6cbd", 0.45) },
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#0f6cbd" },
+            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: alpha("#0071E3", 0.45) },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#0071E3" },
           }}
         >
           {options.map((option) => (

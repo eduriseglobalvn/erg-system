@@ -26,17 +26,17 @@ export function CalendarScopePicker({ label, onClose, onSelect, open, options, s
     <Drawer anchor="bottom" onClose={onClose} open={open} slotProps={{ paper: { "aria-labelledby": "calendar-scope-picker-title", role: "dialog", sx: mobileScopeDrawerPaperSx } }}>
       <Box sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between", px: 2, py: 1.25 }}>
         <Box sx={{ minWidth: 0 }}>
-          <Typography id="calendar-scope-picker-title" sx={{ color: "#172033", fontSize: 17, fontWeight: 900 }}>{label}</Typography>
-          <Typography sx={{ color: "#667085", fontSize: 12.5, mt: 0.2 }}>Lựa chọn sẽ áp dụng ngay cho lịch đang xem.</Typography>
+          <Typography id="calendar-scope-picker-title" sx={{ color: "#1D1D1F", fontSize: 17, fontWeight: 900 }}>{label}</Typography>
+          <Typography sx={{ color: "#6E6E73", fontSize: 12.5, mt: 0.2 }}>Lựa chọn sẽ áp dụng ngay cho lịch đang xem.</Typography>
         </Box>
         <IconButton aria-label="Đóng bộ lọc lịch" onClick={onClose} sx={{ minHeight: 44, minWidth: 44 }}><CloseRoundedIcon /></IconButton>
       </Box>
       <List aria-label={label} role="listbox" sx={{ overflowY: "auto", px: 1, pb: "max(16px, env(safe-area-inset-bottom))", pt: 0 }}>
-        <ScopeOption color="#0F6CBD" label={`Tất cả ${noun}`} onClick={() => onSelect("")} selected={!selectedValue} />
+        <ScopeOption color="#0071E3" label={`Tất cả ${noun}`} onClick={() => onSelect("")} selected={!selectedValue} />
         {options.map((option) => (
           <ScopeOption color={option.color} count={option.count} key={getScopeOptionValue(option)} label={option.label} onClick={() => onSelect(getScopeOptionValue(option))} selected={selectedValue === getScopeOptionValue(option)} />
         ))}
-        {!options.length ? <Typography sx={{ color: "#667085", fontSize: 13.5, px: 1.5, py: 2 }}>{getEmptyScopeOptionLabel(label)}</Typography> : null}
+        {!options.length ? <Typography sx={{ color: "#6E6E73", fontSize: 13.5, px: 1.5, py: 2 }}>{getEmptyScopeOptionLabel(label)}</Typography> : null}
       </List>
     </Drawer>
   );
@@ -50,7 +50,7 @@ function ScopeOption({ color, count, label, onClick, selected }: { color: string
           {selected ? <CheckRoundedIcon sx={{ fontSize: 15 }} /> : null}
         </Box>
       </ListItemIcon>
-      <ListItemText primary={label} secondary={typeof count === "number" ? `${count} lịch` : undefined} slotProps={{ primary: { sx: { color: "#172033", fontSize: 14, fontWeight: selected ? 850 : 700 } }, secondary: { sx: { color: "#667085", fontSize: 12 } } }} />
+      <ListItemText primary={label} secondary={typeof count === "number" ? `${count} lịch` : undefined} slotProps={{ primary: { sx: { color: "#1D1D1F", fontSize: 14, fontWeight: selected ? 850 : 700 } }, secondary: { sx: { color: "#6E6E73", fontSize: 12 } } }} />
     </ListItemButton>
   );
 }

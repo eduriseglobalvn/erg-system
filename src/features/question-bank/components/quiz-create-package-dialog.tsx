@@ -320,7 +320,7 @@ function PackageToggle({
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className="size-4 accent-[#0f6cbd]"
+        className="size-4 accent-[#0071E3]"
       />
     </label>
   );

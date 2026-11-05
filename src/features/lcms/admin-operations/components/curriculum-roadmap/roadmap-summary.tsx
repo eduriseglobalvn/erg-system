@@ -68,7 +68,7 @@ export function EmptyRoadmapState({
             placeItems: "center",
             borderRadius: "50%",
             bgcolor: "#EFF6FF",
-            color: "#0F6CBD",
+            color: "#0071E3",
             boxShadow: "0 0 0 6px #F0F7FF",
           }}
         >
@@ -90,15 +90,15 @@ export function EmptyRoadmapState({
             onClick={onCreateLevel}
             sx={{
               mt: 3,
-              bgcolor: "#0F6CBD",
-              boxShadow: "0 2px 8px rgba(15, 108, 189, 0.25)",
+              bgcolor: "#0071E3",
+              boxShadow: "0 2px 8px rgba(0, 113, 227, 0.25)",
               fontSize: 13,
               fontWeight: 600,
               textTransform: "none",
               px: 3,
               py: 1,
               borderRadius: 2,
-              "&:hover": { bgcolor: "#0B5594" },
+              "&:hover": { bgcolor: "#0058B0" },
             }}
           >
             Tạo Level đầu tiên cho {subjectTitle}

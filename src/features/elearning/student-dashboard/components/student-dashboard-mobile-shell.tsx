@@ -4,7 +4,6 @@ import { useState, type ReactNode } from "react";
 import { OfflineShellStatus } from "@/components/erg-mui/offline";
 import { ERG_ASSETS } from "@/config/seo";
 import { StudentDashboardBottomDock } from "@/features/elearning/student-dashboard/components/student-dashboard-bottom-dock";
-import { StudentDashboardMobileAppBar } from "@/features/elearning/student-dashboard/components/student-dashboard-mobile-app-bar";
 import type { StudentDockPageKey, StudentPageKey } from "@/features/elearning/student-dashboard/types/dashboard-view-types";
 import { LmsPwaSetupSheet } from "@/features/lms/mobile/components/lms-pwa-setup-sheet";
 import { useInstallPrompt } from "@/hooks/use-install-prompt";
@@ -18,23 +17,15 @@ export function StudentDashboardMobileShell({
   activePage,
   announcementUnreadCount = 0,
   children,
-  className,
   dockItems,
-  notificationLabel,
   studentName,
-  onAccountOpen,
-  onAnnouncementsOpen,
   onPageChange,
 }: {
   activePage: StudentPageKey;
   announcementUnreadCount?: number;
   children: ReactNode;
-  className: string;
-  notificationLabel: string;
   dockItems: Array<{ key: StudentDockPageKey; label: string; icon: ReactNode }>;
   studentName: string;
-  onAccountOpen: () => void;
-  onAnnouncementsOpen: () => void;
   onPageChange: (page: StudentDockPageKey) => void;
 }) {
   const installPrompt = useInstallPrompt();
@@ -47,7 +38,7 @@ export function StudentDashboardMobileShell({
   return (
     <Box
       sx={{
-        background: "linear-gradient(180deg, #DCE6FF 0%, #EEF2FF 18%, #F8FAFC 45%, #E8F5F8 100%)",
+        bgcolor: "background.default",
         color: "text.primary",
         display: "flex",
         flexDirection: "column",
@@ -63,14 +54,8 @@ export function StudentDashboardMobileShell({
       {/* Brand logo reference for PWA shell branding & policy */}
       <Box alt="ERG" component="img" src={ERG_ASSETS.logo} sx={{ display: "none" }} />
 
-      <StudentDashboardMobileAppBar
-        className={className}
-        notificationLabel={notificationLabel}
-        studentName={studentName}
-        unreadCount={announcementUnreadCount}
-        onAccountOpen={onAccountOpen}
-        onNotificationsOpen={onAnnouncementsOpen}
-      />
+      {/* No top bar (design canvas): notifications and profile live in the floating dock. */}
+      <Box aria-hidden sx={{ flexShrink: 0, height: "env(safe-area-inset-top, 0px)" }} />
 
       {serviceWorkerUpdate.updateAvailable ? <StudentUpdateBanner onApply={serviceWorkerUpdate.applyUpdate} /> : null}
 
@@ -86,11 +71,11 @@ export function StudentDashboardMobileShell({
           minHeight: 0,
           overflowY: "auto",
           overscrollBehavior: "contain",
-          pb: "calc(72px + env(safe-area-inset-bottom, 0px))",
-          pt: shouldOfferInstall ? 0.75 : 1.5,
+          // Room for the floating dock (60px + 16px offset + breathing space).
+          pb: "calc(112px + env(safe-area-inset-bottom, 0px))",
         }}
       >
-        <Box sx={{ maxWidth: 448, mx: "auto", px: { xs: 1.75, sm: 2.25 }, py: 1.5 }}>
+        <Box sx={{ maxWidth: 448, mx: "auto" }}>
           {children}
         </Box>
       </Box>

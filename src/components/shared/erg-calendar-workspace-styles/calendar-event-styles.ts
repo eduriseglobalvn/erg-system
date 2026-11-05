@@ -76,7 +76,7 @@ export function miniPickerDaySx(isSelected: boolean, isToday: boolean, outsideCu
 
 export function miniEventDotSx(isSelected: boolean, isToday: boolean) {
   return {
-    backgroundColor: isSelected ? "#696CFF" : isToday ? "#696CFF" : "#A7B0FF",
+    backgroundColor: isSelected ? "#0071E3" : isToday ? "#0071E3" : "#A7B0FF",
     borderRadius: "50%",
     bottom: 3,
     boxShadow: isSelected ? "0 0 0 2px #EEF4FF" : "none",

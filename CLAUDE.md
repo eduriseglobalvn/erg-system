@@ -33,7 +33,7 @@
 - ❌ **react-router-dom** — Không dùng, dùng TanStack Router
 
 ### Design System: ERG operational UI tokens
-- **Primary:** `#0F6CBD` (xanh, token `primary` trong `erg-enterprise-tokens.ts`). Quyết định 11/2026 theo `KE_HOACH_TRIEN_KHAI.md` mục 7.1. `#696CFF` (tím) chỉ còn ở code cũ, đang thay dần bằng token — KHÔNG thêm mới.
+- **Bảng màu "Xanh Apple"** (chốt 05/11/2026 từ mẫu thiết kế, thay `#0F6CBD`): primary `#0071E3` / hover `#0058B0` / nền chọn `#EBF4FE`; nền trang `#F5F5F7`, nền phụ `#FAFAFC`, viền `#E3E3E8`, vạch `#EDEDF0`; chữ `#1D1D1F` / phụ `#424245` / meta `#6E6E73`. Lấy qua token trong `erg-enterprise-tokens.ts`, KHÔNG viết hex mới. `#0F6CBD`, `#2563EB`, `#696CFF` là màu cũ, KHÔNG dùng lại.
 - **Typography:** MỘT họ duy nhất **Be Vietnam Pro** (weight 400/500/600/700, subset latin + vietnamese), JetBrains Mono (mono). KHÔNG thêm họ font khác vào theme.
 - **Sidebar (admin/giáo viên):** thẻ sáng nổi (bo `radius.shell` 20, bóng `shadow.float` — vật nổi duy nhất đứng yên); mục đang chọn là nút `primary` đặc chữ trắng; nhóm xổ xuống có mục con thụt vào; huy hiệu số nền nhạt; 264px (`size.sidebar`). Học viên: menu phẳng + bottom nav trên mobile (hằng số màu trong `portal-sidebar-styles.ts`).
 - **Bảng:** Header bg neutral-50, cell padding 12px 16px, border neutral-200
@@ -103,4 +103,4 @@ CI: `.github/workflows/ci.yml`. Mọi GitHub Action phải ghim theo SHA.
 
 - Không để code chết: xoá file không còn import (đã dọn 7 file ở 11/2026). Không thêm re-export "cho êm" để tắt cảnh báo.
 - File nguồn dùng LF (kiểm bằng `git ls-files --eol`). Cảnh báo "LF will be replaced by CRLF" của git do `core.autocrlf=true`, bỏ qua được. Khi dùng Git Bash, tránh `sed` với dấu `` — viết script Node.
-- Kế hoạch tổng thể: `KE_HOACH_TRIEN_KHAI.md`. Mục 7.1 của kế hoạch đề xuất primary `#0F6CBD` + Be Vietnam Pro + card không shadow; chủ dự án đã chốt theo kế hoạch 7.1 (11/2026): primary `#0F6CBD`, Be Vietnam Pro, card chỉ viền. Phần chưa áp dụng hết trong code (nút mặc định `text`, bỏ shadow card, lint cấm hex) là việc đang làm.
+- Kế hoạch tổng thể: `KE_HOACH_TRIEN_KHAI.md`. Mục 7.1 của kế hoạch đề xuất primary `#0F6CBD` + Be Vietnam Pro + card không shadow; chủ dự án đã chốt Be Vietnam Pro và card chỉ viền; màu primary đổi sang `#0071E3` ngày 05/11/2026 (`KE_HOACH_REFACTOR_UI.md`). Phần chưa áp dụng hết trong code (nút mặc định `text`, bỏ shadow card, lint cấm hex) là việc đang làm.

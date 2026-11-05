@@ -83,7 +83,7 @@ export function QuestionEditorDialog({
 
 
   const resolvedTextStyle = resolveSlideTextStyle(draftSlide, activeTextTarget);
-  const questionThemeColor = draftSlide.options?.themeColor ?? "#0f6cbd";
+  const questionThemeColor = draftSlide.options?.themeColor ?? "#0071E3";
 
   function updateTextStyle(patch: Partial<QuizEditorTextStyle>) {
     setDraftSlide((current) =>

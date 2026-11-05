@@ -105,8 +105,8 @@ export function DiscussionView({
                     "& .MuiOutlinedInput-input": { px: 1.45 },
                     "& fieldset": { borderColor: "transparent" },
                     "&:hover fieldset": { borderColor: "transparent" },
-                    "&.Mui-focused": { bgcolor: "#fff", boxShadow: "0 0 0 4px rgba(15,108,189,0.08)" },
-                    "&.Mui-focused fieldset": { borderColor: "rgba(15,108,189,0.34)" },
+                    "&.Mui-focused": { bgcolor: "#fff", boxShadow: "0 0 0 4px rgba(0, 113, 227,0.08)" },
+                    "&.Mui-focused fieldset": { borderColor: "rgba(0, 113, 227,0.34)" },
                   },
                 }}
               />
@@ -146,7 +146,7 @@ export function DiscussionView({
                 sx={{
                   bgcolor: MUI_PRIMARY,
                   borderRadius: 999,
-                  boxShadow: "0 8px 18px rgba(15,108,189,0.16)",
+                  boxShadow: "0 8px 18px rgba(0, 113, 227,0.16)",
                   fontWeight: 600,
                   minHeight: 36,
                   px: 2.1,

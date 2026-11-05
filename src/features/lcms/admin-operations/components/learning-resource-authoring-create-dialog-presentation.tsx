@@ -40,7 +40,7 @@ export function TypeSelectorStrip({
             className={cn(
               "flex-1 rounded-md py-1.5 text-center text-xs font-bold transition",
               active
-                ? "bg-white text-[#0F6CBD] shadow-sm"
+                ? "bg-white text-[#0071E3] shadow-sm"
                 : "text-[#637381] hover:text-[#1C252E]",
               disabled && "cursor-not-allowed opacity-60",
             )}
@@ -78,7 +78,7 @@ export function LessonSubtypePicker({
             className={cn(
               "flex-1 rounded-md py-1.5 text-center text-xs font-bold transition",
               active
-                ? "bg-white text-[#0F6CBD] shadow-sm"
+                ? "bg-white text-[#0071E3] shadow-sm"
                 : "text-[#637381] hover:text-[#1C252E]",
             )}
           >
@@ -159,7 +159,7 @@ export function ContextBox(props: {
   return (
     <div className="flex items-center gap-1.5 text-xs text-[#637381]">
       <span className="font-semibold text-[#52606D]">Vị trí:</span>
-      <span className="font-bold text-[#0F6CBD]">{text}</span>
+      <span className="font-bold text-[#0071E3]">{text}</span>
     </div>
   );
 }

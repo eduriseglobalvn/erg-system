@@ -3,7 +3,7 @@ import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
 export function scopeSelectSx({ minWidth, maxWidth, variant }: { minWidth: number; maxWidth?: number; variant: "title" | "pill" }) {
   const isTitle = variant === "title";
   return {
-    background: isTitle ? "transparent" : "#F8FAFC",
+    background: isTitle ? "transparent" : "#FAFAFC",
     borderRadius: isTitle ? "8px" : "10px",
     minWidth,
     maxWidth: maxWidth ?? (isTitle ? 238 : minWidth + 54),
@@ -15,14 +15,14 @@ export function scopeSelectSx({ minWidth, maxWidth, variant }: { minWidth: numbe
       borderColor: isTitle ? "transparent" : "rgba(145,158,171,0.16)",
     },
     "&:hover .MuiOutlinedInput-notchedOutline": {
-      borderColor: isTitle ? "rgba(15,108,189,0.10)" : "rgba(15,108,189,0.22)",
+      borderColor: isTitle ? "rgba(0, 113, 227,0.10)" : "rgba(0, 113, 227,0.22)",
     },
     "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-      borderColor: "rgba(15,108,189,0.30)",
+      borderColor: "rgba(0, 113, 227,0.30)",
       borderWidth: 1,
     },
     "&.Mui-focused": {
-      boxShadow: "0 0 0 3px rgba(15,108,189,0.08)",
+      boxShadow: "0 0 0 3px rgba(0, 113, 227,0.08)",
     },
     "& .MuiSelect-select": {
       alignItems: "center",
@@ -77,7 +77,7 @@ export const scopeMenuLogoSx = {
   alignItems: "center",
   background: "linear-gradient(135deg, #FEE2F1 0%, #DBEAFE 100%)",
   borderRadius: "50%",
-  color: "#0F6CBD",
+  color: "#0071E3",
   display: "flex",
   flexShrink: 0,
   fontSize: 9,
@@ -90,7 +90,7 @@ export const scopeMenuLogoSx = {
 export const scopeClassIconSx = {
   alignItems: "center",
   background: "linear-gradient(135deg, rgba(219,234,254,0.92) 0%, rgba(254,226,241,0.84) 100%)",
-  border: "1px solid rgba(15,108,189,0.10)",
+  border: "1px solid rgba(0, 113, 227,0.10)",
   borderRadius: "8px",
   display: "flex",
   flexShrink: 0,
