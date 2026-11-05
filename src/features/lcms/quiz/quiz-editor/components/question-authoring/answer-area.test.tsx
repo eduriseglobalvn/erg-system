@@ -41,7 +41,7 @@ describe("AnswerArea", () => {
   it("authors a hotspot slide on its own surface", () => {
     const question = readSlideQuestion(build("hotspot"), t)!;
     render(<Harness kind="hotspot" question={question} />);
-    expect(screen.getByText("Thêm ảnh cho câu hỏi điểm nóng")).toBeInTheDocument();
+    expect(screen.getByText("Thêm ảnh cho câu hỏi điểm nóng · kéo thả hoặc bấm")).toBeInTheDocument();
   });
 
   it("an essay slide renders the marking guide", () => {
