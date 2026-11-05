@@ -249,6 +249,16 @@ describe("assessQuestionReadiness", () => {
       expect(codes(q({ ...k, matching: [pair("1", "a", " "), pair("2", "c", "d")] }))).toEqual(["pair-sides"]);
       expect(codes(newShape(""))).toEqual(["pair-sides"]);
     });
+    it("pair-key: responses exist but no key", () => {
+      const noKey = (prompt: string) =>
+        q({
+          ...k,
+          matching: [pair("1", prompt), pair("2", "c")],
+          matchingResponses: [{ id: "r1", response: "x" }, { id: "r2", response: "y" }],
+        });
+      expect(codes(noKey("a"))).toEqual(["pair-key"]);
+      expect(codes(noKey(""))).toEqual(["pair-sides", "pair-key"]);
+    });
   });
 
   describe("drag_drop", () => {
@@ -264,7 +274,18 @@ describe("assessQuestionReadiness", () => {
     it("min-groups", () => {
       expect(
         codes(q({ ...k, dropTargets: [targets[0], { id: "t2", label: " " }], dragDropItems: items })),
-      ).toEqual(["min-groups"]);
+      ).toEqual(["min-groups", "blank-group"]);
+    });
+    it("blank-group: a third group has no name", () => {
+      expect(
+        codes(q({ ...k, dropTargets: [targets[0], { id: "t3", label: " " }, targets[1]], dragDropItems: items })),
+      ).toEqual(["blank-group"]);
+    });
+    it("blank-item and image-only item", () => {
+      const blank = { id: "j", label: "", correctTargetId: "t1" };
+      expect(codes(q({ ...k, dropTargets: targets, dragDropItems: [items[0], blank] }))).toEqual(["blank-item"]);
+      const withImage = { ...blank, image: { src: "data:image/png;base64,AA==" } as never };
+      expect(codes(q({ ...k, dropTargets: targets, dragDropItems: [withImage] }))).toEqual([]);
     });
     it("item-group: item points at a group that is gone", () => {
       const lost = [{ id: "i", label: "x", correctTargetId: "gone" }];
@@ -273,6 +294,7 @@ describe("assessQuestionReadiness", () => {
     it("min-items", () => {
       expect(codes(q({ ...k, dropTargets: targets, dragDropItems: [{ ...items[0], label: " " }] }))).toEqual([
         "min-items",
+        "blank-item",
       ]);
     });
   });

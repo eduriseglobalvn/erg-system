@@ -55,6 +55,9 @@ describe.each([
   "drag-the-words",
   "short-answer",
   "numeric",
+  "matching",
+  "drag-and-drop",
+  "hotspot",
 ] as const)("new %s slide", (kind) => {
   it("is not ready and has an answers issue beyond the title", () => {
     const slide = build(kind);

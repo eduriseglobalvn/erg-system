@@ -117,7 +117,10 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
       if (pairs.length < 2) add("min-pairs", "Cần ít nhất 2 cặp");
       const key = getMatchingKey(question);
       const responses = question.matchingResponses ?? [];
+      // Responses without a key: the answer side cannot be judged yet, so only the prompts count.
+      const keyMissing = !key && Boolean(question.matchingResponses);
       const incomplete = pairs.some((pair) => {
+        if (keyMissing) return !filled(pair.prompt, pair.promptImage);
         const linked = responses.find((response) => response.id === key?.[pair.id]);
         const responseOk =
           filled(pair.response, pair.responseImage) ||
@@ -125,14 +128,21 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
         return !filled(pair.prompt, pair.promptImage) || !responseOk;
       });
       if (incomplete) add("pair-sides", "Mỗi cặp cần đủ hai vế");
+      if (keyMissing) add("pair-key", "Chưa rõ cặp nào đúng. Kéo mảnh phải về đúng dòng.");
       break;
     }
     case "drag_drop":
       if ((question.dropTargets ?? []).filter((target) => target.label.trim()).length < 2) {
         add("min-groups", "Cần ít nhất 2 nhóm");
       }
+      if ((question.dropTargets ?? []).some((target) => !target.label.trim())) {
+        add("blank-group", "Đặt tên cho mọi nhóm");
+      }
       if (!(question.dragDropItems ?? []).some((item) => filled(item.label, item.image))) {
         add("min-items", "Cần ít nhất 1 mục");
+      }
+      if ((question.dragDropItems ?? []).some((item) => !filled(item.label, item.image))) {
+        add("blank-item", "Xoá mục trống hoặc điền chữ");
       }
       {
         const targetIds = new Set((question.dropTargets ?? []).map((target) => target.id));

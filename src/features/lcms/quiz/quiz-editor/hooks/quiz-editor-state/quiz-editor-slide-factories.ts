@@ -62,19 +62,17 @@ export function buildQuestionSlide(
     : choiceLabels.map((label) => createChoice(createId("choice"), label));
 
   const isMatchQuestion = type === "matching" || type === "drag-and-drop";
-  const matchItems: QuizEditorDragDropItem[] = [
-    {
-      id: createId("item"),
-      label: "",
-      emoji: "",
-      target: "",
-      media: null,
-      targetMedia: null,
-    },
-  ];
-
   const id = createId("slide");
   const runtimeQuestion = buildRuntimeQuestion(type, id, choices, quizProject.questionDefaults.positivePoints, createId);
+  // Mirrors the pairs as mapRuntimeDragDropItems writes them; classification starts with no items.
+  const matchItems: QuizEditorDragDropItem[] = (runtimeQuestion?.matching ?? []).map((pair) => ({
+    id: pair.id,
+    label: "",
+    emoji: "",
+    target: "",
+    media: null,
+    targetMedia: null,
+  }));
 
   return {
     id,
@@ -137,6 +135,23 @@ function buildRuntimeQuestion(
       return { ...base, kind: "short_answer", textBlanks: [] };
     case "numeric":
       return { ...base, kind: "numeric" };
+    case "matching":
+      return {
+        ...base,
+        kind: "matching",
+        matching: [1, 2].map(() => ({ id: createId("pair"), prompt: "", response: "" })),
+      };
+    case "drag-and-drop":
+      return {
+        ...base,
+        kind: "drag_drop",
+        dropTargets: [1, 2].map(() => ({ id: createId("group"), label: "" })),
+        dragDropItems: [],
+      };
+    case "hotspot":
+      return { ...base, kind: "hotspot", hotspotAreas: [] };
+    case "essay":
+      return { ...base, kind: "essay", essayRubric: [] };
     default:
       return undefined;
   }
