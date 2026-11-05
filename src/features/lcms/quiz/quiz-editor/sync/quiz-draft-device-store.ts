@@ -1,4 +1,4 @@
-import { createStore, del, get, keys, set } from "idb-keyval";
+import { createStore, del, get, keys, set, type UseStore } from "idb-keyval";
 
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 
@@ -93,9 +93,7 @@ export function createMemoryQuizDraftDeviceStore(): QuizDraftDeviceStore {
   };
 }
 
-// A separate database: idb-keyval creates one object store per database and "erg-system" is already taken.
-function createIdbQuizDraftDeviceStore(): QuizDraftDeviceStore {
-  const store = createStore("erg-quiz-editor", "drafts");
+function createIdbQuizDraftDeviceStore(store: UseStore): QuizDraftDeviceStore {
   const keysWithPrefix = async (prefix: string) =>
     (await keys<string>(store)).filter((k) => typeof k === "string" && k.startsWith(prefix));
   const readAll = async <T>(prefix: string): Promise<Array<[string, T]>> => {
@@ -148,6 +146,44 @@ function createIdbQuizDraftDeviceStore(): QuizDraftDeviceStore {
   };
 }
 
+const PROBE_KEY = "probe";
+
+/**
+ * IndexedDB when it works, else tab memory (spec §9.1). Old Firefox private mode and blocked site data reject every
+ * request although `indexedDB` exists, so the first call writes and reads a probe key once and the result sticks.
+ */
 export function createQuizDraftDeviceStore(): QuizDraftDeviceStore {
-  return typeof indexedDB !== "undefined" ? createIdbQuizDraftDeviceStore() : createMemoryQuizDraftDeviceStore();
+  if (typeof indexedDB === "undefined") return createMemoryQuizDraftDeviceStore();
+  // A separate database: idb-keyval creates one object store per database and "erg-system" is already taken.
+  const store = createStore("erg-quiz-editor", "drafts");
+  let active = createIdbQuizDraftDeviceStore(store);
+  let probe: Promise<void> | null = null;
+  const ready = () =>
+    (probe ??= (async () => {
+      try {
+        await set(PROBE_KEY, 1, store);
+        if ((await get(PROBE_KEY, store)) !== 1) throw new Error("IndexedDB probe read back nothing");
+        await del(PROBE_KEY, store);
+      } catch (error) {
+        console.error("IndexedDB is unavailable; quiz drafts are kept in this tab only", error);
+        active = createMemoryQuizDraftDeviceStore();
+      }
+    })());
+  const via = <K extends Exclude<keyof QuizDraftDeviceStore, "persistent">>(name: K) =>
+    (async (...args: unknown[]) => {
+      await ready();
+      return (active[name] as (...a: unknown[]) => unknown)(...args);
+    }) as QuizDraftDeviceStore[K];
+  return {
+    get persistent() {
+      return active.persistent;
+    },
+    get: via("get"),
+    put: via("put"),
+    remove: via("remove"),
+    list: via("list"),
+    addBackup: via("addBackup"),
+    listBackups: via("listBackups"),
+    prune: via("prune"),
+  };
 }

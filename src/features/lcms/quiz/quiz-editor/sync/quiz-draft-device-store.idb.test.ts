@@ -5,6 +5,8 @@ import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/a
 const fake = vi.hoisted(() => ({
   data: new Map<string, unknown>(),
   setError: null as unknown,
+  /** Every request rejects, as when the database cannot be opened (private mode, blocked site data). */
+  openError: null as unknown,
   afterKeys: null as null | (() => void),
 }));
 
@@ -26,13 +28,21 @@ vi.mock("idb-keyval", () => ({
     setTimeout(() => transaction.oncomplete?.(), 0);
     return result;
   },
-  get: async (k: string) => fake.data.get(k),
+  get: async (k: string) => {
+    if (fake.openError) throw fake.openError;
+    return fake.data.get(k);
+  },
   set: async (k: string, v: unknown) => {
+    if (fake.openError) throw fake.openError;
     if (fake.setError) throw fake.setError;
     fake.data.set(k, structuredClone(v));
   },
-  del: async (k: string) => void fake.data.delete(k),
+  del: async (k: string) => {
+    if (fake.openError) throw fake.openError;
+    fake.data.delete(k);
+  },
   keys: async () => {
+    if (fake.openError) throw fake.openError;
     const all = [...fake.data.keys()];
     fake.afterKeys?.();
     return all;
@@ -51,6 +61,7 @@ describe("idb quiz draft device store", () => {
   beforeEach(() => {
     fake.data.clear();
     fake.setError = null;
+    fake.openError = null;
     fake.afterKeys = null;
     vi.stubGlobal("indexedDB", {});
   });
@@ -59,14 +70,35 @@ describe("idb quiz draft device store", () => {
     expect(createQuizDraftDeviceStore().persistent).toBe(true);
   });
 
+  // The first call probes the database; errors after that come from the real write.
   it.each(["QuotaExceededError", "NS_ERROR_DOM_QUOTA_REACHED"])("maps %s to DeviceStorageFullError", async (name) => {
+    const s = createQuizDraftDeviceStore();
+    await s.get("t:a", "q1");
     fake.setError = new DOMException("", name);
-    await expect(createQuizDraftDeviceStore().put("t:a", rec())).rejects.toBeInstanceOf(DeviceStorageFullError);
+    await expect(s.put("t:a", rec())).rejects.toBeInstanceOf(DeviceStorageFullError);
   });
 
   it("rethrows other errors untouched", async () => {
+    const s = createQuizDraftDeviceStore();
+    await s.get("t:a", "q1");
     fake.setError = new Error("boom");
-    await expect(createQuizDraftDeviceStore().put("t:a", rec())).rejects.toThrow("boom");
+    await expect(s.put("t:a", rec())).rejects.toThrow("boom");
+  });
+
+  it("falls back to tab memory when IndexedDB exists but cannot be opened", async () => {
+    fake.openError = new DOMException("blocked", "InvalidStateError");
+    const s = createQuizDraftDeviceStore();
+    await s.put("t:a", rec());
+    expect(await s.get("t:a", "q1")).toMatchObject({ key: "q1" });
+    expect(await s.list("t:a")).toHaveLength(1);
+    expect(s.persistent).toBe(false);
+  });
+
+  it("stays on IndexedDB and leaves no probe behind when it works", async () => {
+    const s = createQuizDraftDeviceStore();
+    await s.put("t:a", rec());
+    expect(s.persistent).toBe(true);
+    expect([...fake.data.keys()]).toEqual(["t:a|draft|q1"]);
   });
 
   it("filters by exact scope and key", async () => {
