@@ -249,7 +249,7 @@ export function TeacherOnboardingWorkspace(props: TeacherOnboardingWorkspaceProp
                   textTransform: "uppercase",
                 }}
               >
-                ERG Teacher Onboarding
+                Thiết lập tài khoản ERG
               </Typography>
               <Typography
                 component="h1"
