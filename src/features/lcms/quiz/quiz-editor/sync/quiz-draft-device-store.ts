@@ -40,7 +40,9 @@ export interface QuizDraftDeviceStore {
   prune(scope: string, now: Date): Promise<void>;
 }
 
-export class DeviceStorageFullError extends Error {}
+export class DeviceStorageFullError extends Error {
+  override name = "DeviceStorageFullError";
+}
 
 export const SYNCED_DRAFT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 export const BACKUP_MAX_AGE_MS = 30 * 24 * 60 * 60 * 1000;
@@ -104,11 +106,24 @@ function createIdbQuizDraftDeviceStore(): QuizDraftDeviceStore {
     }
     return rows;
   };
+  // Re-check inside one readwrite transaction so an edit another tab wrote meanwhile is never deleted.
+  const deleteIf = <T>(k: string, shouldDelete: (value: T) => boolean) =>
+    store("readwrite", (os) =>
+      new Promise<void>((resolve, reject) => {
+        const req = os.get(k);
+        req.onsuccess = () => {
+          if (req.result !== undefined && shouldDelete(req.result as T)) os.delete(k);
+        };
+        os.transaction.oncomplete = () => resolve();
+        os.transaction.onerror = () => reject(os.transaction.error);
+        os.transaction.onabort = () => reject(os.transaction.error);
+      }),
+    );
   const putChecked = async (k: string, value: unknown) => {
     try {
       await set(k, value, store);
     } catch (error) {
-      if (error instanceof DOMException && error.name === "QuotaExceededError") throw new DeviceStorageFullError("Device storage is full", { cause: error });
+      if (error instanceof DOMException && (error.name === "QuotaExceededError" || error.name === "NS_ERROR_DOM_QUOTA_REACHED")) throw new DeviceStorageFullError("Device storage is full", { cause: error });
       throw error;
     }
   };
@@ -127,8 +142,8 @@ function createIdbQuizDraftDeviceStore(): QuizDraftDeviceStore {
       return (await readAll<DeviceDraftBackup>(`${backupPrefix(scope, key)}|`)).map(([, v]) => v);
     },
     async prune(scope, now) {
-      for (const [k, v] of await readAll<DeviceDraftRecord>(draftPrefix(scope))) if (isStale(v, now)) await del(k, store);
-      for (const [k, v] of await readAll<DeviceDraftBackup>(backupPrefix(scope))) if (isOldBackup(v, now)) await del(k, store);
+      for (const k of await keysWithPrefix(draftPrefix(scope))) await deleteIf<DeviceDraftRecord>(k, (r) => isStale(r, now));
+      for (const k of await keysWithPrefix(backupPrefix(scope))) await deleteIf<DeviceDraftBackup>(k, (r) => isOldBackup(r, now));
     },
   };
 }
