@@ -1,10 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import {
-  createMatchingId,
-  createNextMatchingAssignments,
-  resizeMatchingTextarea,
-} from "@/components/quiz/questions/matching-question/matching-helpers";
+import { createNextMatchingAssignments } from "@/components/quiz/questions/matching-question/matching-helpers";
 
 describe("createNextMatchingAssignments", () => {
   test("assigns option to row", () => {
@@ -26,17 +22,3 @@ describe("createNextMatchingAssignments", () => {
   });
 });
 
-describe("createMatchingId", () => {
-  test("uses prefix", () => {
-    expect(createMatchingId("match")).toMatch(/^match-\d+-\d+$/);
-  });
-});
-
-describe("resizeMatchingTextarea", () => {
-  test("ignores null and fits height to scrollHeight", () => {
-    expect(() => resizeMatchingTextarea(null)).not.toThrow();
-    const el = { style: { height: "" }, scrollHeight: 42 } as unknown as HTMLTextAreaElement;
-    resizeMatchingTextarea(el);
-    expect(el.style.height).toBe("42px");
-  });
-});

@@ -1,69 +1,8 @@
-import { ImagePlus, X } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  type ChangeEvent,
-  type CSSProperties,
-  type PointerEvent as ReactPointerEvent,
-  type TextareaHTMLAttributes,
-} from "react";
+import { X } from "lucide-react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 
-import { readImageAsDataUrl, resizeMatchingTextarea } from "@/components/quiz/questions/matching-question/matching-helpers";
-import type { MatchingPair, QuestionImage } from "@/domain/quiz/types";
+import type { MatchingPair } from "@/domain/quiz/types";
 import { cn } from "@/lib/utils";
-
-export function MatchingImageControls({
-  image,
-  label,
-  onChange,
-}: {
-  image?: QuestionImage;
-  label: string;
-  onChange: (image: QuestionImage | undefined) => void;
-}) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  async function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    const imageUrl = await readImageAsDataUrl(file);
-    if (!imageUrl) return;
-    onChange({ url: imageUrl, alt: file.name });
-  }
-
-  return (
-    <span className="matching-puzzle__media-controls">
-      <input
-        ref={inputRef}
-        className="sr-only"
-        type="file"
-        accept="image/*"
-        aria-label={label}
-        onChange={handleFileChange}
-      />
-      <button
-        type="button"
-        className="matching-puzzle__media-button"
-        aria-label={image?.url ? `${label} - đổi ảnh` : `${label} - chèn ảnh`}
-        onClick={() => inputRef.current?.click()}
-      >
-        <ImagePlus className="h-4 w-4" />
-      </button>
-      {image?.url ? (
-        <button
-          type="button"
-          className="matching-puzzle__media-button matching-puzzle__media-button--danger"
-          aria-label={`${label} - xóa ảnh`}
-          onClick={() => onChange(undefined)}
-        >
-          <X className="h-4 w-4" />
-        </button>
-      ) : null}
-    </span>
-  );
-}
 
 function ImageResizeHandle({
   width,
@@ -105,36 +44,6 @@ function ImageResizeHandle({
       className="question-image-resize-handle"
       aria-label="Resize image"
       onPointerDown={handlePointerDown}
-    />
-  );
-}
-
-export function AutoResizeMatchingTextarea({
-  value,
-  onChange,
-  ...props
-}: TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  value: string;
-}) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-
-  useEffect(() => {
-    resizeMatchingTextarea(textareaRef.current);
-  }, [value]);
-
-  return (
-    <textarea
-      {...props}
-      ref={textareaRef}
-      value={value}
-      rows={1}
-      onChange={onChange}
-      onInput={(event) => resizeMatchingTextarea(event.currentTarget)}
-      style={{
-        ...(props.style ?? {}),
-        overflowWrap: "anywhere",
-        whiteSpace: "pre-wrap",
-      }}
     />
   );
 }

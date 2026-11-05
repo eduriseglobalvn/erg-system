@@ -66,6 +66,25 @@ describe("QuizTryRunner", () => {
     expect(screen.queryByText(/Chưa đúng/)).toBeNull();
   });
 
+  it("practice: a matching question can be checked once a piece is pushed in", () => {
+    const matching = {
+      id: "mt1",
+      kind: "matching",
+      title: "Ghép",
+      feedback: { correct: "", incorrect: "", partial: "" },
+      matching: [
+        { id: "m1", prompt: "Ctrl + C", response: "Sao chép" },
+        { id: "m2", prompt: "Ctrl + V", response: "Dán" },
+      ],
+    } as unknown as Question;
+    window.matchMedia ??= (() => ({ matches: false, addEventListener() {}, removeEventListener() {}, addListener() {}, removeListener() {} })) as never;
+    render(<QuizTryRunner questions={[matching]} startIndex={0} initialMode="practice" />);
+    const check = screen.getByRole("button", { name: "Xem kết quả" });
+    expect(check).toBeDisabled();
+    fireEvent.keyDown(screen.getAllByRole("button", { name: /^Mảnh / })[0], { key: "Enter" });
+    expect(check).toBeEnabled();
+  });
+
   it("restart goes to question 1 even when started on question 2", () => {
     render(<QuizTryRunner questions={questions} startIndex={1} initialMode="test" />);
     fireEvent.click(screen.getByRole("button", { name: "Nộp bài" }));

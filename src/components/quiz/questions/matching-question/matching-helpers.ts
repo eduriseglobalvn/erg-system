@@ -12,10 +12,6 @@ export type DisplayMatchingPair = MatchingPair & {
   rightImage?: MatchingPair["responseImage"];
 };
 
-export function createMatchingId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
-}
-
 // Resolves null (after a toast) when the file is refused or unreadable, so callers keep the current image.
 export async function readImageAsDataUrl(file: File): Promise<string | null> {
   try {
@@ -24,12 +20,6 @@ export async function readImageAsDataUrl(file: File): Promise<string | null> {
     toast.error(error instanceof QuizImageRejectedError ? error.message : "Không đọc được ảnh.");
     return null;
   }
-}
-
-export function resizeMatchingTextarea(textarea: HTMLTextAreaElement | null) {
-  if (!textarea) return;
-  textarea.style.height = "0px";
-  textarea.style.height = `${textarea.scrollHeight}px`;
 }
 
 export function createNextMatchingAssignments(

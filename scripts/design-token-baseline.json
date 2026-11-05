@@ -155,11 +155,7 @@
     "hex": 11,
     "font": 0
   },
-  "src/components/quiz/questions/matching-question.tsx": {
-    "hex": 4,
-    "font": 0
-  },
-  "src/components/quiz/questions/matching-question/matching-chips.tsx": {
+  "src/components/quiz/questions/matching-question/matching-mobile.tsx": {
     "hex": 2,
     "font": 0
   },
