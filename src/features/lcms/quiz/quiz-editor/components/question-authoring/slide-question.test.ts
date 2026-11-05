@@ -191,3 +191,13 @@ describe("old images held only on the slide", () => {
     expect(JSON.stringify(editTitle(hotspot))).not.toContain("data:");
   });
 });
+
+describe("short answer slides", () => {
+  it("reads an old slide as one blank holding every correct spelling", () => {
+    const old = oldSlide("short-answer");
+    const marked = { ...old, choices: old.choices!.map((c) => ({ ...c, correct: c.label !== "Beta" })) };
+    const blanks = readSlideQuestion(marked, t)!.textBlanks!;
+    expect(blanks).toHaveLength(1);
+    expect(blanks[0].correctAnswers).toEqual(["Alpha", "Gamma"]);
+  });
+});

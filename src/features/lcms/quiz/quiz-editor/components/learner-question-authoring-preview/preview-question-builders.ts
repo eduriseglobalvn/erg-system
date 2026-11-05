@@ -183,11 +183,14 @@ export function normalizeChoices(choices: QuizEditorChoice[] | undefined) {
 const written = (slide: QuizEditorSlide) => normalizeChoices(slide.choices).filter((choice) => choice.label.trim());
 
 function buildTextBlanks(slide: QuizEditorSlide) {
-  return written(slide)
-    .filter((choice) => slide.kind !== "short-answer" || choice.correct)
-    .map((choice, index) => ({
+  if (slide.kind === "short-answer") {
+    // One blank holds every accepted spelling, so the learner gets a single input.
+    const correctAnswers = written(slide).filter((choice) => choice.correct).map((choice) => choice.label);
+    return correctAnswers.length ? [{ id: `${slide.id}-answer`, label: "", placeholder: "......", correctAnswers }] : [];
+  }
+  return written(slide).map((choice, index) => ({
       id: choice.id || `${slide.id}-blank-${index + 1}`,
-      label: slide.kind === "fill-in-the-blanks" ? `Blank ${index + 1}` : "Answer",
+      label: `Blank ${index + 1}`,
       placeholder: "......",
       correctAnswers: [choice.label],
     }));

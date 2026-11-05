@@ -8,6 +8,7 @@ import { LikertAuthoring } from "./likert-authoring";
 import { NumericAuthoring } from "./numeric-authoring";
 import { SelectListsAuthoring } from "./select-lists-authoring";
 import { SequenceAuthoring } from "./sequence-authoring";
+import { ShortAnswerAuthoring } from "./short-answer-authoring";
 import { TrueFalseAuthoring } from "./true-false-authoring";
 
 type Props = {
@@ -29,6 +30,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "fill-in-the-blanks") return <FillBlankAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "select-from-lists") return <SelectListsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "numeric") return <NumericAuthoring key={question.id} onChange={onChange} question={question} />;
+  if (slide.kind === "short-answer") return <ShortAnswerAuthoring key={question.id} onChange={onChange} question={question} />;
   return (
     <div data-testid="answer-fallback">
       {/* The image slot above owns the content image, so the renderer does not draw it a second time. */}
