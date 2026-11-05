@@ -95,6 +95,7 @@ export function QuizBuilderPanel({
             sx={{
               bgcolor: hasSelection ? `${ergEnterpriseTokens.color.primary} !important` : "rgba(0, 0, 0, 0.08) !important",
               borderRadius: "10px",
+              minHeight: 44,
               boxShadow: hasSelection ? `0 2px 8px ${alpha(ergEnterpriseTokens.color.primary, 0.28)}` : "none",
               color: hasSelection ? "#FFFFFF !important" : "rgba(0, 0, 0, 0.35) !important",
               fontSize: "0.875rem",
@@ -149,7 +150,7 @@ export function QuizBuilderPanel({
               variant="outlined"
               onClick={onAutoPick}
               disabled={!canAutoPick}
-              sx={{ py: 1 }}
+              sx={{ minHeight: 44, py: 1 }}
             >
               {copy.autoPickAction}
             </Button>
