@@ -85,4 +85,41 @@ describe("old data", () => {
     const ids = writeBlankSentence(shared, readBlankSentence(shared)).wordSlots!.map((slot) => slot.correctWordId);
     expect(new Set(ids).size).toBe(2);
   });
+
+  it("gives a new slot a fresh word id when its default id is taken", () => {
+    const taken: Question = {
+      ...drag,
+      wordSlots: [{ id: "b1", label: "", correctWordId: "b2-word" }],
+      wordBank: [{ id: "b2-word", label: "AVERAGE" }],
+    };
+    const ids = writeBlankSentence(taken, S).wordSlots!.map((slot) => slot.correctWordId);
+    expect(ids[0]).toBe("b2-word");
+    expect(new Set(ids).size).toBe(2);
+  });
+
+  it("keeps punctuation tight against the word", () => {
+    const old: Question = { ...fill, textBlanks: [{ id: "t1", label: "", prefix: "Thủ đô là", correctAnswers: ["Hà Nội"], suffix: "." }] };
+    expect(readBlankSentence(old).text).toBe("Thủ đô là Hà Nội.");
+    const quoted: Question = { ...fill, textBlanks: [{ id: "t1", label: "", prefix: "Gọi là (", correctAnswers: ["SUM"], suffix: ")," }] };
+    expect(readBlankSentence(quoted).text).toBe("Gọi là (SUM),");
+  });
+
+  it("keeps the text around a whitespace-only word but drops its blank", () => {
+    const old: Question = { ...fill, textBlanks: [{ id: "t1", label: "", prefix: "A", correctAnswers: ["  "], suffix: "B" }] };
+    expect(readBlankSentence(old)).toEqual({ text: "A B", blanks: [] });
+  });
+
+  it("reads inline_choice and writes it as select_from_lists", () => {
+    const inline: Question = {
+      ...base,
+      kind: "inline_choice",
+      inlineBlanks: [{ id: "i1", statement: "Màu trời là", selectPosition: "after", options: ["xanh", "đỏ"], correctOptionId: "xanh", suffix: "." }],
+    };
+    const read = readBlankSentence(inline);
+    expect(read.text).toBe("Màu trời là xanh.");
+    const out = writeBlankSentence(inline, read);
+    expect(out.kind).toBe("select_from_lists");
+    expect(out.inlineBlanks![0].options).toEqual(["xanh", "đỏ"]);
+    expect(readBlankSentence(out)).toEqual(read);
+  });
 });

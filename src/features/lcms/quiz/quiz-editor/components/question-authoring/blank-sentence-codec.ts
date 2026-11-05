@@ -47,11 +47,11 @@ export function readBlankSentence(question: Question): BlankSentence {
     return { text, blanks };
   }
   if (!all.length) return { text: parts?.[0] ?? "", blanks };
-  // Old data stores loose pieces; join them with one space where neither side has one.
+  // Old data stores loose pieces; join them with one space, kept off punctuation and brackets.
   let text = "";
   const append = (piece: string) => {
     if (!piece) return;
-    if (text && !/\s$/.test(text) && !/^\s/.test(piece)) text += " ";
+    if (text && !/[\s(“]$/.test(text) && !/^[\s.,;:!?)…”]/.test(piece)) text += " ";
     text += piece;
   };
   for (const blank of all) {
@@ -78,7 +78,8 @@ function writeDrag(question: Question, edited: EditedBlank[]): Pick<Question, "w
   const used = new Set<string>();
   const wordSlots = edited.map(({ id, lead, suffix }) => {
     const old = oldSlots.find((slot) => slot.id === id);
-    const correctWordId = old?.correctWordId && !used.has(old.correctWordId) ? old.correctWordId : `${id}-word`;
+    let correctWordId = old?.correctWordId && !used.has(old.correctWordId) ? old.correctWordId : `${id}-word`;
+    for (let k = 2; used.has(correctWordId); k++) correctWordId = `${id}-word-${k}`;
     used.add(correctWordId);
     return { ...old, id, label: lead, suffix, correctWordId };
   });
