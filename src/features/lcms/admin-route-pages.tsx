@@ -17,6 +17,7 @@ const EmployeeAccessLogPage = lazy(() => import("@/features/employee-management/
 const LearningStandardsPage = lazy(() => import("@/features/lcms/integrations/learning-standards/components/learning-standards-workspace"));
 const EnterpriseConnectorsPage = lazy(() => import("@/features/integrations/components/enterprise-connectors-workspace"));
 const LearningOutcomesPage = lazy(() => import("@/features/lms/learning-paths").then((m) => ({ default: m.LearningOutcomesAdminWorkspace })));
+const AdminHomePage = lazy(() => import("@/features/lcms/admin-home/admin-home-workspace").then((m) => ({ default: m.AdminHomeWorkspace })));
 const AdminUiKitPage = lazy(() => import("@/features/lcms/pages/admin-ui-kit"));
 const SchoolManagementApp = lazy(() =>
   import("@/features/lcms/school-management").then((module) => ({
@@ -28,6 +29,11 @@ const lcmsScope: ManagementScope = { level: "global" };
 const globalContentScope: ContentScope = { type: "global" };
 
 /** One component per Admin child route; the shell renders only <Outlet />. */
+
+export function AdminHomeRoute() {
+  const { tenantId } = useAdminShellModel();
+  return <Suspense fallback={<ContentPendingSkeleton />}><AdminHomePage tenantId={tenantId} /></Suspense>;
+}
 
 export function AdminPermissionsRoute() {
   const { tenantId } = useAdminShellModel();

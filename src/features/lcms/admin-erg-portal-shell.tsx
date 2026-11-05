@@ -23,7 +23,6 @@ import {
 } from "@/features/lcms/admin-content/admin-content-route";
 import { AdminShellContext, type AdminShellModel } from "@/features/lcms/admin-shell-context";
 import {
-  AdminHeaderBreadcrumb,
   createClientIdempotencyKey,
   FLAT_MENU_ITEMS,
   resolveActiveMenuItem,
@@ -51,7 +50,6 @@ export default function AdminErgPortalShell() {
   }, [location.searchStr]);
   const activeItem = useMemo(() => resolveActiveMenuItem(pathname), [pathname]);
   const activeLeaf = useMemo(() => (activeItem ? toDashboardLeaf(activeItem) : null), [activeItem]);
-  const headerBreadcrumb = useMemo(() => (activeItem ? <AdminHeaderBreadcrumb activeItem={activeItem} /> : null), [activeItem]);
   const isPreservedWorkspace = Boolean(
     activeLeaf?.variant && PRESERVED_WORKSPACE_VARIANTS.has(activeLeaf.variant),
   );
@@ -115,7 +113,6 @@ export default function AdminErgPortalShell() {
   return (
     <ErgPortalLayout
       contentMode={isPreservedWorkspace || isSchoolManagement ? "flush" : "padded"}
-      headerControls={headerBreadcrumb}
       hideHeaderIdentity
       menuGroups={ADMIN_MENU_GROUPS}
       portalInfo={portalInfo}

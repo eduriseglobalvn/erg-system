@@ -371,10 +371,6 @@
     "hex": 4,
     "font": 8
   },
-  "src/features/elearning/student-dashboard/components/student-dashboard-mobile-shell.tsx": {
-    "hex": 4,
-    "font": 0
-  },
   "src/features/elearning/student-dashboard/components/student-dashboard-pwa-banners.tsx": {
     "hex": 6,
     "font": 8
@@ -722,10 +718,6 @@
   "src/features/lcms/admin-operations/components/user-access-control-section-primitives.tsx": {
     "hex": 0,
     "font": 15
-  },
-  "src/features/lcms/admin-portal-shell-helpers.tsx": {
-    "hex": 3,
-    "font": 3
   },
   "src/features/lcms/components/admin-google-calendar-workspace.tsx": {
     "hex": 33,

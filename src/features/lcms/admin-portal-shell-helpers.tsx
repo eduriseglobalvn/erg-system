@@ -1,29 +1,9 @@
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
 import type { MenuItem } from "@/components/portal/ErgPortalLayout";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import { flattenMenuItems, getMenuItemDescription } from "@/features/lcms/admin-menu";
 import { ADMIN_MENU_GROUPS } from "@/features/lcms/admin-content/admin-content-menu";
 
 export const FLAT_MENU_ITEMS = flattenMenuItems(ADMIN_MENU_GROUPS);
-
-export function AdminHeaderBreadcrumb({ activeItem }: { activeItem: MenuItem }) {
-  return (
-  <Box sx={{ alignItems: "center", display: "flex", gap: 0.75, minWidth: 0 }}>
-    {activeItem.section && activeItem.section !== activeItem.label ? (
-      <>
-        <Typography noWrap sx={{ color: "#64748B", fontSize: { xs: 12, sm: 13 }, fontWeight: 500 }}>
-          {activeItem.section}
-        </Typography>
-        <Typography sx={{ color: "#CBD5E1", fontSize: 12, lineHeight: 1 }}>/</Typography>
-      </>
-    ) : null}
-    <Typography noWrap sx={{ color: "#0F172A", fontSize: { xs: 12.5, sm: 13.5 }, fontWeight: 600 }}>
-      {activeItem.label}
-    </Typography>
-  </Box>
-  );
-}
 
 export function createClientIdempotencyKey(prefix: string) {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {

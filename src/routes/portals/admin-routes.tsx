@@ -9,7 +9,7 @@ import {
   lcmsWorkspacePaths,
 } from "@/app/portal-route-registry";
 import { enforcePermissionRoute, enforceWorkspaceRoute } from "@/app/router/route-guards";
-import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, adminContentPathForSection, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
+import { ADMIN_CONTENT_HOME_PATH, ADMIN_CONTENT_ROUTE_PATHS, canonicalAdminWorkspacePath } from "@/features/lcms/admin-content/admin-content-route";
 import { adminPath } from "@/platform/workspaces/workspace-paths";
 import { RoutePendingSkeleton } from "@/routes/route-feedback";
 import { authedRoute, permissionStaticData, ProfileBody, rootRoute } from "@/routes/portals/route-shared";
@@ -80,15 +80,12 @@ const adminIntegrationRoutes = [
   ["/admin/learning-outcomes", "AdminLearningOutcomesRoute"],
 ] as const;
 
-// The old home page showed hard-coded sample data; /admin lands on the first real workspace instead.
-// Runs after the `_authed` guard, so /admin still needs its matrix permission.
+// /admin is the "Trang chủ" menu entry: schools, learners and staff from the live APIs (no sample data).
 const adminIndexRoute = createRoute({
-  getParentRoute: () => authedRoute,
+  getParentRoute: () => adminShellRoute,
   path: "/admin",
   staticData: permissionStaticData("/admin", "ADMIN"),
-  beforeLoad: () => {
-    throw redirect({ href: adminContentPathForSection("resources"), replace: true });
-  },
+  component: page("AdminHomeRoute"),
 });
 
 // Standalone pages: same session/host guard, but not inside the Admin shell.
@@ -141,11 +138,11 @@ export const adminRoutes = [...legacyAdminContentRoutes, ...legacyIntegrationRou
 
 /** Children of `_authed`: guarded once by authedBeforeLoad. */
 export const adminAuthedRoutes = [
-  adminIndexRoute,
   adminProfileRoute,
   questionTypesRoute,
   settingCenterRoleRedirectRoute,
   adminShellRoute.addChildren([
+    adminIndexRoute,
     ...adminContentRoutes,
     ...adminMenuRoutes,
     ...adminIntegrationRoutes.map(([path, pageName]) =>

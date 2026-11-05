@@ -4,6 +4,7 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
+import type { SxProps, Theme } from "@mui/material/styles";
 import { useState, type ReactNode } from "react";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
 
@@ -34,6 +35,8 @@ interface HeaderProps {
   onSignOut?: () => void;
 }
 
+const toSxArray = (sx: SxProps<Theme>) => (Array.isArray(sx) ? sx : [sx]);
+
 export default function ErgPortalHeader({
   centerName,
   headerControls,
@@ -59,9 +62,12 @@ export default function ErgPortalHeader({
     notificationOpen,
   );
 
+  // Menu-level pages carry their own title (design canvas): no empty bar on desktop, the phone keeps it for the menu button.
+  const desktopEmpty = hideIdentity && !headerControls && !headerTrailingControls;
+
   return (
     <>
-      <AppBar position="sticky" sx={portalHeaderAppBarSx(scrolled)}>
+      <AppBar position="sticky" sx={[...toSxArray(portalHeaderAppBarSx(scrolled)), desktopEmpty && { display: { lg: "none" } }]}>
         <Toolbar sx={{ gap: { xs: 0.5, sm: 1 }, minHeight: { xs: "46px !important", md: "50px !important" }, px: { xs: "12px !important", sm: "16px !important", md: "24px !important" }, position: "relative", zIndex: 1 }}>
           {onMenuOpen ? (
             <IconButton
