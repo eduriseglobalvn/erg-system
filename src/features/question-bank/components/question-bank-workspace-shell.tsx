@@ -95,6 +95,7 @@ export function QuestionBankWorkspace({
               onQuestionSelectAll={toggleVisibleQuestions}
               onQuestionToggle={toggleQuestion}
               isLoading={isQuestionBankFetching}
+              loadFailed={questionBankQuery.isError}
               onEditQuestion={openEditQuestionForm}
               onSearchChange={changeSearch}
               onPageChange={setQuestionPage}

@@ -4,12 +4,12 @@ export type QuestionBankCopy = typeof enCopy;
 
 export const viCopy = {
   badge: "Học liệu công ty",
-  description: "Chọn đúng môn, level và chủ đề. Câu hỏi là nguồn gốc; bài luyện tập/kiểm tra là nội dung đã đóng gói để giáo viên giao lại.",
+  description: "Chọn đúng môn, cấp độ và chủ đề. Câu hỏi là nguồn gốc; bài luyện tập/kiểm tra là nội dung đã đóng gói để giáo viên giao lại.",
   createQuizAction: (count: number): string => (count > 0 ? `Tạo quiz từ ${count} câu` : "Tạo quiz"),
   workspaceTitle: "Bộ lọc chính",
-  workspaceDescription: "Lọc theo môn, level và chủ đề.",
+  workspaceDescription: "Lọc theo môn, cấp độ và chủ đề.",
   subjectLabel: "Môn học",
-  levelLabel: "Level",
+  levelLabel: "Cấp độ",
   topicLabel: "Chủ đề",
   currentPathLabel: "Đang xem",
   scopeLabel: (scope: ContentScope): string => (scope.type === "global" ? "Toàn ERG" : scope.centerName),
@@ -32,6 +32,8 @@ export const viCopy = {
     question: "Câu hỏi",
     scope: "Phạm vi",
     topic: "Chủ đề",
+    points: "Điểm",
+    actions: "Thao tác",
   },
   selectQuestionLabel: (question: string): string => `Chọn câu hỏi: ${question}`,
   difficulty: {

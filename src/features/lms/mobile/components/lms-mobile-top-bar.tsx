@@ -23,7 +23,7 @@ export function LmsMobileTopBar({
   onOpenNotifications?: () => void; onScopeOpen: () => void; onUpdate: () => void;
 }) {
   const initial = teacherName.trim().slice(0, 1).toUpperCase() || "GV";
-  const iconButtonSx = { bgcolor: "background.paper", border: "1px solid", borderColor: "divider", height: 40, width: 40 };
+  const iconButtonSx = { bgcolor: "background.paper", border: "1px solid", borderColor: "divider", height: 44, width: 44 };
 
   return (
     <Box component="header" data-testid="lms-mobile-header" sx={{ bgcolor: "background.paper", borderBottom: "1px solid", borderColor: "divider", boxShadow: "0 8px 24px rgba(15,23,42,0.06)", display: { xs: "block", xl: "none" }, flexShrink: 0, pb: 1.25, pt: "calc(env(safe-area-inset-top, 0px) + 8px)", px: 1.5, position: "sticky", top: 0, zIndex: (theme) => theme.zIndex.appBar }}>
@@ -51,7 +51,7 @@ export function LmsMobileTopBar({
               <Badge badgeContent={unreadNotificationCount > 9 ? "9+" : unreadNotificationCount} color="error"><NotificationsNoneRoundedIcon sx={{ fontSize: 19 }} /></Badge>
             </IconButton>
           )}
-          <IconButton aria-label={`Tài khoản ${teacherName}`} onClick={onAccountOpen} sx={{ height: 40, p: 0.5, width: 40 }}>
+          <IconButton aria-label={`Tài khoản ${teacherName}`} onClick={onAccountOpen} sx={{ height: 44, p: 0.5, width: 44 }}>
             <Avatar sx={{ bgcolor: "warning.main", fontSize: 12, fontWeight: 600, height: 32, width: 32 }}>{initial}</Avatar>
           </IconButton>
         </Stack>

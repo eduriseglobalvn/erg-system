@@ -194,13 +194,13 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                         readOnly
                         value={formatShortDateTimeVi(parseAssignDateTime(startDate)) || startDate}
                         onClick={() => setOpenDatePicker("start")}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
+                        className="h-11 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-11 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
                       />
                       <button
                         type="button"
                         aria-label="Chọn ngày bắt đầu"
                         onClick={() => setOpenDatePicker(openDatePicker === "start" ? null : "start")}
-                        className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
+                        className="absolute right-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
                       >
                         <Calendar className="h-4 w-4" />
                       </button>
@@ -215,13 +215,13 @@ export function AssignHomeworkMobileView({ model }: AssignHomeworkMobileViewProp
                         readOnly
                         value={formatShortDateTimeVi(parseAssignDateTime(endDate)) || endDate}
                         onClick={() => setOpenDatePicker("end")}
-                        className="h-10 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-10 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
+                        className="h-11 w-full rounded-[13px] border border-[#cbd7e6] bg-white px-3 pr-11 text-[14px] font-semibold text-slate-900 outline-none focus:border-[#0f6cbd] focus:ring-2 focus:ring-[#0f6cbd]/15"
                       />
                       <button
                         type="button"
                         aria-label="Chọn ngày kết thúc"
                         onClick={() => setOpenDatePicker(openDatePicker === "end" ? null : "end")}
-                        className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
+                        className="absolute right-0 top-1/2 grid h-11 w-11 -translate-y-1/2 place-items-center rounded-[12px] text-slate-400 transition hover:bg-[#eef7ff] hover:text-[#0f6cbd]"
                       >
                         <Calendar className="h-4 w-4" />
                       </button>

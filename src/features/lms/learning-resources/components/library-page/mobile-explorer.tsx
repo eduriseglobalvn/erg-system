@@ -73,7 +73,7 @@ export function MobileLearningResourceExplorer({
               key={`${item.label}-${index}`}
               type="button"
               onClick={() => onSelectCategory(item.categoryId)}
-              className="min-h-9 max-w-[220px] shrink-0 truncate rounded-full border border-[#dce6f1] bg-[#f8fbff] px-3 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]"
+              className="min-h-11 max-w-[220px] shrink-0 truncate rounded-full border border-[#dce6f1] bg-[#f8fbff] px-3 text-[13px] font-bold text-slate-700 shadow-[var(--shadow-xs)]"
             >
               {displayText(item.label)}
             </button>

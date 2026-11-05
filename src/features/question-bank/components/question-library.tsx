@@ -20,6 +20,7 @@ import { alpha } from "@mui/material/styles";
 export function QuestionLibrary({
   copy,
   isLoading,
+  loadFailed = false,
   onEditQuestion,
   onPageChange,
   onQuestionSelectAll,
@@ -33,6 +34,8 @@ export function QuestionLibrary({
   copy: QuestionBankCopy;
   contentScope: ContentScope;
   isLoading: boolean;
+  /** The load failed: the sync notice explains it, so no misleading "no matching questions". */
+  loadFailed?: boolean;
   onEditQuestion: (question: QuestionBankQuestion) => void;
   onPageChange: (page: number) => void;
   onQuestionSelectAll: () => void;
@@ -179,7 +182,7 @@ export function QuestionLibrary({
         <Stack spacing={0}>
           {isLoading ? (
             <QuestionSheetSkeletonRows rowCount={Math.max(visibleQuestions.length || 0, 5)} />
-          ) : visibleQuestions.length === 0 ? (
+          ) : visibleQuestions.length === 0 && loadFailed ? null : visibleQuestions.length === 0 ? (
             <Box
               sx={{
                 alignItems: "center",
@@ -387,6 +390,7 @@ export function QuestionLibrary({
                 color: ergEnterpriseTokens.color.text,
                 fontSize: "0.8rem",
                 fontWeight: 600,
+                minHeight: 44,
                 px: 1.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
@@ -406,6 +410,7 @@ export function QuestionLibrary({
                 color: ergEnterpriseTokens.color.text,
                 fontSize: "0.8rem",
                 fontWeight: 600,
+                minHeight: 44,
                 px: 1.5,
                 textTransform: "none",
                 "&:hover": { bgcolor: "rgba(0, 0, 0, 0.04)" },
