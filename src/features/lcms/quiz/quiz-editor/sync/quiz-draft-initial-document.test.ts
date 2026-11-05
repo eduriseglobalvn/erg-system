@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-api";
 
-import { createMemoryQuizDraftDeviceStore, type DeviceDraftRecord } from "./quiz-draft-device-store";
+import { createMemoryQuizDraftDeviceStore, DeviceStorageFullError, type DeviceDraftRecord } from "./quiz-draft-device-store";
 import {
   chooseInitialDocument,
   createBlankDraft,
@@ -95,5 +95,44 @@ describe("migrateLegacyLocalDrafts", () => {
     expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(0);
     expect(await s.list("tenant-1:a")).toEqual([]);
     expect(localStorage.getItem("erg:quiz-editor:recovery:v1:tenant-2:x")).not.toBeNull();
+  });
+
+  it("returns 0 when the storage accessor throws", async () => {
+    const broken = { get length(): number { throw new DOMException("blocked", "SecurityError"); } } as unknown as Storage;
+    expect(await migrateLegacyLocalDrafts(createMemoryQuizDraftDeviceStore(), "s", "tenant-1", "w", broken)).toBe(0);
+  });
+
+  it("keeps the legacy key and rethrows when the device is full", async () => {
+    putLegacy("q9", "2026-10-01T00:00:00.000Z", serverDoc(2, "q9"));
+    const s = createMemoryQuizDraftDeviceStore();
+    s.put = async () => {
+      throw new DeviceStorageFullError("full");
+    };
+    await expect(migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).rejects.toBeInstanceOf(DeviceStorageFullError);
+    expect(localStorage.getItem(legacyKey("q9"))).not.toBeNull();
+  });
+
+  it("skips a malformed key, leaves it in place and still migrates the rest", async () => {
+    localStorage.setItem("erg:quiz-editor:recovery:v1:tenant-1:%E0%A4%A", "x");
+    putLegacy("q9", "2026-10-01T00:00:00.000Z", serverDoc(2, "q9"));
+    const s = createMemoryQuizDraftDeviceStore();
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(1);
+    expect(localStorage.getItem("erg:quiz-editor:recovery:v1:tenant-1:%E0%A4%A")).toBe("x");
+  });
+
+  it("does not migrate the default-quiz-draft placeholder", async () => {
+    putLegacy("default-quiz-draft", "2026-10-01T00:00:00.000Z", serverDoc(1, "default-quiz-draft"));
+    const s = createMemoryQuizDraftDeviceStore();
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(0);
+    expect(await s.list("tenant-1:a")).toEqual([]);
+    expect(localStorage.getItem(legacyKey("default-quiz-draft"))).toBeNull();
+  });
+
+  it("replaces a store copy whose editedAt is unparseable", async () => {
+    putLegacy("q9", "2026-10-01T00:00:00.000Z", serverDoc(2, "q9"));
+    const s = createMemoryQuizDraftDeviceStore();
+    await s.put("tenant-1:a", rec({ key: "q9", quizId: "q9", editedAt: "garbage" }));
+    expect(await migrateLegacyLocalDrafts(s, "tenant-1:a", "tenant-1", "tab-1")).toBe(1);
+    expect((await s.get("tenant-1:a", "q9"))?.baseDocVersion).toBe(2);
   });
 });
