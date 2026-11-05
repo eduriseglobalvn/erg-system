@@ -31,6 +31,13 @@ describe("AnswerArea", () => {
     expect(screen.getByRole("button", { name: "Bỏ đánh dấu B là đáp án đúng" })).toBeInTheDocument();
   });
 
+  it.each(["fill-in-the-blanks", "select-from-lists"] as const)("authors a %s slide in a sentence", (kind) => {
+    const question = readSlideQuestion(build(kind), t)!;
+    render(<Harness kind={kind} question={question} />);
+    expect(screen.getByRole("textbox", { name: "Câu có ô trống" })).toBeInTheDocument();
+    expect(screen.queryByTestId("answer-fallback")).toBeNull();
+  });
+
   it("falls back to the renderer for kinds without an authoring surface", () => {
     const question = readSlideQuestion(build("essay"), t)!;
     render(<Harness kind="essay" question={question} />);

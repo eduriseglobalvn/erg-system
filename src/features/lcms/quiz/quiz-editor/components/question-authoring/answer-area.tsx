@@ -3,8 +3,10 @@ import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ChoiceAuthoring } from "./choice-authoring";
+import { FillBlankAuthoring } from "./fill-blank-authoring";
 import { LikertAuthoring } from "./likert-authoring";
 import { NumericAuthoring } from "./numeric-authoring";
+import { SelectListsAuthoring } from "./select-lists-authoring";
 import { SequenceAuthoring } from "./sequence-authoring";
 import { TrueFalseAuthoring } from "./true-false-authoring";
 
@@ -24,6 +26,8 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
   if (slide.kind === "true-false") return <TrueFalseAuthoring onChange={onChange} question={question} />;
   if (slide.kind === "likert-scale") return <LikertAuthoring onChange={onChange} question={question} />;
   if (slide.kind === "sequence") return <SequenceAuthoring onChange={onChange} onUpdate={onUpdate} question={question} />;
+  if (slide.kind === "fill-in-the-blanks") return <FillBlankAuthoring key={question.id} onChange={onChange} question={question} />;
+  if (slide.kind === "select-from-lists") return <SelectListsAuthoring key={question.id} onChange={onChange} question={question} />;
   if (slide.kind === "numeric") return <NumericAuthoring key={question.id} onChange={onChange} question={question} />;
   return (
     <div data-testid="answer-fallback">
