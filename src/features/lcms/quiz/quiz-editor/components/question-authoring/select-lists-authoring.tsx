@@ -1,7 +1,7 @@
 import Box from "@mui/material/Box";
 
 import type { Question } from "@/domain/quiz/types";
-import { readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
+import { patchBlank, readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
 import { ChipInput, type ChipItem } from "./chip-input";
 import { SentenceBuilder } from "./sentence-builder";
 
@@ -9,10 +9,7 @@ import { SentenceBuilder } from "./sentence-builder";
 export function SelectListsAuthoring({ question, onChange }: { question: Question; onChange: (next: Question) => void }) {
   const sentence = readBlankSentence(question);
 
-  const setOptions = (id: string, options: string[]) => {
-    const next = writeBlankSentence(question, sentence);
-    onChange({ ...next, inlineBlanks: next.inlineBlanks?.map((b) => (b.id === id ? { ...b, options } : b)) });
-  };
+  const setOptions = (id: string, options: string[]) => onChange(patchBlank(question, sentence, id, { options }));
 
   const renderPopover = (id: string) => {
     const stored = question.inlineBlanks?.find((b) => b.id === id);

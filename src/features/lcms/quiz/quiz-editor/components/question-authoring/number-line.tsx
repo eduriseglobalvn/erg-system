@@ -1,9 +1,10 @@
 import Box from "@mui/material/Box";
+import type { Theme } from "@mui/material/styles";
 
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 import { formatDecimal } from "./decimal-text";
 
-const label = { typography: "caption", fontFamily: tokens.font.mono, fill: (theme: { palette: { text: { secondary: string } } }) => theme.palette.text.secondary };
+const label = { typography: "caption", fontFamily: tokens.font.mono, fill: (theme: Theme) => theme.palette.text.secondary };
 
 /** The accepted range as a picture; percentages only, so the point stays round at any width. */
 export function NumberLine({ value, tolerance, unit }: { value: number; tolerance: number; unit: string }) {

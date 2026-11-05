@@ -127,3 +127,10 @@ export function writeBlankSentence(question: Question, sentence: BlankSentence):
   });
   return { ...out, textBlanks };
 }
+
+/** Writes the sentence, then merges `patch` into the one stored fill or select blank with this id. */
+export function patchBlank(question: Question, sentence: BlankSentence, blankId: string, patch: Partial<TextBlank & InlineBlank>): Question {
+  const next = writeBlankSentence(question, sentence);
+  const merge = <T extends { id: string }>(blanks: T[] | undefined) => blanks?.map((b) => (b.id === blankId ? { ...b, ...patch } : b));
+  return isSelect(next) ? { ...next, inlineBlanks: merge(next.inlineBlanks) } : { ...next, textBlanks: merge(next.textBlanks) };
+}

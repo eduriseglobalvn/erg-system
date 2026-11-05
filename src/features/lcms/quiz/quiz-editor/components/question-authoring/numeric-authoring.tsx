@@ -5,18 +5,16 @@ import { useState } from "react";
 
 import type { Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
+import { answerBoxSx } from "./answer-box";
 import { formatDecimal, parseDecimal } from "./decimal-text";
 import { NumberLine } from "./number-line";
 
 const box = (width: number, correct = false) => ({
+  ...answerBoxSx,
+  ...(!correct && { borderColor: tokens.color.border, bgcolor: "background.paper" }),
   width,
   height: 36,
   px: 1.5,
-  border: 1.5,
-  borderStyle: "solid",
-  borderColor: correct ? (t: { palette: { success: { main: string } } }) => t.palette.success.main : tokens.color.border,
-  borderRadius: `${tokens.radius.control}px`,
-  bgcolor: correct ? tokens.statusTint.success.bg : "background.paper",
   fontFamily: tokens.font.mono,
 });
 

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
 import { rebaseBlanks, setBlankText, type BlankSentence } from "./blank-sentence";
-import { readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
+import { patchBlank, readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
 
 const TEXT = "Hàm tính trung bình là AVERAGE, hàm tính tổng là SUM.";
 const at = (word: string) => ({ start: TEXT.indexOf(word), end: TEXT.indexOf(word) + word.length });
@@ -116,6 +116,14 @@ describe("old data", () => {
     expect(emptied.wordSlots).toEqual(q.wordSlots);
     expect(retyped.wordSlots).toEqual(q.wordSlots);
     expect(retyped.wordBank![0]).toEqual({ id: q.wordSlots![0].correctWordId, label: "M" });
+  });
+
+  it("patchBlank writes the sentence and patches only the blank with that id", () => {
+    const edited = { ...S, text: TEXT.replace("SUM", "MAX"), blanks: S.blanks };
+    const fillOut = patchBlank(writeBlankSentence(fill, S), edited, "b1", { correctAnswers: ["AVERAGE", "TB"] });
+    expect(fillOut.textBlanks!.map((b) => b.correctAnswers)).toEqual([["AVERAGE", "TB"], ["MAX"]]);
+    const selectOut = patchBlank(writeBlankSentence(select, S), edited, "b2", { options: ["MAX", "MIN"] });
+    expect(selectOut.inlineBlanks!.map((b) => b.options)).toEqual([["AVERAGE"], ["MAX", "MIN"]]);
   });
 
   it("renames the correct option when the word is new", () => {

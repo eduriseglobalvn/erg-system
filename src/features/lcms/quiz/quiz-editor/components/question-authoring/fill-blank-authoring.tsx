@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 
 import type { Question } from "@/domain/quiz/types";
 import { blankWord, type BlankSentence } from "./blank-sentence";
-import { readBlankSentence, writeBlankSentence } from "./blank-sentence-codec";
+import { patchBlank, readBlankSentence, writeBlankSentence } from "./blank-sentence-codec";
 import { ChipInput } from "./chip-input";
 import { SentenceBuilder } from "./sentence-builder";
 
@@ -12,13 +12,8 @@ export function FillBlankAuthoring({ question, onChange }: { question: Question;
   const answersOf = (id: string) => question.textBlanks?.find((b) => b.id === id)?.correctAnswers ?? [];
 
   // Index 0 is the word in the sentence; only the alternates after it change here.
-  const setAlternates = (blank: BlankSentence["blanks"][number], alternates: string[]) => {
-    const next = writeBlankSentence(question, sentence);
-    onChange({
-      ...next,
-      textBlanks: next.textBlanks?.map((b) => (b.id === blank.id ? { ...b, correctAnswers: [blankWord(sentence, blank), ...alternates] } : b)),
-    });
-  };
+  const setAlternates = (blank: BlankSentence["blanks"][number], alternates: string[]) =>
+    onChange(patchBlank(question, sentence, blank.id, { correctAnswers: [blankWord(sentence, blank), ...alternates] }));
 
   const renderPopover = (id: string) => {
     const blank = sentence.blanks.find((b) => b.id === id)!;
