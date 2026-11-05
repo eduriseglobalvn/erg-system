@@ -17,8 +17,6 @@ export type QuestionType =
   | "likert-scale"
   | "essay";
 
-export type QuestionCreationPreset = "yes-no";
-
 export type IntroSlideKind = "intro-slide" | "user-info" | "instruction-slide";
 
 export type SlideKind = "info-slide" | "result-slide" | IntroSlideKind | QuestionType;

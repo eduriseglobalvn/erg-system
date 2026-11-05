@@ -8,7 +8,6 @@ import {
 } from "@/features/lcms/quiz/quiz-editor/api/quiz-editor-project-defaults";
 import type {
   IntroSlideKind,
-  QuestionCreationPreset,
   QuestionType,
   QuizEditorChoice,
   QuizEditorDragDropItem,
@@ -41,7 +40,6 @@ type CreateId = (prefix: string) => string;
 
 export function buildQuestionSlide(
   type: QuestionType,
-  preset: QuestionCreationPreset | undefined,
   quizProject: QuizProjectSettings,
   createId: CreateId,
 ): QuizEditorSlide {
@@ -55,8 +53,7 @@ export function buildQuestionSlide(
   );
 
   // A new question starts empty so placeholder text can never count as authored content.
-  const choiceLabels =
-    type === "true-false" ? ["Đúng", "Sai"] : preset === "yes-no" ? [tr("player.yes"), tr("player.no")] : ["", "", ""];
+  const choiceLabels = type === "true-false" ? ["Đúng", "Sai"] : ["", "", ""];
   const choices = choiceLabels.map((label) => createChoice(createId("choice"), label));
 
   const isMatchQuestion = type === "matching" || type === "drag-and-drop";

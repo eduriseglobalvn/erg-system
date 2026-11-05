@@ -50,6 +50,7 @@ const TYPE_ICONS: Record<QuestionType, ElementType> = {
 };
 
 const DEFAULT_TYPE: QuestionType = "multiple-choice";
+const optionId = (type: QuestionType) => `question-type-option-${type}`;
 
 type Props = { open: boolean; title: string; onPick: (type: QuestionType) => void; onClose: () => void };
 
@@ -57,17 +58,21 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<QuestionType>(DEFAULT_TYPE);
 
-  // Reset on the way out so the next opening starts clean.
-  function reset() {
-    setQuery("");
-    setActiveType(DEFAULT_TYPE);
+  const [picked, setPicked] = useState(false);
+  const [wasOpen, setWasOpen] = useState(open);
+  // Reset when the dialog opens, not when it closes, so nothing changes while it fades out.
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setQuery("");
+      setActiveType(DEFAULT_TYPE);
+      setPicked(false);
+    }
   }
-  function close() {
-    reset();
-    onClose();
-  }
+  // At most one creation per opening: a double click or held Enter must not add two questions.
   function pick(type: QuestionType) {
-    reset();
+    if (!open || picked) return;
+    setPicked(true);
     onPick(type);
   }
 
@@ -76,7 +81,7 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
   const active = entries.find((entry) => entry.type === activeType) ?? entries[0];
 
   function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === "Enter" && active) {
+    if (event.key === "Enter" && active && !event.nativeEvent.isComposing) {
       event.preventDefault();
       pick(active.type);
     } else if ((event.key === "ArrowDown" || event.key === "ArrowUp") && entries.length > 0) {
@@ -90,7 +95,7 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
   return (
     <ErgDialog
       open={open}
-      onClose={close}
+      onClose={onClose}
       maxWidth="lg"
       title={title}
       description="Câu chỉ được tạo khi đã chọn dạng. Hủy thì không để lại gì."
@@ -99,7 +104,7 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
           <Typography variant="caption" color="text.secondary" sx={{ mr: "auto" }}>
             {entries.length} dạng
           </Typography>
-          <Button variant="text" onClick={close}>
+          <Button variant="text" onClick={onClose}>
             Hủy
           </Button>
           <ErgButton variant="contained" disabled={!active} onClick={() => active && pick(active.type)}>
@@ -116,7 +121,10 @@ export function QuestionTypePickerDialog({ open, title, onPick, onClose }: Props
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           slotProps={{
-            htmlInput: { "aria-label": "Lọc dạng câu hỏi" },
+            htmlInput: {
+              "aria-label": "Lọc dạng câu hỏi",
+              "aria-activedescendant": active ? optionId(active.type) : undefined,
+            },
             input: {
               startAdornment: (
                 <InputAdornment position="start">
@@ -184,6 +192,7 @@ function TypeOption({
   const { color, radius, shadow } = ergEnterpriseTokens;
   return (
     <Box
+      id={optionId(entry.type)}
       role="option"
       aria-selected={selected}
       tabIndex={-1}

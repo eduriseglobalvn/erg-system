@@ -5,8 +5,8 @@ import { buildQuestionSlide } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-
 
 let n = 0;
 const createId = (prefix: string) => `${prefix}-${++n}`;
-const build = (type: Parameters<typeof buildQuestionSlide>[0], preset?: "yes-no") =>
-  buildQuestionSlide(type, preset, createNewQuizProjectSettings(), createId);
+const build = (type: Parameters<typeof buildQuestionSlide>[0]) =>
+  buildQuestionSlide(type, createNewQuizProjectSettings(), createId);
 
 describe("buildQuestionSlide", () => {
   it("starts a multiple-choice question empty", () => {
@@ -27,9 +27,4 @@ describe("buildQuestionSlide", () => {
     expect(slide.choices!.some((choice) => choice.correct)).toBe(false);
   });
 
-  it("keeps the yes-no preset labels with no correct answer", () => {
-    const slide = build("multiple-choice", "yes-no");
-    expect(slide.choices).toHaveLength(2);
-    expect(slide.choices!.some((choice) => choice.correct)).toBe(false);
-  });
 });

@@ -36,6 +36,42 @@ describe("QuestionTypePickerDialog", () => {
     expect(onPick).toHaveBeenCalledWith("matching");
   });
 
+  it("creates at most once per opening, however often the button is hit", () => {
+    const { onPick, key } = setup();
+    const create = screen.getByRole("button", { name: "Tạo câu Một đáp án" });
+    fireEvent.click(create);
+    fireEvent.click(create);
+    key("Enter");
+    expect(onPick).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not create while an IME composition is running", () => {
+    const { onPick, search } = setup();
+    fireEvent.keyDown(search, { key: "Enter", isComposing: true });
+    expect(onPick).not.toHaveBeenCalled();
+  });
+
+  it("moves the active option across groups and points aria-activedescendant at it", () => {
+    const { onPick, search, key } = setup();
+    key("ArrowDown");
+    key("ArrowDown");
+    key("ArrowDown");
+    expect(screen.getByRole("option", { name: /Thang đánh giá/ })).toHaveAttribute("aria-selected", "true");
+    key("ArrowDown");
+    const fifth = screen.getByRole("option", { name: /Điền chỗ trống/ });
+    expect(fifth).toHaveAttribute("aria-selected", "true");
+    expect(search).toHaveAttribute("aria-activedescendant", fifth.id);
+    key("Enter");
+    expect(onPick).toHaveBeenCalledWith("fill-in-the-blanks");
+  });
+
+  it("wraps ArrowUp from the first entry to the last", () => {
+    const { onPick, key } = setup();
+    key("ArrowUp");
+    key("Enter");
+    expect(onPick).toHaveBeenCalledWith("essay");
+  });
+
   it("a double click creates", () => {
     const { onPick } = setup();
     fireEvent.doubleClick(screen.getByRole("option", { name: /Tự luận/ }));

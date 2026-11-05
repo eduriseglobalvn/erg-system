@@ -38,7 +38,6 @@ import {
 import { useSelectedSlideUpdaters } from "@/features/lcms/quiz/quiz-editor/hooks/quiz-editor-state/use-selected-slide-updaters";
 import type {
   IntroSlideKind,
-  QuestionCreationPreset,
   QuestionType,
   QuizEditorGroup,
   QuizEditorSlide,
@@ -165,8 +164,8 @@ export function useQuizEditorState(initialDraftDocument?: QuizEditorDraftDocumen
     );
   }
 
-  function addQuestion(type: QuestionType, preset?: QuestionCreationPreset) {
-    insertSlide(buildQuestionSlide(type, preset, quizProject, createId));
+  function addQuestion(type: QuestionType) {
+    insertSlide(buildQuestionSlide(type, quizProject, createId));
   }
 
   function addIntroduction(type: IntroSlideKind) {
