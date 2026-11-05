@@ -185,7 +185,7 @@ export function MatchingPuzzle({ rows, mode, locked = false, onDrop }: Props) {
       </Box>
       <DragOverlay>
         {activeRow ? (
-          <PuzzlePiece side="right" tone="idle" sx={{ transform: "rotate(-2deg) scale(1.03)", filter: "drop-shadow(0 12px 16px rgba(16, 24, 40, 0.16))" }}>
+          <PuzzlePiece side="right" tone="idle" sx={{ transform: "rotate(-2deg) scale(1.03)", filter: `drop-shadow(${tokens.shadow.md})` }}>
             <Box sx={{ flex: 1, minWidth: 0 }}>{activeRow.right}</Box>
             <GripDots />
           </PuzzlePiece>

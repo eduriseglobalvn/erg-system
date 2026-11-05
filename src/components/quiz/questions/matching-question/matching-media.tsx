@@ -1,4 +1,5 @@
 import type { MatchingPair } from "@/domain/quiz/types";
+import { ergEnterpriseTokens as tokens } from "@/themes/erg-enterprise-tokens";
 
 export function MatchingInlineMedia({
   image,
@@ -24,8 +25,9 @@ export function MatchingInlineMedia({
       className="matching-inline-media grid h-8 w-8 flex-none place-items-center rounded-md border text-base font-semibold"
       style={{
         color: "var(--quiz-accent-start)",
-        borderColor: "color-mix(in srgb, var(--quiz-accent-start) 28%, transparent)",
-        backgroundColor: "color-mix(in srgb, var(--quiz-accent-start) 9%, transparent)",
+        // Safari 15 (iPhone 7) has no color-mix(), so the tint comes from fixed tokens.
+        borderColor: tokens.color.primarySoft,
+        backgroundColor: tokens.color.primarySofter,
       }}
       aria-hidden="true"
     >
