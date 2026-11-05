@@ -3,6 +3,7 @@ import { createInitialAnswer } from "@/domain/quiz/quiz";
 import type { Question } from "@/domain/quiz/types";
 import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { ChoiceAuthoring } from "./choice-authoring";
+import { LikertAuthoring } from "./likert-authoring";
 import { TrueFalseAuthoring } from "./true-false-authoring";
 
 type Props = {
@@ -19,6 +20,7 @@ export function AnswerArea({ slide, question, onChange, onUpdate }: Props) {
     return <ChoiceAuthoring mode={slide.kind === "multiple-choice" ? "single" : "multiple"} onChange={onChange} onUpdate={onUpdate} question={question} />;
   }
   if (slide.kind === "true-false") return <TrueFalseAuthoring onChange={onChange} question={question} />;
+  if (slide.kind === "likert-scale") return <LikertAuthoring onChange={onChange} question={question} />;
   return (
     <div data-testid="answer-fallback">
       {/* The image slot above owns the content image, so the renderer does not draw it a second time. */}

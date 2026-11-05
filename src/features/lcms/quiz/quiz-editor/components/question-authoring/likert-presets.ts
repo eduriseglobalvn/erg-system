@@ -1,3 +1,5 @@
+import type { LikertScalePoint } from "@/domain/quiz/types";
+
 export type LikertPresetId = "agree" | "satisfied" | "frequency" | "custom";
 
 export const LIKERT_PRESETS: ReadonlyArray<{ id: LikertPresetId; label: string }> = [
@@ -37,4 +39,27 @@ const LABELS: Record<Exclude<LikertPresetId, "custom">, Record<number, string[]>
 /** count is 2..7. */
 export function likertPresetLabels(preset: Exclude<LikertPresetId, "custom">, count: number): string[] {
   return [...LABELS[preset][count]];
+}
+
+/** Keeps ids of retained positions; new points take the next unused `scale-n`; values are renumbered 1..count. */
+export function resizeLikertScale(scale: LikertScalePoint[], count: number, preset: LikertPresetId): LikertScalePoint[] {
+  const labels = preset === "custom" ? null : likertPresetLabels(preset, count);
+  const used = new Set(scale.slice(0, count).map((p) => p.id));
+  let n = 1;
+  return Array.from({ length: count }, (_, i) => {
+    let id = scale[i]?.id;
+    if (!id) {
+      while (used.has(`scale-${n}`)) n += 1;
+      id = `scale-${n}`;
+      used.add(id);
+    }
+    return { id, label: labels ? labels[i] : (scale[i]?.label ?? ""), value: i + 1 };
+  });
+}
+
+/** The preset whose labels equal the scale's, else "custom". */
+export function detectLikertPreset(scale: LikertScalePoint[]): LikertPresetId {
+  const labels = scale.map((p) => p.label).join("|");
+  const hit = LIKERT_PRESETS.find((p) => p.id !== "custom" && scale.length >= 2 && scale.length <= 7 && likertPresetLabels(p.id as Exclude<LikertPresetId, "custom">, scale.length).join("|") === labels);
+  return hit?.id ?? "custom";
 }
