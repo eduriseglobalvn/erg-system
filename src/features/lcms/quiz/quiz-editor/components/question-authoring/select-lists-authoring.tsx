@@ -1,8 +1,7 @@
 import Box from "@mui/material/Box";
 
 import type { Question } from "@/domain/quiz/types";
-import { setBlankText } from "./blank-sentence";
-import { readBlankSentence, writeBlankSentence } from "./blank-sentence-codec";
+import { readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
 import { ChipInput, type ChipItem } from "./chip-input";
 import { SentenceBuilder } from "./sentence-builder";
 
@@ -23,15 +22,16 @@ export function SelectListsAuthoring({ question, onChange }: { question: Questio
         <Box component="span" sx={{ typography: "caption", color: "text.secondary" }}>Các lựa chọn trong ô (bấm để chọn đáp án đúng):</Box>
         <ChipInput
           inputLabel="Thêm lựa chọn"
-          items={options.map((option): ChipItem => {
+          items={options.map((option, index): ChipItem => {
             const correct = option === stored?.correctOptionId;
             return {
-              key: option,
+              // Old data may repeat an option, so the position is the key.
+              key: String(index),
               label: option,
               tone: correct ? "correct" : "plain",
               pressed: correct,
-              onToggle: () => onChange(writeBlankSentence(question, setBlankText(sentence, id, option))),
-              onRemove: correct ? undefined : () => setOptions(id, options.filter((o) => o !== option)),
+              onToggle: correct ? undefined : () => onChange(selectBlankOption(question, id, option)),
+              onRemove: correct ? undefined : () => setOptions(id, options.filter((_, i) => i !== index)),
             };
           })}
           onAdd={(text) => setOptions(id, [...options, text])}

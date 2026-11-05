@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
 import { setBlankText, type BlankSentence } from "./blank-sentence";
-import { readBlankSentence, writeBlankSentence } from "./blank-sentence-codec";
+import { readBlankSentence, selectBlankOption, writeBlankSentence } from "./blank-sentence-codec";
 
 const TEXT = "Hàm tính trung bình là AVERAGE, hàm tính tổng là SUM.";
 const at = (word: string) => ({ start: TEXT.indexOf(word), end: TEXT.indexOf(word) + word.length });
@@ -57,9 +57,29 @@ describe("old data", () => {
   });
 
   it("picks another option as correct without changing the options", () => {
-    const out = writeBlankSentence(oldSelect, setBlankText(readBlankSentence(oldSelect), "i1", "no"));
+    const out = selectBlankOption(oldSelect, "i1", "no");
     expect(out.inlineBlanks![0].options).toEqual(["yes", "no"]);
     expect(out.inlineBlanks![0].correctOptionId).toBe("no");
+    expect(readBlankSentence(out).text).toBe("no Bản sao bị đăng lên mạng.");
+  });
+
+  it("renames only the correct option while typing, even past another option's text", () => {
+    let q: Question = {
+      ...select,
+      inlineBlanks: [{ id: "i1", statement: "Hàm", selectPosition: "after", options: ["MEAN", "MIN", "MAX"], correctOptionId: "MIN" }],
+    };
+    for (const typed of ["MI", "M", "MA", "MAX", "MAXI", "MAXIM", "MAXIMU", "MAXIMUM"]) {
+      q = writeBlankSentence(q, setBlankText(readBlankSentence(q), "i1", typed));
+    }
+    expect(q.inlineBlanks![0].options).toEqual(["MEAN", "MAXIMUM", "MAX"]);
+    expect(q.inlineBlanks![0].correctOptionId).toBe("MAXIMUM");
+  });
+
+  it("keeps a fill alternate when the word is edited", () => {
+    const q = writeBlankSentence(fill, S);
+    const withAlt = { ...q, textBlanks: q.textBlanks!.map((b, i) => (i === 0 ? { ...b, correctAnswers: [...b.correctAnswers, "TRUNG BÌNH"] } : b)) };
+    const out = writeBlankSentence(withAlt, setBlankText(readBlankSentence(withAlt), "b1", "MEAN"));
+    expect(out.textBlanks![0].correctAnswers).toEqual(["MEAN", "TRUNG BÌNH"]);
   });
 
   it("renames the correct option when the word is new", () => {

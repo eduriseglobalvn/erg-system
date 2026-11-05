@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { Question } from "@/domain/quiz/types";
 import { writeBlankSentence } from "./blank-sentence-codec";
@@ -12,9 +12,10 @@ const base = { id: "q", kind: "select_from_lists", prompt: "", title: "T", point
 const START_Q = writeBlankSentence(base, { text: TEXT, blanks: [{ id: "b1", start: START, end: START + 7 }] });
 
 let last: Question = START_Q;
+let calls = 0;
 function Harness() {
   const [q, setQ] = useState(START_Q);
-  return <SelectListsAuthoring onChange={(next) => { last = next; setQ(next); }} question={q} />;
+  return <SelectListsAuthoring onChange={(next) => { calls++; last = next; setQ(next); }} question={q} />;
 }
 
 function openBlank() {
@@ -31,8 +32,9 @@ function add(text: string) {
   fireEvent.keyDown(input, { key: "Enter" });
 }
 
-// A removable chip name also carries its remove icon title (ChipInput), so match the start.
-const chip = (label: string) => screen.getByRole("button", { name: new RegExp(`^${label}( |$)`) });
+const chip = (label: string) => screen.getByRole("button", { name: label });
+// The correct chip has no action, so it is not a button.
+const plainChip = (label: string) => screen.getAllByText(label).find((el) => el.closest(".MuiChip-root"))!.closest(".MuiChip-root")!;
 
 describe("SelectListsAuthoring", () => {
   it("appends added options", () => {
@@ -52,8 +54,28 @@ describe("SelectListsAuthoring", () => {
     expect(last.inlineBlanks![0].correctOptionId).toBe("MIN");
     expect(textarea.value).toContain("MIN");
     expect([...last.inlineBlanks![0].options].sort()).toEqual(["AVERAGE", "MIN", "SUM"]);
-    expect(chip("MIN")).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("button", { name: "MIN" })).toBeNull();
+    expect(plainChip("MIN")).toBeInTheDocument();
     expect(chip("AVERAGE")).toHaveAttribute("aria-pressed", "false");
+  });
+
+  it("does nothing when the correct chip is clicked", () => {
+    openBlank();
+    add("MIN");
+    const before = calls;
+    fireEvent.click(plainChip("AVERAGE"));
+    expect(calls).toBe(before);
+  });
+
+  it("renders old select data without writing it", () => {
+    const old = {
+      ...base,
+      inlineBlanks: [{ id: "i1", statement: "Bản sao bị đăng lên mạng.", selectPosition: "before", options: ["yes", "no"], correctOptionId: "yes" }],
+    } as Question;
+    const onChange = vi.fn();
+    render(<SelectListsAuthoring onChange={onChange} question={old} />);
+    expect((screen.getByRole("textbox", { name: "Câu có ô trống" }) as HTMLTextAreaElement).value).toBe("yes Bản sao bị đăng lên mạng.");
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("lets only wrong options be removed", () => {

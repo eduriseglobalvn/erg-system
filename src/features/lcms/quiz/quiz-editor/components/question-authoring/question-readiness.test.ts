@@ -130,6 +130,9 @@ describe("assessQuestionReadiness", () => {
     it("blank-options: empty correct option", () => {
       expect(codes(q({ kind, inlineBlanks: [blank(["a", "b"], "")] }))).toEqual(["blank-options"]);
     });
+    it("blank-options: duplicate options after trimming", () => {
+      expect(codes(q({ kind, inlineBlanks: [blank(["a", "b", "a "], "a")] }))).toEqual(["blank-options"]);
+    });
   });
 
   describe("drag_words", () => {

@@ -1,5 +1,5 @@
 import type { InlineBlank, Question, TextBlank } from "@/domain/quiz/types";
-import { blankWord, sentenceParts, type BlankSentence, type SentenceBlank } from "./blank-sentence";
+import { blankWord, sentenceParts, setBlankText, type BlankSentence, type SentenceBlank } from "./blank-sentence";
 
 // For fill_blank, select_from_lists, inline_choice and drag_words questions.
 
@@ -65,12 +65,21 @@ export function readBlankSentence(question: Question): BlankSentence {
   return { text, blanks };
 }
 
+// The correct option is tracked by position, so typing past another option's text never renames that option.
 function selectOptions(old: InlineBlank | undefined, word: string): string[] {
   if (!old) return [word];
-  const options = old.options.includes(word)
-    ? old.options
-    : old.options.map((option) => (option === old.correctOptionId ? word : option));
-  return options.includes(word) ? options : [word, ...options];
+  const idx = old.options.indexOf(old.correctOptionId);
+  return idx >= 0 ? old.options.map((option, i) => (i === idx ? word : option)) : [word, ...old.options];
+}
+
+/** Makes `option` the blank's correct answer (and its word in the sentence) without touching the options. */
+export function selectBlankOption(question: Question, blankId: string, option: string): Question {
+  const next = writeBlankSentence(question, setBlankText(readBlankSentence(question), blankId, option));
+  const options = question.inlineBlanks?.find((blank) => blank.id === blankId)?.options;
+  return {
+    ...next,
+    inlineBlanks: next.inlineBlanks?.map((blank) => (blank.id === blankId && options ? { ...blank, options } : blank)),
+  };
 }
 
 function writeDrag(question: Question, edited: EditedBlank[]): Pick<Question, "wordSlots" | "wordBank"> {

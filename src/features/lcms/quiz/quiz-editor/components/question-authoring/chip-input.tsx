@@ -46,9 +46,11 @@ export function ChipInput({ items, onAdd, inputLabel, placeholder }: {
     <Box sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "6px" }}>
       {items.map((item) => (
         <Chip
+          aria-keyshortcuts={item.onRemove ? "Delete" : undefined}
+          aria-label={item.label}
           aria-pressed={item.onToggle ? Boolean(item.pressed) : undefined}
           deleteIcon={item.onRemove ? <CloseIcon titleAccess={`Xoá “${item.label}”`} /> : undefined}
-          icon={item.onToggle && item.pressed ? <CheckIcon /> : undefined}
+          icon={item.pressed ? <CheckIcon /> : undefined}
           key={item.key}
           label={item.label}
           onClick={item.onToggle}

@@ -62,6 +62,7 @@ function answerIssues(question: Question, context: { hasQuestionImage: boolean }
         blanks.some(
           (blank) =>
             blank.options.filter((option) => option.trim()).length < 2 ||
+            new Set(blank.options.map((option) => option.trim())).size < blank.options.length ||
             !blank.correctOptionId ||
             !blank.options.includes(blank.correctOptionId),
         )
