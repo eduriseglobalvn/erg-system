@@ -19,3 +19,14 @@ describe("normalizeBackendQuestion images", () => {
     expect(q?.dragDropItems?.[0].image).toEqual({ url: "u" });
   });
 });
+
+describe("normalizeBackendQuestion suffix", () => {
+  it("keeps the text after the last blank on inline blanks and word slots", () => {
+    const q = normalize({
+      inlineBlanks: [{ id: "b", statement: "s", options: ["a"], correctOptionId: "a", suffix: "." }],
+      wordSlots: [{ id: "w", label: "l", correctWordId: "x", suffix: "." }],
+    });
+    expect(q?.inlineBlanks?.[0].suffix).toBe(".");
+    expect(q?.wordSlots?.[0].suffix).toBe(".");
+  });
+});

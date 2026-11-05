@@ -217,6 +217,7 @@ export function DragWordsQuestion({
                   >
                     {selectedWord?.label ?? "......"}
                   </button>
+                  {slot.suffix ? <> {slot.suffix}</> : null}
                   {reviewMode && !isCorrect ? (
                     <span className="text-sm font-medium text-emerald-700">({correctWord?.label})</span>
                   ) : null}

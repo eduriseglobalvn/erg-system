@@ -112,6 +112,8 @@ export function InlineChoiceQuestion({
     emitBlanks(blanks.filter((blank) => blank.id !== blankId));
   }
 
+  const statementClass = isMobile ? "text-[15px] leading-7 text-slate-600" : "min-w-[260px] flex-1 text-[var(--quiz-readable-size-lg)] font-medium leading-[1.45] text-[#174f91]";
+
   if (editable && onQuestionChange) {
     return (
       <QuestionBodyWithImage question={question}>
@@ -209,7 +211,7 @@ export function InlineChoiceQuestion({
                   onRevealCorrectAnswer={() => setRevealedBlankId(blank.id)}
                 />
               ) : null}
-              <span className={`${isMobile ? "text-[15px] leading-7 text-slate-600" : "min-w-[260px] flex-1 text-[var(--quiz-readable-size-lg)] font-medium leading-[1.45] text-[#174f91]"}`}>
+              <span className={statementClass}>
                 {blank.statement}
               </span>
               {blank.selectPosition === "after" ? (
@@ -222,6 +224,11 @@ export function InlineChoiceQuestion({
                   onChange={handleChange}
                   onRevealCorrectAnswer={() => setRevealedBlankId(blank.id)}
                 />
+              ) : null}
+              {blank.suffix ? (
+                <span className={statementClass}>
+                  {blank.suffix}
+                </span>
               ) : null}
             </div>
           </div>

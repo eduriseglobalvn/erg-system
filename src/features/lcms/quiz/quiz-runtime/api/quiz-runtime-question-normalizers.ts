@@ -109,6 +109,7 @@ function normalizeInlineBlanks(value: unknown, key?: Record<string, unknown>): I
       options: stringArray(record.options),
       correctOptionId: stringArray(record.correctOptionId ?? keyBlanks.get(id))[0] ?? "",
       selectPosition: record.selectPosition === "before" ? "before" : "after",
+      suffix: stringValue(record.suffix, ""),
     };
   });
 }
@@ -134,6 +135,7 @@ function normalizeWordSlots(value: unknown, key?: Record<string, unknown>): Ques
       id,
       label: stringValue(record.label, ""),
       correctWordId: stringArray(record.correctWordId ?? keyBlanks.get(id))[0] ?? "",
+      suffix: stringValue(record.suffix, ""),
     };
   });
 }
