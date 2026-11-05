@@ -150,7 +150,7 @@ function resolvePassingRate(options: CreateQuizFromBankOptions, totalPoints: num
   return normalizeNumberOption(options.passingRate, 0, 100, fallback);
 }
 
-function formatMinuteLimit(minutes: number) {
+export function formatMinuteLimit(minutes: number) {
   const safeMinutes = Math.max(0, Math.round(minutes));
   return `${String(safeMinutes).padStart(2, "0")}:00`;
 }
@@ -161,7 +161,7 @@ export function getQuestionBankAutoQuestionPoints(questionCount: number) {
 }
 
 /** Equal shares in cents that add up to exactly the package total; leftover cents go to the first questions, like the backend split. */
-function getQuestionBankEqualShare(questionCount: number, index: number) {
+export function getQuestionBankEqualShare(questionCount: number, index: number) {
   const cents = QUESTION_BANK_PACKAGE_TOTAL_POINTS * 100;
   return (Math.floor(cents / questionCount) + (index < cents % questionCount ? 1 : 0)) / 100;
 }

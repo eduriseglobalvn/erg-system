@@ -130,7 +130,7 @@ export function QuestionLibrary({
             <TableCell>{copy.table.question}</TableCell>
             <TableCell sx={{ ...wideOnly, width: 120 }}>{copy.table.type}</TableCell>
             <TableCell sx={{ ...wideOnly, width: 96 }}>{copy.table.difficulty}</TableCell>
-            <TableCell sx={{ ...wideOnly, width: 80 }}>{copy.table.used}</TableCell>
+            <TableCell sx={{ ...wideOnly, width: 80, whiteSpace: "nowrap" }}>{copy.table.used}</TableCell>
             <TableCell align="right" sx={{ width: 64 }}>
               <Box component="span" sx={visuallyHidden}>{copy.table.actions}</Box>
             </TableCell>

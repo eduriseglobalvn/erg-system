@@ -6,6 +6,8 @@ import {
   loadQuestionBankData,
   type QuestionBankApiData,
   updateQuestionBankQuestion,
+  updateQuizBankMeta,
+  type QuizBankMetaInput,
   type QuestionBankSaveQuestionInput,
   type QuestionBankWorkspaceInput,
 } from "@/features/question-bank/api/question-bank-api";
@@ -64,6 +66,14 @@ export function useDeleteQuestionBankQuestionMutation(tenantId: string = getDefa
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (questionId: string) => deleteQuestionBankQuestion(questionId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root(tenantId) }),
+  });
+}
+
+export function useUpdateQuizBankMetaMutation(tenantId: string = getDefaultTenantId()) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: QuizBankMetaInput) => updateQuizBankMeta(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: questionBankQueryKeys.root(tenantId) }),
   });
 }

@@ -5,6 +5,7 @@ import type {
   QuestionBankStatus,
   QuestionBankSubject,
   QuizBankItem,
+  QuizBankKind,
 } from "@/features/question-bank/types/question-bank-types";
 import type { QuestionType } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { apiRequest } from "@/lib/api-client";
@@ -196,6 +197,18 @@ export async function updateQuestionBankQuestion(input: QuestionBankSaveQuestion
 export async function deleteQuestionBankQuestion(questionId: string): Promise<QuestionBankDeleteQuestionResult> {
   return apiRequest<QuestionBankDeleteQuestionResult>(API_ENDPOINTS.lcms.question(questionId), {
     method: "DELETE",
+    portal: "lcms",
+  });
+}
+
+export type QuizBankMetaInput = { quizId: string; title?: string; kind?: QuizBankKind };
+export type QuizBankMetaResult = { quizId: string; title: string; kind: QuizBankKind; updatedAt?: string | null };
+
+/** Renames a quiz or changes its kind (the list reads these from the quiz, not from its draft). */
+export async function updateQuizBankMeta({ quizId, ...body }: QuizBankMetaInput): Promise<QuizBankMetaResult> {
+  return apiRequest<QuizBankMetaResult>(API_ENDPOINTS.lcms.quiz(quizId), {
+    body: JSON.stringify(body),
+    method: "PATCH",
     portal: "lcms",
   });
 }

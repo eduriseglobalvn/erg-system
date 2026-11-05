@@ -33,11 +33,12 @@ export type QuizCreateDraft = {
 const box = { border: `1px solid ${t.color.divider}`, borderRadius: `${t.radius.card}px`, px: 1.75, py: 1.25 } as const;
 
 /** Same dialog for "create from selection" and "edit package"; only the title, submit label and time-limit defaults differ. */
-export function QuizCreatePackageDialog({ copy, draft, mode = "create", questions, onChange, onClose, onSubmit }: {
+export function QuizCreatePackageDialog({ copy, draft, mode = "create", questions, saving = false, onChange, onClose, onSubmit }: {
   copy: QuestionBankCopy;
   draft: QuizCreateDraft;
   mode?: "create" | "update";
   questions: QuestionBankQuestion[];
+  saving?: boolean;
   onChange: (draft: QuizCreateDraft) => void;
   onClose: () => void;
   onSubmit: () => void;
@@ -62,7 +63,7 @@ export function QuizCreatePackageDialog({ copy, draft, mode = "create", question
           </Typography>
           <Box sx={{ flex: 1 }} />
           <ErgButton variant="text" onClick={onClose}>{copy.cancel}</ErgButton>
-          <ErgButton onClick={onSubmit} disabled={!draft.title.trim() || questions.length === 0 || pointsInvalid}>
+          <ErgButton onClick={onSubmit} loading={saving} disabled={!draft.title.trim() || (mode === "create" && questions.length === 0) || pointsInvalid}>
             {mode === "update" ? copy.updatePackageConfirm : copy.createQuizConfirm}
           </ErgButton>
         </>

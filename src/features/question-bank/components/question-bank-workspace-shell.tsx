@@ -47,9 +47,9 @@ export function QuestionBankWorkspace({
     activeLevel, activeSubject, autoCount, autoPickAvailableCount, autoTopicIds, changeSearch, clearSelection,
     createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation,
     duplicateQuestion, isQuestionBankFetching,
-    levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject,
+    levelTopics, openCreateQuestionForm, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject,
     pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizPackageEdit,
-    quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
+    quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage,
     setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm,
     submitUpdateQuizPackage, searchValue, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions,
     topicId, applyAutoPick, updateQuestionMutation, view, visibleQuestions, visibleQuizzes,
@@ -126,7 +126,10 @@ export function QuestionBankWorkspace({
           onDelete={deleteQuestion}
           onDuplicate={(question) => void duplicateQuestion(question)}
           onEdit={openEditQuestionForm}
+          onNavigate={setQuickViewQuestion}
           question={quickViewQuestion}
+          quizzes={questionBankData.quizzes}
+          siblings={visibleQuestions}
         />
       ) : null}
       {quickViewQuiz ? (
@@ -137,7 +140,8 @@ export function QuestionBankWorkspace({
           onDelete={(quiz) => deleteQuiz(quiz, true)}
           onEdit={onOpenQuiz ? (quiz) => onOpenQuiz(quiz.id) : undefined}
           onExportPortable={setPortableQuiz}
-          onOpenSettings={openUpdateQuizPackage}
+          onOpenSettings={(quiz) => void openUpdateQuizPackage(quiz)}
+          openingSettings={openingQuizId === quickViewQuiz.id}
           questions={quickViewQuizQuestions}
           quiz={quickViewQuiz}
         />
@@ -184,7 +188,8 @@ export function QuestionBankWorkspace({
           questions={quizPackageEditQuestions}
           onChange={(draft) => setQuizPackageEdit((current) => (current ? { ...current, draft } : current))}
           onClose={() => setQuizPackageEdit(null)}
-          onSubmit={submitUpdateQuizPackage}
+          saving={savingQuizPackage}
+          onSubmit={() => void submitUpdateQuizPackage()}
         />
       ) : null}
       {portableQuiz ? (

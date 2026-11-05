@@ -4,10 +4,11 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { formatDateTimeVi } from "@/domain/formatters/format-date";
+import { useQuizEditorDraftQuery } from "@/features/lcms/quiz/quiz-editor";
 import { questionTypeLabelKeys } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import { useI18n } from "@/platform/i18n";
@@ -15,6 +16,7 @@ import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuickViewDrawer, QuickViewSection } from "./question-bank-quick-view-drawer";
 import { QUIZ_STATUS_TONE } from "./quiz-bank-panel";
+import { quizPackageMaxPoints, readQuizPackageDraft } from "./quiz-package-draft";
 
 /** B2: quick view of one quiz: properties, its questions, and the package actions. */
 export function QuizQuickViewDrawer({
@@ -25,6 +27,7 @@ export function QuizQuickViewDrawer({
   onEdit,
   onExportPortable,
   onOpenSettings,
+  openingSettings = false,
   questions,
   quiz,
 }: {
@@ -36,15 +39,31 @@ export function QuizQuickViewDrawer({
   onEdit?: (quiz: QuizBankItem) => void;
   onExportPortable: (quiz: QuizBankItem) => void;
   onOpenSettings: (quiz: QuizBankItem) => void;
+  /** True while the package settings load the quiz draft. */
+  openingSettings?: boolean;
   /** In quiz order; undefined where the question is not in the loaded bank data. */
   questions: (QuestionBankQuestion | undefined)[];
   quiz: QuizBankItem;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Time, scoring and shuffle live in the draft; the list row only carries a rough duration.
+  const draftQuery = useQuizEditorDraftQuery(quiz.id);
+  const pkg = draftQuery.data ? readQuizPackageDraft(draftQuery.data, quiz) : null;
+  const maxPoints = draftQuery.data ? quizPackageMaxPoints(draftQuery.data.tree) : 0;
+  const onOff = (value: boolean) => (value ? copy.onValue : copy.offValue);
   const properties: Array<[string, string]> = [
     [copy.quizTable.kind, copy.quizKind[quiz.kind]],
     [copy.quizTable.count, String(quiz.questionCount)],
-    [copy.quizTable.duration, quiz.durationLabel],
+    [copy.quizTable.duration, pkg ? (pkg.timeLimitEnabled ? copy.minutesValue(pkg.timeLimitMinutes) : copy.noTimeLimitLabel) : quiz.durationLabel],
+    ...(pkg && draftQuery.data
+      ? ([
+          [copy.passingLabel, `${pkg.passingRate}%`],
+          [copy.shuffleLabel, `${onOff(pkg.shuffleQuestions)} / ${onOff(pkg.shuffleAnswers)}`],
+          [copy.acceptPartialLabel, onOff(pkg.acceptPartial)],
+        ] satisfies Array<[string, string]>)
+      : []),
+    // A draft that was never filled has no question slides; a max of 0 would only mislead.
+    ...(maxPoints > 0 ? ([[copy.maxPointsLabel, copy.pointsValue(maxPoints)]] satisfies Array<[string, string]>) : []),
     [copy.quizTable.source, copy.sourceMode[quiz.sourceMode]],
     [copy.quizTable.scope, copy.scopeLabel(quiz.scope)],
     [copy.quizTable.updated, formatDateTimeVi(quiz.updatedAt)],
@@ -71,13 +90,13 @@ export function QuizQuickViewDrawer({
       footerEnd={
         <>
           {quiz.status === "ready" ? (
-            <ErgButton variant="outlined" startIcon={<DownloadRoundedIcon />} onClick={() => onExportPortable(quiz)}>
-              {copy.exportPortableAction}
-            </ErgButton>
+            <ErgIconButton label={copy.exportPortableAction} tooltip={copy.exportPortableAction} onClick={() => onExportPortable(quiz)}>
+              <DownloadRoundedIcon fontSize="small" />
+            </ErgIconButton>
           ) : null}
-          <Button variant="text" onClick={() => onOpenSettings(quiz)}>
+          <ErgButton variant="text" loading={openingSettings} onClick={() => onOpenSettings(quiz)}>
             {copy.packageSettingsPreviewTitle}
-          </Button>
+          </ErgButton>
           {onEdit ? <ErgButton onClick={() => onEdit(quiz)}>{copy.editQuiz}</ErgButton> : null}
         </>
       }

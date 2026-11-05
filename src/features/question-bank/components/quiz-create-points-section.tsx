@@ -1,5 +1,7 @@
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
@@ -23,7 +25,13 @@ export function QuizCreatePointsSection({ copy, draft, maxPoints, questions, onC
   questions: QuestionBankQuestion[];
   onChange: (draft: QuizCreateDraft) => void;
 }) {
+  const [passingUnit, setPassingUnit] = useState<"percent" | "points">("percent");
   const passingPoints = Math.round(maxPoints * draft.passingRate) / 100;
+  // The draft always stores a percentage; the points unit is only a way to type it.
+  const setPassing = (value: number) => {
+    const percent = passingUnit === "percent" ? value : maxPoints > 0 ? (value / maxPoints) * 100 : 0;
+    onChange({ ...draft, passingRate: Math.min(100, Math.max(0, Math.round(percent * 100) / 100)) });
+  };
 
   return (
     <Stack
@@ -56,16 +64,22 @@ export function QuizCreatePointsSection({ copy, draft, maxPoints, questions, onC
           {copy.equalPointsHint(getQuestionBankAutoQuestionPoints(questions.length), maxPoints)}
         </Typography>
       )}
-      <ErgTextField
-        size="small"
-        type="number"
-        label={copy.passingRateLabel}
-        value={draft.passingRate}
-        onChange={(event) => onChange({ ...draft, passingRate: Number(event.target.value) })}
-        helperText={copy.passingPointsHint(passingPoints, maxPoints)}
-        slotProps={{ htmlInput: { min: 0, max: 100 } }}
-        sx={{ maxWidth: 220 }}
-      />
+      <Stack direction="row" spacing={1.5} sx={{ alignItems: "flex-start" }}>
+        <ErgTextField
+          size="small"
+          type="number"
+          label={passingUnit === "percent" ? copy.passingRateLabel : copy.passingPointsLabel}
+          value={passingUnit === "percent" ? draft.passingRate : passingPoints}
+          onChange={(event) => setPassing(Number(event.target.value))}
+          helperText={passingUnit === "percent" ? copy.passingPointsHint(passingPoints, maxPoints) : copy.passingPercentHint(draft.passingRate)}
+          slotProps={{ htmlInput: { min: 0, max: passingUnit === "percent" ? 100 : maxPoints } }}
+          sx={{ maxWidth: 220 }}
+        />
+        <ToggleButtonGroup exclusive size="small" value={passingUnit} aria-label={copy.passingUnitLabel} onChange={(_, value) => { if (value) setPassingUnit(value); }}>
+          <ToggleButton value="percent">%</ToggleButton>
+          <ToggleButton value="points">{copy.pointsUnit}</ToggleButton>
+        </ToggleButtonGroup>
+      </Stack>
     </Stack>
   );
 }

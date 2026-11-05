@@ -1,3 +1,4 @@
+import type { QuizEditorDraftDocument } from "@/features/lcms/quiz/quiz-editor";
 import type { QuizCreateDraft } from "./quiz-create-package-dialog";
 import type {
   QuestionBankQuestion,
@@ -24,6 +25,8 @@ export type QuestionFormDraft = {
 };
 
 export type QuizPackageEditDraft = {
+  /** The saved draft the dialog was opened from; its docVersion guards the save. */
+  doc: QuizEditorDraftDocument;
   draft: QuizCreateDraft;
   quiz: QuizBankItem;
 };

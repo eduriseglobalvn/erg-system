@@ -9,15 +9,18 @@ import {
   useUpdateQuestionBankQuestionMutation,
 } from "@/features/question-bank/api/question-bank-query";
 import { useDeleteQuizEditorQuizMutation } from "@/features/lcms/quiz/quiz-editor";
+import type { QuizEditorSlide } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import type { QuestionBankApiData, QuestionBankSaveQuestionInput } from "@/features/question-bank/api/question-bank-api";
 import type { QuestionBankChoice, QuestionBankQuestion, QuestionBankSubject, QuestionBankSubjectId, QuizBankItem, QuizBankKind } from "@/features/question-bank/types/question-bank-types";
 import type { DashboardLeaf } from "@/layouts/dashboard/types/dashboard-types";
 import type { ContentScope } from "@/types/scope-types";
 import type { QuestionBankCopy } from "./question-bank-copy";
-import type { QuestionFormDraft, QuestionFormMode, QuizPackageEditDraft } from "./question-bank-workspace-types";
+import type { QuestionFormDraft, QuestionFormMode } from "./question-bank-workspace-types";
 import type { QuizCreateDraft } from "./quiz-create-package-dialog";
 import { buildDuplicateQuestionInput } from "./question-quick-view-model";
+import { quizQuestionSlides, quizSlideKey } from "./quiz-package-draft";
+import { useQuizPackageEdit } from "./use-quiz-package-edit";
 
 type QuizKindFilter = "all" | QuizBankKind;
 
@@ -40,10 +43,10 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   const [searchValue, setSearchValue] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [questionCache, setQuestionCache] = useState<Record<string, QuestionBankQuestion>>({});
-  const [quizPackageEdit, setQuizPackageEdit] = useState<QuizPackageEditDraft | null>(null);
   const [autoTopicIds, setAutoTopicIds] = useState<string[]>([]);
   const [autoCount, setAutoCount] = useState(10);
   const deleteQuizMutation = useDeleteQuizEditorQuizMutation();
+  const { openUpdateQuizPackage, openingQuizId, quizPackageEdit, savingQuizPackage, setQuizPackageEdit, submitUpdateQuizPackage } = useQuizPackageEdit(copy);
   const createQuestionMutation = useCreateQuestionBankQuestionMutation();
   const updateQuestionMutation = useUpdateQuestionBankQuestionMutation();
   const deleteQuestionMutation = useDeleteQuestionBankQuestionMutation();
@@ -105,7 +108,7 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
     const normalizedSearch = debouncedSearchValue.trim().toLowerCase();
     return (quizKind === "all" || quiz.kind === quizKind) && (!normalizedSearch || `${quiz.title} ${quiz.subjectLabel} ${quiz.levelLabel} ${quiz.topicLabels.join(" ")}`.toLowerCase().includes(normalizedSearch)) && canUseInScope(quiz.scope, contentScope);
   }), [contentScope, debouncedSearchValue, quizKind, quizzes]);
-  const quizPackageEditQuestions = useMemo(() => quizPackageEdit ? getQuizPackageQuestions(quizPackageEdit.quiz, questionCache) : [], [questionCache, quizPackageEdit]);
+  const quizPackageEditQuestions = useMemo(() => quizPackageEdit ? getQuizPackageQuestions(quizPackageEdit.quiz, quizQuestionSlides(quizPackageEdit.doc.tree), questionCache) : [], [questionCache, quizPackageEdit]);
   const quickViewQuizQuestions = useMemo(() => quickViewQuiz?.questionIds.map((questionId) => questionCache[questionId]) ?? [], [questionCache, quickViewQuiz]);
   const getTopicQuestionCount = (categoryId: string, targetLevelId = activeLevel.id) => questions.filter((question) => question.subjectId === subjectId && question.levelId === targetLevelId && question.categoryId === categoryId && canUseInScope(question.scope, contentScope)).length;
 
@@ -126,13 +129,11 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
     if (!selectedQuestions.length) return; const firstQuestion = selectedQuestions[0];
     setQuizCreateDraft({ ...NEW_QUIZ_SETTINGS, kind: "train", title: `${firstQuestion.subjectLabel} - ${firstQuestion.levelLabel}`, playerTemplate: createQuestionBankPlayerTemplate(), shuffleQuestions: false, timeLimitEnabled: false, timeLimitMinutes: 20 });
   };
-  const openUpdateQuizPackage = (quiz: QuizBankItem) => { const timeLimitMinutes = parseDurationMinutes(quiz.durationLabel); setQuizPackageEdit({ quiz, draft: { ...NEW_QUIZ_SETTINGS, kind: quiz.kind, title: quiz.title, playerTemplate: createQuestionBankPlayerTemplate(), shuffleQuestions: quiz.sourceMode === "auto-random", timeLimitEnabled: timeLimitMinutes > 0, timeLimitMinutes: timeLimitMinutes || 20 } }); };
   const submitCreateQuizFromSelection = (draft: QuizCreateDraft) => {
     const title = draft.title.trim(); if (!title) { toast.error(copy.quizTitleRequired); return; } if (!selectedQuestions.length) return;
     const { timeLimitEnabled, timeLimitMinutes, ...options } = draft;
     onCreateQuiz(selectedQuestions, { ...options, title, timeLimitMinutes: timeLimitEnabled ? timeLimitMinutes : 0 }); setQuizCreateDraft(null);
   };
-  const submitUpdateQuizPackage = () => { if (!quizPackageEdit?.draft.title.trim()) { toast.error(copy.quizTitleRequired); return; } toast.success(copy.updatePackageSuccess); setQuizPackageEdit(null); };
   const openEditQuestionForm = (question: QuestionBankQuestion) => onCreateQuiz([question], { kind: "train", title: `${question.subjectLabel} - ${question.levelLabel} - ${question.categoryLabel}`, passingScoreMode: "percent", passingScorePoints: 1000, passingRate: 100, shuffleAnswers: false, shuffleQuestions: false, timeLimitMinutes: 0 });
   const submitQuestionForm = async (draft: QuestionFormDraft) => {
     const targetTopicId = topicId === "all" ? levelTopics[0]?.id : topicId;
@@ -151,14 +152,16 @@ export function useQuestionBankWorkspaceController({ activeLeaf, contentScope, c
   };
   const duplicateQuestion = async (question: QuestionBankQuestion) => { try { await createQuestionMutation.mutateAsync(buildDuplicateQuestionInput(question)); } catch { return; } toast.success(copy.duplicateQuestionSuccess); };
 
-  return { activeLevel, activeSubject, autoCount, autoPickAvailableCount: autoPickCandidates.length, autoPickedQuestions, clearSelection, openCreateQuestionForm, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation, duplicateQuestion, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, pickLevel, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizPackageEdit, quizPackageEditQuestions, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, applyAutoPick, view, visibleQuestions, visibleQuizzes };
+  return { activeLevel, activeSubject, autoCount, autoPickAvailableCount: autoPickCandidates.length, autoPickedQuestions, clearSelection, openCreateQuestionForm, autoTopicIds, changeSearch, createQuestionMutation, createQuizFromSelection, deleteQuestion, deleteQuestionMutation, deleteQuiz, deleteQuizMutation, duplicateQuestion, getTopicQuestionCount, isQuestionBankFetching, levelTopics, openEditQuestionForm, openUpdateQuizPackage, openingQuizId, pickLevel, pickSubject, pickTopic, questionBankData, questionBankQuery, questionForm, quickViewQuestion, quickViewQuiz, quickViewQuizQuestions, quizCreateDraft, quizKind, quizPackageEdit, quizPackageEditQuestions, savingQuizPackage, selectedIds, selectedQuestions, setAutoCount, setQuestionForm, setQuestionPage, setQuickViewQuestion, setQuickViewQuiz, setQuizCreateDraft, setQuizKind, setQuizPackageEdit, submitCreateQuizFromSelection, submitQuestionForm, submitUpdateQuizPackage, searchValue, subjectId, subjects, toggleAutoTopic, toggleQuestion, toggleVisibleQuestions, topicId, updateQuestionMutation, applyAutoPick, view, visibleQuestions, visibleQuizzes };
 }
 
 function canUseInScope(itemScope: ContentScope, activeScope: ContentScope) { if (activeScope.type === "global") return itemScope.type === "global"; return itemScope.type === "global" || itemScope.centerId === activeScope.centerId; }
 function arraysEqual(left: string[], right: string[]) { return left.length === right.length && left.every((value, index) => value === right[index]); }
 function pseudoRandomScore(value: string) { return value.split("").reduce((sum, char) => sum + char.charCodeAt(0), 0) % 97; }
-function parseDurationMinutes(durationLabel: string) { const match = durationLabel.match(/\d+/); return match ? Number(match[0]) : 0; }
-function getQuizPackageQuestions(quiz: QuizBankItem, cache: Record<string, QuestionBankQuestion>) { return quiz.questionIds.map((questionId, index) => cache[questionId] ?? createQuizPackageQuestionFallback(quiz, questionId, index)); }
+/** The dialog lists the draft's question slides, keyed like their points; bank data fills in when cached. */
+function getQuizPackageQuestions(quiz: QuizBankItem, slides: QuizEditorSlide[], cache: Record<string, QuestionBankQuestion>) {
+  return slides.map((slide, index) => { const key = quizSlideKey(slide); return { ...(cache[key] ?? createQuizPackageQuestionFallback(quiz, key, index)), id: key, stem: cache[key]?.stem ?? (slide.title || `Câu hỏi ${index + 1}`) }; });
+}
 function createQuizPackageQuestionFallback(quiz: QuizBankItem, questionId: string, index: number): QuestionBankQuestion {
   const categoryLabel = quiz.topicLabels[0] ?? "Chủ đề";
   return { id: questionId, scope: quiz.scope, subjectId: quiz.subjectId, subjectLabel: quiz.subjectLabel, levelId: quiz.levelId, levelLabel: quiz.levelLabel, categoryId: quiz.categoryId ?? "", categoryLabel, gradeLabel: quiz.levelLabel, type: "multiple-choice", difficulty: "core", status: "ready", stem: `Câu hỏi ${index + 1}`, objective: "", tags: [], masteryRate: 0, usageCount: 0, schoolsUsing: 0, lastUsedAt: "", recommendedCluster: categoryLabel };

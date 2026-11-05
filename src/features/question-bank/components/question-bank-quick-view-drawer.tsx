@@ -15,6 +15,7 @@ export function QuickViewDrawer({
   closeLabel,
   footerEnd,
   footerStart,
+  headerActions,
   onClose,
   open,
   subtitle,
@@ -26,6 +27,8 @@ export function QuickViewDrawer({
   footerEnd: ReactNode;
   /** Destructive action, kept apart on the left. */
   footerStart?: ReactNode;
+  /** Extra header buttons, before the close button. */
+  headerActions?: ReactNode;
   onClose: () => void;
   open: boolean;
   subtitle?: ReactNode;
@@ -59,6 +62,7 @@ export function QuickViewDrawer({
             <Typography id={titleId} variant="h4" component="h2">{title}</Typography>
             {subtitle ? <Typography variant="body2" sx={{ color: t.color.textMuted }}>{subtitle}</Typography> : null}
           </Stack>
+          {headerActions}
           <ErgIconButton label={closeLabel} size="small" onClick={onClose}>
             <CloseRoundedIcon fontSize="small" />
           </ErgIconButton>

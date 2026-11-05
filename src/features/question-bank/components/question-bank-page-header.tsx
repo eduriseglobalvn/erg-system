@@ -21,7 +21,8 @@ export function QuestionBankPageHeader({
       component="header"
       sx={{ alignItems: { md: "flex-end" }, display: "flex", flexDirection: { xs: "column", md: "row" }, flexWrap: "wrap", gap: 2 }}
     >
-      <Box sx={{ flex: "1 1 280px", minWidth: 0 }}>
+      {/* The 280px basis is a width; in the stacked xs column it would become a 280px height. */}
+      <Box sx={{ flex: { xs: "0 0 auto", md: "1 1 280px" }, minWidth: 0 }}>
         <Typography variant="h1" component="h1">
           {title}
         </Typography>

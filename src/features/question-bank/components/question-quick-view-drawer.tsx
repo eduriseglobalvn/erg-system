@@ -1,14 +1,21 @@
+import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
+import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import EditRoundedIcon from "@mui/icons-material/EditRounded";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Stack from "@mui/material/Stack";
+import ToggleButton from "@mui/material/ToggleButton";
+import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import Typography from "@mui/material/Typography";
 import { useState } from "react";
 
-import { ErgButton } from "@/components/erg-mui/erg-actions";
+import { ErgButton, ErgIconButton } from "@/components/erg-mui/erg-actions";
 import { ErgConfirmDialog } from "@/components/erg-mui/erg-confirm-dialog";
 import { ErgStatusChip } from "@/components/erg-mui/erg-feedback";
 import { questionTypeLabelKeys } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
-import type { QuestionBankQuestion } from "@/features/question-bank/types/question-bank-types";
+import type { QuestionBankQuestion, QuizBankItem } from "@/features/question-bank/types/question-bank-types";
 import { useI18n } from "@/platform/i18n";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 import type { QuestionBankCopy } from "./question-bank-copy";
 import { QuickViewDrawer, QuickViewSection } from "./question-bank-quick-view-drawer";
 import { DIFFICULTY_TONE } from "./question-library";
@@ -23,7 +30,10 @@ export function QuestionQuickViewDrawer({
   onDelete,
   onDuplicate,
   onEdit,
+  onNavigate,
   question,
+  quizzes,
+  siblings,
 }: {
   copy: QuestionBankCopy;
   deleting: boolean;
@@ -32,10 +42,20 @@ export function QuestionQuickViewDrawer({
   onDelete: (question: QuestionBankQuestion) => Promise<unknown>;
   onDuplicate: (question: QuestionBankQuestion) => void;
   onEdit: (question: QuestionBankQuestion) => void;
+  onNavigate: (question: QuestionBankQuestion) => void;
   question: QuestionBankQuestion;
+  /** Quizzes in the loaded bank data, to list the ones using this question. */
+  quizzes: QuizBankItem[];
+  /** The table rows, for previous/next. */
+  siblings: QuestionBankQuestion[];
 }) {
   const { t: translate } = useI18n();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [learnerView, setLearnerView] = useState(false);
+  const index = siblings.findIndex((item) => item.id === question.id);
+  const previous = index > 0 ? siblings[index - 1] : undefined;
+  const next = index >= 0 ? siblings[index + 1] : undefined;
+  const usedIn = quizzes.filter((quiz) => quiz.questionIds.includes(question.id));
 
   return (
     <QuickViewDrawer
@@ -43,12 +63,28 @@ export function QuestionQuickViewDrawer({
       onClose={onClose}
       closeLabel={copy.close}
       title={copy.questionQuickViewTitle}
-      subtitle={`${question.subjectLabel} · ${question.levelLabel}`}
+      subtitle={[index >= 0 ? copy.questionPosition(index + 1, siblings.length) : null, question.subjectLabel, question.levelLabel].filter(Boolean).join(" · ")}
+      headerActions={
+        index >= 0 ? (
+          <>
+            <ErgIconButton label={copy.previousQuestion} size="small" disabled={!previous} onClick={() => previous && onNavigate(previous)}>
+              <ChevronLeftRoundedIcon fontSize="small" />
+            </ErgIconButton>
+            <ErgIconButton label={copy.nextQuestion} size="small" disabled={!next} onClick={() => next && onNavigate(next)}>
+              <ChevronRightRoundedIcon fontSize="small" />
+            </ErgIconButton>
+          </>
+        ) : null
+      }
       chips={
         <>
           <ErgStatusChip dot={false} label={question.categoryLabel || copy.otherTopic} tone="info" />
           <ErgStatusChip dot={false} label={translate(questionTypeLabelKeys[question.type])} />
           <ErgStatusChip dot={false} label={copy.difficulty[question.difficulty]} tone={DIFFICULTY_TONE[question.difficulty]} />
+          <ToggleButtonGroup exclusive size="small" value={learnerView ? "learner" : "teacher"} aria-label={copy.viewModeLabel} onChange={(_, value) => { if (value) setLearnerView(value === "learner"); }} sx={{ ml: "auto" }}>
+            <ToggleButton value="teacher">{copy.teacherView}</ToggleButton>
+            <ToggleButton value="learner">{copy.learnerView}</ToggleButton>
+          </ToggleButtonGroup>
         </>
       }
       footerStart={
@@ -72,7 +108,21 @@ export function QuestionQuickViewDrawer({
           <Typography variant="body2">{question.objective}</Typography>
         </QuickViewSection>
       ) : null}
-      <QuestionQuickViewCard copy={copy} question={question} />
+      <QuestionQuickViewCard key={`${question.id}-${learnerView}`} copy={copy} learnerView={learnerView} question={question} />
+      <QuickViewSection title={copy.usedInQuizzes(usedIn.length || question.usageCount)}>
+        {usedIn.length ? (
+          <Stack component="ul" spacing={0.75} sx={{ listStyle: "none", m: 0, p: 0 }}>
+            {usedIn.map((quiz) => (
+              <Box component="li" key={quiz.id} sx={{ alignItems: "center", display: "flex", gap: 1, justifyContent: "space-between" }}>
+                <Typography variant="body2" noWrap>{quiz.title}</Typography>
+                <ErgStatusChip dot={false} label={copy.quizKind[quiz.kind]} tone={quiz.kind === "train" ? "info" : "neutral"} />
+              </Box>
+            ))}
+          </Stack>
+        ) : (
+          <Typography variant="body2" sx={{ color: t.color.textMuted }}>{copy.usedCount(question.usageCount)}</Typography>
+        )}
+      </QuickViewSection>
       <ErgConfirmDialog
         open={confirmOpen}
         title={copy.confirmDeleteQuestion(question.stem)}

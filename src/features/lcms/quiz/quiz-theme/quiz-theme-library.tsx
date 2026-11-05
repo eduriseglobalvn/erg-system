@@ -66,7 +66,8 @@ export function QuizThemeLibrary({ copy, selectedId, onPick }: QuizThemeLibraryP
               }}
             >
               <PresetThumbnail preset={preset} selected={selected} />
-              <Stack direction="row" sx={{ alignItems: "baseline", gap: 0.5, justifyContent: "space-between", px: 0.5 }}>
+              {/* Two lines: the cards are narrow, a shared line cut both labels. */}
+              <Stack sx={{ minWidth: 0, px: 0.5 }}>
                 <Typography variant="caption" noWrap sx={{ color: "text.primary", fontWeight: "fontWeightMedium" }}>
                   {copy.presets[preset.id]}
                 </Typography>

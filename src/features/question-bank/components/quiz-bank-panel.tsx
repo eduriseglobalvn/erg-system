@@ -167,7 +167,7 @@ export function QuizBankPanel({
                     <ErgStatusChip label={copy.quizStatus[quiz.status]} tone={QUIZ_STATUS_TONE[quiz.status]} />
                   </TableCell>
                   <TableCell sx={{ ...wideOnly, color: t.color.textSecondary, whiteSpace: "nowrap" }}>
-                    {formatDateTimeVi(quiz.updatedAt)}
+                    {formatDateTimeVi(quiz.updatedAt) || "—"}
                   </TableCell>
                   <TableCell align="right" onClick={(event) => event.stopPropagation()} onKeyDown={(event) => event.stopPropagation()}>
                     <Stack direction="row" spacing={0.5} sx={{ justifyContent: "flex-end" }}>
