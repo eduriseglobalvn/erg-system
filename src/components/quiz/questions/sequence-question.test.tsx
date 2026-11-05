@@ -64,6 +64,19 @@ describe("SequenceQuestion", () => {
     for (const n of ["1", "2", "3"]) expect(screen.getByText(n)).toHaveAttribute("aria-hidden", "true");
   });
 
+  test("an ignored arrow move never steals focus on a later reorder", () => {
+    const onChange = vi.fn();
+    const props = { question, onChange };
+    const { rerender } = render(<SequenceQuestion {...props} value={{ sequenceOrder: ["s2", "s1", "s3"] }} />);
+    fireEvent.keyDown(screen.getByRole("button", { name: "Chèn biểu đồ, vị trí 1" }), { key: "ArrowDown" });
+    expect(onChange).toHaveBeenCalledTimes(1);
+    // The parent ignores the move and renders the same order again.
+    rerender(<SequenceQuestion {...props} value={{ sequenceOrder: ["s2", "s1", "s3"] }} />);
+    // Later the order changes some other way, such as a pointer drag.
+    rerender(<SequenceQuestion {...props} value={{ sequenceOrder: ["s1", "s3", "s2"] }} />);
+    expect(document.activeElement).toBe(document.body);
+  });
+
   test("arrows do nothing at the edges", () => {
     const onChange = vi.fn();
     render(<SequenceQuestion question={question} value={{ sequenceOrder: ["s2", "s1", "s3"] }} onChange={onChange} />);

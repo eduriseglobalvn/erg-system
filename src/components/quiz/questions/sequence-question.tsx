@@ -13,7 +13,7 @@ import { moveTo, SEQUENCE_ROW, sequenceAnnouncements } from "./sequence-question
 export function SequenceQuestion({ question, value, submitted = false, reviewMode = false, result, onChange }: QuestionComponentProps) {
   const isMobile = useIsMobile();
   const listRef = useRef<HTMLDivElement>(null);
-  const focusAfterMove = useRef<string | null>(null);
+  const focusAfterMove = useRef<{ id: string; from: string[] } | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -31,20 +31,22 @@ export function SequenceQuestion({ question, value, submitted = false, reviewMod
   const activeItem = activeId ? itemMap.get(activeId) : undefined;
 
   // Reordering moves the focused card's DOM node, which drops focus; put it back once the new order renders.
+  // Runs every render: a move the parent ignored renders the old order and is dropped, so a later drag can't use it.
   useEffect(() => {
-    const id = focusAfterMove.current;
-    if (!id) return;
+    const pending = focusAfterMove.current;
+    if (!pending) return;
     focusAfterMove.current = null;
+    if (pending.from.length === order.length && pending.from.every((id, i) => id === order[i])) return;
     const cards = Array.from(listRef.current?.querySelectorAll<HTMLElement>("[data-sequence-id]") ?? []);
-    cards.find((card) => card.dataset.sequenceId === id)?.focus();
-  }, [order]);
+    cards.find((card) => card.dataset.sequenceId === pending.id)?.focus();
+  });
 
   function handleKeyDown(event: KeyboardEvent<HTMLElement>, index: number) {
     if (submitted || (event.key !== "ArrowUp" && event.key !== "ArrowDown")) return;
     event.preventDefault();
     const to = event.key === "ArrowUp" ? index - 1 : index + 1;
     if (to < 0 || to >= order.length) return;
-    focusAfterMove.current = order[index];
+    focusAfterMove.current = { id: order[index], from: order };
     onChange({ sequenceOrder: moveTo(order, index, to) });
   }
 
