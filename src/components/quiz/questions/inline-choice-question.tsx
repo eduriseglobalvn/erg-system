@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 import { InlineChoiceSelect, QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePacedStateBatch } from "@/hooks/use-paced-state-batch";
 import type { AnswerPayload, InlineBlank } from "@/domain/quiz/types";

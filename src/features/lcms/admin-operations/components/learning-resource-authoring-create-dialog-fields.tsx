@@ -1,7 +1,6 @@
-import Search from "@mui/icons-material/Search";
 import TextField from "@mui/material/TextField";
-import { AppSelect } from "@/components/ui/app-select";
-import { inputClassName } from "@/components/ui/input";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { ErgSearchField, ErgTextField } from "@/components/erg-mui";
 import { getTaxonomyIconColor, getTaxonomyIconId, taxonomyIconColorOptions, TaxonomyIcon, type TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
@@ -45,7 +44,7 @@ export function TaxonomyFields({
     <div className="grid gap-3">
       {showSubjectPicker ? (
         <Field label="Môn học">
-          <AppSelect variant="native" className={inputClassName} value={draftSubjectId} onChange={(event) => onSubjectChange(event.target.value)}>
+          <AppSelect style={{ width: "100%" }} value={draftSubjectId} onChange={(event) => onSubjectChange(event.target.value)}>
             <option value="">Chọn môn học</option>
             {subjects.map((subject) => (
               <option key={subject.id} value={subject.id}>
@@ -58,7 +57,7 @@ export function TaxonomyFields({
 
       {showLevelPicker ? (
         <Field label="Level">
-          <AppSelect variant="native" className={inputClassName} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
+          <AppSelect style={{ width: "100%" }} value={draftLevelId} onChange={(event) => onLevelChange(event.target.value)} disabled={!draftSubjectId}>
             <option value="">Không phân level (trực tiếp dưới môn học)</option>
             {draftLevelOptions.map((level) => (
               <option key={level.optionId ?? level.id} value={level.optionId ?? ""}>
@@ -72,12 +71,13 @@ export function TaxonomyFields({
       <TextField fullWidth size="small" label={titleLabel} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder={titlePlaceholder} autoFocus />
 
       <Field label="Mô tả">
-        <textarea
+        <ErgTextField
+          compact
+          multiline
+          minRows={2}
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder="Mô tả (tùy chọn)..."
-          rows={2}
-          className={cn(inputClassName, "min-h-14 resize-none py-2")}
         />
       </Field>
     </div>
@@ -110,8 +110,7 @@ export function LessonContainerFields({
       <div className="grid gap-2.5 md:grid-cols-3">
         <Field label="Môn học">
           <AppSelect
-            variant="native"
-            className={inputClassName}
+            style={{ width: "100%" }}
             value={draftSubjectId}
             onChange={(event) => onSubjectChange(event.target.value)}
           >
@@ -126,8 +125,7 @@ export function LessonContainerFields({
 
         <Field label="Level">
           <AppSelect
-            variant="native"
-            className={inputClassName}
+            style={{ width: "100%" }}
             value={draftLevelId}
             onChange={(event) => onLevelChange(event.target.value)}
             disabled={!draftSubjectId}
@@ -143,8 +141,7 @@ export function LessonContainerFields({
 
         <Field label="Chủ đề">
           <AppSelect
-            variant="native"
-            className={inputClassName}
+            style={{ width: "100%" }}
             value={draftTopicId}
             onChange={(event) => onTopicChange(event.target.value)}
             disabled={!draftSubjectId}
@@ -176,10 +173,10 @@ export function LectureFields({
   return (
     <div className="grid gap-3 pt-1">
       <Field label="Tên bài học">
-        <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài 01 - Khởi động và làm quen máy tính" autoFocus />
+        <ErgTextField compact value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Bài 01 - Khởi động và làm quen máy tính" autoFocus />
       </Field>
       <Field label="Link bài giảng (Google Slides)">
-        <input className={inputClassName} value={slidesUrl} onChange={(event) => onSlidesUrlChange(event.target.value)} placeholder="Dán link edit, publish hoặc embed của Google Slides" />
+        <ErgTextField compact value={slidesUrl} onChange={(event) => onSlidesUrlChange(event.target.value)} placeholder="Dán link edit, publish hoặc embed của Google Slides" />
       </Field>
     </div>
   );
@@ -210,21 +207,20 @@ export function ExerciseFields({
     <div className="grid gap-4">
       <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_180px_220px]">
         <Field label="Tìm trong Quiz bank">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#919EAB]" />
-            <input className={cn(inputClassName, "pl-9")} value={exerciseQuery} onChange={(event) => onExerciseQueryChange(event.target.value)} placeholder="Tên quiz, chủ đề, độ khó" autoFocus />
-          </div>
+          <ErgSearchField value={exerciseQuery} onChange={(event) => onExerciseQueryChange(event.target.value)} placeholder="Tên quiz, chủ đề, độ khó" autoFocus />
         </Field>
         <ReadOnlyField label="Môn học" value={selectedSubject?.label ?? "Chưa chọn"} />
         <ReadOnlyField label="Chủ đề" value={selectedNode?.label ?? "Chưa chọn"} />
       </div>
 
       <Field label="Ghi chú khi gắn bài tập">
-        <textarea
+        <ErgTextField
+          compact
+          multiline
+          minRows={2}
           value={description}
           onChange={(event) => onDescriptionChange(event.target.value)}
           placeholder="Ví dụ: Giao cuối tiết hoặc dùng để luyện tập về nhà."
-          className={cn(inputClassName, "min-h-16 resize-none py-3")}
         />
       </Field>
 
@@ -283,10 +279,10 @@ export function ResourceFields({
     <div className="grid gap-4">
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_180px]">
         <Field label="Tên hiển thị">
-          <input className={inputClassName} value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Tài liệu thực hành 01" autoFocus />
+          <ErgTextField compact value={label} onChange={(event) => onLabelChange(event.target.value)} placeholder="Ví dụ: Tài liệu thực hành 01" autoFocus />
         </Field>
         <Field label="Loại tài liệu">
-          <AppSelect variant="native" className={inputClassName} value={resourceFileType} onChange={(event) => onResourceFileTypeChange(event.target.value)}>
+          <AppSelect style={{ width: "100%" }} value={resourceFileType} onChange={(event) => onResourceFileTypeChange(event.target.value)}>
             <option value="PDF">PDF</option>
             <option value="PPTX">Google Slides / PPTX</option>
             <option value="VIDEO">Video</option>
@@ -298,16 +294,16 @@ export function ResourceFields({
         </Field>
       </div>
       <Field label="Link Google Drive / Google Slides">
-        <input className={inputClassName} value={resourceUrl} onChange={(event) => onResourceUrlChange(event.target.value)} placeholder="Dán link share, preview hoặc embed từ Google Drive" />
+        <ErgTextField compact value={resourceUrl} onChange={(event) => onResourceUrlChange(event.target.value)} placeholder="Dán link share, preview hoặc embed từ Google Drive" />
         <p className="text-xs leading-5 text-[#637381]">Link sẽ được gắn vào: {selectedPathLabel || "vị trí đang chọn"}.</p>
       </Field>
       <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px]">
         <Field label="Mô tả ngắn">
-          <textarea value={description} onChange={(event) => onDescriptionChange(event.target.value)} placeholder="Ghi chú cho giáo viên." className={cn(inputClassName, "min-h-20 resize-none py-3")} />
+          <ErgTextField compact multiline minRows={3} value={description} onChange={(event) => onDescriptionChange(event.target.value)} placeholder="Ghi chú cho giáo viên." />
         </Field>
         {resourceFileType === "PPTX" ? (
           <Field label="Tổng số slide">
-            <input className={inputClassName} value={resourceTotalSlides} onChange={(event) => onResourceTotalSlidesChange(event.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="20" />
+            <ErgTextField compact value={resourceTotalSlides} onChange={(event) => onResourceTotalSlidesChange(event.target.value.replace(/[^\d]/g, ""))} inputMode="numeric" placeholder="20" />
           </Field>
         ) : null}
       </div>

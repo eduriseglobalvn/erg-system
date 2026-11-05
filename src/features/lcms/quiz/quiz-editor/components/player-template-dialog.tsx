@@ -14,7 +14,7 @@ import type {
   QuizPlayerTemplate,
 } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { cn } from "@/utils/cn";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 type PlayerTemplatePreviewScreen = "info" | "question";
 

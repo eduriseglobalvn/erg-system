@@ -3,7 +3,7 @@ import { formatShortDateTimeVi } from "@/features/lms/api/lms-date-label";
 import { parseAssignDateTime } from "@/features/lms/components/assign-homework-recipient";
 import { DateTimePickerPopover } from "@/features/lms/components/assign-date-time-picker";
 import { allGroupSourcesFilterValue } from "@/features/lms/components/assign-homework-groups";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import {
   MobileAssignProgress,
   MobileAssignmentGroupList,

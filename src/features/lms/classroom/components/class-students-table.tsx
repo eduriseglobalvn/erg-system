@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import { TABLE_HEADER_HEIGHT, TABLE_ROW_HEIGHT, TABLE_VISIBLE_ROWS } from "./class-students-workspace.constants";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import { getStatusTone } from "./class-students-workspace.utils";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function SelectControl({
   ariaLabel,

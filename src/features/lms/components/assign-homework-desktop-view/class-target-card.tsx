@@ -1,5 +1,5 @@
 import { RefreshCw, Search } from "lucide-react";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import {
   MobileStudentSelectionList,
   StudentSelectionTable,

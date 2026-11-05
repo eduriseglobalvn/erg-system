@@ -30,7 +30,7 @@ import {
   type StudentGroup,
 } from "@/features/lms/components/student-groups-parts";
 import { CreateStudentGroupDialog } from "@/features/lms/components/student-group-create-dialog";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 const allClassesFilterValue = "all-classes";
 const initialStudentGroups = (): StudentGroup[] => [

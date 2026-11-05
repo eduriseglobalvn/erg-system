@@ -22,7 +22,7 @@ import FormHelperText from "@mui/material/FormHelperText";
 import InputBase from "@mui/material/InputBase";
 import Typography from "@mui/material/Typography";
 import { alpha } from "@mui/material/styles";
-import { TsForm } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/erg-mui/tanstack-form";
 import {
   LOGIN_CREDENTIAL_LABEL,
   LOGIN_CREDENTIAL_PLACEHOLDER,

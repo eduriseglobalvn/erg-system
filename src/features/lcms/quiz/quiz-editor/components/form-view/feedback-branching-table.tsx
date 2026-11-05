@@ -4,7 +4,7 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import RateReviewOutlinedIcon from "@mui/icons-material/RateReviewOutlined";
 
 import { useI18n } from "@/platform/i18n";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import type {
   QuizEditorFeedbackBranching,
   QuizEditorFeedbackRow,

@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { StudentCopy } from "./class-students-workspace.copy";
 import type { AssignmentCatalogItem, AssignmentLevel, AssignmentSubject, AssignmentTopic } from "./class-students-workspace.types";
 import { formatSelectedStudentNames } from "./class-students-workspace.utils";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function AssignmentDialog({
   assignments,

@@ -87,7 +87,7 @@ function TsFormLabel({
       error={invalid}
       className={className}
       style={style}
-      sx={{ fontSize: 14, fontWeight: 600, color: "text.primary", "&.Mui-error": { color: "error.main" } }}
+      sx={{ typography: "subtitle2", color: "text.primary", "&.Mui-error": { color: "error.main" } }}
       {...props}
     >
       {children}

@@ -4,24 +4,24 @@ import Table, { type TableProps } from "@mui/material/Table";
 import TableContainer from "@mui/material/TableContainer";
 import Typography from "@mui/material/Typography";
 import type { ReactNode } from "react";
-import { ergEnterpriseTokens } from "@/themes/erg-enterprise-tokens";
+import { ergEnterpriseTokens as t } from "@/themes/erg-enterprise-tokens";
 
 type ErgDataTableShellProps = PaperProps & {
   footer?: ReactNode;
   toolbar?: ReactNode;
 };
 
+/** Card around a table: 1px border, no shadow at rest (design system: shadow only on floating surfaces). */
 export function ErgDataTableShell({ children, footer, toolbar, sx, ...props }: ErgDataTableShellProps) {
   return (
     <Paper
       elevation={0}
       sx={[
         {
-          bgcolor: "#FFFFFF",
-          border: "1px solid rgba(0, 0, 0, 0.06)",
-          borderColor: "rgba(0, 0, 0, 0.06)",
-          borderRadius: "16px",
-          boxShadow: "0 2px 10px rgba(0, 0, 0, 0.02), 0 10px 28px -4px rgba(0, 0, 0, 0.04)",
+          bgcolor: "background.paper",
+          border: `1px solid ${t.color.border}`,
+          borderRadius: `${t.radius.sm}px`,
+          boxShadow: "none",
           display: "flex",
           flexDirection: "column",
           minHeight: 0,
@@ -49,8 +49,7 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     <Box
       sx={{
         alignItems: { xs: "flex-start", sm: "center" },
-        bgcolor: "#FFFFFF",
-        borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
+        borderBottom: `1px solid ${t.color.border}`,
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
         gap: 1.5,
@@ -60,28 +59,12 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
     >
       <Box sx={{ minWidth: 0 }}>
         {title ? (
-          <Typography
-            sx={{
-              color: "text.primary",
-              fontSize: "1.05rem",
-              fontWeight: 600,
-              letterSpacing: "-0.015em",
-            }}
-            variant="subtitle1"
-          >
+          <Typography sx={{ color: "text.primary" }} variant="subtitle1">
             {title}
           </Typography>
         ) : null}
         {meta ? (
-          <Typography
-            sx={{
-              color: "text.secondary",
-              fontSize: "0.8rem",
-              fontWeight: 500,
-              mt: 0.25,
-            }}
-            variant="body2"
-          >
+          <Typography sx={{ color: "text.secondary", mt: 0.25 }} variant="body2">
             {meta}
           </Typography>
         ) : null}
@@ -95,38 +78,12 @@ export function ErgTableToolbar({ actions, meta, title }: ErgTableToolbarProps) 
   );
 }
 
+/** Header, padding and row rules come from the theme's MuiTableCell; numbers line up digit for digit. */
 export function ErgTable({ sx, ...props }: TableProps) {
   return (
     <Table
-      size="small"
       stickyHeader
-      sx={[
-        {
-          "& .MuiTableCell-head": {
-            bgcolor: "rgba(250, 250, 252, 0.96)",
-            borderBottom: "1px solid rgba(0, 0, 0, 0.06)",
-            color: "text.secondary",
-            fontSize: "0.72rem",
-            fontWeight: 600,
-            letterSpacing: "0.04em",
-            py: 1.35,
-            textTransform: "uppercase",
-          },
-          "& .MuiTableCell-body": {
-            borderBottom: "1px solid rgba(0, 0, 0, 0.04)",
-            color: "text.primary",
-            fontSize: "0.85rem",
-            py: 1.35,
-          },
-          "& .MuiTableRow-hover": {
-            transition: "background-color 0.12s ease",
-            "&:hover": {
-              bgcolor: `${ergEnterpriseTokens.color.primarySofter} !important`,
-            },
-          },
-        },
-        ...(Array.isArray(sx) ? sx : [sx]),
-      ]}
+      sx={[{ fontVariantNumeric: "tabular-nums", "& .MuiTableCell-root": { fontVariantNumeric: "tabular-nums" } }, ...(Array.isArray(sx) ? sx : [sx])]}
       {...props}
     />
   );

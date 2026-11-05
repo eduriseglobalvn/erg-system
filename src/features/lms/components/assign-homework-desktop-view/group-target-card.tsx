@@ -1,6 +1,6 @@
 import { RefreshCw, Search } from "lucide-react";
 import { allGroupSourcesFilterValue } from "@/features/lms/components/assign-homework-groups";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import { cn } from "@/lib/utils";
 import {
   AssignmentCheckbox,

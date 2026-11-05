@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import ChevronLeft from "@mui/icons-material/ChevronLeft";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
-import { AppSelect } from "@/components/ui/app-select";
-import { inputClassName } from "@/components/ui/input";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { ErgTextField } from "@/components/erg-mui";
 import type { StudioNode, StudioSubject } from "@/features/lcms/admin-operations/types/learning-resource-authoring";
 import type { TaxonomyRole } from "@/features/lcms/admin-operations/components/learning-resource-authoring-icons";
 import type { ContentDialogOptionId, ExerciseLibraryItem } from "@/features/lcms/admin-operations/utils/learning-resource-content-dialog";
@@ -246,7 +246,7 @@ export function ExerciseOptionCard({ item, selected, onToggle }: { item: Exercis
 export function StatusField({ taxonomy, value, onChange }: { taxonomy?: boolean; value: string; onChange: (value: string) => void }) {
   return (
     <Field label="Trạng thái">
-      <AppSelect variant="native" className={inputClassName} value={value} onChange={(event) => onChange(event.target.value)}>
+      <AppSelect style={{ width: "100%" }} value={value} onChange={(event) => onChange(event.target.value)}>
         <option value={taxonomy ? "active" : "published"}>Đã xuất bản</option>
         <option value="draft">Bản nháp</option>
         <option value="hidden">Đã ẩn</option>
@@ -258,7 +258,7 @@ export function StatusField({ taxonomy, value, onChange }: { taxonomy?: boolean;
 export function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <Field label={label}>
-      <div className={cn(inputClassName, "flex items-center truncate bg-[#F8FAFC] text-[#637381]")}>{value}</div>
+      <ErgTextField compact value={value} slotProps={{ input: { readOnly: true } }} sx={{ "& .MuiOutlinedInput-root": { bgcolor: "grey.50", color: "text.secondary" } }} />
     </Field>
   );
 }

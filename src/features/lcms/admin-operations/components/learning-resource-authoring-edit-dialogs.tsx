@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 
-import { TsForm } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/erg-mui/tanstack-form";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";

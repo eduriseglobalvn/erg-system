@@ -13,7 +13,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { hasApiBase } from "@/lib/api-client";
 import { cn } from "@/lib/utils";
 import { StudentProfileDetailDrawer, type StudentProfileDetailDraft } from "./student-profile-detail-drawer";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 type Classification = "A" | "B" | "C" | "D" | "E";
 type ProgressFilter = "all" | "not-started" | "in-progress" | "completed";

@@ -27,7 +27,7 @@ import {
 import { useI18n } from "@/platform/i18n";
 import type { QuizEditorTextStyle } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 import { cn } from "@/utils/cn";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function SharedTextFormatControls({
   value,

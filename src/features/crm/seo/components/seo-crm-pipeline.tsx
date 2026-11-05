@@ -3,7 +3,7 @@ import TextField from "@mui/material/TextField";
 import { Search } from "lucide-react";
 
 import { DashboardSectionCard } from "@/components/dashboard/dashboard-page-shell";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import type { SeoLeadStatus, SeoSchoolLead } from "@/features/crm/seo/types/seo-crm-types";
 import {
   formatDate, InfoLine, MiniValue, pipelineStatuses, statusLabelMap, statusToneMap, SeoBadge,

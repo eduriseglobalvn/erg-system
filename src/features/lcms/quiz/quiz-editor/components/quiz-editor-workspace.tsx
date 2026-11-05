@@ -201,6 +201,7 @@ export function QuizEditorWorkspace({
 
   return (
     <div className="classic-editor flex h-full max-h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <h1 className="sr-only">{quizProject.info.title || "Soạn bài kiểm tra"}</h1>
       <QuizEditorRibbon
         searchValue={searchValue}
         courseOptions={scope.courseOptions}

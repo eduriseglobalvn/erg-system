@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import Button from "@mui/material/Button";
 import type { ClassroomStudent, StudentStatus } from "@/domain/school/classroom-types";
 import { cn } from "@/lib/utils";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export type StudentProfileDetailDraft = {
   name: string;

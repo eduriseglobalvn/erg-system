@@ -6,7 +6,7 @@ import {
   FormViewSection,
 } from "@/features/lcms/quiz/quiz-editor/components/form-view/authoring-frame";
 import { ResultTabs } from "@/features/lcms/quiz/quiz-editor/components/form-view/result-tabs";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function ResultSlideForm({
   slide,

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
-import { TsFormItem, TsFormLabel, TsFormMessage, TsTextField } from "@/components/ui/tanstack-form";
+import { TsFormItem, TsFormLabel, TsFormMessage, TsTextField } from "@/components/erg-mui/tanstack-form";
 
 test("TsTextField renders label, value, and validation state from a TanStack field-like object", () => {
   const handleChange = vi.fn();

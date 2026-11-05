@@ -10,7 +10,7 @@ const source = readFileSync(
 describe("student sheet import workspace MUI policy", () => {
   it("uses MUI path imports without legacy UI adapters", () => {
     expect(source).not.toContain("@/components/mui-icon-shim");
-    expect(source).not.toContain("@/components/ui/app-select");
+    expect(source).not.toContain("@/components/erg-mui/app-select");
     expect(source).not.toContain("@/lib/utils");
     expect(source).not.toMatch(/@mui\/(?:material|icons-material)[\"']/);
   });

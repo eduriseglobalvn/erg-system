@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-const migratedSources = ["class-students-workspace.tsx"];
+const migratedSources = ["class-students-workspace.tsx", "class-list-workspace.tsx"];
 
 describe("LMS classroom ERG MUI migration policy", () => {
   it.each(migratedSources)("keeps %s free of legacy UI and Tailwind", (fileName) => {

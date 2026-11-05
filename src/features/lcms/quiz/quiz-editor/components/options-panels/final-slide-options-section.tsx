@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
 import { useI18n } from "@/platform/i18n";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import type {
   QuizEditorFinalSlideOptions,
   QuizEditorSlide,

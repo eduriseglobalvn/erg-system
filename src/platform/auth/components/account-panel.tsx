@@ -6,7 +6,7 @@ import ButtonBase from "@mui/material/ButtonBase";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 
-import { TsForm } from "@/components/ui/tanstack-form";
+import { TsForm } from "@/components/erg-mui/tanstack-form";
 import { getLmsPortalUrl } from "@/config/portal-urls";
 import { roleLabel, providerLabel } from "@/platform/auth/api/auth-storage";
 import { CheckIcon } from "@/platform/auth/components/auth-icons";

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 
 export function ShortAnswerMock() {
   const [value, setValue] = useState("Tệp PDF");

@@ -5,9 +5,8 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import TextField from "@mui/material/TextField";
 
-import { AppSelect } from "@/components/ui/app-select";
-import { inputClassName } from "@/components/ui/input";
-import { TsForm } from "@/components/ui/tanstack-form";
+import { AppSelect } from "@/components/erg-mui/app-select";
+import { TsForm } from "@/components/erg-mui/tanstack-form";
 import { uploadLearningResourceResource } from "@/features/lms/learning-resources/api/learning-resource-authoring-api";
 import {
   AuthoringCardDescription,
@@ -103,18 +102,18 @@ export function UploadScreen({
         <CardContent>
           <TsForm className="grid gap-4 md:grid-cols-2" onSubmit={(event) => { event.preventDefault(); event.stopPropagation(); void form.handleSubmit(); }}>
             <Field label="Môn học">
-              <AppSelect className={inputClassName} value={subject?.id ?? ""} onChange={(event) => setSubjectId(event.target.value)}>
+              <AppSelect style={{ width: "100%" }} value={subject?.id ?? ""} onChange={(event) => setSubjectId(event.target.value)}>
                 {subjects.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
               </AppSelect>
             </Field>
             <Field label="Gắn vào vị trí">
-              <AppSelect className={inputClassName} value={node?.id ?? ""} onChange={(event) => setNodeId(event.target.value)}>
+              <AppSelect style={{ width: "100%" }} value={node?.id ?? ""} onChange={(event) => setNodeId(event.target.value)}>
                 {subjectNodes.map((item) => <option key={item.id} value={item.id}>{pathLabel(subject?.label ?? "", findPath(subject?.tree ?? [], item.id))}</option>)}
               </AppSelect>
             </Field>
             <Field label="Tên hiển thị"><TextField size="small" fullWidth value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Ví dụ: Bài giảng Unit 1" /></Field>
             <Field label="Loại tài liệu">
-              <AppSelect className={inputClassName} value={fileType} onChange={(event) => setFileType(event.target.value)}>
+              <AppSelect style={{ width: "100%" }} value={fileType} onChange={(event) => setFileType(event.target.value)}>
                 <option value="PPTX">Bài giảng điện tử</option><option value="PDF">PDF / Giáo trình</option><option value="AUDIO">Audio</option><option value="VIDEO">Video</option><option value="ZIP">Gói học liệu ZIP</option><option value="HTML5">HTML5</option>
               </AppSelect>
             </Field>

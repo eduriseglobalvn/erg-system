@@ -2,7 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 
 import { QuestionBodyWithImage } from "@/components/quiz/questions/shared";
 import type { QuestionComponentProps } from "@/components/quiz/questions/types";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import type { DragWord, DragWordSlot } from "@/domain/quiz/types";
 
 export function DragWordsQuestion({

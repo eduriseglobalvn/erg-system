@@ -1,6 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { resolveQuizFontStack } from "@/config/fonts";
-import { AppSelect } from "@/components/ui/app-select";
+import { AppSelect } from "@/components/erg-mui/app-select";
 import { quizEditorFontOptions } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-text-style";
 import { PropertyField, PropertySection } from "@/features/lcms/quiz/quiz-editor/components/quiz-properties-dialog-parts";
 import type { QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";

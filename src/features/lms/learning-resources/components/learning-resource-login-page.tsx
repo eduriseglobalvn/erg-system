@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { Lock } from "lucide-react";
 
 import { Navigate, useLocation } from "@tanstack/react-router";
-import { TsForm, TsFormMessage } from "@/components/ui/tanstack-form";
+import { TsForm, TsFormMessage } from "@/components/erg-mui/tanstack-form";
 import { AUTH_ACCOUNT_CHANGED_EVENT, getCurrentAccount } from "@/platform/auth";
 import { useAuthSession } from "@/platform/auth/hooks/use-auth-session";
 import { sanitizeLocalRedirect } from "@/platform/auth/utils/auth-redirects";
