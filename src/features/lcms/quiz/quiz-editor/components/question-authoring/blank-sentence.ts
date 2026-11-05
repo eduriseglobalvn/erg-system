@@ -45,9 +45,11 @@ export function rebaseBlanks(prev: BlankSentence, nextText: string, caret: numbe
 }
 
 export function addBlank(s: BlankSentence, start: number, end: number, id: string): BlankSentence | null {
-  const raw = s.text.slice(start, end);
-  const from = start + (raw.length - raw.trimStart().length);
-  const to = end - (raw.length - raw.trimEnd().length);
+  const lo = Math.max(0, Math.min(start, s.text.length));
+  const hi = Math.max(lo, Math.min(end, s.text.length));
+  const raw = s.text.slice(lo, hi);
+  const from = lo + (raw.length - raw.trimStart().length);
+  const to = hi - (raw.length - raw.trimEnd().length);
   if (to <= from || s.blanks.some((b) => from < b.end && b.start < to)) return null;
   const blanks = [...s.blanks, { id, start: from, end: to }].sort((x, y) => x.start - y.start);
   return { text: s.text, blanks };
@@ -61,11 +63,14 @@ export const removeBlank = (s: BlankSentence, id: string): BlankSentence => ({
 export function setBlankText(s: BlankSentence, id: string, text: string): BlankSentence {
   const target = s.blanks.find((b) => b.id === id);
   if (!target) return s;
-  const d = text.length - (target.end - target.start);
+  const blank = text.trim() !== "";
+  const next = blank ? text : "";
+  const d = next.length - (target.end - target.start);
   return {
-    text: s.text.slice(0, target.start) + text + s.text.slice(target.end),
-    blanks: s.blanks.map((b) =>
-      b.id === id ? { ...b, end: b.end + d } : b.start >= target.end ? { ...b, start: b.start + d, end: b.end + d } : b,
-    ),
+    text: s.text.slice(0, target.start) + next + s.text.slice(target.end),
+    blanks: s.blanks.flatMap((b) => {
+      if (b.id === id) return blank ? [{ ...b, end: b.end + d }] : [];
+      return b.start >= target.end ? [{ ...b, start: b.start + d, end: b.end + d }] : [b];
+    }),
   };
 }

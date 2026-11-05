@@ -60,7 +60,63 @@ describe("rebaseBlanks", () => {
   });
 });
 
+describe("rebaseBlanks edge cases", () => {
+  it("grows the blank for a multi-character paste inside it", () => {
+    const next = `${TEXT.slice(0, START + 3)}XYZ${TEXT.slice(START + 3)}`;
+    expect(word(rebaseBlanks(S, next, START + 6))).toBe("AVEXYZRAGE");
+  });
+  it("leaves the blank when the character after it is deleted", () => {
+    const next = TEXT.slice(0, END) + TEXT.slice(END + 1);
+    expect(rebaseBlanks(S, next, END).blanks).toEqual(S.blanks);
+  });
+  it("leaves everything when the text is unchanged", () => {
+    expect(rebaseBlanks(S, TEXT, 0)).toEqual(S);
+  });
+  it("keeps two adjacent blanks when the space between is deleted", () => {
+    const ab: BlankSentence = {
+      text: "AB CD",
+      blanks: [
+        { id: "a", start: 0, end: 2 },
+        { id: "c", start: 3, end: 5 },
+      ],
+    };
+    const r = rebaseBlanks(ab, "ABCD", 2);
+    expect(r.blanks).toEqual([
+      { id: "a", start: 0, end: 2 },
+      { id: "c", start: 2, end: 4 },
+    ]);
+  });
+  it("falls back to the diff for an out-of-range caret", () => {
+    const next = `x${TEXT}`;
+    for (const caret of [-1, 999]) {
+      expect(rebaseBlanks(S, next, caret).blanks[0]).toMatchObject({ start: START + 1, end: END + 1 });
+    }
+  });
+  it("drops the blank when a deletion crosses its end edge", () => {
+    const next = TEXT.slice(0, END - 3) + TEXT.slice(END + 1);
+    expect(rebaseBlanks(S, next, END - 3).blanks).toEqual([]);
+  });
+  it("shifts a second blank", () => {
+    const two: BlankSentence = {
+      text: "A BB C DD",
+      blanks: [
+        { id: "x", start: 2, end: 4 },
+        { id: "y", start: 7, end: 9 },
+      ],
+    };
+    const r = rebaseBlanks(two, "ZZ A BB C DD", 2);
+    expect(r.blanks.map((b) => [b.start, b.end])).toEqual([
+      [5, 7],
+      [10, 12],
+    ]);
+  });
+});
+
 describe("addBlank / removeBlank", () => {
+  it("clamps the range to the text", () => {
+    const r = addBlank({ text: "ab", blanks: [] }, 0, 10, "x");
+    expect(r?.blanks).toEqual([{ id: "x", start: 0, end: 2 }]);
+  });
   const T = "Thủ đô  Hà Nội ";
   it("trims the range to the word", () => {
     const r = addBlank({ text: T, blanks: [] }, 3, 8, "n1");
@@ -81,6 +137,13 @@ describe("sentenceParts / setBlankText", () => {
   it("splits around blanks", () => {
     expect(sentenceParts(S)).toEqual(["Hàm tính trung bình là ", "."]);
     expect(sentenceParts({ text: "abc", blanks: [] })).toEqual(["abc"]);
+  });
+  it("removes the blank when its text is emptied or whitespace-only", () => {
+    for (const t of ["", "  "]) {
+      const r = setBlankText(S, "b1", t);
+      expect(r.blanks).toEqual([]);
+      expect(r.text).toBe("Hàm tính trung bình là .");
+    }
   });
   it("replaces a blank word and shifts later blanks", () => {
     const two: BlankSentence = {
