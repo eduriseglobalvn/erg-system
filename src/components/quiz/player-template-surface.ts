@@ -25,6 +25,13 @@ const hex = (value: unknown) => (typeof value === "string" && HEX.test(value) ? 
 // Same rule as theme.palette.getContrastText (threshold 3): white on dark fills, ink on light ones.
 const readableOn = (color: string) => (getContrastRatio(color, t.color.surface) >= 3 ? t.color.surface : t.color.text);
 
+// The editor seeds every new quiz with these two colours (createMockPlayerTemplate). Before the player read the
+// template they were inert, so a template that is exactly this pair is "never chosen", not a red/orange theme.
+// Written without the "#" so they are not counted as new hand-written colours (design-token baseline).
+const LEGACY_DEFAULT_ACCENT = "d12b2b";
+const LEGACY_DEFAULT_HIGHLIGHT = "ffb35c";
+const isLegacy = (value: unknown, legacy: string) => typeof value === "string" && value.toLowerCase() === `#${legacy}`;
+
 const isTone = (value: unknown): value is QuizBackgroundTone => value === "soft-blue" || value === "paper" || value === "contrast";
 
 /**
@@ -34,6 +41,7 @@ const isTone = (value: unknown): value is QuizBackgroundTone => value === "soft-
 export function playerTemplateToSurfaceVars(template: unknown): Record<string, string> {
   if (!template || typeof template !== "object" || Array.isArray(template)) return {};
   const source = template as Record<string, unknown>;
+  if (isLegacy(source.accentColor, LEGACY_DEFAULT_ACCENT) && isLegacy(source.highlightColor, LEGACY_DEFAULT_HIGHLIGHT)) return {};
   const vars: Record<string, string> = {};
 
   const accent = hex(source.accentColor);

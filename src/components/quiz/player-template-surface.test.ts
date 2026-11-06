@@ -49,3 +49,17 @@ describe("playerTemplateToSurfaceVars", () => {
     expect(playerTemplateToSurfaceVars({ accentColor: 42, highlightColor: null, backgroundTone: {} })).toEqual({});
   });
 });
+
+describe("legacy editor default", () => {
+  const legacy = { accentColor: "#d12b2b", highlightColor: "#ffb35c", backgroundTone: "paper", roundedCorners: false };
+
+  it("is treated as no template, case-insensitively", () => {
+    expect(playerTemplateToSurfaceVars(legacy)).toEqual({});
+    expect(playerTemplateToSurfaceVars({ ...legacy, accentColor: "#D12B2B", highlightColor: "#FFB35C" })).toEqual({});
+  });
+
+  it("still applies when only one of the two colours was changed", () => {
+    expect(playerTemplateToSurfaceVars({ ...legacy, accentColor: "#0071E3" })["--quiz-accent"]).toBe("#0071E3");
+    expect(playerTemplateToSurfaceVars({ ...legacy, highlightColor: "#D2E6FC" })["--quiz-highlight"]).toBe("#D2E6FC");
+  });
+});

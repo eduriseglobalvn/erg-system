@@ -56,3 +56,23 @@ test("normalizes a verified portable payload into the shared QuizPackage consume
   expect(normalized.quiz).toEqual(withoutGuide);
 });
 
+
+const portable = (quiz: unknown): VerifiedPortableExamPackage => ({
+  canonicalPayload: JSON.stringify({ quiz }),
+  contentHash: "sha256:" + "b".repeat(64),
+  envelope: {
+    schemaVersion: 1, packageId: "pkg-t", quizId: "q", packageFormat: "single", gradingMode: "server-authoritative",
+    package: { quiz },
+    signatureBlock: { algorithm: "Ed25519", contentHash: "sha256:" + "b".repeat(64), signature: "s", publicKeyId: "k" },
+  },
+  manifest: {
+    schemaVersion: 1, packageId: "pkg-t", quizId: "q", packageFormat: "single", gradingMode: "server-authoritative",
+    contentHash: "sha256:" + "b".repeat(64), signature: "s", publicKeyId: "k", signatureAlgorithm: "Ed25519", versionLabel: "1",
+  },
+  packagePayload: { quiz },
+}) as never;
+
+test("a portable payload keeps the teacher's player template on the quiz", () => {
+  const template = { accentColor: "#0071E3" };
+  expect(normalizePortableQuizPackage(portable({ ...sampleQuiz, playerTemplate: template })).quiz.playerTemplate).toEqual(template);
+});

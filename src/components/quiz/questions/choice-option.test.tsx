@@ -34,6 +34,18 @@ describe("ChoiceOption letter key", () => {
   });
 });
 
+describe("ChoiceOption hover", () => {
+  // jsdom has no :hover, so read emotion's emitted rules: a selected option must not repaint its (maybe dark) highlight on hover.
+  const hoverRule = (selected: boolean) => {
+    renderThemed(<ChoiceOption mode="single" onClick={noop} selected={selected}>Phương án</ChoiceOption>);
+    const css = Array.from(document.querySelectorAll("style")).map((el) => el.textContent ?? "").join("");
+    return screen.getByRole("button").className.split(" ").some((name) => css.includes(`.${name}:hover`));
+  };
+
+  it("keeps a selected option as it is", () => expect(hoverRule(true)).toBe(false));
+  it("tints an unselected option", () => expect(hoverRule(false)).toBe(true));
+});
+
 describe("ChoiceOption review tag", () => {
   it("labels the correct answer", () => {
     renderThemed(<ChoiceOption mode="single" onClick={noop} selected={false} reviewTag="correct">Đúng</ChoiceOption>);

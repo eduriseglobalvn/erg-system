@@ -6,6 +6,7 @@ import { useState } from "react";
 import { ErgButton } from "@/components/erg-mui/erg-actions";
 import { PracticeFeedbackPanel } from "@/components/quiz/practice-feedback-panel";
 import { QuestionRenderer } from "@/components/quiz/question-renderer";
+import { reviewPaperSx } from "@/components/quiz/review/review-summary-header";
 import { createInitialAnswer, isAnswerComplete, normalizeAnswerForSubmission, scoreQuestion } from "@/domain/quiz/quiz";
 import type { AnswerPayload, AnswerResult, Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
@@ -42,7 +43,7 @@ export function LocalRetryPlayer({ questions, indices, onExit }: LocalRetryPlaye
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mx: "auto", maxWidth: 880, p: { xs: 2, md: 3 }, width: "100%" }}>
-      <Box component="header" sx={{ alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "space-between" }}>
+      <Box component="header" sx={{ ...reviewPaperSx, alignItems: "center", display: "flex", flexWrap: "wrap", gap: 1, justifyContent: "space-between" }}>
         <Box>
           <Typography component="h1" variant="h6">Luyện lại</Typography>
           <Typography color="text.secondary" variant="body2">Không tính điểm, không gửi lên hệ thống.</Typography>

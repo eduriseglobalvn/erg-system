@@ -75,7 +75,8 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         textAlign: "left",
         transition: theme.transitions.create(["background-color", "border-color"], { duration: ergEnterpriseTokens.motion.duration.fast }),
         width: "100%",
-        "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.06), borderColor: "divider" },
+        // A selected option keeps its (possibly dark) highlight on hover; the label colour is chosen for that fill.
+        ...(selected ? {} : { "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.06), borderColor: "divider" } }),
         "&:focus-visible": { borderColor: "primary.main", boxShadow: ergEnterpriseTokens.shadow.focus, outline: "none" },
         "&:disabled": { cursor: "default", pointerEvents: "none" },
       })}

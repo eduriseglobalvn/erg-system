@@ -7,7 +7,7 @@ import type { GridSurface } from "@/components/quiz/question-grid-layout";
 import { QuestionListPanel } from "@/components/quiz/question-list-panel";
 import { buildReviewCells, retryIndices, reviewScoreOutOf10, toQuestionResults } from "@/components/quiz/review/review-model";
 import { ReviewQuestionView } from "@/components/quiz/review/review-question-view";
-import { ReviewSummaryHeader } from "@/components/quiz/review/review-summary-header";
+import { reviewPaperSx, ReviewSummaryHeader } from "@/components/quiz/review/review-summary-header";
 import type { Attempt, Question } from "@/domain/quiz/types";
 import { ergEnterpriseTokens as tk } from "@/themes/erg-enterprise-tokens";
 
@@ -71,7 +71,7 @@ export function ReviewLayout({ attempt, questions, flagged, current, elapsedSeco
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2 }}>
         {phoneDetail ? (
           <>
-            <Button variant="text" sx={{ alignSelf: "flex-start" }} onClick={() => setPhoneDetail(false)}>Danh sách câu</Button>
+            <Button variant="text" sx={{ ...reviewPaperSx, alignSelf: "flex-start" }} onClick={() => setPhoneDetail(false)}>Danh sách câu</Button>
             {detail}
           </>
         ) : (

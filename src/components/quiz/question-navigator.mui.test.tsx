@@ -81,6 +81,8 @@ describe("QuestionNavigator grid", () => {
     expect(style(1).borderStyle).toBe("dashed");
     expect(style(2).borderStyle).toBe("solid");
     expect(style(2).borderColor).not.toBe(style(3).borderColor);
+    // The current number is ink on white whatever the accent: a light accent must not make it unreadable.
+    expect(style(3).color).toBe("rgb(29, 29, 31)");
     // jsdom cannot resolve var(); the done fill is the template accent over the ERG primary.
     expect(style(4).backgroundColor).toBe("var(--quiz-accent, #0071E3)");
   });
