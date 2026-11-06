@@ -42,6 +42,7 @@ export function ChoiceOption(props: ChoiceOptionProps) {
   const reviewTag = props.reviewTag ?? legacyTag(props);
   const tag = reviewTag ? REVIEW_TAGS[reviewTag] : null;
   const tone = tag?.tone ?? "primary";
+  const keyFilled = selected || reviewTag === "correct";
 
   return (
     <ButtonBase
@@ -74,11 +75,11 @@ export function ChoiceOption(props: ChoiceOptionProps) {
         component="span"
         sx={(theme) => ({
           alignItems: "center",
-          bgcolor: selected ? theme.palette[tone].main : "background.paper",
+          bgcolor: keyFilled ? theme.palette[tone].main : "background.paper",
           border: "1.5px solid",
           borderColor: selected || tag ? theme.palette[tone].main : "divider",
           borderRadius: `${ergEnterpriseTokens.radius.chip}px`,
-          color: selected ? theme.palette.getContrastText(theme.palette[tone].main) : "text.primary",
+          color: keyFilled ? theme.palette.getContrastText(theme.palette[tone].main) : "text.primary",
           position: "relative",
           display: "inline-flex",
           typography: "subtitle2",

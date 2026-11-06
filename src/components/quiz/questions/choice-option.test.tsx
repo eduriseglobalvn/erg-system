@@ -50,9 +50,18 @@ describe("ChoiceOption review tag", () => {
     expect(getComputedStyle(screen.getByText("A")).backgroundColor).toBe("rgb(22, 163, 74)");
   });
 
-  it("uses the dark success shade for small tag text", () => {
-    renderThemed(<ChoiceOption mode="single" onClick={noop} selected={false} reviewTag="correct">Đúng</ChoiceOption>);
-    expect(getComputedStyle(screen.getByText("Đáp án đúng")).color).not.toBe("rgb(22, 163, 74)");
+  it("fills the letter key for correct, picked and pickedWrong", () => {
+    renderThemed(<>
+      <ChoiceOption letter="A" mode="single" onClick={noop} selected={false} reviewTag="correct">a</ChoiceOption>
+      <ChoiceOption letter="B" mode="single" onClick={noop} selected reviewTag="picked">b</ChoiceOption>
+      <ChoiceOption letter="C" mode="single" onClick={noop} selected reviewTag="pickedWrong">c</ChoiceOption>
+      <ChoiceOption letter="D" mode="single" onClick={noop} selected={false}>d</ChoiceOption>
+    </>);
+    expect(getComputedStyle(screen.getByText("A")).backgroundColor).toBe("rgb(22, 163, 74)");
+    expect(getComputedStyle(screen.getByText("A")).color).toBe("rgb(255, 255, 255)");
+    expect(getComputedStyle(screen.getByText("B")).backgroundColor).toBe("rgb(22, 163, 74)");
+    expect(getComputedStyle(screen.getByText("C")).backgroundColor).toBe("rgb(217, 45, 32)");
+    expect(getComputedStyle(screen.getByText("D")).backgroundColor).not.toBe("rgb(22, 163, 74)");
   });
 
   it("derives tags from legacy flags", () => {
