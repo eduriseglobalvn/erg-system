@@ -71,7 +71,7 @@ describe("QuizListTitlebar publish", () => {
   });
 
   it("shows the server's reason and its detail lines under the bar, until dismissed", () => {
-    const { onDismissPublishFailure } = renderBar({ publishFailure: { message: "Không xuất bản được", items: ["Câu 2 thiếu đáp án", "Câu 3 thiếu đề bài"] } });
+    const { onDismissPublishFailure } = renderBar({ publishFailure: { kind: "server", message: "Không xuất bản được", items: ["Câu 2 thiếu đáp án", "Câu 3 thiếu đề bài"] } });
     const alert = screen.getByRole("alert");
     expect(alert).toHaveTextContent("Máy chủ chưa cho xuất bản.");
     expect(alert).toHaveTextContent("Không xuất bản được");
@@ -79,6 +79,19 @@ describe("QuizListTitlebar publish", () => {
     expect(alert).toHaveTextContent("Câu 3 thiếu đề bài");
     fireEvent.click(screen.getByRole("button", { name: "Đóng" }));
     expect(onDismissPublishFailure).toHaveBeenCalledTimes(1);
+  });
+
+  it("a lost connection is not a server refusal: no red, and a retry that publishes again", () => {
+    const { onPublish } = renderBar({ publishFailure: { kind: "network", message: "Failed to fetch", items: [] } });
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent("Mất kết nối, chưa xuất bản.");
+    expect(alert).not.toHaveTextContent("Máy chủ chưa cho xuất bản.");
+    expect(alert).not.toHaveTextContent("Failed to fetch");
+    expect(alert).not.toHaveClass("MuiAlert-standardError");
+    const retry = screen.getByRole("button", { name: "Thử lại" });
+    expect(retry).toHaveClass("MuiButton-text");
+    fireEvent.click(retry);
+    expect(onPublish).toHaveBeenCalledTimes(1);
   });
 });
 

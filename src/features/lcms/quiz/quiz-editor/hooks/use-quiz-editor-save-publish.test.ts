@@ -156,6 +156,28 @@ describe("useQuizEditorPublish", () => {
     await waitFor(() => expect(view.result.current.isPublishing).toBe(false));
   });
 
+  it("tells a lost connection apart from a refusal when the publish request fails", async () => {
+    publishQuizEditorDraft.mockRejectedValueOnce(new ApiClientError("Failed to fetch", "NETWORK_ERROR", 0));
+    const view = setup(fakeSync());
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+    await waitFor(() => expect(view.result.current.publishFailure?.kind).toBe("network"));
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it("a flush that went offline shows the lost connection in place, with no red toast", async () => {
+    const view = setup(fakeSync({ status: { kind: "pending" } }));
+    const flushNow = flushTo(view.setSync, { status: { kind: "offline", pendingEdits: 1 } });
+    act(() => view.setSync(fakeSync({ status: { kind: "pending" }, flushNow })));
+
+    actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
+    await view.result.current.handlePublish();
+
+    await waitFor(() => expect(view.result.current.publishFailure?.kind).toBe("network"));
+    expect(toast.error).not.toHaveBeenCalled();
+    expect(publishQuizEditorDraft).not.toHaveBeenCalled();
+  });
+
   it("leaves the fingerprints untouched when the server rejects the publish", async () => {
     publishQuizEditorDraft.mockRejectedValue(new Error("Câu 2 chưa có đáp án đúng"));
     const view = setup(fakeSync());
@@ -180,7 +202,7 @@ describe("useQuizEditorPublish", () => {
     await view.result.current.handlePublish();
 
     await waitFor(() =>
-      expect(view.result.current.publishFailure).toEqual({ message: "Không xuất bản được", items: ["Câu 2 thiếu đáp án", "Câu 3 thiếu đề bài"] }),
+      expect(view.result.current.publishFailure).toEqual({ kind: "server", message: "Không xuất bản được", items: ["Câu 2 thiếu đáp án", "Câu 3 thiếu đề bài"] }),
     );
     expect(toast.error).not.toHaveBeenCalled();
     expect(globalMutationError.mock.calls[0]?.[3]).toMatchObject({ meta: { silent: true } });
@@ -196,7 +218,7 @@ describe("useQuizEditorPublish", () => {
     const view = setup(fakeSync());
     actEnvironment.IS_REACT_ACT_ENVIRONMENT = false;
     await view.result.current.handlePublish();
-    await waitFor(() => expect(view.result.current.publishFailure).toEqual({ message: "Máy chủ bận", items: [] }));
+    await waitFor(() => expect(view.result.current.publishFailure).toEqual({ kind: "server", message: "Máy chủ bận", items: [] }));
     actEnvironment.IS_REACT_ACT_ENVIRONMENT = true;
     act(() => view.result.current.dismissPublishFailure());
     expect(view.result.current.publishFailure).toBeNull();

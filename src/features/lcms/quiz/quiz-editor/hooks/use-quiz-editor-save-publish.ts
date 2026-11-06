@@ -11,7 +11,7 @@ import { readinessLabel } from "@/features/lcms/quiz/quiz-editor/components/ques
 import { readSlideReadiness } from "@/features/lcms/quiz/quiz-editor/components/question-authoring/slide-question";
 import { resolveNewQuizScope } from "@/features/lcms/quiz/quiz-editor/components/quiz-editor-workspace-utils";
 import { fingerprintedSlides, recordPublished } from "@/features/lcms/quiz/quiz-editor/model/quiz-publish-state";
-import type { QuizDraftSyncStatus } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-sync-engine";
+import { classifySyncError, type QuizDraftSyncStatus } from "@/features/lcms/quiz/quiz-editor/sync/quiz-draft-sync-engine";
 import type { useQuizDraftSync } from "@/features/lcms/quiz/quiz-editor/sync/use-quiz-draft-sync";
 import type { QuizEditorSlide, QuizProjectSettings } from "@/features/lcms/quiz/quiz-editor/types/quiz-editor-types";
 
@@ -38,8 +38,10 @@ export function buildQuizCreateInput({ doc, subjects, courseId, levelId, topicId
 }
 
 export type NotReadyQuestion = { slideId: string; number: number; title: string; label: string };
-/** What the server said when it refused to publish: its message, and the per-question lines it sent along. */
-export type PublishFailure = { message: string; items: string[] };
+/** Why publishing stopped: the connection dropped (retry), or the server refused, with its message and per-question lines. */
+export type PublishFailure = { kind: "network" | "server"; message: string; items: string[] };
+
+const NETWORK_FAILURE: PublishFailure = { kind: "network", message: "", items: [] };
 
 /** `readinessOnly`: nothing but unfinished questions blocks it, so the button explains instead of going dead. */
 function blockedReason(status: QuizDraftSyncStatus, questionCount: number, notReadyCount: number): { text: string; readinessOnly: boolean } | null {
@@ -50,13 +52,14 @@ function blockedReason(status: QuizDraftSyncStatus, questionCount: number, notRe
 }
 
 function toPublishFailure(error: unknown): PublishFailure {
+  if (classifySyncError(error) === "network") return NETWORK_FAILURE;
   const details = error instanceof ApiClientError && Array.isArray(error.details) ? error.details : [];
   const items = details.flatMap((item: unknown) => {
     if (typeof item === "string") return [item];
     const message = item && typeof item === "object" ? (item as { message?: unknown }).message : null;
     return typeof message === "string" ? [message] : [];
   });
-  return { message: error instanceof Error && error.message ? error.message : "Chưa xuất bản được. Thử lại sau.", items };
+  return { kind: "server", message: error instanceof Error && error.message ? error.message : "Chưa xuất bản được. Thử lại sau.", items };
 }
 
 /** Publishes the whole quiz (the server compiles every question), after the last edit reached the server. */
@@ -111,7 +114,9 @@ export function useQuizEditorPublish({ sync, draftId, questionSlides, setSlidesP
       // A full device still publishes when every change reached the server.
       const sent = status.kind === "saved" || (status.kind === "storage-full" && !hasUnsyncedChanges);
       if (!sent || !quizId) {
-        toast.error("Chưa gửi được thay đổi lên máy chủ nên chưa xuất bản.");
+        // No red error for a lost connection (spec §9.4): it is said in place, with a retry.
+        if (status.kind === "offline") setPublishFailure(NETWORK_FAILURE);
+        else toast.error("Chưa gửi được thay đổi lên máy chủ nên chưa xuất bản.");
         return;
       }
       // Same key for the same draft version, so a retried click cannot publish twice.

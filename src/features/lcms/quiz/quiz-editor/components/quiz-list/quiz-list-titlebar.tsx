@@ -80,7 +80,12 @@ export function QuizListTitlebar({
           </Tooltip>
         </Box>
       </Box>
-      {publishFailure ? (
+      {publishFailure?.kind === "network" ? (
+        <Alert closeText="Đóng" onClose={onDismissPublishFailure} severity="warning" sx={{ borderRadius: 0 }}>
+          Mất kết nối, chưa xuất bản.{" "}
+          <Button color="inherit" onClick={onPublish} size="small" sx={{ verticalAlign: "baseline" }} variant="text">Thử lại</Button>
+        </Alert>
+      ) : publishFailure ? (
         <Alert closeText="Đóng" onClose={onDismissPublishFailure} severity="error" sx={{ borderRadius: 0 }}>
           <Box>Máy chủ chưa cho xuất bản.</Box>
           <Box>{publishFailure.message}</Box>
