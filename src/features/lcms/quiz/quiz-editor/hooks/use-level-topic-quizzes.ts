@@ -25,6 +25,7 @@ export function useLevelTopicQuizzes(scope: {
     rows: buildTopicRail(topics, summaries, drafts, openQuiz),
     summaries,
     // Pending, not loading: offline the query pauses, and a topic must still not pass for one without a quiz.
-    quizzesPending: workspace.isPending,
+    // A failed list with nothing cached is just as unknown.
+    quizzesPending: workspace.isPending || (workspace.isError && !workspace.data),
   };
 }
