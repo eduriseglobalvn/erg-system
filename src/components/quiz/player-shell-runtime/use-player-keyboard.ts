@@ -65,7 +65,9 @@ export function usePlayerKeyboard({
       }
 
       if (submitDialogMode) {
-        if (event.key === "Enter") {
+        // Enter on a focused dialog control (Làm tiếp, close, a question chip) activates that control, not the submit.
+        const onControl = event.target instanceof Element && event.target.closest("button, a, [role=button]") !== null;
+        if (event.key === "Enter" && !onControl) {
           event.preventDefault();
           void finalizeAttempt();
         }

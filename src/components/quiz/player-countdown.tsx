@@ -15,16 +15,20 @@ type PlayerCountdownProps = {
   children: (remainingSeconds: number) => ReactNode;
 };
 
+function secondsLeft({ session, deadlineAt, active, localClock }: { session: LocalQuizAttemptSession | null; deadlineAt: number | null; active: boolean; localClock: boolean }) {
+  if (!active || deadlineAt === null || !session) return null;
+  const now = serverNowMs(session, Date.now(), localClock);
+  return now === null ? null : Math.max(0, Math.ceil((deadlineAt - now) / 1000));
+}
+
 /** Whole seconds left until `deadlineAt` (ticks every second), or null while unknown. */
 export function useRemainingSeconds({ session, deadlineAt, active, localClock = false }: Pick<PlayerCountdownProps, "session" | "deadlineAt" | "active" | "localClock">) {
-  const [remaining, setRemaining] = useState<number | null>(null);
+  // Lazy init so the first render already has the value (no flash of a time-less dialog).
+  const [remaining, setRemaining] = useState<number | null>(() => secondsLeft({ session, deadlineAt, active, localClock }));
 
   useEffect(() => {
     if (!active || deadlineAt === null || !session) return;
-    const tick = () => {
-      const now = serverNowMs(session, Date.now(), localClock);
-      setRemaining(now === null ? null : Math.max(0, Math.ceil((deadlineAt - now) / 1000)));
-    };
+    const tick = () => setRemaining(secondsLeft({ session, deadlineAt, active, localClock }));
     tick();
     const timerId = window.setInterval(tick, 1000);
     return () => window.clearInterval(timerId);

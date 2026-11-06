@@ -17,7 +17,7 @@ describe("SubmitConfirmDialog", () => {
     expect(screen.getByText("Chưa làm tính 0 điểm")).toBeInTheDocument();
     expect(screen.getByText("1 câu đánh dấu xem lại")).toBeInTheDocument();
     expect(screen.getByText("18 câu đã làm")).toBeInTheDocument();
-    for (const n of ["7", "15", "12"]) expect(screen.getByRole("button", { name: n })).toBeInTheDocument();
+    for (const n of ["7", "15", "12"]) expect(screen.getByRole("button", { name: `Câu ${n}` })).toBeInTheDocument();
   });
 
   it("omits the empty groups when everything is answered", () => {
@@ -33,7 +33,7 @@ describe("SubmitConfirmDialog", () => {
     const onCancel = vi.fn();
     render(<SubmitConfirmDialog {...base} onCancel={onCancel} onJump={onJump} summary={partial} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "7" }));
+    fireEvent.click(screen.getByRole("button", { name: "Câu 7" }));
     expect(onJump).toHaveBeenCalledWith(6);
     expect(onCancel).toHaveBeenCalledOnce();
   });

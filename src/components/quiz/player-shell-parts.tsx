@@ -94,7 +94,7 @@ function SubmitQuestionGroup({ title, note, numbers, onPick }: { title: string; 
         {note ? <Typography color="text.secondary" variant="caption">{note}</Typography> : null}
       </Box>
       <Box role="group" aria-label={title} sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-        {numbers.map((number) => <Chip key={number} clickable label={number} onClick={() => onPick(number)} variant="outlined" />)}
+        {numbers.map((number) => <Chip key={number} aria-label={`Câu ${number}`} clickable label={number} onClick={() => onPick(number)} variant="outlined" />)}
       </Box>
     </Stack>
   );

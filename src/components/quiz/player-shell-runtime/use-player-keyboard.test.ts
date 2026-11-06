@@ -138,6 +138,34 @@ describe("usePlayerKeyboard web shortcuts", () => {
   });
 });
 
+describe("usePlayerKeyboard submit dialog Enter", () => {
+  function setup() {
+    const finalizeAttempt = vi.fn();
+    mount({ finalizeAttempt, submitDialogMode: "confirm" });
+    return finalizeAttempt;
+  }
+  const enter = (target: EventTarget) => target.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+
+  it("confirms with Enter when focus is on the page body", () => {
+    const finalizeAttempt = setup();
+    enter(document.body);
+    expect(finalizeAttempt).toHaveBeenCalledOnce();
+  });
+
+  it.each([
+    ["button", () => document.createElement("button")],
+    ["link", () => Object.assign(document.createElement("a"), { href: "#x" })],
+    ["role=button", () => Object.assign(document.createElement("div"), { role: "button" })],
+  ])("does not submit when Enter lands on a %s (it activates that control)", (_name, make) => {
+    const finalizeAttempt = setup();
+    const el = document.body.appendChild(make());
+    const inner = el.appendChild(document.createElement("span"));
+    enter(inner);
+    el.remove();
+    expect(finalizeAttempt).not.toHaveBeenCalled();
+  });
+});
+
 describe("usePlayerKeyboard repeat and shift", () => {
   const press = (key: string, init: KeyboardEventInit = {}) =>
     window.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true, ...init }));
